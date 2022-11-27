@@ -22,3 +22,5 @@ libutilssh
 refactorings
 xdebug
 xdebugini
+Bazyli
+Brzóska

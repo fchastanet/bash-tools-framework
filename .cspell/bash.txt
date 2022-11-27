@@ -73,3 +73,8 @@ autoupdate
 auwm
 chgrp
 nohup
+DOCKERHUB
+PATHCONV
+CONV
+uroot
+proot

@@ -2,7 +2,7 @@
 set -o errexit
 set -o pipefail
 
-BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )
+BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 VENDOR="$1"
 BASH_TAR_VERSION="$2"
 BASH_BASE_IMAGE="$3"
@@ -11,7 +11,7 @@ PUSH_IMAGE="${5:-}"
 DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 if [[ -z "${VENDOR}" || -z "${BASH_TAR_VERSION}" || -z "${BASH_BASE_IMAGE}" ]]; then
-  (>&2 echo "please provide these parameters VENDOR, BASH_TAR_VERSION, BASH_BASE_IMAGE")
+  (echo >&2 "please provide these parameters VENDOR, BASH_TAR_VERSION, BASH_BASE_IMAGE")
   exit 1
 fi
 
@@ -19,7 +19,7 @@ cd "${BASE_DIR}" || exit 1
 
 # pull image if needed
 if [[ "${PULL_IMAGE}" == "true" ]]; then
-  docker pull "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" || true 
+  docker pull "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" || true
 fi
 
 # build image and push it ot registry
@@ -30,7 +30,7 @@ DOCKER_BUILDKIT=1 docker build \
   --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
   --build-arg BASH_TAR_VERSION="${BASH_TAR_VERSION}" \
-  --build-arg BASH_IMAGE="${BASH_BASE_IMAGE}"  \
+  --build-arg BASH_IMAGE="${BASH_BASE_IMAGE}" \
   -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   -t "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   .docker

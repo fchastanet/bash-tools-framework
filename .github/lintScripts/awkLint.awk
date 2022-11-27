@@ -10,11 +10,11 @@ BEGIN {
 }
 {
   line=$0
-  
+
   # awk: bin/mysql2puml.awk:181:     if (length(currentLine) < 2 || match(currentLine, "^--") > 0) {
   # awk: bin/mysql2puml.awk:181:     ^ syntax error
   # awk: warning: function `uml_parse_line' called but never defined
- 
+
   if (match(line, /^awk: ([^:]+):([^:]+): ([ ]*)(.+)$/, arr)) {
       file=arr[1]
       oldLineNumber=lineNumber
@@ -29,7 +29,7 @@ BEGIN {
         lineDetails[oldLineNumber ",message"] = lineDetails[oldLineNumber ",source"]
         delete lineDetails[oldLineNumber ",source"]
       }
-      
+
       if (oldLineNumber == lineNumber) {
         lineDetails[lineNumber ",message"] = arr[4]
         lineDetails[lineNumber ",columnNumber"] = length(arr[3]) + 1
@@ -93,4 +93,3 @@ function escapeXmlAttribute(str)
     gsub(/'/, "\\&apos;", str)
     return str
 }
-

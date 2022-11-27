@@ -1,0 +1,20 @@
+{
+  "threshold": 0,
+  "reporters": ["html", "markdown"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.rbenv/**",
+    "**/.history/**",
+    "**/backup/**",
+    "**/megalinter-reports/**",
+    "conf/localAppData/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/originalSettings.json",
+    "**/snippets/**",
+    "**/.venv/**",
+    "**/*cache*/**",
+    "**/.github/**",
+    "**/.idea/**",
+    "**/report/**",
+    "**/*.svg"
+  ]
+}

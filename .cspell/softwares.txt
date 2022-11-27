@@ -126,3 +126,9 @@ wholename
 resolvconf
 runc
 gzipped
+puml
+tmpl
+deepsource
+checkstyle
+Buildx
+mysqldump

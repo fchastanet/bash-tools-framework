@@ -14,7 +14,7 @@ RUN set -x \
     # used for bash conpilation
     bison=2:3.5.* \
     # used for bash conpilation
-    build-essential=12.* \ 
+    build-essential=12.* \
     # used for bash conpilation
     ca-certificates=* \
     # used for bash conpilation

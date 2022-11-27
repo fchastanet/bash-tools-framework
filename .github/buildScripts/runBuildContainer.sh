@@ -3,13 +3,13 @@
 set -o errexit
 set -o pipefail
 
-BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )
+BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 VENDOR="${VENDOR:-ubuntu}"
 BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"
 BASH_IMAGE="${BASH_IMAGE:-ubuntu:20.04}"
-DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"  
+DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
-(>&2 echo "run tests using ${VENDOR}:${BASH_TAR_VERSION}")
+(echo >&2 "run tests using ${VENDOR}:${BASH_TAR_VERSION}")
 cd "${BASE_DIR}" || exit 1
 
 if [[ ! -d "${BASE_DIR}/vendor" ]]; then
