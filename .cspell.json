@@ -4,6 +4,7 @@
   "ignorePaths": [
     "**/node_modules/**",
     "**/vscode-extension/**",
+    "**/vendor/**",
     "**/.git/**",
     "**/backup/**",
     "**/logs/**",

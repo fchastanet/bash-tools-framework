@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+# generate code from templates <https://github.com/TekWizely/bash-tpl>
+#  - auto import function with pattern folder::(._::)_(functionName) =>
+#    Folder/functionName.sh
+#  - auto import \_.sh if at least one function imported in the directory
+
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd)
+ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd)"
+LIB_DIR="$(cd "${ROOT_DIR}/lib" && pwd)"
+
+# shellcheck source=/lib/_header.sh
+source "${LIB_DIR}/_header.sh"
+# shellcheck source=/lib/Log/_.sh
+source "${LIB_DIR}/Log/_.sh"
+# shellcheck source=/lib/Log/displayInfo.sh
+source "${LIB_DIR}/Log/displayInfo.sh"
+# shellcheck source=/lib/Log/displayWarning.sh
+source "${LIB_DIR}/Log/displayWarning.sh"
+# shellcheck source=/lib/Array/contains.sh
+source "${LIB_DIR}/Array/contains.sh"
+
+# shellcheck disable=SC2034
+((failures = 0)) || true
+
+shopt -s expand_aliases
+set -o pipefail
+set -o errexit
+# a log is generated when a command fails
+set -o errtrace
+# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+shopt -s nullglob
+export TERM=xterm-256color
+
+removeDuplicatedShebangs() {
+  sed '1!{/^#!/d;}'
+}
+
+removeEmptyLinesFromBeginning() {
+  awk 'NF {p=1} p'
+}
+
+# @see https://unix.stackexchange.com/a/653883
+trimEmptyLines() {
+  awk '
+    NF {print saved $0; saved = ""; started = 1; next}
+    started {saved = saved $0 ORS}
+  '
+}
+
+catFileCleaned() {
+  # remove shebang line and remove empty lines at beginning and end of file
+  sed '1d' "$1" | trimEmptyLines
+  # ensure we have at least one empty line between 2 functions
+  echo
+}
+
+# Loop until no more file to import
+# 1. generate code from template
+# 2. remove duplicated #!/usr/bin/env bash
+# 3. deduce files to import based on [A-Za-z0-9]+::[A-Za-z0-9]+ pattern
+#    (skip files already imported and those that do not exist)
+# 4. inject import files at the beginning of the file
+# TODO I could get rid of bash-tpl by providing special function IMPORT::dir::file
+#    this function should be replaced inline
+
+INPUT_FILE="$1"
+OUTPUT_FILE="$2"
+FILES_IMPORTED=("${INPUT_FILE}")
+
+COMPILED_FILE="$(mktemp)"
+IMPORTED_FUNCTIONS_TEMP_SOURCE="$(mktemp)"
+# clean temp files on exit
+trap 'rm -f "${COMPILED_FILE}" "${IMPORTED_FUNCTIONS_TEMP_SOURCE}" || true' EXIT INT ABRT TERM
+
+# shellcheck source=/dev/null
+source <("${ROOT_DIR}/build/bash-tpl" "${INPUT_FILE}") | removeDuplicatedShebangs >"${COMPILED_FILE}"
+
+((FUNCTIONS_IMPORTED = 1))
+((ITERATION = 1))
+while ((FUNCTIONS_IMPORTED >= 1)); do
+  Log::displayInfo "Iteration #${ITERATION}"
+  ((FUNCTIONS_IMPORTED = 0)) || true
+  echo >"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+
+  cp "${COMPILED_FILE}" "${COMPILED_FILE}.${ITERATION}"
+  readarray -t FUNCTIONS_TO_IMPORT < <(
+    grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)([ \t);`]|$)' "${COMPILED_FILE}" |
+      awk '{$1=$1};1' |
+      sort |
+      uniq
+  )
+  for functionToImport in "${FUNCTIONS_TO_IMPORT[@]}"; do
+    fileToImport="${LIB_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+    if ! Array::contains "${fileToImport}" "${FILES_IMPORTED[@]}"; then
+      if [[ -f "${fileToImport}" ]]; then
+        # check if we need to import _.sh
+        underscoreFile="$(dirname "${fileToImport}")/_.sh"
+        if ! Array::contains "${underscoreFile}" "${FILES_IMPORTED[@]}" &&
+          [[ -f "${underscoreFile}" ]]; then
+          Log::displayInfo "Importing ${underscoreFile} ..."
+          catFileCleaned "${underscoreFile}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+          FILES_IMPORTED+=("${underscoreFile}")
+        fi
+
+        Log::displayInfo "Importing ${fileToImport} ..."
+        catFileCleaned "${fileToImport}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+      else
+        Log::displayWarning "File ${fileToImport} does not exist"
+      fi
+      FILES_IMPORTED+=("${fileToImport}")
+      ((++FUNCTIONS_IMPORTED))
+    fi
+  done
+  sed -i "/# FUNCTIONS/ r ${IMPORTED_FUNCTIONS_TEMP_SOURCE}" "${COMPILED_FILE}"
+  ((ITERATION++))
+done
+
+Log::displayInfo "Writing file ${OUTPUT_FILE}"
+mv "${COMPILED_FILE}" "${OUTPUT_FILE}"

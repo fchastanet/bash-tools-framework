@@ -1,7 +1,8 @@
 {
   "search.exclude": {
     "**/report": true,
-    "**/backup": true
+    "**/backup": true,
+    "**/megalinter-reports": true
   },
   "markdown.extension.toc.omittedFromToc": {
     "*.md": ["# %%"]

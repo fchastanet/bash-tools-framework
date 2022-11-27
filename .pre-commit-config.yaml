@@ -35,11 +35,11 @@ repos:
     hooks:
       - id: shellcheck
         # shellcheck does not validate correctly zsh files
-        exclude: (.\.zsh$|/\.zshrc$)
+        exclude: (.\.zsh$|/\.zshrc$|^vendor/.*$|^build/bash-tpl$)
 
       - id: shfmt
         args: [-i, '2', -ci]
-        exclude: (.\.zsh$|/\.zshrc$)
+        exclude: (.\.zsh$|/\.zshrc|^vendor/.*$)
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
