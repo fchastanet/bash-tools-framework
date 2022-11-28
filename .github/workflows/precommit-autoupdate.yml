@@ -1,7 +1,9 @@
 name: Pre-commit auto-update
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    # https://crontab.cronhub.io/
+    - cron: '30 10 * * *'
 jobs:
   auto-update:
     runs-on: ubuntu-latest
