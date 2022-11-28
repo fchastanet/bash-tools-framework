@@ -1,0 +1,10 @@
+{
+  "search.exclude": {
+    "**/report": true,
+    "**/backup": true
+  },
+  "markdown.extension.toc.omittedFromToc": {
+    "*.md": ["# %%"]
+  },
+  "markdown.extension.toc.levels": "2..6"
+}

@@ -1,0 +1,44 @@
+---
+# Configuration file for MegaLinter
+# See all available variables at https://oxsecurity.github.io/megalinter/configuration/ and in linters documentation
+
+APPLY_FIXES: all # all, none, or list of linter keys
+# ENABLE: # If you use ENABLE variable, all other languages/formats/tooling-formats will be disabled by default
+# ENABLE_LINTERS: # If you use ENABLE_LINTERS variable, all other linters will be disabled by default
+DISABLE:
+  - CSS
+  - HTML
+  - SQL
+SHOW_ELAPSED_TIME: true
+FILEIO_REPORTER: false
+PRINT_ALPACA: false
+SPELL_CSPELL_FILTER_REGEX_EXCLUDE: (.*-megalinter_file_names_cspell.txt)
+EXCLUDED_DIRECTORIES:
+  - '.history'
+JAVASCRIPT_DEFAULT_STYLE: prettier
+JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
+JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/settings\.json|conf/localAppData/Packages/Microsoft\.WindowsTerminal_8wekyb3d8bbwe/LocalState/originalSettings\.json|report|.vscode/launch.json)
+SPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/.idea)
+MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: (report)
+GIT_GIT_DIFF_PRE_COMMANDS:
+  - command: git config --global core.autocrlf input
+    continue_if_failed: false
+  - command: git config --global core.eol lf
+    continue_if_failed: false
+  - command: git config --global core.whitespace cr-at-eol,-trailing-space
+    continue_if_failed: false
+EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: (\.git)
+JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (report/)
+BASH_SHELLCHECK_ARGUMENTS: --source-path=/tmp/lint
+CREDENTIALS_SECRETLINT_CONFIG_FILE: .secretlintrc.yml
+BASH_SHFMT_ARGUMENTS: -i 2 -ci
+IGNORE_GITIGNORED_FILES: true
+PRE_COMMANDS:
+  - command: env
+    cwd: 'workspace'
+POST_COMMANDS:
+  # FIX files set as root user
+  # HOST_USER_ID and HOST_GROUP_ID set in package.json
+  - command: find . -user 0 -exec chown ${HOST_USER_ID}:${HOST_GROUP_ID} {} ';'
+    cwd: 'workspace'
+# DISABLE_ERRORS: true # Uncomment if you want MegaLinter to detect errors but not block CI to pass

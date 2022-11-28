@@ -1,0 +1,83 @@
+---
+repos:
+  - repo: local
+    hooks:
+      - id: remove-megalinter-containers
+        name: remove-megalinter-containers
+        entry:
+          bash -c 'set -x && docker ps -a -q --filter="name=megalinter" | xargs
+          -r docker rm || true'
+        language: system
+        always_run: true
+        require_serial: true
+        verbose: true
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: mixed-line-ending
+      - id: end-of-file-fixer
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-xml
+      - id: check-yaml
+      - id: forbid-new-submodules
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-json
+        exclude: |
+          (?x)^(
+            conf\/.vscode\/settings.json
+          )$
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shellcheck
+        # shellcheck does not validate correctly zsh files
+        exclude: (.\.zsh$|/\.zshrc$)
+
+      - id: shfmt
+        args: [-i, '2', -ci]
+        exclude: (.\.zsh$|/\.zshrc$)
+
+      # Check both committed and uncommitted files for git conflict
+      # markers and whitespace errors according to core.whitespace
+      # and conflict-marker-size configuration in a git repo.
+      - id: git-check
+
+  ## Python, Polyglot, Git, pre-commit
+  - repo: https://github.com/ScribeMD/pre-commit-hooks
+    rev: 0.15.0
+    hooks:
+      - id: megalinter-incremental
+        args: [--flavor, terraform, --release, v6.11.1]
+        stages:
+          - commit
+      - id: megalinter-full
+        args: [--flavor, terraform, --release, v6.11.1]
+        stages:
+          - push
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.0-alpha.4
+    hooks:
+      - id: prettier
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.2.2
+    hooks:
+      - id: pyupgrade
+        args: [--py36-plus]
+
+  - repo: local
+    hooks:
+      - id: remove-megalinter-containers-after-run
+        name: remove-megalinter-containers
+        entry:
+          bash -c 'set -x && docker ps -a -q --filter="name=megalinter" | xargs
+          -r docker rm || true'
+        language: system
+        always_run: true
+        require_serial: true
+        verbose: true

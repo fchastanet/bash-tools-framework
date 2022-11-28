@@ -1,0 +1,9 @@
+{
+  "retryOn429": true,
+  "retryCount": 5,
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/wiley/"
+    }
+  ]
+}
