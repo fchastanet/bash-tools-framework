@@ -14,5 +14,22 @@ Build status:
 <!-- markdownlint-restore -->
 
 - [1. Excerpt](#1-excerpt)
+- [2. Development Environment](#2-development-environment)
+  - [2.1. github page](#21-github-page)
 
 ## 1. Excerpt
+
+## 2. Development Environment
+
+### 2.1. github page
+
+Launch locally
+
+```bash
+sudo apt-get install ruby-dev
+sudo gem install bundler
+bundle install
+bundle exec jekyll serve
+```
+
+Navigate to <http://localhost:4000/>

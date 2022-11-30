@@ -2,3 +2,4 @@ logs/*
 vendor/
 .history/
 megalinter-reports/
+_site/
