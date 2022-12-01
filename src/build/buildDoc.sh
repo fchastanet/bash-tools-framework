@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
+# BUILD_BIN_FILE=${ROOT_DIR}/build/buildDoc.sh
 
-set -o errexit
-set -o pipefail
+.INCLUDE lib/_header.tpl
 
-CURRENT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# FUNCTIONS
 
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-  "${CURRENT_DIR}/.build/runBuildContainer.sh" "/bash/doc.sh" "$@"
+  "${ROOT_DIR}/.build/runBuildContainer.sh" "/bash/build/doc.sh" "$@"
   exit $?
 fi
 
@@ -49,7 +49,7 @@ generateReadme() {
     local TOKEN="$1"
     "${CURRENT_DIR}/bin/${TOKEN}" --help | escapeColorCodes >"${TMP_DIR}/${TOKEN}_help"
     (
-      cd "${TMP_DIR}"
+      cd "${TMP_DIR}" || exit 1
       sed -i -e "/@@@${TOKEN}_help@@@/r ${TOKEN}_help" -e "/@@@${TOKEN}_help@@@/d" "${CURRENT_DIR}/README.md"
     )
   }

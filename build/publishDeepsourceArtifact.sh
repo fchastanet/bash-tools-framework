@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM <% $SRC_FILE_PATH %>
+# GENERATED FILE FROM src/build/publishDeepsourceArtifact.sh
 # DO NOT EDIT IT
 #####################################
 
-LIB_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd)
+ROOT_DIR="/home/wsl/projects/bash-tools2"
 # shellcheck disable=SC2034
-ROOT_DIR="$(cd "${LIB_DIR}/.." && pwd)"
+LIB_DIR="${ROOT_DIR}/lib"
+# shellcheck disable=SC2034
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -24,3 +25,15 @@ export TERM=xterm-256color
 #avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# FUNCTIONS
+
+FILE="$1"
+(
+  cd "${ROOT_DIR}" || exit 1
+  # Install deepsource CLI
+  curl https://deepsource.io/cli | sh
+
+  # Report coverage artifact to 'test-coverage' analyzer
+  ./bin/deepsource report --analyzer shell --key shellcheck --value-file "${FILE}"
+)

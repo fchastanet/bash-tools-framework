@@ -13,10 +13,6 @@ LIB_DIR="$(cd "${ROOT_DIR}/lib" && pwd)"
 source "${LIB_DIR}/_header.sh"
 # shellcheck source=/lib/Log/_.sh
 source "${LIB_DIR}/Log/_.sh"
-# shellcheck source=/lib/Log/displayInfo.sh
-source "${LIB_DIR}/Log/displayInfo.sh"
-# shellcheck source=/lib/Log/displayWarning.sh
-source "${LIB_DIR}/Log/displayWarning.sh"
 # shellcheck source=/lib/Array/contains.sh
 source "${LIB_DIR}/Array/contains.sh"
 
@@ -65,7 +61,7 @@ catFileCleaned() {
 #    this function should be replaced inline
 
 INPUT_FILE="$1"
-OUTPUT_FILE="$2"
+INPUT_RELATIVE_FILE="$2"
 FILES_IMPORTED=("${INPUT_FILE}")
 
 COMPILED_FILE="$(mktemp)"
@@ -74,12 +70,12 @@ IMPORTED_FUNCTIONS_TEMP_SOURCE="$(mktemp)"
 trap 'rm -f "${COMPILED_FILE}" "${IMPORTED_FUNCTIONS_TEMP_SOURCE}" || true' EXIT INT ABRT TERM
 
 # shellcheck source=/dev/null
-source <("${ROOT_DIR}/build/bash-tpl" "${INPUT_FILE}") | removeDuplicatedShebangs >"${COMPILED_FILE}"
+(ROOT_DIR="${ROOT_DIR}" SRC_FILE_PATH="${INPUT_RELATIVE_FILE}" source <("${ROOT_DIR}/build/bash-tpl" "${INPUT_FILE}")) | removeDuplicatedShebangs >"${COMPILED_FILE}"
 
 ((FUNCTIONS_IMPORTED = 1))
 ((ITERATION = 1))
 while ((FUNCTIONS_IMPORTED >= 1)); do
-  Log::displayInfo "Iteration #${ITERATION}"
+  (echo >&2 -e "\tIteration #${ITERATION}")
   ((FUNCTIONS_IMPORTED = 0)) || true
   echo >"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
 
@@ -98,15 +94,15 @@ while ((FUNCTIONS_IMPORTED >= 1)); do
         underscoreFile="$(dirname "${fileToImport}")/_.sh"
         if ! Array::contains "${underscoreFile}" "${FILES_IMPORTED[@]}" &&
           [[ -f "${underscoreFile}" ]]; then
-          Log::displayInfo "Importing ${underscoreFile} ..."
+          (echo >&2 -e "\tImporting ${underscoreFile} ...")
           catFileCleaned "${underscoreFile}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
           FILES_IMPORTED+=("${underscoreFile}")
         fi
 
-        Log::displayInfo "Importing ${fileToImport} ..."
+        (echo >&2 -e "\tImporting ${fileToImport} ...")
         catFileCleaned "${fileToImport}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
       else
-        Log::displayWarning "File ${fileToImport} does not exist"
+        (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist\e[0m")
       fi
       FILES_IMPORTED+=("${fileToImport}")
       ((++FUNCTIONS_IMPORTED))
@@ -115,6 +111,4 @@ while ((FUNCTIONS_IMPORTED >= 1)); do
   sed -i "/# FUNCTIONS/ r ${IMPORTED_FUNCTIONS_TEMP_SOURCE}" "${COMPILED_FILE}"
   ((ITERATION++))
 done
-
-Log::displayInfo "Writing file ${OUTPUT_FILE}"
-mv "${COMPILED_FILE}" "${OUTPUT_FILE}"
+cat -s "${COMPILED_FILE}"

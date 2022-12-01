@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-LIB_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd)
+#####################################
+# GENERATED FILE FROM src/Docker/installDockerInWsl.sh
+# DO NOT EDIT IT
+#####################################
+
+ROOT_DIR="/home/wsl/projects/bash-tools2"
 # shellcheck disable=SC2034
-ROOT_DIR="$(cd "${LIB_DIR}/.." && pwd)"
+LIB_DIR="${ROOT_DIR}/lib"
+# shellcheck disable=SC2034
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true

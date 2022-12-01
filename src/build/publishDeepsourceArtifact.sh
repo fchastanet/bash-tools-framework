@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+# BUILD_BIN_FILE=${ROOT_DIR}/build/publishDeepsourceArtifact.sh
 
-set -o errexit
-set -o pipefail
+.INCLUDE lib/_header.tpl
 
-BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+# FUNCTIONS
+
 FILE="$1"
 (
-  cd "${BASE_DIR}"
+  cd "${ROOT_DIR}" || exit 1
   # Install deepsource CLI
   curl https://deepsource.io/cli | sh
 

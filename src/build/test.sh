@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# BUILD_BIN_FILE=${ROOT_DIR}/build/test.sh
 
-set -o errexit
-set -o pipefail
-CURRENT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+.INCLUDE lib/_header.tpl
+
+# FUNCTIONS
 
 # use this in order to debug inside the container
 # docker build -t bash-tools-ubuntu:5.1 -f .docker/Dockerfile.ubuntu
@@ -18,11 +19,11 @@ CURRENT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (
     if (($# < 1)); then
-      "${CURRENT_DIR}/vendor/bats/bin/bats" -r tests
+      "${ROOT_DIR}/vendor/bats/bin/bats" -r tests
     else
-      "${CURRENT_DIR}/vendor/bats/bin/bats" "$@"
+      "${ROOT_DIR}/vendor/bats/bin/bats" "$@"
     fi
   )
 else
-  "${CURRENT_DIR}/.build/runBuildContainer.sh" "/bash/test.sh" "$@"
+  "${ROOT_DIR}/.build/runBuildContainer.sh" "/bash/test.sh" "$@"
 fi

@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
+# BUILD_BIN_FILE=${ROOT_DIR}/build/runBuildContainer.sh
 
-set -o errexit
-set -o pipefail
+.INCLUDE lib/_header.tpl
 
-BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+# FUNCTIONS
+
 VENDOR="${VENDOR:-ubuntu}"
 BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"
 BASH_IMAGE="${BASH_IMAGE:-ubuntu:20.04}"
 DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 (echo >&2 "run tests using ${VENDOR}:${BASH_TAR_VERSION}")
-cd "${BASE_DIR}" || exit 1
+cd "${ROOT_DIR}" || exit 1
 
-if [[ ! -d "${BASE_DIR}/vendor" ]]; then
+if [[ ! -d "${ROOT_DIR}/vendor" ]]; then
   ./.build/installBuildDeps.sh
 fi
 
@@ -28,7 +29,7 @@ if [[ "${SKIP_BUILD:-0}" = "0" ]]; then
     --build-arg GROUP_ID="$(id -g)" \
     -f .docker/DockerfileUser \
     -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    .docker
+    ".docker"
 fi
 
 # run tests
@@ -41,7 +42,7 @@ docker run \
   --rm \
   "${args[@]}" \
   -w /bash \
-  -v "${BASE_DIR}:/bash" \
+  -v "${ROOT_DIR}:/bash" \
   --user "$(id -u):$(id -g)" \
   "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
   "$@"

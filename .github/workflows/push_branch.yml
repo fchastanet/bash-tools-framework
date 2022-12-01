@@ -25,16 +25,13 @@ jobs:
           echo "$(pwd)/bin" >> "${GITHUB_PATH}"
       - name: Install vendors (shellcheck follow source during linting)
         shell: bash
-        run: ./.github/buildScripts/installBuildDeps.sh
+        run: ./build/installBuildDeps.sh
       - name: Linting - Shellcheck
-        run:
-          ./.github/lintScripts/shellcheck.sh | tee
-          logs/shellcheck-checkstyle.xml
+        run: ./bin/linters/shellcheck.sh | tee logs/shellcheck-checkstyle.xml
       - name: Linting - Awk
-        run: ./.github/lintScripts/awkLint.sh | tee logs/awk-checkstyle.xml
+        run: ./bin/linters/awkLint.sh | tee logs/awk-checkstyle.xml
       - name: Linting - Dockerfile
-        run:
-          ./.github/lintScripts/dockerLint.sh | tee logs/docker-checkstyle.xml
+        run: ./bin/linters/dockerLint.sh | tee logs/docker-checkstyle.xml
       - uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
           path: 'logs/*-checkstyle.xml'

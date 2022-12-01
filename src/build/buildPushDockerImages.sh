@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-set -o errexit
-set -o pipefail
+# BUILD_BIN_FILE=${ROOT_DIR}/build/buildPushDockerImages.sh
 
-BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+.INCLUDE lib/_header.tpl
+
+# FUNCTIONS
+
 VENDOR="$1"
 BASH_TAR_VERSION="$2"
 BASH_BASE_IMAGE="$3"
@@ -11,11 +13,10 @@ PUSH_IMAGE="${5:-}"
 DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 if [[ -z "${VENDOR}" || -z "${BASH_TAR_VERSION}" || -z "${BASH_BASE_IMAGE}" ]]; then
-  (echo >&2 "please provide these parameters VENDOR, BASH_TAR_VERSION, BASH_BASE_IMAGE")
-  exit 1
+  Log::fatal "please provide these parameters VENDOR, BASH_TAR_VERSION, BASH_BASE_IMAGE"
 fi
 
-cd "${BASE_DIR}" || exit 1
+cd "${ROOT_DIR}" || exit 1
 
 # pull image if needed
 if [[ "${PULL_IMAGE}" == "true" ]]; then
@@ -33,7 +34,7 @@ DOCKER_BUILDKIT=1 docker build \
   --build-arg BASH_IMAGE="${BASH_BASE_IMAGE}" \
   -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   -t "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
-  .docker
+  ".docker"
 docker run --rm "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" bash --version
 
 if [[ "${PUSH_IMAGE}" == "push" ]]; then

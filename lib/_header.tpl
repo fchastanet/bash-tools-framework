@@ -5,9 +5,10 @@
 # DO NOT EDIT IT
 #####################################
 
-LIB_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd)
+ROOT_DIR="<% $ROOT_DIR %>"
 # shellcheck disable=SC2034
-ROOT_DIR="$(cd "${LIB_DIR}/.." && pwd)"
+LIB_DIR="<%% echo '${ROOT_DIR}/lib' %>"
+# shellcheck disable=SC2034
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true

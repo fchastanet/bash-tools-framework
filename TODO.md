@@ -3,6 +3,8 @@
 - generate github page from Readme.tmpl.md using github workflow
   - include bin help
   - include bash doc
+- \_header.tpl compute ROOT_DIR relative to BUILD_BIN_FILE
+- cat << EOF avoid to interpolate variables
 - Update libraries command
 
   - command that allows to update the libraries in the repo
@@ -24,3 +26,6 @@
     global HOME variable
   - replace all ${HOME} by $(Env::get "HOME")
   - generate automatically .env.template from Env::get
+- <https://dougrichardson.us/notes/fail-fast-bash-scripting.html>
+- <https://github.com/adoyle-h/lobash>
+- <https://github.com/elibs/ebash>

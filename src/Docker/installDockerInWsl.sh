@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-.INCLUDE lib/_header.sh
+.INCLUDE lib/_header.tpl
 
 # FUNCTIONS
 

@@ -79,3 +79,6 @@ PATHCONV
 CONV
 uroot
 proot
+envsubst
+regextype
+gsub

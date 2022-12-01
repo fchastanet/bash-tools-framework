@@ -35,7 +35,7 @@ repos:
     hooks:
       - id: shellcheck
         # shellcheck does not validate correctly zsh files
-        exclude: (.\.zsh$|/\.zshrc$|^vendor/.*$|^build/bash-tpl$)
+        exclude: (.\.zsh$|/\.zshrc$|^vendor/.*$|^build/bash-tpl$|\.tpl$)
 
       - id: shfmt
         args: [-i, '2', -ci]

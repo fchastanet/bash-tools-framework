@@ -13,7 +13,7 @@ BEGIN {
 
   # awk: bin/mysql2puml.awk:181:     if (length(currentLine) < 2 || match(currentLine, "^--") > 0) {
   # awk: bin/mysql2puml.awk:181:     ^ syntax error
-  # awk: warning: function `uml_parse_line' called but never defined
+  # awk: warning: function uml_parse_line called but never defined
 
   if (match(line, /^awk: ([^:]+):([^:]+): ([ ]*)(.+)$/, arr)) {
       file=arr[1]
