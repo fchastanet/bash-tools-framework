@@ -5,7 +5,7 @@ Wsl::cachedWslpath() {
   local tempEnvFile
   local key
 
-  tempEnvFile="/tmp/ck_ip_devenv_wslpath_$(id -un)"
+  tempEnvFile="/tmp/bash_tools_wslpath_$(id -un)"
   Wsl::removeCacheFileIfTooOld "${tempEnvFile}" "+1"
 
   key="$(getKeyFromWslpathOptions "$@")"

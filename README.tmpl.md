@@ -109,7 +109,7 @@ touch ~/.parallel/will-cite
 
 **Help**
 
-```
+```text
 @@@gitRenameBranch_help@@@
 ```
 
@@ -124,7 +124,7 @@ bin/dbQueryAllDatabases -e localhost-root conf/dbQueries/databaseSize.sql
 
 **Help**
 
-```
+```text
 @@@dbQueryAllDatabases_help@@@
 ```
 
@@ -150,7 +150,7 @@ bin/dbScriptAllDatabases --jobs 10 -d localhost-root dbCheckStructOneDatabase
 
 **Help:**
 
-```
+```text
 @@@dbScriptAllDatabases_help@@@
 ```
 
@@ -187,7 +187,7 @@ dbImport --from-dsn default.remote --target-dsn default.local -p all fromDb targ
 
 **Help**
 
-```
+```text
 @@@dbImport_help@@@
 ```
 
@@ -206,7 +206,7 @@ saved in ${HOME}/.bash-tools/dbImportProfiles with this format `auto*<dsn>*<db>`
 
 **Help**
 
-```
+```text
 @@@dbImportProfile_help@@@
 ```
 
@@ -214,7 +214,7 @@ saved in ${HOME}/.bash-tools/dbImportProfiles with this format `auto*<dsn>*<db>`
 
 **Help**
 
-```
+```text
 @@@cli_help@@@
 ```
 
@@ -264,7 +264,7 @@ as input is given to the command, tty option is not provided to docker exec
 
 **Help**
 
-```
+```text
 @@@gitIsAncestorOf_help@@@
 ```
 
@@ -272,7 +272,7 @@ as input is given to the command, tty option is not provided to docker exec
 
 **Help**
 
-```
+```text
 @@@mysql2puml_help@@@
 ```
 

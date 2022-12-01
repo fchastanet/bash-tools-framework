@@ -103,7 +103,7 @@ while ((FUNCTIONS_IMPORTED >= 1)); do
         (echo >&2 -e "\tImporting ${fileToImport} ...")
         catFileCleaned "${fileToImport}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
       else
-        (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist\e[0m")
+        (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
       fi
       FILES_IMPORTED+=("${fileToImport}")
       ((++FUNCTIONS_IMPORTED))

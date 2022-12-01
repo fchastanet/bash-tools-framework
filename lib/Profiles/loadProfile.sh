@@ -10,7 +10,7 @@ Profiles::loadProfile() {
     ROOT_DEPENDENCY="your software selection"
   else
     Log::displayInfo "Loading profile '${ROOT_DIR}/profile.${PROFILE}.sh'"
-    # shellcheck source=/profile.default.sh
+    # shellcheck source=/lib/Profiles/profile.default.template
     source "${ROOT_DIR}/profile.${PROFILE}.sh"
     ROOT_DEPENDENCY="profile ${PROFILE}"
   fi
@@ -30,6 +30,7 @@ Profiles::loadProfile() {
     CONFIG_LIST=("_Test" "_Upgrade" "MandatorySoftwares" "${CONFIG_LIST[@]}" "_Clean" "_Export")
     # deduce dependencies
     allDepsResult=()
+    # shellcheck disable=SC2034
     allDepsResultSeen=()
     allDepsRecursive "${ROOT_DEPENDENCY}" "${CONFIG_LIST[@]}"
     CONFIG_LIST=("${allDepsResult[@]}")

@@ -46,6 +46,22 @@ repos:
       # and conflict-marker-size configuration in a git repo.
       - id: git-check
 
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.0-alpha.4
+    hooks:
+      - id: prettier
+
+  - repo: local
+    hooks:
+      - id: build-sh-files
+        name: build-sh-files
+        entry: bash -c './build.sh'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
   ## Python, Polyglot, Git, pre-commit
   - repo: https://github.com/ScribeMD/pre-commit-hooks
     rev: 0.15.0
@@ -58,17 +74,6 @@ repos:
         args: [--flavor, terraform, --release, v6.11.1]
         stages:
           - push
-
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.4
-    hooks:
-      - id: prettier
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.2.3
-    hooks:
-      - id: pyupgrade
-        args: [--py36-plus]
 
   - repo: local
     hooks:

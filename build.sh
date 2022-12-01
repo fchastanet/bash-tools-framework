@@ -12,6 +12,8 @@ source "${LIB_DIR}/Log/displayInfo.sh"
 # shellcheck source=/lib/Log/displayError.sh
 source "${LIB_DIR}/Log/displayError.sh"
 
+# exitCode will be > 0 if at least one file has been updated or created
+((exitCode = 0)) || true
 compileFile() {
   srcFile="$1"
   srcRelativeFile="$(realpath -m --relative-to="${ROOT_DIR}" "${srcFile}")"
@@ -29,11 +31,20 @@ compileFile() {
 
   Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
   mkdir -p "$(dirname "${BIN_FILE}")"
+  oldMd5="$(md5sum "${BIN_FILE}" | awk '{print $1}' || "new")"
   "${ROOT_DIR}/build/compile" "${srcFile}" "${srcRelativeFile}" "${BIN_FILE_RELATIVE2ROOT_DIR}" |
     sed -r '/^# (BIN_FILE|BIN_FILE_RELATIVE2ROOT_DIR)=.*$/d' >"${BIN_FILE}"
   chmod +x "${BIN_FILE}"
+  if [[ "${oldMd5}" != "$(md5sum "${BIN_FILE}" | awk '{print $1}' || "new")" ]]; then
+    ((++exitCode))
+  fi
 }
 
 while IFS= read -r file; do
   compileFile "${file}"
 done < <(find "${ROOT_DIR}/src" -name "*.sh")
+
+if [[ "${exitCode}" != "0" ]]; then
+  Log::displayError "${exitCode} file(s) have been updated by this build"
+  exit "${exitCode}"
+fi

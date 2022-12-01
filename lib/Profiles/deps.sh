@@ -2,6 +2,7 @@
 
 Profiles::deps() {
   dependency="${SCRIPTS_DIR}/$1/dependencies"
+  # shellcheck disable=SC2154
   if [[ "${allDepsResultSeen["$1"]}" = 'stored' ]]; then
     # avoid dead loop
     return 0

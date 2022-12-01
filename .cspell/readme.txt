@@ -24,3 +24,13 @@ xdebug
 xdebugini
 Bazyli
 Brzóska
+Scrasnups
+installationconfiguration
+bingitrenamebranch
+bindbqueryalldatabases
+bindbscriptalldatabases
+bindbimport
+bindbimportprofile
+bincli
+bingitisancestorof
+binmysql

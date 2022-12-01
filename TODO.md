@@ -28,3 +28,4 @@
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html>
 - <https://github.com/adoyle-h/lobash>
 - <https://github.com/elibs/ebash>
+- <https://github.com/pre-commit/action>
