@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# BUILD_BIN_FILE=${ROOT_DIR}/build/runBuildContainer.sh
+# BIN_FILE=${ROOT_DIR}/bin/runBuildContainer
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 VENDOR="${VENDOR:-ubuntu}"
 BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"

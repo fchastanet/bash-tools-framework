@@ -5,10 +5,10 @@
 # DO NOT EDIT IT
 #####################################
 
-ROOT_DIR="/home/wsl/projects/bash-tools2"
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 # shellcheck disable=SC2034
 LIB_DIR="${ROOT_DIR}/lib"
-# shellcheck disable=SC2034
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true

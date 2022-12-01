@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# BUILD_BIN_FILE=${ROOT_DIR}/build/installBuildDeps.sh
+# BIN_FILE=${ROOT_DIR}/bin/installBuildDeps
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 Git::shallowClone \
   "https://github.com/fchastanet/tomdoc.sh.git" \

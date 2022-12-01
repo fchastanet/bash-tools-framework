@@ -15,13 +15,31 @@ Build status:
 
 - [1. Excerpt](#1-excerpt)
 - [2. Development Environment](#2-development-environment)
-  - [2.1. github page](#21-github-page)
+  - [2.1. Install build dependencies](#21-install-build-dependencies)
+  - [2.2. github page](#22-github-page)
 
 ## 1. Excerpt
 
 ## 2. Development Environment
 
-### 2.1. github page
+### 2.1. Install build dependencies
+
+In order to generate bash documentation nad to run unit tests, you have to
+launch this command to install some libraries.
+
+```bash
+ ./build/installBuildDeps.sh
+```
+
+this script will install the following libraries inside `vendor` folder:
+
+- [fchastanet/tomdoc.sh](https://github.com/fchastanet/tomdoc.sh.git)
+- [bats-core/bats-core](https://github.com/bats-core/bats-core.git)
+- [bats-core/bats-support](https://github.com/bats-core/bats-support.git)
+- [bats-core/bats-assert](https://github.com/bats-core/bats-assert.git)
+- [Flamefire/bats-mock](https://github.com/Flamefire/bats-mock.git)
+
+### 2.2. github page
 
 Launch locally
 

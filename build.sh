@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd)
-LIB_DIR="$(cd "${CURRENT_DIR}/lib" && pwd)"
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+LIB_DIR="$(cd "${CURRENT_DIR}/lib" && pwd -P)"
 
 # shellcheck source=/lib/_header.sh
 source "${LIB_DIR}/_header.sh"
@@ -15,22 +15,23 @@ source "${LIB_DIR}/Log/displayError.sh"
 compileFile() {
   srcFile="$1"
   srcRelativeFile="$(realpath -m --relative-to="${ROOT_DIR}" "${srcFile}")"
-  BUILD_BIN_FILE="$(grep -E '# BUILD_BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=(.*)$/\1/' || :)"
-  BUILD_BIN_FILE="$(echo "${BUILD_BIN_FILE}" | envsubst)"
-  if [[ -z "${BUILD_BIN_FILE}" ]]; then
-    BUILD_BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${ROOT_DIR}/src/#${ROOT_DIR}/bin/#")"
+  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  BIN_FILE="$(echo "${BIN_FILE}" | envsubst)"
+  BIN_FILE_RELATIVE2ROOT_DIR="$(grep -E '# BIN_FILE_RELATIVE2ROOT_DIR=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  if [[ -z "${BIN_FILE}" ]]; then
+    BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${ROOT_DIR}/src/#${ROOT_DIR}/bin/#" | sed -E 's#.sh$##')"
   else
-    if ! realpath "${BUILD_BIN_FILE}" &>/dev/null; then
-      Log::displayError "${srcFile} does not define a valid BUILD_BIN_FILE value"
+    if ! realpath "${BIN_FILE}" &>/dev/null; then
+      Log::displayError "${srcFile} does not define a valid BIN_FILE value"
       return 1
     fi
   fi
 
-  Log::displayInfo "Writing file ${BUILD_BIN_FILE} from ${srcFile}"
-  mkdir -p "$(dirname "${BUILD_BIN_FILE}")"
-  "${ROOT_DIR}/build/compile" "${srcFile}" "${srcRelativeFile}" |
-    sed -r '/^# BUILD_BIN_FILE=.*$/d' >"${BUILD_BIN_FILE}"
-  chmod +x "${BUILD_BIN_FILE}"
+  Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
+  mkdir -p "$(dirname "${BIN_FILE}")"
+  "${ROOT_DIR}/build/compile" "${srcFile}" "${srcRelativeFile}" "${BIN_FILE_RELATIVE2ROOT_DIR}" |
+    sed -r '/^# (BIN_FILE|BIN_FILE_RELATIVE2ROOT_DIR)=.*$/d' >"${BIN_FILE}"
+  chmod +x "${BIN_FILE}"
 }
 
 while IFS= read -r file; do

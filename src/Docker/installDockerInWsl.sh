@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
+# BIN_FILE_RELATIVE2ROOT_DIR=../..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 .INCLUDE lib/_includes/executedAsRoot.sh
 

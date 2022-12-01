@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
+# BIN_FILE=${ROOT_DIR}/bin/install
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
-BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# load bash-framework
-# shellcheck source=bash-framework/_bootstrap.sh
-source "$(cd "${BASE_DIR}" && pwd)/bash-framework/_bootstrap.sh"
-import bash-framework/Log
+.INCLUDE lib/_header.tpl
 
 if ! command -v parallel 2>/dev/null; then
   Log::displayInfo "We will install GNU parallel software, please enter you sudo password"

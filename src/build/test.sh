@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# BUILD_BIN_FILE=${ROOT_DIR}/build/test.sh
+# BIN_FILE=${ROOT_DIR}/bin/test
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 # use this in order to debug inside the container
 # docker build -t bash-tools-ubuntu:5.1 -f .docker/Dockerfile.ubuntu

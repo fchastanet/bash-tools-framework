@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# BUILD_BIN_FILE=${ROOT_DIR}/build/publishDeepsourceArtifact.sh
+# BIN_FILE=${ROOT_DIR}/bin/publishDeepsourceArtifact
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 FILE="$1"
 (

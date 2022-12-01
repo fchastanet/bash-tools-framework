@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# BUILD_BIN_FILE=${ROOT_DIR}/build/buildPushDockerImages.sh
+# BIN_FILE=${ROOT_DIR}/bin/buildPushDockerImages
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 VENDOR="$1"
 BASH_TAR_VERSION="$2"

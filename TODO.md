@@ -3,7 +3,6 @@
 - generate github page from Readme.tmpl.md using github workflow
   - include bin help
   - include bash doc
-- \_header.tpl compute ROOT_DIR relative to BUILD_BIN_FILE
 - cat << EOF avoid to interpolate variables
 - Update libraries command
 

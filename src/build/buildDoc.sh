@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# BUILD_BIN_FILE=${ROOT_DIR}/build/buildDoc.sh
+# BIN_FILE=${ROOT_DIR}/bin/buildDoc
+# BIN_FILE_RELATIVE2ROOT_DIR=..
 
 .INCLUDE lib/_header.tpl
-
-# FUNCTIONS
 
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
   "${ROOT_DIR}/.build/runBuildContainer.sh" "/bash/build/doc.sh" "$@"

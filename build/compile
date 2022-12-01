@@ -5,9 +5,9 @@
 #    Folder/functionName.sh
 #  - auto import \_.sh if at least one function imported in the directory
 
-CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd)
-ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd)"
-LIB_DIR="$(cd "${ROOT_DIR}/lib" && pwd)"
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+LIB_DIR="$(cd "${ROOT_DIR}/lib" && pwd -P)"
 
 # shellcheck source=/lib/_header.sh
 source "${LIB_DIR}/_header.sh"
@@ -62,6 +62,7 @@ catFileCleaned() {
 
 INPUT_FILE="$1"
 INPUT_RELATIVE_FILE="$2"
+BIN_FILE_RELATIVE2ROOT_DIR="$3"
 FILES_IMPORTED=("${INPUT_FILE}")
 
 COMPILED_FILE="$(mktemp)"
@@ -70,7 +71,7 @@ IMPORTED_FUNCTIONS_TEMP_SOURCE="$(mktemp)"
 trap 'rm -f "${COMPILED_FILE}" "${IMPORTED_FUNCTIONS_TEMP_SOURCE}" || true' EXIT INT ABRT TERM
 
 # shellcheck source=/dev/null
-(ROOT_DIR="${ROOT_DIR}" SRC_FILE_PATH="${INPUT_RELATIVE_FILE}" source <("${ROOT_DIR}/build/bash-tpl" "${INPUT_FILE}")) | removeDuplicatedShebangs >"${COMPILED_FILE}"
+(BIN_FILE_RELATIVE2ROOT_DIR="${BIN_FILE_RELATIVE2ROOT_DIR}" SRC_FILE_PATH="${INPUT_RELATIVE_FILE}" source <("${ROOT_DIR}/build/bash-tpl" "${INPUT_FILE}")) | removeDuplicatedShebangs >"${COMPILED_FILE}"
 
 ((FUNCTIONS_IMPORTED = 1))
 ((ITERATION = 1))
