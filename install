@@ -6,7 +6,7 @@
 #####################################
 
 CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
-ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+ROOT_DIR="$(cd "${CURRENT_DIR}/" && pwd -P)"
 # shellcheck disable=SC2034
 LIB_DIR="${ROOT_DIR}/lib"
 
@@ -27,6 +27,12 @@ export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 
 # FUNCTIONS
+
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}"
+}
 
 if [[ -t 0 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
@@ -81,6 +87,18 @@ Log::displayInfo() {
 Log::displayWarning() {
   echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}"
 }
+
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  Log::displayError "$1"
+  exit 1
+}
+
+if [[ "$(id -u)" = "0" ]]; then
+  Log::fatal "this script should be executed as normal user"
+  exit 1
+fi
 
 if ! command -v parallel 2>/dev/null; then
   Log::displayInfo "We will install GNU parallel software, please enter you sudo password"

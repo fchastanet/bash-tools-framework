@@ -5,7 +5,7 @@
 .INCLUDE lib/_header.tpl
 
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-  "${ROOT_DIR}/.build/runBuildContainer.sh" "/bash/build/doc.sh" "$@"
+  "${ROOT_DIR}/build/runBuildContainer" "/bash/build/buildDoc" "$@"
   exit $?
 fi
 

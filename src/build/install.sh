@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/install
-# BIN_FILE_RELATIVE2ROOT_DIR=..
+# BIN_FILE=${ROOT_DIR}/install
+# BIN_FILE_RELATIVE2ROOT_DIR=
 
 .INCLUDE lib/_header.tpl
+
+.INCLUDE lib/_includes/executedAsUser.sh
 
 if ! command -v parallel 2>/dev/null; then
   Log::displayInfo "We will install GNU parallel software, please enter you sudo password"

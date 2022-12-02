@@ -31,7 +31,7 @@ compileFile() {
 
   Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
   mkdir -p "$(dirname "${BIN_FILE}")"
-  oldMd5="$(md5sum "${BIN_FILE}" | awk '{print $1}' || "new")"
+  oldMd5="$(md5sum "${BIN_FILE}" 2>/dev/null | awk '{print $1}' || echo "new")"
   "${ROOT_DIR}/build/compile" "${srcFile}" "${srcRelativeFile}" "${BIN_FILE_RELATIVE2ROOT_DIR}" |
     sed -r '/^# (BIN_FILE|BIN_FILE_RELATIVE2ROOT_DIR)=.*$/d' >"${BIN_FILE}"
   chmod +x "${BIN_FILE}"

@@ -4,5 +4,5 @@
 # @param {String} $1 character to use as separator (default value #)
 UI::drawLine() {
   local character="${1:-#}"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' "${character}"
+  printf '%*s\n' "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo)}" '' | tr ' ' "${character}"
 }
