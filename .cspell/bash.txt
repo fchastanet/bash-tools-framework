@@ -84,3 +84,5 @@ regextype
 gsub
 willywonka
 onbuild
+TMPDIR
+SIGUSR

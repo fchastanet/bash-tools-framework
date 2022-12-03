@@ -133,3 +133,5 @@ checkstyle
 Buildx
 mysqldump
 timeago
+mysqlshow
+gtid

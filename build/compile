@@ -7,14 +7,14 @@
 
 CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-LIB_DIR="$(cd "${ROOT_DIR}/lib" && pwd -P)"
+SRC_DIR="$(cd "${ROOT_DIR}/src" && pwd -P)"
 
-# shellcheck source=/lib/_header.sh
-source "${LIB_DIR}/_header.sh"
-# shellcheck source=/lib/Log/_.sh
-source "${LIB_DIR}/Log/_.sh"
-# shellcheck source=/lib/Array/contains.sh
-source "${LIB_DIR}/Array/contains.sh"
+# shellcheck source=/src/_includes/_header.sh
+source "${SRC_DIR}/_includes/_header.sh"
+# shellcheck source=/src/Log/_.sh
+source "${SRC_DIR}/Log/_.sh"
+# shellcheck source=/src/Array/contains.sh
+source "${SRC_DIR}/Array/contains.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -88,7 +88,7 @@ while ((FUNCTIONS_IMPORTED >= 1)); do
       uniq
   )
   for functionToImport in "${FUNCTIONS_TO_IMPORT[@]}"; do
-    fileToImport="${LIB_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+    fileToImport="${SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
     if ! Array::contains "${fileToImport}" "${FILES_IMPORTED[@]}"; then
       if [[ -f "${fileToImport}" ]]; then
         # check if we need to import _.sh

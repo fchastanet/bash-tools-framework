@@ -3,3 +3,4 @@ vendor
 .history
 megalinter-reports
 _site
+doc

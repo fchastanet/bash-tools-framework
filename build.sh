@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
-LIB_DIR="$(cd "${CURRENT_DIR}/lib" && pwd -P)"
+SRC_DIR="$(cd "${CURRENT_DIR}/src" && pwd -P)"
 
-# shellcheck source=/lib/_header.sh
-source "${LIB_DIR}/_header.sh"
-# shellcheck source=/lib/Log/_.sh
-source "${LIB_DIR}/Log/_.sh"
-# shellcheck source=/lib/Log/displayInfo.sh
-source "${LIB_DIR}/Log/displayInfo.sh"
-# shellcheck source=/lib/Log/displayError.sh
-source "${LIB_DIR}/Log/displayError.sh"
+# shellcheck source=/src/_includes/_header.sh
+source "${SRC_DIR}/_includes/_header.sh"
+# shellcheck source=/src/Log/_.sh
+source "${SRC_DIR}/Log/_.sh"
+# shellcheck source=/src/Log/displayInfo.sh
+source "${SRC_DIR}/Log/displayInfo.sh"
+# shellcheck source=/src/Log/displayError.sh
+source "${SRC_DIR}/Log/displayError.sh"
 
 # exitCode will be > 0 if at least one file has been updated or created
 ((exitCode = 0)) || true
