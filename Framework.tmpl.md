@@ -69,8 +69,8 @@ All these tools are based on _Bash framework_ with the following features:
 
 # load bash-framework
 # shellcheck source=bash-framework/_bootstrap.sh
-CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "$( cd "${CURRENT_DIR}/.." && pwd )/bash-framework/_bootstrap.sh"
+BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source "$( cd "${BIN_DIR}/.." && pwd )/bash-framework/_bootstrap.sh"
 
 # bash framework is loaded, .env has been loaded (default .env file present in bash-framework is loaded if none exists yet)
 

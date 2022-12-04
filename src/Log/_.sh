@@ -14,6 +14,8 @@ if [[ -t 0 ]]; then
   # Internal: reset color
   export readonly __RESET_COLOR='\e[0m' # Reset Color
   # shellcheck disable=SC2155,SC2034
+  export readonly __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+  # shellcheck disable=SC2155,SC2034
   export readonly __HELP_TITLE="$(echo -e "\e[1;37m")"
   # shellcheck disable=SC2155,SC2034
   export readonly __HELP_NORMAL="$(echo -e "\033[0m")"
@@ -30,6 +32,7 @@ else
   export readonly __DEBUG_COLOR=''
   # Internal: reset color
   export readonly __RESET_COLOR=''
-  export readonly __HELP_TITLE=""
-  export readonly __HELP_NORMAL=""
+  export readonly __HELP_EXAMPLE=''
+  export readonly __HELP_TITLE=''
+  export readonly __HELP_NORMAL=''
 fi

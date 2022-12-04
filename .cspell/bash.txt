@@ -86,3 +86,4 @@ willywonka
 onbuild
 TMPDIR
 SIGUSR
+inlines

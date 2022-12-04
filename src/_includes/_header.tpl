@@ -5,8 +5,8 @@
 # DO NOT EDIT IT
 #####################################
 
-CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
-ROOT_DIR="$(cd "${CURRENT_DIR}/<% ${BIN_FILE_RELATIVE2ROOT_DIR} %>" && pwd -P)"
+BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${BIN_DIR}/<% ${ROOT_DIR_RELATIVE_TO_BIN_DIR} %>" && pwd -P)"
 # shellcheck disable=SC2034
 SRC_DIR="<%% echo '${ROOT_DIR}/lib' %>"
 
