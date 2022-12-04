@@ -15,7 +15,8 @@ source "${SRC_DIR}/Log/displayError.sh"
 # exitCode will be > 0 if at least one file has been updated or created
 ((exitCode = 0)) || true
 compileFile() {
-  srcFile="$1"
+  local srcFile="$1"
+  local srcRelativeFile, BIN_FILE, ROOT_DIR_RELATIVE_TO_BIN_DIR
   srcRelativeFile="$(realpath -m --relative-to="${ROOT_DIR}" "${srcFile}")"
   BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | envsubst)"
@@ -31,6 +32,7 @@ compileFile() {
 
   Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
   mkdir -p "$(dirname "${BIN_FILE}")"
+  local oldMd5
   oldMd5="$(md5sum "${BIN_FILE}" 2>/dev/null | awk '{print $1}' || echo "new")"
   "${ROOT_DIR}/build/compile" "${srcFile}" "${srcRelativeFile}" "${ROOT_DIR_RELATIVE_TO_BIN_DIR}" |
     sed -r '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d' >"${BIN_FILE}"

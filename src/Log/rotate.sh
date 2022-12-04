@@ -4,8 +4,8 @@
 # @param $1 log file name
 # @param $2 maximum number of log files
 Log::rotate() {
-  FILENAME="$1"
-  MAX_LOG="${2:-5}"
+  local FILENAME="$1"
+  local MAX_LOG="${2:-5}"
   for i in $(seq $((MAX_LOG - 1)) -1 1); do
     Log::displayInfo "Log rotation ${FILENAME}.${i} to ${FILENAME}.$((i + 1))"
     mv "${FILENAME}."{"${i}","$((i + 1))"} &>/dev/null || true

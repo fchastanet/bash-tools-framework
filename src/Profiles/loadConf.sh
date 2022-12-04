@@ -22,6 +22,7 @@ Profiles::loadConf() {
   fi
 
   # if conf is absolute
+  local confFile
   if [[ "${conf}" == /* ]]; then
     # file contains /, consider it as absolute filename
     confFile="${conf}"

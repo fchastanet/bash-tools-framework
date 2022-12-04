@@ -17,8 +17,8 @@ Profiles::getConfMergedList() {
   local extension="${2:-sh}"
   local indentStr="${3:-       - }"
 
-  DEFAULT_CONF_DIR="${__BASH_FRAMEWORK_VENDOR_PATH:?}/conf/${confFolder}"
-  HOME_CONF_DIR="${HOME}/.bash-tools/${confFolder}"
+  local DEFAULT_CONF_DIR="${__BASH_FRAMEWORK_VENDOR_PATH:?}/conf/${confFolder}"
+  local HOME_CONF_DIR="${HOME}/.bash-tools/${confFolder}"
 
   (
     if [[ -d "${DEFAULT_CONF_DIR}" ]]; then

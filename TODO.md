@@ -2,9 +2,10 @@
 
 - Bash-tools-framework contains framework and common code
 - Bash-tools only contains commands, build tools (linters, ...)
+
   - move build.sh to bin/build
   - copy jekyll conf
-- check if all variable = are declared local
+  - check if all variable = are declared local
 
 - generate github page from Readme.tmpl.md using github workflow
   - include bin help

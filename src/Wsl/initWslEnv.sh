@@ -7,6 +7,7 @@ Wsl::initEnv() {
     # that could break PATH variable
     # using "${dir}" we ensure path with spaces will be
     # correctly handled
+    local dir
     # shellcheck disable=SC2207,SC2116
     IFS=':' windowsDirs=($(echo "${WINDOW_PATH}"))
     for dir in "${windowsDirs[@]}"; do

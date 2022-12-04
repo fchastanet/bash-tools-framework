@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 Profiles::checkMissingScripts() {
+  local tempDir
   # create temp dir
   tempDir=$(mktemp -p /tmp -d checkMissingScripts.XXXXXX)
   trap 'rm -Rf ${tempDir}' EXIT
 
-  missingInstallScripts=()
-  missingConfigureScripts=()
-  missingTestScripts=()
-  missingDependencies=()
+  local -a missingInstallScripts=()
+  local -a missingConfigureScripts=()
+  local -a missingTestScripts=()
+  local -a missingDependencies=()
 
   while IFS= read -r line; do
     if [[ ! -f "${SCRIPTS_DIR}/${line}/install" ]]; then

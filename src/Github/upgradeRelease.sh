@@ -18,7 +18,7 @@ Github::upgradeRelease() {
 
   Github::getLatestRelease "${repo}" latestVersion
 
-  currentVersion="not existing"
+  local currentVersion="not existing"
   if [[ -f "${targetFile}" ]]; then
     currentVersion="$(${versionCallback} "${targetFile}" 2>&1 | grep -oP '[0-9]+\.[0-9]+(\.[0-9]+)' || true)"
   fi
@@ -30,6 +30,7 @@ Github::upgradeRelease() {
     else
       Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${latestVersion}"
     fi
+    local url
     url="$(echo "${releaseUrl}" | sed -E "s/@latestVersion@/${latestVersion}/g")"
     Log::displayInfo "Using url ${url}"
     Retry::default curl \

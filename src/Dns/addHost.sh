@@ -7,6 +7,7 @@
 Dns::addHost() {
   local hostName="$1"
   local ip="${2:-127.0.0.1}"
+  local -a cmd
 
   if ! grep -q -E "[[:space:]]${hostName}([[:space:]]|$)" /etc/hosts; then
     backupFile /etc/hosts

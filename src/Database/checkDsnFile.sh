@@ -8,7 +8,7 @@
 #
 # Returns 0 on valid file, 1 otherwise with log output
 Database::checkDsnFile() {
-  DSN_FILENAME="$1"
+  local DSN_FILENAME="$1"
   if [[ ! -f "${DSN_FILENAME}" ]]; then
     Log::displayError "dsn file ${DSN_FILENAME} not found"
     return 1

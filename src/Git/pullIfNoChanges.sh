@@ -3,7 +3,7 @@
 # pull the repository if no change in it
 # @return 0 on successful pulling, 1 on failure or no pull needed
 Git::pullIfNoChanges() {
-  dir="$1"
+  local dir="$1"
   if [[ -d "${dir}/.git" ]]; then
     (
       cd "${dir}"

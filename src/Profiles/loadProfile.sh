@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 Profiles::loadProfile() {
-  PROFILE="$1"
+  local PROFILE="$1"
+  local -a CONFIG_LIST=()
+  local ROOT_DEPENDENCY
   checkMissingScripts || exit 1
   # load the profile
   if [[ -z "${PROFILE}" ]]; then
@@ -29,9 +31,9 @@ Profiles::loadProfile() {
   if [[ "${SKIP_DEPENDENCIES}" = "0" ]]; then
     CONFIG_LIST=("_Test" "_Upgrade" "MandatorySoftwares" "${CONFIG_LIST[@]}" "_Clean" "_Export")
     # deduce dependencies
-    allDepsResult=()
+    local -a allDepsResult=()
     # shellcheck disable=SC2034
-    allDepsResultSeen=()
+    local -a allDepsResultSeen=()
     Profiles::allDepsRecursive "${ROOT_DEPENDENCY}" "${CONFIG_LIST[@]}" allDepsResult allDepsResultSeen
     CONFIG_LIST=("${allDepsResult[@]}")
   else

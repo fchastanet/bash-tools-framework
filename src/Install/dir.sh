@@ -36,7 +36,7 @@ Install::dir() {
       Log:fatal "unable to copy directory '${FROM_DIR#"${ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
     chown -R "${USER_NAME}":"${USER_GROUP}" "${DEST_DIR}"
     # chown all parent directory with same user
-    fullDir="${FROM_DIR}"
+    local fullDir="${FROM_DIR}"
     for parentFolder in ${DIRNAME////$'\n'}; do
       fullDir="${fullDir}/${parentFolder}"
       chown "${USER_NAME}":"${USER_GROUP}" "${fullDir}"

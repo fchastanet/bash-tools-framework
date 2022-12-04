@@ -8,14 +8,11 @@
 # @param {$@} gitCloneOptions
 # @return 0 on successful pulling/cloning, 1 on failure
 Git::cloneOrPullIfNoChanges() {
-  dir="$1"
-  shift || true
-  repo="$1"
-  shift || true
-  cloneCallback=${1:-}
-  shift || true
-  pullCallback=${1:-}
-  shift || true
+  local dir="$1"
+  local repo="$2"
+  local cloneCallback=${3:-}
+  local pullCallback=${4:-}
+  shift 4 || true
 
   if [[ -d "${dir}/.git" ]]; then
     Git::pullIfNoChanges "${dir}" && (

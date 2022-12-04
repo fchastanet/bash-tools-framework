@@ -9,7 +9,7 @@
 # * $@ command with arguments to execute
 Framework::run() {
   # 'bash_framework_status', 'bash_framework_duration' are global variables
-  local -i start end
+  local -i start, end
   start=$(date +%s)
   bash_framework_status=0
   bash_framework_output=""

@@ -3,7 +3,7 @@
 Profiles::deps() {
   local dep="$1"
   local -an allDepsResultSeen=$2
-  dependency="${SCRIPTS_DIR}/${dep}/dependencies"
+  local dependency="${SCRIPTS_DIR}/${dep}/dependencies"
   if [[ "${allDepsResultSeen["$1"]}" = 'stored' ]]; then
     # avoid dead loop
     return 0

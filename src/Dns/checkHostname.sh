@@ -25,7 +25,7 @@ Dns::checkHostname() {
     if [[ ${ip} != 127.0.* ]]; then
       # resolve to a non local address
       # check if ip resolve to our ips
-      message="check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
+      local message="check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
       if Assert::windows; then
         Functions::captureOutputAndExitCode "ipconfig | grep ${ip} | cat" "${message}"
         returnCode=$?

@@ -4,7 +4,7 @@
 # if not present compute it using callback
 # and store it in property file
 Cache::getPropertyValue() {
-  local propertyFile, key, callback
+  local propertyFile, key, callback, value
   propertyFile="$1"
   key="$(echo -E "$2" | sed 's#\\#/#g')"
   callback=$3

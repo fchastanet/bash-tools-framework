@@ -13,7 +13,9 @@ Framework::importFilesOnce() {
       savedOptions='set -x'
       set +x
       ;;
-    *) savedOptions='' ;;
+    *)
+      savedOptions=''
+      ;;
   esac
   local libPath
   for libPath in "$@"; do
