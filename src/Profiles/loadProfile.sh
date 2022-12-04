@@ -32,7 +32,7 @@ Profiles::loadProfile() {
     allDepsResult=()
     # shellcheck disable=SC2034
     allDepsResultSeen=()
-    allDepsRecursive "${ROOT_DEPENDENCY}" "${CONFIG_LIST[@]}"
+    Profiles::allDepsRecursive "${ROOT_DEPENDENCY}" "${CONFIG_LIST[@]}" allDepsResult allDepsResultSeen
     CONFIG_LIST=("${allDepsResult[@]}")
   else
     CONFIG_LIST=("${CONFIG_LIST[@]}")

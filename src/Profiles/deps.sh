@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 Profiles::deps() {
-  dependency="${SCRIPTS_DIR}/$1/dependencies"
-  # shellcheck disable=SC2154
+  local dep="$1"
+  local -an allDepsResultSeen=$2
+  dependency="${SCRIPTS_DIR}/${dep}/dependencies"
   if [[ "${allDepsResultSeen["$1"]}" = 'stored' ]]; then
     # avoid dead loop
     return 0

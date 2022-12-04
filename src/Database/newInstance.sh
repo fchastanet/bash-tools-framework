@@ -32,8 +32,7 @@ Database::newInstance() {
   Database::checkDsnFile "${DSN_FILE}"
   instanceNewInstance['DSN_FILE']="${DSN_FILE}"
 
-  # shellcheck source=/conf/dsn/default.local.env
-  # shellcheck disable=SC1091
+  # shellcheck source=tests/data/dsn_valid.env
   source "${instanceNewInstance['DSN_FILE']}"
 
   instanceNewInstance['USER']="${USER}"
@@ -42,7 +41,6 @@ Database::newInstance() {
   instanceNewInstance['PORT']="${PORT}"
 
   # generate authFile for easy authentication
-  # shellcheck disable=SC2064
   instanceNewInstance['AUTH_FILE']=$(mktemp -p "${TMPDIR:-/tmp}" -t "mysql.XXXXXXXXXXXX")
   (
     echo "[client]"
@@ -51,7 +49,6 @@ Database::newInstance() {
     echo "host = ${HOSTNAME}"
     echo "port = ${PORT}"
   ) >"${instanceNewInstance['AUTH_FILE']}"
-  # shellcheck disable=SC2064
   Functions::trapAdd "rm -f \"${instanceNewInstance['AUTH_FILE']}\" 2>/dev/null || true" ERR EXIT
 
   # some of those values can be overridden using the dsn file

@@ -10,7 +10,6 @@
 #
 # **Returns**: mysql command status code
 Database::query() {
-  # shellcheck disable=SC2178
   local -n instanceQuery=$1
   local -a mysqlCommand=()
 

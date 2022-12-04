@@ -20,7 +20,6 @@ Github::upgradeRelease() {
 
   currentVersion="not existing"
   if [[ -f "${targetFile}" ]]; then
-    # shellcheck disable=SC2086
     currentVersion="$(${versionCallback} "${targetFile}" 2>&1 | grep -oP '[0-9]+\.[0-9]+(\.[0-9]+)' || true)"
   fi
   if [[ "${currentVersion}" = "${latestVersion}" ]]; then
@@ -43,7 +42,7 @@ Github::upgradeRelease() {
     if [[ "$(type -t ${installCallback})" = "function" ]]; then
       ${installCallback} "/tmp/newSoftware" "${targetFile}"
     else
-      mkdir -p "$(dirname ${targetFile})"
+      mkdir -p "$(dirname "${targetFile}")"
       mv /tmp/newSoftware "${targetFile}"
       chmod +x "${targetFile}"
       hash -r
