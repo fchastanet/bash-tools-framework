@@ -51,7 +51,7 @@ JAVASCRIPT_DEFAULT_STYLE: prettier
 JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
 JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (report/)
 
-JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/settings\.json|conf/localAppData/Packages/Microsoft\.WindowsTerminal_8wekyb3d8bbwe/LocalState/originalSettings\.json|report|.vscode/launch.json)
+JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/settings\.json|report|.vscode/launch.json)
 
 MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: (report)
 

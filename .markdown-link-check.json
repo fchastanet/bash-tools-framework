@@ -3,9 +3,6 @@
   "retryCount": 5,
   "ignorePatterns": [
     {
-      "pattern": "^https://github.com/wiley/"
-    },
-    {
       "pattern": "^http://localhost:4000/"
     }
   ]

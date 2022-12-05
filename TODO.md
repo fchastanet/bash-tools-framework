@@ -1,15 +1,11 @@
 # Todo
 
 - Bash-tools-framework contains framework and common code
-- Bash-tools only contains commands, build tools (linters, ...)
-
-  - move build.sh to bin/build
-  - copy jekyll conf
-  - check if all variable = are declared local
 
 - generate github page from Readme.tmpl.md using github workflow
   - include bin help
   - include bash doc
+- install.sh will get last version of build tools from bash-tools
 - cat << EOF avoid to interpolate variables
 - Update libraries command
 
@@ -21,6 +17,7 @@
   - ensure we don't have any globals, all variables should be passed to the
     functions
 - add build.sh in precommit hook
+- doc.sh, linters and other build tools will be defined in bash-tools
 - linter that checks if namespace::function exist in lib directory
 - support nested namespace
 - import bash-tools commands + libs

@@ -73,7 +73,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Pull/Build/Push docker image
         env:
-          PULL: ${{ github.ref != 'refs/heads/master' || 'pull' }}
+          PULL: ${{ github.ref != 'refs/heads/master' || format('pull') }}
           PUSH: push
         run:
           ./.github/buildScripts/buildPushDockerImages.sh "${{ matrix.vendor }}"
