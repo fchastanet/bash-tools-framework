@@ -6,6 +6,7 @@
     "**/.git/**",
     "**/.rbenv/**",
     "**/.history/**",
+    "**/bin/**",
     "**/backup/**",
     "**/megalinter-reports/**",
     "conf/localAppData/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/originalSettings.json",

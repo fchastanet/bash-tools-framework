@@ -51,7 +51,7 @@ ONBUILD RUN set -x \
     \
     && if [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
       EXISTINGGROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" &&\
-      if [ -n "$EXISTINGGROUP" ] ; then groupdel "${EXISTINGGROUP}" ; fi &&\
+      if [ -n "${EXISTINGGROUP}" ] ; then groupdel "${EXISTINGGROUP}" ; fi &&\
       userdel -f www-data &&\
       if getent group www-data ; then groupdel www-data; fi &&\
       groupadd -g "${GROUP_ID}" www-data &&\

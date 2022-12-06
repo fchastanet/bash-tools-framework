@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+
+# generate code from templates <https://github.com/TekWizely/bash-tpl>
+#  - auto import function with pattern folder::(._::)_(functionName) =>
+#    Folder/functionName.sh
+#  - auto import \_.sh if at least one function imported in the directory
+
+BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
+SRC_DIR="$(cd "${ROOT_DIR}/src" && pwd -P)"
+
+# shellcheck source=/src/_includes/_header.sh
+source "${SRC_DIR}/_includes/_header.sh"
+# shellcheck source=/src/Array/contains.sh
+source "${SRC_DIR}/Array/contains.sh"
+# shellcheck source=/src/Log/_.sh
+source "${SRC_DIR}/Log/_.sh"
+# shellcheck source=/src/Log/displayInfo.sh
+source "${SRC_DIR}/Log/displayInfo.sh"
+# shellcheck source=/src/Log/displayError.sh
+source "${SRC_DIR}/Log/displayError.sh"
+# shellcheck source=/src/Log/fatal.sh
+source "${SRC_DIR}/Log/fatal.sh"
+# shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
+source "${SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
+# shellcheck source=/src/Filters/catFileCleaned.sh
+source "${SRC_DIR}/Filters/catFileCleaned.sh"
+# shellcheck source=/src/Filters/trimEmptyLines.sh
+source "${SRC_DIR}/Filters/trimEmptyLines.sh"
+
+# shellcheck disable=SC2034
+((failures = 0)) || true
+declare -a srcDirs=()
+# shellcheck disable=SC2034
+ORIGINAL_TEMPLATE_DIR="${SRC_DIR}"
+TEMPLATE_DIR="${SRC_DIR}"
+
+################################################
+# Parse options
+################################################
+# Usage info
+showHelp() {
+  SCRIPT_NAME=${0##*/}
+  cat <<EOF
+${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the script given in parameter
+
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath> <relativePath> [--src-dir|-s <srcDir>] [--template <templateName>]
+    --help,-h prints this help and exits
+
+    <fileToCompile> the relative or absolute path to compile into one file
+
+    <srcFilePath> the src file you want to show at the top of generated file to indicate
+       from which source file the binary has been generated.
+       You can use the variable SRC_FILE_PATH in your template.
+
+    <relativePath> some binary files needs to deduce root path relative to where they
+      are installed.
+      Eg: this is useful for these binary files to know that to get some configuration files.
+      You can use the variable ROOT_DIR_RELATIVE_TO_BIN_DIR in your template.
+
+    --src-dir|-s <srcDir> provide the directory where to find the functions source code.
+      By default this project src directory is used.
+
+      You can add as much --src-dir options as needed to define other source dirs.
+      The functions will be searched in the order defined (it allows function redefinition)
+      Example: --src-dir src --src-dir otherSrc
+      Functions::myFunction will be searched in
+        - src/Functions/myFunction.sh
+        - otherSrc/Functions/myFunction.sh
+
+      ${__HELP_TITLE}Important Note:${__HELP_NORMAL} if you provide a --src-dir and you need also functions
+      defined in this project, think about adding a --src-dir for this project too
+
+    --template-dir|-t <templateDir> the template directory to use to override some template includes
+      2 variables are defined:
+      * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
+      * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
+
+${__HELP_TITLE}Example:${__HELP_NORMAL}
+Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
+${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
+
+Here you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
+but overriding some or all functions of bash-tools-framework/src
+${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src${__HELP_NORMAL}
+
+Here you want to override the default templates too
+${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
+
+EOF
+}
+
+# read command parameters
+# $@ is all command line parameters passed to the script.
+# -o is for short options like -h
+# -l is for long options with double dash like --help
+# the comma separates different long options
+options=$(getopt -l help,src-dir:,template-dir: -o hs:t: -- "$@" 2>/dev/null) || {
+  showHelp
+  Log::fatal "invalid options specified"
+}
+
+eval set -- "${options}"
+while true; do
+  case $1 in
+    -h | --help)
+      showHelp
+      exit 0
+      ;;
+    --src-dir | -s)
+      shift || true
+      if [[ ! -d "$1" ]]; then
+        Log::fatal "Directory '$1' does not exists"
+      fi
+      srcDirs+=("$(realpath --physical "$1")")
+      ;;
+    --template-dir | -t)
+      shift || true
+      if [[ ! -d "$1" ]]; then
+        Log::fatal "Directory '$1' does not exists"
+      fi
+      TEMPLATE_DIR="$(realpath --physical "$1")"
+      ;;
+    --)
+      shift || true
+      break
+      ;;
+    *)
+      showHelp
+      Log::fatal "invalid argument $1"
+      ;;
+  esac
+  shift || true
+done
+# default srcDirs if none provided
+if [[ "${#srcDirs}" = "0" ]]; then
+  srcDirs=("${SRC_DIR}")
+fi
+
+if (($# != 3)); then
+  Log::fatal "You must provide exactly 3 fixed parameters"
+fi
+
+INPUT_FILE="$1"
+# the src file you want to show at the top of generated file to indicate
+# from which source file the binary has been generated
+SRC_FILE_PATH="$2"
+# how to join ROOT_DIR from target BIN_FILE directory
+ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
+
+################################################
+# compile Algo
+################################################
+
+# Loop until no more file to import
+# 1. generate code from template
+# 2. remove duplicated #!/usr/bin/env bash
+# 3. deduce files to import based on [A-Za-z0-9]+::[A-Za-z0-9]+ pattern
+#    (skip files already imported and those that do not exist)
+# 4. inject import files at the beginning of the file
+# TODO I could get rid of bash-tpl by providing special function IMPORT::dir::file
+#    this function should be replaced inline
+
+FILES_IMPORTED=("${INPUT_FILE}")
+COMPILED_FILE="$(mktemp)"
+IMPORTED_FUNCTIONS_TEMP_SOURCE="$(mktemp)"
+
+# clean temp files on exit
+trap 'rm -f "${COMPILED_FILE}" "${IMPORTED_FUNCTIONS_TEMP_SOURCE}" || true' EXIT INT ABRT TERM
+
+(Log::displayInfo >&2 "Calling SRC_FILE_PATH='${SRC_FILE_PATH}' ORIGINAL_TEMPLATE_DIR='${SRC_DIR}' TEMPLATE_DIR='${TEMPLATE_DIR}' ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' ${ROOT_DIR}/bin/bash-tpl '${INPUT_FILE}'")
+# shellcheck source=/dev/null
+(source <(
+  SRC_FILE_PATH="${SRC_FILE_PATH}" \
+    ORIGINAL_TEMPLATE_DIR="${SRC_DIR}" \
+    TEMPLATE_DIR="${TEMPLATE_DIR}" \
+    ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
+    "${ROOT_DIR}/bin/bash-tpl" "${INPUT_FILE}"
+)) | Filters::removeDuplicatedShebangs >"${COMPILED_FILE}"
+
+((FUNCTIONS_IMPORTED = 1))
+((ITERATION = 1))
+while ((FUNCTIONS_IMPORTED >= 1)); do
+  (echo >&2 -e "${__INFO_COLOR}\tIteration #${ITERATION}${__RESET_COLOR}")
+  ((FUNCTIONS_IMPORTED = 0)) || true
+  echo >"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+
+  cp "${COMPILED_FILE}" "${COMPILED_FILE}.${ITERATION}"
+  readarray -t FUNCTIONS_TO_IMPORT < <(
+    grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)([ \t);`]|$)' "${COMPILED_FILE}" |
+      awk '{$1=$1};1' |
+      sort |
+      uniq
+  )
+  for functionToImport in "${FUNCTIONS_TO_IMPORT[@]}"; do
+    fileToImport="${SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+    if ! Array::contains "${fileToImport}" "${FILES_IMPORTED[@]}"; then
+      if [[ -f "${fileToImport}" ]]; then
+        # check if we need to import _.sh
+        underscoreFile="$(dirname "${fileToImport}")/_.sh"
+        if ! Array::contains "${underscoreFile}" "${FILES_IMPORTED[@]}" &&
+          [[ -f "${underscoreFile}" ]]; then
+          (echo >&2 -e "${__INFO_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+          Filters::catFileCleaned "${underscoreFile}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+          FILES_IMPORTED+=("${underscoreFile}")
+        fi
+
+        (echo >&2 -e "\t${__INFO_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+        Filters::catFileCleaned "${fileToImport}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+      else
+        (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+      fi
+      FILES_IMPORTED+=("${fileToImport}")
+      ((++FUNCTIONS_IMPORTED))
+    fi
+  done
+  sed -i "/# FUNCTIONS/ r ${IMPORTED_FUNCTIONS_TEMP_SOURCE}" "${COMPILED_FILE}"
+  ((ITERATION++))
+done
+cat -s "${COMPILED_FILE}"

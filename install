@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+#####################################
+# GENERATED FILE FROM src/build/install.sh
+# DO NOT EDIT IT
+#####################################
+
+BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${BIN_DIR}/" && pwd -P)"
+# shellcheck disable=SC2034
+SRC_DIR="${ROOT_DIR}/lib"
+
+# shellcheck disable=SC2034
+((failures = 0)) || true
+
+shopt -s expand_aliases
+set -o pipefail
+set -o errexit
+# a log is generated when a command fails
+set -o errtrace
+# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+shopt -s nullglob
+export TERM=xterm-256color
+
+#avoid interactive install
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# FUNCTIONS
+
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}"
+}
+
+if [[ -t 0 ]]; then
+  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+  export readonly __ERROR_COLOR='\e[31m'   # Red
+  export readonly __INFO_COLOR='\e[44m'    # white on lightBlue
+  export readonly __SUCCESS_COLOR='\e[32m' # Green
+  export readonly __WARNING_COLOR='\e[33m' # Yellow
+  export readonly __SKIPPED_COLOR='\e[93m' # Light Yellow
+  # shellcheck disable=SC2034
+  export readonly __TEST_COLOR='\e[100m' # Light magenta
+  # shellcheck disable=SC2034
+  export readonly __TEST_ERROR_COLOR='\e[41m' # white on red
+  # shellcheck disable=SC2034
+  export readonly __SKIPPED_COLOR='\e[33m' # Yellow
+  export readonly __DEBUG_COLOR='\e[37m'   # Grey
+  # Internal: reset color
+  export readonly __RESET_COLOR='\e[0m' # Reset Color
+  # shellcheck disable=SC2155,SC2034
+  export readonly __HELP_TITLE="$(echo -e "\e[1;37m")"
+  # shellcheck disable=SC2155,SC2034
+  export readonly __HELP_NORMAL="$(echo -e "\033[0m")"
+else
+  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+  export readonly __ERROR_COLOR=''
+  export readonly __INFO_COLOR=''
+  export readonly __SUCCESS_COLOR=''
+  export readonly __WARNING_COLOR=''
+  export readonly __SKIPPED_COLOR=''
+  # shellcheck disable=SC2034
+  export readonly __TEST_COLOR=''
+  # shellcheck disable=SC2034
+  export readonly __TEST_ERROR_COLOR=''
+  # shellcheck disable=SC2034
+  export readonly __SKIPPED_COLOR=''
+  export readonly __DEBUG_COLOR=''
+  # Internal: reset color
+  export readonly __RESET_COLOR=''
+  # shellcheck disable=SC2155,SC2034
+  export readonly __HELP_TITLE=""
+  # shellcheck disable=SC2155,SC2034
+  export readonly __HELP_NORMAL=""
+fi
+
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
+Log::displayInfo() {
+  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}"
+}
+
+# Display message using warning color (yellow)
+# @param {String} $1 message
+Log::displayWarning() {
+  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}"
+}
+
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  Log::displayError "$1"
+  exit 1
+}
+
+if [[ "$(id -u)" = "0" ]]; then
+  Log::fatal "this script should be executed as normal user"
+  exit 1
+fi
+
+if ! command -v parallel 2>/dev/null; then
+  Log::displayInfo "We will install GNU parallel software, please enter you sudo password"
+  sudo apt update || true
+  if sudo apt install -y parallel; then
+    # remove parallel nagware
+    mkdir -p ~/.parallel
+    touch ~/.parallel/will-cite
+  else
+    Log::displayWarning "Impossible to install GNU parallel, please install it manually"
+  fi
+fi
+
+if [[ -d "${HOME}/.bash-tools" ]]; then
+  # update
+  cp -R --no-clobber "${BASE_DIR}/conf/." "${HOME}/.bash-tools"
+  [[ "${BASE_DIR}/tests/data/.env" -nt "${HOME}/.bash-tools/.env" ]] && {
+    Log::displayWarning "${BASE_DIR}/tests/data/.env is newer than ${HOME}/.bash-tools/.env, compare the files to check if some updates need to be applied"
+  }
+else
+  mkdir -p ~/.bash-tools
+  cp -R conf/. ~/.bash-tools
+  sed -i -e "s@^BASH_TOOLS_FOLDER=.*@BASH_TOOLS_FOLDER=$(pwd)@g" ~/.bash-tools/.env
+fi

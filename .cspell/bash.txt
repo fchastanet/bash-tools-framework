@@ -26,6 +26,7 @@ strfile
 USERGROUP
 USERGROUPID
 USERHOME
+HOME
 USERID
 USERPROFILE
 Struct
@@ -78,3 +79,11 @@ PATHCONV
 CONV
 uroot
 proot
+envsubst
+regextype
+gsub
+willywonka
+onbuild
+TMPDIR
+SIGUSR
+inlines

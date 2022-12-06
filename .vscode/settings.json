@@ -1,7 +1,15 @@
 {
+  "search.useIgnoreFiles": true,
   "search.exclude": {
-    "**/report": true,
-    "**/backup": true
+    "report": true,
+    "backup": true,
+    "megalinter-reports": true,
+    "bin": true,
+    "_site": true,
+    "vendor": true
+  },
+  "files.exclude": {
+    "_site/**": true
   },
   "markdown.extension.toc.omittedFromToc": {
     "*.md": ["# %%"]

@@ -35,16 +35,32 @@ repos:
     hooks:
       - id: shellcheck
         # shellcheck does not validate correctly zsh files
-        exclude: (.\.zsh$|/\.zshrc$)
+        exclude: (.\.zsh$|/\.zshrc$|^vendor/.*$|^bin/bash-tpl$|\.tpl$)
 
       - id: shfmt
         args: [-i, '2', -ci]
-        exclude: (.\.zsh$|/\.zshrc$)
+        exclude: (.\.zsh$|/\.zshrc|^vendor/.*$)
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
       # and conflict-marker-size configuration in a git repo.
       - id: git-check
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.0-alpha.4
+    hooks:
+      - id: prettier
+
+  # - repo: local
+  #   hooks:
+  #     - id: build-sh-files
+  #       name: build-sh-files
+  #       entry: bash -c './build.sh'
+  #       language: system
+  #       always_run: true
+  #       require_serial: true
+  #       fail_fast: true
+  #       verbose: true
 
   ## Python, Polyglot, Git, pre-commit
   - repo: https://github.com/ScribeMD/pre-commit-hooks
@@ -58,17 +74,6 @@ repos:
         args: [--flavor, terraform, --release, v6.11.1]
         stages:
           - push
-
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.4
-    hooks:
-      - id: prettier
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.2.3
-    hooks:
-      - id: pyupgrade
-        args: [--py36-plus]
 
   - repo: local
     hooks:
