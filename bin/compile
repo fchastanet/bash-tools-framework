@@ -9,23 +9,23 @@ BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
 SRC_DIR="$(cd "${ROOT_DIR}/src" && pwd -P)"
 
-# shellcheck source=/src/_includes/_header.sh
+# shellcheck source=../src/_includes/_header.sh
 source "${SRC_DIR}/_includes/_header.sh"
-# shellcheck source=/src/Array/contains.sh
+# shellcheck source=../src/Array/contains.sh
 source "${SRC_DIR}/Array/contains.sh"
-# shellcheck source=/src/Log/_.sh
+# shellcheck source=../src/Log/_.sh
 source "${SRC_DIR}/Log/_.sh"
-# shellcheck source=/src/Log/displayInfo.sh
+# shellcheck source=../src/Log/displayInfo.sh
 source "${SRC_DIR}/Log/displayInfo.sh"
-# shellcheck source=/src/Log/displayError.sh
+# shellcheck source=../src/Log/displayError.sh
 source "${SRC_DIR}/Log/displayError.sh"
-# shellcheck source=/src/Log/fatal.sh
+# shellcheck source=../src/Log/fatal.sh
 source "${SRC_DIR}/Log/fatal.sh"
-# shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
+# shellcheck source=../src/Filters/removeDuplicatedShebangs.sh
 source "${SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
-# shellcheck source=/src/Filters/catFileCleaned.sh
+# shellcheck source=../src/Filters/catFileCleaned.sh
 source "${SRC_DIR}/Filters/catFileCleaned.sh"
-# shellcheck source=/src/Filters/trimEmptyLines.sh
+# shellcheck source=../src/Filters/trimEmptyLines.sh
 source "${SRC_DIR}/Filters/trimEmptyLines.sh"
 
 # shellcheck disable=SC2034
@@ -164,58 +164,87 @@ ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
 
 FILES_IMPORTED=("${INPUT_FILE}")
 COMPILED_FILE="$(mktemp)"
+COMPILED_FILE2="$(mktemp)"
 IMPORTED_FUNCTIONS_TEMP_SOURCE="$(mktemp)"
 
 # clean temp files on exit
-trap 'rm -f "${COMPILED_FILE}" "${IMPORTED_FUNCTIONS_TEMP_SOURCE}" || true' EXIT INT ABRT TERM
+trap 'rm -f "${COMPILED_FILE}" "${COMPILED_FILE2}" "${IMPORTED_FUNCTIONS_TEMP_SOURCE}" || true' EXIT INT ABRT TERM
 
-(Log::displayInfo >&2 "Calling SRC_FILE_PATH='${SRC_FILE_PATH}' ORIGINAL_TEMPLATE_DIR='${SRC_DIR}' TEMPLATE_DIR='${TEMPLATE_DIR}' ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' ${ROOT_DIR}/bin/bash-tpl '${INPUT_FILE}'")
-# shellcheck source=/dev/null
-(source <(
-  SRC_FILE_PATH="${SRC_FILE_PATH}" \
-    ORIGINAL_TEMPLATE_DIR="${SRC_DIR}" \
-    TEMPLATE_DIR="${TEMPLATE_DIR}" \
-    ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
-    "${ROOT_DIR}/bin/bash-tpl" "${INPUT_FILE}"
-)) | Filters::removeDuplicatedShebangs >"${COMPILED_FILE}"
+evalTemplate() {
+  local FILE="$1"
+  (Log::displayInfo >&2 "source <(\
+    SRC_FILE_PATH='${SRC_FILE_PATH}' \
+      ORIGINAL_TEMPLATE_DIR='${SRC_DIR}' \
+      TEMPLATE_DIR='${TEMPLATE_DIR}' \
+      ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
+      FRAMEWORK_ROOT_DIR='${ROOT_DIR}' \
+      ${ROOT_DIR}/bin/bash-tpl '${FILE}' \
+  ) > binFile")
+  # shellcheck source=/dev/null
+  (source <(
+    SRC_FILE_PATH="${SRC_FILE_PATH}" \
+      ORIGINAL_TEMPLATE_DIR="${SRC_DIR}" \
+      TEMPLATE_DIR="${TEMPLATE_DIR}" \
+      ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
+      FRAMEWORK_ROOT_DIR="${ROOT_DIR}" \
+      "${ROOT_DIR}/bin/bash-tpl" "${FILE}"
+  )) | Filters::removeDuplicatedShebangs 
+}
+evalTemplate "${INPUT_FILE}" > "${COMPILED_FILE}"
 
-((FUNCTIONS_IMPORTED = 1))
-((ITERATION = 1))
-while ((FUNCTIONS_IMPORTED >= 1)); do
-  (echo >&2 -e "${__INFO_COLOR}\tIteration #${ITERATION}${__RESET_COLOR}")
-  ((FUNCTIONS_IMPORTED = 0)) || true
-  echo >"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+injectImportedFunctions() {
+  FILE="$1"
 
-  cp "${COMPILED_FILE}" "${COMPILED_FILE}.${ITERATION}"
-  readarray -t FUNCTIONS_TO_IMPORT < <(
-    grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)([ \t);`]|$)' "${COMPILED_FILE}" |
-      awk '{$1=$1};1' |
-      sort |
-      uniq
-  )
-  for functionToImport in "${FUNCTIONS_TO_IMPORT[@]}"; do
-    fileToImport="${SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
-    if ! Array::contains "${fileToImport}" "${FILES_IMPORTED[@]}"; then
-      if [[ -f "${fileToImport}" ]]; then
-        # check if we need to import _.sh
-        underscoreFile="$(dirname "${fileToImport}")/_.sh"
-        if ! Array::contains "${underscoreFile}" "${FILES_IMPORTED[@]}" &&
-          [[ -f "${underscoreFile}" ]]; then
-          (echo >&2 -e "${__INFO_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
-          Filters::catFileCleaned "${underscoreFile}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
-          FILES_IMPORTED+=("${underscoreFile}")
+  ((FUNCTIONS_IMPORTED = 1))
+  ((ITERATION = 1))
+  while ((FUNCTIONS_IMPORTED >= 1)); do
+    (echo >&2 -e "${__INFO_COLOR}\tIteration #${ITERATION}${__RESET_COLOR}")
+    ((FUNCTIONS_IMPORTED = 0)) || true
+    echo >"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+
+    cp "${FILE}" "${FILE}.${ITERATION}"
+    readarray -t FUNCTIONS_TO_IMPORT < <(
+      grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)([ \t);`]|$)' "${FILE}" |
+        awk '{$1=$1};1' |
+        sort |
+        uniq
+    )
+    for functionToImport in "${FUNCTIONS_TO_IMPORT[@]}"; do
+      fileToImport="${SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+      if ! Array::contains "${fileToImport}" "${FILES_IMPORTED[@]}"; then
+        if [[ -f "${fileToImport}" ]]; then
+          # check if we need to import _.sh
+          underscoreFile="$(dirname "${fileToImport}")/_.sh"
+          if ! Array::contains "${underscoreFile}" "${FILES_IMPORTED[@]}" &&
+            [[ -f "${underscoreFile}" ]]; then
+            (echo >&2 -e "${__INFO_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+            Filters::catFileCleaned "${underscoreFile}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+            FILES_IMPORTED+=("${underscoreFile}")
+          fi
+
+          (echo >&2 -e "\t${__INFO_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+          Filters::catFileCleaned "${fileToImport}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
+        else
+          (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
         fi
-
-        (echo >&2 -e "\t${__INFO_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
-        Filters::catFileCleaned "${fileToImport}" >>"${IMPORTED_FUNCTIONS_TEMP_SOURCE}"
-      else
-        (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+        FILES_IMPORTED+=("${fileToImport}")
+        ((++FUNCTIONS_IMPORTED))
       fi
-      FILES_IMPORTED+=("${fileToImport}")
-      ((++FUNCTIONS_IMPORTED))
-    fi
+    done
+    sed -i "/# FUNCTIONS/ r ${IMPORTED_FUNCTIONS_TEMP_SOURCE}" "${FILE}"
+    ((ITERATION++))
   done
-  sed -i "/# FUNCTIONS/ r ${IMPORTED_FUNCTIONS_TEMP_SOURCE}" "${COMPILED_FILE}"
-  ((ITERATION++))
-done
-cat -s "${COMPILED_FILE}"
+}
+injectImportedFunctions "${COMPILED_FILE}"
+
+# evaluate again the current compiledFile as a template in the case 
+# where injected function are using templating function (include files like Framework::loadEnv
+(Log::displayInfo >&2 "evalTemplate2")
+evalTemplate "${COMPILED_FILE}" > "${COMPILED_FILE2}"
+
+# inject again functions in case included file at previous step needs some new functions
+# FUNCTIONS_IMPORTED is global variable so we will not reimport already included functions
+(Log::displayInfo >&2 "injectImportedFunctions2")
+injectImportedFunctions "${COMPILED_FILE2}"
+
+cat -s "${COMPILED_FILE2}"
