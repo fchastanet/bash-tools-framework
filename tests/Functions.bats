@@ -81,24 +81,24 @@ function assert_commandExists_not_exists { #@test
 }
 
 function functions_getList { #@test
-  run Functions::getList "${BATS_TEST_DIRNAME}/dataGetList" "sh"
+  run Profiles::list "${BATS_TEST_DIRNAME}/dataGetList" "sh"
   [[ "${status}" -eq 0 ]]
   [[ "${#lines[@]}" = "2" ]]
   [[ "${lines[0]}" = "       - test" ]]
   [[ "${lines[1]}" = "       - test2" ]]
 
-  run Functions::getList "${BATS_TEST_DIRNAME}/dataGetList" "sh" "-"
+  run Profiles::list "${BATS_TEST_DIRNAME}/dataGetList" "sh" "-"
   [[ "${status}" -eq 0 ]]
   [[ "${#lines[@]}" = "2" ]]
   [[ "${lines[0]}" = "-test" ]]
   [[ "${lines[1]}" = "-test2" ]]
 
-  run Functions::getList "${BATS_TEST_DIRNAME}/dataGetList" "dsn" "*"
+  run Profiles::list "${BATS_TEST_DIRNAME}/dataGetList" "dsn" "*"
   [[ "${status}" -eq 0 ]]
   # shellcheck disable=SC2154
   [[ "${output}" = "*hello" ]]
 
-  run Functions::getList "${BATS_TEST_DIRNAME}/unknown" "sh" "*"
+  run Profiles::list "${BATS_TEST_DIRNAME}/unknown" "sh" "*"
   [[ "${status}" -eq 1 ]]
 }
 

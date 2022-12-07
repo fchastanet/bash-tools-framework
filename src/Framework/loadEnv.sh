@@ -14,9 +14,8 @@
 ## alternatively you can force a given .env file to be loaded using
 ## BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
 Framework::loadEnv() {
-  # import default .env file
-  # shellcheck source=tests/data/.env
-  source "${ROOT_DIR}/tests/data/.env" || exit 1
+  # import default .env file  
+  .INCLUDE "${FRAMEWORK_ROOT_DIR}/tests/data/.env"
 
   # import custom .env file
   if [[ -z "${BASH_FRAMEWORK_ENV_FILEPATH+xxx}" ]]; then

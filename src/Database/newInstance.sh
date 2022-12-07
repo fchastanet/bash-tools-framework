@@ -5,7 +5,7 @@
 # **Arguments**:
 # * $1 - (passed by reference) database instance to create
 # * $2 - dsn profile - load the dsn.env profile
-#     absolute file is deduced using rules defined in Functions::getAbsoluteConfFile
+#     absolute file is deduced using rules defined in Profiles::getAbsoluteConfFile
 #
 # **Example:**
 # ```shell
@@ -28,7 +28,7 @@ Database::newInstance() {
   instanceNewInstance['DSN_FILE']=""
 
   # check dsn file
-  DSN_FILE="$(Functions::getAbsoluteConfFile "dsn" "${dsn}" "env")" || exit 1
+  DSN_FILE="$(Profiles::getAbsoluteConfFile "dsn" "${dsn}" "env")" || exit 1
   Database::checkDsnFile "${DSN_FILE}"
   instanceNewInstance['DSN_FILE']="${DSN_FILE}"
 
@@ -49,7 +49,7 @@ Database::newInstance() {
     echo "host = ${HOSTNAME}"
     echo "port = ${PORT}"
   ) >"${instanceNewInstance['AUTH_FILE']}"
-  Functions::trapAdd "rm -f \"${instanceNewInstance['AUTH_FILE']}\" 2>/dev/null || true" ERR EXIT
+  Framework::trapAdd "rm -f \"${instanceNewInstance['AUTH_FILE']}\" 2>/dev/null || true" ERR EXIT
 
   # some of those values can be overridden using the dsn file
   # SKIP_COLUMN_NAMES enabled by default

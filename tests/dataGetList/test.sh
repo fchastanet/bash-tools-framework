@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-# used by Functions.bats Functions::getList
+# used by Functions.bats Profiles::list

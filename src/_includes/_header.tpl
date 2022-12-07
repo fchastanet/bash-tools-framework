@@ -5,6 +5,10 @@
 # DO NOT EDIT IT
 #####################################
 
+# shellcheck disable=SC2034
+SCRIPT_NAME=${0##*/}
+# shellcheck disable=SC2034
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 ROOT_DIR="$(cd "${BIN_DIR}/<% ${ROOT_DIR_RELATIVE_TO_BIN_DIR} %>" && pwd -P)"
 # shellcheck disable=SC2034

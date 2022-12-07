@@ -5,7 +5,7 @@
 # **Arguments**:
 # * $1 (passed by reference) database instance to use
 # * $2 sql query to execute.
-#    if not provided or empty, the command can be piped (eg: cat file.sql | Database::queryDb ...)
+#    if not provided or empty, the command can be piped (eg: cat file.sql | Database::query ...)
 # * _$3 (optional)_ the db name
 #
 # **Returns**: mysql command status code

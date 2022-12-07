@@ -5,10 +5,6 @@
 # DO NOT EDIT IT
 #####################################
 
-SRC_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)
-# shellcheck disable=SC2034
-ROOT_DIR="$(cd "${SRC_DIR}/.." && pwd -P)"
-
 # shellcheck disable=SC2034
 ((failures = 0)) || true
 

@@ -17,15 +17,15 @@ Profiles::getConfMergedList() {
   local extension="${2:-sh}"
   local indentStr="${3:-       - }"
 
-  local DEFAULT_CONF_DIR="${__BASH_FRAMEWORK_VENDOR_PATH:?}/conf/${confFolder}"
+  local DEFAULT_CONF_DIR="${ROOT_DIR:?}/conf/${confFolder}"
   local HOME_CONF_DIR="${HOME}/.bash-tools/${confFolder}"
 
   (
     if [[ -d "${DEFAULT_CONF_DIR}" ]]; then
-      Functions::getList "${DEFAULT_CONF_DIR}" "${extension}" "${indentStr}"
+      Profiles::list "${DEFAULT_CONF_DIR}" "" "${extension}" "-type f" "${indentStr}"
     fi
     if [[ -d "${HOME_CONF_DIR}" ]]; then
-      Functions::getList "${HOME_CONF_DIR}" "${extension}" "${indentStr}"
+      Profiles::list "${HOME_CONF_DIR}" "" "${extension}" "-type f" "${indentStr}"
     fi
   ) | sort | uniq
 }

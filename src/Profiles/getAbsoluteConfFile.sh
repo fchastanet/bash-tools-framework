@@ -45,7 +45,7 @@ Profiles::getAbsoluteConfFile() {
       echo "${absoluteConfFile}"
       return 0
     fi
-    absoluteConfFile="${__BASH_FRAMEWORK_VENDOR_PATH:?}/conf/${confFolder}/${conf}${extension}"
+    absoluteConfFile="${ROOT_DIR:?}/conf/${confFolder}/${conf}${extension}"
     if [[ -f "${absoluteConfFile}" ]]; then
       echo "${absoluteConfFile}"
       return 0
