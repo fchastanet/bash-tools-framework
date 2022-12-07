@@ -63,7 +63,7 @@ jobs:
             bashImage: bash
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -73,11 +73,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Pull/Build/Push docker image
         env:
-          PULL: ${{ github.ref != 'refs/heads/master' || format('pull') }}
+          BRANCH: ${{ github.ref }}
           PUSH: push
-        run:
-          ./.github/buildScripts/buildPushDockerImages.sh "${{ matrix.vendor }}"
-          "${{ matrix.bashTarVersion }}" "${{ matrix.bashImage }}" "${PULL}"
+        run: |
+          ./.github/buildScripts/buildPushDockerImages.sh "${{ matrix.vendor }}" \
+          "${{ matrix.bashTarVersion }}" "${{ matrix.bashImage }}" "${BRANCH}" \
           "${PUSH}"
       - name: Check image
         run:
@@ -96,7 +96,7 @@ jobs:
           - '5.1'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: docker pull image
@@ -129,7 +129,7 @@ jobs:
             bashImage: bash
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: docker pull image

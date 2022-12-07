@@ -3,7 +3,6 @@
 # test used for bats debugging purpose
 
 BATS_TEST_DIRNAME=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-declare -g vendorDir
 vendorDir="$(cd "${BATS_TEST_DIRNAME}/../../vendor" && pwd)"
 
 # shellcheck source=/src/Framework/loadEnv.sh

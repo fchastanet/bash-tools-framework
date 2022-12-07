@@ -1,13 +1,10 @@
 # Todo
 
-- refact Log::loadEnv 
+- refact Log::loadEnv
   - just load variables with fallback
   - then in each log file vendor/bash-tools-framework/src/Log/displayInfo.sh
-    - if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-        define function
-      else
-        define function empty
-      fi
+    - if ((BASH_FRAMEWORK_LOG_LEVEL >= \_\_LEVEL_INFO)); then define function
+      else define function empty fi
 - Bash-tools-framework contains framework and common code
 
 - generate github page from Readme.tmpl.md using github workflow

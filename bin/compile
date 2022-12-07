@@ -188,9 +188,9 @@ evalTemplate() {
       ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
       FRAMEWORK_ROOT_DIR="${ROOT_DIR}" \
       "${ROOT_DIR}/bin/bash-tpl" "${FILE}"
-  )) | Filters::removeDuplicatedShebangs 
+  )) | Filters::removeDuplicatedShebangs
 }
-evalTemplate "${INPUT_FILE}" > "${COMPILED_FILE}"
+evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
 
 injectImportedFunctions() {
   FILE="$1"
@@ -237,10 +237,10 @@ injectImportedFunctions() {
 }
 injectImportedFunctions "${COMPILED_FILE}"
 
-# evaluate again the current compiledFile as a template in the case 
-# where injected function are using templating function (include files like Framework::loadEnv
+# evaluate again the current compiledFile as a template in the case
+# where injected function are using template function (include files like Framework::loadEnv
 (Log::displayInfo >&2 "evalTemplate2")
-evalTemplate "${COMPILED_FILE}" > "${COMPILED_FILE2}"
+evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # FUNCTIONS_IMPORTED is global variable so we will not reimport already included functions

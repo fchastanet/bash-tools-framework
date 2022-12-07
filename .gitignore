@@ -1,7 +1,7 @@
-/logs
-/vendor
-/.history
-/megalinter-reports
-/_site
-/doc
+/logs/
+/vendor/
+/.history/
+/megalinter-reports/
+/_site/
+/doc/
 /.jekyll-metadata

@@ -1,9 +1,10 @@
 ---
 ---
-@import "{{ site.theme }}";
 
-.btn-external .icon{ 
+@import '{{ site.theme }}';
+
+.btn-external .icon {
   background-image: url("{{ '/' | relative_url }}assets/images/external-link.svg");
   background-color: initial;
   opacity: 0.6;
- }
+}

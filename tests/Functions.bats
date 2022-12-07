@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-ROO_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)"
+ROOT_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)"
 # shellcheck source=/src/Framework/loadEnv.sh
-BASH_FRAMEWORK_ENV_FILEPATH="" source "${ROO_DIR}/src/Framework/loadEnv.sh" || exit 1
+BASH_FRAMEWORK_ENV_FILEPATH="" source "${ROOT_DIR}/src/Framework/loadEnv.sh" || exit 1
 
-load "${ROO_DIR}/vendor/bats-mock-Flamefire/load.bash"
+load "${ROOT_DIR}/vendor/bats-mock-Flamefire/load.bash"
 
 setup() {
   mkdir -p /tmp/home/.bash-tools/cliProfiles
   mkdir -p /tmp/home/.bash-tools/dsn
-  cp -v "${ROO_DIR}/conf/cliProfiles/default.sh" /tmp/home/.bash-tools/cliProfiles
+  cp -v "${ROOT_DIR}/conf/cliProfiles/default.sh" /tmp/home/.bash-tools/cliProfiles
 }
 
 teardown() {
