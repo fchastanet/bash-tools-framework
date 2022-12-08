@@ -41,7 +41,7 @@ Git::shallowClone() {
   fi
   (
     cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --depth 1 origin "${REVISION}"
+    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}"
     git reset --hard FETCH_HEAD
   )
 }
