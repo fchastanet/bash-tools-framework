@@ -7,7 +7,7 @@
 # * $1 repository
 # * $2 Install dir
 # * $3 revision commit sha, tag or branch
-# * $4 put 1 to force directory deletion if directory exists and it's not a git repository (default: 0)
+# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
 #     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
 #
 # **Return**:
@@ -23,7 +23,7 @@ Git::shallowClone() {
     Log::displayInfo "Repository ${INSTALL_DIR} already installed"
   else
     if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "1" ]]; then
+      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
         Log::displayWarning "Removing ${INSTALL_DIR} ..."
         rm -Rf "${INSTALL_DIR}" || exit 1
       else
