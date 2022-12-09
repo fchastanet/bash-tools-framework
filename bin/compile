@@ -204,7 +204,7 @@ injectImportedFunctions() {
 
     cp "${FILE}" "${FILE}.${ITERATION}"
     readarray -t FUNCTIONS_TO_IMPORT < <(
-      grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)([ \t);`]|$)' "${FILE}" |
+      grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)' "${FILE}" |
         awk '{$1=$1};1' |
         sort |
         uniq
