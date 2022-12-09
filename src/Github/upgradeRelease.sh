@@ -33,21 +33,22 @@ Github::upgradeRelease() {
     local url
     url="$(echo "${releaseUrl}" | sed -E "s/@latestVersion@/${latestVersion}/g")"
     Log::displayInfo "Using url ${url}"
+    newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t github.newSoftware.XXXX)
     Retry::default curl \
       -L \
-      -o /tmp/newSoftware \
+      -o "${newSoftware}" \
       --fail \
       "${url}"
 
     # shellcheck disable=SC2086
     if [[ "$(type -t ${installCallback})" = "function" ]]; then
-      ${installCallback} "/tmp/newSoftware" "${targetFile}"
+      ${installCallback} "${newSoftware}" "${targetFile}"
     else
       mkdir -p "$(dirname "${targetFile}")"
-      mv /tmp/newSoftware "${targetFile}"
+      mv "${newSoftware}" "${targetFile}"
       chmod +x "${targetFile}"
       hash -r
     fi
-    rm -f /tmp/newSoftware || true
+    rm -f "${newSoftware}" || true
   fi
 }

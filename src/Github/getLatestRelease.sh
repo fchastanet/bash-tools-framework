@@ -10,7 +10,7 @@ Github::getLatestRelease() {
   local -n resultRef=$2
   resultRef=""
   local resultFile
-  resultFile="$(mktemp -p /tmp)"
+  resultFile="$(mktemp -p "${TMPDIR:-/tmp}" -t githubLatestRelease.XXXX)"
   # Get latest release from GitHub api
   if Retry::default curl \
     -o "${resultFile}" \
