@@ -51,8 +51,8 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePat
     <fileToCompile> the relative or absolute path to compile into one file
 
     <srcFilePath> the src file you want to show at the top of generated file to indicate
-       from which source file the binary has been generated.
-       You can use the variable SRC_FILE_PATH in your template.
+      from which source file the binary has been generated.
+      You can use the variable SRC_FILE_PATH in your template.
 
     <relativePath> some binary files needs to deduce root path relative to where they
       are installed.
@@ -246,5 +246,8 @@ evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 # FUNCTIONS_IMPORTED is global variable so we will not reimport already included functions
 (Log::displayInfo >&2 "injectImportedFunctions2")
 injectImportedFunctions "${COMPILED_FILE2}"
+
+# remove spaces at the end of the lines
+sed -i -E 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 
 cat -s "${COMPILED_FILE2}"
