@@ -26,3 +26,23 @@ export TERM=xterm-256color
 #avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# shellcheck disable=SC2034
+TMPDIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)"
+export TMPDIR
+
+# temp dir cleaning
+cleanOnExit() {
+  rm -Rf "${TMPDIR}" >/dev/null 2>&1
+}
+trap cleanOnExit EXIT HUP QUIT ABRT TERM
+
+# @see https://unix.stackexchange.com/a/386856
+interruptManagement() {
+  # restore SIGINT handler
+  trap - INT
+  # ensure that Ctrl-C is trapped by this script and not by sub process
+  # report to the parent that we have indeed been interrupted
+  kill -s INT "$$"
+}
+trap interruptManagement INT
