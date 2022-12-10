@@ -5,35 +5,35 @@
 #    Folder/functionName.sh
 #  - auto import \_.sh if at least one function imported in the directory
 
-BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
-ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
-SRC_DIR="$(cd "${ROOT_DIR}/src" && pwd -P)"
+_COMPILE_BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+_COMPILE_ROOT_DIR="$(cd "${_COMPILE_BIN_DIR}/.." && pwd -P)"
+_COMPILE_SRC_DIR="$(cd "${_COMPILE_ROOT_DIR}/src" && pwd -P)"
 
 # shellcheck source=/src/_includes/_header.sh
-source "${SRC_DIR}/_includes/_header.sh"
+source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 # shellcheck source=/src/Array/contains.sh
-source "${SRC_DIR}/Array/contains.sh"
+source "${_COMPILE_SRC_DIR}/Array/contains.sh"
 # shellcheck source=/src/Log/_.sh
-source "${SRC_DIR}/Log/_.sh"
+source "${_COMPILE_SRC_DIR}/Log/_.sh"
 # shellcheck source=/src/Log/displayInfo.sh
-source "${SRC_DIR}/Log/displayInfo.sh"
+source "${_COMPILE_SRC_DIR}/Log/displayInfo.sh"
 # shellcheck source=/src/Log/displayError.sh
-source "${SRC_DIR}/Log/displayError.sh"
+source "${_COMPILE_SRC_DIR}/Log/displayError.sh"
 # shellcheck source=/src/Log/fatal.sh
-source "${SRC_DIR}/Log/fatal.sh"
+source "${_COMPILE_SRC_DIR}/Log/fatal.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
-source "${SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
+source "${_COMPILE_SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
 # shellcheck source=/src/Filters/catFileCleaned.sh
-source "${SRC_DIR}/Filters/catFileCleaned.sh"
+source "${_COMPILE_SRC_DIR}/Filters/catFileCleaned.sh"
 # shellcheck source=/src/Filters/trimEmptyLines.sh
-source "${SRC_DIR}/Filters/trimEmptyLines.sh"
+source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
 declare -a srcDirs=()
 # shellcheck disable=SC2034
-ORIGINAL_TEMPLATE_DIR="${SRC_DIR}"
-TEMPLATE_DIR="${SRC_DIR}"
+ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 
 ################################################
 # Parse options
@@ -135,7 +135,7 @@ while true; do
 done
 # default srcDirs if none provided
 if [[ "${#srcDirs}" = "0" ]]; then
-  srcDirs=("${SRC_DIR}")
+  srcDirs=("${_COMPILE_SRC_DIR}")
 fi
 
 if (($# != 3)); then
@@ -169,20 +169,20 @@ evalTemplate() {
   local FILE="$1"
   (Log::displayInfo >&2 "evalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
-      ORIGINAL_TEMPLATE_DIR='${SRC_DIR}' \
+      ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
-      FRAMEWORK_ROOT_DIR='${ROOT_DIR}' \
-      ${ROOT_DIR}/bin/bash-tpl '${FILE}' \
+      FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
+      ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
   ) > binFile")
   # shellcheck source=/dev/null
   (source <(
     SRC_FILE_PATH="${SRC_FILE_PATH}" \
-      ORIGINAL_TEMPLATE_DIR="${SRC_DIR}" \
+      ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
       TEMPLATE_DIR="${TEMPLATE_DIR}" \
       ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
-      FRAMEWORK_ROOT_DIR="${ROOT_DIR}" \
-      "${ROOT_DIR}/bin/bash-tpl" "${FILE}"
+      FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}" \
+      "${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}"
   )) | Filters::removeDuplicatedShebangs
 }
 evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
@@ -211,7 +211,7 @@ injectImportedFunctions() {
     )
     ((functionsNeedToBeImported = 0)) || true
     for functionToImport in "${functionsToImport[@]}"; do
-      fileToImport="${SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
       if ! Array::contains "${fileToImport}" "${filesImported[@]}"; then
         if [[ -f "${fileToImport}" ]]; then
           # check if we need to import _.sh
@@ -244,12 +244,12 @@ injectImportedFunctions "${COMPILED_FILE}" FILES_IMPORTED
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Framework::loadEnv
-(Log::displayInfo >&2 "evalTemplate2")
+Log::displayInfo >&2 "evalTemplate2"
 evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # FILES_IMPORTED is global variable so we will not reimport already included functions
-(Log::displayInfo >&2 "injectImportedFunctions2")
+Log::displayInfo >&2 "injectImportedFunctions2"
 injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
 
 # remove spaces at the end of the lines
