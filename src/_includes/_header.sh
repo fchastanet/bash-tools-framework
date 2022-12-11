@@ -46,3 +46,10 @@ interruptManagement() {
   kill -s INT "$$"
 }
 trap interruptManagement INT
+
+if [[ -n "${BIN_DIR}" ]]; then
+  export PATH="${BIN_DIR}":${PATH}
+fi
+if [[ -n "${VENDOR_BIN_DIR}" ]]; then
+  export PATH="${VENDOR_BIN_DIR}":${PATH}
+fi

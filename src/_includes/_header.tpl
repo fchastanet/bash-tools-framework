@@ -16,6 +16,10 @@ SRC_DIR="<%% echo '${ROOT_DIR}/src' %>"
 # shellcheck disable=SC2034
 VENDOR_DIR="<%% echo '${ROOT_DIR}/vendor' %>"
 # shellcheck disable=SC2034
+VENDOR_BIN_DIR="<%% echo '${ROOT_DIR}/vendor/bin' %>"
+export PATH="${BIN_DIR}":"${VENDOR_BIN_DIR}":${PATH}
+
+# shellcheck disable=SC2034
 TMPDIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)"
 export TMPDIR
 

@@ -92,7 +92,7 @@ getBinFileFromSrcFile() {
     BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${rootDir}/src/#${binDir}/#" | sed -E 's#.sh$##')"
   fi
   if ! realpath "${BIN_FILE}" &>/dev/null; then
-    Log::displayError >&2 "${srcFile} does not define a valid BIN_FILE value"
+    Log::displayError "${srcFile} does not define a valid BIN_FILE value"
     return 1
   fi
   echo "${BIN_FILE}"
@@ -131,6 +131,7 @@ constructBinFile() {
     "$(getRootDirRelativeToBinDirFromSrcFile "${srcFile}")" \
     --template-dir "${templateDir}" |
     removeMetaDataFilter >"${BIN_FILE}"
+  chmod +x "${BIN_FILE}"
 }
 
 constructBinFile "${srcFile}" "${templateDir}" "${binDir}" "${rootDir}"

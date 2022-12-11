@@ -167,7 +167,7 @@ COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
 
 evalTemplate() {
   local FILE="$1"
-  (Log::displayInfo >&2 "evalTemplate source <(\
+  (Log::displayInfo "evalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
@@ -204,7 +204,7 @@ injectImportedFunctions() {
     echo >"${importedFunctionsTempFile}"
 
     readarray -t functionsToImport < <(
-      grep -Poi '([a-z0-9_-]+::[a-z0-9_-]+)' "${file}" |
+      grep -Poi '([a-z0-9_]+[a-z0-9_-]*::[a-z0-9_-]+)' "${file}" |
         awk '{$1=$1};1' |
         sort |
         uniq
@@ -244,12 +244,12 @@ injectImportedFunctions "${COMPILED_FILE}" FILES_IMPORTED
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Framework::loadEnv
-Log::displayInfo >&2 "evalTemplate2"
+Log::displayInfo "evalTemplate2"
 evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # FILES_IMPORTED is global variable so we will not reimport already included functions
-Log::displayInfo >&2 "injectImportedFunctions2"
+Log::displayInfo "injectImportedFunctions2"
 injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
 
 # remove spaces at the end of the lines

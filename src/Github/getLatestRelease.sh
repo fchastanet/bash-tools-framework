@@ -7,6 +7,8 @@
 # @output log messages about retry
 Github::getLatestRelease() {
   local repo="$1"
+  # we need to pass the result through a reference instead of output directly
+  # because retry can output too
   local -n resultRef=$2
   resultRef=""
   local resultFile

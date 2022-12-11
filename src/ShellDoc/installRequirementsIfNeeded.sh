@@ -4,7 +4,7 @@ ShellDoc::installRequirementsIfNeeded() {
   local tomDocInstalled
   tomDocInstalled="$(cat "${BASH_FRAMEWORK_TOMDOC_INSTALLED}")"
   if [[ "${tomDocInstalled}" != "1" ]]; then
-    (Log::displayInfo >&2 "Check if tomdoc.sh is up to date")
+    (Log::displayInfo "Check if tomdoc.sh is up to date")
     if Git::shallowClone \
       "https://github.com/fchastanet/tomdoc.sh.git" \
       "${VENDOR_DIR}/fchastanet.tomdoc.sh" \

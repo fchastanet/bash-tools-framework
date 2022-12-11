@@ -20,19 +20,19 @@ Git::shallowClone() {
   local FORCE_DELETION="${4:-0}"
 
   if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo >&2 "Repository ${INSTALL_DIR} already installed"
+    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
   else
     if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
       if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning >&2 "Removing ${INSTALL_DIR} ..."
+        Log::displayWarning "Removing ${INSTALL_DIR} ..."
         rm -Rf "${INSTALL_DIR}" || exit 1
       else
-        Log::displayError >&2 "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
+        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
         return 1
       fi
     fi
     (
-      Log::displayInfo >&2 "Installing ${INSTALL_DIR} ..."
+      Log::displayInfo "Installing ${INSTALL_DIR} ..."
       mkdir -p "${INSTALL_DIR}"
       cd "${INSTALL_DIR}" || exit 1
       git init >&2
