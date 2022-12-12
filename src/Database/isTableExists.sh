@@ -13,7 +13,7 @@
 Database::isTableExists() {
   # shellcheck disable=SC2034
   local -n instanceIsTableExists=$1
-  local dbName, tableThatShouldExists, sql
+  local dbName tableThatShouldExists sql
   dbName="$2"
   tableThatShouldExists="$3"
 

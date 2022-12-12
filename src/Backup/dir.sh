@@ -9,7 +9,7 @@
 # @return 2 on backup failure
 # @output message about where the directory is backed up
 Backup::dir() {
-  local FROM_DIR, DIRNAME, ESCAPED_DIRNAME, BACKUP_FILE
+  local FROM_DIR DIRNAME ESCAPED_DIRNAME BACKUP_FILE
   FROM_DIR="$1"
   DIRNAME="$2"
 

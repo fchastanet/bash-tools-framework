@@ -12,7 +12,7 @@
 Database::dropDb() {
   # shellcheck disable=SC2034
   local -n instanceDropDb=$1
-  local dbName, sql, result
+  local dbName sql result
   dbName="$2"
 
   sql="DROP DATABASE IF EXISTS ${dbName}"

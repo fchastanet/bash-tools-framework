@@ -111,7 +111,7 @@ function log_log_file_not_writable { #@test
   [[ "${BASH_FRAMEWORK_LOG_LEVEL}" == "${__LEVEL_OFF}" ]]
 }
 
-function log_logDebug_activated_with_envfile { #@test
+function log_logDebug_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_LOG_FILE="${logFile}" \
     BASH_FRAMEWORK_INITIALIZED=0 \
@@ -133,7 +133,7 @@ function log_logDebug_activated_with_env_var { #@test
   [[ "${status}" == "0" ]]
 }
 
-function log_logInfo_activated_with_envfile { #@test
+function log_logInfo_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_LOG_FILE="${logFile}" \
     BASH_FRAMEWORK_INITIALIZED=0 \
@@ -153,7 +153,7 @@ function log_logInfo_activated_with_env_var { #@test
   [[ "${status}" == "0" ]]
 }
 
-function log_logSuccess_activated_with_envfile { #@test
+function log_logSuccess_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_LOG_FILE="${logFile}" \
     BASH_FRAMEWORK_INITIALIZED=0 \
@@ -173,7 +173,7 @@ function log_logSuccess_activated_with_env_var { #@test
   [[ "${status}" == "0" ]]
 }
 
-function log_logWarning_activated_with_envfile { #@test
+function log_logWarning_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_LOG_FILE="${logFile}" \
     BASH_FRAMEWORK_INITIALIZED=0 \
@@ -193,7 +193,7 @@ function log_logWarning_activated_with_env_var { #@test
   [[ "${status}" == "0" ]]
 }
 
-function log_logError_activated_with_envfile { #@test
+function log_logError_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_LOG_FILE="${logFile}" \
     BASH_FRAMEWORK_INITIALIZED=0 \

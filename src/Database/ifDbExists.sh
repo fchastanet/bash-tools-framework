@@ -7,7 +7,7 @@
 # * $2 database name
 Database::ifDbExists() {
   local -n instanceIfDbExists=$1
-  local dbName, result
+  local dbName result
   dbName="$2"
   local -a mysqlCommand=()
 

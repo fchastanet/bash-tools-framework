@@ -48,3 +48,9 @@
 - <https://github.com/adoyle-h/lobash>
 - <https://github.com/elibs/ebash>
 - <https://github.com/pre-commit/action>
+
+## Best practices
+
+- local or declare multiple local a z
+- shift each arg to avoid not shifting at all
+- declare all variables as local in functions to avoid making them global

@@ -17,7 +17,7 @@ source "${SRC_DIR}/Log/displayError.sh"
 ((exitCode = 0)) || true
 compileFile() {
   local srcFile="$1"
-  local srcRelativeFile, BIN_FILE, ROOT_DIR_RELATIVE_TO_BIN_DIR
+  local srcRelativeFile BIN_FILE ROOT_DIR_RELATIVE_TO_BIN_DIR
   srcRelativeFile="$(realpath -m --relative-to="${ROOT_DIR}" "${srcFile}")"
   BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | envsubst)"

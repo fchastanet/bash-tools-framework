@@ -2,7 +2,7 @@
 
 Wsl::cachedWslpath() {
   local -a args=("$@")
-  local tempEnvFile, key
+  local tempEnvFile key
 
   tempEnvFile="${TMPDIR:-/tmp}/bash_tools_wslpath_$(id -un)"
   Wsl::removeCacheFileIfTooOld "${tempEnvFile}" "+1"

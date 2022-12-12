@@ -18,9 +18,9 @@ teardown() {
 assertDisplayLogs() {
   local displayLevel=$1
 
-  local debugMsg, expectedDebugMsg, infoMsg, expectedInfoMsg
-  local successMsg, expectedSuccessMsg, warningMsg, expectedWarningMsg
-  local errorMsg, expectedErrorMsg
+  local debugMsg expectedDebugMsg infoMsg expectedInfoMsg
+  local successMsg expectedSuccessMsg warningMsg expectedWarningMsg
+  local errorMsg expectedErrorMsg
   debugMsg=$(Log::displayDebug "debug" 2>&1)
   expectedDebugMsg="$(echo -e "${__DEBUG_COLOR}DEBUG - debug${__RESET_COLOR}")"
   infoMsg=$(Log::displayInfo "info" 2>&1)
@@ -78,7 +78,7 @@ assertDisplayLogs() {
   return 1
 }
 
-function log_displayDebug_activated_with_envfile { #@test
+function log_displayDebug_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_INITIALIZED=0 \
     BASH_FRAMEWORK_LOG_FILE="${logFile}" \
@@ -98,7 +98,7 @@ function log_displayDebug_activated_with_env_var { #@test
   [[ "${status}" == "0" ]]
 }
 
-function log_displayInfo_activated_with_envfile { #@test
+function log_displayInfo_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_INITIALIZED=0 \
     BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/data/Log.info.env" \
@@ -114,7 +114,7 @@ function log_displayInfo_activated_with_env_var { #@test
   assertDisplayLogs "${__LEVEL_INFO}"
 }
 
-function log_displaySuccess_activated_with_envfile { #@test
+function log_displaySuccess_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_INITIALIZED=0 \
     BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/data/Log.success.env" \
@@ -130,7 +130,7 @@ function log_displaySuccess_activated_with_env_var { #@test
   assertDisplayLogs "${__LEVEL_SUCCESS}"
 }
 
-function log_displayWarning_activated_with_envfile { #@test
+function log_displayWarning_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_INITIALIZED=0 \
     BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/data/Log.warning.env" \
@@ -146,7 +146,7 @@ function log_displayWarning_activated_with_env_var { #@test
   assertDisplayLogs "${__LEVEL_WARNING}"
 }
 
-function log_displayError_activated_with_envfile { #@test
+function log_displayError_activated_with_envFile { #@test
   # shellcheck source=/src/Framework/loadEnv.sh
   BASH_FRAMEWORK_INITIALIZED=0 \
     BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/data/Log.error.env" \

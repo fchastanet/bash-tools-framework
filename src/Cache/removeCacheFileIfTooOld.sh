@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 Cache::removeCacheFileIfTooOld() {
-  local cacheFile, expiration
+  local cacheFile expiration
   cacheFile="$1"
   expiration="$2"
 
