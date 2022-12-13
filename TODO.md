@@ -54,3 +54,4 @@
 - local or declare multiple local a z
 - shift each arg to avoid not shifting at all
 - declare all variables as local in functions to avoid making them global
+- export readonly does not work, first readonly then export

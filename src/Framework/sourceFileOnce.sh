@@ -19,7 +19,7 @@ Framework::sourceFileOnce() {
 
   libPath="$(Framework::GetAbsolutePath "${libPath}")"
 
-  # [ -e "${libPath}" ] && echo "Trying to load from: ${libPath}"
+  # [[ -e "${libPath}" ]] && echo "Trying to load from: ${libPath}"
   if [[ -f "${libPath}" ]]; then
     ## if already imported let's return
     # if declare -f "Array::contains" &> /dev/null &&

@@ -21,10 +21,10 @@ Framework::loadEnv() {
   if [[ -z "${BASH_FRAMEWORK_ENV_FILEPATH+xxx}" ]]; then
     # BASH_FRAMEWORK_ENV_FILEPATH not defined
     if [[ -f "${HOME}/.bash-tools/.env" ]]; then
-      # shellcheck source=tests/data/.env
+      # shellcheck source=/tests/data/.env
       source "${HOME}/.bash-tools/.env" || exit 1
     elif [[ -f "${HOME}/.env" ]]; then
-      # shellcheck source=tests/data/.env
+      # shellcheck source=/tests/data/.env
       source "${HOME}/.env" || exit 1
     fi
   elif [[ -z "${BASH_FRAMEWORK_ENV_FILEPATH}" ]]; then
@@ -34,7 +34,7 @@ Framework::loadEnv() {
     # load BASH_FRAMEWORK_ENV_FILEPATH
     [[ ! -f "${BASH_FRAMEWORK_ENV_FILEPATH}" ]] &&
       Log::fatal "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
-    # shellcheck source=tests/data/.env
+    # shellcheck source=/tests/data/.env
     source "${BASH_FRAMEWORK_ENV_FILEPATH}"
   fi
 

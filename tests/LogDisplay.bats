@@ -169,9 +169,9 @@ function log_fatal { #@test
     source "${ROOT_DIR}/src/Framework/loadEnv.sh" || exit 1
   run Log::fatal 'fatal msg'
   # shellcheck disable=SC2154
-  [ "${status}" -eq 1 ]
+  [[ "${status}" -eq 1 ]]
   # shellcheck disable=SC2154
-  [ "$(echo -e "${__FATAL_COLOR}FATAL - fatal msg${__RESET_COLOR}")" = "${output}" ]
+  [[ "$(echo -e "${__FATAL_COLOR}FATAL - fatal msg${__RESET_COLOR}")" = "${output}" ]]
 }
 
 function display_off_with_env_file { #@test

@@ -11,13 +11,13 @@ RUN set -x \
   && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
   && apt-get update \
   && apt-get install -y -q --no-install-recommends \
-    # used for bash conpilation
+    # used for bash compilation
     bison=2:3.5.* \
-    # used for bash conpilation
+    # used for bash compilation
     build-essential=12.* \
-    # used for bash conpilation
+    # used for bash compilation
     ca-certificates=* \
-    # used for bash conpilation
+    # used for bash compilation
     curl=7.68.* \
     gawk=1:5.0.* \
     # gettext provides envsubst used for doc.sh
@@ -49,9 +49,9 @@ ONBUILD SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ONBUILD RUN set -x \
     && set -o errexit \
     \
-    && if [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
-      EXISTINGGROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" &&\
-      if [ -n "${EXISTINGGROUP}" ] ; then groupdel "${EXISTINGGROUP}" ; fi &&\
+    && if [[ "${USER_ID:-0}" != "0" && "${GROUP_ID:-0}" != "0" ]]; then \
+      EXISTING_GROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" &&\
+      if [[ -n "${EXISTING_GROUP}" ]] ; then groupdel "${EXISTING_GROUP}" ; fi &&\
       userdel -f www-data &&\
       if getent group www-data ; then groupdel www-data; fi &&\
       groupadd -g "${GROUP_ID}" www-data &&\

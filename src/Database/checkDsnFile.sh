@@ -16,7 +16,7 @@ Database::checkDsnFile() {
 
   (
     unset HOSTNAME PORT PASSWORD USER
-    # shellcheck source=tests/data/dsn_valid.env
+    # shellcheck source=/tests/data/dsn_valid.env
     source "${DSN_FILENAME}"
     if [[ -z ${HOSTNAME+x} ]]; then
       Log::displayError "dsn file ${DSN_FILENAME} : HOSTNAME not provided"

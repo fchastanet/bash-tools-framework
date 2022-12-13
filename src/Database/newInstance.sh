@@ -32,7 +32,7 @@ Database::newInstance() {
   Database::checkDsnFile "${DSN_FILE}"
   instanceNewInstance['DSN_FILE']="${DSN_FILE}"
 
-  # shellcheck source=tests/data/dsn_valid.env
+  # shellcheck source=/tests/data/dsn_valid.env
   source "${instanceNewInstance['DSN_FILE']}"
 
   instanceNewInstance['USER']="${USER}"

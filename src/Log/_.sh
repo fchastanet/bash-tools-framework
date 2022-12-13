@@ -2,37 +2,48 @@
 
 if [[ -t 1 || -t 2 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-  export readonly __ERROR_COLOR='\e[31m'      # Red
-  export readonly __INFO_COLOR='\e[44m'       # white on lightBlue
-  export readonly __SUCCESS_COLOR='\e[32m'    # Green
-  export readonly __WARNING_COLOR='\e[33m'    # Yellow
-  export readonly __SKIPPED_COLOR='\e[93m'    # Light Yellow
-  export readonly __TEST_COLOR='\e[100m'      # Light magenta
-  export readonly __TEST_ERROR_COLOR='\e[41m' # white on red
-  export readonly __SKIPPED_COLOR='\e[33m'    # Yellow
-  export readonly __DEBUG_COLOR='\e[37m'      # Grey
+  readonly __ERROR_COLOR='\e[31m'      # Red
+  readonly __INFO_COLOR='\e[44m'       # white on lightBlue
+  readonly __SUCCESS_COLOR='\e[32m'    # Green
+  readonly __WARNING_COLOR='\e[33m'    # Yellow
+  readonly __TEST_COLOR='\e[100m'      # Light magenta
+  readonly __TEST_ERROR_COLOR='\e[41m' # white on red
+  readonly __SKIPPED_COLOR='\e[33m'    # Yellow
+  readonly __DEBUG_COLOR='\e[37m'      # Grey
   # Internal: reset color
-  export readonly __RESET_COLOR='\e[0m' # Reset Color
+  readonly __RESET_COLOR='\e[0m' # Reset Color
   # shellcheck disable=SC2155,SC2034
-  export readonly __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+  readonly __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
   # shellcheck disable=SC2155,SC2034
-  export readonly __HELP_TITLE="$(echo -e "\e[1;37m")"
+  readonly __HELP_TITLE="$(echo -e "\e[1;37m")"
   # shellcheck disable=SC2155,SC2034
-  export readonly __HELP_NORMAL="$(echo -e "\033[0m")"
+  readonly __HELP_NORMAL="$(echo -e "\033[0m")"
 else
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-  export readonly __ERROR_COLOR=''
-  export readonly __INFO_COLOR=''
-  export readonly __SUCCESS_COLOR=''
-  export readonly __WARNING_COLOR=''
-  export readonly __SKIPPED_COLOR=''
-  export readonly __TEST_COLOR=''
-  export readonly __TEST_ERROR_COLOR=''
-  export readonly __SKIPPED_COLOR=''
-  export readonly __DEBUG_COLOR=''
+  readonly __ERROR_COLOR=''
+  readonly __INFO_COLOR=''
+  readonly __SUCCESS_COLOR=''
+  readonly __WARNING_COLOR=''
+  readonly __SKIPPED_COLOR=''
+  readonly __TEST_COLOR=''
+  readonly __TEST_ERROR_COLOR=''
+  readonly __DEBUG_COLOR=''
   # Internal: reset color
-  export readonly __RESET_COLOR=''
-  export readonly __HELP_EXAMPLE=''
-  export readonly __HELP_TITLE=''
-  export readonly __HELP_NORMAL=''
+  readonly __RESET_COLOR=''
+  readonly __HELP_EXAMPLE=''
+  readonly __HELP_TITLE=''
+  readonly __HELP_NORMAL=''
 fi
+export __ERROR_COLOR
+export __INFO_COLOR
+export __SUCCESS_COLOR
+export __WARNING_COLOR
+export __SKIPPED_COLOR
+export __TEST_COLOR
+export __TEST_ERROR_COLOR
+export __SKIPPED_COLOR
+export __DEBUG_COLOR
+export __RESET_COLOR
+export __HELP_EXAMPLE
+export __HELP_TITLE
+export __HELP_NORMAL
