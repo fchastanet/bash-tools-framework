@@ -9,10 +9,13 @@
 # @return 0 on successful pulling/cloning, 1 on failure
 Git::cloneOrPullIfNoChanges() {
   local dir="$1"
-  local repo="$2"
-  local cloneCallback=${3:-}
-  local pullCallback=${4:-}
-  shift 4 || true
+  shift || true
+  local repo="$1"
+  shift || true
+  local cloneCallback=${1:-}
+  shift || true
+  local pullCallback=${1:-}
+  shift || true
 
   if [[ -d "${dir}/.git" ]]; then
     Git::pullIfNoChanges "${dir}" && (

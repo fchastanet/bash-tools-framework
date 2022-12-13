@@ -1,5 +1,20 @@
 # Todo
 
+- compile exit 1 if at least 1 warning
+  - error if bash-tpl template not found
+    - File not found: '/dbQueryAllDatabases.awk'
+  - File not found:
+    '/home/wsl/projects/bash-tools/src/\_includes/executedAsUser.sh'
+    - manage template inheritance
+  - manage whitelist or add comment ignore
+    - File
+      /home/wsl/projects/bash-tools/vendor/bash-tools-framework/src/Acquire/ForceIPv4.sh
+      does not exist
+- refact Log::loadEnv
+  - just load variables with fallback
+  - then in each log file vendor/bash-tools-framework/src/Log/displayInfo.sh
+    - if ((BASH_FRAMEWORK_LOG_LEVEL >= \_\_LEVEL_INFO)); then define function
+      else define function empty fi
 - Bash-tools-framework contains framework and common code
 
 - generate github page from Readme.tmpl.md using github workflow
@@ -33,3 +48,9 @@
 - <https://github.com/adoyle-h/lobash>
 - <https://github.com/elibs/ebash>
 - <https://github.com/pre-commit/action>
+
+## Best practices
+
+- local or declare multiple local a z
+- shift each arg to avoid not shifting at all
+- declare all variables as local in functions to avoid making them global

@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 
-BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 SRC_DIR="$(cd "${BIN_DIR}/src" && pwd -P)"
+BIN_DIR="$(cd "${ROOT_DIR}/bin" && pwd -P)"
 
-# shellcheck source=/src/_includes/_header.sh
+# shellcheck source=./src/_includes/_header.sh
 source "${SRC_DIR}/_includes/_header.sh"
-# shellcheck source=/src/Log/_.sh
+# shellcheck source=./src/Log/_.sh
 source "${SRC_DIR}/Log/_.sh"
-# shellcheck source=/src/Log/displayInfo.sh
+# shellcheck source=./src/Log/displayInfo.sh
 source "${SRC_DIR}/Log/displayInfo.sh"
-# shellcheck source=/src/Log/displayError.sh
+# shellcheck source=./src/Log/displayError.sh
 source "${SRC_DIR}/Log/displayError.sh"
 
 # exitCode will be > 0 if at least one file has been updated or created
 ((exitCode = 0)) || true
 compileFile() {
   local srcFile="$1"
-  local srcRelativeFile, BIN_FILE, ROOT_DIR_RELATIVE_TO_BIN_DIR
+  local srcRelativeFile BIN_FILE ROOT_DIR_RELATIVE_TO_BIN_DIR
   srcRelativeFile="$(realpath -m --relative-to="${ROOT_DIR}" "${srcFile}")"
   BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | envsubst)"

@@ -5,7 +5,7 @@
 # @param $2 the expected email address domain
 # @return 1 on error
 Assert::emailAddress() {
-  local email, expectedDomain, expectedRegexp
+  local email expectedDomain expectedRegexp
   local -a splitEmail
   email="$1"
   expectedDomain="$2"

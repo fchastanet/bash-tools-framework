@@ -30,7 +30,7 @@ Profiles::loadConf() {
     # shellcheck source=/conf/dsn/default.local.env
     confFile="${HOME}/.bash-tools/${confFolder}/${conf}${extension}"
     if [[ ! -f "${confFile}" ]]; then
-      confFile="${__BASH_FRAMEWORK_VENDOR_PATH:?}/conf/${confFolder}/${conf}${extension}"
+      confFile="${ROOT_DIR:?}/conf/${confFolder}/${conf}${extension}"
     fi
   fi
   if [[ ! -f "${confFile}" ]]; then

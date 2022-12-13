@@ -12,7 +12,7 @@
 Database::createDb() {
   # shellcheck disable=SC2034
   local -n instanceCreateDb=$1
-  local dbName, sql, result
+  local dbName sql result
   dbName="$2"
 
   sql="CREATE DATABASE IF NOT EXISTS ${dbName} CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'"

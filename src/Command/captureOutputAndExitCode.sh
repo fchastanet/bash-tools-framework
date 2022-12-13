@@ -6,7 +6,7 @@
 # @errorOutput command output
 # @return exit code of the command
 Command::captureOutputAndExitCode() {
-  local command, logMessage, returnCode
+  local command logMessage returnCode
   command=$1
   logMessage="$2"
   returnCode=1

@@ -11,14 +11,15 @@
 # @return 2 if command does not exist
 Version::checkMinimal() {
   local commandName="$1"
-  local commandVersion="$2"
+  local argVersion="$2"
   local minimalVersion="$3"
+  local parseVersionCallback=${4:-Version::parse}
   local help="${4:-}"
 
   Assert::commandExists "${commandName}" "${help}" || return 2
 
   local version
-  version="$(${commandVersion} 2>&1 | sed -nre 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | head -n1)"
+  version="$("${commandName}" "${argVersion}" 2>&1 | ${parseVersionCallback})"
 
   Log::displayDebug "check ${commandName} version ${version} against minimal ${minimalVersion}"
 

@@ -87,3 +87,5 @@ onbuild
 TMPDIR
 SIGUSR
 inlines
+SIGINT
+batslib

@@ -7,7 +7,7 @@
 # * $1 repository
 # * $2 Install dir
 # * $3 revision commit sha, tag or branch
-# * $4 put 1 to force directory deletion if directory exists and it's not a git repository (default: 0)
+# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
 #     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
 #
 # **Return**:
@@ -23,7 +23,7 @@ Git::shallowClone() {
     Log::displayInfo "Repository ${INSTALL_DIR} already installed"
   else
     if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "1" ]]; then
+      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
         Log::displayWarning "Removing ${INSTALL_DIR} ..."
         rm -Rf "${INSTALL_DIR}" || exit 1
       else
@@ -35,13 +35,13 @@ Git::shallowClone() {
       Log::displayInfo "Installing ${INSTALL_DIR} ..."
       mkdir -p "${INSTALL_DIR}"
       cd "${INSTALL_DIR}" || exit 1
-      git init
-      git remote add origin "${REPO}"
+      git init >&2
+      git remote add origin "${REPO}" >&2
     )
   fi
   (
     cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --depth 1 origin "${REVISION}"
-    git reset --hard FETCH_HEAD
+    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
+    git reset --hard FETCH_HEAD >&2
   )
 }

@@ -13,7 +13,7 @@
 Database::dropTable() {
   # shellcheck disable=SC2034
   local -n instanceDropTable=$1
-  local dbName, tableName, sql, result
+  local dbName tableName sql result
   dbName="$2"
   tableName="$3"
 

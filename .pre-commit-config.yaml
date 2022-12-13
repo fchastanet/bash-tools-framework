@@ -63,15 +63,15 @@ repos:
   #       verbose: true
 
   ## Python, Polyglot, Git, pre-commit
-  - repo: https://github.com/ScribeMD/pre-commit-hooks
-    rev: 0.15.0
+  - repo: https://github.com/fchastanet/megalinter
+    rev: 2cf009a24ee58c0c61ac17551c1d0dc27fa6023c
     hooks:
       - id: megalinter-incremental
-        args: [--flavor, terraform, --release, v6.11.1]
+        args: [--flavor, terraform]
         stages:
           - commit
       - id: megalinter-full
-        args: [--flavor, terraform, --release, v6.11.1]
+        args: [--flavor, terraform]
         stages:
           - push
 

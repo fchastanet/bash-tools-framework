@@ -33,7 +33,7 @@ Install::dir() {
     cd "${FROM_DIR}/${DIRNAME}" || exit 1
     shopt -s dotglob # * will match hidden files too
     cp -R -- * "${DEST_DIR}" ||
-      Log:fatal "unable to copy directory '${FROM_DIR#"${ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
+      Log::fatal "unable to copy directory '${FROM_DIR#"${ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
     chown -R "${USER_NAME}":"${USER_GROUP}" "${DEST_DIR}"
     # chown all parent directory with same user
     local fullDir="${FROM_DIR}"

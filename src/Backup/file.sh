@@ -6,7 +6,7 @@
 #                  default or other value normal copy
 # @output messages about backup file location
 Backup::file() {
-  local file, sudo, backupFile
+  local file sudo backupFile
   file="$1"
   sudo="${2:-0}"
   if [[ -f "${file}" ]]; then

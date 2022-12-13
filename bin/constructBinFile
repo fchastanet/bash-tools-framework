@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
+SRC_DIR="$(cd "${ROOT_DIR}/src" && pwd -P)"
+
+# shellcheck source=src/_includes/_header.sh
+source "${SRC_DIR}/_includes/_header.sh"
+# shellcheck source=src/Log/_.sh
+source "${SRC_DIR}/Log/_.sh"
+# shellcheck source=src/Log/displayInfo.sh
+source "${SRC_DIR}/Log/displayInfo.sh"
+# shellcheck source=src/Log/displayError.sh
+source "${SRC_DIR}/Log/displayError.sh"
+# shellcheck source=src/Log/fatal.sh
+source "${SRC_DIR}/Log/fatal.sh"
+
+# Usage info
+showHelp() {
+  cat <<EOF
+${__HELP_TITLE}Description:${__HELP_NORMAL} create binary file from a srcFile
+
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {srcFile} {templateDir} {binDir} {rootDir}
+
+  --help,-h : prints this help and exits
+  srcFile     : file that needs to be compiled
+  templateDir : directory from which bash-tpl templates will be searched
+  binDir      : fallback bin directory in case BIN_FILE has not been provided
+  rootDir     : directory used to compute src file relative path
+
+srcFile should contains metadata BIN_FILE and ROOT_DIR_RELATIVE_TO_BIN_DIR at
+top of the bash script file (see example below)
+
+if BIN_FILE metadata is not provided, the binary file will be copied to {binDir}
+without sh extension
+
+${__HELP_TITLE}File header example:${__HELP_NORMAL}
+#!/usr/bin/env bash
+# BIN_FILE=${ROOT_DIR}/bin/generateShellDoc
+# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
+EOF
+}
+
+# read command parameters
+# $@ is all command line parameters passed to the script.
+# -o is for short options like -h
+# -l is for long options with double dash like --help
+# the comma separates different long options
+options=$(getopt -l help -o h -- "$@" 2>/dev/null) || {
+  showHelp
+  Log::fatal "invalid options specified"
+}
+
+eval set -- "${options}"
+while true; do
+  case $1 in
+    -h | --help)
+      showHelp
+      exit 0
+      ;;
+    --)
+      shift || true
+      break
+      ;;
+    *)
+      showHelp
+      Log::fatal "invalid argument $1"
+      ;;
+  esac
+  shift || true
+done
+
+if (($# != 4)); then
+  Log::fatal "yous should provide exactly 4 parameters"
+fi
+
+declare srcFile="$1"
+declare templateDir="$2"
+declare binDir="$3"
+declare rootDir="$4"
+
+getBinFileFromSrcFile() {
+  local srcFile="$1"
+  local binDir="$2"
+  local rootDir="$3"
+  local BIN_FILE
+
+  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  BIN_FILE="$(echo "${BIN_FILE}" | ROOT_DIR="${rootDir}" envsubst)"
+  if [[ -z "${BIN_FILE}" ]]; then
+    BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${rootDir}/src/#${binDir}/#" | sed -E 's#.sh$##')"
+  fi
+  if ! realpath "${BIN_FILE}" &>/dev/null; then
+    Log::displayError "${srcFile} does not define a valid BIN_FILE value"
+    return 1
+  fi
+  echo "${BIN_FILE}"
+}
+
+getRootDirRelativeToBinDirFromSrcFile() {
+  local srcFile="$1"
+  grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :
+}
+
+removeMetaDataFilter() {
+  sed -r '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d'
+}
+
+getFileRelativeToDir() {
+  local srcFile="$1"
+  local relativeTo="$2"
+
+  realpath -m --relative-to="${relativeTo}" "${srcFile}"
+}
+
+constructBinFile() {
+  local srcFile="$1"
+  local templateDir="$2"
+  local binDir="$3"
+  local rootDir="$4"
+
+  local BIN_FILE
+  BIN_FILE=$(getBinFileFromSrcFile "${srcFile}" "${binDir}" "${rootDir}")
+  mkdir -p "$(realpath -m "$(dirname "${BIN_FILE}")")" || true
+
+  Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
+  "${BIN_DIR}/compile" \
+    "${srcFile}" \
+    "$(getFileRelativeToDir "${srcFile}" "${rootDir}")" \
+    "$(getRootDirRelativeToBinDirFromSrcFile "${srcFile}")" \
+    --template-dir "${templateDir}" |
+    removeMetaDataFilter >"${BIN_FILE}"
+  chmod +x "${BIN_FILE}"
+}
+
+constructBinFile "${srcFile}" "${templateDir}" "${binDir}" "${rootDir}"

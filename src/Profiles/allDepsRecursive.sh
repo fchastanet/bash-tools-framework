@@ -2,9 +2,11 @@
 
 Profiles::allDepsRecursive() {
   local parent="$1"
-  local -an allDepsResult=$2
-  local -an allDepsResultSeen=$3
-  shift 3
+  shift || true
+  local -an allDepsResult=$1
+  shift || true
+  local -an allDepsResultSeen=$1
+  shift || true
   local i
   local addDep=0
   local -a deps

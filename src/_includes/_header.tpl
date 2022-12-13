@@ -5,10 +5,39 @@
 # DO NOT EDIT IT
 #####################################
 
+# shellcheck disable=SC2034
+SCRIPT_NAME=${0##*/}
+# shellcheck disable=SC2034
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 ROOT_DIR="$(cd "${BIN_DIR}/<% ${ROOT_DIR_RELATIVE_TO_BIN_DIR} %>" && pwd -P)"
 # shellcheck disable=SC2034
-SRC_DIR="<%% echo '${ROOT_DIR}/lib' %>"
+SRC_DIR="<%% echo '${ROOT_DIR}/src' %>"
+# shellcheck disable=SC2034
+VENDOR_DIR="<%% echo '${ROOT_DIR}/vendor' %>"
+# shellcheck disable=SC2034
+VENDOR_BIN_DIR="<%% echo '${ROOT_DIR}/vendor/bin' %>"
+export PATH="${BIN_DIR}":"${VENDOR_BIN_DIR}":${PATH}
+
+# shellcheck disable=SC2034
+TMPDIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)"
+export TMPDIR
+
+# temp dir cleaning
+cleanOnExit() {
+  rm -Rf "${TMPDIR}" >/dev/null 2>&1
+}
+trap cleanOnExit EXIT HUP QUIT ABRT TERM
+
+# @see https://unix.stackexchange.com/a/386856
+interruptManagement() {
+  # restore SIGINT handler
+  trap - INT
+  # ensure that Ctrl-C is trapped by this script and not by sub process
+  # report to the parent that we have indeed been interrupted
+  kill -s INT "$$"
+}
+trap interruptManagement INT
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true

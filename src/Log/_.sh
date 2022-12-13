@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -t 0 ]]; then
+if [[ -t 1 || -t 2 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
   export readonly __ERROR_COLOR='\e[31m'      # Red
   export readonly __INFO_COLOR='\e[44m'       # white on lightBlue

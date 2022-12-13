@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 Assert::regexpInFile() {
-  local regexp, file, message
+  local regexp file message
   regexp="$1"
   file="$2"
   message="$3"

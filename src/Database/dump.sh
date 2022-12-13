@@ -13,18 +13,17 @@
 Database::dump() {
   # shellcheck disable=SC2178
   local -n instanceDump=$1
-  local db, optionalTableList
-  db="$2"
-  optionalTableList=""
-  local -a dumpAdditionalOptions=()
-  local -a mysqlCommand=()
-
+  shift || true
+  local db="$1"
+  shift || true
   # optional table list
-  shift 2 || true
+  local optionalTableList=""
   if [[ -n "${1+x}" ]]; then
     optionalTableList="$1"
-    shift 1 || true
+    shift || true
   fi
+  local -a dumpAdditionalOptions=()
+  local -a mysqlCommand=()
 
   # additional options
   if [[ -n "${1+x}" ]]; then

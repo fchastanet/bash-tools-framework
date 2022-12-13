@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-ROO_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)"
+ROOT_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)"
 # shellcheck source=/src/Framework/loadEnv.sh
-BASH_FRAMEWORK_ENV_FILEPATH="" source "${ROO_DIR}/src/Framework/loadEnv.sh" || exit 1
+BASH_FRAMEWORK_ENV_FILEPATH="" source "${ROOT_DIR}/src/Framework/loadEnv.sh" || exit 1
 
-load "${ROO_DIR}/vendor/bats-mock-Flamefire/load.bash"
+load "${ROOT_DIR}/vendor/bats-mock-Flamefire/load.bash"
 
 setup() {
   mkdir -p /tmp/home/.bash-tools/cliProfiles
   mkdir -p /tmp/home/.bash-tools/dsn
-  cp -v "${ROO_DIR}/conf/cliProfiles/default.sh" /tmp/home/.bash-tools/cliProfiles
+  cp -v "${ROOT_DIR}/conf/cliProfiles/default.sh" /tmp/home/.bash-tools/cliProfiles
 }
 
 teardown() {
@@ -81,24 +81,24 @@ function assert_commandExists_not_exists { #@test
 }
 
 function functions_getList { #@test
-  run Functions::getList "${BATS_TEST_DIRNAME}/dataGetList" "sh"
+  run Profiles::list "${BATS_TEST_DIRNAME}/dataGetList" "sh"
   [[ "${status}" -eq 0 ]]
   [[ "${#lines[@]}" = "2" ]]
   [[ "${lines[0]}" = "       - test" ]]
   [[ "${lines[1]}" = "       - test2" ]]
 
-  run Functions::getList "${BATS_TEST_DIRNAME}/dataGetList" "sh" "-"
+  run Profiles::list "${BATS_TEST_DIRNAME}/dataGetList" "sh" "-"
   [[ "${status}" -eq 0 ]]
   [[ "${#lines[@]}" = "2" ]]
   [[ "${lines[0]}" = "-test" ]]
   [[ "${lines[1]}" = "-test2" ]]
 
-  run Functions::getList "${BATS_TEST_DIRNAME}/dataGetList" "dsn" "*"
+  run Profiles::list "${BATS_TEST_DIRNAME}/dataGetList" "dsn" "*"
   [[ "${status}" -eq 0 ]]
   # shellcheck disable=SC2154
   [[ "${output}" = "*hello" ]]
 
-  run Functions::getList "${BATS_TEST_DIRNAME}/unknown" "sh" "*"
+  run Profiles::list "${BATS_TEST_DIRNAME}/unknown" "sh" "*"
   [[ "${status}" -eq 1 ]]
 }
 

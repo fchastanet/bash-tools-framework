@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
 Profiles::checkMissingScripts() {
-  local tempDir
-  # create temp dir
-  tempDir=$(mktemp -p /tmp -d checkMissingScripts.XXXXXX)
-  trap 'rm -Rf ${tempDir}' EXIT
-
   local -a missingInstallScripts=()
   local -a missingConfigureScripts=()
   local -a missingTestScripts=()
