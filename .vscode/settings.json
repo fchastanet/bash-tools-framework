@@ -5,7 +5,8 @@
     "backup": true,
     "megalinter-reports": true,
     "_site": true,
-    "vendor": true
+    "vendor": true,
+    "bin": false
   },
   "files.exclude": {
     "_site/**": true

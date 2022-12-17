@@ -170,7 +170,8 @@ COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
 
 evalTemplate() {
   local FILE="$1"
-  (Log::displayInfo "evalTemplate source <(\
+  if [[ "${DEBUG:-0}" = "1" ]]; then
+    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
       REPOSITORY_URL='${GITHUB_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
@@ -178,7 +179,8 @@ evalTemplate() {
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
       FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
       ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
-  ) > binFile")
+      ) > binFile${__RESET_COLOR}")
+  fi
   # shellcheck source=/dev/null
   (source <(
     SRC_FILE_PATH="${SRC_FILE_PATH}" \
@@ -205,7 +207,9 @@ injectImportedFunctions() {
   ((functionsNeedToBeImported = 1))
   ((iteration = 1))
   while ((functionsNeedToBeImported >= 1)); do
-    (echo >&2 -e "${__INFO_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
+    if [[ "${DEBUG:-0}" = "1" ]]; then
+      (echo >&2 -e "${__DEBUG_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
+    fi
     echo >"${importedFunctionsTempFile}"
 
     readarray -t functionsToImport < <(
@@ -223,12 +227,16 @@ injectImportedFunctions() {
           underscoreFile="$(dirname "${fileToImport}")/_.sh"
           if ! Array::contains "${underscoreFile}" "${filesImported[@]}" &&
             [[ -f "${underscoreFile}" ]]; then
-            (echo >&2 -e "${__INFO_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+            if [[ "${DEBUG:-0}" = "1" ]]; then
+              (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+            fi
             Filters::catFileCleaned "${underscoreFile}" >>"${importedFunctionsTempFile}"
             filesImported+=("${underscoreFile}")
           fi
 
-          (echo >&2 -e "\t${__INFO_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+          if [[ "${DEBUG:-0}" = "1" ]]; then
+            (echo >&2 -e "\t${__DEBUG_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+          fi
           Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
         else
           (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
@@ -249,12 +257,16 @@ injectImportedFunctions "${COMPILED_FILE}" FILES_IMPORTED
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Framework::loadEnv
-Log::displayInfo "evalTemplate2"
+if [[ "${DEBUG:-0}" = "1" ]]; then
+  (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate2${__RESET_COLOR}")
+fi
 evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # FILES_IMPORTED is global variable so we will not reimport already included functions
-Log::displayInfo "injectImportedFunctions2"
+if [[ "${DEBUG:-0}" = "1" ]]; then
+  (echo >&2 -e "${__DEBUG_COLOR}\tinjectImportedFunctions2${__RESET_COLOR}")
+fi
 injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
 
 # remove spaces at the end of the lines
