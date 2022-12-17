@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM <% $SRC_FILE_PATH %>
+# GENERATED FILE FROM <% $REPOSITORY_URL %>/<% $SRC_FILE_PATH %>
 # DO NOT EDIT IT
 #####################################
 

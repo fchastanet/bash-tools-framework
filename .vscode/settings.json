@@ -4,7 +4,6 @@
     "report": true,
     "backup": true,
     "megalinter-reports": true,
-    "bin": true,
     "_site": true,
     "vendor": true
   },
@@ -15,8 +14,5 @@
     "*.md": ["# %%"]
   },
   "markdown.extension.toc.levels": "2..6",
-  "shellcheck.customArgs": [
-    "--source-path=SCRIPTDIR",
-    "--external-sources"
-  ]
+  "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"]
 }

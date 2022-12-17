@@ -77,6 +77,9 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePat
       * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
       * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
 
+${__HELP_TITLE}Environment variables:${__HELP_NORMAL}
+REPOSITORY_URL: used in template to indicate from which github repo the file has been generated
+
 ${__HELP_TITLE}Example:${__HELP_NORMAL}
 Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
 ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
@@ -169,6 +172,7 @@ evalTemplate() {
   local FILE="$1"
   (Log::displayInfo "evalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
+      REPOSITORY_URL='${GITHUB_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
@@ -178,6 +182,7 @@ evalTemplate() {
   # shellcheck source=/dev/null
   (source <(
     SRC_FILE_PATH="${SRC_FILE_PATH}" \
+      REPOSITORY_URL="${GITHUB_URL}" \
       ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
       TEMPLATE_DIR="${TEMPLATE_DIR}" \
       ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
