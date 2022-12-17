@@ -10,6 +10,8 @@ source "${SRC_DIR}/_includes/_header.sh"
 source "${SRC_DIR}/Log/_.sh"
 # shellcheck source=src/Log/displayInfo.sh
 source "${SRC_DIR}/Log/displayInfo.sh"
+# shellcheck source=src/Log/displaySkipped.sh
+source "${SRC_DIR}/Log/displaySkipped.sh"
 # shellcheck source=src/Log/displayError.sh
 source "${SRC_DIR}/Log/displayError.sh"
 # shellcheck source=src/Log/fatal.sh
@@ -89,7 +91,8 @@ getBinFileFromSrcFile() {
   BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | ROOT_DIR="${rootDir}" envsubst)"
   if [[ -z "${BIN_FILE}" ]]; then
-    BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${rootDir}/src/#${binDir}/#" | sed -E 's#.sh$##')"
+    Log::displaySkipped "${srcFile} does not contains BIN_FILE metadata"
+    return 0
   fi
   mkdir -p "$(dirname "${BIN_FILE}")" || true
   if ! realpath "${BIN_FILE}" &>/dev/null; then
@@ -123,6 +126,10 @@ constructBinFile() {
 
   local BIN_FILE
   BIN_FILE=$(getBinFileFromSrcFile "${srcFile}" "${binDir}" "${rootDir}")
+  if [[ -z "${BIN_FILE}" ]]; then
+    # BIN_FILE metadata not provided => skipped
+    return 0
+  fi
   mkdir -p "$(realpath -m "$(dirname "${BIN_FILE}")")" || true
 
   Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
