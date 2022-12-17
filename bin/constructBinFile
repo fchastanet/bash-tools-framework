@@ -91,6 +91,7 @@ getBinFileFromSrcFile() {
   if [[ -z "${BIN_FILE}" ]]; then
     BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${rootDir}/src/#${binDir}/#" | sed -E 's#.sh$##')"
   fi
+  mkdir -p "$(dirname "${BIN_FILE}")" || true
   if ! realpath "${BIN_FILE}" &>/dev/null; then
     Log::displayError "${srcFile} does not define a valid BIN_FILE value"
     return 1
