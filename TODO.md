@@ -1,15 +1,32 @@
 # Todo
 
+- test Env::load
+  - Env::load with invalid .env file => should display a warning message
+  - Env::load with missing .env file => fatal
+  - Env::load twice do not source again the files
+  - Env::load with 1 env file as parameter
+  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
+  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
+    BASH_FRAMEWORK_ENV_FILEPATH="${ROOT_DIR}/.env"
+  - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
+- do I add Env::load to \_header.tpl ?
+  - no but load tests/data/.env by default ? using var
+    BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
+- Framework linter
+  - check if all function namespace::function are existing in the framework
+  - check that function defined in a .sh and used outside is correctly named
 - compile exit 1 if at least 1 warning
   - error if bash-tpl template not found
     - File not found: '/dbQueryAllDatabases.awk'
-  - File not found:
-    '/home/wsl/projects/bash-tools/src/\_includes/executedAsUser.sh'
-    - manage template inheritance
   - manage whitelist or add comment ignore
     - File
       /home/wsl/projects/bash-tools/vendor/bash-tools-framework/src/Acquire/ForceIPv4.sh
       does not exist
+- new function Env::get "HOME"
+  - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
+    global HOME variable
+  - replace all ${HOME} by $(Env::get "HOME")
+  - variables can be overridden by env variables using OVERRIDE_VARIABLE_NAME
 - refact Log::loadEnv
   - just load variables with fallback
   - then in each log file vendor/bash-tools-framework/src/Log/displayInfo.sh
@@ -56,3 +73,8 @@
 - export readonly does not work, first readonly then export
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html> but set -o
   nounset is not usable because empty array are considered unset
+- ${PARAMETER:-WORD} ${PARAMETER-WORD} If the parameter PARAMETER is unset
+  (never was defined) or null (empty), this one expands to WORD, otherwise it
+  expands to the value of PARAMETER, as if it just was ${PARAMETER}. If you omit
+  the : (colon), like shown in the second form, the default value is only used
+  when the parameter was unset, not when it was empty.

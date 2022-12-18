@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# global variables used by Framework::run
+declare -gx bash_framework_status
+declare -gix bash_framework_duration
+declare -gx bash_framework_output
+
 # *Public*: run command and store data in following global variables :
 # * bash_framework_status the exit status of the command
 # * bash_framework_duration the duration of the command

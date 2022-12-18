@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+# Public: log level off
+export __LEVEL_OFF=0
+# Public: log level error
+export __LEVEL_ERROR=1
+# Public: log level warning
+export __LEVEL_WARNING=2
+# Public: log level info
+export __LEVEL_INFO=3
+# Public: log level success
+export __LEVEL_SUCCESS=3
+# Public: log level debug
+export __LEVEL_DEBUG=4
+
+export __LEVEL_OFF
+export __LEVEL_ERROR
+export __LEVEL_WARNING
+export __LEVEL_INFO
+export __LEVEL_SUCCESS
+export __LEVEL_DEBUG
+
 if [[ -t 1 || -t 2 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
   readonly __ERROR_COLOR='\e[31m'      # Red
@@ -47,3 +67,21 @@ export __RESET_COLOR
 export __HELP_EXAMPLE
 export __HELP_TITLE
 export __HELP_NORMAL
+
+Env::load
+
+if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+  BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+  export BASH_FRAMEWORK_LOG_LEVEL
+elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+  if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
+    Log::fatal "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
+  fi
+  if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
+    Log::fatal "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
+  fi
+else
+  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+  fi
+fi

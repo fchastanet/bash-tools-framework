@@ -8,19 +8,16 @@
 _COMPILE_BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 _COMPILE_ROOT_DIR="$(cd "${_COMPILE_BIN_DIR}/.." && pwd -P)"
 _COMPILE_SRC_DIR="$(cd "${_COMPILE_ROOT_DIR}/src" && pwd -P)"
+export FRAMEWORK_DIR="${_COMPILE_ROOT_DIR}"
 
 # shellcheck source=/src/_includes/_header.sh
 source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${_COMPILE_SRC_DIR}/Array/contains.sh"
-# shellcheck source=/src/Log/_.sh
-source "${_COMPILE_SRC_DIR}/Log/_.sh"
-# shellcheck source=/src/Log/displayInfo.sh
-source "${_COMPILE_SRC_DIR}/Log/displayInfo.sh"
-# shellcheck source=/src/Log/displayError.sh
-source "${_COMPILE_SRC_DIR}/Log/displayError.sh"
-# shellcheck source=/src/Log/fatal.sh
-source "${_COMPILE_SRC_DIR}/Log/fatal.sh"
+# shellcheck source=src/Env/load.sh
+source "${_COMPILE_SRC_DIR}/Env/load.sh"
+# shellcheck source=src/Log/__all.sh
+source "${_COMPILE_SRC_DIR}/Log/__all.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
 # shellcheck source=/src/Filters/catFileCleaned.sh

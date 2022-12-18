@@ -1,10 +1,12 @@
 # bash-tools-framework
 
+> **_NOTE:_** **Documentation is best viewed on
+> [github-pages](https://fchastanet.github.io/bash-tools-framework/)**
+
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD013 -->
 
-Build status:
-[![Workflow executed at each push](https://github.com/fchastanet/bash-tools-framework/actions/workflows/push_branch.yml/badge.svg?branch=master)](https://github.com/fchastanet/bash-tools-framework/actions/workflows/push_branch.yml)
+[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
 [![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
 [![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
 [![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
@@ -103,7 +105,7 @@ In order to generate bash documentation nad to run unit tests, you have to
 launch this command to install some libraries.
 
 ```bash
- ./build/installBuildDeps.sh
+./build/installBuildDeps.sh
 ```
 
 this script will install the following libraries inside `vendor` folder:
