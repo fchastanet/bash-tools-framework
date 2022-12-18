@@ -73,12 +73,13 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePat
       defined in this project, think about adding a --src-dir for this project too
 
     --template-dir|-t <templateDir> the template directory to use to override some template includes
-      2 variables are defined:
-      * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
-      * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
+      Check environment variables below.
 
 ${__HELP_TITLE}Environment variables:${__HELP_NORMAL}
-REPOSITORY_URL: used in template to indicate from which github repo the file has been generated
+  * REPOSITORY_URL: used in template to indicate from which github repo the file has been generated
+  * SRC_ABSOLUTE_PATH: absolute path to the template file being computed
+  * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
+  * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
 
 ${__HELP_TITLE}Example:${__HELP_NORMAL}
 Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
@@ -178,17 +179,20 @@ evalTemplate() {
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
       FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
+      SRC_ABSOLUTE_PATH='$(realpath "${SRC_FILE_PATH}")' \
       ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
       ) > binFile${__RESET_COLOR}")
   fi
+  SRC_ABSOLUTE_PATH="$(realpath "${SRC_FILE_PATH}")"
   # shellcheck source=/dev/null
-  (source <(
+  (cd "${TEMPLATE_DIR}" && source <(
     SRC_FILE_PATH="${SRC_FILE_PATH}" \
       REPOSITORY_URL="${GITHUB_URL}" \
       ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
       TEMPLATE_DIR="${TEMPLATE_DIR}" \
       ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
       FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}" \
+      SRC_ABSOLUTE_PATH="${SRC_ABSOLUTE_PATH}" \
       "${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}"
   )) | Filters::removeDuplicatedShebangs
 }

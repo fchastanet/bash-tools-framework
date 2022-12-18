@@ -44,7 +44,6 @@
     global HOME variable
   - replace all ${HOME} by $(Env::get "HOME")
   - generate automatically .env.template from Env::get
-- <https://dougrichardson.us/notes/fail-fast-bash-scripting.html>
 - <https://github.com/adoyle-h/lobash>
 - <https://github.com/elibs/ebash>
 - <https://github.com/pre-commit/action>
@@ -55,3 +54,5 @@
 - shift each arg to avoid not shifting at all
 - declare all variables as local in functions to avoid making them global
 - export readonly does not work, first readonly then export
+- <https://dougrichardson.us/notes/fail-fast-bash-scripting.html> but set -o
+  nounset is not usable because empty array are considered unset
