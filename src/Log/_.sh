@@ -67,21 +67,3 @@ export __RESET_COLOR
 export __HELP_EXAMPLE
 export __HELP_TITLE
 export __HELP_NORMAL
-
-Env::load
-
-if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-  BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-  export BASH_FRAMEWORK_LOG_LEVEL
-elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-  if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
-    Log::fatal "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
-  fi
-  if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
-    Log::fatal "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
-  fi
-else
-  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-  fi
-fi

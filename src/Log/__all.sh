@@ -36,3 +36,5 @@ source "${FRAMEWORK_DIR}/src/Log/logSuccess.sh"
 source "${FRAMEWORK_DIR}/src/Log/logWarning.sh"
 # shellcheck source=src/Log/rotate.sh
 source "${FRAMEWORK_DIR}/src/Log/rotate.sh"
+# shellcheck source=src/Log/ZZZ.sh
+source "${FRAMEWORK_DIR}/src/Log/ZZZ.sh"

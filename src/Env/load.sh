@@ -11,9 +11,9 @@ BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_f
 
 # shellcheck source=tests/data/.env
 cat >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" <<'EOF'
-BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}
-BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}
-BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${ROOT_DIR}/logs/${SCRIPT_NAME}.log}
+BASH_FRAMEWORK_LOG_LEVEL=0
+BASH_FRAMEWORK_DISPLAY_LEVEL=3
+BASH_FRAMEWORK_LOG_FILE=${ROOT_DIR}/logs/${SCRIPT_NAME}.log
 BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=5
 EOF
 
@@ -68,7 +68,6 @@ Env::load() {
         Log::displayWarning "Cannot load '${file}'"
       }
     done
-    awk -F= '!a[$1]++' "${files[@]}" | grep -v '^$\|^\s*\#' | cut -d= -f1 >"${ROOT_DIR}/f"
 
     # 4. copy only the variables to the tmp file
     local varName

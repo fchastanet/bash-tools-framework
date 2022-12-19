@@ -3,7 +3,8 @@
 # generate code from templates <https://github.com/TekWizely/bash-tpl>
 #  - auto import function with pattern folder::(._::)_(functionName) =>
 #    Folder/functionName.sh
-#  - auto import \_.sh if at least one function imported in the directory
+#  - auto import \_.sh before if at least one function imported in the directory
+#  - auto import ZZZ.sh after loading functions if at least one function imported in the directory
 
 _COMPILE_BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 _COMPILE_ROOT_DIR="$(cd "${_COMPILE_BIN_DIR}/.." && pwd -P)"
@@ -201,9 +202,12 @@ injectImportedFunctions() {
 
   local functionsNeedToBeImported
   local -a functionsToImport
-  local iteration
+  local iteration zzzFile fileToImport underscoreFile
   local importedFunctionsTempFile
   importedFunctionsTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_functions.XXXXXXX")"
+
+  local importedZZZTempFile
+  importedZZZTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_zzz_files.XXXXXXX")"
 
   ((functionsNeedToBeImported = 1))
   ((iteration = 1))
@@ -212,6 +216,7 @@ injectImportedFunctions() {
       (echo >&2 -e "${__DEBUG_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
     fi
     echo >"${importedFunctionsTempFile}"
+    echo >"${importedZZZTempFile}"
 
     readarray -t functionsToImport < <(
       grep -Poi '([a-z0-9_]+[a-z0-9_-]*::[a-z0-9_-]+)' "${file}" |
@@ -234,6 +239,16 @@ injectImportedFunctions() {
             Filters::catFileCleaned "${underscoreFile}" >>"${importedFunctionsTempFile}"
             filesImported+=("${underscoreFile}")
           fi
+          # check if we need to import ZZZ.sh
+          zzzFile="$(dirname "${fileToImport}")/ZZZ.sh"
+          if ! Array::contains "${zzzFile}" "${filesImported[@]}" &&
+            [[ -f "${zzzFile}" ]]; then
+            if [[ "${DEBUG:-0}" = "1" ]]; then
+              (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${zzzFile} ...${__RESET_COLOR}")
+            fi
+            Filters::catFileCleaned "${zzzFile}" >>"${importedZZZTempFile}"
+            filesImported+=("${zzzFile}")
+          fi
 
           if [[ "${DEBUG:-0}" = "1" ]]; then
             (echo >&2 -e "\t${__DEBUG_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
@@ -246,7 +261,13 @@ injectImportedFunctions() {
         ((functionsNeedToBeImported = 1)) # as we added some files, we need to do another pass
       fi
     done
-    sed -i "/# FUNCTIONS/ r ${importedFunctionsTempFile}" "${file}"
+
+    # insert functions before # FUNCTIONS
+    sed -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
+
+    # insert zzz files after # FUNCTIONS
+    sed -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"
+
     ((iteration++))
   done
 }

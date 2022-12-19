@@ -1,5 +1,6 @@
 # Todo
 
+- ability to override env variable using OVERRIDE\_\*
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
   - Env::load with missing .env file => fatal
