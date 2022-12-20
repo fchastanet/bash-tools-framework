@@ -62,6 +62,17 @@ repos:
   #       fail_fast: true
   #       verbose: true
 
+  - repo: local
+    hooks:
+      - id: run-unit-tests
+        name: run-unit-tests
+        entry: bash -c './vendor/bats/bin/bats -r src'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
   ## Python, Polyglot, Git, pre-commit
   - repo: https://github.com/fchastanet/megalinter
     rev: 2cf009a24ee58c0c61ac17551c1d0dc27fa6023c

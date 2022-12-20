@@ -54,10 +54,10 @@ function database_framework_is_loaded { #@test
 }
 
 function database_checkDsnFile_file_not_found { #@test
-  run Database::checkDsnFile "notfound" 2>&1
+  run Database::checkDsnFile "notFound" 2>&1
   [[ "${status}" -eq 1 ]]
   # shellcheck disable=SC2154
-  [[ "${output}" == *"dsn file notfound not found"* ]]
+  [[ "${output}" == *"dsn file notFound not found"* ]]
 }
 
 function database_checkDsnFile_missing_hostname { #@test
@@ -144,7 +144,7 @@ function database_newInstance_invalid_dsn_file { #@test
   # TODO check if dbFromInstance empty
 }
 
-function database_newInstance_valid_dsnfile_from_framework { #@test
+function database_newInstance_valid_dsnFile_from_framework { #@test
   # shellcheck disable=SC2030
   local -A dbFromInstance
   run Database::newInstance dbFromInstance "default.local"
@@ -236,7 +236,7 @@ function database_newInstance_auth_files_should_be_deleted { #@test
     authFile2="${dbFromInstance2['AUTH_FILE']}"
     [[ -f "${authFile1}" ]]
     [[ -f "${authFile2}" ]]
-    # we write variables in files as values will be lost outside of this subshell
+    # we write variables in files as values will be lost outside of this subShell
     echo -n "${authFile1}" >/tmp/home/authFile1
     echo -n "${authFile2}" >/tmp/home/authFile2
   )
@@ -253,12 +253,12 @@ function database_newInstance_auth_files_should_be_deleted { #@test
 function database_ifDbExists_exists { #@test
   # call 2: check if from db exists, this time we answer no
   stub mysqlshow \
-    '* --ssl-mode=DISABLED mydb : echo "Database: mydb"'
+    '* --ssl-mode=DISABLED myDb : echo "Database: myDb"'
 
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
 
-  run Database::ifDbExists dbFromInstance 'mydb'
+  run Database::ifDbExists dbFromInstance 'myDb'
   [[ "${status}" -eq 0 ]]
 }
 
@@ -272,7 +272,7 @@ function database_isTableExists_exists { #@test
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
 
-  run Database::isTableExists dbFromInstance 'mydb' 'mytable'
+  run Database::isTableExists dbFromInstance 'myDb' 'myTable'
   [[ "${status}" -eq 0 ]]
   [[ -f "/tmp/home/query" ]]
   [[ "$(cat /tmp/home/query)" == "$(cat "${BATS_TEST_DIRNAME}/data/isTableExists.query")" ]]
@@ -288,7 +288,7 @@ function database_isTableExists_not_exists { #@test
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
 
-  run Database::isTableExists dbFromInstance 'mydb' 'mytable'
+  run Database::isTableExists dbFromInstance 'myDb' 'myTable'
   [[ "${status}" -eq 1 ]]
   [[ -f "/tmp/home/query" ]]
   [[ "$(cat /tmp/home/query)" == "$(cat "${BATS_TEST_DIRNAME}/data/isTableExists.query")" ]]
@@ -297,15 +297,15 @@ function database_isTableExists_not_exists { #@test
 function database_createDb { #@test
   # shellcheck disable=SC2016
   stub mysql \
-    '* --batch --raw --default-character-set=utf8 -s --skip-column-names -e * : echo $8 > /tmp/home/query ; echo "Database: mydb"'
+    '* --batch --raw --default-character-set=utf8 -s --skip-column-names -e * : echo $8 > /tmp/home/query ; echo "Database: myDb"'
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
 
-  run Database::createDb dbFromInstance 'mydb'
+  run Database::createDb dbFromInstance 'myDb'
   [[ "${status}" -eq 0 ]]
-  [[ "${output}" == *"Db mydb has been created"* ]]
+  [[ "${output}" == *"Db myDb has been created"* ]]
   [[ -f "/tmp/home/query" ]]
   [[ "$(cat /tmp/home/query)" == "$(cat "${BATS_TEST_DIRNAME}/data/createDb.query")" ]]
 }
@@ -313,15 +313,15 @@ function database_createDb { #@test
 function database_dropDb { #@test
   # shellcheck disable=SC2016
   stub mysql \
-    '* --batch --raw --default-character-set=utf8 -s --skip-column-names -e * : echo $8 > /tmp/home/query ; echo "Database: mydb"'
+    '* --batch --raw --default-character-set=utf8 -s --skip-column-names -e * : echo $8 > /tmp/home/query ; echo "Database: myDb"'
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
 
-  run Database::dropDb dbFromInstance 'mydb'
+  run Database::dropDb dbFromInstance 'myDb'
   [[ "${status}" -eq 0 ]]
-  [[ "${output}" == *"Db mydb has been dropped"* ]]
+  [[ "${output}" == *"Db myDb has been dropped"* ]]
   [[ -f "/tmp/home/query" ]]
   [[ "$(cat /tmp/home/query)" == "$(cat "${BATS_TEST_DIRNAME}/data/dropDb.query")" ]]
 }
@@ -329,24 +329,24 @@ function database_dropDb { #@test
 function database_dropTable { #@test
   # shellcheck disable=SC2016
   stub mysql \
-    '* --batch --raw --default-character-set=utf8 -s --skip-column-names mydb -e * : echo $9 > /tmp/home/query ; echo "Database: mydb"'
+    '* --batch --raw --default-character-set=utf8 -s --skip-column-names myDb -e * : echo $9 > /tmp/home/query ; echo "Database: myDb"'
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
-  run Database::dropTable dbFromInstance 'mydb' 'mytable'
+  run Database::dropTable dbFromInstance 'myDb' 'myTable'
   [[ "${status}" -eq 0 ]]
-  [[ "${output}" == *"Table mydb.mytable has been dropped"* ]]
+  [[ "${output}" == *"Table myDb.myTable has been dropped"* ]]
   [[ -f "/tmp/home/query" ]]
   [[ "$(cat /tmp/home/query)" == "$(cat "${BATS_TEST_DIRNAME}/data/dropTable.query")" ]]
 }
 
 function database_dump { #@test
   stub mysqldump \
-    '* --default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED mydb : echo "dump"'
+    '* --default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED myDb : echo "dump"'
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
-  run Database::dump dbFromInstance 'mydb'
+  run Database::dump dbFromInstance 'myDb'
 
   [[ "${status}" -eq 0 ]]
   [[ "${output}" = "dump" ]]
@@ -354,12 +354,12 @@ function database_dump { #@test
 
 function database_dump_with_table_list { #@test
   stub mysqldump \
-    '* --default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED mydb table1 table2 : echo "dump table1 table2"'
+    '* --default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED myDb table1 table2 : echo "dump table1 table2"'
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
-  run Database::dump dbFromInstance 'mydb' "table1 table2"
+  run Database::dump dbFromInstance 'myDb' "table1 table2"
 
   [[ "${status}" -eq 0 ]]
   [[ "${output}" = "dump table1 table2" ]]
@@ -368,12 +368,12 @@ function database_dump_with_table_list { #@test
 function database_dump_with_additional_options { #@test
   # shellcheck disable=SC2016
   stub mysqldump \
-    '* --default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED --no-create-info --skip-add-drop-table --single-transaction=TRUE mydb : echo "dump additional options"'
+    '* --default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED --no-create-info --skip-add-drop-table --single-transaction=TRUE myDb : echo "dump additional options"'
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
   HOME=/tmp/home Database::newInstance dbFromInstance "dsn_valid"
-  run Database::dump dbFromInstance 'mydb' "" --no-create-info --skip-add-drop-table --single-transaction=TRUE
+  run Database::dump dbFromInstance 'myDb' "" --no-create-info --skip-add-drop-table --single-transaction=TRUE
 
   [[ "${status}" -eq 0 ]]
   [[ "${output}" = "dump additional options" ]]

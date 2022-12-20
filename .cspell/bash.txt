@@ -91,3 +91,4 @@ SIGINT
 batslib
 WORKDIR
 userdel
+unstub

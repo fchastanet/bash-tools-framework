@@ -1,5 +1,11 @@
 # Todo
 
+- src/Docker/testContainer.sh bats
+- getTagCompatibleFromBranch camelCase to snakeCase
+- fix workflow
+  - move test.sh, buildPushDockerImages, runBuildContainer and make them
+    independent of bash-tools, the binaries will be generated in both repo but
+    same base
 - ability to override env variable using OVERRIDE\_\*
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
@@ -52,6 +58,7 @@
 - add build.sh in precommit hook
 - doc.sh, linters and other build tools will be defined in bash-tools
 - linter that checks if namespace::function exist in lib directory
+- <https://www.sphinx-doc.org/en/master/>
 - support nested namespace
 - import bash-tools commands + libs
 - import ck_ip_dev_env commands

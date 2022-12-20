@@ -73,11 +73,11 @@ function assert_commandExists_exists { #@test
 }
 
 function assert_commandExists_not_exists { #@test
-  run Assert::commandExists "qsfdsfds"
+  run Assert::commandExists "invalidCommand"
   # shellcheck disable=SC2154
   [[ "${status}" -eq 1 ]]
   # shellcheck disable=SC2154
-  [[ "${lines[0]}" = "$(echo -e "${__ERROR_COLOR}ERROR - qsfdsfds is not installed, please install it${__RESET_COLOR}")" ]]
+  [[ "${lines[0]}" = "$(echo -e "${__ERROR_COLOR}ERROR - invalidCommand is not installed, please install it${__RESET_COLOR}")" ]]
 }
 
 function functions_getList { #@test
@@ -219,7 +219,7 @@ function profiles_getAbsoluteConfFile_file_not_found { #@test
 
 function framework_trapAdd { #@test
   trap 'echo "SIGUSR1 original" >> /tmp/home/trap' SIGUSR1
-  Framework::trapAdd 'echo "SIGUSR1 overriden" >> /tmp/home/trap' SIGUSR1
+  Framework::trapAdd 'echo "SIGUSR1 overridden" >> /tmp/home/trap' SIGUSR1
   kill -SIGUSR1 $$
   [[ "$(cat /tmp/home/trap)" = "$(cat "${BATS_TEST_DIRNAME}/data/Functions_addTrap_expected")" ]]
 }
@@ -227,7 +227,7 @@ function framework_trapAdd { #@test
 function framework_trapAdd_2_events_at_once { #@test
   trap 'echo "SIGUSR1 original" >> /tmp/home/trap' SIGUSR1
   trap 'echo "SIGUSR2 original" >> /tmp/home/trap' SIGUSR2
-  Framework::trapAdd 'echo "SIGUSR1&2 overriden" >> /tmp/home/trap' SIGUSR1 SIGUSR2
+  Framework::trapAdd 'echo "SIGUSR1&2 overridden" >> /tmp/home/trap' SIGUSR1 SIGUSR2
   kill -SIGUSR1 $$
   [[ "$(cat /tmp/home/trap)" = "$(cat "${BATS_TEST_DIRNAME}/data/Functions_addTrap2_1_expected")" ]]
   rm /tmp/home/trap
@@ -240,13 +240,13 @@ function framework_run_status_0 { #@test
     '* : echo 1609970133' \
     '* : echo 1609970134'
 
-  Framework::run echo 'coucou' 2>/tmp/home/error
+  Framework::run echo 'hello' 2>/tmp/home/error
   # shellcheck disable=SC2154
   [[ "${bash_framework_status}" -eq 0 ]]
   # shellcheck disable=SC2154
   [[ "${bash_framework_duration}" = "1" ]]
   # shellcheck disable=SC2154
-  [[ "${bash_framework_output}" = "coucou" ]]
+  [[ "${bash_framework_output}" = "hello" ]]
   [[ "$(cat /tmp/home/error)" = "" ]]
 }
 
