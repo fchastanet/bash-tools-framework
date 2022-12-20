@@ -35,9 +35,19 @@ teardown() {
 }
 
 function Docker::testContainerDirNotExists { #@test
-  run Docker::testContainer "invalid" "containerName" "title" "url"
+  callbackSuccess() {
+    echo "callback success"
+  }
+
+  run Docker::testContainer "invalid" "containerName" "title" callbackSuccess
   assert_failure 1
   assert_output "ERROR   - Directory invalid does not exist"
+}
+
+function Docker::testContainerCallbackInvalid { #@test
+  run Docker::testContainer "." "containerName" "title" "invalidCallback"
+  assert_failure 4
+  assert_output "ERROR   - testCallBack parameter should be a function"
 }
 
 function Docker::testContainerDockerComposeUpFailure { #@test
@@ -45,7 +55,10 @@ function Docker::testContainerDockerComposeUpFailure { #@test
     "up -d : echo 'docker-compose up' && exit 1" \
     "down : exit 1"
 
-  run Docker::testContainer "." "containerName" "title" "url"
+  callbackSuccess() {
+    echo "callback success"
+  }
+  run Docker::testContainer "." "containerName" "title" callbackSuccess
   assert_failure 3
   assert_line --index 0 "INFO    - Launching title ..."
   assert_line --index 1 "docker-compose up"
@@ -77,7 +90,7 @@ function Docker::testContainerWithCallbackError { #@test
 
   callbackFailure() {
     echo "callback failure"
-    exit 1
+    return 1
   }
   run Docker::testContainer "." "containerName" "title" callbackFailure
   assert_failure 2
@@ -87,41 +100,4 @@ function Docker::testContainerWithCallbackError { #@test
   assert_line --index 3 "docker-compose logs of containerName"
   assert_line --index 4 "ERROR   - title initialization has failed, check above logs"
   assert_line --index 5 "INFO    - Shuting down title ..."
-}
-
-function Docker::testContainerWithCurlOK { #@test
-  stub docker-compose \
-    "up -d : echo 'docker-compose is up'" \
-    "down : echo 'docker-compose down'"
-  stub curl \
-    "--silent -o /dev/null --fail -L --connect-timeout 5 --max-time 10 url : echo 'curl success' && exit 0"
-
-  run Docker::testContainer "." "containerName" "title" "url" "1" "0"
-  assert_success
-  assert_line --index 0 "INFO    - Launching title ..."
-  assert_line --index 1 "docker-compose is up"
-  assert_line --index 2 "INFO    - Attempt 1/1: Try to contact title ..."
-  assert_line --index 3 "curl success"
-  assert_line --index 4 "SUCCESS - title tested successfully"
-  assert_line --index 5 "INFO    - Shuting down title ..."
-}
-
-function Docker::testContainerWithCurlError { #@test
-  stub docker-compose \
-    "up -d : echo 'docker-compose is up'" \
-    "logs containerName : echo 'docker-compose logs of containerName'" \
-    "down : echo 'docker-compose down'"
-  stub curl \
-    "--silent -o /dev/null --fail -L --connect-timeout 5 --max-time 10 url : echo 'curl failure' && exit 1"
-
-  run Docker::testContainer "." "containerName" "title" "url" "1" "0"
-  assert_failure 2
-  assert_line --index 0 "INFO    - Launching title ..."
-  assert_line --index 1 "docker-compose is up"
-  assert_line --index 2 "INFO    - Attempt 1/1: Try to contact title ..."
-  assert_line --index 3 "curl failure"
-  assert_line --index 4 "ERROR   - The command has failed after 1 attempts."
-  assert_line --index 5 "docker-compose logs of containerName"
-  assert_line --index 6 "ERROR   - title initialization has failed, check above logs"
-  assert_line --index 7 "INFO    - Shuting down title ..."
 }
