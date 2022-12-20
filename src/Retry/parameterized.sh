@@ -18,7 +18,7 @@ Retry::parameterized() {
     Log::displayInfo "Attempt ${retriesCount}/${maxRetries}: ${message}"
     if "$@"; then
       break
-    elif [[ ${retriesCount} -le ${maxRetries} ]]; then
+    elif ((retriesCount < maxRetries)); then
       Log::displayWarning "Command failed. Wait for ${delayBetweenTries} seconds"
       ((retriesCount++))
       sleep "${delayBetweenTries}"

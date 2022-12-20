@@ -2,9 +2,9 @@
 
 Assert::dirExists() {
   local dir="$1"
-  local user="${2:-${USERNAME}}"
-  local group="${3:-${USERGROUP}}"
-  Log::displayInfo "Check ${dir} exists with user ${user}:${group}"
+  local user="${2:-${USERNAME:-$(id -un)}}"
+  local group="${3:-${USERGROUP:-$(id -gn)}}"
+  Log::displayInfo "Check if directory ${dir} exists with user ${user}:${group}"
   if [[ ! -d "${dir}" ]]; then
     Log::displayError "missing directory ${dir}"
     return 1

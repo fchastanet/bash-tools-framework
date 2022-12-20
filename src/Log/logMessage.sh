@@ -20,6 +20,7 @@ Log::logMessage() {
 
   date="$(date '+%Y-%m-%d %H:%M:%S')"
 
-  [[ -f "${BASH_FRAMEWORK_LOG_FILE}" ]] &&
+  if [[ -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
 }
