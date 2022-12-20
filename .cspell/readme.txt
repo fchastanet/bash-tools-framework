@@ -34,3 +34,5 @@ bindbimportprofile
 bincli
 bingitisancestorof
 binmysql
+manpages
+asciidoctor

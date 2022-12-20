@@ -69,11 +69,7 @@
       "languageId": "dirColors"
     },
     {
-      "filename": "README.md",
-      "languageId": "readme"
-    },
-    {
-      "filename": "README.tmpl.md",
+      "filename": "*.md",
       "languageId": "readme"
     },
     {

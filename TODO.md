@@ -1,7 +1,13 @@
 # Todo
 
-- src/Docker/testContainer.sh bats
-- getTagCompatibleFromBranch camelCase to snakeCase
+- replace all sed -r by sed -E
+- generate options parsing + doc from template
+  - > <https://github.com/ko1nksm/getoptions>>
+  - <https://github.com/matejak/argbash>
+- register to <https://repology.org/projects/> in order to show matrix image
+  <https://github.com/jirutka/esh/blob/master/README.adoc>
+- asciidoctor to build manpages
+- migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc>
 - fix workflow
   - move test.sh, buildPushDockerImages, runBuildContainer and make them
     independent of bash-tools, the binaries will be generated in both repo but
@@ -86,3 +92,4 @@
   expands to the value of PARAMETER, as if it just was ${PARAMETER}. If you omit
   the : (colon), like shown in the second form, the default value is only used
   when the parameter was unset, not when it was empty.
+- always use sed -E
