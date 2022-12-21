@@ -17,10 +17,8 @@ Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
   local date
-
-  date="$(date '+%Y-%m-%d %H:%M:%S')"
-
-  if [[ -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) && [[ -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
   fi
 }
