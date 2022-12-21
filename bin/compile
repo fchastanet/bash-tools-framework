@@ -226,7 +226,7 @@ injectImportedFunctions() {
     )
     ((functionsNeedToBeImported = 0)) || true
     for functionToImport in "${functionsToImport[@]}"; do
-      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
       if ! Array::contains "${fileToImport}" "${filesImported[@]}"; then
         if [[ -f "${fileToImport}" ]]; then
           # check if we need to import _.sh
@@ -263,10 +263,10 @@ injectImportedFunctions() {
     done
 
     # insert functions before # FUNCTIONS
-    sed -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
+    sed -E -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
 
     # insert zzz files after # FUNCTIONS
-    sed -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"
+    sed -E -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"
 
     ((iteration++))
   done
@@ -292,6 +292,6 @@ fi
 injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
 
 # remove spaces at the end of the lines
-sed -i -E 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
+sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 
 cat -s "${COMPILED_FILE2}"

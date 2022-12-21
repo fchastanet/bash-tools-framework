@@ -20,7 +20,7 @@ Docker::pullImage() {
   local tag
   for tag in "$@"; do
     Log::displayInfo "docker pull ${registryImageUrl}:${tag}"
-    if docker pull "${registryImageUrl}:${tag}" | sed -nr 's#^Digest: sha256:(.+)$#\1#p'; then
+    if docker pull "${registryImageUrl}:${tag}" | sed -En 's#^Digest: sha256:(.+)$#\1#p'; then
       return 0
     fi
   done

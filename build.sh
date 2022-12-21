@@ -19,9 +19,9 @@ compileFile() {
   local srcFile="$1"
   local srcRelativeFile BIN_FILE ROOT_DIR_RELATIVE_TO_BIN_DIR
   srcRelativeFile="$(realpath -m --relative-to="${ROOT_DIR}" "${srcFile}")"
-  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | envsubst)"
-  ROOT_DIR_RELATIVE_TO_BIN_DIR="$(grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  ROOT_DIR_RELATIVE_TO_BIN_DIR="$(grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   if [[ -z "${BIN_FILE}" ]]; then
     BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${ROOT_DIR}/src/#${ROOT_DIR}/bin/#" | sed -E 's#.sh$##')"
   else
@@ -36,7 +36,7 @@ compileFile() {
   local oldMd5
   oldMd5="$(md5sum "${BIN_FILE}" 2>/dev/null | awk '{print $1}' || echo "new")"
   "${ROOT_DIR}/build/compile" "${srcFile}" "${srcRelativeFile}" "${ROOT_DIR_RELATIVE_TO_BIN_DIR}" |
-    sed -r '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d' >"${BIN_FILE}"
+    sed -E '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d' >"${BIN_FILE}"
   chmod +x "${BIN_FILE}"
   if [[ "${oldMd5}" != "$(md5sum "${BIN_FILE}" | awk '{print $1}' || "new")" ]]; then
     ((++exitCode))

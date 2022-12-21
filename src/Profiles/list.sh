@@ -29,7 +29,7 @@ Profiles::list() {
     # shellcheck disable=SC2086
     cd "${DIR}" &&
       find . -maxdepth 1 ${FIND_OPTIONS} -name "${PREFIX}*${extension}" |
-      sed "s#^\./${PREFIX}##g" |
-        sed "s/${EXT}$//g" | sort | sed "s/^/${INDENT_STR}/"
+      sed -E "s#^\./${PREFIX}##g" |
+        sed -E "s/${EXT}$//g" | sort | sed -E "s/^/${INDENT_STR}/"
   )
 }

@@ -1,17 +1,12 @@
 # Todo
 
-- replace all sed -r by sed -E
-- generate options parsing + doc from template
-  - > <https://github.com/ko1nksm/getoptions>>
-  - <https://github.com/matejak/argbash>
-- register to <https://repology.org/projects/> in order to show matrix image
-  <https://github.com/jirutka/esh/blob/master/README.adoc>
-- asciidoctor to build manpages
-- migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc>
-- fix workflow
+- workflow
+  - register to <https://repology.org/projects/> in order to show matrix image
+    <https://github.com/jirutka/esh/blob/master/README.adoc>
   - move test.sh, buildPushDockerImages, runBuildContainer and make them
     independent of bash-tools, the binaries will be generated in both repo but
     same base
+- replace all sed -r by sed -E
 - ability to override env variable using OVERRIDE\_\*
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
@@ -78,6 +73,14 @@
 - <https://github.com/adoyle-h/lobash>
 - <https://github.com/elibs/ebash>
 - <https://github.com/pre-commit/action>
+
+## Big Features/Studies
+
+- generate options parsing + doc from template
+  - <https://github.com/ko1nksm/getoptions>
+  - <https://github.com/matejak/argbash>
+- migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc>
+- asciidoctor to build manpages
 
 ## Best practices
 

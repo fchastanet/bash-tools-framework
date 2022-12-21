@@ -83,7 +83,7 @@ getBinFileFromSrcFile() {
   local rootDir="$3"
   local BIN_FILE
 
-  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | ROOT_DIR="${rootDir}" envsubst)"
   if [[ -z "${BIN_FILE}" ]]; then
     Log::displaySkipped "${srcFile} does not contains BIN_FILE metadata"
@@ -99,11 +99,11 @@ getBinFileFromSrcFile() {
 
 getRootDirRelativeToBinDirFromSrcFile() {
   local srcFile="$1"
-  grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :
+  grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :
 }
 
 removeMetaDataFilter() {
-  sed -r '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d'
+  sed -E '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d'
 }
 
 getFileRelativeToDir() {
