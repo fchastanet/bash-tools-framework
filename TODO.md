@@ -1,12 +1,18 @@
 # Todo
 
+- Framework linter
+  - check if all function namespace::function are existing in the framework
+  - check that function defined in a .sh and used outside is correctly named
+  - check all functions calls exists
+  - ensure we don't have any globals, all variables should be passed to the
+    functions
 - workflow
+  - add build.sh in precommit hook
   - register to <https://repology.org/projects/> in order to show matrix image
     <https://github.com/jirutka/esh/blob/master/README.adoc>
   - move test.sh, buildPushDockerImages, runBuildContainer and make them
     independent of bash-tools, the binaries will be generated in both repo but
     same base
-- replace all sed -r by sed -E
 - ability to override env variable using OVERRIDE\_\*
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
@@ -20,9 +26,6 @@
 - do I add Env::load to \_header.tpl ?
   - no but load tests/data/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
-- Framework linter
-  - check if all function namespace::function are existing in the framework
-  - check that function defined in a .sh and used outside is correctly named
 - compile exit 1 if at least 1 warning
   - error if bash-tpl template not found
     - File not found: '/dbQueryAllDatabases.awk'
@@ -31,45 +34,28 @@
       /home/wsl/projects/bash-tools/vendor/bash-tools-framework/src/Acquire/ForceIPv4.sh
       does not exist
 - new function Env::get "HOME"
+
   - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
     global HOME variable
   - replace all ${HOME} by $(Env::get "HOME")
+  - generate automatically .env.template from Env::get
   - variables can be overridden by env variables using OVERRIDE_VARIABLE_NAME
-- refact Log::loadEnv
-  - just load variables with fallback
-  - then in each log file vendor/bash-tools-framework/src/Log/displayInfo.sh
-    - if ((BASH_FRAMEWORK_LOG_LEVEL >= \_\_LEVEL_INFO)); then define function
-      else define function empty fi
-- Bash-tools-framework contains framework and common code
 
 - generate github page from Readme.tmpl.md using github workflow
   - include bin help
   - include bash doc
 - install.sh will get last version of build tools from bash-tools
-- cat << EOF avoid to interpolate variables
 - Update libraries command
 
   - command that allows to update the libraries in the repo
   - github cron that checks if library updates exists
 
-- Refact
-  - check all functions calls exists
-  - ensure we don't have any globals, all variables should be passed to the
-    functions
-- add build.sh in precommit hook
 - doc.sh, linters and other build tools will be defined in bash-tools
-- linter that checks if namespace::function exist in lib directory
-- <https://www.sphinx-doc.org/en/master/>
 - support nested namespace
 - import bash-tools commands + libs
 - import ck_ip_dev_env commands
-- fix github actions scripts
-- add megalinter <https://github.com/marketplace/actions/megalinter>
-- new function Env::get "HOME"
-  - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
-    global HOME variable
-  - replace all ${HOME} by $(Env::get "HOME")
-  - generate automatically .env.template from Env::get
+- add megalinter github action
+  <https://github.com/marketplace/actions/megalinter>
 - <https://github.com/adoyle-h/lobash>
 - <https://github.com/elibs/ebash>
 - <https://github.com/pre-commit/action>
@@ -80,7 +66,17 @@
   - <https://github.com/ko1nksm/getoptions>
   - <https://github.com/matejak/argbash>
 - migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc>
-- asciidoctor to build manpages
+- <https://www.sphinx-doc.org/en/master/>
+- bash documentation
+  - <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/> add man page
+    heredoc + tool that extract heredoc from each sh files
+  - asciidoctor to build manpages
+  - <https://github.com/gumpu/ROBODoc>
+  - could I use groovy doc ?
+  - bashDoc linter check params coherence
+    - 2 @param $1
+    - @param $1 after @param $2
+    - @paramDefault $1 just after @param $2
 
 ## Best practices
 
@@ -96,3 +92,4 @@
   the : (colon), like shown in the second form, the default value is only used
   when the parameter was unset, not when it was empty.
 - always use sed -E
+- cat << 'EOF' avoid to interpolate variables

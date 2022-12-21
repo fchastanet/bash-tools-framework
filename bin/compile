@@ -25,6 +25,8 @@ source "${_COMPILE_SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
 source "${_COMPILE_SRC_DIR}/Filters/catFileCleaned.sh"
 # shellcheck source=/src/Filters/trimEmptyLines.sh
 source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
+# shellcheck source=/src/Filters/bashFrameworkFunctions.sh
+source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -219,7 +221,7 @@ injectImportedFunctions() {
     echo >"${importedZZZTempFile}"
 
     readarray -t functionsToImport < <(
-      grep -Poi '([a-z0-9_]+[a-z0-9_-]*::[a-z0-9_-]+)' "${file}" |
+      Filters::bashFrameworkFunctions "${file}" |
         awk '{$1=$1};1' |
         sort |
         uniq
