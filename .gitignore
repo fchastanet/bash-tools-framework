@@ -5,3 +5,9 @@
 /_site/
 /doc/
 /.jekyll-metadata
+
+# bash-tools reused binaries
+/bin/awkLint
+/bin/shellcheckLint
+/bin/test
+/bin/runBuildContainer

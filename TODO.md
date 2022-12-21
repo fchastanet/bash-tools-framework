@@ -1,13 +1,6 @@
 # Todo
 
-- Framework linter
-  - check if all function namespace::function are existing in the framework
-  - check that function defined in a .sh and used outside is correctly named
-  - check all functions calls exists
-  - ensure we don't have any globals, all variables should be passed to the
-    functions
 - workflow
-  - add build.sh in precommit hook
   - register to <https://repology.org/projects/> in order to show matrix image
     <https://github.com/jirutka/esh/blob/master/README.adoc>
   - move test.sh, buildPushDockerImages, runBuildContainer and make them
@@ -62,6 +55,13 @@
 
 ## Big Features/Studies
 
+- Framework linter (do we really need it, yes if confirmed when bug related is
+  found)
+
+  - check if all function namespace::function are existing in the framework
+  - check that function defined in a .sh and used outside is correctly named
+  - check all functions calls exists
+
 - generate options parsing + doc from template
   - <https://github.com/ko1nksm/getoptions>
   - <https://github.com/matejak/argbash>
@@ -93,3 +93,5 @@
   when the parameter was unset, not when it was empty.
 - always use sed -E
 - cat << 'EOF' avoid to interpolate variables
+- ensure we don't have any globals, all variables should be passed to the
+  functions
