@@ -3,9 +3,6 @@
 - workflow
   - register to <https://repology.org/projects/> in order to show matrix image
     <https://github.com/jirutka/esh/blob/master/README.adoc>
-  - move test.sh, buildPushDockerImages, runBuildContainer and make them
-    independent of bash-tools, the binaries will be generated in both repo but
-    same base
 - ability to override env variable using OVERRIDE\_\*
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
@@ -54,6 +51,10 @@
 - <https://github.com/pre-commit/action>
 
 ## Big Features/Studies
+
+- move test.sh, buildPushDockerImages, runBuildContainer and make them
+  independent of bash-tools, the binaries will be generated in both repo but
+  same base
 
 - Framework linter (do we really need it, yes if confirmed when bug related is
   found)

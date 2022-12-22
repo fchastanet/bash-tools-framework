@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
+SRC_DIR="${ROOT_DIR}/src"
+export FRAMEWORK_DIR="${ROOT_DIR}"
+
+# shellcheck source=/src/_includes/_header.sh
+source "${SRC_DIR}/_includes/_header.sh"
+# shellcheck source=/src/Env/load.sh
+source "${SRC_DIR}/Env/load.sh"
+# shellcheck source=/src/Log/__all.sh
+source "${SRC_DIR}/Log/__all.sh"
+# shellcheck source=/src/Args/defaultHelp.sh
+source "${SRC_DIR}/Args/defaultHelp.sh"
+# shellcheck source=/src/Args/defaultHelpNoExit.sh
+source "${SRC_DIR}/Args/defaultHelpNoExit.sh"
+# shellcheck source=/src/ShellDoc/__all.sh
+source "${SRC_DIR}/ShellDoc/__all.sh"
+
+# shellcheck source=src/_includes/executedAsUser.sh
+source "${SRC_DIR}/_includes/executedAsUser.sh"
+
+HELP="$(
+  cat <<EOF
+${__HELP_TITLE}Description:${__HELP_NORMAL} generate jekyll documentation
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
+EOF
+)"
+Args::defaultHelp "${HELP}" "$@"
+
+# clean folder before generate
+rm -f "${ROOT_DIR}/jekyll/Index.md" || true
+rm -Rf "${ROOT_DIR}/jekyll/bashDoc" || true
+
+ShellDoc::generateShellDocsFromDir \
+  "${SRC_DIR}" \
+  "${ROOT_DIR}/jekyll/bashDoc" \
+  "${ROOT_DIR}/jekyll/Index.md" \
+  '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
+
+cp "${ROOT_DIR}/README.md" "${ROOT_DIR}/jekyll"
+cp "${ROOT_DIR}/Framework.tmpl.md" "${ROOT_DIR}/jekyll/Framework.md"
+# inject index file into Framework.md
+sed -E -i "/## Framework library full Index/ r ${ROOT_DIR}/jekyll/Index.md" "${ROOT_DIR}/jekyll/Framework.md"
+rm -f "${ROOT_DIR}/jekyll/Index.md"

@@ -43,6 +43,9 @@ installBin "awkLint"
 installBin "shellcheckLint"
 installBin "test"
 installBin "runBuildContainer"
+installBin "generateShellDoc"
+# TODO remove
+sed -i -E 's@#!/usr/bin/env bash$@#!/usr/bin/env bash\nset -x@' "${BIN_DIR}/shellcheckLint"
 
 Git::shallowClone \
   "https://github.com/bats-core/bats-core.git" \

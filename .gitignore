@@ -1,4 +1,5 @@
-/logs/
+/logs/*
+!/logs/.gitkeep
 /vendor/
 /.history/
 /megalinter-reports/
@@ -11,3 +12,9 @@
 /bin/shellcheckLint
 /bin/test
 /bin/runBuildContainer
+
+/jekyll/*.md
+/jekyll/_site
+/jekyll/bashDoc
+/jekyll/tests
+/jekyll/bashDoc

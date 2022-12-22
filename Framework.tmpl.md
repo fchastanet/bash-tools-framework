@@ -82,4 +82,4 @@ import bash-framework/Database
 import bash-framework/Array
 ```
 
-@@@bash_doc_index@@@
+## Framework library full Index
