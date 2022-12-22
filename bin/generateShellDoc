@@ -470,7 +470,7 @@ ShellDoc::installRequirementsIfNeeded() {
     (Log::displayInfo "Check if tomdoc.sh is up to date")
     if Git::shallowClone \
       "https://github.com/fchastanet/tomdoc.sh.git" \
-      "${VENDOR_DIR}/fchastanet.tomdoc.sh" \
+      "${VENDOR_DIR:-${ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
       "master" \
       "FORCE_DELETION"; then
       echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"
