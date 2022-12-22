@@ -93,3 +93,5 @@ WORKDIR
 userdel
 unstub
 canonicalize
+coreutils
+addgroup

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/doc.sh
+# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/buildPushDockerImages.sh
 # DO NOT EDIT IT
 #####################################
 
@@ -141,58 +141,6 @@ export __HELP_NORMAL
 Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   exit 1
-}
-
-# shellcheck disable=SC2034
-BASH_FRAMEWORK_TOMDOC_INSTALLED=$(mktemp -p "${TMPDIR:-/tmp}" -t tomdocInstalled.XXXX)
-
-# generate doc + index
-# @param {String} $1 fromDir
-# @param {String} $2 docDir
-# @param {String} $3 indexFile
-# @param {String} excludeFilesPattern $4 grep exclude pattern
-#   eg: '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
-ShellDoc::generateShellDocsFromDir() {
-  local fromDir="$1"
-  local docDir="$2"
-  local indexFile="$3"
-  local excludeFilesPattern="${4:-}"
-  local -a grepExclude
-  local startTime endTime
-
-  if [[ -z "${excludeFilesPattern}" ]]; then
-    grepExclude=(cat)
-  else
-    grepExclude=(grep -E -v "${excludeFilesPattern}")
-  fi
-
-  startTime=$(date +%s.%3N)
-  ((nbFilesGenerated = 0)) || true
-  while IFS= read -r relativeFile; do
-    relativeFile="${relativeFile#./}"
-    local basenameNoExtension="${relativeFile%.*}"
-    local targetDocFile="${docDir}/${basenameNoExtension}.md"
-    local targetDocDir
-    local targetDocFileRelative
-    targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "$(dirname "${indexFile}")" "${targetDocFile}")"
-
-    # create target doc dir
-    targetDocDir="$(dirname "${targetDocFile}")"
-    mkdir -p "${targetDocDir}" || {
-      Log::displayError "unable to create target doc directory ${targetDocDir}"
-      return 1
-    }
-
-    # generate markdown file from shell file
-    Log::displayInfo "generate markdown doc for ${relativeFile} in ${targetDocFile}"
-
-    if ShellDoc::generateShellDocFile "${fromDir}" "${relativeFile}" "${targetDocFile}"; then
-      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${basenameNoExtension}"
-    fi
-    ((nbFilesGenerated++)) || true
-  done < <(cd "${fromDir}" && find . -name "*.sh" | "${grepExclude[@]}" | sort)
-  endTime=$(date +%s.%3N)
-  Log::displayInfo "${nbFilesGenerated} files generated in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
 }
 
 Args::defaultHelpNoExit() {
@@ -421,44 +369,6 @@ Log::rotate() {
   fi
 }
 
-# add reference to index file
-# @param {String} $1 indexFile
-# @param {String} $2 mdRelativeFile
-# @param {String} $3 title
-ShellDoc::appendDocToIndex() {
-  local indexFile="$1"
-  local mdRelativeFile="$2"
-  local title="$3"
-
-  echo "* [${title}](${mdRelativeFile})" >>"${indexFile}"
-}
-
-# generate shell doc file
-#
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile the file from which the markdown file will be generated
-# @param {String} $3 targetDocFile the markdown file generated using tomdoc
-# @return 0 if file has been generated, 1 if file is empty or error
-# if generated doc is empty, targetDocFile is deleted if it was existing
-ShellDoc::generateShellDocFile() {
-  local currentDir="$1"
-  local relativeFile="$2"
-  local targetDocFile="$3"
-
-  (
-    local doc
-    doc="$(ShellDoc::generateShellDoc "${currentDir}" "${relativeFile}")"
-    if [[ -n "${doc}" ]]; then
-      echo "${doc}" >"${targetDocFile}"
-      return 0
-    else
-      # empty doc
-      rm -f "${targetDocFile}" || true
-      return 1
-    fi
-  )
-}
-
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
@@ -485,85 +395,6 @@ Log::logMessage() {
     date="$(date '+%Y-%m-%d %H:%M:%S')"
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
   fi
-}
-
-# extract shDoc from file
-#
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile
-# @output the shell documentation in markdown format
-ShellDoc::generateShellDoc() {
-  local currentDir="$1"
-  local relativeFile="$2"
-
-  ShellDoc::installRequirementsIfNeeded
-  (
-    cd "${currentDir}" || exit 1
-    "${ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
-  )
-}
-
-ShellDoc::installRequirementsIfNeeded() {
-  local tomDocInstalled
-  tomDocInstalled="$(cat "${BASH_FRAMEWORK_TOMDOC_INSTALLED}")"
-  if [[ "${tomDocInstalled}" != "1" ]]; then
-    (Log::displayInfo "Check if tomdoc.sh is up to date")
-    if Git::shallowClone \
-      "https://github.com/fchastanet/tomdoc.sh.git" \
-      "${VENDOR_DIR:-${ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
-      "master" \
-      "FORCE_DELETION"; then
-      echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"
-    else
-      Log::fatal "unable to install tomdoc.sh library"
-    fi
-  fi
-}
-
-# Public: shallow clone a repository at specific commit sha, tag or branch
-# or update repo if already exists
-#
-# **Arguments**:
-# * $1 repository
-# * $2 Install dir
-# * $3 revision commit sha, tag or branch
-# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
-#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
-#
-# **Return**:
-# * code !=0 if git failure or directory not writable
-# * code=1 if destination dir already exists and force option is not 1
-Git::shallowClone() {
-  local REPO="$1"
-  local INSTALL_DIR="$2"
-  local REVISION="$3"
-  local FORCE_DELETION="${4:-0}"
-
-  if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
-  else
-    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning "Removing ${INSTALL_DIR} ..."
-        rm -Rf "${INSTALL_DIR}" || exit 1
-      else
-        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
-        return 1
-      fi
-    fi
-    (
-      Log::displayInfo "Installing ${INSTALL_DIR} ..."
-      mkdir -p "${INSTALL_DIR}"
-      cd "${INSTALL_DIR}" || exit 1
-      git init >&2
-      git remote add origin "${REPO}" >&2
-    )
-  fi
-  (
-    cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
-    git reset --hard FETCH_HEAD >&2
-  )
 }
 
 # FUNCTIONS
@@ -626,32 +457,50 @@ if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
   }
 fi
 
-export FRAMEWORK_DIR="${ROOT_DIR}"
-
-if [[ "$(id -u)" = "0" ]]; then
-  Log::fatal "this script should be executed as normal user"
-fi
-
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} generate jekyll documentation
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
+${__HELP_TITLE}Description:${__HELP_NORMAL} pull, build and push docker image
+- pull previous docker image from docker hub if exists
+- build new image using previous image as cache
+- tag built image
+- push it to docker registry
+
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <vendor> <bash_tar_version> <bash_base_image> <branch_name> <push_image>
+additional docker build options can be passed via DOCKER_BUILD_OPTIONS env variable
 EOF
 )"
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "$@" || true
 
-# clean folder before generate
-rm -f "${ROOT_DIR}/jekyll/Index.md" || true
-rm -Rf "${ROOT_DIR}/jekyll/bashDoc" || true
+VENDOR="$1"
+BASH_TAR_VERSION="$2"
+BASH_BASE_IMAGE="$3"
+BRANCH_NAME="$4"
+PUSH_IMAGE="${5:-}"
+DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
-ShellDoc::generateShellDocsFromDir \
-  "${SRC_DIR}" \
-  "${ROOT_DIR}/jekyll/bashDoc" \
-  "${ROOT_DIR}/jekyll/Index.md" \
-  '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
+if [[ -z "${VENDOR}" || -z "${BASH_TAR_VERSION}" || -z "${BASH_BASE_IMAGE}" ]]; then
+  Log::fatal "please provide these parameters VENDOR, BASH_TAR_VERSION, BASH_BASE_IMAGE"
+fi
 
-cp "${ROOT_DIR}/README.md" "${ROOT_DIR}/jekyll"
-cp "${ROOT_DIR}/Framework.tmpl.md" "${ROOT_DIR}/jekyll/Framework.md"
-# inject index file into Framework.md
-sed -E -i "/## Framework library full Index/ r ${ROOT_DIR}/jekyll/Index.md" "${ROOT_DIR}/jekyll/Framework.md"
-rm -f "${ROOT_DIR}/jekyll/Index.md"
+# pull image if needed
+if [[ "${BRANCH_NAME}" != 'refs/heads/master' ]]; then
+  docker pull "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" || true
+fi
+
+# build image and push it ot registry
+# shellcheck disable=SC2086
+DOCKER_BUILDKIT=1 docker build \
+  ${DOCKER_BUILD_OPTIONS} \
+  -f "${ROOT_DIR}/.docker/Dockerfile.${VENDOR}" \
+  --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
+  --build-arg BUILDKIT_INLINE_CACHE=1 \
+  --build-arg BASH_TAR_VERSION="${BASH_TAR_VERSION}" \
+  --build-arg BASH_IMAGE="${BASH_BASE_IMAGE}" \
+  -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
+  -t "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
+  "${ROOT_DIR}/.docker"
+docker run --rm "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" bash --version
+
+if [[ "${PUSH_IMAGE}" == "push" ]]; then
+  docker push "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}"
+fi

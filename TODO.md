@@ -1,5 +1,9 @@
 # Todo
 
+- add <https://github.com/fchastanet/bash-tools-framework> in help of each
+  command
+- awkLint/shellcheckLint use xargs
+- remove TODO from bin/installDevRequirements
 - workflow
   - register to <https://repology.org/projects/> in order to show matrix image
     <https://github.com/jirutka/esh/blob/master/README.adoc>

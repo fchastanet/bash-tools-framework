@@ -1,0 +1,4 @@
+# it will trigger the onbuild instruction of base image
+ARG BASH_IMAGE=scrasnups/build:bash-tools-alpine-5.0.17
+# hadolint ignore=DL3006
+FROM ${BASH_IMAGE}

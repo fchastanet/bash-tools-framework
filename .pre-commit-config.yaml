@@ -39,7 +39,7 @@ repos:
 
       - id: shfmt
         args: [-i, '2', -ci]
-        exclude: (.\.zsh$|/\.zshrc|^vendor/.*$)
+        exclude: (.\.zsh$|/\.zshrc|^vendor/.*$|^tests/data/.*$)
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
@@ -51,22 +51,33 @@ repos:
     hooks:
       - id: prettier
 
-  # - repo: local
-  #   hooks:
-  #     - id: build-sh-files
-  #       name: build-sh-files
-  #       entry: bash -c './build.sh'
-  #       language: system
-  #       always_run: true
-  #       require_serial: true
-  #       fail_fast: true
-  #       verbose: true
+  - repo: local
+    hooks:
+      - id: build-sh-files
+        name: build-sh-files
+        entry: bash -c './.github/workflows/buildBinFiles.sh'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
+  - repo: local
+    hooks:
+      - id: build-doc-files
+        name: build-doc-files
+        entry: bash -c 'SKIP_BUILD=1 ./bin/doc'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
 
   - repo: local
     hooks:
       - id: run-unit-tests
         name: run-unit-tests
-        entry: bash -c './vendor/bats/bin/bats -r src'
+        entry: bash -c './bin/test -r src'
         language: system
         always_run: true
         require_serial: true
@@ -74,15 +85,15 @@ repos:
         verbose: true
 
   ## Python, Polyglot, Git, pre-commit
-  - repo: https://github.com/fchastanet/megalinter
-    rev: 2cf009a24ee58c0c61ac17551c1d0dc27fa6023c
+  - repo: https://github.com/ScribeMD/pre-commit-hooks
+    rev: 0.15.0
     hooks:
       - id: megalinter-incremental
-        args: [--flavor, terraform]
+        args: [--flavor, terraform, --release, v6.11.1]
         stages:
           - commit
       - id: megalinter-full
-        args: [--flavor, terraform]
+        args: [--flavor, terraform, --release, v6.11.1]
         stages:
           - push
 
