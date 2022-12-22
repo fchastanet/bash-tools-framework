@@ -124,6 +124,8 @@ jobs:
         if: always()
         with:
           files: logs/report.xml
+          check_name:
+            'Unit Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}'
 
       - uses: ouzi-dev/commit-status-updater@v2
         if: always()
