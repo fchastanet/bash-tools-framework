@@ -92,3 +92,4 @@ batslib
 WORKDIR
 userdel
 unstub
+canonicalize
