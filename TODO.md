@@ -100,3 +100,4 @@
 - cat << 'EOF' avoid to interpolate variables
 - ensure we don't have any globals, all variables should be passed to the
   functions
+- avoid using grep -P as it is not supported on alpine, prefer using -E

@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 vendorDir="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)/vendor"
+srcDir="$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)"
+set -o errexit
+set -o pipefail
 
 load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"
@@ -8,6 +11,8 @@ load "${vendorDir}/bats-mock-Flamefire/load.bash"
 
 # shellcheck source=src/Filters/camel2snakeCase.sh
 source "${BATS_TEST_DIRNAME}/camel2snakeCase.sh"
+# shellcheck source=/src/Filters/toLowerCase.sh
+source "${srcDir}/Filters/toLowerCase.sh"
 
 function Filters::camel2snakeCaseSimple { #@test
   echo "TEST" | {
