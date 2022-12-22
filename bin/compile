@@ -257,7 +257,8 @@ injectImportedFunctions() {
           fi
           Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
         else
-          (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+          (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+          ((failures++)) || true
         fi
         filesImported+=("${fileToImport}")
         ((functionsNeedToBeImported = 1)) # as we added some files, we need to do another pass
@@ -297,3 +298,5 @@ injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 
 cat -s "${COMPILED_FILE2}"
+
+exit "${failures}"
