@@ -25,7 +25,7 @@ Profiles::checkMissingScripts() {
       fi
     done < <(deps "${line}")
 
-  done < <(cd "${SCRIPTS_DIR}/" && find . -maxdepth 1 -type d | sed -e 's#^./##g' | grep -v '^.$')
+  done < <(cd "${SCRIPTS_DIR}/" && find . -maxdepth 1 -type d | sed -E 's#^./##g' | grep -v '^.$')
 
   if [[ ${#missingInstallScripts[@]} != 0 ]]; then
     Log::displayError "missing install script in '${SCRIPTS_DIR}/'"

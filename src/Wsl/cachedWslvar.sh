@@ -5,6 +5,6 @@ Wsl::cachedWslvar() {
   local tempEnvFile
   tempEnvFile="${TMPDIR:-/tmp}/bash_tools_wslvar_$(id -un)"
 
-  Wsl::removeCacheFileIfTooOld "${tempEnvFile}" "+1"
-  Functions::getPropertyValue "${tempEnvFile}" "${var}" wsl::originalWslvar "${var}"
+  Cache::removeCacheFileIfTooOld "${tempEnvFile}" "+1"
+  Cache::getPropertyValue "${tempEnvFile}" "${var}" Wsl::originalWslvar "${var}"
 }

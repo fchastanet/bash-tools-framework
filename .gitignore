@@ -1,7 +1,14 @@
-/logs/
+/logs/*
+!/logs/.gitkeep
 /vendor/
 /.history/
 /megalinter-reports/
 /_site/
 /doc/
 /.jekyll-metadata
+
+/jekyll/*.md
+/jekyll/_site
+/jekyll/bashDoc
+/jekyll/tests
+/jekyll/bashDoc

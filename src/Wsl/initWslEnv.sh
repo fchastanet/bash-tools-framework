@@ -20,7 +20,7 @@ Wsl::initEnv() {
         export WSL_INTEROP=/run/WSL/${i}_interop
       fi
     done
-    WSL_DISTRO_NAME="$(Wsl::cachedWslpath -m / | sed -r 's#.*\$/([^/]+)/$#\1#')"
+    WSL_DISTRO_NAME="$(Wsl::cachedWslpath -m / | sed -E 's#.*\$/([^/]+)/$#\1#')"
     export WSL_DISTRO_NAME
   fi
 }

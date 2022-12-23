@@ -28,19 +28,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: docker pull image
+        run: |
+          docker pull "scrasnups/build:bash-tools-ubuntu-5.1"
+
+      - name: Generate documentation
+        run: |
+          ./bin/doc
+
       - name: Setup Pages
         uses: actions/configure-pages@v2
+
       - uses: actions/cache@v2
         with:
           path: vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile') }}
           restore-keys: |
             ${{ runner.os }}-gems-
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./
+          source: ./jekyll
           destination: ./_site
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
 

@@ -4,6 +4,9 @@
   "ignorePatterns": [
     {
       "pattern": "^http://localhost:4000/"
+    },
+    {
+      "pattern": "^https://www.cyberciti.biz/.*$"
     }
   ]
 }

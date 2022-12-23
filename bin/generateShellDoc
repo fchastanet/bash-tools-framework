@@ -1,0 +1,690 @@
+#!/usr/bin/env bash
+
+#####################################
+# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/generateShellDoc.sh
+# DO NOT EDIT IT
+#####################################
+
+# shellcheck disable=SC2034
+SCRIPT_NAME=${0##*/}
+# shellcheck disable=SC2034
+CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
+# shellcheck disable=SC2034
+SRC_DIR="${ROOT_DIR}/src"
+# shellcheck disable=SC2034
+VENDOR_DIR="${ROOT_DIR}/vendor"
+# shellcheck disable=SC2034
+VENDOR_BIN_DIR="${ROOT_DIR}/vendor/bin"
+export PATH="${BIN_DIR}":"${VENDOR_BIN_DIR}":${PATH}
+
+# shellcheck disable=SC2034
+TMPDIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)"
+export TMPDIR
+
+# temp dir cleaning
+cleanOnExit() {
+  rm -Rf "${TMPDIR}" >/dev/null 2>&1
+}
+trap cleanOnExit EXIT HUP QUIT ABRT TERM
+
+# @see https://unix.stackexchange.com/a/386856
+interruptManagement() {
+  # restore SIGINT handler
+  trap - INT
+  # ensure that Ctrl-C is trapped by this script and not by sub process
+  # report to the parent that we have indeed been interrupted
+  kill -s INT "$$"
+}
+trap interruptManagement INT
+
+# shellcheck disable=SC2034
+((failures = 0)) || true
+
+shopt -s expand_aliases
+
+# Bash will remember & return the highest exit code in a chain of pipes.
+# This way you can catch the error inside pipes, e.g. mysqldump | gzip
+set -o pipefail
+set -o errexit
+
+# a log is generated when a command fails
+set -o errtrace
+
+# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+shopt -s nullglob
+
+export TERM=xterm-256color
+
+#avoid interactive install
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+
+if [[ -t 1 || -t 2 ]]; then
+  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+  readonly __ERROR_COLOR='\e[31m'      # Red
+  readonly __INFO_COLOR='\e[44m'       # white on lightBlue
+  readonly __SUCCESS_COLOR='\e[32m'    # Green
+  readonly __WARNING_COLOR='\e[33m'    # Yellow
+  readonly __TEST_COLOR='\e[100m'      # Light magenta
+  readonly __TEST_ERROR_COLOR='\e[41m' # white on red
+  readonly __SKIPPED_COLOR='\e[33m'    # Yellow
+  readonly __DEBUG_COLOR='\e[37m'      # Grey
+  # Internal: reset color
+  readonly __RESET_COLOR='\e[0m' # Reset Color
+  # shellcheck disable=SC2155,SC2034
+  readonly __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+  # shellcheck disable=SC2155,SC2034
+  readonly __HELP_TITLE="$(echo -e "\e[1;37m")"
+  # shellcheck disable=SC2155,SC2034
+  readonly __HELP_NORMAL="$(echo -e "\033[0m")"
+else
+  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+  readonly __ERROR_COLOR=''
+  readonly __INFO_COLOR=''
+  readonly __SUCCESS_COLOR=''
+  readonly __WARNING_COLOR=''
+  readonly __SKIPPED_COLOR=''
+  readonly __TEST_COLOR=''
+  readonly __TEST_ERROR_COLOR=''
+  readonly __DEBUG_COLOR=''
+  # Internal: reset color
+  readonly __RESET_COLOR=''
+  readonly __HELP_EXAMPLE=''
+  readonly __HELP_TITLE=''
+  readonly __HELP_NORMAL=''
+fi
+export __ERROR_COLOR
+export __INFO_COLOR
+export __SUCCESS_COLOR
+export __WARNING_COLOR
+export __SKIPPED_COLOR
+export __TEST_COLOR
+export __TEST_ERROR_COLOR
+export __SKIPPED_COLOR
+export __DEBUG_COLOR
+export __RESET_COLOR
+export __HELP_EXAMPLE
+export __HELP_TITLE
+export __HELP_NORMAL
+
+# Checks if file can be created in folder
+# The file does not need to exist
+Assert::fileWritable() {
+  local file="$1"
+  local dir
+  dir="$(dirname "${file}")"
+
+  [[ -w "${dir}" ]]
+}
+
+# Public: log level off
+export __LEVEL_OFF=0
+# Public: log level error
+export __LEVEL_ERROR=1
+# Public: log level warning
+export __LEVEL_WARNING=2
+# Public: log level info
+export __LEVEL_INFO=3
+# Public: log level success
+export __LEVEL_SUCCESS=3
+# Public: log level debug
+export __LEVEL_DEBUG=4
+
+export __LEVEL_OFF
+export __LEVEL_ERROR
+export __LEVEL_WARNING
+export __LEVEL_INFO
+export __LEVEL_SUCCESS
+export __LEVEL_DEBUG
+
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
+}
+
+# shellcheck disable=SC2034
+BASH_FRAMEWORK_TOMDOC_INSTALLED=$(mktemp -p "${TMPDIR:-/tmp}" -t tomdocInstalled.XXXX)
+
+# generate doc + index
+# @param {String} $1 fromDir
+# @param {String} $2 docDir
+# @param {String} $3 indexFile
+# @param {String} excludeFilesPattern $4 grep exclude pattern
+#   eg: '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
+ShellDoc::generateShellDocsFromDir() {
+  local fromDir="$1"
+  local docDir="$2"
+  local indexFile="$3"
+  local excludeFilesPattern="${4:-}"
+  local -a grepExclude
+  local startTime endTime
+
+  if [[ -z "${excludeFilesPattern}" ]]; then
+    grepExclude=(cat)
+  else
+    grepExclude=(grep -E -v "${excludeFilesPattern}")
+  fi
+
+  startTime=$(date +%s.%3N)
+  ((nbFilesGenerated = 0)) || true
+  while IFS= read -r relativeFile; do
+    relativeFile="${relativeFile#./}"
+    local basenameNoExtension="${relativeFile%.*}"
+    local targetDocFile="${docDir}/${basenameNoExtension}.md"
+    local targetDocDir
+    local targetDocFileRelative
+    targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "$(dirname "${indexFile}")" "${targetDocFile}")"
+
+    # create target doc dir
+    targetDocDir="$(dirname "${targetDocFile}")"
+    mkdir -p "${targetDocDir}" || {
+      Log::displayError "unable to create target doc directory ${targetDocDir}"
+      return 1
+    }
+
+    # generate markdown file from shell file
+    Log::displayInfo "generate markdown doc for ${relativeFile} in ${targetDocFile}"
+
+    if ShellDoc::generateShellDocFile "${fromDir}" "${relativeFile}" "${targetDocFile}"; then
+      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${basenameNoExtension}"
+    fi
+    ((nbFilesGenerated++)) || true
+  done < <(cd "${fromDir}" && find . -name "*.sh" | "${grepExclude[@]}" | sort)
+  endTime=$(date +%s.%3N)
+  Log::displayInfo "${nbFilesGenerated} files generated in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
+}
+
+# lazy initialization
+declare -g BASH_FRAMEWORK_INITIALIZED="0"
+
+declare BASH_FRAMEWORK_CACHED_ENV_FILE
+BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
+
+declare BASH_FRAMEWORK_DEFAULT_ENV_FILE
+BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_file.XXXXXXX")"
+
+# shellcheck source=tests/data/.env
+cat >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" <<'EOF'
+BASH_FRAMEWORK_LOG_LEVEL=0
+BASH_FRAMEWORK_DISPLAY_LEVEL=3
+BASH_FRAMEWORK_LOG_FILE=${ROOT_DIR}/logs/${SCRIPT_NAME}.log
+BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=5
+EOF
+
+# load variables in order(from less specific to more specific) from :
+# - ${ROOT_DIR}/tests/data/.env file
+# - ${ROOT_DIR}/.env file if exists
+# - ~/.env file if exists
+# - ~/.bash-tools/.env file if exists
+# - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+Env::load() {
+  if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
+    return 0
+  fi
+  (
+    # reset temp file
+    echo >"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+
+    # ensure all sourced variables will be exported
+    set -o allexport
+
+    # 1. list .env files that need to be loaded
+    local -a files=(
+      "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
+    )
+    if [[ -f "${ROOT_DIR}/conf/.env" && -r "${ROOT_DIR}/conf/.env" ]]; then
+      files+=("${ROOT_DIR}/conf/.env")
+    fi
+    if [[ -f "${HOME}/.env" && -r "${HOME}/.env" ]]; then
+      files+=("${HOME}/.env")
+    fi
+    local file
+    for file in "$@"; do
+      if [[ -f "${file}" && -r "${file}" ]]; then
+        files+=("${file}")
+      fi
+    done
+    # import custom .env file
+    if [[ -n "${BASH_FRAMEWORK_ENV_FILEPATH+xxx}" ]]; then
+      # load BASH_FRAMEWORK_ENV_FILEPATH
+      if [[ -f "${BASH_FRAMEWORK_ENV_FILEPATH}" && -r "${BASH_FRAMEWORK_ENV_FILEPATH}" ]]; then
+        files+=("${BASH_FRAMEWORK_ENV_FILEPATH}")
+      else
+        Log::fatal "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
+      fi
+    fi
+
+    # 2. source each file in order
+    local file
+    for file in "${files[@]}"; do
+      # shellcheck source=tests/data/.env
+      source "${file}" || {
+        Log::displayWarning "Cannot load '${file}'"
+      }
+    done
+
+    # 4. copy only the variables to the tmp file
+    local varName
+    while IFS=$'\n' read -r varName; do
+      echo "${varName}='${!varName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+
+      # 3. using awk deduce all variables that need to be copied in tmp file
+      #    from less specific file to the most
+    done < <(awk -F= '!a[$1]++' "${files[@]}" | grep -v '^$\|^\s*\#' | cut -d= -f1)
+    set +o allexport
+  )
+
+  # Finally load the temp file to make the variables available in current script
+  set -o allexport
+  # shellcheck source=tests/data/.env
+  source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+
+  export BASH_FRAMEWORK_INITIALIZED=1
+
+  set +o allexport
+}
+
+# Display message using debug color (grey)
+# @param {String} $1 message
+Log::displayDebug() {
+  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  Log::logDebug "$1"
+}
+
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  Log::logError "$1"
+}
+
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
+Log::displayHelp() {
+  echo -e "${__INFO_COLOR}HELP    - ${1}${__RESET_COLOR}" >&2
+  Log::logHelp "$1"
+}
+
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
+Log::displayInfo() {
+  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
+  Log::logInfo "$1"
+}
+
+# Display message using skip color (yellow)
+# @param {String} $1 message
+Log::displaySkipped() {
+  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  Log::logSkipped "$1"
+}
+
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
+Log::displaySuccess() {
+  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  Log::logSuccess "$1"
+}
+
+# Display message using warning color (yellow)
+# @param {String} $1 message
+Log::displayWarning() {
+  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  Log::logWarning "$1"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logDebug() {
+  Log::logMessage "DEBUG" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logError() {
+  Log::logMessage "ERROR" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logFatal() {
+  Log::logMessage "FATAL" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logHelp() {
+  Log::logMessage "HELP" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logInfo() {
+  Log::logMessage "INFO" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logSkipped() {
+  Log::logMessage "SKIPPED" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logSuccess() {
+  Log::logMessage "SUCCESS" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logWarning() {
+  Log::logMessage "WARNING" "$@"
+}
+
+# To be called before logging in the log file
+# @param $1 log file name
+# @param $2 maximum number of log files
+Log::rotate() {
+  local FILENAME="$1"
+  local MAX_LOG="${2:-5}"
+  for i in $(seq $((MAX_LOG - 1)) -1 1); do
+    Log::displayInfo "Log rotation ${FILENAME}.${i} to ${FILENAME}.$((i + 1))"
+    mv "${FILENAME}."{"${i}","$((i + 1))"} &>/dev/null || true
+  done
+  if mv "${FILENAME}" "${FILENAME}.1" &>/dev/null; then
+    Log::displayInfo "Log rotation ${FILENAME} to ${FILENAME}.1"
+  fi
+}
+
+# add reference to index file
+# @param {String} $1 indexFile
+# @param {String} $2 mdRelativeFile
+# @param {String} $3 title
+ShellDoc::appendDocToIndex() {
+  local indexFile="$1"
+  local mdRelativeFile="$2"
+  local title="$3"
+
+  echo "* [${title}](${mdRelativeFile})" >>"${indexFile}"
+}
+
+# generate shell doc file
+#
+# @param {String} $1 currentDir
+# @param {String} $2 relativeFile the file from which the markdown file will be generated
+# @param {String} $3 targetDocFile the markdown file generated using tomdoc
+# @return 0 if file has been generated, 1 if file is empty or error
+# if generated doc is empty, targetDocFile is deleted if it was existing
+ShellDoc::generateShellDocFile() {
+  local currentDir="$1"
+  local relativeFile="$2"
+  local targetDocFile="$3"
+
+  (
+    local doc
+    doc="$(ShellDoc::generateShellDoc "${currentDir}" "${relativeFile}")"
+    if [[ -n "${doc}" ]]; then
+      echo "${doc}" >"${targetDocFile}"
+      return 0
+    else
+      # empty doc
+      rm -f "${targetDocFile}" || true
+      return 1
+    fi
+  )
+}
+
+# Internal: common log message
+#
+# **Arguments**:
+# * $1 - message's level description
+# * $2 - message
+# **Output**:
+# [date]|[levelMsg]|message
+#
+# **Examples**:
+# <pre>
+# 2020-01-19 19:20:21|ERROR  |log error
+# 2020-01-19 19:20:21|SKIPPED|log skipped
+# </pre>
+Log::logMessage() {
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) && [[ -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
+}
+
+# extract shDoc from file
+#
+# @param {String} $1 currentDir
+# @param {String} $2 relativeFile
+# @output the shell documentation in markdown format
+ShellDoc::generateShellDoc() {
+  local currentDir="$1"
+  local relativeFile="$2"
+
+  ShellDoc::installRequirementsIfNeeded
+  (
+    cd "${currentDir}" || exit 1
+    "${ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
+  )
+}
+
+ShellDoc::installRequirementsIfNeeded() {
+  local tomDocInstalled
+  tomDocInstalled="$(cat "${BASH_FRAMEWORK_TOMDOC_INSTALLED}")"
+  if [[ "${tomDocInstalled}" != "1" ]]; then
+    (Log::displayInfo "Check if tomdoc.sh is up to date")
+    if Git::shallowClone \
+      "https://github.com/fchastanet/tomdoc.sh.git" \
+      "${VENDOR_DIR:-${ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
+      "master" \
+      "FORCE_DELETION"; then
+      echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"
+    else
+      Log::fatal "unable to install tomdoc.sh library"
+    fi
+  fi
+}
+
+# Public: shallow clone a repository at specific commit sha, tag or branch
+# or update repo if already exists
+#
+# **Arguments**:
+# * $1 repository
+# * $2 Install dir
+# * $3 revision commit sha, tag or branch
+# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
+#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
+#
+# **Return**:
+# * code !=0 if git failure or directory not writable
+# * code=1 if destination dir already exists and force option is not 1
+Git::shallowClone() {
+  local REPO="$1"
+  local INSTALL_DIR="$2"
+  local REVISION="$3"
+  local FORCE_DELETION="${4:-0}"
+
+  if [[ -d "${INSTALL_DIR}/.git" ]]; then
+    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
+  else
+    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
+      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
+        Log::displayWarning "Removing ${INSTALL_DIR} ..."
+        rm -Rf "${INSTALL_DIR}" || exit 1
+      else
+        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
+        return 1
+      fi
+    fi
+    (
+      Log::displayInfo "Installing ${INSTALL_DIR} ..."
+      mkdir -p "${INSTALL_DIR}"
+      cd "${INSTALL_DIR}" || exit 1
+      git init >&2
+      git remote add origin "${REPO}" >&2
+    )
+  fi
+  (
+    cd "${INSTALL_DIR}" || exit 1
+    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
+    git reset --hard FETCH_HEAD >&2
+  )
+}
+
+# FUNCTIONS
+
+Env::load
+
+if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
+      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+      Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
+    fi
+    if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
+      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+      Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
+    fi
+  fi
+  Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
+  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+  fi
+fi
+
+# disable display methods following display level
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
+  Log::displayDebug() { :; }
+fi
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_INFO)); then
+  Log::displayHelp() { :; }
+  Log::displayInfo() { :; }
+  Log::displaySkipped() { :; }
+  Log::displaySuccess() { :; }
+fi
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
+  Log::displayWarning() { :; }
+fi
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
+  Log::displayError() { :; }
+fi
+# disable log methods following log level
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_DEBUG)); then
+  Log::logDebug() { :; }
+fi
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_INFO)); then
+  Log::logHelp() { :; }
+  Log::logInfo() { :; }
+  Log::logSkipped() { :; }
+  Log::logSuccess() { :; }
+fi
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
+  Log::logWarning() { :; }
+fi
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
+  Log::logError() { :; }
+fi
+
+# Usage info
+showHelp() {
+  cat <<EOF
+${__HELP_TITLE}Description:${__HELP_NORMAL} find all .sh files and generate shDoc
+in markdown format in the specified target directory
+
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {fromDir} {docDir} {indexFile}
+
+  --help,-h : prints this help and exits
+  fromDir   : directory from which sh files will be searched
+  docDir    : target doc directory
+  indexFile : the markdown index file
+
+${__HELP_TITLE}Author:${__HELP_NORMAL}
+[François Chastanet](https://github.com/fchastanet)
+
+${__HELP_TITLE}License:${__HELP_NORMAL}
+MIT License
+
+Copyright (c) 2022 François Chastanet
+EOF
+}
+
+# read command parameters
+# $@ is all command line parameters passed to the script.
+# -o is for short options like -h
+# -l is for long options with double dash like --help
+# the comma separates different long options
+options=$(getopt -l help -o h -- "$@" 2>/dev/null) || {
+  showHelp
+  Log::fatal "invalid options specified"
+}
+
+eval set -- "${options}"
+while true; do
+  case $1 in
+    -h | --help)
+      showHelp
+      exit 0
+      ;;
+    --)
+      shift || true
+      break
+      ;;
+    *)
+      showHelp
+      Log::fatal "invalid argument $1"
+      ;;
+  esac
+  shift || true
+done
+
+if (($# != 3)); then
+  Log::fatal "yous should provide exactly 3 parameters"
+fi
+
+declare fromDir="$1"
+declare docDir="$2"
+declare indexFile="$3"
+
+fromDir="$(realpath "${fromDir}")"
+docDir="$(realpath "${docDir}")"
+indexFile="$(realpath "${indexFile}")"
+
+if [[ ! -d "${fromDir}" ]]; then
+  Log::fatal "From directory '${fromDir}' does not exists"
+fi
+if [[ ! -r "${fromDir}" ]]; then
+  Log::fatal "From directory '${fromDir}' is not readable"
+fi
+
+mkdir -p "${docDir}" || true
+if [[ ! -w "${docDir}" ]]; then
+  Log::fatal "From directory '${fromDir}' is not writeable"
+fi
+
+if ! Assert::fileWritable "${indexFile}"; then
+  Log::fatal "File ${indexFile} is not writeable"
+fi
+
+# reset index file
+if [[ -f "${indexFile}" ]]; then
+  echo >"${indexFile}"
+fi
+
+ShellDoc::generateShellDocsFromDir \
+  "${fromDir}" \
+  "${docDir}" \
+  "${indexFile}"

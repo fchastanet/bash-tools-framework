@@ -2,5 +2,4 @@
 
 if [[ "$(id -u)" = "0" ]]; then
   Log::fatal "this script should be executed as normal user"
-  exit 1
 fi

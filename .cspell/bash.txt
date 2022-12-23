@@ -91,3 +91,9 @@ SIGINT
 batslib
 WORKDIR
 userdel
+unstub
+canonicalize
+coreutils
+addgroup
+Chastanet
+Scrasnups

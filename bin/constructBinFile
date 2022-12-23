@@ -3,17 +3,14 @@
 BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
 SRC_DIR="$(cd "${ROOT_DIR}/src" && pwd -P)"
+export FRAMEWORK_DIR="${ROOT_DIR}"
 
 # shellcheck source=src/_includes/_header.sh
 source "${SRC_DIR}/_includes/_header.sh"
-# shellcheck source=src/Log/_.sh
-source "${SRC_DIR}/Log/_.sh"
-# shellcheck source=src/Log/displayInfo.sh
-source "${SRC_DIR}/Log/displayInfo.sh"
-# shellcheck source=src/Log/displayError.sh
-source "${SRC_DIR}/Log/displayError.sh"
-# shellcheck source=src/Log/fatal.sh
-source "${SRC_DIR}/Log/fatal.sh"
+# shellcheck source=src/Env/load.sh
+source "${SRC_DIR}/Env/load.sh"
+# shellcheck source=src/Log/__all.sh
+source "${SRC_DIR}/Log/__all.sh"
 
 # Usage info
 showHelp() {
@@ -39,6 +36,8 @@ ${__HELP_TITLE}File header example:${__HELP_NORMAL}
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/generateShellDoc
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
+
+$(envsubst <"${SRC_DIR}/_includes/author.tpl")
 EOF
 }
 
@@ -86,11 +85,13 @@ getBinFileFromSrcFile() {
   local rootDir="$3"
   local BIN_FILE
 
-  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
+  BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
   BIN_FILE="$(echo "${BIN_FILE}" | ROOT_DIR="${rootDir}" envsubst)"
   if [[ -z "${BIN_FILE}" ]]; then
-    BIN_FILE="$(echo "${srcFile}" | sed -E "s#^${rootDir}/src/#${binDir}/#" | sed -E 's#.sh$##')"
+    Log::displaySkipped "${srcFile} does not contains BIN_FILE metadata"
+    return 0
   fi
+  mkdir -p "$(dirname "${BIN_FILE}")" || true
   if ! realpath "${BIN_FILE}" &>/dev/null; then
     Log::displayError "${srcFile} does not define a valid BIN_FILE value"
     return 1
@@ -100,11 +101,11 @@ getBinFileFromSrcFile() {
 
 getRootDirRelativeToBinDirFromSrcFile() {
   local srcFile="$1"
-  grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -r 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :
+  grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :
 }
 
 removeMetaDataFilter() {
-  sed -r '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d'
+  sed -E '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d'
 }
 
 getFileRelativeToDir() {
@@ -122,6 +123,10 @@ constructBinFile() {
 
   local BIN_FILE
   BIN_FILE=$(getBinFileFromSrcFile "${srcFile}" "${binDir}" "${rootDir}")
+  if [[ -z "${BIN_FILE}" ]]; then
+    # BIN_FILE metadata not provided => skipped
+    return 0
+  fi
   mkdir -p "$(realpath -m "$(dirname "${BIN_FILE}")")" || true
 
   Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"

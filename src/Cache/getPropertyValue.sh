@@ -7,7 +7,7 @@ Cache::getPropertyValue() {
   local propertyFile key callback value
   propertyFile="$1"
   shift || true
-  key="$(echo -E "$1" | sed 's#\\#/#g')"
+  key="$(echo -E "$1" | sed -E 's#\\#/#g')"
   shift || true
   callback=$1
   shift || true

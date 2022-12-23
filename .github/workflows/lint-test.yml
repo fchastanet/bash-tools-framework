@@ -1,7 +1,8 @@
-name: Workflow executed at each push
+---
+# Lint the code base and launch unit test at each push or pull request
+name: Lint and test
 on:
   push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -15,26 +16,33 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - name: Download hadolint and make available in path
-        shell: bash
-        run: |
-          mkdir -p bin || true
-          wget -q -O bin/hadolint \
-            "https://github.com/hadolint/hadolint/releases/download/v2.8.0/hadolint-Linux-x86_64"
-          chmod +x bin/hadolint
-          echo "$(pwd)/bin" >> "${GITHUB_PATH}"
-      - name: Install vendors (shellcheck follow source during linting)
-        shell: bash
-        run: ./build/installBuildDeps.sh
-      - name: Linting - Shellcheck
-        run: ./bin/linters/shellcheck.sh | tee logs/shellcheck-checkstyle.xml
-      - name: Linting - Awk
-        run: ./bin/linters/awkLint.sh | tee logs/awk-checkstyle.xml
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        with:
+          name: lint
+          status: pending
+
+      - name: Install vendors
+        run: ./bin/installDevRequirements
+
       - name: Linting - Dockerfile
-        run: ./bin/linters/dockerLint.sh | tee logs/docker-checkstyle.xml
-      - uses: jwgmeligmeyling/checkstyle-github-action@master
+        run: ./bin/dockerLint | tee logs/docker-checkstyle.xml
+
+      - name: Linting - Shellcheck
+        run: ./bin/shellcheckLint | tee logs/shellcheck-checkstyle.xml
+
+      - name: Linting - Awk
+        run: ./bin/awkLint | tee logs/awk-checkstyle.xml
+
+      - name: build bin files + check md5
+        run:
+          ./.github/workflows/buildBinFiles.sh 2>&1 | tee logs/buidBinFiles.log
+
+      - name: Checkstyle aggregation
+        uses: jwgmeligmeyling/checkstyle-github-action@master
         with:
           path: 'logs/*-checkstyle.xml'
+
       - name: Archive results
         uses: actions/upload-artifact@v3
         with:
@@ -43,7 +51,13 @@ jobs:
             logs/*.xml
             logs/*.log
 
-  buildDockerImages:
+      - uses: ouzi-dev/commit-status-updater@v2
+        if: always()
+        with:
+          name: lint
+          status: ${{ job.status }}
+
+  buildDockerImagesAndTest:
     needs: linters
     runs-on: ubuntu-22.04
     strategy:
@@ -64,86 +78,74 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        with:
+          name: build bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}
+          status: pending
+
       - name: Pull/Build/Push docker image
         env:
           BRANCH: ${{ github.ref }}
           PUSH: push
-        run: |
-          ./.github/buildScripts/buildPushDockerImages.sh "${{ matrix.vendor }}" \
-          "${{ matrix.bashTarVersion }}" "${{ matrix.bashImage }}" "${BRANCH}" \
+        run:
+          ./bin/buildPushDockerImages "${{matrix.vendor}}"
+          "${{matrix.bashTarVersion}}" "${{matrix.bashImage}}" "${BRANCH}"
           "${PUSH}"
+
       - name: Check image
-        run:
-          docker run --rm "bash-tools-${{ matrix.vendor }}-${{
-          matrix.bashTarVersion }}" bash --version
-
-  testDoc:
-    needs: buildDockerImages
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: true
-      matrix:
-        vendor:
-          - ubuntu
-        bashTarVersion:
-          - '5.1'
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: docker pull image
-        run: docker pull scrasnups/build:bash-tools-ubuntu-5.1
-      - name: Check if doc up to date
         run: |
-          ./doc.sh
-          if ! git diff --exit-code; then
-            (>&2 echo "Documentation not up to date, please run doc.sh to update it")
-            exit 1
-          fi
+          docker run --rm \
+          "bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}" bash \
+          --version
 
-  tests:
-    needs: buildDockerImages
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: true
-      matrix:
-        vendor:
-          - ubuntu
-          - alpine
-        bashTarVersion:
-          - '4.4'
-          - '5.0'
-          - '5.1'
-        include:
-          - vendor: ubuntu
-            bashImage: ubuntu:20.04
-          - vendor: alpine
-            bashImage: bash
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: docker pull image
-        run:
-          docker pull scrasnups/build:bash-tools-${{ matrix.vendor }}-${{
-          matrix.bashTarVersion }}
       - name: run unit tests
         run: |
-          ./test.sh --version
-          SKIP_BUILD=1 ./test.sh --formatter junit -r tests | tee ./logs/junit.xml
-          echo "results:"
-          cat ./logs/junit.xml
+          ./bin/installDevRequirements
+          # shellcheck disable=SC2266
+          VENDOR="${{ matrix.vendor }}" \
+          BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
+          BASH_IMAGE="${{ matrix.bashImage }}" \
+          SKIP_BUILD=0 \
+          SKIP_USER=1 \
+          ./bin/test --report-formatter junit -o logs -r src
+
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
         with:
-          files: logs/junit.xml
+          files: logs/report.xml
+          check_name:
+            'Unit Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}'
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        if: always()
+        with:
+          name: build bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}
+          status: ${{ job.status }}
+
+  buildResults:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: Final Build Results
+    needs: [linters, buildDockerImagesAndTest]
+    steps:
+      # run this action to get the workflow conclusion
+      # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
+      - uses: technote-space/workflow-conclusion-action@v3
+
+      # run other action with the workflow conclusion
+      - uses: ouzi-dev/commit-status-updater@v2
+        with:
+          name: build
+          # neutral, success, skipped, cancelled, timed_out, action_required, failure
+          status: ${{ env.WORKFLOW_CONCLUSION }}

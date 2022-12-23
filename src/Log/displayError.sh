@@ -4,4 +4,5 @@
 # @param {String} $1 message
 Log::displayError() {
   echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  Log::logError "$1"
 }

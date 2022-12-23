@@ -45,13 +45,14 @@ WORKDIR /bash
 
 ONBUILD ARG USER_ID=1000
 ONBUILD ARG GROUP_ID=1000
+ONBUILD ARG SKIP_USER=0
 ONBUILD SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ONBUILD RUN set -x \
     && set -o errexit \
     \
-    && if [[ "${USER_ID:-0}" != "0" && "${GROUP_ID:-0}" != "0" ]]; then \
+    && if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
       EXISTING_GROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" &&\
-      if [[ -n "${EXISTING_GROUP}" ]] ; then groupdel "${EXISTING_GROUP}" ; fi &&\
+      if [ -n "${EXISTING_GROUP}" ] ; then groupdel "${EXISTING_GROUP}" ; fi &&\
       userdel -f www-data &&\
       if getent group www-data ; then groupdel www-data; fi &&\
       groupadd -g "${GROUP_ID}" www-data &&\

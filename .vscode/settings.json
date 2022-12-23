@@ -4,9 +4,19 @@
     "report": true,
     "backup": true,
     "megalinter-reports": true,
-    "bin": true,
     "_site": true,
-    "vendor": true
+    "vendor": true,
+    "bin": false,
+    "bin/awkLint": true,
+    "bin/buildPushDockerImages": true,
+    "bin/constructBinFile": true,
+    "bin/doc": true,
+    "bin/dockerLint": true,
+    "bin/generateShellDoc": true,
+    "bin/installDevRequirements": true,
+    "bin/runBuildContainer": true,
+    "bin/shellcheckLint": true,
+    "bin/test": true
   },
   "files.exclude": {
     "_site/**": true
@@ -15,8 +25,5 @@
     "*.md": ["# %%"]
   },
   "markdown.extension.toc.levels": "2..6",
-  "shellcheck.customArgs": [
-    "--source-path=SCRIPTDIR",
-    "--external-sources"
-  ]
+  "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"]
 }

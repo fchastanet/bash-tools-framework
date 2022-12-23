@@ -3,30 +3,30 @@
 # generate code from templates <https://github.com/TekWizely/bash-tpl>
 #  - auto import function with pattern folder::(._::)_(functionName) =>
 #    Folder/functionName.sh
-#  - auto import \_.sh if at least one function imported in the directory
+#  - auto import \_.sh before if at least one function imported in the directory
+#  - auto import ZZZ.sh after loading functions if at least one function imported in the directory
 
 _COMPILE_BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 _COMPILE_ROOT_DIR="$(cd "${_COMPILE_BIN_DIR}/.." && pwd -P)"
 _COMPILE_SRC_DIR="$(cd "${_COMPILE_ROOT_DIR}/src" && pwd -P)"
+export FRAMEWORK_DIR="${_COMPILE_ROOT_DIR}"
 
 # shellcheck source=/src/_includes/_header.sh
 source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${_COMPILE_SRC_DIR}/Array/contains.sh"
-# shellcheck source=/src/Log/_.sh
-source "${_COMPILE_SRC_DIR}/Log/_.sh"
-# shellcheck source=/src/Log/displayInfo.sh
-source "${_COMPILE_SRC_DIR}/Log/displayInfo.sh"
-# shellcheck source=/src/Log/displayError.sh
-source "${_COMPILE_SRC_DIR}/Log/displayError.sh"
-# shellcheck source=/src/Log/fatal.sh
-source "${_COMPILE_SRC_DIR}/Log/fatal.sh"
+# shellcheck source=src/Env/load.sh
+source "${_COMPILE_SRC_DIR}/Env/load.sh"
+# shellcheck source=src/Log/__all.sh
+source "${_COMPILE_SRC_DIR}/Log/__all.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
 # shellcheck source=/src/Filters/catFileCleaned.sh
 source "${_COMPILE_SRC_DIR}/Filters/catFileCleaned.sh"
 # shellcheck source=/src/Filters/trimEmptyLines.sh
 source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
+# shellcheck source=/src/Filters/bashFrameworkFunctions.sh
+source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -73,9 +73,13 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePat
       defined in this project, think about adding a --src-dir for this project too
 
     --template-dir|-t <templateDir> the template directory to use to override some template includes
-      2 variables are defined:
-      * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
-      * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
+      Check environment variables below.
+
+${__HELP_TITLE}Environment variables:${__HELP_NORMAL}
+  * REPOSITORY_URL: used in template to indicate from which github repo the file has been generated
+  * SRC_ABSOLUTE_PATH: absolute path to the template file being computed
+  * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
+  * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
 
 ${__HELP_TITLE}Example:${__HELP_NORMAL}
 Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
@@ -88,6 +92,7 @@ ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -
 Here you want to override the default templates too
 ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
 
+$(envsubst <"${_COMPILE_SRC_DIR}/_includes/author.tpl")
 EOF
 }
 
@@ -167,21 +172,28 @@ COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
 
 evalTemplate() {
   local FILE="$1"
-  (Log::displayInfo "evalTemplate source <(\
+  if [[ "${DEBUG:-0}" = "1" ]]; then
+    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
+      REPOSITORY_URL='${GITHUB_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
       FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
+      SRC_ABSOLUTE_PATH='$(realpath "${SRC_FILE_PATH}")' \
       ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
-  ) > binFile")
+      ) > binFile${__RESET_COLOR}")
+  fi
+  SRC_ABSOLUTE_PATH="$(realpath "${SRC_FILE_PATH}")"
   # shellcheck source=/dev/null
-  (source <(
+  (cd "${TEMPLATE_DIR}" && source <(
     SRC_FILE_PATH="${SRC_FILE_PATH}" \
+      REPOSITORY_URL="${GITHUB_URL}" \
       ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
       TEMPLATE_DIR="${TEMPLATE_DIR}" \
       ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
       FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}" \
+      SRC_ABSOLUTE_PATH="${SRC_ABSOLUTE_PATH}" \
       "${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}"
   )) | Filters::removeDuplicatedShebangs
 }
@@ -193,46 +205,73 @@ injectImportedFunctions() {
 
   local functionsNeedToBeImported
   local -a functionsToImport
-  local iteration
+  local iteration zzzFile fileToImport underscoreFile
   local importedFunctionsTempFile
   importedFunctionsTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_functions.XXXXXXX")"
+
+  local importedZZZTempFile
+  importedZZZTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_zzz_files.XXXXXXX")"
 
   ((functionsNeedToBeImported = 1))
   ((iteration = 1))
   while ((functionsNeedToBeImported >= 1)); do
-    (echo >&2 -e "${__INFO_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
+    if [[ "${DEBUG:-0}" = "1" ]]; then
+      (echo >&2 -e "${__DEBUG_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
+    fi
     echo >"${importedFunctionsTempFile}"
+    echo >"${importedZZZTempFile}"
 
     readarray -t functionsToImport < <(
-      grep -Poi '([a-z0-9_]+[a-z0-9_-]*::[a-z0-9_-]+)' "${file}" |
+      Filters::bashFrameworkFunctions "${file}" |
         awk '{$1=$1};1' |
         sort |
         uniq
     )
     ((functionsNeedToBeImported = 0)) || true
     for functionToImport in "${functionsToImport[@]}"; do
-      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -r 's#::#/#g').sh"
+      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
       if ! Array::contains "${fileToImport}" "${filesImported[@]}"; then
         if [[ -f "${fileToImport}" ]]; then
           # check if we need to import _.sh
           underscoreFile="$(dirname "${fileToImport}")/_.sh"
           if ! Array::contains "${underscoreFile}" "${filesImported[@]}" &&
             [[ -f "${underscoreFile}" ]]; then
-            (echo >&2 -e "${__INFO_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+            if [[ "${DEBUG:-0}" = "1" ]]; then
+              (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+            fi
             Filters::catFileCleaned "${underscoreFile}" >>"${importedFunctionsTempFile}"
             filesImported+=("${underscoreFile}")
           fi
+          # check if we need to import ZZZ.sh
+          zzzFile="$(dirname "${fileToImport}")/ZZZ.sh"
+          if ! Array::contains "${zzzFile}" "${filesImported[@]}" &&
+            [[ -f "${zzzFile}" ]]; then
+            if [[ "${DEBUG:-0}" = "1" ]]; then
+              (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${zzzFile} ...${__RESET_COLOR}")
+            fi
+            Filters::catFileCleaned "${zzzFile}" >>"${importedZZZTempFile}"
+            filesImported+=("${zzzFile}")
+          fi
 
-          (echo >&2 -e "\t${__INFO_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+          if [[ "${DEBUG:-0}" = "1" ]]; then
+            (echo >&2 -e "\t${__DEBUG_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+          fi
           Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
         else
-          (echo >&2 -e "${__WARNING_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+          (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+          ((failures++)) || true
         fi
         filesImported+=("${fileToImport}")
         ((functionsNeedToBeImported = 1)) # as we added some files, we need to do another pass
       fi
     done
-    sed -i "/# FUNCTIONS/ r ${importedFunctionsTempFile}" "${file}"
+
+    # insert functions before # FUNCTIONS
+    sed -E -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
+
+    # insert zzz files after # FUNCTIONS
+    sed -E -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"
+
     ((iteration++))
   done
 }
@@ -244,15 +283,21 @@ injectImportedFunctions "${COMPILED_FILE}" FILES_IMPORTED
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Framework::loadEnv
-Log::displayInfo "evalTemplate2"
+if [[ "${DEBUG:-0}" = "1" ]]; then
+  (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate2${__RESET_COLOR}")
+fi
 evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # FILES_IMPORTED is global variable so we will not reimport already included functions
-Log::displayInfo "injectImportedFunctions2"
+if [[ "${DEBUG:-0}" = "1" ]]; then
+  (echo >&2 -e "${__DEBUG_COLOR}\tinjectImportedFunctions2${__RESET_COLOR}")
+fi
 injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
 
 # remove spaces at the end of the lines
-sed -i -E 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
+sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 
 cat -s "${COMPILED_FILE2}"
+
+exit "${failures}"

@@ -17,7 +17,6 @@ Github::upgradeRelease() {
   local latestVersion
   local repo
 
-  set -x
   repo="$(Github::extractRepoFromGithubUrl "${releaseUrl}")"
   Github::getLatestRelease "${repo}" latestVersion
   Log::displayInfo "Repo ${repo} latest version found is ${latestVersion}"
