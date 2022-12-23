@@ -19,12 +19,12 @@ function Docker::getBuildCacheFromArgEmpty { #@test
 
 function Docker::getBuildCacheFromArg1Tag { #@test
   run Docker::getBuildCacheFromArg "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools"
-  assert_output "--cache-from='id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools' "
+  assert_output --partial "--cache-from='id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools' "
 }
 
 function Docker::getBuildCacheFromArg2Tags { #@test
   run Docker::getBuildCacheFromArg "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "tag2"
-  assert_output "--cache-from='id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools' --cache-from='tag2' "
+  assert_output --partial "--cache-from='id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools' --cache-from='tag2' "
 }
 
 function Docker::getBuildCacheFromArg1EmptyTag { #@test
@@ -34,5 +34,5 @@ function Docker::getBuildCacheFromArg1EmptyTag { #@test
 
 function Docker::getBuildCacheFromArg1EmptyTag2 { #@test
   run Docker::getBuildCacheFromArg "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" ""
-  assert_output "--cache-from='id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools' "
+  assert_output --partial "--cache-from='id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools' "
 }

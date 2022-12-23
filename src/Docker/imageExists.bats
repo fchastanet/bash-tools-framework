@@ -25,7 +25,7 @@ teardown() {
 function Docker::imageExistsWithoutTags { #@test
   run Docker::imageExists "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" 2>&1
   assert_failure
-  assert_output "ERROR   - At least one tag should be provided"
+  assert_output --partial "ERROR   - At least one tag should be provided"
 }
 
 function Docker::imageExistsWith1Tag { #@test
@@ -49,7 +49,7 @@ function Docker::imageDoesNotExistWith1Tag { #@test
     'manifest inspect "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1" : exit 1'
   run Docker::imageExists "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "tag1"
   assert_failure
-  assert_output "ERROR   - image with tag id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1 does not exists"
+  assert_output --partial "ERROR   - image with tag id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1 does not exists"
 }
 
 function Docker::imageDoesNotExistWith2Tags { #@test
@@ -59,5 +59,5 @@ function Docker::imageDoesNotExistWith2Tags { #@test
   run Docker::imageExists \
     "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "tag1" "tag2"
   assert_failure
-  assert_output "ERROR   - image with tag id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag2 does not exists"
+  assert_output --partial "ERROR   - image with tag id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag2 does not exists"
 }

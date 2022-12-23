@@ -29,7 +29,7 @@ teardown() {
 function Docker::pullImageWithoutTags { #@test
   run Docker::pullImage "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" 2>&1
   assert_failure
-  assert_output "ERROR   - At least one tag should be provided"
+  assert_output --partial "ERROR   - At least one tag should be provided"
 }
 
 function Docker::pullImageWith1Tag { #@test
@@ -37,7 +37,7 @@ function Docker::pullImageWith1Tag { #@test
     "pull 'id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1' : cat '${BATS_TEST_DIRNAME}/testsData/pullImage.txt'"
   run Docker::pullImage "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "tag1"
   assert_success
-  assert_line --index 0 "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1"
+  assert_line --index 0 --partial "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1"
   assert_line --index 1 "27cb6e6ccef575a4698b66f5de06c7ecd61589132d5a91d098f7f3f9285415a9"
 }
 
@@ -48,8 +48,8 @@ function Docker::pullImageWith2Tags { #@test
   run Docker::pullImage \
     "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "tag1" "tag2" 2>&1
   assert_success
-  assert_line --index 0 "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1"
-  assert_line --index 1 "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag2"
+  assert_line --index 0 --partial "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1"
+  assert_line --index 1 --partial "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag2"
   assert_line --index 2 "27cb6e6ccef575a4698b66f5de06c7ecd61589132d5a91d098f7f3f9285415a9"
 }
 
@@ -60,7 +60,7 @@ function Docker::pullImageWith2TagsFailure { #@test
   run Docker::pullImage \
     "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "tag1" "tag2" 2>&1
   assert_failure
-  assert_line --index 0 "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1"
-  assert_line --index 1 "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag2"
-  assert_line --index 2 "ERROR   - No image pulled"
+  assert_line --index 0 --partial "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag1"
+  assert_line --index 1 --partial "INFO    - docker pull id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools:tag2"
+  assert_line --index 2 --partial "ERROR   - No image pulled"
 }

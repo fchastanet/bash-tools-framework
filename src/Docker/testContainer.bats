@@ -35,19 +35,20 @@ teardown() {
 }
 
 function Docker::testContainerDirNotExists { #@test
+  # shellcheck disable=SC2317
   callbackSuccess() {
     echo "callback success"
   }
 
   run Docker::testContainer "invalid" "containerName" "title" callbackSuccess
   assert_failure 1
-  assert_output "ERROR   - Directory invalid does not exist"
+  assert_output --partial "ERROR   - Directory invalid does not exist"
 }
 
 function Docker::testContainerCallbackInvalid { #@test
   run Docker::testContainer "." "containerName" "title" "invalidCallback"
   assert_failure 4
-  assert_output "ERROR   - testCallBack parameter should be a function"
+  assert_output --partial "ERROR   - testCallBack parameter should be a function"
 }
 
 function Docker::testContainerDockerComposeUpFailure { #@test
@@ -55,14 +56,15 @@ function Docker::testContainerDockerComposeUpFailure { #@test
     "up -d : echo 'docker-compose up' && exit 1" \
     "down : exit 1"
 
+  # shellcheck disable=SC2317
   callbackSuccess() {
     echo "callback success"
   }
   run Docker::testContainer "." "containerName" "title" callbackSuccess
   assert_failure 3
-  assert_line --index 0 "INFO    - Launching title ..."
-  assert_line --index 1 "docker-compose up"
-  assert_line --index 2 "INFO    - Shuting down title ..."
+  assert_line --index 0 --partial "INFO    - Launching title ..."
+  assert_line --index 1 --partial "docker-compose up"
+  assert_line --index 2 --partial "INFO    - Shuting down title ..."
 }
 
 function Docker::testContainerWithCallbackOK { #@test
@@ -70,16 +72,17 @@ function Docker::testContainerWithCallbackOK { #@test
     "up -d : echo 'docker-compose is up'" \
     "down : echo 'docker-compose down'"
 
+  # shellcheck disable=SC2317
   callbackSuccess() {
     echo "callback success"
   }
   run Docker::testContainer "." "containerName" "title" callbackSuccess
   assert_success
-  assert_line --index 0 "INFO    - Launching title ..."
-  assert_line --index 1 "docker-compose is up"
-  assert_line --index 2 "callback success"
-  assert_line --index 3 "SUCCESS - title tested successfully"
-  assert_line --index 4 "INFO    - Shuting down title ..."
+  assert_line --index 0 --partial "INFO    - Launching title ..."
+  assert_line --index 1 --partial "docker-compose is up"
+  assert_line --index 2 --partial "callback success"
+  assert_line --index 3 --partial "SUCCESS - title tested successfully"
+  assert_line --index 4 --partial "INFO    - Shuting down title ..."
 }
 
 function Docker::testContainerWithCallbackError { #@test
@@ -88,16 +91,17 @@ function Docker::testContainerWithCallbackError { #@test
     "logs containerName : echo 'docker-compose logs of containerName'" \
     "down : echo 'docker-compose down'"
 
+  # shellcheck disable=SC2317
   callbackFailure() {
     echo "callback failure"
     return 1
   }
   run Docker::testContainer "." "containerName" "title" callbackFailure
   assert_failure 2
-  assert_line --index 0 "INFO    - Launching title ..."
-  assert_line --index 1 "docker-compose is up"
-  assert_line --index 2 "callback failure"
-  assert_line --index 3 "docker-compose logs of containerName"
-  assert_line --index 4 "ERROR   - title initialization has failed, check above logs"
-  assert_line --index 5 "INFO    - Shuting down title ..."
+  assert_line --index 0 --partial "INFO    - Launching title ..."
+  assert_line --index 1 --partial "docker-compose is up"
+  assert_line --index 2 --partial "callback failure"
+  assert_line --index 3 --partial "docker-compose logs of containerName"
+  assert_line --index 4 --partial "ERROR   - title initialization has failed, check above logs"
+  assert_line --index 5 --partial "INFO    - Shuting down title ..."
 }

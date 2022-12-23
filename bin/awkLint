@@ -161,7 +161,7 @@ ${__HELP_TITLE}Author:${__HELP_NORMAL}
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 
-Copyright (c) 2020 Scrasnups
+Copyright (c) 2022 François Chastanet
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@"

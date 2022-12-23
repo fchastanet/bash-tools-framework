@@ -5,7 +5,8 @@
 # @param {int}    $2 delay between attempt
 # @param {String} $3 message to display to describe the attempt
 # @param ...      $@ rest of parameters, the command to run
-# @return 0 on success, 1 if max retries count reached
+# @return 0 on success
+# @return 1 if max retries count reached
 # @return 2 if maxRetries invalid value
 Retry::parameterized() {
   local maxRetries=$1
@@ -17,6 +18,7 @@ Retry::parameterized() {
   local retriesCount=1
   if [[ "${maxRetries}" -lt 1 ]]; then
     Log::displayError "invalid maxRetry value"
+    return 2
   fi
 
   while true; do

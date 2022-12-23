@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Image is tagged on docker registry
+# Check if image is tagged on docker registry
 # best practice: provide tags 'tagPrefix_shortSha' 'tagPrefix_branchName'
 # so image will be tagged with
 # - tagPrefix_shortSha

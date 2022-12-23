@@ -25,7 +25,7 @@ teardown() {
 function Docker::tagImageWithoutTags { #@test
   run Docker::tagImage "id.dkr.ecr.eu-west-1.amazonaws.com/bash-tools" "image:latest" 2>&1
   assert_failure
-  assert_output "ERROR   - At least one tag should be provided"
+  assert_output --partial "ERROR   - At least one tag should be provided"
 }
 
 function Docker::tagImageWith1Tag { #@test

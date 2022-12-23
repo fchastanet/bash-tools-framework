@@ -505,13 +505,6 @@ Log::displaySuccess() {
   Log::logSuccess "$1"
 }
 
-# Display message using error color (red) and exit immediately with error status 1
-# @param {String} $1 message
-Log::fatal() {
-  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
-  exit 1
-}
-
 # log message to file
 # @param {String} $1 message
 Log::logDebug() {
@@ -522,12 +515,6 @@ Log::logDebug() {
 # @param {String} $1 message
 Log::logError() {
   Log::logMessage "ERROR" "$@"
-}
-
-# log message to file
-# @param {String} $1 message
-Log::logFatal() {
-  Log::logMessage "FATAL" "$@"
 }
 
 # log message to file
@@ -580,7 +567,8 @@ Log::rotate() {
 # @param {int}    $2 delay between attempt
 # @param {String} $3 message to display to describe the attempt
 # @param ...      $@ rest of parameters, the command to run
-# @return 0 on success, 1 if max retries count reached
+# @return 0 on success
+# @return 1 if max retries count reached
 # @return 2 if maxRetries invalid value
 Retry::parameterized() {
   local maxRetries=$1
@@ -592,6 +580,7 @@ Retry::parameterized() {
   local retriesCount=1
   if [[ "${maxRetries}" -lt 1 ]]; then
     Log::displayError "invalid maxRetry value"
+    return 2
   fi
 
   while true; do
@@ -616,6 +605,14 @@ Version::githubApiExtractVersion() {
   jq -r ".tag_name" | Version::parse
 }
 
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
+}
+
 # Internal: common log message
 #
 # **Arguments**:
@@ -637,6 +634,12 @@ Log::logMessage() {
     date="$(date '+%Y-%m-%d %H:%M:%S')"
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
   fi
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logFatal() {
+  Log::logMessage "FATAL" "$@"
 }
 
 # FUNCTIONS
@@ -694,9 +697,6 @@ if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
 fi
 if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
   Log::logError() { :; }
-  Log::logFatal() {
-    Log::fatal "$1"
-  }
 fi
 
 DEFAULT_ARGS=(--check-sourced -x -f checkstyle)
@@ -716,7 +716,7 @@ ${__HELP_TITLE}Author:${__HELP_NORMAL}
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 
-Copyright (c) 2020 Scrasnups
+Copyright (c) 2022 François Chastanet
 
 EOF
 )"

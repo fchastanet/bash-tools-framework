@@ -7,7 +7,7 @@
 Docker::getTagCompatibleFromBranch() {
   local separator="${1:-_}"
   Filters::camel2snakeCase |
-    sed \
+    sed -E \
       -e 's#^origin/##' \
       -e "s@/@${separator}@g"
 }

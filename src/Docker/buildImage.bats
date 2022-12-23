@@ -29,19 +29,19 @@ teardown() {
 function Docker::buildImageInvalidBuildDirectory { #@test
   run Docker::buildImage "badBuildDirectory" "${BATS_TEST_DIRNAME}/testsData/Dockerfile" "localImageName" 2>&1
   assert_failure 1
-  assert_output "ERROR   - Build directory invalid 'badBuildDirectory'"
+  assert_output --partial "ERROR   - Build directory invalid 'badBuildDirectory'"
 }
 
 function Docker::buildImageInvalidDockerfile { #@test
   run Docker::buildImage "." "Dockerfile" "localImageName" 2>&1
   assert_failure 2
-  assert_output "ERROR   - Dockerfile path invalid 'Dockerfile'"
+  assert_output --partial "ERROR   - Dockerfile path invalid 'Dockerfile'"
 }
 
 function Docker::buildImageInvalidLocalImageName { #@test
   run Docker::buildImage "." "${BATS_TEST_DIRNAME}/testsData/Dockerfile" "" 2>&1
   assert_failure 3
-  assert_output "ERROR   - empty localImageName"
+  assert_output --partial "ERROR   - empty localImageName"
 }
 
 function Docker::buildImage { #@test

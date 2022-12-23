@@ -25,5 +25,5 @@ Docker::pullImage() {
     fi
   done
   Log::displayError "No image pulled"
-  return 1
+  return 2
 }

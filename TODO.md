@@ -1,5 +1,14 @@
 # Todo
 
+- add UT
+- update bashDoc
+- bin/test auto install bats so we can remove installDevRequirements
+- add Framework::timeElapsed to display elapsed time of the command run
+  - eg: ShellDoc::generateShellDocsFromDir
+  - could compute time elapsed of subShell ?
+- refact buildPushDockerImages.sh with Docker/functions... and using correct
+  tagging
+  - update test consequently
 - add <https://github.com/fchastanet/bash-tools-framework> in help of each
   command
 - awkLint/shellcheckLint use xargs
@@ -56,23 +65,34 @@
 
 ## Big Features/Studies
 
-- move test.sh, buildPushDockerImages, runBuildContainer and make them
-  independent of bash-tools, the binaries will be generated in both repo but
-  same base
+- generate automatically the \_\_all.sh file
 
-- Framework linter (do we really need it, yes if confirmed when bug related is
-  found)
+  - by including all the sh files of the directory except the ZZZ.sh
+  - by including also dependent functions
+  - it would mean to include dependent functions of the dependent function
+    recursively
+    - is it a good idea, as probably all the framework would be imported (like
+      log, ...)
+    - src/Log/\_\_all.sh contains ZZZ.sh
+  - instead I could simply move bin files to src and compile them using the
+    current bin file (inception) and so get rid of \_\_all.sh
+
+- Framework linter
 
   - check if all function namespace::function are existing in the framework
   - check that function defined in a .sh and used outside is correctly named
   - check all functions calls exists
+  - do we really need it ? yes if confirmed when bug related is found
 
 - generate options parsing + doc from template
+
   - <https://github.com/ko1nksm/getoptions>
   - <https://github.com/matejak/argbash>
+
 - migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc>
-- <https://www.sphinx-doc.org/en/master/>
+
 - bash documentation
+  - <https://www.sphinx-doc.org/en/master/>
   - <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/> add man page
     heredoc + tool that extract heredoc from each sh files
   - asciidoctor to build manpages

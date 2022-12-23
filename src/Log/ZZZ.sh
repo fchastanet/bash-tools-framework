@@ -53,7 +53,4 @@ if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
 fi
 if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
   Log::logError() { :; }
-  Log::logFatal() {
-    Log::fatal "$1"
-  }
 fi

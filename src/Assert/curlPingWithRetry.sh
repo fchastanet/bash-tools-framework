@@ -7,7 +7,7 @@
 # @paramDefault {int} maxRetries $3 default Value: 40
 # @param {int} delayBetweenTries $4 delay between attempt in seconds
 # @paramDefault {String} delayBetweenTries $4 default Value: 5 seconds
-Assert::curlWithRetry() {
+Assert::curlPingWithRetry() {
   local url="$1"
   local title="${2:-"Try to contact ${url} ..."}"
   local maxRetries="${3:-40}"
