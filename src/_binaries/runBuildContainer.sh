@@ -12,6 +12,8 @@ TTY allocation is detected automatically
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <vendor> <bash_tar_version> <bash_base_image> <bash_image> ...
 additional docker build options can be passed via DOCKER_BUILD_OPTIONS env variable
+
+.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@" || true

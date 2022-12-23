@@ -22,6 +22,9 @@ ${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
     docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-alpine-5.1-user bash
 
 ${__HELP_TITLE}Bats help:${__HELP_NORMAL}
+
+.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+
 EOF
 )"
 if ! Args::defaultHelpNoExit "${HELP}" "$@"; then

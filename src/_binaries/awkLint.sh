@@ -12,6 +12,8 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <directory>
 Lint all files with .awk extension in specified folder.
 Filters out eventual .history folder
 Result in checkstyle format.
+
+.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@"

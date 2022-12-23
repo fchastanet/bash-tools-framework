@@ -6,7 +6,17 @@
     "megalinter-reports": true,
     "_site": true,
     "vendor": true,
-    "bin": false
+    "bin": false,
+    "bin/awkLint": true,
+    "bin/buildPushDockerImages": true,
+    "bin/constructBinFile": true,
+    "bin/doc": true,
+    "bin/dockerLint": true,
+    "bin/generateShellDoc": true,
+    "bin/installDevRequirements": true,
+    "bin/runBuildContainer": true,
+    "bin/shellcheckLint": true,
+    "bin/test": true
   },
   "files.exclude": {
     "_site/**": true

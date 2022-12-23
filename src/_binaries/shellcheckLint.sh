@@ -14,6 +14,9 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL} shellcheck wrapper
 - use the default options '${DEFAULT_ARGS[*]}' if no parameter specified
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <shellcheck options>
+
+.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+
 EOF
 )"
 Args::defaultHelpNoExit "${HELP}" "$@" || true

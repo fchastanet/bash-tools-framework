@@ -95,3 +95,5 @@ unstub
 canonicalize
 coreutils
 addgroup
+Chastanet
+Scrasnups

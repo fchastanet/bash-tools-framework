@@ -17,6 +17,8 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {fromDir} {docDir} {indexFi
   fromDir   : directory from which sh files will be searched
   docDir    : target doc directory
   indexFile : the markdown index file
+
+.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
 EOF
 }
 

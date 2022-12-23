@@ -36,6 +36,8 @@ ${__HELP_TITLE}File header example:${__HELP_NORMAL}
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/generateShellDoc
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
+
+$(envsubst <"${SRC_DIR}/_includes/author.tpl")
 EOF
 }
 
