@@ -101,24 +101,25 @@ touch ~/.parallel/will-cite
 
 ### 3.1. Install dev dependencies
 
-In order to generate bash documentation and to run unit tests, you have to
-launch this command to install some libraries.
+Dev dependencies are automatically installed when used
 
-```bash
-./bin/installDevRequirements.sh
-```
-
-this script will install the following libraries inside `vendor` folder:
+`bin/test` script will install the following libraries inside `vendor` folder:
 
 - [bats-core/bats-core](https://github.com/bats-core/bats-core.git)
 - [bats-core/bats-support](https://github.com/bats-core/bats-support.git)
 - [bats-core/bats-assert](https://github.com/bats-core/bats-assert.git)
 - [Flamefire/bats-mock](https://github.com/Flamefire/bats-mock.git)
 
-The following library will be installed automatically when launching `./bin/doc`
-for the first time
+`./bin/doc` script will install:
 
 - [fchastanet/tomdoc.sh](https://github.com/fchastanet/tomdoc.sh.git)
+
+To avoid checking for libraries update and have an impact on performance, a file
+is created in vendor dir.
+
+- `vendor/.tomdocInstalled`
+- `vendor/.batsInstalled` You can remove these files to force the update of the
+  libraries, or just wait 24 hours that the timeout expires.
 
 ### 3.2. UT
 

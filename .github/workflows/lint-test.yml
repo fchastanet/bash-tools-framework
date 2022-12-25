@@ -22,14 +22,13 @@ jobs:
           name: lint
           status: pending
 
-      - name: Install vendors
-        run: ./bin/installDevRequirements
-
       - name: Linting - Dockerfile
         run: ./bin/dockerLint | tee logs/docker-checkstyle.xml
 
       - name: Linting - Shellcheck
-        run: ./bin/shellcheckLint | tee logs/shellcheck-checkstyle.xml
+        run:
+          ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | tee
+          logs/shellcheck-checkstyle.xml
 
       - name: Linting - Awk
         run: ./bin/awkLint | tee logs/awk-checkstyle.xml
@@ -110,7 +109,6 @@ jobs:
 
       - name: run unit tests
         run: |
-          ./bin/installDevRequirements
           # shellcheck disable=SC2266
           VENDOR="${{ matrix.vendor }}" \
           BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \

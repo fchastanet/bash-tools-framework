@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# shellcheck source=src/ShellDoc/_.sh
-source "${FRAMEWORK_DIR}/src/ShellDoc/_.sh"
 # shellcheck source=src/ShellDoc/appendDocToIndex.sh
 source "${FRAMEWORK_DIR}/src/ShellDoc/appendDocToIndex.sh"
 # shellcheck source=src/ShellDoc/generateShellDoc.sh

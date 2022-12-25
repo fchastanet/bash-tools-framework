@@ -25,10 +25,6 @@ DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 Log::displayInfo "Using ${VENDOR}:${BASH_TAR_VERSION}"
 
-if [[ ! -d "${ROOT_DIR}/vendor" ]]; then
-  "${BIN_DIR}/installDevRequirements"
-fi
-
 if [[ "${SKIP_BUILD:-0}" = "0" && -f "${ROOT_DIR}/.docker/DockerfileUser" ]]; then
   "${BIN_DIR}/buildPushDockerImages" "${VENDOR}" "${BASH_TAR_VERSION}" "${BASH_IMAGE}"
 

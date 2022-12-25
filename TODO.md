@@ -2,7 +2,6 @@
 
 - add UT
 - update bashDoc
-- bin/test auto install bats so we can remove installDevRequirements
 - add Framework::timeElapsed to display elapsed time of the command run
   - eg: ShellDoc::generateShellDocsFromDir
   - could compute time elapsed of subShell ?
@@ -12,7 +11,6 @@
 - add <https://github.com/fchastanet/bash-tools-framework> in help of each
   command
 - awkLint/shellcheckLint use xargs
-- remove TODO from bin/installDevRequirements
 - workflow
   - register to <https://repology.org/projects/> in order to show matrix image
     <https://github.com/jirutka/esh/blob/master/README.adoc>
@@ -76,6 +74,7 @@
     - src/Log/\_\_all.sh contains ZZZ.sh
   - instead I could simply move bin files to src and compile them using the
     current bin file (inception) and so get rid of \_\_all.sh
+  - could it be solved with dependency injection system ?
 
 - Framework linter
 

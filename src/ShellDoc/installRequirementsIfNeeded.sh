@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
+BASH_FRAMEWORK_TOMDOC_INSTALLED="${ROOT_DIR}/vendor/.tomdocInstalled"
+BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT=86400 # 1 day
+
 ShellDoc::installRequirementsIfNeeded() {
-  local tomDocInstalled
-  tomDocInstalled="$(cat "${BASH_FRAMEWORK_TOMDOC_INSTALLED}")"
-  if [[ "${tomDocInstalled}" != "1" ]]; then
+  if [[ "$(
+    Cache::getFileContentIfNotExpired \
+      "${BASH_FRAMEWORK_TOMDOC_INSTALLED}" \
+      "${BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT}"
+  )" != "1" ]]; then
+
     (Log::displayInfo "Check if tomdoc.sh is up to date")
     if Git::shallowClone \
       "https://github.com/fchastanet/tomdoc.sh.git" \
