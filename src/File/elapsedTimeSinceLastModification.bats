@@ -12,8 +12,13 @@ load "${vendorDir}/bats-mock-Flamefire/load.bash"
 # shellcheck source=src/File/elapsedTimeSinceLastModification.sh
 source "${srcDir}/File/elapsedTimeSinceLastModification.sh"
 
+setup() {
+  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
+  export TMPDIR="${BATS_TMP_DIR}"
+}
+
 teardown() {
-  rm -f "/tmp/fileExists" || true
+  rm -Rf "${BATS_TMP_DIR}" || true
 }
 
 function File::elapsedTimeSinceLastModificationNoFileProvided { #@test
@@ -23,14 +28,14 @@ function File::elapsedTimeSinceLastModificationNoFileProvided { #@test
 }
 
 function File::elapsedTimeSinceLastModificationFileNotExists { #@test
-  run File::elapsedTimeSinceLastModification "/tmp/fileNotExists"
+  run File::elapsedTimeSinceLastModification "${BATS_TMP_DIR}/fileNotExists"
   assert_failure 1
   assert_output ""
 }
 
 function File::elapsedTimeSinceLastModification { #@test
-  touch -d "1 hour ago" /tmp/fileExists
-  run File::elapsedTimeSinceLastModification "/tmp/fileExists"
+  touch -d "1 hour ago" "${BATS_TMP_DIR}/fileExists"
+  run File::elapsedTimeSinceLastModification "${BATS_TMP_DIR}/fileExists"
   assert_success
   # shellcheck disable=SC2154
   ((output >= 3600 && output <= 3602))

@@ -70,6 +70,7 @@ if [[ -t 1 || -t 2 ]]; then
   readonly __TEST_COLOR='\e[100m'      # Light magenta
   readonly __TEST_ERROR_COLOR='\e[41m' # white on red
   readonly __SKIPPED_COLOR='\e[33m'    # Yellow
+  readonly __HELP_COLOR='\e[7;49;33m'  # Black on Gold
   readonly __DEBUG_COLOR='\e[37m'      # Grey
   # Internal: reset color
   readonly __RESET_COLOR='\e[0m' # Reset Color
@@ -86,6 +87,7 @@ else
   readonly __SUCCESS_COLOR=''
   readonly __WARNING_COLOR=''
   readonly __SKIPPED_COLOR=''
+  readonly __HELP_COLOR=''
   readonly __TEST_COLOR=''
   readonly __TEST_ERROR_COLOR=''
   readonly __DEBUG_COLOR=''
@@ -103,6 +105,7 @@ export __SKIPPED_COLOR
 export __TEST_COLOR
 export __TEST_ERROR_COLOR
 export __SKIPPED_COLOR
+export __HELP_COLOR
 export __DEBUG_COLOR
 export __RESET_COLOR
 export __HELP_EXAMPLE
@@ -396,24 +399,12 @@ Version::parse() {
 
 # lazy initialization
 declare -g BASH_FRAMEWORK_INITIALIZED="0"
-
-declare BASH_FRAMEWORK_CACHED_ENV_FILE
-BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
-
-declare BASH_FRAMEWORK_DEFAULT_ENV_FILE
-BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_file.XXXXXXX")"
-
-# shellcheck source=tests/data/.env
-cat >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" <<'EOF'
-BASH_FRAMEWORK_LOG_LEVEL=0
-BASH_FRAMEWORK_DISPLAY_LEVEL=3
-BASH_FRAMEWORK_LOG_FILE=${ROOT_DIR}/logs/${SCRIPT_NAME}.log
-BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=5
-EOF
+declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
+declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
 # load variables in order(from less specific to more specific) from :
-# - ${ROOT_DIR}/tests/data/.env file
-# - ${ROOT_DIR}/.env file if exists
+# - ${ROOT_DIR}/src/Env/testsData/.env file
+# - ${ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
@@ -421,6 +412,16 @@ Env::load() {
   if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
     return 0
   fi
+  BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
+  BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_file.XXXXXXX")"
+  # shellcheck source=src/Env/testsData/.env
+  (
+    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
+    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
+    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
+    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+  ) >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
+
   (
     # reset temp file
     echo >"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
@@ -428,7 +429,7 @@ Env::load() {
     # ensure all sourced variables will be exported
     set -o allexport
 
-    # 1. list .env files that need to be loaded
+    # list .env files that need to be loaded
     local -a files=(
       "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
     )
@@ -454,29 +455,32 @@ Env::load() {
       fi
     fi
 
-    # 2. source each file in order
+    # add all files added as parameters
+    files+=("$@")
+
+    # source each file in order
     local file
     for file in "${files[@]}"; do
-      # shellcheck source=tests/data/.env
+      # shellcheck source=src/Env/testsData/.env
       source "${file}" || {
         Log::displayWarning "Cannot load '${file}'"
       }
     done
 
-    # 4. copy only the variables to the tmp file
+    # copy only the variables to the tmp file
     local varName
     while IFS=$'\n' read -r varName; do
       echo "${varName}='${!varName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
 
-      # 3. using awk deduce all variables that need to be copied in tmp file
-      #    from less specific file to the most
+      # using awk deduce all variables that need to be copied in tmp file
+      #   from less specific file to the most
     done < <(awk -F= '!a[$1]++' "${files[@]}" | grep -v '^$\|^\s*\#' | cut -d= -f1)
     set +o allexport
-  )
+  ) || exit 1
 
   # Finally load the temp file to make the variables available in current script
   set -o allexport
-  # shellcheck source=tests/data/.env
+  # shellcheck source=src/Env/testsData/.env
   source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
 
   export BASH_FRAMEWORK_INITIALIZED=1
@@ -487,7 +491,7 @@ Env::load() {
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayHelp() {
-  echo -e "${__INFO_COLOR}HELP    - ${1}${__RESET_COLOR}" >&2
+  echo -e "${__HELP_COLOR}HELP    - ${1}${__RESET_COLOR}" >&2
   Log::logHelp "$1"
 }
 
@@ -630,7 +634,8 @@ Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
   local date
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) && [[ -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
     date="$(date '+%Y-%m-%d %H:%M:%S')"
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
   fi
@@ -645,26 +650,6 @@ Log::logFatal() {
 # FUNCTIONS
 
 Env::load
-
-if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-    export BASH_FRAMEWORK_LOG_LEVEL
-  elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-    if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
-      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
-      Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
-    fi
-    if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
-      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
-      Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
-    fi
-  fi
-  Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
-  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-  fi
-fi
 
 # disable display methods following display level
 if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
@@ -697,6 +682,26 @@ if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
 fi
 if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
   Log::logError() { :; }
+fi
+
+if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
+      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+      Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
+    fi
+    if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
+      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+      Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
+    fi
+  fi
+  Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
+  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+  fi
 fi
 
 DEFAULT_ARGS=(--check-sourced -x -f checkstyle)

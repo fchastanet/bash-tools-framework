@@ -115,7 +115,7 @@ jobs:
           BASH_IMAGE="${{ matrix.bashImage }}" \
           SKIP_BUILD=0 \
           SKIP_USER=1 \
-          ./bin/test --report-formatter junit -o logs -r src
+          ./bin/test --report-formatter junit -o logs -r src -j 8
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1

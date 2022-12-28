@@ -1,7 +1,20 @@
 # Todo
 
+- UT ensure /tmp files are deleted after UT run
+
+```bash
+  if [[ "${TMPDIR:-/tmp}" = "/tmp" ]]; then
+    local i=1 line file func
+    while read -r line func file < <(caller $i); do
+      echo >&3 "[$i] $file:$line $func(): $(sed -n ${line}p $file)"
+      ((i++))
+    done
+  fi
+```
+
 - add UT
 - update bashDoc
+- replace Command::captureOutputAndExitCode with Framework::run
 - add Framework::timeElapsed to display elapsed time of the command run
   - eg: ShellDoc::generateShellDocsFromDir
   - could compute time elapsed of subShell ?
@@ -25,7 +38,7 @@
     BASH_FRAMEWORK_ENV_FILEPATH="${ROOT_DIR}/.env"
   - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
 - do I add Env::load to \_header.tpl ?
-  - no but load tests/data/.env by default ? using var
+  - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
 - compile exit 1 if at least 1 warning
   - error if bash-tpl template not found

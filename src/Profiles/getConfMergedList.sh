@@ -17,7 +17,7 @@ Profiles::getConfMergedList() {
   local extension="${2:-sh}"
   local indentStr="${3:-       - }"
 
-  local DEFAULT_CONF_DIR="${ROOT_DIR:?}/conf/${confFolder}"
+  local DEFAULT_CONF_DIR="${ROOT_DIR}/conf/${confFolder}"
   local HOME_CONF_DIR="${HOME}/.bash-tools/${confFolder}"
 
   (

@@ -15,12 +15,10 @@ Profiles::loadConf() {
   local confFolder="$1"
   local conf="$2"
   local extension="${3:-sh}"
-  local confFile=""
 
   if [[ -n "${extension}" && "${extension:0:1}" != "." ]]; then
     extension=".${extension}"
   fi
-
   # if conf is absolute
   local confFile
   if [[ "${conf}" == /* ]]; then
@@ -30,7 +28,7 @@ Profiles::loadConf() {
     # shellcheck source=/conf/dsn/default.local.env
     confFile="${HOME}/.bash-tools/${confFolder}/${conf}${extension}"
     if [[ ! -f "${confFile}" ]]; then
-      confFile="${ROOT_DIR:?}/conf/${confFolder}/${conf}${extension}"
+      confFile="${ROOT_DIR}/conf/${confFolder}/${conf}${extension}"
     fi
   fi
   if [[ ! -f "${confFile}" ]]; then

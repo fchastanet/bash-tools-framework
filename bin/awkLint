@@ -70,6 +70,7 @@ if [[ -t 1 || -t 2 ]]; then
   readonly __TEST_COLOR='\e[100m'      # Light magenta
   readonly __TEST_ERROR_COLOR='\e[41m' # white on red
   readonly __SKIPPED_COLOR='\e[33m'    # Yellow
+  readonly __HELP_COLOR='\e[7;49;33m'  # Black on Gold
   readonly __DEBUG_COLOR='\e[37m'      # Grey
   # Internal: reset color
   readonly __RESET_COLOR='\e[0m' # Reset Color
@@ -86,6 +87,7 @@ else
   readonly __SUCCESS_COLOR=''
   readonly __WARNING_COLOR=''
   readonly __SKIPPED_COLOR=''
+  readonly __HELP_COLOR=''
   readonly __TEST_COLOR=''
   readonly __TEST_ERROR_COLOR=''
   readonly __DEBUG_COLOR=''
@@ -103,6 +105,7 @@ export __SKIPPED_COLOR
 export __TEST_COLOR
 export __TEST_ERROR_COLOR
 export __SKIPPED_COLOR
+export __HELP_COLOR
 export __DEBUG_COLOR
 export __RESET_COLOR
 export __HELP_EXAMPLE

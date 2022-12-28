@@ -28,6 +28,8 @@ source "${FRAMEWORK_DIR}/src/Log/logError.sh"
 source "${FRAMEWORK_DIR}/src/Log/logHelp.sh"
 # shellcheck source=src/Log/logInfo.sh
 source "${FRAMEWORK_DIR}/src/Log/logInfo.sh"
+# shellcheck source=src/Log/logFatal.sh
+source "${FRAMEWORK_DIR}/src/Log/logFatal.sh"
 # shellcheck source=src/Log/logSkipped.sh
 source "${FRAMEWORK_DIR}/src/Log/logSkipped.sh"
 # shellcheck source=src/Log/logSuccess.sh

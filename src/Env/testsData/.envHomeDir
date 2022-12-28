@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2030
+# shellcheck disable=SC2031
+# shellcheck disable=SC2034
+
+BASH_FRAMEWORK_LOG_LEVEL=2
+BASH_FRAMEWORK_DISPLAY_LEVEL=2
+BASH_FRAMEWORK_LOG_FILE=/tmp/load.bats/test-home.log
+BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=19

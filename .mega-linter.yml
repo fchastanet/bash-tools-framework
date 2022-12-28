@@ -35,7 +35,7 @@ BASH_SHFMT_ARGUMENTS: -i 2 -ci
 
 CREDENTIALS_SECRETLINT_CONFIG_FILE: .secretlintrc.yml
 
-EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: (\.git)
+EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: (\.git|src/Dns/testData/ipconfig\.txt|src/Profiles/testsData/expectedDsnList\.txt)
 
 GIT_GIT_DIFF_PRE_COMMANDS:
   - command: git config --global core.autocrlf input
@@ -51,9 +51,9 @@ JAVASCRIPT_DEFAULT_STYLE: prettier
 JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
 JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (report/)
 
-JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/settings\.json|report|.vscode/launch.json)
+JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/settings\.json|report|\.vscode/launch\.json)
 
 MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: (report)
 
-SPELL_CSPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/.idea|.*-megalinter_file_names_cspell.txt|bin/bash-tpl)
-SPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/.idea|bin/bash-tpl)
+SPELL_CSPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|.*-megalinter_file_names_cspell.txt|bin/bash-tpl)
+SPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|bin/bash-tpl)

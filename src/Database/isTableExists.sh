@@ -18,5 +18,6 @@ Database::isTableExists() {
   tableThatShouldExists="$3"
 
   sql="select count(*) from information_schema.tables where table_schema='${dbName}' and table_name='${tableThatShouldExists}'"
-  Database::query instanceIsTableExists "${sql}"
+  result="$(Database::query instanceIsTableExists "${sql}")"
+  [[ "${result}" = "1" ]]
 }
