@@ -232,9 +232,10 @@ Env::load() {
     set -o allexport
 
     # list .env files that need to be loaded
-    local -a files=(
-      "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
-    )
+    local -a files=()
+    if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
+      files+=("${BASH_FRAMEWORK_DEFAULT_ENV_FILE}")
+    fi
     if [[ -f "${ROOT_DIR}/conf/.env" && -r "${ROOT_DIR}/conf/.env" ]]; then
       files+=("${ROOT_DIR}/conf/.env")
     fi
@@ -253,7 +254,7 @@ Env::load() {
       if [[ -f "${BASH_FRAMEWORK_ENV_FILEPATH}" && -r "${BASH_FRAMEWORK_ENV_FILEPATH}" ]]; then
         files+=("${BASH_FRAMEWORK_ENV_FILEPATH}")
       else
-        Log::fatal "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
+        Log::displayWarning "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
       fi
     fi
 

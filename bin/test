@@ -334,9 +334,10 @@ Env::load() {
     set -o allexport
 
     # list .env files that need to be loaded
-    local -a files=(
-      "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
-    )
+    local -a files=()
+    if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
+      files+=("${BASH_FRAMEWORK_DEFAULT_ENV_FILE}")
+    fi
     if [[ -f "${ROOT_DIR}/conf/.env" && -r "${ROOT_DIR}/conf/.env" ]]; then
       files+=("${ROOT_DIR}/conf/.env")
     fi
@@ -355,7 +356,7 @@ Env::load() {
       if [[ -f "${BASH_FRAMEWORK_ENV_FILEPATH}" && -r "${BASH_FRAMEWORK_ENV_FILEPATH}" ]]; then
         files+=("${BASH_FRAMEWORK_ENV_FILEPATH}")
       else
-        Log::fatal "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
+        Log::displayWarning "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
       fi
     fi
 
@@ -477,14 +478,6 @@ Log::rotate() {
   fi
 }
 
-# Display message using error color (red) and exit immediately with error status 1
-# @param {String} $1 message
-Log::fatal() {
-  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
-  Log::logFatal "$1"
-  exit 1
-}
-
 # Internal: common log message
 #
 # **Arguments**:
@@ -507,12 +500,6 @@ Log::logMessage() {
     date="$(date '+%Y-%m-%d %H:%M:%S')"
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
   fi
-}
-
-# log message to file
-# @param {String} $1 message
-Log::logFatal() {
-  Log::logMessage "FATAL" "$@"
 }
 
 # FUNCTIONS

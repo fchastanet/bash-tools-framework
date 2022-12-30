@@ -23,8 +23,8 @@ function Env::load::alreadyInitialized { #@test
 function Env::load::forceLoadNonExistentFile { #@test
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TMP_DIR}/notExists"
   run Env::load
-  assert_failure 1
-  assert_output --partial "FATAL   - env file not not found - ${BATS_TMP_DIR}/notExists"
+  assert_success
+  assert_output --partial "WARN    - env file not not found - ${BATS_TMP_DIR}/notExists"
 }
 
 function Env::load::forceLoadExistentFile { #@test
