@@ -1,10 +1,7 @@
 # Todo
 
-- Args::version to display binary version
-- .env files simplification
-  - avoid complex variable interpolation
-  - allow variable to be overrided by using OVERRIDE_XXX
 - UT ensure /tmp files are deleted after UT run
+- Args::version to display binary version
 
 ```bash
   if [[ "${TMPDIR:-/tmp}" = "/tmp" ]]; then

@@ -29,9 +29,6 @@ Env::load() {
     # reset temp file
     echo >"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
 
-    # ensure all sourced variables will be exported
-    set -o allexport
-
     # list .env files that need to be loaded
     local -a files=()
     if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
@@ -72,18 +69,25 @@ Env::load() {
     done
 
     # copy only the variables to the tmp file
-    local varName
+    local varName overrideVarName
     while IFS=$'\n' read -r varName; do
-      echo "${varName}='${!varName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+      overrideVarName="OVERRIDE_${varName}"
+      if [[ -z ${!overrideVarName+xxx} ]]; then
+        echo "${varName}='${!varName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+      else
+        # variable is overridden
+        echo "${varName}='${!overrideVarName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+      fi
 
       # using awk deduce all variables that need to be copied in tmp file
       #   from less specific file to the most
     done < <(awk -F= '!a[$1]++' "${files[@]}" | grep -v '^$\|^\s*\#' | cut -d= -f1)
-    set +o allexport
   ) || exit 1
 
-  # Finally load the temp file to make the variables available in current script
+  # ensure all sourced variables will be exported
   set -o allexport
+
+  # Finally load the temp file to make the variables available in current script
   # shellcheck source=src/Env/testsData/.env
   source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
 

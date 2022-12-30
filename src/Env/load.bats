@@ -116,3 +116,25 @@ function Env::load::noEnvFilesDefaultValues { #@test
   [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${ROOT_DIR}/logs/${SCRIPT_NAME}.log" ]]
   [[ "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}" = "5" ]]
 }
+
+function Env::load::loadRootDirConfEnvFileAndOverride { #@test
+  mkdir -p "${BATS_TMP_DIR}/rootDir/conf"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envOverride" "${BATS_TMP_DIR}/rootDir/conf/.env"
+  export ROOT_DIR="${BATS_TMP_DIR}/rootDir"
+  unset HOME
+  export OVERRIDE_BASH_FRAMEWORK_DISPLAY_LEVEL=overriddenDisplayLevel
+  export OVERRIDE_BASH_FRAMEWORK_LOG_LEVEL=overriddenLogLevel
+  export OVERRIDE_BASH_FRAMEWORK_LOG_FILE=overriddenLogFile
+  export OVERRIDE_BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=overriddenLogFileMaxRotation
+  export CUSTOM_VAR1=notTakenIntoAccount
+  export OVERRIDE_CUSTOM_VAR2=modified
+  Env::load || return 1
+  [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
+  [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "overriddenDisplayLevel" ]]
+  [[ "${BASH_FRAMEWORK_LOG_LEVEL}" = "overriddenLogLevel" ]]
+  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "overriddenLogFile" ]]
+  [[ "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}" = "overriddenLogFileMaxRotation" ]]
+  [[ "${CUSTOM_VAR1}" = "notModified" ]]
+  # shellcheck disable=SC2153
+  [[ "${CUSTOM_VAR2}" = "modified" ]]
+}
