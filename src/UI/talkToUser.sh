@@ -13,7 +13,7 @@ UI::talkToUser() {
   fi
 
   Log::displayInfo "${msg}"
-  if Functions::isWsl && command -v powershell.exe &>/dev/null; then
+  if Functions::isWsl && "${BASH_FRAMEWORK_COMMAND:-command}" -v powershell.exe &>/dev/null; then
     powershell.exe -ExecutionPolicy Bypass -NoProfile -Command "${SCRIPTS_DIR}/talk.ps1" "'${msg}'" || true
   else
     tput bel || true
