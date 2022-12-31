@@ -10,6 +10,7 @@ Bats::installRequirementsIfNeeded() {
       "${BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT}"
   )" != "1" ]] \
     ; then
+    Log::displayInfo "Install or update bats requirements"
     Git::shallowClone \
       "https://github.com/bats-core/bats-core.git" \
       "${ROOT_DIR}/vendor/bats" \
