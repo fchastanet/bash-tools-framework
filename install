@@ -115,8 +115,8 @@ fi
 if [[ -d "${HOME}/.bash-tools" ]]; then
   # update
   cp -R --no-clobber "${BASE_DIR}/conf/." "${HOME}/.bash-tools"
-  [[ "${BASE_DIR}/tests/data/.env" -nt "${HOME}/.bash-tools/.env" ]] && {
-    Log::displayWarning "${BASE_DIR}/tests/data/.env is newer than ${HOME}/.bash-tools/.env, compare the files to check if some updates need to be applied"
+  [[ "${BASE_DIR}/src/Env/testsData/.env" -nt "${HOME}/.bash-tools/.env" ]] && {
+    Log::displayWarning "${BASE_DIR}/src/Env/testsData/.env is newer than ${HOME}/.bash-tools/.env, compare the files to check if some updates need to be applied"
   }
 else
   mkdir -p ~/.bash-tools

@@ -22,14 +22,13 @@ jobs:
           name: lint
           status: pending
 
-      - name: Install vendors
-        run: ./bin/installDevRequirements
-
       - name: Linting - Dockerfile
         run: ./bin/dockerLint | tee logs/docker-checkstyle.xml
 
       - name: Linting - Shellcheck
-        run: ./bin/shellcheckLint | tee logs/shellcheck-checkstyle.xml
+        run:
+          ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | tee
+          logs/shellcheck-checkstyle.xml
 
       - name: Linting - Awk
         run: ./bin/awkLint | tee logs/awk-checkstyle.xml
@@ -73,8 +72,12 @@ jobs:
         include:
           - vendor: ubuntu
             bashImage: ubuntu:20.04
+            options: -j 8
           - vendor: alpine
             bashImage: bash
+            # when using 8 jobs, junit report.xml is empty
+            options: -j 2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -110,14 +113,13 @@ jobs:
 
       - name: run unit tests
         run: |
-          ./bin/installDevRequirements
           # shellcheck disable=SC2266
           VENDOR="${{ matrix.vendor }}" \
           BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
           BASH_IMAGE="${{ matrix.bashImage }}" \
           SKIP_BUILD=0 \
           SKIP_USER=1 \
-          ./bin/test --report-formatter junit -o logs -r src
+          ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1

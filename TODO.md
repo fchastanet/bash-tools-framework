@@ -1,8 +1,24 @@
 # Todo
 
+- bats assert that no new variable pollute environment to check that every
+  variable is used as local
+- Profiles::list findOptions as last arg so any number of args
+- UT ensure /tmp files are deleted after UT run
+- Args::version to display binary version
+
+```bash
+  if [[ "${TMPDIR:-/tmp}" = "/tmp" ]]; then
+    local i=1 line file func
+    while read -r line func file < <(caller $i); do
+      echo >&3 "[$i] $file:$line $func(): $(sed -n ${line}p $file)"
+      ((i++))
+    done
+  fi
+```
+
 - add UT
 - update bashDoc
-- bin/test auto install bats so we can remove installDevRequirements
+- replace Command::captureOutputAndExitCode with Framework::run
 - add Framework::timeElapsed to display elapsed time of the command run
   - eg: ShellDoc::generateShellDocsFromDir
   - could compute time elapsed of subShell ?
@@ -12,7 +28,6 @@
 - add <https://github.com/fchastanet/bash-tools-framework> in help of each
   command
 - awkLint/shellcheckLint use xargs
-- remove TODO from bin/installDevRequirements
 - workflow
   - register to <https://repology.org/projects/> in order to show matrix image
     <https://github.com/jirutka/esh/blob/master/README.adoc>
@@ -27,7 +42,7 @@
     BASH_FRAMEWORK_ENV_FILEPATH="${ROOT_DIR}/.env"
   - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
 - do I add Env::load to \_header.tpl ?
-  - no but load tests/data/.env by default ? using var
+  - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
 - compile exit 1 if at least 1 warning
   - error if bash-tpl template not found
@@ -76,6 +91,7 @@
     - src/Log/\_\_all.sh contains ZZZ.sh
   - instead I could simply move bin files to src and compile them using the
     current bin file (inception) and so get rid of \_\_all.sh
+  - could it be solved with dependency injection system ?
 
 - Framework linter
 
@@ -103,7 +119,7 @@
     - @param $1 after @param $2
     - @paramDefault $1 just after @param $2
 
-## Best practices
+## Best practices and recipes
 
 - local or declare multiple local a z
 - shift each arg to avoid not shifting at all
@@ -111,13 +127,24 @@
 - export readonly does not work, first readonly then export
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html> but set -o
   nounset is not usable because empty array are considered unset
-- ${PARAMETER:-WORD} ${PARAMETER-WORD} If the parameter PARAMETER is unset
+- `${PARAMETER:-WORD}` `${PARAMETER-WORD}` If the parameter PARAMETER is unset
   (never was defined) or null (empty), this one expands to WORD, otherwise it
   expands to the value of PARAMETER, as if it just was ${PARAMETER}. If you omit
   the : (colon), like shown in the second form, the default value is only used
   when the parameter was unset, not when it was empty.
-- always use sed -E
-- cat << 'EOF' avoid to interpolate variables
+- always use `sed -E`
+- `cat << 'EOF'` avoid to interpolate variables
 - ensure we don't have any globals, all variables should be passed to the
   functions
 - avoid using grep -P as it is not supported on alpine, prefer using -E
+- to construct complex command line, prefer to use an array
+  - `declare -a cmd=(git push origin :${branch})`
+  - then you can display the result using echo `"${cmd[*]}"`
+  - you can execute the command using `"${cmd[@]}"`
+- to check if an environment variable is set
+
+```bash
+if [[ -z ${varName+xxx} ]]; then
+  # varName is not set
+fi
+```

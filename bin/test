@@ -70,6 +70,7 @@ if [[ -t 1 || -t 2 ]]; then
   readonly __TEST_COLOR='\e[100m'      # Light magenta
   readonly __TEST_ERROR_COLOR='\e[41m' # white on red
   readonly __SKIPPED_COLOR='\e[33m'    # Yellow
+  readonly __HELP_COLOR='\e[7;49;33m'  # Black on Gold
   readonly __DEBUG_COLOR='\e[37m'      # Grey
   # Internal: reset color
   readonly __RESET_COLOR='\e[0m' # Reset Color
@@ -86,6 +87,7 @@ else
   readonly __SUCCESS_COLOR=''
   readonly __WARNING_COLOR=''
   readonly __SKIPPED_COLOR=''
+  readonly __HELP_COLOR=''
   readonly __TEST_COLOR=''
   readonly __TEST_ERROR_COLOR=''
   readonly __DEBUG_COLOR=''
@@ -103,6 +105,7 @@ export __SKIPPED_COLOR
 export __TEST_COLOR
 export __TEST_ERROR_COLOR
 export __SKIPPED_COLOR
+export __HELP_COLOR
 export __DEBUG_COLOR
 export __RESET_COLOR
 export __HELP_EXAMPLE
@@ -133,12 +136,433 @@ Args::defaultHelpNoExit() {
   done
 }
 
+BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED="${ROOT_DIR}/vendor/.batsInstalled"
+BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT=86400 # 1 day
+
+Bats::installRequirementsIfNeeded() {
+  if [[ "$(
+    Cache::getFileContentIfNotExpired \
+      "${BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED}" \
+      "${BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT}"
+  )" != "1" ]] \
+    ; then
+    Log::displayInfo "Install or update bats requirements"
+    Git::shallowClone \
+      "https://github.com/bats-core/bats-core.git" \
+      "${ROOT_DIR}/vendor/bats" \
+      "master" \
+      "FORCE_DELETION"
+
+    # last revision 2019
+    Git::shallowClone \
+      "https://github.com/bats-core/bats-support.git" \
+      "${ROOT_DIR}/vendor/bats-support" \
+      "master" \
+      "FORCE_DELETION"
+
+    Git::shallowClone \
+      "https://github.com/bats-core/bats-assert.git" \
+      "${ROOT_DIR}/vendor/bats-assert" \
+      "master" \
+      "FORCE_DELETION"
+
+    Git::shallowClone \
+      "https://github.com/Flamefire/bats-mock.git" \
+      "${ROOT_DIR}/vendor/bats-mock-Flamefire" \
+      "master" \
+      "FORCE_DELETION"
+
+    echo "1" >"${BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED}"
+  fi
+}
+
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
 }
 
+# get file content if file not expired
+# @param {String} file $1 the file to get content from
+# @param {String} maxDuration $2 number of seconds after which the file is considered expired
+# @output {String} the file content if not expired
+# @return 1 if file does not exists
+# @return 2 if file expired
+Cache::getFileContentIfNotExpired() {
+  local file="$1"
+  local maxDuration="$2"
+
+  if [[ ! -f "${file}" ]]; then
+    return 1
+  fi
+  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
+    return 2
+  fi
+  cat "${file}"
+}
+
+# Public: shallow clone a repository at specific commit sha, tag or branch
+# or update repo if already exists
+#
+# **Arguments**:
+# * $1 repository
+# * $2 Install dir
+# * $3 revision commit sha, tag or branch
+# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
+#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
+#
+# **Return**:
+# * code !=0 if git failure or directory not writable
+# * code=1 if destination dir already exists and force option is not 1
+Git::shallowClone() {
+  local REPO="$1"
+  local INSTALL_DIR="$2"
+  local REVISION="$3"
+  local FORCE_DELETION="${4:-0}"
+
+  if [[ -d "${INSTALL_DIR}/.git" ]]; then
+    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
+  else
+    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
+      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
+        Log::displayWarning "Removing ${INSTALL_DIR} ..."
+        rm -Rf "${INSTALL_DIR}" || exit 1
+      else
+        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
+        return 1
+      fi
+    fi
+    (
+      Log::displayInfo "Installing ${INSTALL_DIR} ..."
+      mkdir -p "${INSTALL_DIR}"
+      cd "${INSTALL_DIR}" || exit 1
+      git init >&2
+      git remote add origin "${REPO}" >&2
+    )
+  fi
+  (
+    cd "${INSTALL_DIR}" || exit 1
+    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
+    git reset --hard FETCH_HEAD >&2
+  )
+}
+
+# Public: log level off
+export __LEVEL_OFF=0
+# Public: log level error
+export __LEVEL_ERROR=1
+# Public: log level warning
+export __LEVEL_WARNING=2
+# Public: log level info
+export __LEVEL_INFO=3
+# Public: log level success
+export __LEVEL_SUCCESS=3
+# Public: log level debug
+export __LEVEL_DEBUG=4
+
+export __LEVEL_OFF
+export __LEVEL_ERROR
+export __LEVEL_WARNING
+export __LEVEL_INFO
+export __LEVEL_SUCCESS
+export __LEVEL_DEBUG
+
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
+Log::displayInfo() {
+  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
+  Log::logInfo "$1"
+}
+
+# lazy initialization
+declare -g BASH_FRAMEWORK_INITIALIZED="0"
+declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
+declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
+
+# load variables in order(from less specific to more specific) from :
+# - ${ROOT_DIR}/src/Env/testsData/.env file
+# - ${ROOT_DIR}/conf/.env file if exists
+# - ~/.env file if exists
+# - ~/.bash-tools/.env file if exists
+# - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+Env::load() {
+  if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
+    return 0
+  fi
+  BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
+  BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_file.XXXXXXX")"
+  # shellcheck source=src/Env/testsData/.env
+  (
+    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
+    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
+    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
+    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+  ) >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
+
+  (
+    # reset temp file
+    echo >"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+
+    # list .env files that need to be loaded
+    local -a files=()
+    if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
+      files+=("${BASH_FRAMEWORK_DEFAULT_ENV_FILE}")
+    fi
+    if [[ -f "${ROOT_DIR}/conf/.env" && -r "${ROOT_DIR}/conf/.env" ]]; then
+      files+=("${ROOT_DIR}/conf/.env")
+    fi
+    if [[ -f "${HOME}/.env" && -r "${HOME}/.env" ]]; then
+      files+=("${HOME}/.env")
+    fi
+    local file
+    for file in "$@"; do
+      if [[ -f "${file}" && -r "${file}" ]]; then
+        files+=("${file}")
+      fi
+    done
+    # import custom .env file
+    if [[ -n "${BASH_FRAMEWORK_ENV_FILEPATH+xxx}" ]]; then
+      # load BASH_FRAMEWORK_ENV_FILEPATH
+      if [[ -f "${BASH_FRAMEWORK_ENV_FILEPATH}" && -r "${BASH_FRAMEWORK_ENV_FILEPATH}" ]]; then
+        files+=("${BASH_FRAMEWORK_ENV_FILEPATH}")
+      else
+        Log::displayWarning "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
+      fi
+    fi
+
+    # add all files added as parameters
+    files+=("$@")
+
+    # source each file in order
+    local file
+    for file in "${files[@]}"; do
+      # shellcheck source=src/Env/testsData/.env
+      source "${file}" || {
+        Log::displayWarning "Cannot load '${file}'"
+      }
+    done
+
+    # copy only the variables to the tmp file
+    local varName overrideVarName
+    while IFS=$'\n' read -r varName; do
+      overrideVarName="OVERRIDE_${varName}"
+      if [[ -z ${!overrideVarName+xxx} ]]; then
+        echo "${varName}='${!varName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+      else
+        # variable is overridden
+        echo "${varName}='${!overrideVarName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+      fi
+
+      # using awk deduce all variables that need to be copied in tmp file
+      #   from less specific file to the most
+    done < <(awk -F= '!a[$1]++' "${files[@]}" | grep -v '^$\|^\s*\#' | cut -d= -f1)
+  ) || exit 1
+
+  # ensure all sourced variables will be exported
+  set -o allexport
+
+  # Finally load the temp file to make the variables available in current script
+  # shellcheck source=src/Env/testsData/.env
+  source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
+
+  export BASH_FRAMEWORK_INITIALIZED=1
+
+  set +o allexport
+}
+
+# Number of seconds since last modification of the file
+# @param {String} file $1 file path
+# @return 1 if file does not exist
+# @output number of seconds since last modification of the file
+File::elapsedTimeSinceLastModification() {
+  local file="$1"
+  if [[ ! -f "${file}" ]]; then
+    return 1
+  fi
+  local lastModificationTimeSeconds diff
+  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
+  ((diff = $(date +%s) - lastModificationTimeSeconds))
+  echo -n "${diff}"
+}
+
+# Display message using debug color (grey)
+# @param {String} $1 message
+Log::displayDebug() {
+  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  Log::logDebug "$1"
+}
+
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  Log::logError "$1"
+}
+
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
+Log::displayHelp() {
+  echo -e "${__HELP_COLOR}HELP    - ${1}${__RESET_COLOR}" >&2
+  Log::logHelp "$1"
+}
+
+# Display message using skip color (yellow)
+# @param {String} $1 message
+Log::displaySkipped() {
+  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  Log::logSkipped "$1"
+}
+
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
+Log::displaySuccess() {
+  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  Log::logSuccess "$1"
+}
+
+# Display message using warning color (yellow)
+# @param {String} $1 message
+Log::displayWarning() {
+  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  Log::logWarning "$1"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logDebug() {
+  Log::logMessage "DEBUG" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logError() {
+  Log::logMessage "ERROR" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logHelp() {
+  Log::logMessage "HELP" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logInfo() {
+  Log::logMessage "INFO" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logSkipped() {
+  Log::logMessage "SKIPPED" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logSuccess() {
+  Log::logMessage "SUCCESS" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logWarning() {
+  Log::logMessage "WARNING" "$@"
+}
+
+# To be called before logging in the log file
+# @param $1 log file name
+# @param $2 maximum number of log files
+Log::rotate() {
+  local FILENAME="$1"
+  local MAX_LOG="${2:-5}"
+  for i in $(seq $((MAX_LOG - 1)) -1 1); do
+    Log::displayInfo "Log rotation ${FILENAME}.${i} to ${FILENAME}.$((i + 1))"
+    mv "${FILENAME}."{"${i}","$((i + 1))"} &>/dev/null || true
+  done
+  if mv "${FILENAME}" "${FILENAME}.1" &>/dev/null; then
+    Log::displayInfo "Log rotation ${FILENAME} to ${FILENAME}.1"
+  fi
+}
+
+# Internal: common log message
+#
+# **Arguments**:
+# * $1 - message's level description
+# * $2 - message
+# **Output**:
+# [date]|[levelMsg]|message
+#
+# **Examples**:
+# <pre>
+# 2020-01-19 19:20:21|ERROR  |log error
+# 2020-01-19 19:20:21|SKIPPED|log skipped
+# </pre>
+Log::logMessage() {
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
+}
+
 # FUNCTIONS
+
+Env::load
+
+# disable display methods following display level
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
+  Log::displayDebug() { :; }
+fi
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_INFO)); then
+  Log::displayHelp() { :; }
+  Log::displayInfo() { :; }
+  Log::displaySkipped() { :; }
+  Log::displaySuccess() { :; }
+fi
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
+  Log::displayWarning() { :; }
+fi
+if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
+  Log::displayError() { :; }
+fi
+# disable log methods following log level
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_DEBUG)); then
+  Log::logDebug() { :; }
+fi
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_INFO)); then
+  Log::logHelp() { :; }
+  Log::logInfo() { :; }
+  Log::logSkipped() { :; }
+  Log::logSuccess() { :; }
+fi
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
+  Log::logWarning() { :; }
+fi
+if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
+  Log::logError() { :; }
+fi
+
+if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
+      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+      Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
+    fi
+    if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
+      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+      Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
+    fi
+  fi
+  Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
+  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+  fi
+fi
 
 HELP="$(
   cat <<EOF
@@ -173,6 +597,8 @@ if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
   "${VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi
+
+Bats::installRequirementsIfNeeded
 
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (

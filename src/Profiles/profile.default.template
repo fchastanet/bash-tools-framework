@@ -13,10 +13,6 @@ CONFIG_LIST+=(
   BashProfile
   ZshProfile
   BashTools
-  CKLM
-  CKLS
-  CK_SKILLS
-  CKLS_QA
   CodeCheckers
   Composer
   ComposerDependencies

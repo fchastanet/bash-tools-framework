@@ -11,7 +11,11 @@ Dns::checkHostname() {
 
   # check if host is reachable
   local returnCode=0
-  Functions::captureOutputAndExitCode "ping -c 1 ${host}" "try to reach host ${host}"
+  if Assert::windows; then
+    Command::captureOutputAndExitCode "ping -n 1 ${host}" "try to reach host ${host}"
+  else
+    Command::captureOutputAndExitCode "ping -c 1 ${host}" "try to reach host ${host}"
+  fi
   returnCode=$?
 
   if [[ "${returnCode}" = "0" ]]; then
@@ -27,10 +31,10 @@ Dns::checkHostname() {
       # check if ip resolve to our ips
       local message="check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
       if Assert::windows; then
-        Functions::captureOutputAndExitCode "ipconfig | grep ${ip} | cat" "${message}"
+        Command::captureOutputAndExitCode "ipconfig | grep ${ip} | cat" "${message}"
         returnCode=$?
       else
-        Functions::captureOutputAndExitCode "ifconfig | grep ${ip} | cat" "${message}"
+        Command::captureOutputAndExitCode "ifconfig | grep ${ip} | cat" "${message}"
         returnCode=$?
       fi
       if [[ "${returnCode}" != "0" ]]; then
@@ -40,6 +44,5 @@ Dns::checkHostname() {
       fi
     fi
   fi
-
   return "${returnCode}"
 }

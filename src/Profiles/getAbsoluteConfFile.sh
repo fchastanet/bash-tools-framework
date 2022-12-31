@@ -16,50 +16,47 @@ Profiles::getAbsoluteConfFile() {
   local confFolder="$1"
   local conf="$2"
   local extension="${3-.sh}"
+  if [[ -n "${extension}" && "${extension:0:1}" != "." ]]; then
+    extension=".${extension}"
+  fi
 
-  getAbs() {
-    local absoluteConfFile=""
-    # load conf from absolute file, then home folder, then bash framework conf folder
-    absoluteConfFile="${conf}"
-    if [[ "${absoluteConfFile:0:1}" = "/" && -f "${absoluteConfFile}" ]]; then
-      # file contains /, consider it as absolute filename
-      echo "${absoluteConfFile}"
+  testAbs() {
+    local result
+    result="$(realpath -e "$1" 2>/dev/null)"
+    # shellcheck disable=SC2181
+    if [[ "$?" = "0" && -f "${result}" ]]; then
+      echo "${result}"
       return 0
     fi
-
-    # relative to where script is executed
-    absoluteConfFile="$(realpath "${__BASH_FRAMEWORK_CALLING_SCRIPT}/${conf}" 2>/dev/null || echo "")"
-    if [[ -f "${absoluteConfFile}" ]]; then
-      echo "${absoluteConfFile}"
-      return 0
-    fi
-
-    # take extension into account
-    if [[ -n "${extension}" && "${extension:0:1}" != "." ]]; then
-      extension=".${extension}"
-    fi
-
-    # shellcheck source=/conf/dsn/default.local.env
-    absoluteConfFile="${HOME}/.bash-tools/${confFolder}/${conf}${extension}"
-    if [[ -f "${absoluteConfFile}" ]]; then
-      echo "${absoluteConfFile}"
-      return 0
-    fi
-    absoluteConfFile="${ROOT_DIR:?}/conf/${confFolder}/${conf}${extension}"
-    if [[ -f "${absoluteConfFile}" ]]; then
-      echo "${absoluteConfFile}"
-      return 0
-    fi
-
     return 1
   }
-  local abs=""
-  abs="$(getAbs)" || {
-    # file not found
-    Log::displayError "conf file '${conf}' not found"
-    return 1
-  }
-  Log::displayDebug "conf file '${conf}' matching '${abs}' file"
-  echo "${abs}"
-  return 0
+
+  # conf is absolute file (including extension)
+  testAbs "${confFolder}${extension}" && return 0
+  # conf is absolute file
+  testAbs "${confFolder}" && return 0
+  # conf is absolute file (including extension)
+  testAbs "${conf}${extension}" && return 0
+  # conf is absolute file
+  testAbs "${conf}" && return 0
+
+  # relative to where script is executed (including extension)
+  if [[ -n "${CURRENT_DIR+xxx}" ]]; then
+    testAbs "$(File::concatenatePath "${CURRENT_DIR}" "${confFolder}")/${conf}${extension}" && return 0
+  fi
+  # from home/.bash-tools/<confFolder>
+  testAbs "$(File::concatenatePath "${HOME}/.bash-tools" "${confFolder}")/${conf}${extension}" && return 0
+
+  if [[ -n "${ROOT_DIR+xxx}" ]]; then
+    # from framework conf/<confFolder> (including extension)
+    testAbs "$(File::concatenatePath "${ROOT_DIR}/conf" "${confFolder}")/${conf}${extension}" && return 0
+
+    # from framework conf/<confFolder>
+    testAbs "$(File::concatenatePath "${ROOT_DIR}/conf" "${confFolder}")/${conf}" && return 0
+  fi
+
+  # file not found
+  Log::displayError "conf file '${conf}' not found"
+
+  return 1
 }

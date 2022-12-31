@@ -3,17 +3,51 @@
 > **_NOTE:_** **Documentation is best viewed on
 > [github-pages](https://fchastanet.github.io/bash-tools-framework/)**
 
+<!-- prettier-ignore-start -->
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD013 -->
 
-[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
-[![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework 'Average time to resolve an issue')
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework 'Percentage of issues still open')
+[![CI/CD](
+  https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg
+)](
+  https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster
+)
+
+[![ProjectStatus](
+  http://opensource.box.com/badges/active.svg
+)](
+  http://opensource.box.com/badges
+  'Project Status'
+)
+
+[![DeepSource](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true
+)](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge
+)
+
+[![DeepSource](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true
+)](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge
+)
+
+[![AverageTimeToResolveAnIssue](
+  http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg
+)](
+  http://isitmaintained.com/project/fchastanet/bash-tools-framework
+  'Average time to resolve an issue'
+)
+
+[![PercentageOfIssuesStillOpen](
+  http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg
+)](
+  http://isitmaintained.com/project/fchastanet/bash-tools-framework
+  'Percentage of issues still open'
+)
 
 <!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 - [1. Excerpt](#1-excerpt)
 - [2. Installation/Configuration](#2-installationconfiguration)
@@ -63,9 +97,7 @@ cd bash-tools
 
 The following structure will be created in your home directory
 
-<!-- markdownlint-capture -->
-<!-- markdownlint-disable MD033 -->
-<pre>
+```text
 ~/.bash-tools/
 ├── cliProfiles
 │   ├── default.sh
@@ -83,8 +115,7 @@ The following structure will be created in your home directory
 │   └── default.remote.env
 │   └── localhost-root.env
 └── .env
-</pre>
-<!-- markdownlint-restore -->
+```
 
 Some tools need [GNU parallel software](https://www.gnu.org/software/parallel/),
 it allows running multiple processes in parallel. You can install it running
@@ -101,24 +132,25 @@ touch ~/.parallel/will-cite
 
 ### 3.1. Install dev dependencies
 
-In order to generate bash documentation and to run unit tests, you have to
-launch this command to install some libraries.
+Dev dependencies are automatically installed when used
 
-```bash
-./bin/installDevRequirements.sh
-```
-
-this script will install the following libraries inside `vendor` folder:
+`bin/test` script will install the following libraries inside `vendor` folder:
 
 - [bats-core/bats-core](https://github.com/bats-core/bats-core.git)
 - [bats-core/bats-support](https://github.com/bats-core/bats-support.git)
 - [bats-core/bats-assert](https://github.com/bats-core/bats-assert.git)
 - [Flamefire/bats-mock](https://github.com/Flamefire/bats-mock.git)
 
-The following library will be installed automatically when launching `./bin/doc`
-for the first time
+`./bin/doc` script will install:
 
 - [fchastanet/tomdoc.sh](https://github.com/fchastanet/tomdoc.sh.git)
+
+To avoid checking for libraries update and have an impact on performance, a file
+is created in vendor dir.
+
+- `vendor/.tomdocInstalled`
+- `vendor/.batsInstalled` You can remove these files to force the update of the
+  libraries, or just wait 24 hours that the timeout expires.
 
 ### 3.2. UT
 
@@ -126,7 +158,19 @@ All the methods of this framework are unit tested, you can run the unit tests
 using the following command
 
 ```bash
-./test.sh
+./bin/test
+```
+
+Launch UT on different environments:
+
+```bash
+VENDOR="alpine" BASH_TAR_VERSION=4.4 BASH_IMAGE=bash SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r tests
+VENDOR="alpine" BASH_TAR_VERSION=5.0 BASH_IMAGE=bash SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r tests
+VENDOR="alpine" BASH_TAR_VERSION=5.1 BASH_IMAGE=bash SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r tests
+
+VENDOR="ubuntu" BASH_TAR_VERSION=4.4 BASH_IMAGE=ubuntu:20.04 SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r tests
+VENDOR="ubuntu" BASH_TAR_VERSION=5.0 BASH_IMAGE=ubuntu:20.04 SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r tests
+VENDOR="ubuntu" BASH_TAR_VERSION=5.1 BASH_IMAGE=ubuntu:20.04 SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r tests
 ```
 
 ### 3.3. auto generated bash doc

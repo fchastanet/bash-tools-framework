@@ -24,6 +24,8 @@ RUN set -x \
     gettext-base=0.19.* \
     git=1:2.25.* \
     gzip=1.10-* \
+    # used by bats when multiple jobs
+    parallel=20161222-1.1 \
     \
   && ( \
     cd /tmp \
@@ -34,6 +36,9 @@ RUN set -x \
     && ./configure \
     && make install \
   ) \
+  # remove parallel nagware
+  && mkdir -p ~/.parallel \
+  && touch ~/.parallel/will-cite \
   \
   # clean apt packages
   && apt-get remove -y ca-certificates curl bison build-essential \
@@ -57,5 +62,8 @@ ONBUILD RUN set -x \
       if getent group www-data ; then groupdel www-data; fi &&\
       groupadd -g "${GROUP_ID}" www-data &&\
       useradd -l -u "${USER_ID}" -g www-data www-data &&\
-      install -d -m 0755 -o www-data -g www-data /home/www-data; \
+      install -d -m 0755 -o www-data -g www-data /home/www-data &&\
+      # remove parallel nagware
+      mkdir -p /home/www-data/.parallel &&\
+      touch /home/www-data/.parallel/will-cite; \
     fi

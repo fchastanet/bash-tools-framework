@@ -1,0 +1,1 @@
+select count(*) from information_schema.tables where table_schema='myDb' and table_name='myTable'

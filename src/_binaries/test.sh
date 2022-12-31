@@ -32,6 +32,8 @@ if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
   exit 0
 fi
 
+Bats::installRequirementsIfNeeded
+
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (
     if (($# < 1)); then

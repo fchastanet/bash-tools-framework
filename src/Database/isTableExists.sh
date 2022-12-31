@@ -13,10 +13,9 @@
 Database::isTableExists() {
   # shellcheck disable=SC2034
   local -n instanceIsTableExists=$1
-  local dbName tableThatShouldExists sql
-  dbName="$2"
-  tableThatShouldExists="$3"
+  local dbName="$2"
+  local tableThatShouldExists="$3"
 
-  sql="select count(*) from information_schema.tables where table_schema='${dbName}' and table_name='${tableThatShouldExists}'"
-  Database::query instanceIsTableExists "${sql}"
+  local sql="select count(*) from information_schema.tables where table_schema='${dbName}' and table_name='${tableThatShouldExists}'"
+  [[ "$(Database::query instanceIsTableExists "${sql}")" = "1" ]]
 }

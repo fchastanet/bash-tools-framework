@@ -2,34 +2,37 @@
 
 # Public: list files of dir with given extension and display it as a list one by line
 #
-# **Arguments**:
-# * $1 the directory to list
-# * $2 the profile file prefix (default: "")
-# * $3 the extension
-# * $4 find options (default: '-type f', eg: -type d)
-# * $5 the indentation ('       - ' by default) can be any string compatible with sed not containing any /
-# **Output**: list of files without extension/directory
+# @param {String} dir $1 the directory to list
+# @param {String} prefix $2 the profile file prefix (default: "")
+# @param {String} ext $3 the extension
+# @param {String} findOptions $4 find options, eg: -type d
+# @paramDefault {String} findOptions $4 '-type f'
+# @param {String} indentStr $5 the indentation can be any string compatible with sed not containing any /
+# @paramDefault {String} indentStr $5 '       - '
+# @output list of files without extension/directory
 # eg:
 #       - default.local
 #       - default.remote
 #       - localhost-root
+# @return 1 if directory does not exists
 Profiles::list() {
-  local DIR="$1"
-  local PREFIX="${2:-}"
-  local EXT="${3}"
-  local FIND_OPTIONS="${4--type f}"
-  local INDENT_STR="${5-       - }"
+  local dir="$1"
+  local prefix="${2:-}"
+  local ext="${3}"
+  local findOptions="${4--type f}"
+  local indentStr="${5-       - }"
 
-  local extension="${EXT}"
-  if [[ -n "${EXT}" && "${EXT:0:1}" != "." ]]; then
-    extension=".${EXT}"
+  if [[ ! -d "${dir}" ]]; then
+    Log::displayError "Directory ${dir} does not exist"
   fi
-
+  if [[ -n "${ext}" && "${ext:0:1}" != "." ]]; then
+    ext=".${ext}"
+  fi
   (
     # shellcheck disable=SC2086
-    cd "${DIR}" &&
-      find . -maxdepth 1 ${FIND_OPTIONS} -name "${PREFIX}*${extension}" |
-      sed -E "s#^\./${PREFIX}##g" |
-        sed -E "s/${EXT}$//g" | sort | sed -E "s/^/${INDENT_STR}/"
+    cd "${dir}" &&
+      find . -maxdepth 1 ${findOptions} -name "${prefix}*${ext}" |
+      sed -E "s#^\./${prefix}##g" |
+        sed -E "s#${ext}\$##g" | sort | sed -E "s#^#${indentStr}#"
   )
 }

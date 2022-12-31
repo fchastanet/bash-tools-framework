@@ -10,6 +10,7 @@ Framework::trapAdd() {
   shift || Log::fatal "${FUNCNAME[0]} usage error"
   # helper fn to get existing trap command from output
   # of trap -p
+  # shellcheck disable=SC2317
   extract_trap_cmd() { printf '%s\n' "$3"; }
   for trapAddName in "$@"; do
     trap -- "$(

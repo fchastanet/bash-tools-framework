@@ -6,7 +6,13 @@ RUN set -x \
     && apk add --no-cache \
     "coreutils=~9" \
     "gawk=~5.1" \
-    "git=~2"
+    "git=~2" \
+    "parallel=20220422-r0" \
+    \
+    # remove parallel nagware
+    && mkdir -p ~/.parallel \
+    && touch ~/.parallel/will-cite
+
 ENV IN_BASH_DOCKER="You're in docker"
 
 ONBUILD ARG USER_ID=1000
@@ -14,6 +20,9 @@ ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
 ONBUILD RUN set -x \
     && if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
-        addgroup -g ${GROUP_ID} -S www-data \
-        && adduser -u ${USER_ID} -D -S -h /app -s /sbin/nologin -G www-data www-data; \
+        addgroup -g ${GROUP_ID} -S www-data &&\
+        adduser -u ${USER_ID} -D -S -h /app -s /sbin/nologin -G www-data www-data &&\
+        # remove parallel nagware
+        mkdir -p /app/.parallel &&\
+        touch /app/.parallel/will-cite; \
     fi

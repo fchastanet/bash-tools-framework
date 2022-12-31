@@ -16,8 +16,8 @@
 # Returns immediately if the instance is already initialized
 Database::newInstance() {
   local -n instanceNewInstance=$1
-  local dsn
-  dsn="$2"
+  local dsn="$2"
+  local DSN_FILE
 
   if [[ -v instanceNewInstance['INITIALIZED'] && "${instanceNewInstance['INITIALIZED']:-0}" == "1" ]]; then
     return
@@ -28,8 +28,8 @@ Database::newInstance() {
   instanceNewInstance['DSN_FILE']=""
 
   # check dsn file
-  DSN_FILE="$(Profiles::getAbsoluteConfFile "dsn" "${dsn}" "env")" || exit 1
-  Database::checkDsnFile "${DSN_FILE}"
+  DSN_FILE="$(Profiles::getAbsoluteConfFile "dsn" "${dsn}" "env")" || return 1
+  Database::checkDsnFile "${DSN_FILE}" || return 1
   instanceNewInstance['DSN_FILE']="${DSN_FILE}"
 
   # shellcheck source=/tests/data/dsn_valid.env
@@ -49,7 +49,6 @@ Database::newInstance() {
     echo "host = ${HOSTNAME}"
     echo "port = ${PORT}"
   ) >"${instanceNewInstance['AUTH_FILE']}"
-  Framework::trapAdd "rm -f \"${instanceNewInstance['AUTH_FILE']}\" 2>/dev/null || true" ERR EXIT
 
   # some of those values can be overridden using the dsn file
   # SKIP_COLUMN_NAMES enabled by default
