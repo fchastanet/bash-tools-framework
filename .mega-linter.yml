@@ -35,7 +35,7 @@ BASH_SHFMT_ARGUMENTS: -i 2 -ci
 
 CREDENTIALS_SECRETLINT_CONFIG_FILE: .secretlintrc.yml
 
-EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: (\.git|src/Dns/testData/ipconfig\.txt|src/Profiles/testsData/expectedDsnList\.txt)
+EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: \.git/|testsData/.*\.txt|^Gemfile.lock$|bin/bash-tpl
 
 GIT_GIT_DIFF_PRE_COMMANDS:
   - command: git config --global core.autocrlf input

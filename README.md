@@ -3,17 +3,51 @@
 > **_NOTE:_** **Documentation is best viewed on
 > [github-pages](https://fchastanet.github.io/bash-tools-framework/)**
 
+<!-- prettier-ignore-start -->
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD013 -->
 
-[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
-[![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework 'Average time to resolve an issue')
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework 'Percentage of issues still open')
+[![CI/CD](
+  https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg
+)](
+  https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster
+)
+
+[![ProjectStatus](
+  http://opensource.box.com/badges/active.svg
+)](
+  http://opensource.box.com/badges
+  'Project Status'
+)
+
+[![DeepSource](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true
+)](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge
+)
+
+[![DeepSource](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true
+)](
+  https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge
+)
+
+[![AverageTimeToResolveAnIssue](
+  http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg
+)](
+  http://isitmaintained.com/project/fchastanet/bash-tools-framework
+  'Average time to resolve an issue'
+)
+
+[![PercentageOfIssuesStillOpen](
+  http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg
+)](
+  http://isitmaintained.com/project/fchastanet/bash-tools-framework
+  'Percentage of issues still open'
+)
 
 <!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 - [1. Excerpt](#1-excerpt)
 - [2. Installation/Configuration](#2-installationconfiguration)
@@ -63,9 +97,7 @@ cd bash-tools
 
 The following structure will be created in your home directory
 
-<!-- markdownlint-capture -->
-<!-- markdownlint-disable MD033 -->
-<pre>
+```text
 ~/.bash-tools/
 ├── cliProfiles
 │   ├── default.sh
@@ -83,8 +115,7 @@ The following structure will be created in your home directory
 │   └── default.remote.env
 │   └── localhost-root.env
 └── .env
-</pre>
-<!-- markdownlint-restore -->
+```
 
 Some tools need [GNU parallel software](https://www.gnu.org/software/parallel/),
 it allows running multiple processes in parallel. You can install it running

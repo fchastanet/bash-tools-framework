@@ -46,7 +46,7 @@ function Dns::checkHostnameExternalHostLinux { #@test
     "-o : echo 'Linux'" \
     "-o : echo 'Linux'"
   stub ping "-c 1 willywonka.fchastanet.lan : echo 'PING willywonka.fchastanet.lan (192.168.1.1) 56(84) bytes of data.'"
-  stub ifconfig " : cat '${BATS_TEST_DIRNAME}/testData/ifconfig.txt'"
+  stub ifconfig " : cat '${BATS_TEST_DIRNAME}/testsData/ifconfig.txt'"
 
   run Dns::checkHostname "willywonka.fchastanet.lan"
   assert_success
@@ -61,7 +61,7 @@ function Dns::checkHostnameExternalHostWindows { #@test
     "-o : echo 'Msys'" \
     "-o : echo 'Msys'"
   stub ping "-n 1 willywonka.fchastanet.lan : echo 'PING willywonka.fchastanet.lan (192.168.1.1) 56(84) bytes of data.'"
-  stub ipconfig " : cat '${BATS_TEST_DIRNAME}/testData/ipconfig.txt'"
+  stub ipconfig " : cat '${BATS_TEST_DIRNAME}/testsData/ipconfig.txt'"
 
   run Dns::checkHostname "willywonka.fchastanet.lan"
   assert_success

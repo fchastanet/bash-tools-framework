@@ -120,9 +120,13 @@ function Database::newInstance::valid_dsnFile_from_home { #@test
   [[ "${dbFromInstance['DSN_FILE']}" = "${BATS_TMP_DIR}/home/.bash-tools/dsn/dsn_valid.env" ]]
   [[ "${dbFromInstance['DB_IMPORT_OPTIONS']}" = "--connect-timeout=5 --batch --raw --default-character-set=utf8" ]]
 
+  # shellcheck disable=SC2031
   [[ "${dbFromInstance['HOSTNAME']}" = "127.0.0.1" ]]
+  # shellcheck disable=SC2031
   [[ "${dbFromInstance['USER']}" = "root" ]]
+  # shellcheck disable=SC2031
   [[ "${dbFromInstance['PASSWORD']}" = "root" ]]
+  # shellcheck disable=SC2031
   [[ "${dbFromInstance['PORT']}" = "3306" ]]
 
   [[ -f "${dbFromInstance['AUTH_FILE']}" ]]
