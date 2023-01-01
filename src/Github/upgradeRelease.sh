@@ -18,7 +18,8 @@ Github::upgradeRelease() {
   local repo
 
   repo="$(Github::extractRepoFromGithubUrl "${releaseUrl}")"
-  Github::getLatestRelease "${repo}" latestVersion
+  Github::getLatestRelease "${repo}" latestVersion ||
+    Log::fatal "Repo ${repo} latest version not found"
   Log::displayInfo "Repo ${repo} latest version found is ${latestVersion}"
 
   local currentVersion="not existing"
