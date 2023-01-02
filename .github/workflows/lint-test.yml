@@ -26,16 +26,16 @@ jobs:
         run: ./bin/dockerLint | tee logs/docker-checkstyle.xml
 
       - name: Linting - Shellcheck
-        run:
-          ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | tee
-          logs/shellcheck-checkstyle.xml
+        run: |
+          ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | \
+            tee logs/shellcheck-checkstyle.xml
 
       - name: Linting - Awk
         run: ./bin/awkLint | tee logs/awk-checkstyle.xml
 
       - name: build bin files + check md5
         run:
-          ./.github/workflows/buildBinFiles.sh 2>&1 | tee logs/buidBinFiles.log
+          ./.github/workflows/buildBinFiles.sh 2>&1 | tee logs/buildBinFiles.log
 
       - name: Checkstyle aggregation
         uses: jwgmeligmeyling/checkstyle-github-action@master
@@ -72,11 +72,11 @@ jobs:
         include:
           - vendor: ubuntu
             bashImage: ubuntu:20.04
-            options: -j 8
+            options: -j 1
           - vendor: alpine
             bashImage: bash
             # when using 8 jobs, junit report.xml is empty
-            options: -j 2
+            options: -j 1
 
     steps:
       - name: Checkout

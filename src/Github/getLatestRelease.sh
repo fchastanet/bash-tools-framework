@@ -21,6 +21,9 @@ Github::getLatestRelease() {
     "https://api.github.com/repos/${repo}/releases/latest"; then
     # shellcheck disable=SC2034
     resultRef="$(Version::githubApiExtractVersion <"${resultFile}")"
+    return 0
   fi
+  # display curl result in case of failure
+  cat >&2 "${resultFile}"
   rm -f "${resultFile}"
 }
