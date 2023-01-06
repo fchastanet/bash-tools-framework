@@ -98,11 +98,11 @@ repos:
     rev: 0.15.0
     hooks:
       - id: megalinter-incremental
-        args: [--flavor, terraform, --release, v6.11.1]
+        args: [--flavor, terraform, --release, v6.16.0]
         stages:
           - commit
       - id: megalinter-full
-        args: [--flavor, terraform, --release, v6.11.1]
+        args: [--flavor, terraform, --release, v6.16.0]
         stages:
           - push
 

@@ -3,7 +3,7 @@
   "retryCount": 5,
   "ignorePatterns": [
     {
-      "pattern": "^http://localhost:4000/"
+      "pattern": "^http://localhost:3000/"
     },
     {
       "pattern": "^https://www.cyberciti.biz/.*$"

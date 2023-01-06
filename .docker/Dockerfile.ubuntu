@@ -11,6 +11,7 @@ RUN set -x \
   && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
   && apt-get update \
   && apt-get install -y -q --no-install-recommends \
+    bc=1.* \
     # used for bash compilation
     bison=2:3.5.* \
     # used for bash compilation
@@ -24,6 +25,7 @@ RUN set -x \
     gettext-base=0.19.* \
     git=1:2.25.* \
     gzip=1.10-* \
+    jq=1.6-* \
     # used by bats when multiple jobs
     parallel=20161222-1.1 \
     \
@@ -41,7 +43,7 @@ RUN set -x \
   && touch ~/.parallel/will-cite \
   \
   # clean apt packages
-  && apt-get remove -y ca-certificates curl bison build-essential \
+  && apt-get remove -y ca-certificates bison build-essential \
   && apt-get -y clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 

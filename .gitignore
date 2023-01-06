@@ -13,3 +13,10 @@
 /jekyll/bashDoc
 /jekyll/tests
 /jekyll/bashDoc
+
+# docsify github pages
+/pages/*.md
+/pages/_site
+/pages/bashDoc
+/pages/tests
+!/**/_sidebar.md
