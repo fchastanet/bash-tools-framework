@@ -1,3 +1,6 @@
+---
+name: Github pr approved status
+
 on:
   pull_request_review:
     types: [submitted]
