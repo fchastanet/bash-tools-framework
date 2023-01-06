@@ -35,11 +35,6 @@ jobs:
       - name: docker pull image
         run: docker pull scrasnups/build:bash-tools-ubuntu-5.1
 
-      - name: Install vendors
-        run: |
-          set -exo pipefail
-          ./bin/installRequirements
-
       - name: Check if doc up to date
         run: |
           ./bin/doc
