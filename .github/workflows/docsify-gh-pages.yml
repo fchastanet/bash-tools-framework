@@ -1,6 +1,6 @@
 ---
-# build and deploy Jekyll site to GitHub Pages
-name: Deploy Jekyll
+# build and deploy Docsify site to GitHub Pages
+name: Deploy Docsify
 
 on:
   # Runs on pushes targeting the default branch
@@ -33,31 +33,24 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: docker pull image
-        run: |
-          docker pull "scrasnups/build:bash-tools-ubuntu-5.1"
+        run: docker pull scrasnups/build:bash-tools-ubuntu-5.1
 
-      - name: Generate documentation
+      - name: Install vendors
+        run: |
+          set -exo pipefail
+          ./bin/installRequirements
+
+      - name: Check if doc up to date
         run: |
           ./bin/doc
 
       - name: Setup Pages
         uses: actions/configure-pages@v2
 
-      - uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
-
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./jekyll
-          destination: ./_site
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'pages'
 
   # Deployment job
   deploy:

@@ -85,7 +85,11 @@
     {
       "name": "packages",
       "pattern": "/[-A-Za-z0-9.]+/[-A-Za-z0-9.]+/g"
+    },
+    {
+      "name": "markdownToc",
+      "pattern": "\\]\\(#[^)]+\\)$"
     }
   ],
-  "ignoreRegExpList": ["urls", "packages"]
+  "ignoreRegExpList": ["urls", "packages", "markdownToc"]
 }
