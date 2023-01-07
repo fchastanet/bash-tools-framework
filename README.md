@@ -1,7 +1,17 @@
 # bash-tools-framework
 
-> **_NOTE:_** **Documentation is best viewed on
-> [github-pages](https://fchastanet.github.io/bash-tools-framework/)**
+<!-- remove -->
+
+> **_NOTE:_** Documentation is best viewed on
+> [github-pages](https://fchastanet.github.io/bash-tools-framework/)
+
+<!-- endRemove -->
+
+> [!TIP|label:Checkout related projects of this suite]
+>
+> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
+> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
+> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
 
 <!-- prettier-ignore-start -->
 <!-- markdownlint-capture -->
@@ -47,7 +57,6 @@
   - [1.1. Build tools](#11-build-tools)
   - [1.2. Compilation tools](#12-compilation-tools)
   - [1.3. Internal tools](#13-internal-tools)
-- [2. Installation/Configuration](#2-installationconfiguration)
 - [3. Development Environment](#3-development-environment)
   - [3.1. Install dev dependencies](#31-install-dev-dependencies)
   - [3.2. UT](#32-ut)
@@ -81,50 +90,6 @@ lint files, generate shell documentation and compile bash files.
 - **doc** : generate markdown documentation for this framework
 - **runBuildContainer** : run docker container with the Dockerfile of this
   project, allowing to build doc and run tests
-
-## 2. Installation/Configuration
-
-clone this repository and create configuration files in your home directory
-alternatively you can use the **install.sh** script
-
-```bash
-git clone git@github.com:fchastanet/bash-tools.git
-cd bash-tools
-./install.sh
-```
-
-The following structure will be created in your home directory
-
-```text
-~/.bash-tools/
-├── cliProfiles
-│   ├── default.sh
-│   ├── mysql.remote.sh
-│   ├── mysql.sh
-├── dbImportDumps
-├── dbImportProfiles
-│   ├── all.sh
-│   ├── default.sh
-│   ├── none.sh
-├── dbQueries
-│   └── databaseSize.sql
-├── dsn
-│   └── default.local.env
-│   └── default.remote.env
-│   └── localhost-root.env
-└── .env
-```
-
-Some tools need [GNU parallel software](https://www.gnu.org/software/parallel/),
-it allows running multiple processes in parallel. You can install it running
-
-```bash
-sudo apt update
-sudo apt install -y parallel
-# remove parallel nagware
-mkdir ~/.parallel
-touch ~/.parallel/will-cite
-```
 
 ## 3. Development Environment
 

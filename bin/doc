@@ -800,6 +800,11 @@ ShellDoc::generateShellDocsFromDir \
   '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|_binaries/.*\.sh|/__all\.sh)$'
 
 cp "${ROOT_DIR}/README.md" "${DOC_DIR}"
+sed -i -E \
+  -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
+  -e 's#https://fchastanet.github.io/bash-tools-framework##' \
+  "${DOC_DIR}/README.md"
+
 cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
 cp "${ROOT_DIR}/Framework.tmpl.md" "${DOC_DIR}/Framework.md"
 cp "${ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"

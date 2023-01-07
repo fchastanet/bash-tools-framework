@@ -1,10 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
     <title>Bash Tools Framework</title>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="bash,tools,framework,ubuntu,alpine" />
+    <meta
+      name="description"
+      content="Collection of several bash functions and commands that helps you to lint files, generate shell documentation and compile bash files."
+    />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="description" content="Description" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
@@ -21,17 +25,34 @@
       }
       :root {
         --sidebar-nav-link-border-width: 0 0 0 5px;
-        --theme-color   : purple;
+        --theme-color: purple;
       }
 
+      a[href^="http"]::after,
+      a[href^="https://"]::after
+      {
+        content: '';
+        width: 11px;
+        height: 11px;
+        margin-left: 4px;
+        background-image: url('assets/images/external-link.svg');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        display: inline-block;
+      }
+
+      a[href^="https://fchastanet.github.io/bash-tools-framework/"]::after,
+      a[href^="https://github.com/fchastanet/bash-tools-framework/"]::after,
+      a[href^="http://opensource.box.com"]::after,
+      a[href^="https://deepsource.io"]::after,
+      a[href^="http://isitmaintained.com"]::after
+      {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
-    <nav>
-      <a href="#/">Home</a> |
-      <a href="https://fchastanet.github.io/bash-tools/">Bash Tools</a> |
-      <a href="https://fchastanet.github.io/bash-tools/">Bash Dev Env</a>
-    </nav>
     <div id="app"></div>
     <script>
       window.$docsify = {
@@ -39,6 +60,7 @@
         repo: 'fchastanet/bash-tools-framework',
         externalLinkTarget: '_self', // default: '_blank'
         loadSidebar: true,
+        loadNavbar: true,
         subMaxLevel: 3,
         auto2top: true,
         search: 'auto',
@@ -57,5 +79,6 @@
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="//unpkg.com/docsify-scroll-to-top/dist/docsify-scroll-to-top.min.js"></script>
     <script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
+    <script src="https://unpkg.com/docsify-plugin-flexible-alerts"></script>
   </body>
 </html>
