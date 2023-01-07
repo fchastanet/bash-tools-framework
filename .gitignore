@@ -7,16 +7,10 @@
 /doc/
 *.bak
 
-/.jekyll-metadata
-/jekyll/*.md
-/jekyll/_site
-/jekyll/bashDoc
-/jekyll/tests
-/jekyll/bashDoc
-
 # docsify github pages
 /pages/*.md
 /pages/_site
 /pages/bashDoc
 /pages/tests
 !/**/_sidebar.md
+!/**/_navbar.md
