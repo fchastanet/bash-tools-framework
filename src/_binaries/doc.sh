@@ -48,7 +48,8 @@ ShellDoc::generateShellDocsFromDir \
 cp "${ROOT_DIR}/README.md" "${DOC_DIR}"
 sed -i -E \
   -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
-  -e 's#https://fchastanet.github.io/bash-tools-framework##' \
+  -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
+  -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
   "${DOC_DIR}/README.md"
 
 cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
