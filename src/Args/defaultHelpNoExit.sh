@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 Args::defaultHelpNoExit() {
-  local helpArg="$1"
+  local helpArg=$1
   shift || true
   # shellcheck disable=SC2034
   local args
@@ -11,7 +11,11 @@ Args::defaultHelpNoExit() {
   while true; do
     case $1 in
       -h | --help)
-        Args::showHelp "${helpArg}"
+        if [[ "$(type -t "${helpArg}")" = "function" ]]; then
+          "${helpArg}" "$@"
+        else
+          Args::showHelp "${helpArg}"
+        fi
         return 1
         ;;
       --)

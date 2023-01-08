@@ -700,7 +700,7 @@ while true; do
 done
 
 if (($# != 3)); then
-  Log::fatal "yous should provide exactly 3 parameters"
+  Log::fatal "you should provide exactly 3 parameters"
 fi
 
 declare fromDir="$1"
