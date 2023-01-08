@@ -138,10 +138,8 @@ while true; do
   esac
   shift || true
 done
-# default srcDirs if none provided
-if [[ "${#srcDirs}" = "0" ]]; then
-  srcDirs=("${_COMPILE_SRC_DIR}")
-fi
+# add framework src dir by default
+srcDirs+=("${_COMPILE_SRC_DIR}")
 
 if (($# != 3)); then
   Log::fatal "You must provide exactly 3 fixed parameters"
@@ -229,7 +227,17 @@ injectImportedFunctions() {
     )
     ((functionsNeedToBeImported = 0)) || true
     for functionToImport in "${functionsToImport[@]}"; do
-      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+      local fileNameToImport
+      fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+      # search through srcDirs the file to import
+      for srcDir in "${srcDirs[@]}"; do
+        fileToImport="${srcDir}/${fileNameToImport}"
+        if [[ -f "${fileToImport}" ]]; then
+          # we found it
+          break
+        fi
+      done
+
       if ! Array::contains "${fileToImport}" "${filesImported[@]}"; then
         if [[ -f "${fileToImport}" ]]; then
           # check if we need to import _.sh
