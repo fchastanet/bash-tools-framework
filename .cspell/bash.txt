@@ -56,8 +56,6 @@ keychain
 libkrb
 pykerberos
 distutils
-libloadandcheckconfigsh
-loadandcheckconfig
 loadprofile
 installfile
 installdir

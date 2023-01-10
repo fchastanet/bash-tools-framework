@@ -7,7 +7,7 @@ Git::pullIfNoChanges() {
   if [[ -d "${dir}/.git" ]]; then
     (
       cd "${dir}"
-      git update-index --refresh
+      git update-index --refresh &>/dev/null || true
       if git diff-index --quiet HEAD --; then
         Log::displayInfo "Pull git repository '${dir}' as no changes detected"
         git pull --progress

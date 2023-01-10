@@ -55,6 +55,17 @@ repos:
 
   - repo: local
     hooks:
+      - id: frameworkLint
+        name: frameworkLint
+        entry: bash -c './bin/frameworkLint -f plain'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
+  - repo: local
+    hooks:
       - id: build-sh-files
         name: build-sh-files
         entry: bash -c './.github/workflows/buildBinFiles.sh'

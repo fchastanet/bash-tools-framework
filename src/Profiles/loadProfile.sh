@@ -12,7 +12,7 @@ Profiles::loadProfile() {
     ROOT_DEPENDENCY="your software selection"
   else
     Log::displayInfo "Loading profile '${ROOT_DIR}/profile.${PROFILE}.sh'"
-    # shellcheck source=/src/Profiles/profile.default.template
+    # shellcheck source=/src/Profiles/testsData/profile.default.template
     source "${ROOT_DIR}/profile.${PROFILE}.sh"
     ROOT_DEPENDENCY="profile ${PROFILE}"
   fi
