@@ -30,6 +30,9 @@ jobs:
           ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | \
             tee logs/shellcheck-checkstyle.xml
 
+      - name: Linting - Framework
+        run: ./bin/frameworkLint | tee logs/framework-checkstyle.xml
+
       - name: Linting - Awk
         run: ./bin/awkLint | tee logs/awk-checkstyle.xml
 

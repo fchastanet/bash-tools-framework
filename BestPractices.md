@@ -21,6 +21,8 @@
   - then you can display the result using echo `"${cmd[*]}"`
   - you can execute the command using `"${cmd[@]}"`
 - to check if an environment variable is set
+- use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
+  using customized aliased commands by the user
 
 ```bash
 if [[ -z ${varName+xxx} ]]; then

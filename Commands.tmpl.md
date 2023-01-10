@@ -5,12 +5,13 @@
   - [1.2. bin/runBuildContainer](#12-binrunbuildcontainer)
   - [1.3. bin/buildPushDockerImages](#13-binbuildpushdockerimages)
   - [1.4. bin/doc](#14-bindoc)
-  - [1.4. bin/constructBinFile](#14-binconstructbinfile)
-  - [1.4. bin/compile](#14-bincompile)
+  - [1.5. bin/constructBinFile](#15-binconstructbinfile)
+  - [1.6. bin/compile](#16-bincompile)
 - [2. Linters](#2-linters)
   - [2.1. bin/dockerLint](#21-bindockerlint)
   - [2.2. bin/shellcheckLint](#22-binshellchecklint)
   - [2.3. bin/awkLint](#23-binawklint)
+  - [2.4. bin/frameworkLint](#24-binframeworklint)
 - [3. Converter and Generator tools](#3-converter-and-generator-tools)
   - [3.1. bin/generateShellDoc](#31-bingenerateshelldoc)
 
@@ -40,13 +41,13 @@
 @@@doc_help@@@
 ```
 
-### 1.4. bin/constructBinFile
+### 1.5. bin/constructBinFile
 
 ```text
 @@@constructBinFile_help@@@
 ```
 
-### 1.4. bin/compile
+### 1.6. bin/compile
 
 ```text
 @@@compile_help@@@
@@ -70,6 +71,12 @@
 
 ```text
 @@@awkLint_help@@@
+```
+
+### 2.4. bin/frameworkLint
+
+```text
+@@@frameworkLint_help@@@
 ```
 
 ## 3. Converter and Generator tools

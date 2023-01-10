@@ -1,5 +1,8 @@
 # Todo
 
+- integrate <https://argbash.dev> ?
+- use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
+  using customized aliased commands by the user
 - bats assert that no new variable pollute environment to check that every
   variable is used as local
 - Profiles::list findOptions as last arg so any number of args
@@ -91,13 +94,6 @@
   - instead I could simply move bin files to src and compile them using the
     current bin file (inception) and so get rid of \_\_all.sh
   - could it be solved with dependency injection system ?
-
-- Framework linter
-
-  - check if all function namespace::function are existing in the framework
-  - check that function defined in a .sh and used outside is correctly named
-  - check all functions calls exists
-  - do we really need it ? yes if confirmed when bug related is found
 
 - generate options parsing + doc from template
 
