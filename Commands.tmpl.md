@@ -13,7 +13,7 @@
   - [2.3. bin/awkLint](#23-binawklint)
   - [2.4. bin/frameworkLint](#24-binframeworklint)
   - [2.5. bin/megalinter](#25-binmegalinter)
-  - [2.5. .github/workflows/buildBinFiles](#25-githubworkflowsbuildbinfiles)
+  - [2.5. bin/buildBinFiles](#25-binbuildbinfiles)
 - [3. Converter and Generator tools](#3-converter-and-generator-tools)
   - [3.1. bin/generateShellDoc](#31-bingenerateshelldoc)
 
@@ -87,7 +87,7 @@
 @@@megalinter_help@@@
 ```
 
-### 2.5. .github/workflows/buildBinFiles
+### 2.5. bin/buildBinFiles
 
 ```text
 @@@buildBinFiles_help@@@
