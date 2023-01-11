@@ -4,6 +4,8 @@
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
+Bats::installRequirementsIfNeeded
+
 HELP="$(
   cat <<EOF
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
@@ -31,8 +33,6 @@ if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
   "${VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi
-
-Bats::installRequirementsIfNeeded
 
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (
