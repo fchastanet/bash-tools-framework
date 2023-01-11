@@ -2,9 +2,11 @@
 # BIN_FILE=${ROOT_DIR}/bin/shellcheckLint
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
-DEFAULT_ARGS=(--check-sourced -x -f checkstyle)
+if [[ -z "${DEFAULT_ARGS+unset}" ]]; then
+  DEFAULT_ARGS=(--source-path=SCRIPTDIR --check-sourced -x -f checkstyle)
+fi
 MIN_SHELLCHECK_VERSION="0.9.0"
 HELP="$(
   cat <<EOF
@@ -15,7 +17,7 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL} shellcheck wrapper
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <shellcheck options>
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 
 EOF
 )"

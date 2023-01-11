@@ -182,12 +182,27 @@ done
 COMPILED_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file.XXXXXXX")"
 COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
 
+# shellcheck disable=SC2317
+dynamicTemplateDir() {
+  local file="$1"
+  if [[ ! -f "${file}" ]]; then
+    if [[ -f "${TEMPLATE_DIR}/${file}" ]]; then
+      echo "${TEMPLATE_DIR}/${file}"
+      return 0
+    elif [[ -f "${ORIGINAL_TEMPLATE_DIR}/${file}" ]]; then
+      echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
+      return 0
+    fi
+  fi
+  echo "${file}"
+}
+export -f dynamicTemplateDir
+
 evalTemplate() {
   local FILE="$1"
   if [[ "${DEBUG:-0}" = "1" ]]; then
     (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
-      REPOSITORY_URL='${GITHUB_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \

@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/test
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 HELP="$(
   cat <<EOF
@@ -23,7 +23,7 @@ ${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
 
 ${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 
 EOF
 )"

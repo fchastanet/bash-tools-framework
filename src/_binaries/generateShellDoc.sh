@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/generateShellDoc
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 # Usage info
 showHelp() {
@@ -18,7 +18,7 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {fromDir} {docDir} {indexFi
   docDir    : target doc directory
   indexFile : the markdown index file
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 }
 

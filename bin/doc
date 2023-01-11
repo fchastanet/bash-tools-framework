@@ -767,6 +767,9 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
 
+${__HELP_TITLE}Source file:${__HELP_NORMAL}
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/doc.sh
+
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 

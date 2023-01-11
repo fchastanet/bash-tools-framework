@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/doc
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 DOC_DIR="${ROOT_DIR}/pages"
 
 HELP="$(
@@ -10,7 +10,7 @@ HELP="$(
 ${__HELP_TITLE}Description:${__HELP_NORMAL} generate markdown documentation
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@"

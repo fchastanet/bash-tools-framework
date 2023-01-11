@@ -718,7 +718,9 @@ if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
   fi
 fi
 
-DEFAULT_ARGS=(--check-sourced -x -f checkstyle)
+if [[ -z "${DEFAULT_ARGS+unset}" ]]; then
+  DEFAULT_ARGS=(--source-path=SCRIPTDIR --check-sourced -x -f checkstyle)
+fi
 MIN_SHELLCHECK_VERSION="0.9.0"
 HELP="$(
   cat <<EOF
@@ -731,6 +733,9 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <shellcheck options>
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
+
+${__HELP_TITLE}Source file:${__HELP_NORMAL}
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/shellcheckLint.sh
 
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License

@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/buildPushDockerImages
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 HELP="$(
   cat <<EOF
@@ -15,7 +15,7 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL} pull, build and push docker image
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <vendor> <bash_tar_version> <bash_base_image> <branch_name> <push_image>
 additional docker build options can be passed via DOCKER_BUILD_OPTIONS env variable
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@" || true
