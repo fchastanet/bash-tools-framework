@@ -37,8 +37,7 @@ jobs:
         run: ./bin/awkLint | tee logs/awk-checkstyle.xml
 
       - name: build bin files + check md5
-        run:
-          ./.github/workflows/buildBinFiles.sh 2>&1 | tee logs/buildBinFiles.log
+        run: ./.github/workflows/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
 
       - name: Checkstyle aggregation
         uses: jwgmeligmeyling/checkstyle-github-action@master
