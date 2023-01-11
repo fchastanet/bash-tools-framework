@@ -15,7 +15,7 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--fix] [--incremental|-i]
 
     --fix                     apply linters fixes automatically
     --incremental|-i          run megalinter only on files that are git staged
-    --log-level <logLevel>    set megalinter log level (default: info)
+    --log-level <logLevel>    set megalinter log level
       <logLevel> can be one of these values: debug, info, warning, error
     --filesOnly               skip linters that run in project mode
     --json                    generate megalinter report in json format
@@ -32,15 +32,13 @@ EOF
 # -l is for long options with double dash like --help
 # the comma separates different long options
 options=$(getopt -l help,log-level:,incremental,fix,json,filesOnly,image: -o hi -- "$@" 2>/dev/null) || {
-  Args::showHelp
+  Args::showHelp "${HELP}"
   Log::fatal "invalid options specified"
 }
 
 declare -a megalinterOptions=(
   -e CLEAR_REPORT_FOLDER=true
 )
-declare LOG_LEVEL=info
-
 eval set -- "${options}"
 while true; do
   case $1 in
@@ -80,9 +78,11 @@ while true; do
   shift || true
 done
 
-megalinterOptions+=(
-  -e "LOG_LEVEL=${LOG_LEVEL}"
-)
+if [[ -n "${LOG_LEVEL+unset}" ]]; then
+  megalinterOptions+=(
+    -e "LOG_LEVEL=${LOG_LEVEL}"
+  )
+fi
 
 if (($# > 0)); then
   if [[ "${INCREMENTAL}" = "1" ]]; then
@@ -104,14 +104,19 @@ if tty -s; then
   megalinterOptions+=("-it")
 fi
 
+if [[ -d "vendor/bash-tools-framework" ]]; then
+  megalinterOptions+=(
+    -v "$(cd vendor/bash-tools-framework && pwd -P):/tmp/lint/vendor/bash-tools-framework"
+  )
+fi
+
 declare cmd=(
   docker run --rm --name=megalinter
   -e HOST_USER_ID="$(id -u)"
   -e HOST_GROUP_ID="$(id -g)"
   "${megalinterOptions[@]}"
   -v /var/run/docker.sock:/var/run/docker.sock:rw
-  -v /home/wsl/projects/bash-tools:/tmp/lint:rw
-  -v "$(cd vendor/bash-tools-framework && pwd -P):/tmp/lint/vendor/bash-tools-framework"
+  -v "${ROOT_DIR}":/tmp/lint:rw
   oxsecurity/megalinter-terraform:v6.16.0
 )
 Log::displayInfo "Running ${cmd[*]}"

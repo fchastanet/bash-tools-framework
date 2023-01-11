@@ -588,8 +588,6 @@ ${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
     docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-ubuntu-5.1-user bash
     docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-alpine-5.1-user bash
 
-${__HELP_TITLE}Bats help:${__HELP_NORMAL}
-
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
 
@@ -600,6 +598,8 @@ ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 
 Copyright (c) 2022 François Chastanet
+
+${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 
 EOF
 )"

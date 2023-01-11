@@ -27,7 +27,7 @@ jobs:
 
       - name: Linting - Shellcheck
         run: |
-          ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | \
+          ./bin/shellcheckLint -f checkstyle | \
             tee logs/shellcheck-checkstyle.xml
 
       - name: Linting - Framework

@@ -21,12 +21,6 @@ repos:
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
     hooks:
-      - id: shellcheck
-        exclude: ^vendor/.*$|\.tpl$|^bin/bash-tpl$
-        args:
-          - --source-path=SCRIPTDIR
-          - --external-sources
-
       - id: shfmt
         args: [-i, '2', -ci]
         exclude: ^vendor/.*$|^tests/data/.*$|^bin/bash-tpl$
@@ -40,6 +34,17 @@ repos:
     rev: v3.0.0-alpha.4
     hooks:
       - id: prettier
+
+  - repo: local
+    hooks:
+      - id: shellcheckLint
+        name: shellcheckLint
+        entry: bash -c './bin/shellcheckLint --staged -f tty'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
 
   - repo: local
     hooks:
