@@ -12,6 +12,7 @@
   - [2.2. bin/shellcheckLint](#22-binshellchecklint)
   - [2.3. bin/awkLint](#23-binawklint)
   - [2.4. bin/frameworkLint](#24-binframeworklint)
+  - [2.5. bin/megalinter](#25-binmegalinter)
 - [3. Converter and Generator tools](#3-converter-and-generator-tools)
   - [3.1. bin/generateShellDoc](#31-bingenerateshelldoc)
 
@@ -77,6 +78,12 @@
 
 ```text
 @@@frameworkLint_help@@@
+```
+
+### 2.5. bin/megalinter
+
+```text
+@@@megalinter_help@@@
 ```
 
 ## 3. Converter and Generator tools

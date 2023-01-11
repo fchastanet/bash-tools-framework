@@ -38,7 +38,7 @@ while true; do
   case $1 in
     -h | --help)
       echo -e "${HELP}"
-      return 1
+      exit 0
       ;;
     -f | --format)
       shift || true
