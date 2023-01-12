@@ -1,5 +1,6 @@
 # Todo
 
+- Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
 - src/\_binaries/shellcheckLint.sh create function Array::remove
 - refact src/\_binaries/frameworkLint.sh formatter for plain or checkstyle
 - integrate <https://argbash.dev> ?

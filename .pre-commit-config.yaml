@@ -1,5 +1,16 @@
 ---
 repos:
+  - repo: local
+    hooks:
+      - id: fixShebangExecutionBit
+        name: fixShebangExecutionBit
+        entry: bash -c './bin/findShebangFiles chmod +x'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:

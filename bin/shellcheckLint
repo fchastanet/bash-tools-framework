@@ -820,17 +820,16 @@ fi
     exclude='^$'
   fi
   export -f File::detectBashFile
-  # shellcheck disable=SC2046
-  LC_ALL=C.UTF-8 "${VENDOR_BIN_DIR}/shellcheck" "$@" $(
-    (
-      if [[ "${ONLY_STAGED}" = "1" ]]; then
-        git --no-pager diff --name-only --cached --diff-filter=audbx
-      else
-        git ls-files --exclude-standard -c -o -m
-      fi
-    ) |
-      xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
-      grep -E -v "${exclude}" | uniq ||
-      true
-  )
+
+  (
+    if [[ "${ONLY_STAGED}" = "1" ]]; then
+      git --no-pager diff --name-only --cached --diff-filter=udbx
+    else
+      git ls-files --exclude-standard -c -o -m
+    fi
+  ) |
+    xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
+    grep -E -v "${exclude}" |
+    uniq |
+    LC_ALL=C.UTF-8 xargs -r "${VENDOR_BIN_DIR}/shellcheck" "$@"
 )
