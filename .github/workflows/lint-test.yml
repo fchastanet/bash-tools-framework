@@ -27,15 +27,17 @@ jobs:
 
       - name: Linting - Shellcheck
         run: |
-          ./bin/shellcheckLint --source-path=SCRIPTDIR --external-sources | \
+          ./bin/shellcheckLint -f checkstyle | \
             tee logs/shellcheck-checkstyle.xml
+
+      - name: Linting - Framework
+        run: ./bin/frameworkLint | tee logs/framework-checkstyle.xml
 
       - name: Linting - Awk
         run: ./bin/awkLint | tee logs/awk-checkstyle.xml
 
       - name: build bin files + check md5
-        run:
-          ./.github/workflows/buildBinFiles.sh 2>&1 | tee logs/buildBinFiles.log
+        run: ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
 
       - name: Checkstyle aggregation
         uses: jwgmeligmeyling/checkstyle-github-action@master

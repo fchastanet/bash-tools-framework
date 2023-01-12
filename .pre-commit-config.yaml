@@ -1,17 +1,5 @@
 ---
 repos:
-  - repo: local
-    hooks:
-      - id: remove-megalinter-containers
-        name: remove-megalinter-containers
-        entry:
-          bash -c 'set -x && docker ps -a -q --filter="name=megalinter" | xargs
-          -r docker rm || true'
-        language: system
-        always_run: true
-        require_serial: true
-        verbose: true
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -33,12 +21,6 @@ repos:
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
     hooks:
-      - id: shellcheck
-        exclude: ^vendor/.*$|\.tpl$|^bin/bash-tpl$
-        args:
-          - --source-path=SCRIPTDIR
-          - --external-sources
-
       - id: shfmt
         args: [-i, '2', -ci]
         exclude: ^vendor/.*$|^tests/data/.*$|^bin/bash-tpl$
@@ -55,9 +37,31 @@ repos:
 
   - repo: local
     hooks:
+      - id: shellcheckLint
+        name: shellcheckLint
+        entry: bash -c './bin/shellcheckLint --staged -f tty'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
+  - repo: local
+    hooks:
+      - id: frameworkLint
+        name: frameworkLint
+        entry: bash -c './bin/frameworkLint -f plain'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+
+  - repo: local
+    hooks:
       - id: build-sh-files
         name: build-sh-files
-        entry: bash -c './.github/workflows/buildBinFiles.sh'
+        entry: bash -c './bin/buildBinFiles --ignore-missing'
         language: system
         always_run: true
         require_serial: true
@@ -86,27 +90,13 @@ repos:
         fail_fast: true
         verbose: true
 
-  ## Python, Polyglot, Git, pre-commit
-  - repo: https://github.com/ScribeMD/pre-commit-hooks
-    rev: 0.15.0
-    hooks:
-      - id: megalinter-incremental
-        args: [--flavor, terraform, --release, v6.16.0]
-        stages:
-          - commit
-      - id: megalinter-full
-        args: [--flavor, terraform, --release, v6.16.0]
-        stages:
-          - push
-
   - repo: local
     hooks:
-      - id: remove-megalinter-containers-after-run
-        name: remove-megalinter-containers
-        entry:
-          bash -c 'set -x && docker ps -a -q --filter="name=megalinter" | xargs
-          -r docker rm || true'
+      - id: megalinter
+        name: megalinter
+        entry: bash -c './bin/megalinter --incremental --fix'
         language: system
         always_run: true
         require_serial: true
+        fail_fast: true
         verbose: true

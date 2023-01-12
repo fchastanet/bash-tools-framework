@@ -14,7 +14,7 @@ Dns::addHost() {
     printf '%s\t%s\n' "${ip}" "${hostName}" >>/etc/hosts
     Log::displaySuccess "Host ${hostName} added to /etc/hosts"
   fi
-  if Functions::isWsl; then
+  if Assert::wsl; then
     [[ -f "${BASE_MNT_C}/Windows/System32/drivers/etc/hosts" ]] || return 1
     if ! dos2unix <"${BASE_MNT_C}/Windows/System32/drivers/etc/hosts" | grep -q -E "[[:space:]]${hostName}([[:space:]]|$)"; then
       backupFile "${BASE_MNT_C}/Windows/System32/drivers/etc/hosts"

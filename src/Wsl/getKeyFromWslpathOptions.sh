@@ -3,7 +3,7 @@
 Wsl::getKeyFromWslpathOptions() {
   local options
   options=$(getopt -o "auwm" -- "$@" 2>/dev/null) || {
-    Log::error "invalid options specified"
+    Log::displayError "invalid options specified"
     return 1
   }
   local key="wslpath"
@@ -19,7 +19,7 @@ Wsl::getKeyFromWslpathOptions() {
         ;;
       *)
         shift || true
-        Log::warning "Unknown key $1"
+        Log::displayWarning "Unknown key $1"
         ;;
     esac
     shift || true

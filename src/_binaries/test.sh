@@ -2,7 +2,9 @@
 # BIN_FILE=${ROOT_DIR}/bin/test
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+
+Bats::installRequirementsIfNeeded
 
 HELP="$(
   cat <<EOF
@@ -21,9 +23,9 @@ ${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
     docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-ubuntu-5.1-user bash
     docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-alpine-5.1-user bash
 
-${__HELP_TITLE}Bats help:${__HELP_NORMAL}
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 
 EOF
 )"
@@ -31,8 +33,6 @@ if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
   "${VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi
-
-Bats::installRequirementsIfNeeded
 
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (

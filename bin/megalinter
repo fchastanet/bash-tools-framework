@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/test.sh
+# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter.sh
 # DO NOT EDIT IT
 #####################################
 
@@ -113,142 +113,32 @@ export __HELP_EXAMPLE
 export __HELP_TITLE
 export __HELP_NORMAL
 
-Args::defaultHelpNoExit() {
-  local helpArg=$1
-  shift || true
-  # shellcheck disable=SC2034
-  local args
-  args="$(getopt -l help -o h -- "$@" 2>/dev/null)" || true
-  eval set -- "${args}"
-
-  while true; do
-    case $1 in
-      -h | --help)
-        if [[ "$(type -t "${helpArg}")" = "function" ]]; then
-          "${helpArg}" "$@"
-        else
-          Args::showHelp "${helpArg}"
-        fi
-        return 1
-        ;;
-      --)
-        break
-        ;;
-      *)
-        # ignore
-        ;;
-    esac
-  done
-}
-
-BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED="${ROOT_DIR}/vendor/.batsInstalled"
-BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT=86400 # 1 day
-
-Bats::installRequirementsIfNeeded() {
-  if [[ "$(
-    Cache::getFileContentIfNotExpired \
-      "${BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED}" \
-      "${BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT}"
-  )" != "1" ]] \
-    ; then
-    Log::displayInfo "Install or update bats requirements"
-    Git::shallowClone \
-      "https://github.com/bats-core/bats-core.git" \
-      "${ROOT_DIR}/vendor/bats" \
-      "master" \
-      "FORCE_DELETION"
-
-    # last revision 2019
-    Git::shallowClone \
-      "https://github.com/bats-core/bats-support.git" \
-      "${ROOT_DIR}/vendor/bats-support" \
-      "master" \
-      "FORCE_DELETION"
-
-    Git::shallowClone \
-      "https://github.com/bats-core/bats-assert.git" \
-      "${ROOT_DIR}/vendor/bats-assert" \
-      "master" \
-      "FORCE_DELETION"
-
-    Git::shallowClone \
-      "https://github.com/Flamefire/bats-mock.git" \
-      "${ROOT_DIR}/vendor/bats-mock-Flamefire" \
-      "master" \
-      "FORCE_DELETION"
-
-    echo "1" >"${BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED}"
-  fi
-}
-
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
 }
 
-# get file content if file not expired
-# @param {String} file $1 the file to get content from
-# @param {String} maxDuration $2 number of seconds after which the file is considered expired
-# @output {String} the file content if not expired
-# @return 1 if file does not exists
-# @return 2 if file expired
-Cache::getFileContentIfNotExpired() {
-  local file="$1"
-  local maxDuration="$2"
-
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
-    return 2
-  fi
-  cat "${file}"
-}
-
-# Public: shallow clone a repository at specific commit sha, tag or branch
-# or update repo if already exists
+# concat each element of an array with a separator
 #
 # **Arguments**:
-# * $1 repository
-# * $2 Install dir
-# * $3 revision commit sha, tag or branch
-# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
-#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
+# $1 - glue string
+# $@ - rest is the array
 #
-# **Return**:
-# * code !=0 if git failure or directory not writable
-# * code=1 if destination dir already exists and force option is not 1
-Git::shallowClone() {
-  local REPO="$1"
-  local INSTALL_DIR="$2"
-  local REVISION="$3"
-  local FORCE_DELETION="${4:-0}"
-
-  if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
-  else
-    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning "Removing ${INSTALL_DIR} ..."
-        rm -Rf "${INSTALL_DIR}" || exit 1
-      else
-        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
-        return 1
-      fi
-    fi
-    (
-      Log::displayInfo "Installing ${INSTALL_DIR} ..."
-      mkdir -p "${INSTALL_DIR}"
-      cd "${INSTALL_DIR}" || exit 1
-      git init >&2
-      git remote add origin "${REPO}" >&2
-    )
-  fi
-  (
-    cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
-    git reset --hard FETCH_HEAD >&2
-  )
+# **Examples**:
+#
+# ```shell
+#  declare -a array=(test1, test2)
+#  echo "Result= $(Array::join "," "${array[@]})"
+#  Result= test1,test2
+# ```
+#
+# Returns 0 if found, 1 otherwise
+Array::join() {
+  local glue="${1-}"
+  shift || true
+  local first="${1-}"
+  shift || true
+  printf %s "${first}" "${@/#/${glue}}"
 }
 
 # Public: log level off
@@ -276,6 +166,14 @@ export __LEVEL_DEBUG
 Log::displayInfo() {
   echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
   Log::logInfo "$1"
+}
+
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
 }
 
 # lazy initialization
@@ -374,21 +272,6 @@ Env::load() {
   set +o allexport
 }
 
-# Number of seconds since last modification of the file
-# @param {String} file $1 file path
-# @return 1 if file does not exist
-# @output number of seconds since last modification of the file
-File::elapsedTimeSinceLastModification() {
-  local file="$1"
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  local lastModificationTimeSeconds diff
-  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
-  ((diff = $(date +%s) - lastModificationTimeSeconds))
-  echo -n "${diff}"
-}
-
 # Display message using debug color (grey)
 # @param {String} $1 message
 Log::displayDebug() {
@@ -441,6 +324,12 @@ Log::logDebug() {
 # @param {String} $1 message
 Log::logError() {
   Log::logMessage "ERROR" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logFatal() {
+  Log::logMessage "FATAL" "$@"
 }
 
 # log message to file
@@ -569,53 +458,129 @@ if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
   fi
 fi
 
-Bats::installRequirementsIfNeeded
+IMAGE_NAME=oxsecurity/megalinter-terraform:v6.16.0
 
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
-Launch bats inside docker container
+${__HELP_TITLE}Description:${__HELP_NORMAL} run megalinter over this repository
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--help|-h] prints this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--fix] [--incremental|-i]
+    [--log-level <logLevel>] [--filesOnly] [--json] [--image <imageName>] [<files>]
 
-${__HELP_TITLE}Examples:${__HELP_NORMAL}
-to force image rebuilding
-    DOCKER_BUILD_OPTIONS=--no-cache ./bin/test
-
-rebuild alpine image
-    DOCKER_BUILD_OPTIONS=--no-cache VENDOR=alpine BASH_IMAGE=bash:5.1 BASH_TAR_VERSION=5.1 ./bin/test
-
-${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
-    docker build -t bash-tools-ubuntu:5.1 -f .docker/Dockerfile.ubuntu
-    docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-ubuntu-5.1-user bash
-    docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-alpine-5.1-user bash
+    --fix                     apply linters fixes automatically
+    --incremental|-i          run megalinter only on files that are git staged
+    --log-level <logLevel>    set megalinter log level
+      <logLevel> can be one of these values: debug, info, warning, error
+    --filesOnly               skip linters that run in project mode
+    --json                    generate megalinter report in json format
+    --image <imageName>       specify docker megalinter image name to use (default: ${IMAGE_NAME})
+    <files> optionally you can provide a list of files to run megalinter on
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
 
 ${__HELP_TITLE}Source file:${__HELP_NORMAL}
-https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/test.sh
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter.sh
 
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 
 Copyright (c) 2022 François Chastanet
-
-${__HELP_TITLE}Bats help:${__HELP_NORMAL}
-
 EOF
 )"
-if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
-  "${VENDOR_DIR}/bats/bin/bats" --help
-  exit 0
+
+# read command parameters
+# $@ is all command line parameters passed to the script.
+# -o is for short options like -h
+# -l is for long options with double dash like --help
+# the comma separates different long options
+options=$(getopt -l help,log-level:,incremental,fix,json,filesOnly,image: -o hi: -- "$@" 2>/dev/null) || {
+  Args::showHelp "${HELP}"
+  Log::fatal "invalid options specified"
+}
+
+declare -a megalinterOptions=(
+  -e CLEAR_REPORT_FOLDER=true
+)
+eval set -- "${options}"
+while true; do
+  case $1 in
+    -h | --help)
+      Args::showHelp "${HELP}"
+      exit 0
+      ;;
+    --log-level)
+      shift || true
+      LOG_LEVEL="$1"
+      ;;
+    --json)
+      megalinterOptions+=(-e JSON_REPORTER=true)
+      ;;
+    --filesOnly)
+      megalinterOptions+=(-e SKIP_CLI_LINT_MODES=project)
+      ;;
+    --fix)
+      megalinterOptions+=(-e APPLY_FIXES=all)
+      ;;
+    --incremental | -i)
+      INCREMENTAL=1
+      ;;
+    --image)
+      shift || true
+      IMAGE_NAME=$1
+      ;;
+    --)
+      shift || true
+      break
+      ;;
+    *)
+      showHelp
+      Log::fatal "invalid argument $1"
+      ;;
+  esac
+  shift || true
+done
+
+if [[ -n "${LOG_LEVEL+unset}" ]]; then
+  megalinterOptions+=(
+    -e "LOG_LEVEL=${LOG_LEVEL}"
+  )
 fi
 
-if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
-  (
-    if (($# < 1)); then
-      "${VENDOR_DIR}/bats/bin/bats" -r tests
-    else
-      "${VENDOR_DIR}/bats/bin/bats" "$@"
-    fi
-  )
-else
-  "${BIN_DIR}/runBuildContainer" "/bash/bin/test" "$@"
+if (($# > 0)); then
+  if [[ "${INCREMENTAL}" = "1" ]]; then
+    Log::fatal "you cannot provide a list of files and the --incremental option"
+  fi
+  megalinterOptions+=(-e MEGALINTER_FILES_TO_LINT="$(Array::join "," "$@")")
 fi
+
+if [[ "${INCREMENTAL}" = "1" ]]; then
+  IFS=$'\n' read -r -d '' -a updatedFiles < <(git --no-pager diff --name-only --cached || true) || true
+  megalinterOptions+=(-e MEGALINTER_FILES_TO_LINT="$(Array::join "," "${updatedFiles[@]}")")
+fi
+
+if [[ -z "$(docker image ls -q "${IMAGE_NAME}")" ]]; then
+  docker pull "${IMAGE_NAME}"
+fi
+
+if tty -s; then
+  megalinterOptions+=("-it")
+fi
+
+if [[ -d "vendor/bash-tools-framework" ]]; then
+  megalinterOptions+=(
+    -v "$(cd vendor/bash-tools-framework && pwd -P):/tmp/lint/vendor/bash-tools-framework"
+  )
+fi
+
+declare cmd=(
+  docker run --rm --name=megalinter
+  -e HOST_USER_ID="$(id -u)"
+  -e HOST_GROUP_ID="$(id -g)"
+  "${megalinterOptions[@]}"
+  -v /var/run/docker.sock:/var/run/docker.sock:rw
+  -v "${ROOT_DIR}":/tmp/lint:rw
+  oxsecurity/megalinter-terraform:v6.16.0
+)
+Log::displayInfo "Running ${cmd[*]}"
+"${cmd[@]}"

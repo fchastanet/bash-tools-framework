@@ -11,7 +11,7 @@ Assert::etcHost() {
     Log::displayError "host ${host} not configured in /etc/hosts"
     return 1
   fi
-  if Functions::isWsl; then
+  if Assert::wsl; then
     if [[ ! -f "${BASE_MNT_C}/Windows/System32/drivers/etc/hosts" ]]; then
       Log::displayError "missing file ${BASE_MNT_C}/Windows/System32/drivers/etc/hosts"
       return 1

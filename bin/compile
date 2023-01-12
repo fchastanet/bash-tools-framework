@@ -17,6 +17,8 @@ source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 source "${_COMPILE_SRC_DIR}/Array/contains.sh"
 # shellcheck source=src/Env/load.sh
 source "${_COMPILE_SRC_DIR}/Env/load.sh"
+# shellcheck source=src/File/upFind.sh
+source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 # shellcheck source=src/Log/__all.sh
 source "${_COMPILE_SRC_DIR}/Log/__all.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
@@ -138,10 +140,8 @@ while true; do
   esac
   shift || true
 done
-# default srcDirs if none provided
-if [[ "${#srcDirs}" = "0" ]]; then
-  srcDirs=("${_COMPILE_SRC_DIR}")
-fi
+# add framework src dir by default
+srcDirs+=("${_COMPILE_SRC_DIR}")
 
 if (($# != 3)); then
   Log::fatal "You must provide exactly 3 fixed parameters"
@@ -153,6 +153,18 @@ INPUT_FILE="$1"
 SRC_FILE_PATH="$2"
 # how to join ROOT_DIR from target BIN_FILE directory
 ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
+
+# try to find .framework-config
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
+NON_FRAMEWORK_FILES_REGEXP=
+for srcDir in "${srcDirs[@]}"; do
+  configFile="$(File::upFind "${srcDir}" ".framework-config" || true)"
+  if [[ -n "${configFile}" ]]; then
+    # shellcheck source=/.framework-config
+    source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
+    Log::displayDebug "Config file ${configFile} is loaded"
+  fi
+done
 
 ################################################
 # compile Algo
@@ -170,12 +182,27 @@ ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
 COMPILED_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file.XXXXXXX")"
 COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
 
+# shellcheck disable=SC2317
+dynamicTemplateDir() {
+  local file="$1"
+  if [[ ! -f "${file}" ]]; then
+    if [[ -f "${TEMPLATE_DIR}/${file}" ]]; then
+      echo "${TEMPLATE_DIR}/${file}"
+      return 0
+    elif [[ -f "${ORIGINAL_TEMPLATE_DIR}/${file}" ]]; then
+      echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
+      return 0
+    fi
+  fi
+  echo "${file}"
+}
+export -f dynamicTemplateDir
+
 evalTemplate() {
   local FILE="$1"
   if [[ "${DEBUG:-0}" = "1" ]]; then
     (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
-      REPOSITORY_URL='${GITHUB_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
@@ -229,7 +256,22 @@ injectImportedFunctions() {
     )
     ((functionsNeedToBeImported = 0)) || true
     for functionToImport in "${functionsToImport[@]}"; do
-      fileToImport="${_COMPILE_SRC_DIR}/$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+      if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+        (echo >&2 -e "${__DEBUG_COLOR}\tFunction ${functionToImport} ignored, because of rule defined in ${configFile}${__RESET_COLOR}")
+        continue
+      fi
+
+      local fileNameToImport
+      fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+      # search through srcDirs the file to import
+      for srcDir in "${srcDirs[@]}"; do
+        fileToImport="${srcDir}/${fileNameToImport}"
+        if [[ -f "${fileToImport}" ]]; then
+          # we found it
+          break
+        fi
+      done
+
       if ! Array::contains "${fileToImport}" "${filesImported[@]}"; then
         if [[ -f "${fileToImport}" ]]; then
           # check if we need to import _.sh
@@ -282,7 +324,7 @@ declare -a FILES_IMPORTED=("${INPUT_FILE}")
 injectImportedFunctions "${COMPILED_FILE}" FILES_IMPORTED
 
 # evaluate again the current compiledFile as a template in the case
-# where injected function are using template function (include files like Framework::loadEnv
+# where injected function are using template function (include files like Env::load
 if [[ "${DEBUG:-0}" = "1" ]]; then
   (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate2${__RESET_COLOR}")
 fi

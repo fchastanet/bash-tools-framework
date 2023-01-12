@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/shellcheckLint.sh
+# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
 # DO NOT EDIT IT
 #####################################
 
@@ -113,9 +113,24 @@ export __HELP_EXAMPLE
 export __HELP_TITLE
 export __HELP_NORMAL
 
-Args::showHelp() {
-  local helpArg="$1"
-  echo -e "${helpArg}"
+# check if an element is contained in an array
+#
+# **Arguments**:
+# $@ - first parameter is the needle, rest is the array
+#
+# **Examples**:
+#
+# ```shell
+#  Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
+# ```
+#
+# Returns 0 if found, 1 otherwise
+Array::contains() {
+  local element
+  for element in "${@:2}"; do
+    [[ "${element}" = "$1" ]] && return 0
+  done
+  return 1
 }
 
 # missingBashFileList this file will contain the files that are not available when checking them
@@ -136,171 +151,8 @@ File::detectBashFile() {
 
 export -f File::detectBashFile
 
-# upgrade given binary to latest github release using retry
-# @param {String}   targetFile target binary file (eg: /usr/local/bin/kind)
-# @param {String}   releaseUrl github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
-#    the placeholder @latestVersion@ will be replaced by the latest release version
-# @param {Function} versionCallback function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
-# @param {Function} installCallback function called to install the file retrieved on github (default copy as is and set execution bit)
-# @output log messages about retry, install, upgrade
-Github::upgradeRelease() {
-  local targetFile="$1"
-  local releaseUrl="$2"
-  local argVersion="${3:---version}"
-  local versionCallback="${4:-Version::getCommandVersionFromPlainText}"
-  # shellcheck disable=SC2034
-  local installCallback="${5:-}"
-  local latestVersion
-  local repo
-
-  repo="$(Github::extractRepoFromGithubUrl "${releaseUrl}")"
-  Github::getLatestRelease "${repo}" latestVersion ||
-    Log::fatal "Repo ${repo} latest version not found"
-  Log::displayInfo "Repo ${repo} latest version found is ${latestVersion}"
-
-  local currentVersion="not existing"
-  if [[ -f "${targetFile}" ]]; then
-    currentVersion="$(${versionCallback} "${targetFile}" "${argVersion}" 2>&1 || true)"
-  fi
-  if [[ "${currentVersion}" = "${latestVersion}" ]]; then
-    Log::displayInfo "${targetFile} version ${latestVersion} already installed"
-  else
-    if [[ -z "${currentVersion}" ]]; then
-      Log::displayInfo "Installing ${targetFile} with version ${latestVersion}"
-    else
-      Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${latestVersion}"
-    fi
-    local url
-    url="$(echo "${releaseUrl}" | sed -E "s/@latestVersion@/${latestVersion}/g")"
-    Log::displayInfo "Using url ${url}"
-    newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t github.newSoftware.XXXX)
-    Retry::default curl \
-      -L \
-      -o "${newSoftware}" \
-      --fail \
-      "${url}"
-
-    Github::defaultInstall "${newSoftware}" "${targetFile}" "${latestVersion}" "${installCallback}"
-  fi
-}
-
-# Check that command version is greater than expected minimal version
-# display warning if command version greater than expected minimal version
-# display error if command version less than expected minimal version and exit 1
-# @param {String} $1 command path
-# @param {String} $2 command line parameters to launch to get command version
-# @param {String} $3 expected minimal command version
-# @param {String} $4 optional help message to display if command does not exist
-# @return 1 if command version less than expected minimal version, 0 otherwise
-# @return 2 if command does not exist
-Version::checkMinimal() {
-  local commandName="$1"
-  local argVersion="$2"
-  local minimalVersion="$3"
-  local parseVersionCallback=${4:-Version::parse}
-  local help="${4:-}"
-
-  Assert::commandExists "${commandName}" "${help}" || return 2
-
-  local version
-  version="$("${commandName}" "${argVersion}" 2>&1 | ${parseVersionCallback})"
-
-  Log::displayDebug "check ${commandName} version ${version} against minimal ${minimalVersion}"
-
-  Version::compare "${version}" "${minimalVersion}" || {
-    local result=$?
-    if [[ "${result}" = "1" ]]; then
-      Log::displayWarning "${commandName} version is ${version} greater than ${minimalVersion}, OK let's continue"
-    elif [[ "${result}" = "2" ]]; then
-      Log::displayError "${commandName} minimal version is ${minimalVersion}, your version is ${version}"
-      return 1
-    fi
-    return 0
-  }
-
-}
-
-# extract software version number
-# @param $1 the command that will be called with --version parameter
-Version::getCommandVersionFromPlainText() {
-  local command="$1"
-  local argVersion="${2:---version}"
-  "${command}" "${argVersion}" 2>&1 |
-    Version::parse # keep only version numbers
-}
-
-# Public: check if command specified exists or return 1
-# with error and message if not
-#
-# **Arguments**:
-# * $1 commandName on which existence must be checked
-# * $2 helpIfNotExists a help command to display if the command does not exist
-#
-# **Exit**: code 1 if the command specified does not exist
-Assert::commandExists() {
-  local commandName="$1"
-  local helpIfNotExists="$2"
-
-  "${BASH_FRAMEWORK_COMMAND:-command}" -v "${commandName}" >/dev/null 2>/dev/null || {
-    Log::displayError "${commandName} is not installed, please install it"
-    if [[ -n "${helpIfNotExists}" ]]; then
-      Log::displayInfo "${helpIfNotExists}"
-    fi
-    return 1
-  }
-  return 0
-}
-
-Github::defaultInstall() {
-  local newSoftware="$1"
-  local targetFile="$2"
-  local version="$3"
-  local installCallback=$4
-  # shellcheck disable=SC2086
-  mkdir -p "$(dirname "${targetFile}")"
-  if [[ "$(type -t "${installCallback}")" = "function" ]]; then
-    ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
-  else
-    mv "${newSoftware}" "${targetFile}"
-  fi
-  chmod +x "${targetFile}"
-  hash -r
-  rm -f "${newSoftware}" || true
-}
-
-# github repository eg: kubernetes-sigs/kind
-# @param {String} githubUrl eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64
-Github::extractRepoFromGithubUrl() {
-  local githubUrl="$1"
-  echo "${githubUrl}" | sed -E 's#^https://github.com/([^/]+)/([^/]+)/.*$#\1/\2#'
-}
-
-# Retrieve the latest version number of a github release using Github API using retry
-# @param {String} $1 repository in the format fchastanet/bash-tools
-#   that would match https://github.com/fchastanet/bash-tools
-# @param {String} $2 reference to a variable that will contain the result of the command
-# @output log messages about retry
-Github::getLatestRelease() {
-  local repo="$1"
-  # we need to pass the result through a reference instead of output directly
-  # because retry can output too
-  local -n resultRef=$2
-  resultRef=""
-  local resultFile
-  resultFile="$(mktemp -p "${TMPDIR:-/tmp}" -t githubLatestRelease.XXXX)"
-  # Get latest release from GitHub api
-  if Retry::default curl \
-    -o "${resultFile}" \
-    --fail \
-    --silent \
-    "https://api.github.com/repos/${repo}/releases/latest"; then
-    # shellcheck disable=SC2034
-    resultRef="$(Version::githubApiExtractVersion <"${resultFile}")"
-    return 0
-  fi
-  # display curl result in case of failure
-  cat >&2 "${resultFile}"
-  rm -f "${resultFile}"
+Filters::bashFrameworkFunctions() {
+  grep -Eoi '([a-z0-9_]+[a-z0-9_-]*::)+([a-z0-9_-]+)' "$@"
 }
 
 # Public: log level off
@@ -323,13 +175,6 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# Display message using debug color (grey)
-# @param {String} $1 message
-Log::displayDebug() {
-  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
-  Log::logDebug "$1"
-}
-
 # Display message using error color (red)
 # @param {String} $1 message
 Log::displayError() {
@@ -337,11 +182,18 @@ Log::displayError() {
   Log::logError "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
+# Display message using skip color (yellow)
 # @param {String} $1 message
-Log::displayInfo() {
-  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
-  Log::logInfo "$1"
+Log::displaySkipped() {
+  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  Log::logSkipped "$1"
+}
+
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
+Log::displaySuccess() {
+  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  Log::logSuccess "$1"
 }
 
 # Display message using warning color (yellow)
@@ -357,51 +209,6 @@ Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
   exit 1
-}
-
-# Retry a command 5 times with a delay of 15 seconds between each attempt
-# @param          $@ the command to run
-# @return 0 on success, 1 if max retries count reached
-Retry::default() {
-  Retry::parameterized 5 15 "" "$@"
-}
-
-# @param $1 version 1
-# @param $2 version 2
-# @return
-#   0 if equal
-#   1 if version1 > version2
-#   2 else
-Version::compare() {
-  if [[ "$1" = "$2" ]]; then
-    return 0
-  fi
-  local IFS=.
-  # shellcheck disable=2206
-  local i ver1=($1) ver2=($2)
-  # fill empty fields in ver1 with zeros
-  for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
-    ver1[i]=0
-  done
-  for ((i = 0; i < ${#ver1[@]}; i++)); do
-    if [[ -z "${ver2[i]+unset}" ]] || [[ -z ${ver2[i]} ]]; then
-      # fill empty fields in ver2 with zeros
-      ver2[i]=0
-    fi
-    if ((10#${ver1[i]} > 10#${ver2[i]})); then
-      return 1
-    fi
-    if ((10#${ver1[i]} < 10#${ver2[i]})); then
-      return 2
-    fi
-  done
-  return 0
-}
-
-# filter to keep only version number from a string
-# @stdin the string to parse
-Version::parse() {
-  sed -En 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | head -n1
 }
 
 # lazy initialization
@@ -500,6 +307,13 @@ Env::load() {
   set +o allexport
 }
 
+# Display message using debug color (grey)
+# @param {String} $1 message
+Log::displayDebug() {
+  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  Log::logDebug "$1"
+}
+
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayHelp() {
@@ -507,18 +321,11 @@ Log::displayHelp() {
   Log::logHelp "$1"
 }
 
-# Display message using skip color (yellow)
+# Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
-Log::displaySkipped() {
-  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  Log::logSkipped "$1"
-}
-
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
-Log::displaySuccess() {
-  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
-  Log::logSuccess "$1"
+Log::displayInfo() {
+  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
+  Log::logInfo "$1"
 }
 
 # log message to file
@@ -582,49 +389,6 @@ Log::rotate() {
   if mv "${FILENAME}" "${FILENAME}.1" &>/dev/null; then
     Log::displayInfo "Log rotation ${FILENAME} to ${FILENAME}.1"
   fi
-}
-
-# Retry a command several times depending on parameters
-# @param {int}    $1 max retries
-# @param {int}    $2 delay between attempt
-# @param {String} $3 message to display to describe the attempt
-# @param ...      $@ rest of parameters, the command to run
-# @return 0 on success
-# @return 1 if max retries count reached
-# @return 2 if maxRetries invalid value
-Retry::parameterized() {
-  local maxRetries=$1
-  shift || true
-  local delayBetweenTries=$1
-  shift || true
-  local message="$1"
-  shift || true
-  local retriesCount=1
-  if [[ "${maxRetries}" -lt 1 ]]; then
-    Log::displayError "invalid maxRetry value"
-    return 2
-  fi
-
-  while true; do
-    Log::displayInfo "Attempt ${retriesCount}/${maxRetries}: ${message}"
-    if "$@"; then
-      break
-    elif [[ "${retriesCount}" -lt "${maxRetries}" ]]; then
-      Log::displayWarning "Command failed. Wait for ${delayBetweenTries} seconds"
-      ((retriesCount++))
-      sleep "${delayBetweenTries}"
-    else
-      Log::displayError "The command has failed after ${retriesCount} attempts."
-      return 1
-    fi
-  done
-  return 0
-}
-
-# extract version number from github api
-# @stdin json result of github API
-Version::githubApiExtractVersion() {
-  jq -r ".tag_name" | Version::parse
 }
 
 # Internal: common log message
@@ -708,129 +472,180 @@ if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
   fi
 fi
 
-if [[ -z "${DEFAULT_ARGS+unset}" ]]; then
-  DEFAULT_ARGS=(-f tty)
-fi
-MIN_SHELLCHECK_VERSION="0.9.0"
-
-# check if command in PATH is already the minimal version needed
-if ! Version::checkMinimal "${VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
-  install() {
-    local file="$1"
-    local targetFile="$2"
-    local version="$3"
-    local tempDir
-    tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
-    (
-      cd "${tempDir}" || exit 1
-      tar -xJvf "${file}"
-      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
-      chmod +x "${targetFile}"
-    )
-  }
-  Github::upgradeRelease \
-    "${VENDOR_BIN_DIR}/shellcheck" \
-    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz" \
-    "--version" \
-    Version::getCommandVersionFromPlainText \
-    install
-fi
-
+CONFIG_FILENAME="${ROOT_DIR}/.framework-config"
+FORMAT="plain"
+DEFAULT_ARGS=(-f checkstyle)
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Synopsis:${__HELP_NORMAL} shellcheck wrapper
+${__HELP_TITLE}Synopsis:${__HELP_NORMAL} This framework linter
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--help] prints this help and exits.
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--staged] <shellcheck options>
-
-  [--staged] lint only staged git files which are beginning with a bash shebang.
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>]
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
-shellcheck wrapper that will
-- install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically
-- by default, lint all git files of this project which are beginning with a bash shebang
-  except if the option --staged is passed
-- use the default options '${DEFAULT_ARGS[*]}' if no parameter specified
+- check if all namespace::functions are existing in the framework
+- check that function defined in a .sh is correctly named
 
-${__HELP_TITLE}Special configuration .shellcheckrc:${__HELP_NORMAL}
-use the following line in your .shellcheckrc file to exclude
-some files from being checked (use grep -E syntax)
-exclude=^bin/bash-tpl$
+${__HELP_TITLE}Options:${__HELP_NORMAL}
+  -f|--format <checkstyle,plain>  define output format of this command
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
 
 ${__HELP_TITLE}Source file:${__HELP_NORMAL}
-https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/shellcheckLint.sh
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
 
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 
 Copyright (c) 2022 François Chastanet
-
-${__HELP_TITLE}Shellcheck help:${__HELP_NORMAL}
 EOF
 )"
 
-declare -a savedOptions=("$@")
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
+NON_FRAMEWORK_FILES_REGEXP=
+if [[ -f "${CONFIG_FILENAME}" ]]; then
+  # shellcheck source=/.framework-config
+  source "${CONFIG_FILENAME}" || Log::fatal "error while loading config file '${CONFIG_FILENAME}'"
+fi
 
-# read command parameters
-# $@ is all command line parameters passed to the script.
-# -o is for short options like -h
-# -l is for long options with double dash like --help
-# the comma separates different long options
-options=$(getopt -n "$0" -l help,staged -o h -- "$@" 2>/dev/null || true)
-ONLY_STAGED=0
-eval set -- "${options}"
+if (($# == 0)); then
+  set -- "${DEFAULT_ARGS[@]}"
+fi
+
+declare args
+args="$(getopt -l help,format: -o hf: -- "$@" 2>/dev/null)" || true
+eval set -- "${args}"
+
 while true; do
   case $1 in
     -h | --help)
-      Args::showHelp "${HELP}"
-      "${VENDOR_BIN_DIR}/shellcheck" --help
+      echo -e "${HELP}"
       exit 0
       ;;
-    --staged)
-      ONLY_STAGED=1
+    -f | --format)
+      shift || true
+      if ! Array::contains "$1" "checkstyle" "plain"; then
+        Log::fatal "format option invalid"
+      fi
+      FORMAT="$1"
       ;;
     --)
       break
       ;;
-    *) ;;
-
+    *)
+      # ignore
+      ;;
   esac
   shift || true
 done
 
-# shell check options without this command option
-for i in "${!savedOptions[@]}"; do
-  if [[ "${savedOptions[i]}" = "--staged" ]]; then
-    unset 'savedOptions[i]'
-  fi
-done
+checkEachFunctionHasSrcFile() {
+  local file="$1"
+  readarray -t functionsToImport < <(
+    Filters::bashFrameworkFunctions "${file}" |
+      awk '{$1=$1};1' |
+      sort |
+      uniq || true
+  )
+  for functionToImport in "${functionsToImport[@]}"; do
+    if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+      Log::displaySkipped "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
+      continue
+    fi
+    local fileNameToImport
+    fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+    if [[ ! -f "${SRC_DIR}/${fileNameToImport}" ]]; then
+      if [[ "${FORMAT}" = "plain" ]]; then
+        Log::displayError "The function ${functionToImport} called in ${file} does not have a matching source file ${fileNameToImport}"
+      else
+        echo "<error severity='error' message='Function ${functionToImport} does not have a matching source file ${fileNameToImport}'/>"
+      fi
+      return 1
+    fi
+  done
+}
 
-if ((${#savedOptions[@]} == 0)); then
-  set -- "${DEFAULT_ARGS[@]}"
-else
-  set -- "${savedOptions[@]}"
+# search for at least one function that is matching the filename
+checkEachSrcFileHasOneFunctionCorrectlyNamed() {
+  local srcFile="$1"
+  if [[ ! "${srcFile}" =~ ^src/ ]]; then
+    return 0
+  fi
+  local foundFunctionMatching=0
+  local expectedFunctionName currentFunction
+  local file="${srcFile#src/}"
+  expectedFunctionName="$(echo "${file%.sh}" | sed -E 's#/#::#g')"
+  if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+    Log::displaySkipped "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
+    return 0
+  fi
+
+  while IFS='' read -r currentFunction; do
+    if [[ "${currentFunction}" = "${expectedFunctionName}" ]]; then
+      foundFunctionMatching=1
+    fi
+  done < <(sed -E -n 's#^([^([:blank:]]+)\(\)[[:blank:]]*\{#\1#p' "${srcFile}")
+
+  if [[ "${foundFunctionMatching}" = "0" ]]; then
+    if [[ "${FORMAT}" = "plain" ]]; then
+      Log::displayWarning "File ${srcFile} does not contain any function named '${expectedFunctionName}'"
+    else
+      echo "<error severity='warning' message='Should contain a function named ${expectedFunctionName}'/>"
+    fi
+    ((++warningCount))
+    return 0
+  fi
+}
+
+((errorCount = 0)) || true
+((warningCount = 0)) || true
+if [[ "${FORMAT}" = "checkstyle" ]]; then
+  echo "<?xml version='1.0' encoding='UTF-8'?>"
+  echo "<checkstyle>"
 fi
 
-(
-  exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
-  if [[ -z "${exclude}" ]]; then
-    exclude='^$'
+# shellcheck disable=SC2016
+while IFS='' read -r file; do
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
+    echo "<file name='${file}'>"
   fi
-  export -f File::detectBashFile
-  # shellcheck disable=SC2046
-  LC_ALL=C.UTF-8 "${VENDOR_BIN_DIR}/shellcheck" "$@" $(
-    (
-      if [[ "${ONLY_STAGED}" = "1" ]]; then
-        git --no-pager diff --name-only --cached --diff-filter=audbx
-      else
-        git ls-files --exclude-standard -c -o -m
-      fi
-    ) |
-      xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
-      grep -E -v "${exclude}" | uniq ||
-      true
-  )
+
+  checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
+
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
+    echo "</file>"
+  fi
+done < <(
+  git ls-files --exclude-standard |
+    grep -E -v -e "${NON_FRAMEWORK_FILES_REGEXP}" |
+    xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
+    true
 )
+
+# shellcheck disable=SC2154
+while IFS='' read -r file; do
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayWarning "File ${file} does not exist, git renamed file ?"
+  else
+    echo "<file name='${file}'>"
+    echo "<error severity='warning' message='file does not exist, git renamed file ?'/>"
+    echo "</file>"
+  fi
+  ((++warningCount))
+done < <(cat "${missingBashFileList}")
+
+if [[ "${FORMAT}" = "checkstyle" ]]; then
+  echo "</checkstyle>"
+fi
+if ((errorCount > 0 || warningCount > 0)); then
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
+  fi
+  if ((errorCount > 0)); then
+    exit 1
+  fi
+else
+  Log::displaySuccess "No error found !"
+fi
