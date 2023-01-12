@@ -1,5 +1,7 @@
 # Todo
 
+- src/\_binaries/shellcheckLint.sh create function Array::remove
+- refact src/\_binaries/frameworkLint.sh formatter for plain or checkstyle
 - integrate <https://argbash.dev> ?
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the user

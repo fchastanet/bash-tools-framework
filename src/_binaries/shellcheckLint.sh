@@ -34,15 +34,16 @@ fi
 
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} shellcheck wrapper
+${__HELP_TITLE}Synopsis:${__HELP_NORMAL} shellcheck wrapper
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--help] prints this help and exits.
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--staged] <shellcheck options>
 
   [--staged] lint only staged git files which are beginning with a bash shebang.
 
+${__HELP_TITLE}Description:${__HELP_NORMAL}
 shellcheck wrapper that will
-- installs new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically
+- install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically
 - by default, lint all git files of this project which are beginning with a bash shebang
   except if the option --staged is passed
 - use the default options '${DEFAULT_ARGS[*]}' if no parameter specified

@@ -182,11 +182,11 @@ Log::displayError() {
   Log::logError "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
+# Display message using skip color (yellow)
 # @param {String} $1 message
-Log::displayInfo() {
-  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
-  Log::logInfo "$1"
+Log::displaySkipped() {
+  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  Log::logSkipped "$1"
 }
 
 # Display message using success color (bg green/fg white)
@@ -321,11 +321,11 @@ Log::displayHelp() {
   Log::logHelp "$1"
 }
 
-# Display message using skip color (yellow)
+# Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
-Log::displaySkipped() {
-  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  Log::logSkipped "$1"
+Log::displayInfo() {
+  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
+  Log::logInfo "$1"
 }
 
 # log message to file
@@ -477,11 +477,17 @@ FORMAT="plain"
 DEFAULT_ARGS=(-f checkstyle)
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} framework linter
+${__HELP_TITLE}Synopsis:${__HELP_NORMAL} This framework linter
+
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>]
+
+${__HELP_TITLE}Description:${__HELP_NORMAL}
 - check if all namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
+${__HELP_TITLE}Options:${__HELP_NORMAL}
+  -f|--format <checkstyle,plain>  define output format of this command
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
@@ -544,7 +550,7 @@ checkEachFunctionHasSrcFile() {
   )
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      Log::displayInfo "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
+      Log::displaySkipped "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
       continue
     fi
     local fileNameToImport
@@ -571,7 +577,7 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local file="${srcFile#src/}"
   expectedFunctionName="$(echo "${file%.sh}" | sed -E 's#/#::#g')"
   if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displayInfo "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
+    Log::displaySkipped "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
     return 0
   fi
 

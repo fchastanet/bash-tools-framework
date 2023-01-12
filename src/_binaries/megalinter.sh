@@ -22,7 +22,7 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--fix] [--incremental|-i]
     --image <imageName>       specify docker megalinter image name to use (default: ${IMAGE_NAME})
     <files> optionally you can provide a list of files to run megalinter on
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
 
@@ -31,7 +31,7 @@ EOF
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-options=$(getopt -l help,log-level:,incremental,fix,json,filesOnly,image: -o hi -- "$@" 2>/dev/null) || {
+options=$(getopt -l help,log-level:,incremental,fix,json,filesOnly,image: -o hi: -- "$@" 2>/dev/null) || {
   Args::showHelp "${HELP}"
   Log::fatal "invalid options specified"
 }

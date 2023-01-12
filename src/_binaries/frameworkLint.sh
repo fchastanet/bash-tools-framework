@@ -9,11 +9,17 @@ FORMAT="plain"
 DEFAULT_ARGS=(-f checkstyle)
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} framework linter
+${__HELP_TITLE}Synopsis:${__HELP_NORMAL} This framework linter
+
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>]
+
+${__HELP_TITLE}Description:${__HELP_NORMAL}
 - check if all namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
+${__HELP_TITLE}Options:${__HELP_NORMAL}
+  -f|--format <checkstyle,plain>  define output format of this command
 
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
@@ -67,7 +73,7 @@ checkEachFunctionHasSrcFile() {
   )
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      Log::displayInfo "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
+      Log::displaySkipped "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
       continue
     fi
     local fileNameToImport
@@ -94,7 +100,7 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local file="${srcFile#src/}"
   expectedFunctionName="$(echo "${file%.sh}" | sed -E 's#/#::#g')"
   if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displayInfo "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
+    Log::displaySkipped "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
     return 0
   fi
 
