@@ -18,7 +18,7 @@ Backup::dir() {
     BACKUP_FILE="${BACKUP_DIR}/${ESCAPED_DIRNAME}-$(date "+%Y%m%d-%H%M%S").tgz"
     Log::displayInfo "Backup directory '${FROM_DIR}/${DIRNAME}' to ${BACKUP_FILE#"${ROOT_DIR}/"}"
     if ! tar --same-owner -czf "${BACKUP_FILE}" "${FROM_DIR}/${DIRNAME}" 2>/dev/null; then
-      Log::error "cannot backup '${FROM_DIR}/${DIRNAME}'"
+      Log::displayError "cannot backup '${FROM_DIR}/${DIRNAME}'"
       return 2
     fi
   else

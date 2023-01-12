@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/test.sh
+# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
 # DO NOT EDIT IT
 #####################################
 
@@ -113,142 +113,46 @@ export __HELP_EXAMPLE
 export __HELP_TITLE
 export __HELP_NORMAL
 
-Args::defaultHelpNoExit() {
-  local helpArg=$1
-  shift || true
-  # shellcheck disable=SC2034
-  local args
-  args="$(getopt -l help -o h -- "$@" 2>/dev/null)" || true
-  eval set -- "${args}"
-
-  while true; do
-    case $1 in
-      -h | --help)
-        if [[ "$(type -t "${helpArg}")" = "function" ]]; then
-          "${helpArg}" "$@"
-        else
-          Args::showHelp "${helpArg}"
-        fi
-        return 1
-        ;;
-      --)
-        break
-        ;;
-      *)
-        # ignore
-        ;;
-    esac
-  done
-}
-
-BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED="${ROOT_DIR}/vendor/.batsInstalled"
-BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT=86400 # 1 day
-
-Bats::installRequirementsIfNeeded() {
-  if [[ "$(
-    Cache::getFileContentIfNotExpired \
-      "${BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED}" \
-      "${BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT}"
-  )" != "1" ]] \
-    ; then
-    Log::displayInfo "Install or update bats requirements"
-    Git::shallowClone \
-      "https://github.com/bats-core/bats-core.git" \
-      "${ROOT_DIR}/vendor/bats" \
-      "master" \
-      "FORCE_DELETION"
-
-    # last revision 2019
-    Git::shallowClone \
-      "https://github.com/bats-core/bats-support.git" \
-      "${ROOT_DIR}/vendor/bats-support" \
-      "master" \
-      "FORCE_DELETION"
-
-    Git::shallowClone \
-      "https://github.com/bats-core/bats-assert.git" \
-      "${ROOT_DIR}/vendor/bats-assert" \
-      "master" \
-      "FORCE_DELETION"
-
-    Git::shallowClone \
-      "https://github.com/Flamefire/bats-mock.git" \
-      "${ROOT_DIR}/vendor/bats-mock-Flamefire" \
-      "master" \
-      "FORCE_DELETION"
-
-    echo "1" >"${BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED}"
-  fi
-}
-
-Args::showHelp() {
-  local helpArg="$1"
-  echo -e "${helpArg}"
-}
-
-# get file content if file not expired
-# @param {String} file $1 the file to get content from
-# @param {String} maxDuration $2 number of seconds after which the file is considered expired
-# @output {String} the file content if not expired
-# @return 1 if file does not exists
-# @return 2 if file expired
-Cache::getFileContentIfNotExpired() {
-  local file="$1"
-  local maxDuration="$2"
-
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
-    return 2
-  fi
-  cat "${file}"
-}
-
-# Public: shallow clone a repository at specific commit sha, tag or branch
-# or update repo if already exists
+# check if an element is contained in an array
 #
 # **Arguments**:
-# * $1 repository
-# * $2 Install dir
-# * $3 revision commit sha, tag or branch
-# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
-#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
+# $@ - first parameter is the needle, rest is the array
 #
-# **Return**:
-# * code !=0 if git failure or directory not writable
-# * code=1 if destination dir already exists and force option is not 1
-Git::shallowClone() {
-  local REPO="$1"
-  local INSTALL_DIR="$2"
-  local REVISION="$3"
-  local FORCE_DELETION="${4:-0}"
+# **Examples**:
+#
+# ```shell
+#  Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
+# ```
+#
+# Returns 0 if found, 1 otherwise
+Array::contains() {
+  local element
+  for element in "${@:2}"; do
+    [[ "${element}" = "$1" ]] && return 0
+  done
+  return 1
+}
 
-  if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
+# missingBashFileList this file will contain the files that are not available when checking them
+# File::detectBashFile is used in conjunction with git ls-files
+# typical case for missing file is when a file is marked as deleted but not staged
+declare missingBashFileList
+missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+export missingBashFileList
+
+File::detectBashFile() {
+  file="$1"
+  if [[ ! -f "${file}" ]]; then
+    echo "${file}" >>"${missingBashFileList}"
   else
-    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning "Removing ${INSTALL_DIR} ..."
-        rm -Rf "${INSTALL_DIR}" || exit 1
-      else
-        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
-        return 1
-      fi
-    fi
-    (
-      Log::displayInfo "Installing ${INSTALL_DIR} ..."
-      mkdir -p "${INSTALL_DIR}"
-      cd "${INSTALL_DIR}" || exit 1
-      git init >&2
-      git remote add origin "${REPO}" >&2
-    )
+    awk 'FNR==1{if ($0~"^#!.*bash") print FILENAME}' "${file}"
   fi
-  (
-    cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
-    git reset --hard FETCH_HEAD >&2
-  )
+}
+
+export -f File::detectBashFile
+
+Filters::bashFrameworkFunctions() {
+  grep -Eoi '([a-z0-9_]+[a-z0-9_-]*::)+([a-z0-9_-]+)' "$@"
 }
 
 # Public: log level off
@@ -271,11 +175,40 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  Log::logError "$1"
+}
+
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayInfo() {
   echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
   Log::logInfo "$1"
+}
+
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
+Log::displaySuccess() {
+  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  Log::logSuccess "$1"
+}
+
+# Display message using warning color (yellow)
+# @param {String} $1 message
+Log::displayWarning() {
+  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  Log::logWarning "$1"
+}
+
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
 }
 
 # lazy initialization
@@ -374,33 +307,11 @@ Env::load() {
   set +o allexport
 }
 
-# Number of seconds since last modification of the file
-# @param {String} file $1 file path
-# @return 1 if file does not exist
-# @output number of seconds since last modification of the file
-File::elapsedTimeSinceLastModification() {
-  local file="$1"
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  local lastModificationTimeSeconds diff
-  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
-  ((diff = $(date +%s) - lastModificationTimeSeconds))
-  echo -n "${diff}"
-}
-
 # Display message using debug color (grey)
 # @param {String} $1 message
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
-}
-
-# Display message using error color (red)
-# @param {String} $1 message
-Log::displayError() {
-  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  Log::logError "$1"
 }
 
 # Display message using info color (bg light blue/fg white)
@@ -417,20 +328,6 @@ Log::displaySkipped() {
   Log::logSkipped "$1"
 }
 
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
-Log::displaySuccess() {
-  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
-  Log::logSuccess "$1"
-}
-
-# Display message using warning color (yellow)
-# @param {String} $1 message
-Log::displayWarning() {
-  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
-  Log::logWarning "$1"
-}
-
 # log message to file
 # @param {String} $1 message
 Log::logDebug() {
@@ -441,6 +338,12 @@ Log::logDebug() {
 # @param {String} $1 message
 Log::logError() {
   Log::logMessage "ERROR" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logFatal() {
+  Log::logMessage "FATAL" "$@"
 }
 
 # log message to file
@@ -569,53 +472,174 @@ if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
   fi
 fi
 
-Bats::installRequirementsIfNeeded
-
+CONFIG_FILENAME="${ROOT_DIR}/.framework-config"
+FORMAT="plain"
+DEFAULT_ARGS=(-f checkstyle)
 HELP="$(
   cat <<EOF
+${__HELP_TITLE}Description:${__HELP_NORMAL} framework linter
+- check if all namespace::functions are existing in the framework
+- check that function defined in a .sh is correctly named
+
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
-Launch bats inside docker container
-
-${__HELP_TITLE}Examples:${__HELP_NORMAL}
-to force image rebuilding
-    DOCKER_BUILD_OPTIONS=--no-cache ./bin/test
-
-rebuild alpine image
-    DOCKER_BUILD_OPTIONS=--no-cache VENDOR=alpine BASH_IMAGE=bash:5.1 BASH_TAR_VERSION=5.1 ./bin/test
-
-${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
-    docker build -t bash-tools-ubuntu:5.1 -f .docker/Dockerfile.ubuntu
-    docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-ubuntu-5.1-user bash
-    docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-alpine-5.1-user bash
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
 
 ${__HELP_TITLE}Source file:${__HELP_NORMAL}
-https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/test.sh
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
 
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
 
 Copyright (c) 2022 François Chastanet
-
-${__HELP_TITLE}Bats help:${__HELP_NORMAL}
-
 EOF
 )"
-if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
-  "${VENDOR_DIR}/bats/bin/bats" --help
-  exit 0
+
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
+NON_FRAMEWORK_FILES_REGEXP=
+if [[ -f "${CONFIG_FILENAME}" ]]; then
+  # shellcheck source=/.framework-config
+  source "${CONFIG_FILENAME}" || Log::fatal "error while loading config file '${CONFIG_FILENAME}'"
 fi
 
-if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
-  (
-    if (($# < 1)); then
-      "${VENDOR_DIR}/bats/bin/bats" -r tests
-    else
-      "${VENDOR_DIR}/bats/bin/bats" "$@"
-    fi
+if (($# == 0)); then
+  set -- "${DEFAULT_ARGS[@]}"
+fi
+
+declare args
+args="$(getopt -l help,format: -o hf: -- "$@" 2>/dev/null)" || true
+eval set -- "${args}"
+
+while true; do
+  case $1 in
+    -h | --help)
+      echo -e "${HELP}"
+      exit 0
+      ;;
+    -f | --format)
+      shift || true
+      if ! Array::contains "$1" "checkstyle" "plain"; then
+        Log::fatal "format option invalid"
+      fi
+      FORMAT="$1"
+      ;;
+    --)
+      break
+      ;;
+    *)
+      # ignore
+      ;;
+  esac
+  shift || true
+done
+
+checkEachFunctionHasSrcFile() {
+  local file="$1"
+  readarray -t functionsToImport < <(
+    Filters::bashFrameworkFunctions "${file}" |
+      awk '{$1=$1};1' |
+      sort |
+      uniq || true
   )
+  for functionToImport in "${functionsToImport[@]}"; do
+    if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+      Log::displayInfo "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
+      continue
+    fi
+    local fileNameToImport
+    fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+    if [[ ! -f "${SRC_DIR}/${fileNameToImport}" ]]; then
+      if [[ "${FORMAT}" = "plain" ]]; then
+        Log::displayError "The function ${functionToImport} called in ${file} does not have a matching source file ${fileNameToImport}"
+      else
+        echo "<error severity='error' message='Function ${functionToImport} does not have a matching source file ${fileNameToImport}'/>"
+      fi
+      return 1
+    fi
+  done
+}
+
+# search for at least one function that is matching the filename
+checkEachSrcFileHasOneFunctionCorrectlyNamed() {
+  local srcFile="$1"
+  if [[ ! "${srcFile}" =~ ^src/ ]]; then
+    return 0
+  fi
+  local foundFunctionMatching=0
+  local expectedFunctionName currentFunction
+  local file="${srcFile#src/}"
+  expectedFunctionName="$(echo "${file%.sh}" | sed -E 's#/#::#g')"
+  if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+    Log::displayInfo "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
+    return 0
+  fi
+
+  while IFS='' read -r currentFunction; do
+    if [[ "${currentFunction}" = "${expectedFunctionName}" ]]; then
+      foundFunctionMatching=1
+    fi
+  done < <(sed -E -n 's#^([^([:blank:]]+)\(\)[[:blank:]]*\{#\1#p' "${srcFile}")
+
+  if [[ "${foundFunctionMatching}" = "0" ]]; then
+    if [[ "${FORMAT}" = "plain" ]]; then
+      Log::displayWarning "File ${srcFile} does not contain any function named '${expectedFunctionName}'"
+    else
+      echo "<error severity='warning' message='Should contain a function named ${expectedFunctionName}'/>"
+    fi
+    ((++warningCount))
+    return 0
+  fi
+}
+
+((errorCount = 0)) || true
+((warningCount = 0)) || true
+if [[ "${FORMAT}" = "checkstyle" ]]; then
+  echo "<?xml version='1.0' encoding='UTF-8'?>"
+  echo "<checkstyle>"
+fi
+
+# shellcheck disable=SC2016
+while IFS='' read -r file; do
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
+    echo "<file name='${file}'>"
+  fi
+
+  checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
+
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
+    echo "</file>"
+  fi
+done < <(
+  git ls-files --exclude-standard |
+    grep -E -v -e "${NON_FRAMEWORK_FILES_REGEXP}" |
+    xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
+    true
+)
+
+# shellcheck disable=SC2154
+while IFS='' read -r file; do
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayWarning "File ${file} does not exist, git renamed file ?"
+  else
+    echo "<file name='${file}'>"
+    echo "<error severity='warning' message='file does not exist, git renamed file ?'/>"
+    echo "</file>"
+  fi
+  ((++warningCount))
+done < <(cat "${missingBashFileList}")
+
+if [[ "${FORMAT}" = "checkstyle" ]]; then
+  echo "</checkstyle>"
+fi
+if ((errorCount > 0 || warningCount > 0)); then
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
+  fi
+  if ((errorCount > 0)); then
+    exit 1
+  fi
 else
-  "${BIN_DIR}/runBuildContainer" "/bash/bin/test" "$@"
+  Log::displaySuccess "No error found !"
 fi

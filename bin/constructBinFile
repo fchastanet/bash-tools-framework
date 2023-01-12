@@ -18,13 +18,15 @@ showHelp() {
 ${__HELP_TITLE}Description:${__HELP_NORMAL} create binary file from a srcFile
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {srcFile} {templateDir} {binDir} {rootDir}
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {srcFile} {templateDir} {binDir} {rootDir} [{srcDirs}]
 
   --help,-h : prints this help and exits
   srcFile     : file that needs to be compiled
   templateDir : directory from which bash-tpl templates will be searched
   binDir      : fallback bin directory in case BIN_FILE has not been provided
   rootDir     : directory used to compute src file relative path
+  srcDirs : (optional) you can provide multiple directories where to find the
+                functions source code additionally to the bash-tools-framework/src directory
 
 srcFile should contains metadata BIN_FILE and ROOT_DIR_RELATIVE_TO_BIN_DIR at
 top of the bash script file (see example below)
@@ -70,14 +72,12 @@ while true; do
   shift || true
 done
 
-if (($# != 4)); then
-  Log::fatal "yous should provide exactly 4 parameters"
-fi
-
 declare srcFile="$1"
 declare templateDir="$2"
 declare binDir="$3"
 declare rootDir="$4"
+shift 4 || true
+declare -a srcDirs=("$@")
 
 getBinFileFromSrcFile() {
   local srcFile="$1"
@@ -130,11 +130,16 @@ constructBinFile() {
   mkdir -p "$(realpath -m "$(dirname "${BIN_FILE}")")" || true
 
   Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
-  "${BIN_DIR}/compile" \
-    "${srcFile}" \
-    "$(getFileRelativeToDir "${srcFile}" "${rootDir}")" \
-    "$(getRootDirRelativeToBinDirFromSrcFile "${srcFile}")" \
-    --template-dir "${templateDir}" |
+  local -a compileArgs=(
+    "${srcFile}"
+    "$(getFileRelativeToDir "${srcFile}" "${rootDir}")"
+    "$(getRootDirRelativeToBinDirFromSrcFile "${srcFile}")"
+    --template-dir "${templateDir}"
+  )
+  for srcDir in "${srcDirs[@]}"; do
+    compileArgs+=(--src-dir "${srcDir}")
+  done
+  "${BIN_DIR}/compile" "${compileArgs[@]}" |
     removeMetaDataFilter >"${BIN_FILE}"
   chmod +x "${BIN_FILE}"
 }

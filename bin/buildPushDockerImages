@@ -114,7 +114,9 @@ export __HELP_TITLE
 export __HELP_NORMAL
 
 Args::defaultHelp() {
-  if ! Args::defaultHelpNoExit "$@"; then
+  local helpArg=$1
+  shift || true
+  if ! Args::defaultHelpNoExit "${helpArg}" "$@"; then
     exit 0
   fi
 }
@@ -148,7 +150,7 @@ Log::fatal() {
 }
 
 Args::defaultHelpNoExit() {
-  local helpArg="$1"
+  local helpArg=$1
   shift || true
   # shellcheck disable=SC2034
   local args
@@ -158,7 +160,11 @@ Args::defaultHelpNoExit() {
   while true; do
     case $1 in
       -h | --help)
-        Args::showHelp "${helpArg}"
+        if [[ "$(type -t "${helpArg}")" = "function" ]]; then
+          "${helpArg}" "$@"
+        else
+          Args::showHelp "${helpArg}"
+        fi
         return 1
         ;;
       --)
@@ -478,6 +484,9 @@ additional docker build options can be passed via DOCKER_BUILD_OPTIONS env varia
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
+
+${__HELP_TITLE}Source file:${__HELP_NORMAL}
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/buildPushDockerImages.sh
 
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License

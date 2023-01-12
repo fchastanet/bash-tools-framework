@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/awkLint
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 HELP="$(
   cat <<EOF
@@ -13,14 +13,14 @@ Lint all files with .awk extension in specified folder.
 Filters out eventual .history folder
 Result in checkstyle format.
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@"
 
 awkLintScript="$(
   cat <<'EOF'
-.INCLUDE "${TEMPLATE_DIR}/_binaries/awkLint.awk"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_binaries/awkLint.awk"
 EOF
 )"
 

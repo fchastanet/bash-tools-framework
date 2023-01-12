@@ -17,7 +17,7 @@ Install::file() {
   local TO_DIR="$2"
   local FILENAME="$3"
   local successCallback=${4:-setUserRights}
-  local failureCallback=${5:-unableToCopy}
+  local failureCallback=${5:-Install::unableToCopyCallback}
   ((argsToShift = 3))
   if [[ -n "${4+x}" ]]; then
     ((argsToShift++))

@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/dockerLint
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 DEFAULT_ARGS=(-f checkstyle)
 MIN_HADOLINT_VERSION="2.12.0"
@@ -15,7 +15,7 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL} hadolint wrapper
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <hadolint options>
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
 Args::defaultHelpNoExit "${HELP}" "$@" || true

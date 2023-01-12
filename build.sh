@@ -6,11 +6,11 @@ BIN_DIR="${ROOT_DIR}/bin"
 # shellcheck disable=SC2034
 FRAMEWORK_DIR="${ROOT_DIR}"
 
-# shellcheck source=/src/_includes/_header.sh
+# shellcheck source=src/_includes/_header.sh
 source "${SRC_DIR}/_includes/_header.sh"
-# shellcheck source=/src/Env/load.sh
+# shellcheck source=src/Env/load.sh
 source "${SRC_DIR}/Env/load.sh"
-# shellcheck source=/src/Log/__all.sh
+# shellcheck source=src/Log/__all.sh
 source "${SRC_DIR}/Log/__all.sh"
 
 export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework/tree/master"

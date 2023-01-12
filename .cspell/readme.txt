@@ -12,9 +12,6 @@ Jetbrains
 markdownlint
 cklmurl
 functionsretryparameterized
-libloadandcheckconfigsh
-loadandcheckconfig
-libloadandcheckconfigsh
 functionsretryparameterized
 loadprofile
 libassertsh

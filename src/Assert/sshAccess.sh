@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 Assert::sshAccess() {
-  Functions::asUserInheritEnv ssh \
+  Sudo::asUserInheritEnv ssh \
     -q \
     -o PubkeyAuthentication=yes \
     -o PasswordAuthentication=no \

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 Apt::install() {
-  Retry::default apt-get install -y -q "$@"
+  Retry::default sudo apt-get install -y -q "$@"
 }

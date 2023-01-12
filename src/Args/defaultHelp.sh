@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 Args::defaultHelp() {
-  if ! Args::defaultHelpNoExit "$@"; then
+  local helpArg=$1
+  shift || true
+  if ! Args::defaultHelpNoExit "${helpArg}" "$@"; then
     exit 0
   fi
 }

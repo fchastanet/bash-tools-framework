@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/runBuildContainer
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 HELP="$(
   cat <<EOF
@@ -13,7 +13,7 @@ TTY allocation is detected automatically
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <vendor> <bash_tar_version> <bash_base_image> <bash_image> ...
 additional docker build options can be passed via DOCKER_BUILD_OPTIONS env variable
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/author.tpl"
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
 Args::defaultHelp "${HELP}" "$@" || true
@@ -45,7 +45,11 @@ fi
 # run tests
 args=()
 if tty -s; then
-  args=("-it")
+  args+=("-it")
+fi
+
+if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
+  args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
 fi
 
 docker run \

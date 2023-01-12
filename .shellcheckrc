@@ -5,3 +5,5 @@ enable=add-default-case
 enable=quote-safe-variables
 enable=require-double-brackets
 source-path=SCRIPTDIR
+# special property used by shellcheckLint
+exclude=^bin/bash-tpl$
