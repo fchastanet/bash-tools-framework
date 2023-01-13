@@ -1,5 +1,6 @@
 ABRT
 audbx
+udbx
 deps
 Deps
 dhclient

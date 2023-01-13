@@ -1,55 +1,68 @@
 # The commands
 
 - [1. Build tools](#1-build-tools)
-  - [1.1. bin/test](#11-bintest)
-  - [1.2. bin/runBuildContainer](#12-binrunbuildcontainer)
-  - [1.3. bin/buildPushDockerImages](#13-binbuildpushdockerimages)
-  - [1.4. bin/doc](#14-bindoc)
-  - [1.5. bin/constructBinFile](#15-binconstructbinfile)
-  - [1.6. bin/compile](#16-bincompile)
+  - [1.1. bin/buildBinFiles](#11-binbuildbinfiles)
+  - [1.2. bin/findShebangFiles](#12-binfindshebangfiles)
+  - [1.3. bin/test](#13-bintest)
+  - [1.4. bin/runBuildContainer](#14-binrunbuildcontainer)
+  - [1.5. bin/buildPushDockerImages](#15-binbuildpushdockerimages)
+  - [1.6. bin/doc](#16-bindoc)
+  - [1.7. bin/constructBinFile](#17-binconstructbinfile)
+  - [1.8. bin/compile](#18-bincompile)
 - [2. Linters](#2-linters)
   - [2.1. bin/dockerLint](#21-bindockerlint)
   - [2.2. bin/shellcheckLint](#22-binshellchecklint)
   - [2.3. bin/awkLint](#23-binawklint)
   - [2.4. bin/frameworkLint](#24-binframeworklint)
   - [2.5. bin/megalinter](#25-binmegalinter)
-  - [2.5. bin/buildBinFiles](#25-binbuildbinfiles)
 - [3. Converter and Generator tools](#3-converter-and-generator-tools)
   - [3.1. bin/generateShellDoc](#31-bingenerateshelldoc)
 
 ## 1. Build tools
 
-### 1.1. bin/test
+### 1.1. bin/buildBinFiles
+
+```text
+@@@buildBinFiles_help@@@
+```
+
+### 1.2. bin/findShebangFiles
+
+```text
+@@@findShebangFiles_help@@@
+```
+
+### 1.3. bin/test
 
 ```text
 @@@test_help@@@
 ```
 
-### 1.2. bin/runBuildContainer
+### 1.4. bin/runBuildContainer
 
 ```text
 @@@runBuildContainer_help@@@
 ```
 
-### 1.3. bin/buildPushDockerImages
+### 1.5. bin/buildPushDockerImages
 
 ```text
 @@@buildPushDockerImages_help@@@
 ```
 
-### 1.4. bin/doc
+### 1.6. bin/doc
 
 ```text
 @@@doc_help@@@
 ```
 
-### 1.5. bin/constructBinFile
+### 1.7. bin/constructBinFile
 
 ```text
 @@@constructBinFile_help@@@
 ```
 
-### 1.6. bin/compile
+### 1.8. bin/compile
 
 ```text
 @@@compile_help@@@
@@ -85,12 +98,6 @@
 
 ```text
 @@@megalinter_help@@@
-```
-
-### 2.5. bin/buildBinFiles
-
-```text
-@@@buildBinFiles_help@@@
 ```
 
 ## 3. Converter and Generator tools
