@@ -11,7 +11,7 @@
 # * $3 file extension to use (default: sh)
 #
 # Returns 1 if file not found or error during file loading
-Profiles::loadConf() {
+Conf::load() {
   local confFolder="$1"
   local conf="$2"
   local extension="${3:-sh}"

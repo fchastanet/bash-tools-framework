@@ -12,7 +12,7 @@
 #       - default.local
 #       - default.remote
 #       - localhost-root
-Profiles::getConfMergedList() {
+Conf::getMergedList() {
   local confFolder="$1"
   local extension="${2:-sh}"
   local indentStr="${3:-       - }"
@@ -22,10 +22,10 @@ Profiles::getConfMergedList() {
 
   (
     if [[ -d "${DEFAULT_CONF_DIR}" ]]; then
-      Profiles::list "${DEFAULT_CONF_DIR}" "" "${extension}" "-type f" "${indentStr}"
+      Conf::list "${DEFAULT_CONF_DIR}" "" "${extension}" "-type f" "${indentStr}"
     fi
     if [[ -d "${HOME_CONF_DIR}" ]]; then
-      Profiles::list "${HOME_CONF_DIR}" "" "${extension}" "-type f" "${indentStr}"
+      Conf::list "${HOME_CONF_DIR}" "" "${extension}" "-type f" "${indentStr}"
     fi
   ) | sort | uniq
 }

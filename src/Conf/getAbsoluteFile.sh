@@ -12,7 +12,7 @@
 # * $3 the extension (sh by default)
 #
 # Returns absolute conf filename
-Profiles::getAbsoluteConfFile() {
+Conf::getAbsoluteFile() {
   local confFolder="$1"
   local conf="$2"
   local extension="${3-.sh}"

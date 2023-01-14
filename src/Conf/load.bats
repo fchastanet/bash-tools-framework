@@ -10,8 +10,8 @@ load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"
 load "${vendorDir}/bats-mock-Flamefire/load.bash"
 
-# shellcheck source=/src/Profiles/loadConf.sh
-source "${srcDir}/Profiles/loadConf.sh"
+# shellcheck source=/src/Conf/load.sh
+source "${srcDir}/Conf/load.sh"
 # shellcheck source=/src/Env/load.sh
 source "${srcDir}/Env/load.sh"
 # shellcheck source=/src/Log/__all.sh
@@ -32,8 +32,8 @@ teardown() {
   rm -Rf "${BATS_TMP_DIR}" || true
 }
 
-function Profiles::loadConfAbsoluteFile { #@test
-  Profiles::loadConf "anyFolder" "${BATS_TMP_DIR}/home/.bash-tools/cliProfiles/default.sh"
+function Conf::loadAbsoluteFile { #@test
+  Conf::load "anyFolder" "${BATS_TMP_DIR}/home/.bash-tools/cliProfiles/default.sh"
   # shellcheck disable=SC2154
   [[ "${finalUserArg}" = "www-data" ]]
   # shellcheck disable=SC2154
@@ -42,8 +42,8 @@ function Profiles::loadConfAbsoluteFile { #@test
   [[ "${finalContainerArg}" = "project-apache2" ]]
 }
 
-function Profiles::loadConfDefault { #@test
-  Profiles::loadConf "cliProfiles" "default"
+function Conf::loadDefault { #@test
+  Conf::load "cliProfiles" "default"
 
   # shellcheck disable=SC2154
   [[ "${finalUserArg}" = "www-data" ]]
@@ -53,16 +53,16 @@ function Profiles::loadConfDefault { #@test
   [[ "${finalContainerArg}" = "project-apache2" ]]
 }
 
-function Profiles::loadConfDsn { #@test
-  Profiles::loadConf "dsn" "default.local" ".env"
+function Conf::loadDsn { #@test
+  Conf::load "dsn" "default.local" ".env"
   [[ "${HOSTNAME}" = "127.0.0.1" ]]
   [[ "${USER}" = "root" ]]
   [[ "${PASSWORD}" = "root" ]]
   [[ "${PORT}" = "3306" ]]
 }
 
-function Profiles::loadConfFileNotFound { #@test
-  run Profiles::loadConf "dsn" "not found" ".sh"
+function Conf::loadFileNotFound { #@test
+  run Conf::load "dsn" "not found" ".sh"
   assert_failure 1
   assert_output ""
 }

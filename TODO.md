@@ -8,7 +8,7 @@
   using customized aliased commands by the user
 - bats assert that no new variable pollute environment to check that every
   variable is used as local
-- Profiles::list findOptions as last arg so any number of args
+- Conf::list findOptions as last arg so any number of args
 - UT ensure /tmp files are deleted after UT run
 - Args::version to display binary version
 

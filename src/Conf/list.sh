@@ -15,7 +15,7 @@
 #       - default.remote
 #       - localhost-root
 # @return 1 if directory does not exists
-Profiles::list() {
+Conf::list() {
   local dir="$1"
   local prefix="${2:-}"
   local ext="${3}"

@@ -10,10 +10,10 @@ load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"
 load "${vendorDir}/bats-mock-Flamefire/load.bash"
 
-# shellcheck source=/src/Profiles/getConfMergedList.sh
-source "${srcDir}/Profiles/getConfMergedList.sh"
-# shellcheck source=/src/Profiles/list.sh
-source "${srcDir}/Profiles/list.sh"
+# shellcheck source=/src/Conf/getMergedList.sh
+source "${srcDir}/Conf/getMergedList.sh"
+# shellcheck source=/src/Conf/list.sh
+source "${srcDir}/Conf/list.sh"
 # shellcheck source=/src/Env/load.sh
 source "${srcDir}/Env/load.sh"
 # shellcheck source=/src/Log/__all.sh
@@ -32,20 +32,20 @@ teardown() {
   rm -Rf "${BATS_TMP_DIR}" || true
 }
 
-function Profiles::getConfMergedList { #@test
+function Conf::getMergedList { #@test
   touch "${BATS_TMP_DIR}/home/.bash-tools/dsn/dsn_invalid_port.env"
   touch "${BATS_TMP_DIR}/home/.bash-tools/dsn/otherInvalidExt.ext"
   touch "${BATS_TMP_DIR}/home/.bash-tools/dsn/otherInvalidExt2.sh"
 
-  HOME="${BATS_TMP_DIR}/home" run Profiles::getConfMergedList "dsn" "env"
+  HOME="${BATS_TMP_DIR}/home" run Conf::getMergedList "dsn" "env"
   assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/expectedDsnList.txt")"
 }
 
-function Profiles::getConfMergedListCustomIndent { #@test
+function Conf::getMergedListCustomIndent { #@test
   touch "${BATS_TMP_DIR}/home/.bash-tools/dsn/dsn_invalid_port.env"
   touch "${BATS_TMP_DIR}/home/.bash-tools/dsn/otherInvalidExt.ext"
   touch "${BATS_TMP_DIR}/home/.bash-tools/dsn/otherInvalidExt2.sh"
 
-  HOME="${BATS_TMP_DIR}/home" run Profiles::getConfMergedList "dsn" "env" "* "
+  HOME="${BATS_TMP_DIR}/home" run Conf::getMergedList "dsn" "env" "* "
   assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/expectedDsnListCustomIndent.txt")"
 }

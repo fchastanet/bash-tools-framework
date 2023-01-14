@@ -9,8 +9,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/Database/newInstance.sh"
 # shellcheck source=src/Database/checkDsnFile.sh
 source "${srcDir}/Database/checkDsnFile.sh"
-# shellcheck source=src/Profiles/getAbsoluteConfFile.sh
-source "${srcDir}/Profiles/getAbsoluteConfFile.sh"
+# shellcheck source=src/Conf/getAbsoluteFile.sh
+source "${srcDir}/Conf/getAbsoluteFile.sh"
 # shellcheck source=src/File/concatenatePath.sh
 source "${srcDir}/File/concatenatePath.sh"
 
