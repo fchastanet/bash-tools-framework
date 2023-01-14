@@ -47,7 +47,7 @@ showHelp() {
 ${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the script given in parameter
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath> <relativePath> [--src-dir|-s <srcDir>] [--template <templateName>]
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath> <relativePath> <rootDir> [--src-dir|-s <srcDir>] [--template <templateName>]
     --help,-h prints this help and exits
 
     <fileToCompile> the relative or absolute path to compile into one file
@@ -60,6 +60,8 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePat
       are installed.
       Eg: this is useful for these binary files to know that to get some configuration files.
       You can use the variable ROOT_DIR_RELATIVE_TO_BIN_DIR in your template.
+
+    <rootDir> useful to include some files during compilation
 
     --src-dir|-s <srcDir> provide the directory where to find the functions source code.
       By default this project src directory is used.
@@ -143,8 +145,8 @@ done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 
-if (($# != 3)); then
-  Log::fatal "You must provide exactly 3 fixed parameters"
+if (($# != 4)); then
+  Log::fatal "You must provide exactly 4 fixed parameters"
 fi
 
 INPUT_FILE="$1"
@@ -153,6 +155,8 @@ INPUT_FILE="$1"
 SRC_FILE_PATH="$2"
 # how to join ROOT_DIR from target BIN_FILE directory
 ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
+# root dir absolute path
+ROOT_DIR="$4"
 
 # try to find .framework-config
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
@@ -203,11 +207,13 @@ evalTemplate() {
   if [[ "${DEBUG:-0}" = "1" ]]; then
     (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
+      REPOSITORY_URL='${GITHUB_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
+      ROOT_DIR='${ROOT_DIR}' \
       ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
       FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
-      SRC_ABSOLUTE_PATH='$(realpath "${SRC_FILE_PATH}")' \
+      SRC_ABSOLUTE_PATH='${SRC_ABSOLUTE_PATH}' \
       ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
       ) > binFile${__RESET_COLOR}")
   fi
@@ -218,6 +224,7 @@ evalTemplate() {
       REPOSITORY_URL="${GITHUB_URL}" \
       ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
       TEMPLATE_DIR="${TEMPLATE_DIR}" \
+      ROOT_DIR="${ROOT_DIR}" \
       ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
       FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}" \
       SRC_ABSOLUTE_PATH="${SRC_ABSOLUTE_PATH}" \

@@ -134,6 +134,7 @@ constructBinFile() {
     "${srcFile}"
     "$(getFileRelativeToDir "${srcFile}" "${rootDir}")"
     "$(getRootDirRelativeToBinDirFromSrcFile "${srcFile}")"
+    "${rootDir}"
     --template-dir "${templateDir}"
   )
   for srcDir in "${srcDirs[@]}"; do
