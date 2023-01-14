@@ -16,6 +16,7 @@
     "pages/README.md",
     "pages/Commands.md",
     "pages/Framework.md",
+    "pages/bashDoc/**",
     "**/.venv/**",
     "**/*cache*/**",
     "**/.github/**",
