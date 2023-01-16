@@ -14,6 +14,9 @@
   nounset is not usable because empty array are considered unset
 - always use `sed -E`
 - avoid using grep -P as it is not supported on alpine, prefer using -E
+- grep regular expresion [A-Za-z] matches by default accentuated character, it
+  you don't want to match them, use the environment variable `LC_ALL=POSIX`,
+  - Eg: `LC_ALL=POSIX grep -E -q '^[A-Za-z_0-9:]+$'`
 
 ## General tips
 
@@ -53,3 +56,7 @@ alternatively you can use this framework function `Assert::validVariableName`
   expands to the value of PARAMETER, as if it just was ${PARAMETER}. If you omit
   the : (colon), like shown in the second form, the default value is only used
   when the parameter was unset, not when it was empty.
+
+## Array
+
+- read each line of a file to an array `readarray -t var < /path/to/filename`
