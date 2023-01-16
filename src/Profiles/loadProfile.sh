@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
 
 Profiles::loadProfile() {
-  local PROFILE="$1"
+  local profileDir="$1"
+  shift 2 || true
+  local profile="$1"
+
   local -a CONFIG_LIST=()
-  local ROOT_DEPENDENCY
-  checkMissingScripts || exit 1
+
   # load the profile
-  if [[ -z "${PROFILE}" ]]; then
+  if [[ -z "${profile}" ]]; then
     shift
     CONFIG_LIST=("$@")
-    ROOT_DEPENDENCY="your software selection"
   else
-    Log::displayInfo "Loading profile '${ROOT_DIR}/profile.${PROFILE}.sh'"
-    # shellcheck source=/src/Profiles/testsData/profile.default.template
-    source "${ROOT_DIR}/profile.${PROFILE}.sh"
-    ROOT_DEPENDENCY="profile ${PROFILE}"
+    Log::displayInfo "Loading profile '${profileDir}/profile.${profile}.sh'"
+    if [[ ! -f "${profileDir}/profile.${profile}.sh" ]]; then
+      Log::fatal "profile profile.${profile}.sh not found in '${profileDir}'"
+    fi
+    # shellcheck source=/src/Profiles/testsData/profile.test1.sh
+    source "${profileDir}/profile.${profile}.sh"
   fi
   if [[ ! -v CONFIG_LIST ]]; then
-    Log::fatal "Profile ${ROOT_DIR}/profile.${PROFILE}.sh missing variable CONFIG_LIST"
+    Log::fatal "Profile ${profileDir}/profile.${profile}.sh missing variable CONFIG_LIST"
   fi
   if [[ ${#CONFIG_LIST[@]} -eq 0 ]]; then
-    Log::fatal "Profile ${ROOT_DIR}/profile.${PROFILE}.sh variable CONFIG_LIST cannot be empty"
+    Log::fatal "Profile ${profileDir}/profile.${profile}.sh variable CONFIG_LIST cannot be empty"
   fi
 
   # remove duplicates from profile preserving order
@@ -28,16 +31,6 @@ Profiles::loadProfile() {
     IFS=$'\n'
     echo "${CONFIG_LIST[*]}" | awk '!x[$0]++'
   )
-  if [[ "${SKIP_DEPENDENCIES}" = "0" ]]; then
-    CONFIG_LIST=("_Test" "_Upgrade" "MandatorySoftwares" "${CONFIG_LIST[@]}" "_Clean" "_Export")
-    # deduce dependencies
-    local -a allDepsResult=()
-    # shellcheck disable=SC2034
-    local -a allDepsResultSeen=()
-    Profiles::allDepsRecursive "${ROOT_DEPENDENCY}" "${CONFIG_LIST[@]}" allDepsResult allDepsResultSeen
-    CONFIG_LIST=("${allDepsResult[@]}")
-  else
-    CONFIG_LIST=("${CONFIG_LIST[@]}")
-  fi
+  echo "${CONFIG_LIST[@]}"
 
 }

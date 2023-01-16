@@ -17,6 +17,8 @@
     "pages/Commands.md",
     "pages/Framework.md",
     "pages/bashDoc/**",
+    "**/testsData/**",
+    "tests/ManualTest*.sh",
     "**/.venv/**",
     "**/*cache*/**",
     "**/.github/**",
