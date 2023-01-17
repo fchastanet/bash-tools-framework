@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #####################################
-# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
+# GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint.sh
 # DO NOT EDIT IT
 #####################################
 
@@ -133,28 +133,6 @@ Array::contains() {
   return 1
 }
 
-# missingBashFileList this file will contain the files that are not available when checking them
-# File::detectBashFile is used in conjunction with git ls-files
-# typical case for missing file is when a file is marked as deleted but not staged
-declare missingBashFileList
-missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-export missingBashFileList
-
-File::detectBashFile() {
-  file="$1"
-  if [[ ! -f "${file}" ]]; then
-    echo "${file}" >>"${missingBashFileList}"
-  else
-    awk 'FNR==1{if ($0~"^#!.*bash") print FILENAME}' "${file}"
-  fi
-}
-
-export -f File::detectBashFile
-
-Filters::bashFrameworkFunctions() {
-  grep -Eoi '([a-z0-9_]+[a-z0-9_-]*::)+([a-z0-9_-]+)' "$@"
-}
-
 # Public: log level off
 export __LEVEL_OFF=0
 # Public: log level error
@@ -175,40 +153,187 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# Display message using error color (red)
-# @param {String} $1 message
-Log::displayError() {
-  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  Log::logError "$1"
-}
-
-# Display message using skip color (yellow)
-# @param {String} $1 message
-Log::displaySkipped() {
-  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  Log::logSkipped "$1"
-}
-
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
-Log::displaySuccess() {
-  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
-  Log::logSuccess "$1"
-}
-
-# Display message using warning color (yellow)
-# @param {String} $1 message
-Log::displayWarning() {
-  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
-  Log::logWarning "$1"
-}
-
 # Display message using error color (red) and exit immediately with error status 1
 # @param {String} $1 message
 Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
   exit 1
+}
+
+# ensure all methods called dynamically are imported
+# import Log::displayError
+# import Log::displaySkipped
+# import Log::displayWarning
+
+# formatter plain
+ProfilesLintDefinitionsHeader_plain() {
+  true
+}
+ProfilesLintDefinitionsFileStart_plain() {
+  true
+}
+ProfilesLintDefinitionsFileMsg_plain() {
+  local file="$1"
+  local severity="$2"
+  local msg="$3"
+  # to avoid frameworkLint to detect "Log :: display" as a missing definition
+  local separator="::"
+  "Log${separator}display${severity^}" "File ${file} - ${msg}"
+}
+ProfilesLintDefinitionsFileEnd_plain() {
+  true
+}
+ProfilesLintDefinitionsFooter_plain() {
+  local errorCount="$1"
+  if [[ "${errorCount}" = "0" ]]; then
+    Log::displaySuccess "No lint error found !"
+  else
+    Log::displayError "${errorCount} errors has been found"
+  fi
+}
+
+# formatter checkstyle
+ProfilesLintDefinitionsHeader_checkstyle() {
+  echo "<?xml version='1.0' encoding='UTF-8'?>"
+  echo "<checkstyle>"
+}
+ProfilesLintDefinitionsFileStart_checkstyle() {
+  local file="$1"
+  echo "<file name='${file}'>"
+}
+ProfilesLintDefinitionsFileMsg_checkstyle() {
+  local file="$1"
+  local severity="$2"
+  local msg="$3"
+  echo "<error severity='${severity}' message='$(echo "${msg}" | sed -E "s/'/\&quot;/g")'/>"
+}
+ProfilesLintDefinitionsFileEnd_checkstyle() {
+  local file="$1"
+  echo "</file>"
+}
+ProfilesLintDefinitionsFooter_checkstyle() {
+  echo "</checkstyle>"
+}
+
+# linter
+Profiles::lintDefinitions() {
+  local scriptsDir="$1"
+  local format="$2"
+  local -a mandatoryMethods=(
+    helpDescription
+    helpVariables
+    listVariables
+    defaultVariables
+    checkVariables
+    fortunes
+    dependencies
+    breakOnConfigFailure
+    breakOnTestFailure
+    install
+    configure
+    "test"
+  )
+  local errorCount
+  ((errorCount = 0)) || true
+  "ProfilesLintDefinitionsHeader_${format}"
+
+  while IFS= read -r relativeScriptFile; do
+    ProfilesLintDefinitionFile "${scriptsDir}" "${relativeScriptFile}" "${format}" ||
+      ((errorCount += $?))
+  done < <(ProfilesListDefinitionsFiles "${scriptsDir}")
+
+  "ProfilesLintDefinitionsFooter_${format}" "${errorCount}"
+
+  return "${errorCount}"
+}
+
+ProfilesListDefinitionsFiles() {
+  local scriptsDir="$1"
+  find "${scriptsDir}" -type f -name '*.sh' | sed -E "s#^${scriptsDir}/##" | sort
+}
+
+ProfilesGetScriptNameFromRelativeScriptFile() {
+  local relativeScriptFile="$1"
+  local scriptName
+  scriptName="$(basename "${relativeScriptFile}")"
+  echo "${scriptName%.sh}"
+}
+
+ProfilesLintDefinitionFile() {
+  local scriptsDir="$1"
+  local relativeScriptFile="$2"
+  local format="$3"
+  local scriptName fullMethodName relativeScriptFile errorCount
+  local errorCount
+  ((errorCount = 0)) || true
+
+  scriptName="$(ProfilesGetScriptNameFromRelativeScriptFile "${relativeScriptFile}")"
+
+  "ProfilesLintDefinitionsFileStart_${format}" "${relativeScriptFile}"
+
+  # load each script and check methods validity
+  ( #
+    ((errors = 0)) || true
+    # remove all the methods defined
+    # shellcheck disable=SC2046
+    declare -a functions
+    readarray -t functions < <(
+      declare -f -F | grep -E '^declare -f installScripts_' | cut -f 3 -d' '
+    )
+    if ((${#functions[@]} > 0)); then
+      unset -f "${functions[@]}" || true
+    fi
+
+    # shellcheck source=src/Profiles/testsData/allDepsRecursive/installScripts/Install1.sh
+    source "${scriptsDir}/${relativeScriptFile}"
+
+    # check if other definitions files functions are defined by this definition file
+    # it would mean that another file has defined the same methods
+    local relativeOtherScriptFile
+    while IFS= read -r relativeOtherScriptFile; do
+      if [[ "${relativeOtherScriptFile}" = "${relativeScriptFile}" ]]; then
+        continue
+      fi
+      local otherScriptName
+      otherScriptName="$(ProfilesGetScriptNameFromRelativeScriptFile "${relativeOtherScriptFile}")"
+      local otherScriptMethods
+      otherScriptMethods="$(declare -f -F | grep -E "^declare -f installScripts_${otherScriptName}_" | sed -E 's/declare -f //g')"
+      if [[ -n "${otherScriptMethods}" ]]; then
+        "ProfilesLintDefinitionsFileMsg_${format}" "${relativeScriptFile}" "error" \
+          "Methods ${otherScriptMethods} should be defined in ${otherScriptName}.sh file"
+        ((++errors))
+      fi
+    done < <(ProfilesListDefinitionsFiles "${scriptsDir}")
+
+    # check that all mandatory methods exists
+    for method in "${mandatoryMethods[@]}"; do
+      fullMethodName="installScripts_${scriptName}_${method}"
+      if ! declare -f -F "${fullMethodName}" &>/dev/null; then
+        "ProfilesLintDefinitionsFileMsg_${format}" "${relativeScriptFile}" "error" \
+          "Method ${fullMethodName} does not exist, check that following methods exists (${mandatoryMethods[*]})"
+        ((++errors))
+        # stop at first method missing
+        break
+      fi
+      # check if each dependency exists
+      if [[ "${method}" = "dependencies" ]]; then
+        while IFS= read -r dep; do
+          if [[ ! -f "${scriptsDir}/${dep}.sh" ]]; then
+            "ProfilesLintDefinitionsFileMsg_${format}" "${relativeScriptFile}" "error" \
+              "unknown dependency '${dep}' specified in '${fullMethodName}'"
+            ((++errors))
+          fi
+        done < <("${fullMethodName}")
+      fi
+    done
+
+    return "${errors}"
+  ) || ((errorCount += $?))
+
+  "ProfilesLintDefinitionsFileEnd_${format}" "${relativeScriptFile}"
+
+  return "${errorCount}"
 }
 
 # lazy initialization
@@ -314,6 +439,13 @@ Log::displayDebug() {
   Log::logDebug "$1"
 }
 
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  Log::logError "$1"
+}
+
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayHelp() {
@@ -326,6 +458,27 @@ Log::displayHelp() {
 Log::displayInfo() {
   echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
   Log::logInfo "$1"
+}
+
+# Display message using skip color (yellow)
+# @param {String} $1 message
+Log::displaySkipped() {
+  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  Log::logSkipped "$1"
+}
+
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
+Log::displaySuccess() {
+  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  Log::logSuccess "$1"
+}
+
+# Display message using warning color (yellow)
+# @param {String} $1 message
+Log::displayWarning() {
+  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  Log::logWarning "$1"
 }
 
 # log message to file
@@ -472,31 +625,43 @@ if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
   fi
 fi
 
-CONFIG_FILENAME="${ROOT_DIR}/.framework-config"
 FORMAT="plain"
-DEFAULT_ARGS=(-f checkstyle)
 HELP="$(
   cat <<EOF
-${__HELP_TITLE}Synopsis:${__HELP_NORMAL} This framework linter
+${__HELP_TITLE}Synopsis:${__HELP_NORMAL} lint definitions files
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>]
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>] <folder>
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
-Lint files of the current repository
-- check if all namespace::functions are existing in the framework
-- check that function defined in a .sh is correctly named
+Lint files of the given directory
+- check that all mandatory methods are existing
+  installScripts_<fileName>_helpDescription
+  installScripts_<fileName>_helpVariables
+  installScripts_<fileName>_listVariables
+  installScripts_<fileName>_defaultVariables
+  installScripts_<fileName>_checkVariables
+  installScripts_<fileName>_fortunes
+  installScripts_<fileName>_dependencies
+  installScripts_<fileName>_breakOnConfigFailure
+  installScripts_<fileName>_breakOnTestFailure
+  installScripts_<fileName>_install
+  installScripts_<fileName>_configure
+  installScripts_<fileName>_test
+- check if other definitions files functions are defined by currently
+  linted definition file it would mean that another file has defined
+  the same methods
+- check if each dependency exists
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
-  --src-dir|-s <srcDir> provide the directory where to find the functions source code.
-      By default current src directory is used also.
+    (default: plain)
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
 
 ${__HELP_TITLE}Source file:${__HELP_NORMAL}
-https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
+https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint.sh
 
 ${__HELP_TITLE}License:${__HELP_NORMAL}
 MIT License
@@ -505,21 +670,8 @@ Copyright (c) 2022 François Chastanet
 EOF
 )"
 
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
-NON_FRAMEWORK_FILES_REGEXP=^$
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
-FRAMEWORK_SRC_DIRS=()
-if [[ -f "${CONFIG_FILENAME}" ]]; then
-  # shellcheck source=/.framework-config
-  source "${CONFIG_FILENAME}" || Log::fatal "error while loading config file '${CONFIG_FILENAME}'"
-fi
-
-if (($# == 0)); then
-  set -- "${DEFAULT_ARGS[@]}"
-fi
-
 declare args
-args="$(getopt -l help,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,format: -o hf: -- "$@" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do
@@ -535,13 +687,6 @@ while true; do
       fi
       FORMAT="$1"
       ;;
-    --src-dir | -s)
-      shift || true
-      if [[ ! -d "$1" ]]; then
-        Log::fatal "Directory '$1' does not exists"
-      fi
-      FRAMEWORK_SRC_DIRS+=("$(realpath --physical "$1")")
-      ;;
     --)
       shift || true
       break
@@ -553,122 +698,10 @@ while true; do
   shift || true
 done
 
-# add src dir by default
-FRAMEWORK_SRC_DIRS+=("${ROOT_DIR}/src")
-
-checkEachFunctionHasSrcFile() {
-  local file="$1"
-  readarray -t functionsToImport < <(
-    Filters::bashFrameworkFunctions "${file}" |
-      awk '{$1=$1};1' |
-      sort |
-      uniq || true
-  )
-  for functionToImport in "${functionsToImport[@]}"; do
-    if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      Log::displaySkipped "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
-      continue
-    fi
-    local fileNameToImport
-    fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
-
-    local found=0
-    for srcDir in "${FRAMEWORK_SRC_DIRS[@]}"; do
-      if [[ -f "${srcDir}/${fileNameToImport}" ]]; then
-        found=1
-      fi
-    done
-    if [[ "${found}" = "0" ]]; then
-      if [[ "${FORMAT}" = "plain" ]]; then
-        Log::displayError "The function ${functionToImport} called in ${file} does not have a matching source file ${fileNameToImport} in any source directories specified"
-      else
-        echo "<error severity='error' message='Function ${functionToImport} does not have a matching source file ${fileNameToImport}  in any source directories specified'/>"
-      fi
-      return 1
-    fi
-  done
-}
-
-# search for at least one function that is matching the filename
-checkEachSrcFileHasOneFunctionCorrectlyNamed() {
-  local srcFile="$1"
-  if echo "${srcFile}" | grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}"; then
-    return 0
-  fi
-  local foundFunctionMatching=0
-  local expectedFunctionName currentFunction
-  local file="${srcFile#src/}"
-  expectedFunctionName="$(echo "${file%.sh}" | sed -E 's#/#::#g')"
-  if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displaySkipped "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
-    return 0
-  fi
-
-  while IFS='' read -r currentFunction; do
-    if [[ "${currentFunction}" = "${expectedFunctionName}" ]]; then
-      foundFunctionMatching=1
-    fi
-  done < <(sed -E -n 's#^([^([:blank:]]+)\(\)[[:blank:]]*\{#\1#p' "${srcFile}")
-
-  if [[ "${foundFunctionMatching}" = "0" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "File ${srcFile} does not contain any function named '${expectedFunctionName}'"
-    else
-      echo "<error severity='warning' message='Should contain a function named ${expectedFunctionName}'/>"
-    fi
-    ((++warningCount))
-    return 0
-  fi
-}
-
-((errorCount = 0)) || true
-((warningCount = 0)) || true
-if [[ "${FORMAT}" = "checkstyle" ]]; then
-  echo "<?xml version='1.0' encoding='UTF-8'?>"
-  echo "<checkstyle>"
+if (($# != 1)); then
+  Log::fatal "This command needs exactly one parameter"
 fi
 
-# shellcheck disable=SC2016
-while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "checkstyle" ]]; then
-    echo "<file name='${file}'>"
-  fi
+scriptsDir="$1"
 
-  checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
-  checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
-
-  if [[ "${FORMAT}" = "checkstyle" ]]; then
-    echo "</file>"
-  fi
-done < <(
-  git ls-files --exclude-standard |
-    grep -E -v -e "${NON_FRAMEWORK_FILES_REGEXP}" |
-    xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
-    true
-)
-
-# shellcheck disable=SC2154
-while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayWarning "File ${file} does not exist, git renamed file ?"
-  else
-    echo "<file name='${file}'>"
-    echo "<error severity='warning' message='file does not exist, git renamed file ?'/>"
-    echo "</file>"
-  fi
-  ((++warningCount))
-done < <(cat "${missingBashFileList}")
-
-if [[ "${FORMAT}" = "checkstyle" ]]; then
-  echo "</checkstyle>"
-fi
-if ((errorCount > 0 || warningCount > 0)); then
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
-  fi
-  if ((errorCount > 0)); then
-    exit 1
-  fi
-else
-  Log::displaySuccess "No error found !"
-fi
+Profiles::lintDefinitions "${scriptsDir}" "${FORMAT}"

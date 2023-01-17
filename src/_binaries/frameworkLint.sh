@@ -66,6 +66,7 @@ while true; do
       FRAMEWORK_SRC_DIRS+=("$(realpath --physical "$1")")
       ;;
     --)
+      shift || true
       break
       ;;
     *)

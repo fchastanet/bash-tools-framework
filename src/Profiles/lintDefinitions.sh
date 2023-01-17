@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
-# ensure all method called dynamically are imported
-(
-  Log::displayError
-  Log::displaySkipped
-  Log::displayWarning
-) &>/dev/null
+# ensure all methods called dynamically are imported
+# import Log::displayError
+# import Log::displaySkipped
+# import Log::displayWarning
 
 # formatter plain
 ProfilesLintDefinitionsHeader_plain() {
