@@ -2,23 +2,23 @@
 
 Profiles::loadProfile() {
   local profileDir="$1"
-  shift 2 || true
-  local profile="$1"
-
+  local profile="$2"
   local -a CONFIG_LIST=()
 
-  # load the profile
-  if [[ -z "${profile}" ]]; then
-    shift
-    CONFIG_LIST=("$@")
-  else
-    Log::displayInfo "Loading profile '${profileDir}/profile.${profile}.sh'"
-    if [[ ! -f "${profileDir}/profile.${profile}.sh" ]]; then
-      Log::fatal "profile profile.${profile}.sh not found in '${profileDir}'"
-    fi
-    # shellcheck source=/src/Profiles/testsData/profile.test1.sh
-    source "${profileDir}/profile.${profile}.sh"
+  if [[ -z "${profile}" || -z "${profileDir}" ]]; then
+    Log::displayError "This method needs exactly 2 parameters"
+    return 1
   fi
+
+  # load the profile
+  Log::displayInfo "Loading profile '${profileDir}/profile.${profile}.sh'"
+  if [[ ! -f "${profileDir}/profile.${profile}.sh" ]]; then
+    Log::fatal "profile profile.${profile}.sh not found in '${profileDir}'"
+  fi
+
+  # shellcheck source=src/Profiles/testsData/profile.test1.sh
+  source "${profileDir}/profile.${profile}.sh"
+
   if [[ ! -v CONFIG_LIST ]]; then
     Log::fatal "Profile ${profileDir}/profile.${profile}.sh missing variable CONFIG_LIST"
   fi
@@ -28,9 +28,7 @@ Profiles::loadProfile() {
 
   # remove duplicates from profile preserving order
   mapfile -t CONFIG_LIST < <(
-    IFS=$'\n'
-    echo "${CONFIG_LIST[*]}" | awk '!x[$0]++'
+    IFS=$'\n' printf '%s\n' "${CONFIG_LIST[@]}" | awk '!x[$0]++'
   )
-  echo "${CONFIG_LIST[@]}"
-
+  printf '%s\n' "${CONFIG_LIST[@]}"
 }
