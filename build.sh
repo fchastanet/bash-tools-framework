@@ -13,7 +13,7 @@ source "${SRC_DIR}/Env/load.sh"
 # shellcheck source=src/Log/__all.sh
 source "${SRC_DIR}/Log/__all.sh"
 
-export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework/tree/master"
+export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched
 # binDir      : fallback bin directory in case BIN_FILE has not been provided

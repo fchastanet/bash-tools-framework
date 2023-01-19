@@ -11,28 +11,28 @@ teardown() {
 }
 
 function Profiles::checkScriptsExistenceNoScript { #@test
-  run Profiles::checkScriptsExistence "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts"
+  run Profiles::checkScriptsExistence "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts" ".sh"
   assert_success
   assert_output ""
 }
 
 function Profiles::checkScriptsExistence1Script { #@test
   run Profiles::checkScriptsExistence "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts" \
-    "Install1"
+    ".sh" "Install1"
   assert_success
   assert_output ""
 }
 
 function Profiles::checkScriptsExistence2Scripts { #@test
   run Profiles::checkScriptsExistence "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts" \
-    "Install1" "Install2"
+    ".sh" "Install1" "Install2"
   assert_success
   assert_output ""
 }
 
 function Profiles::checkScriptsExistence3ScriptsThirdScriptMissing { #@test
   run Profiles::checkScriptsExistence "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts" \
-    "Install1" "Install3" "NotExist"
+    ".sh" "Install1" "Install3" "NotExist"
   assert_failure 1
   assert_output --partial "FATAL   - script NotExist doesn't exist"
 }

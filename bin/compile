@@ -207,7 +207,7 @@ evalTemplate() {
   if [[ "${DEBUG:-0}" = "1" ]]; then
     (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
     SRC_FILE_PATH='${SRC_FILE_PATH}' \
-      REPOSITORY_URL='${GITHUB_URL}' \
+      REPOSITORY_URL='${REPOSITORY_URL}' \
       ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
       TEMPLATE_DIR='${TEMPLATE_DIR}' \
       ROOT_DIR='${ROOT_DIR}' \
@@ -221,7 +221,7 @@ evalTemplate() {
   # shellcheck source=/dev/null
   (cd "${TEMPLATE_DIR}" && source <(
     SRC_FILE_PATH="${SRC_FILE_PATH}" \
-      REPOSITORY_URL="${GITHUB_URL}" \
+      REPOSITORY_URL="${REPOSITORY_URL}" \
       ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
       TEMPLATE_DIR="${TEMPLATE_DIR}" \
       ROOT_DIR="${ROOT_DIR}" \
