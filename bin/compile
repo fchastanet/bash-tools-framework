@@ -85,6 +85,16 @@ ${__HELP_TITLE}Environment variables:${__HELP_NORMAL}
   * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
   * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
 
+${__HELP_TITLE}META variables:${__HELP_NORMAL}
+It's possible to inject some variables that will be used to interpret the template
+Eg: add this line to the beginning of the file without breaking comment section (no newlines between #)
+${__HELP_EXAMPLE}
+#!/usr/bin/env bash
+# META_SCRIPT=MinimumRequirements
+The variable SCRIPT can then be used in the template using
+SCRIPT="<% \${SCRIPT} %>"
+${__HELP_NORMAL}
+
 ${__HELP_TITLE}Example:${__HELP_NORMAL}
 Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
 ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
@@ -204,33 +214,49 @@ export -f dynamicTemplateDir
 
 evalTemplate() {
   local FILE="$1"
+  local metaExports
+  # https://regex101.com/r/7zDYFK/1
+  metaExports="$(
+    sed -E -n '/^#/!q;p' "${FILE}" |
+      grep -E '# META_.*=' |
+      sed -E 's/^#[ \t]+META_([^=]+)=[ \t]*([^\n\r]*)/\1="\2"\nexport \1\n/g' |
+      tr '\n' ' ' ||
+      :
+  )"
   if [[ "${DEBUG:-0}" = "1" ]]; then
-    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
-    SRC_FILE_PATH='${SRC_FILE_PATH}' \
-      REPOSITORY_URL='${REPOSITORY_URL}' \
-      ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
-      TEMPLATE_DIR='${TEMPLATE_DIR}' \
-      ROOT_DIR='${ROOT_DIR}' \
-      ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
-      FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
-      SRC_ABSOLUTE_PATH='${SRC_ABSOLUTE_PATH}' \
-      ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
+    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(
+      ${metaExports}
+      SRC_FILE_PATH='${SRC_FILE_PATH}'
+      REPOSITORY_URL='${REPOSITORY_URL}'
+      ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}'
+      TEMPLATE_DIR='${TEMPLATE_DIR}'
+      ROOT_DIR='${ROOT_DIR}'
+      ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}'
+      FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}'
+      SRC_ABSOLUTE_PATH='${SRC_ABSOLUTE_PATH}'
+      ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}'
       ) > binFile${__RESET_COLOR}")
   fi
   SRC_ABSOLUTE_PATH="$(realpath "${SRC_FILE_PATH}")"
-  # shellcheck source=/dev/null
-  (cd "${TEMPLATE_DIR}" && source <(
-    SRC_FILE_PATH="${SRC_FILE_PATH}" \
-      REPOSITORY_URL="${REPOSITORY_URL}" \
-      ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
-      TEMPLATE_DIR="${TEMPLATE_DIR}" \
-      ROOT_DIR="${ROOT_DIR}" \
-      ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
-      FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}" \
-      SRC_ABSOLUTE_PATH="${SRC_ABSOLUTE_PATH}" \
-      "${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}"
-  )) | Filters::removeDuplicatedShebangs
+  (# shellcheck disable=SC2034
+    cd "${TEMPLATE_DIR}"
+    eval "${metaExports}"
+    ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+    FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}"
+    export TEMPLATE_DIR
+    export SRC_FILE_PATH
+    export REPOSITORY_URL
+    export ORIGINAL_TEMPLATE_DIR
+    export TEMPLATE_DIR
+    export ROOT_DIR
+    export ROOT_DIR_RELATIVE_TO_BIN_DIR
+    export FRAMEWORK_ROOT_DIR
+    export SRC_ABSOLUTE_PATH
+    # shellcheck source=/dev/null
+    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
+  ) | Filters::removeDuplicatedShebangs
 }
+
 evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
 
 injectImportedFunctions() {
