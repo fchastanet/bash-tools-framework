@@ -32,10 +32,9 @@ FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 NON_FRAMEWORK_FILES_REGEXP=^$
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
-if [[ -f "${CONFIG_FILENAME}" ]]; then
-  # shellcheck source=/.framework-config
-  source "${CONFIG_FILENAME}" || Log::fatal "error while loading config file '${CONFIG_FILENAME}'"
-fi
+
+# load .framework-config
+Framework::loadConfig "${ROOT_DIR}" >/dev/null || Log::fatal "error while loading config file"
 
 if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"

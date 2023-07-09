@@ -11,6 +11,16 @@ source "${SRC_DIR}/_includes/_header.sh"
 source "${SRC_DIR}/Env/load.sh"
 # shellcheck source=src/Log/__all.sh
 source "${SRC_DIR}/Log/__all.sh"
+# shellcheck source=src/File/upFind.sh
+source "${SRC_DIR}/File/upFind.sh"
+# shellcheck source=src/Array/contains.sh
+source "${SRC_DIR}/Array/contains.sh"
+# shellcheck source=src/Filters/bashFrameworkFunctions.sh
+source "${SRC_DIR}/Filters/bashFrameworkFunctions.sh"
+# shellcheck source=/src/Conf/loadNearestFile.sh
+source "${SRC_DIR}/Conf/loadNearestFile.sh"
+# shellcheck source=src/Framework/loadConfig.sh
+source "${SRC_DIR}/Framework/loadConfig.sh"
 
 # Usage info
 showHelp() {
@@ -78,6 +88,10 @@ declare binDir="$3"
 declare rootDir="$4"
 shift 4 || true
 declare -a srcDirs=("$@")
+srcDirs+=("${SRC_DIR}")
+
+# load .framework-config
+configFile="$(Framework::loadConfig "${srcDirs[@]}")"
 
 getBinFileFromSrcFile() {
   local srcFile="$1"

@@ -51,4 +51,5 @@ function Framework::loadConfigFoundInDir1 { #@test
   run Framework::loadConfig "${BATS_TMP_DIR}/dir1/dir/dir1.1"
   assert_success
   assert_line --index 0 --partial ".framework-config loaded"
+  assert_line --index 1 "${BATS_TMP_DIR}/dir1/.framework-config"
 }

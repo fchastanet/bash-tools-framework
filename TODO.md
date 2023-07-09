@@ -23,6 +23,9 @@
   fi
 ```
 
+- extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
+  - define a sh format able to describe an interface
+  - would it be possible to implement inheritance ?
 - add UT
 - update bashDoc
 - replace Command::captureOutputAndExitCode with Framework::run
@@ -117,3 +120,54 @@
     - 2 @param $1
     - @param $1 after @param $2
     - @paramDefault $1 just after @param $2
+
+## SUDO feature
+
+sudo <sudoParams> (inline "<% ${SCRIPT_DIR} %>/installFile") <params>
+
+sudo@@Install::file [sudo args] -- [function args]
+
+sudo@@Install::file
+
+inline@@sudo "<% ${SCRIPT_DIR} %>/installFile" [sudo args] -- [scripts args]
+inline@@exec "<% ${SCRIPT_DIR} %>/installFile" [scripts args]
+  inline_installFile() {
+    script="""
+    """
+    if [[ ! -f /tmp/installFile ]]; then
+      echo "${script}" > /tmp/installFile
+    fi
+    /tmp/installFile "$@"
+  }
+  inline_installFile <params>
+
+- alternative to compile <https://blog.tratif.com/2023/02/17/bash-tips-6-embedding-files-in-a-single-bash-script/>
+  - from bin file, generate a directory will all the necessary bin files and assets
+  - tar the entire directory
+  - create a bootstrap script able to untar and execute the entrypoint
+- rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten and exported
+  - it is used by called scripts
+- actually what I want is to be able to launch another command but inlining this command inside the final sh file
+  - sudo <sudoParams> (inline "<% ${SCRIPT_DIR} %>/installFile") <params>
+    - inlineAs @installFile "<% ${SCRIPT_DIR} %>/installFile"
+    - sudo <sudoParams> @installFile <params>
+    - @installFile would be replaced by the generated file
+- constructBinFile will just rename sudo@@function to @@sudo_function@@
+  - then it's the responsibility of the constructBinFile to construct the sudo_function in the right directory and build it
+  - TODO inject in the binFile the PATH
+- compile if a function is called as sudo
+  - eg: sudo@@Install::file [sudo args] -- [function args]
+    - compile will rewrite it as unserialize_Install_file && "${SCRIPTS_DIR}/sudo_Install_file
+    - compile will create a temporary file sudo_Install_file with the content of the Install::file function and default header file and call to Install::file "$@"
+    - compile will compile this file so all functions will be imported
+    - then base64 of this file and store it in a variable inside original compiled file
+    - finally a function unserialize_Install_file will be generated
+    - unserialize_Install_file will create a temp file using the base64 string
+    - and sudo_Install_file will call this file as sudo (-E?)
+
+even better that that, it doesn't matter if the command to execute is a sudo or not
+  we just want to encapsulate a dependent binary(bash or not) inside the executable
+  add INCLUDE_BINARY meta data
+    - external binary
+    - sh file with metadata, means we need to build this binary if not done yet
+    - then generate a tar file with all the binaries included

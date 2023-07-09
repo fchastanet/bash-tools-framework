@@ -10,6 +10,7 @@
 # @param {String} $1 config file name to search
 # @param {String} $@ source directories in which the config file will be searched
 # @return 0 if file found, 1 if file not found
+# @output the filepath loaded if any
 Conf::loadNearestFile() {
   local configFileName="$1"
   shift || true
@@ -20,6 +21,7 @@ Conf::loadNearestFile() {
       # shellcheck source=/.framework-config
       source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
       Log::displayDebug "Config file ${configFile} is loaded"
+      echo "${configFile}"
       return 0
     fi
   done

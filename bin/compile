@@ -15,6 +15,12 @@ export FRAMEWORK_DIR="${_COMPILE_ROOT_DIR}"
 source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${_COMPILE_SRC_DIR}/Array/contains.sh"
+# shellcheck source=/src/File/upFind.sh
+source "${_COMPILE_SRC_DIR}/File/upFind.sh"
+# shellcheck source=/src/Conf/loadNearestFile.sh
+source "${_COMPILE_SRC_DIR}/Conf/loadNearestFile.sh"
+# shellcheck source=/src/Framework/loadConfig.sh
+source "${_COMPILE_SRC_DIR}/Framework/loadConfig.sh"
 # shellcheck source=src/Env/load.sh
 source "${_COMPILE_SRC_DIR}/Env/load.sh"
 # shellcheck source=src/File/upFind.sh
@@ -168,17 +174,11 @@ ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
 # root dir absolute path
 ROOT_DIR="$4"
 
-# try to find .framework-config
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
-NON_FRAMEWORK_FILES_REGEXP=
-for srcDir in "${srcDirs[@]}"; do
-  configFile="$(File::upFind "${srcDir}" ".framework-config" || true)"
-  if [[ -n "${configFile}" ]]; then
-    # shellcheck source=/.framework-config
-    source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
-    Log::displayDebug "Config file ${configFile} is loaded"
-  fi
-done
+
+# load .framework-config
+# shellcheck source=/.framework-config
+configFile="$(Framework::loadConfig "${srcDirs[@]}")"
 
 ################################################
 # compile Algo
