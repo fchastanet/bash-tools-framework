@@ -152,14 +152,17 @@ File::detectBashFile() {
 export -f File::detectBashFile
 
 Filters::bashFrameworkFunctions() {
-  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@"
+  grep -Eoi '([a-z0-9_]+[a-z0-9_-]*::)+([a-z0-9_-]+)' "$@"
 }
 
 # @param {string[]} $@ the src directories in which .framework-config file will be searched
 # @output the config file path loaded if any
 # @return 0 if .framework-config file has beend found in srcDirs provided
 Framework::loadConfig() {
-  Conf::loadNearestFile ".framework-config" "$@"
+  # shellcheck disable=SC2034
+  local -n loadedConfigFile=$1
+  shift || true
+  Conf::loadNearestFile ".framework-config" loadedConfigFile "$@"
 }
 
 # Public: log level off
@@ -226,12 +229,14 @@ Log::fatal() {
 # then if not found will go in up directories until /
 # source the file if found
 # @param {String} $1 config file name to search
+# @param {String} $2 passed by reference, will return the loaded config file name
 # @param {String} $@ source directories in which the config file will be searched
 # @return 0 if file found, 1 if file not found
 # @output the filepath loaded if any
 Conf::loadNearestFile() {
   local configFileName="$1"
-  shift || true
+  local -n loadedFile="$2"
+  shift 2 || true
   local -a srcDirs=("$@")
   for srcDir in "${srcDirs[@]}"; do
     configFile="$(File::upFind "${srcDir}" "${configFileName}" || true)"
@@ -239,7 +244,8 @@ Conf::loadNearestFile() {
       # shellcheck source=/.framework-config
       source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
       Log::displayDebug "Config file ${configFile} is loaded"
-      echo "${configFile}"
+      # shellcheck disable=SC2034
+      loadedFile="${configFile}"
       return 0
     fi
   done
@@ -580,7 +586,10 @@ FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
 
 # load .framework-config
-Framework::loadConfig "${ROOT_DIR}" >/dev/null || Log::fatal "error while loading config file"
+# shellcheck disable=SC2034
+configFile=""
+# shellcheck source=/.framework-config
+Framework::loadConfig configFile "${ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
 
 if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"

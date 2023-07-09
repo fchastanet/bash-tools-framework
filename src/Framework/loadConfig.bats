@@ -36,20 +36,19 @@ teardown() {
 }
 
 function Framework::loadConfigNoSrcDir { #@test
-  run Framework::loadConfig
+  run Framework::loadConfig configFile
   assert_failure 1
   assert_line --index 0 --partial "Config file '.framework-config' not found in any source directories provided"
 }
 
 function Framework::loadConfigNotFound { #@test
-  run Framework::loadConfig "${BATS_TMP_DIR}/dir2/dir/dir2.1"
+  run Framework::loadConfig configFile "${BATS_TMP_DIR}/dir2/dir/dir2.1"
   assert_failure 1
   assert_line --index 0 --partial "Config file '.framework-config' not found in any source directories provided"
 }
 
 function Framework::loadConfigFoundInDir1 { #@test
-  run Framework::loadConfig "${BATS_TMP_DIR}/dir1/dir/dir1.1"
-  assert_success
-  assert_line --index 0 --partial ".framework-config loaded"
-  assert_line --index 1 "${BATS_TMP_DIR}/dir1/.framework-config"
+  configFile=""
+  Framework::loadConfig configFile "${BATS_TMP_DIR}/dir1/dir/dir1.1"
+  [[ "${configFile}" = "${BATS_TMP_DIR}/dir1/.framework-config" ]]
 }

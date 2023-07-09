@@ -37,41 +37,34 @@ teardown() {
 }
 
 function Conf::loadNearestFileFileNoSrcDir { #@test
-  run Conf::loadNearestFile "anyConfFile"
+  run Conf::loadNearestFile "anyConfFile" configFile
   assert_failure 1
   assert_line --index 0 --partial "Config file 'anyConfFile' not found in any source directories provided"
 }
 
 function Conf::loadNearestFileFileNotFound { #@test
-  run Conf::loadNearestFile "anyConfFile" "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2"
+  run Conf::loadNearestFile "anyConfFile" configFile "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2"
   assert_failure 1
   assert_line --index 0 --partial "Config file 'anyConfFile' not found in any source directories provided"
 }
 
 function Conf::loadNearestFileFileFoundInDir1 { #@test
-  run Conf::loadNearestFile ".framework-config1" "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
-  assert_success
-  assert_line --index 0 --partial ".framework-config1 loaded"
-  assert_line --index 1 --partial "${BATS_TMP_DIR}/dir/dir/dir1/.framework-config1"
+  Conf::loadNearestFile ".framework-config1" configFile "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
+  [[ "${configFile}" = "${BATS_TMP_DIR}/dir/dir/dir1/.framework-config1" ]]
 }
 
 function Conf::loadNearestFileFileFoundInDir2 { #@test
-  run Conf::loadNearestFile ".framework-config2" "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
-  assert_success
-  assert_line --index 0 --partial ".framework-config2 loaded"
-  assert_line --index 1 --partial "${BATS_TMP_DIR}/dir/dir/.framework-config2"
+  Conf::loadNearestFile ".framework-config2" configFile "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
+  [[ "${configFile}" = "${BATS_TMP_DIR}/dir/dir/.framework-config2" ]]
 }
 
 function Conf::loadNearestFileFileFoundInDir3 { #@test
-  run Conf::loadNearestFile ".framework-config3" "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
-  assert_success
-  assert_line --index 0 --partial ".framework-config3 loaded"
-  assert_line --index 1 --partial "${BATS_TMP_DIR}/dir/dir/dir2/.framework-config3"
+  Conf::loadNearestFile ".framework-config3" configFile "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
+  [[ "${configFile}" = "${BATS_TMP_DIR}/dir/dir/dir2/.framework-config3" ]]
 }
 
 function Conf::loadNearestFileFileFoundInRootDir { #@test
-  run Conf::loadNearestFile ".framework-configRoot" "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
+  run Conf::loadNearestFile ".framework-configRoot" configFile "${BATS_TMP_DIR}/dir/dir/dir1" "${BATS_TMP_DIR}/dir/dir/dir2" 2>&1
   assert_success
   assert_line --index 0 --partial ".framework-configRoot loaded"
-  assert_line --index 1 --partial "${BATS_TMP_DIR}/.framework-configRoot"
 }

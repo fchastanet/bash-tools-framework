@@ -177,8 +177,9 @@ ROOT_DIR="$4"
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 
 # load .framework-config
+configFile=""
 # shellcheck source=/.framework-config
-configFile="$(Framework::loadConfig "${srcDirs[@]}")"
+Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while loading .framework-config file"
 
 ################################################
 # compile Algo

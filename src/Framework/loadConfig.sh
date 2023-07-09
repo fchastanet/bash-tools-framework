@@ -4,5 +4,8 @@
 # @output the config file path loaded if any
 # @return 0 if .framework-config file has beend found in srcDirs provided
 Framework::loadConfig() {
-  Conf::loadNearestFile ".framework-config" "$@"
+  # shellcheck disable=SC2034
+  local -n loadedConfigFile=$1
+  shift || true
+  Conf::loadNearestFile ".framework-config" loadedConfigFile "$@"
 }

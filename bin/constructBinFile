@@ -91,7 +91,9 @@ declare -a srcDirs=("$@")
 srcDirs+=("${SRC_DIR}")
 
 # load .framework-config
-configFile="$(Framework::loadConfig "${srcDirs[@]}")"
+configFile=""
+# shellcheck source=/.framework-config
+Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while loading .framework-config file"
 
 getBinFileFromSrcFile() {
   local srcFile="$1"

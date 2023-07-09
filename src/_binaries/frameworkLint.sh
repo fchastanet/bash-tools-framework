@@ -34,7 +34,10 @@ FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
 
 # load .framework-config
-Framework::loadConfig "${ROOT_DIR}" >/dev/null || Log::fatal "error while loading config file"
+# shellcheck disable=SC2034
+configFile=""
+# shellcheck source=/.framework-config
+Framework::loadConfig configFile "${ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
 
 if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"
