@@ -121,7 +121,7 @@ getRootDirRelativeToBinDirFromSrcFile() {
 }
 
 removeMetaDataFilter() {
-  sed -E '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR)=.*$/d'
+  sed -E '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR|META_)=.*$/d'
 }
 
 getFileRelativeToDir() {
