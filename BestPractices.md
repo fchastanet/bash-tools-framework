@@ -14,7 +14,7 @@
   nounset is not usable because empty array are considered unset
 - always use `sed -E`
 - avoid using grep -P as it is not supported on alpine, prefer using -E
-- grep regular expresion [A-Za-z] matches by default accentuated character, it
+- grep regular expression [A-Za-z] matches by default accentuated character, it
   you don't want to match them, use the environment variable `LC_ALL=POSIX`,
   - Eg: `LC_ALL=POSIX grep -E -q '^[A-Za-z_0-9:]+$'`
 

@@ -261,10 +261,12 @@ evalTemplate() {
 evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
 
 importFunctions() {
-  local importedFunctionsTempFile="$1"
-  local importedZZZTempFile="$2"
-  local -n filesImportedWithFunctions=$3
-  local -n functionsNeedToBeImported=$4
+  local file="$1"
+  local importedFunctionsTempFile="$2"
+  local importedZZZTempFile="$3"
+  local -n filesImportedWithFunctions=$4
+  local -n functionsNeedToBeImported=$5
+  local -n importFailures=$6
   local functionToImport
 
   readarray -t functionsToImport < <(
@@ -320,7 +322,7 @@ importFunctions() {
         Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
       else
         (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
-        ((failures++)) || true
+        ((importFailures++)) || true
       fi
       filesImportedWithFunctions+=("${fileToImport}")
       # shellcheck disable=SC2034
@@ -352,7 +354,7 @@ injectImportedFunctions() {
     echo >"${importedFunctionsTempFile}"
     echo >"${importedZZZTempFile}"
 
-    importFunctions "${importedFunctionsTempFile}" "${importedZZZTempFile}" filesImported needAnotherPass
+    importFunctions "${file}" "${importedFunctionsTempFile}" "${importedZZZTempFile}" filesImported needAnotherPass failures
 
     # insert functions before # FUNCTIONS
     sed -E -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
