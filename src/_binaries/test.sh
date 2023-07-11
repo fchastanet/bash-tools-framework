@@ -37,7 +37,7 @@ fi
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (
     if (($# < 1)); then
-      "${VENDOR_DIR}/bats/bin/bats" -r tests
+      "${VENDOR_DIR}/bats/bin/bats" -r src
     else
       "${VENDOR_DIR}/bats/bin/bats" "$@"
     fi

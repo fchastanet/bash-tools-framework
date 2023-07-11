@@ -2,15 +2,17 @@ ARG BASH_IMAGE=ubuntu:20.04
 # hadolint ignore=DL3006
 FROM ${BASH_IMAGE}
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG BASH_TAR_VERSION=5.1
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
-RUN set -x \
-  && set -o errexit \
-  && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
-  && apt-get update \
-  && apt-get install -y -q --no-install-recommends \
+ARG DEBIAN_FRONTEND=noninteractive
+COPY 01-noDoc /etc/dpkg/dpkg.cfg.d/
+COPY 02-aptNoCache /etc/apt/apt.conf.d/
+SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
+# hadolint ignore=DL3003
+RUN \
+  apt-get update ;\
+  apt-get upgrade -y ;\
+  apt-get install -y -q --no-install-recommends \
     bc=1.* \
     # used for bash compilation
     bison=2:3.5.* \
@@ -28,24 +30,29 @@ RUN set -x \
     jq=1.6-* \
     # used by bats when multiple jobs
     parallel=20161222-1.1 \
-    \
-  && ( \
-    cd /tmp \
-    && curl \
-      -o bash.tar.gz "https://ftp.gnu.org/gnu/bash/bash-${BASH_TAR_VERSION}.tar.gz" \
-    && tar xzf bash.tar.gz \
-    && cd bash-${BASH_TAR_VERSION} \
-    && ./configure \
-    && make install \
-  ) \
+  ;\
+  ( \
+    cd /tmp || exit 1 ;\
+    curl -o bash.tar.gz "https://ftp.gnu.org/gnu/bash/bash-${BASH_TAR_VERSION}.tar.gz" ;\
+    tar xzf bash.tar.gz ;\
+    cd "bash-${BASH_TAR_VERSION}" || exit 1 ;\
+    ./configure ;\
+    make install ;\
+  ) ;\
   # remove parallel nagware
-  && mkdir -p ~/.parallel \
-  && touch ~/.parallel/will-cite \
+  mkdir -p ~/.parallel ;\
+  touch ~/.parallel/will-cite ;\
   \
   # clean apt packages
-  && apt-get remove -y ca-certificates bison build-essential \
-  && apt-get -y clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+  apt-get remove -y ca-certificates bison build-essential ;\
+  apt-get autoremove -y ;\
+  rm -rf \
+    /var/lib/apt/lists/* \
+    /tmp/* \
+    /var/tmp/* \
+    /usr/share/doc/* \
+    # remove apt cache and man/doc
+    /var/cache/apt/archives /usr/share/{doc,man,locale}/
 
 ENV IN_BASH_DOCKER="You're in docker"
 WORKDIR /bash
@@ -53,19 +60,17 @@ WORKDIR /bash
 ONBUILD ARG USER_ID=1000
 ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
-ONBUILD SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ONBUILD RUN set -x \
-    && set -o errexit \
-    \
-    && if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
-      EXISTING_GROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" &&\
-      if [ -n "${EXISTING_GROUP}" ] ; then groupdel "${EXISTING_GROUP}" ; fi &&\
-      userdel -f www-data &&\
-      if getent group www-data ; then groupdel www-data; fi &&\
-      groupadd -g "${GROUP_ID}" www-data &&\
-      useradd -l -u "${USER_ID}" -g www-data www-data &&\
-      install -d -m 0755 -o www-data -g www-data /home/www-data &&\
+ONBUILD SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
+ONBUILD RUN \
+    if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
+      EXISTING_GROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" ;\
+      if [ -n "${EXISTING_GROUP}" ] ; then groupdel "${EXISTING_GROUP}" ; fi ;\
+      userdel -f www-data ;\
+      if getent group www-data ; then groupdel www-data; fi ;\
+      groupadd -g "${GROUP_ID}" www-data ;\
+      useradd -l -u "${USER_ID}" -g www-data www-data ;\
+      install -d -m 0755 -o www-data -g www-data /home/www-data ;\
       # remove parallel nagware
-      mkdir -p /home/www-data/.parallel &&\
-      touch /home/www-data/.parallel/will-cite; \
+      mkdir -p /home/www-data/.parallel ;\
+      touch /home/www-data/.parallel/will-cite ;\
     fi

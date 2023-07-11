@@ -54,3 +54,11 @@ function Filters::bashFrameworkFunctionMultiple { #@test
     assert_output "Namespace1::Namespace2::function"
   }
 }
+
+function Filters::bashFrameworkFunctionWithPrefix { #@test
+  echo "sudo::Namespace1::Namespace2::function" | {
+    PREFIX="sudo::" run Filters::bashFrameworkFunctions
+    assert_success
+    assert_output "sudo::Namespace1::Namespace2::function"
+  }
+}

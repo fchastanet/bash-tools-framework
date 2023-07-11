@@ -5,7 +5,7 @@
 # **Arguments**:
 # * $1 - (passed by reference) database instance to create
 # * $2 - dsn profile - load the dsn.env profile
-#     absolute file is deduced using rules defined in Profiles::getAbsoluteConfFile
+#     absolute file is deduced using rules defined in Conf::getAbsoluteFile
 #
 # **Example:**
 # ```shell
@@ -28,7 +28,7 @@ Database::newInstance() {
   instanceNewInstance['DSN_FILE']=""
 
   # check dsn file
-  DSN_FILE="$(Profiles::getAbsoluteConfFile "dsn" "${dsn}" "env")" || return 1
+  DSN_FILE="$(Conf::getAbsoluteFile "dsn" "${dsn}" "env")" || return 1
   Database::checkDsnFile "${DSN_FILE}" || return 1
   instanceNewInstance['DSN_FILE']="${DSN_FILE}"
 

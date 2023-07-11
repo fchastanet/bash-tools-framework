@@ -15,6 +15,12 @@ export FRAMEWORK_DIR="${_COMPILE_ROOT_DIR}"
 source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${_COMPILE_SRC_DIR}/Array/contains.sh"
+# shellcheck source=/src/File/upFind.sh
+source "${_COMPILE_SRC_DIR}/File/upFind.sh"
+# shellcheck source=/src/Conf/loadNearestFile.sh
+source "${_COMPILE_SRC_DIR}/Conf/loadNearestFile.sh"
+# shellcheck source=/src/Framework/loadConfig.sh
+source "${_COMPILE_SRC_DIR}/Framework/loadConfig.sh"
 # shellcheck source=src/Env/load.sh
 source "${_COMPILE_SRC_DIR}/Env/load.sh"
 # shellcheck source=src/File/upFind.sh
@@ -47,7 +53,7 @@ showHelp() {
 ${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the script given in parameter
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath> <relativePath> [--src-dir|-s <srcDir>] [--template <templateName>]
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath> <relativePath> <rootDir> [--src-dir|-s <srcDir>] [--template <templateName>]
     --help,-h prints this help and exits
 
     <fileToCompile> the relative or absolute path to compile into one file
@@ -60,6 +66,8 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePat
       are installed.
       Eg: this is useful for these binary files to know that to get some configuration files.
       You can use the variable ROOT_DIR_RELATIVE_TO_BIN_DIR in your template.
+
+    <rootDir> useful to include some files during compilation
 
     --src-dir|-s <srcDir> provide the directory where to find the functions source code.
       By default this project src directory is used.
@@ -82,6 +90,16 @@ ${__HELP_TITLE}Environment variables:${__HELP_NORMAL}
   * SRC_ABSOLUTE_PATH: absolute path to the template file being computed
   * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
   * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
+
+${__HELP_TITLE}META variables:${__HELP_NORMAL}
+It's possible to inject some variables that will be used to interpret the template
+Eg: add this line to the beginning of the file without breaking comment section (no newlines between #)
+${__HELP_EXAMPLE}
+#!/usr/bin/env bash
+# META_SCRIPT=MinimumRequirements
+The variable SCRIPT can then be used in the template using
+SCRIPT="<% \${SCRIPT} %>"
+${__HELP_NORMAL}
 
 ${__HELP_TITLE}Example:${__HELP_NORMAL}
 Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
@@ -143,8 +161,8 @@ done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 
-if (($# != 3)); then
-  Log::fatal "You must provide exactly 3 fixed parameters"
+if (($# != 4)); then
+  Log::fatal "You must provide exactly 4 fixed parameters"
 fi
 
 INPUT_FILE="$1"
@@ -153,18 +171,15 @@ INPUT_FILE="$1"
 SRC_FILE_PATH="$2"
 # how to join ROOT_DIR from target BIN_FILE directory
 ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
+# root dir absolute path
+ROOT_DIR="$4"
 
-# try to find .framework-config
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
-NON_FRAMEWORK_FILES_REGEXP=
-for srcDir in "${srcDirs[@]}"; do
-  configFile="$(File::upFind "${srcDir}" ".framework-config" || true)"
-  if [[ -n "${configFile}" ]]; then
-    # shellcheck source=/.framework-config
-    source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
-    Log::displayDebug "Config file ${configFile} is loaded"
-  fi
-done
+
+# load .framework-config
+configFile=""
+# shellcheck source=/.framework-config
+Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while loading .framework-config file"
 
 ################################################
 # compile Algo
@@ -200,37 +215,128 @@ export -f dynamicTemplateDir
 
 evalTemplate() {
   local FILE="$1"
+  local metaExports
+  # https://regex101.com/r/7zDYFK/1
+  metaExports="$(
+    sed -E -n '/^#/!q;p' "${FILE}" |
+      grep -E '# META_.*=' |
+      sed -E 's/^#[ \t]+META_([^=]+)=[ \t]*([^\n\r]*)/\1="\2"\nexport \1\n/g' |
+      tr '\n' ' ' ||
+      :
+  )"
   if [[ "${DEBUG:-0}" = "1" ]]; then
-    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(\
-    SRC_FILE_PATH='${SRC_FILE_PATH}' \
-      ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}' \
-      TEMPLATE_DIR='${TEMPLATE_DIR}' \
-      ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}' \
-      FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}' \
-      SRC_ABSOLUTE_PATH='$(realpath "${SRC_FILE_PATH}")' \
-      ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}' \
+    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(
+      ${metaExports}
+      SRC_FILE_PATH='${SRC_FILE_PATH}'
+      REPOSITORY_URL='${REPOSITORY_URL}'
+      ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}'
+      TEMPLATE_DIR='${TEMPLATE_DIR}'
+      ROOT_DIR='${ROOT_DIR}'
+      ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}'
+      FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}'
+      SRC_ABSOLUTE_PATH='${SRC_ABSOLUTE_PATH}'
+      ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}'
       ) > binFile${__RESET_COLOR}")
   fi
   SRC_ABSOLUTE_PATH="$(realpath "${SRC_FILE_PATH}")"
-  # shellcheck source=/dev/null
-  (cd "${TEMPLATE_DIR}" && source <(
-    SRC_FILE_PATH="${SRC_FILE_PATH}" \
-      REPOSITORY_URL="${GITHUB_URL}" \
-      ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}" \
-      TEMPLATE_DIR="${TEMPLATE_DIR}" \
-      ROOT_DIR_RELATIVE_TO_BIN_DIR="${ROOT_DIR_RELATIVE_TO_BIN_DIR}" \
-      FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}" \
-      SRC_ABSOLUTE_PATH="${SRC_ABSOLUTE_PATH}" \
-      "${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}"
-  )) | Filters::removeDuplicatedShebangs
+  (# shellcheck disable=SC2034
+    cd "${TEMPLATE_DIR}"
+    eval "${metaExports}"
+    ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+    FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}"
+    export TEMPLATE_DIR
+    export SRC_FILE_PATH
+    export REPOSITORY_URL
+    export ORIGINAL_TEMPLATE_DIR
+    export TEMPLATE_DIR
+    export ROOT_DIR
+    export ROOT_DIR_RELATIVE_TO_BIN_DIR
+    export FRAMEWORK_ROOT_DIR
+    export SRC_ABSOLUTE_PATH
+    # shellcheck source=/dev/null
+    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
+  ) | Filters::removeDuplicatedShebangs
 }
+
 evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
+
+importFunctions() {
+  local file="$1"
+  local importedFunctionsTempFile="$2"
+  local importedZZZTempFile="$3"
+  local -n filesImportedWithFunctions=$4
+  local -n functionsNeedToBeImported=$5
+  local -n importFailures=$6
+  local functionToImport
+
+  readarray -t functionsToImport < <(
+    Filters::bashFrameworkFunctions "${file}" |
+      awk '{$1=$1};1' |
+      sort |
+      uniq
+  )
+  ((functionsNeedToBeImported = 0)) || true
+  for functionToImport in "${functionsToImport[@]}"; do
+    if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+      (echo >&2 -e "${__DEBUG_COLOR}\tFunction ${functionToImport} ignored, because of rule defined in ${configFile}${__RESET_COLOR}")
+      continue
+    fi
+
+    local fileNameToImport
+    fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
+    # search through srcDirs the file to import
+    for srcDir in "${srcDirs[@]}"; do
+      fileToImport="${srcDir}/${fileNameToImport}"
+      if [[ -f "${fileToImport}" ]]; then
+        # we found it
+        break
+      fi
+    done
+
+    if ! Array::contains "${fileToImport}" "${filesImportedWithFunctions[@]}"; then
+      if [[ -f "${fileToImport}" ]]; then
+        # check if we need to import _.sh
+        underscoreFile="$(dirname "${fileToImport}")/_.sh"
+        if ! Array::contains "${underscoreFile}" "${filesImportedWithFunctions[@]}" &&
+          [[ -f "${underscoreFile}" ]]; then
+          if [[ "${DEBUG:-0}" = "1" ]]; then
+            (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
+          fi
+          Filters::catFileCleaned "${underscoreFile}" >>"${importedFunctionsTempFile}"
+          filesImportedWithFunctions+=("${underscoreFile}")
+        fi
+        # check if we need to import ZZZ.sh
+        zzzFile="$(dirname "${fileToImport}")/ZZZ.sh"
+        if ! Array::contains "${zzzFile}" "${filesImportedWithFunctions[@]}" &&
+          [[ -f "${zzzFile}" ]]; then
+          if [[ "${DEBUG:-0}" = "1" ]]; then
+            (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${zzzFile} ...${__RESET_COLOR}")
+          fi
+          Filters::catFileCleaned "${zzzFile}" >>"${importedZZZTempFile}"
+          filesImportedWithFunctions+=("${zzzFile}")
+        fi
+
+        if [[ "${DEBUG:-0}" = "1" ]]; then
+          (echo >&2 -e "\t${__DEBUG_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
+        fi
+        Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
+      else
+        (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+        ((importFailures++)) || true
+      fi
+      filesImportedWithFunctions+=("${fileToImport}")
+      # shellcheck disable=SC2034
+      ((functionsNeedToBeImported = 1)) # as we added some files, we need to do another pass
+    fi
+  done
+}
 
 injectImportedFunctions() {
   local file="$1"
+  # shellcheck disable=SC2034
   local -n filesImported=$2
 
-  local functionsNeedToBeImported
+  local needAnotherPass
   local -a functionsToImport
   local iteration zzzFile fileToImport underscoreFile
   local importedFunctionsTempFile
@@ -239,74 +345,16 @@ injectImportedFunctions() {
   local importedZZZTempFile
   importedZZZTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_zzz_files.XXXXXXX")"
 
-  ((functionsNeedToBeImported = 1))
+  ((needAnotherPass = 1))
   ((iteration = 1))
-  while ((functionsNeedToBeImported >= 1)); do
+  while ((needAnotherPass >= 1)); do
     if [[ "${DEBUG:-0}" = "1" ]]; then
       (echo >&2 -e "${__DEBUG_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
     fi
     echo >"${importedFunctionsTempFile}"
     echo >"${importedZZZTempFile}"
 
-    readarray -t functionsToImport < <(
-      Filters::bashFrameworkFunctions "${file}" |
-        awk '{$1=$1};1' |
-        sort |
-        uniq
-    )
-    ((functionsNeedToBeImported = 0)) || true
-    for functionToImport in "${functionsToImport[@]}"; do
-      if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-        (echo >&2 -e "${__DEBUG_COLOR}\tFunction ${functionToImport} ignored, because of rule defined in ${configFile}${__RESET_COLOR}")
-        continue
-      fi
-
-      local fileNameToImport
-      fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
-      # search through srcDirs the file to import
-      for srcDir in "${srcDirs[@]}"; do
-        fileToImport="${srcDir}/${fileNameToImport}"
-        if [[ -f "${fileToImport}" ]]; then
-          # we found it
-          break
-        fi
-      done
-
-      if ! Array::contains "${fileToImport}" "${filesImported[@]}"; then
-        if [[ -f "${fileToImport}" ]]; then
-          # check if we need to import _.sh
-          underscoreFile="$(dirname "${fileToImport}")/_.sh"
-          if ! Array::contains "${underscoreFile}" "${filesImported[@]}" &&
-            [[ -f "${underscoreFile}" ]]; then
-            if [[ "${DEBUG:-0}" = "1" ]]; then
-              (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
-            fi
-            Filters::catFileCleaned "${underscoreFile}" >>"${importedFunctionsTempFile}"
-            filesImported+=("${underscoreFile}")
-          fi
-          # check if we need to import ZZZ.sh
-          zzzFile="$(dirname "${fileToImport}")/ZZZ.sh"
-          if ! Array::contains "${zzzFile}" "${filesImported[@]}" &&
-            [[ -f "${zzzFile}" ]]; then
-            if [[ "${DEBUG:-0}" = "1" ]]; then
-              (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${zzzFile} ...${__RESET_COLOR}")
-            fi
-            Filters::catFileCleaned "${zzzFile}" >>"${importedZZZTempFile}"
-            filesImported+=("${zzzFile}")
-          fi
-
-          if [[ "${DEBUG:-0}" = "1" ]]; then
-            (echo >&2 -e "\t${__DEBUG_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
-          fi
-          Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
-        else
-          (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
-          ((failures++)) || true
-        fi
-        filesImported+=("${fileToImport}")
-        ((functionsNeedToBeImported = 1)) # as we added some files, we need to do another pass
-      fi
-    done
+    importFunctions "${file}" "${importedFunctionsTempFile}" "${importedZZZTempFile}" filesImported needAnotherPass failures
 
     # insert functions before # FUNCTIONS
     sed -E -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"

@@ -11,8 +11,8 @@ source "${srcDir}/Database/dump.sh"
 source "${srcDir}/Database/query.sh"
 # shellcheck source=src/Database/newInstance.sh
 source "${srcDir}/Database/newInstance.sh"
-# shellcheck source=src/Profiles/getAbsoluteConfFile.sh
-source "${srcDir}/Profiles/getAbsoluteConfFile.sh"
+# shellcheck source=src/Conf/getAbsoluteFile.sh
+source "${srcDir}/Conf/getAbsoluteFile.sh"
 # shellcheck source=src/File/concatenatePath.sh
 source "${srcDir}/File/concatenatePath.sh"
 

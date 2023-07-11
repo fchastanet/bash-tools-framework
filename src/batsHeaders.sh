@@ -16,6 +16,8 @@ load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"
 load "${vendorDir}/bats-mock-Flamefire/load.bash"
 
+# shellcheck source=/src/_standalones/Bats/assert_lines_count.sh
+source "${srcDir}/_standalones/Bats/assert_lines_count.sh"
 # shellcheck source=/src/Env/load.sh
 source "${srcDir}/Env/load.sh"
 # shellcheck source=src/Log/_.sh

@@ -40,14 +40,14 @@ fi
 # shellcheck disable=SC2086
 DOCKER_BUILDKIT=1 docker build \
   ${DOCKER_BUILD_OPTIONS} \
-  -f "${ROOT_DIR}/.docker/Dockerfile.${VENDOR}" \
+  -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/Dockerfile.${VENDOR}" \
   --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
   --build-arg BASH_TAR_VERSION="${BASH_TAR_VERSION}" \
   --build-arg BASH_IMAGE="${BASH_BASE_IMAGE}" \
   -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   -t "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
-  "${ROOT_DIR}/.docker"
+  "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker"
 docker run --rm "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" bash --version
 
 if [[ "${PUSH_IMAGE}" == "push" ]]; then

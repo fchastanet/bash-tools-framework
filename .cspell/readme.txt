@@ -33,3 +33,5 @@ bingitisancestorof
 binmysql
 manpages
 asciidoctor
+unserialize
+untar

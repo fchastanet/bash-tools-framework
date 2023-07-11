@@ -25,7 +25,7 @@ DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 Log::displayInfo "Using ${VENDOR}:${BASH_TAR_VERSION}"
 
-if [[ "${SKIP_BUILD:-0}" = "0" && -f "${ROOT_DIR}/.docker/DockerfileUser" ]]; then
+if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/DockerfileUser" ]]; then
   "${BIN_DIR}/buildPushDockerImages" "${VENDOR}" "${BASH_TAR_VERSION}" "${BASH_IMAGE}"
 
   # build docker image with user configuration
@@ -37,9 +37,9 @@ if [[ "${SKIP_BUILD:-0}" = "0" && -f "${ROOT_DIR}/.docker/DockerfileUser" ]]; th
     --build-arg SKIP_USER="${SKIP_USER:-0}" \
     --build-arg USER_ID="$(id -u)" \
     --build-arg GROUP_ID="$(id -g)" \
-    -f "${ROOT_DIR}/.docker/DockerfileUser" \
+    -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/DockerfileUser" \
     -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "${ROOT_DIR}/.docker"
+    "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker"
 fi
 
 # run tests

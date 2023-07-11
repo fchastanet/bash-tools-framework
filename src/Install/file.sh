@@ -1,62 +1,68 @@
 #!/usr/bin/env bash
 
 # installs file to given directory
-# @param $1 FROM_DIR - directory to take filename from
-# @param $2 TO_DIR - directory in which file will be copied
-# @param $3 FILENAME - the filename to copy, the file can specify a subdirectory
-#    that will be used relatively in FROM_DIR and TO_DIR
-# @param $4 SUCCESS_CALLBACK the callback to call when file is installed successfully
+# @param $1 fromFile - original file to copy
+# @param $2 targetFile - target file
+# @param $3 SUCCESS_CALLBACK the callback to call when file is installed successfully
 #    by default setUserRights callback is called
-#    callback parameters ${FROM_FILE} ${DEST_FILE} $@
-# @param $5 FAILURE_CALLBACK the callback to call when file installation has failed
+#    callback parameters ${fromFile} ${targetFile} $@
+# @param $4 FAILURE_CALLBACK the callback to call when file installation has failed
 #    by default setUserRights callback is called
-#    callback parameters ${FROM_FILE} ${DEST_FILE} $@
+#    callback parameters ${fromFile} ${targetFile} $@
 # @param $@ all parameters after 4th will be passed to callback
+# @return 1 if fromFile is not readable
+# @return 2 if backup file failure
+# @return 0 on success or if OVERWRITE_CONFIG_FILES=0
+# @return 0 on success or if CHANGE_WINDOWS_FILES=0 and target file is a windows file
+# @environment OVERWRITE_CONFIG_FILES
+# @environment CHANGE_WINDOWS_FILES
+# @environment USER_NAME
+# @environment USER_GROUP
+# @environment BASE_MNT_C
+# @environment ROOT_DIR
 Install::file() {
-  local FROM_DIR="$1"
-  local TO_DIR="$2"
-  local FILENAME="$3"
-  local successCallback=${4:-setUserRights}
-  local failureCallback=${5:-Install::unableToCopyCallback}
-  ((argsToShift = 3))
-  if [[ -n "${4+x}" ]]; then
-    ((argsToShift++))
-  fi
-  if [[ -n "${5+x}" ]]; then
-    ((argsToShift++))
-  fi
-  shift "${argsToShift}"
+  local fromFile="$1"
+  local targetFile="$2"
+  shift 2 || true
+  local successCallback=${1:-Install::setUserRightsCallback}
+  shift || true
+  local failureCallback=${1:-Install::unableToCopyCallback}
+  shift || true
 
-  if [[ ! -f "${FROM_DIR}/${FILENAME}" || ! -r "${FROM_DIR}/${FILENAME}" ]]; then
-    Log::fatal "cannot read source file '${FROM_DIR}/${FILENAME}'"
+  if [[ ! -f "${fromFile}" || ! -r "${fromFile}" ]]; then
+    Log::displayError "cannot read source file '${fromFile}'"
+    return 1
   fi
 
   # skip if OVERWRITE_CONFIG_FILES is 0 and target file exists
-  if [[ "${OVERWRITE_CONFIG_FILES}" = "0" && -f "${TO_DIR}/${FILENAME}" ]]; then
-    Log::displayWarning "File '${TO_DIR}/${FILENAME}' exists - Skip install (because OVERWRITE_CONFIG_FILES=0 in .env file)"
+  if [[ "${OVERWRITE_CONFIG_FILES}" = "0" && -f "${targetFile}" ]]; then
+    Log::displayWarning "File '${targetFile}' exists - Skip install (because OVERWRITE_CONFIG_FILES=0 in .env file)"
     return 0
   fi
 
   # skip if CHANGE_WINDOWS_FILES is 0 and target dir is c drive
-  if [[ "${CHANGE_WINDOWS_FILES}" = "0" && "${TO_DIR}" =~ ^${BASE_MNT_C} ]]; then
-    Log::displayWarning "File '${TO_DIR}/${FILENAME}' - Skip install (because CHANGE_WINDOWS_FILES=0 in .env file)"
+  if [[ "${CHANGE_WINDOWS_FILES}" = "0" && "${targetFile}" =~ ^${BASE_MNT_C} ]]; then
+    Log::displayWarning "File '${targetFile}' - Skip install (because CHANGE_WINDOWS_FILES=0 in .env file)"
     return 0
   fi
 
-  local DEST_FILE="${TO_DIR}/${FILENAME}"
-  local DEST_DIR
-  DEST_DIR="$(dirname "${DEST_FILE}")"
-  if [[ ! -d "${DEST_DIR}" ]]; then
-    mkdir -p "${DEST_DIR}"
-    chown "${USER_NAME}":"${USER_GROUP}" "${DEST_DIR}"
+  local targetDir
+  targetDir="$(dirname "${targetFile}")"
+  if [[ ! -d "${targetDir}" ]]; then
+    mkdir -p "${targetDir}"
+    chown "${USER_NAME}":"${USER_GROUP}" "${targetDir}"
   fi
+  local fromDir
+  fromDir="$(dirname "${fromFile}")"
+  local fromFilename
+  fromFilename="$(basename "${fromFile}")"
 
-  backupFile "${TO_DIR}/${FILENAME}"
-  local DEST_FILE="${TO_DIR}/${FILENAME}"
-  if cp "${FROM_DIR}/${FILENAME}" "${DEST_FILE}"; then
-    ${successCallback} "${FROM_DIR}/${FILENAME}" "${DEST_FILE}" "$@"
-    Log::displaySuccess "Installed file '${FROM_DIR#"${ROOT_DIR}/"}/${FILENAME}' to '${DEST_FILE}'"
+  Backup::file "${targetFile}" || return 2
+
+  if cp "${fromFile}" "${targetFile}"; then
+    ${successCallback} "${fromFile}" "${targetFile}" "$@"
+    Log::displaySuccess "Installed file '${fromDir#"${ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"
   else
-    ${failureCallback} "${FROM_DIR}" "${FILENAME}" "${DEST_FILE}" "$@"
+    ${failureCallback} "${fromDir}" "${fromFilename}" "${targetFile}" "$@"
   fi
 }

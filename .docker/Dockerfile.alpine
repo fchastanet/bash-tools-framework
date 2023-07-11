@@ -1,31 +1,36 @@
 ARG BASH_IMAGE=amd64/bash:5.0.17
+
 # hadolint ignore=DL3006
 FROM ${BASH_IMAGE}
 
-RUN set -x \
-    && apk add --no-cache \
-    "bc=~1" \
-    "coreutils=~9" \
-    "curl=~7" \
-    "gawk=~5.1" \
-    "git=~2" \
-    "jq=~1.6" \
-    "parallel=20220422-r0" \
-    \
+SHELL ["/bin/sh", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
+RUN \
+    apk upgrade ;\
+    echo 'http://dl-cdn.alpinelinux.org/alpine/v3.17/main' >> /etc/apk/repositories ;\
+    apk update ;\
+    apk add --no-cache \
+      "bc=~1" \
+      "coreutils=~9" \
+      "curl=~8" \
+      "gawk=~5.1" \
+      "git=~2" \
+      "jq=~1.6" \
+      "parallel=20221022-r0" \
+    ;\
     # remove parallel nagware
-    && mkdir -p ~/.parallel \
-    && touch ~/.parallel/will-cite
+    mkdir -p ~/.parallel ;\
+    touch ~/.parallel/will-cite
 
 ENV IN_BASH_DOCKER="You're in docker"
 
 ONBUILD ARG USER_ID=1000
 ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
-ONBUILD RUN set -x \
-    && if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
-        addgroup -g ${GROUP_ID} -S www-data &&\
-        adduser -u ${USER_ID} -D -S -h /app -s /sbin/nologin -G www-data www-data &&\
-        # remove parallel nagware
-        mkdir -p /app/.parallel &&\
-        touch /app/.parallel/will-cite; \
+ONBUILD RUN \
+    if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
+      addgroup -g ${GROUP_ID} -S www-data ;\
+      adduser -u ${USER_ID} -D -S -h /app -s /sbin/nologin -G www-data www-data ;\
+      # remove parallel nagware
+      mkdir -p /app/.parallel ;\
+      touch /app/.parallel/will-cite; \
     fi

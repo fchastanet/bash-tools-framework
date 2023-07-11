@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
 
-# check if param is valid email address without @ part
+# check if param is valid email address
 # @param $1 the full email address
-# @param $2 the expected email address domain
 # @return 1 on error
 Assert::emailAddress() {
-  local email expectedDomain expectedRegexp
-  local -a splitEmail
+  local email expectedRegexp
   email="$1"
-  expectedDomain="$2"
-  expectedRegexp="^[A-Za-z0-9._%+-]+$"
+  expectedRegexp="^\S+@\S+$"
 
-  # shellcheck disable=SC2206
-  splitEmail=(${email//@/ })
-  [[ "${splitEmail[0]}" =~ ${expectedRegexp} && "${splitEmail[1]}" = "${expectedDomain}" ]]
+  [[ "${email}" =~ ${expectedRegexp} ]]
 }
