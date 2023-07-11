@@ -24,9 +24,15 @@ function Profiles::allDepsRecursiveOK { #@test
     "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts" "your software selection" \
     "Install1"
   [[ ${#allDepsResultSeen[@]} = 4 ]]
+  [[ "${allDepsResultSeen["Install1"]}" = "stored" ]]
+  [[ "${allDepsResultSeen["Install2"]}" = "stored" ]]
+  [[ "${allDepsResultSeen["Install3"]}" = "stored" ]]
+  [[ "${allDepsResultSeen["Install4"]}" = "stored" ]]
   [[ ${#allDepsResult[@]} = 4 ]]
-  [[ "$(declare -p allDepsResultSeen)" = 'declare -A allDepsResultSeen=([Install4]="stored" [Install2]="stored" [Install3]="stored" [Install1]="stored" )' ]]
-  [[ "$(declare -p allDepsResult)" = 'declare -a allDepsResult=([0]="Install2" [1]="Install3" [2]="Install4" [3]="Install1")' ]]
+  [[ "${allDepsResult[0]}" = "Install2" ]]
+  [[ "${allDepsResult[1]}" = "Install3" ]]
+  [[ "${allDepsResult[2]}" = "Install4" ]]
+  [[ "${allDepsResult[3]}" = "Install1" ]]
 }
 
 function Profiles::allDepsRecursiveMissingDependencies { #@test
