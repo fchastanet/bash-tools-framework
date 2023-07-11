@@ -7,7 +7,8 @@ ARG BASH_TAR_VERSION=5.1
 ARG DEBIAN_FRONTEND=noninteractive
 COPY 01-noDoc /etc/dpkg/dpkg.cfg.d/
 COPY 02-aptNoCache /etc/apt/apt.conf.d/
-SHELL ["bash", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
+SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
+# hadolint ignore=DL3003
 RUN \
   apt-get update ;\
   apt-get upgrade -y ;\
@@ -31,10 +32,10 @@ RUN \
     parallel=20161222-1.1 \
   ;\
   ( \
-    cd /tmp ;\
+    cd /tmp || exit 1 ;\
     curl -o bash.tar.gz "https://ftp.gnu.org/gnu/bash/bash-${BASH_TAR_VERSION}.tar.gz" ;\
     tar xzf bash.tar.gz ;\
-    cd "bash-${BASH_TAR_VERSION}" ;\
+    cd "bash-${BASH_TAR_VERSION}" || exit 1 ;\
     ./configure ;\
     make install ;\
   ) ;\
