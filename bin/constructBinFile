@@ -41,15 +41,31 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} {srcFile} {templateDir} {bi
 srcFile should contains metadata BIN_FILE and ROOT_DIR_RELATIVE_TO_BIN_DIR at
 top of the bash script file (see example below)
 
-if BIN_FILE metadata is not provided, the binary file will be copied to {binDir}
-without sh extension
+${__HELP_TITLE}ROOT_DIR_RELATIVE_TO_BIN_DIR metadata:${__HELP_NORMAL}
+Mandatory information allowing the compiler to deduce bash-tools-framework root directory.
 
-${__HELP_TITLE}File header example:${__HELP_NORMAL}
+${__HELP_TITLE}BIN_FILE metadata (optional):${__HELP_NORMAL}
+allows to indicate where the resulting bin file will be generated
+if not provided, the binary file will be copied to {binDir} without sh extension
+
+${__HELP_TITLE}INCLUDE metadata (optional):${__HELP_NORMAL}
+${__HELP_EXAMPLE}Syntax: # INCLUDE "srcFile" AS "targetFile"${__HELP_NORMAL}
+${__HELP_EXAMPLE}Syntax: # INCLUDE "srcDir" AS "targetDir"${__HELP_NORMAL}
+${__HELP_EXAMPLE}Syntax: # INCLUDE namespace::functions AS "myFunction"${__HELP_NORMAL}
+if INCLUDE metadata is provided, the file/dir provided will be added inside the resulting
+bin file as a tar gz file(base64 encoded) and automatically extracted when executed.
+
+${__HELP_TITLE}File header example:${__HELP_NORMAL}${__HELP_EXAMPLE}
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/generateShellDoc
+# BIN_FILE=\${ROOT_DIR}/bin/myBinary
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
+# META_SCRIPT=MinimumRequirements
+# INCLUDE "\${ROOT_DIR}/bin/otherNeededBinary" AS "\${BIN_DIR}/otherNeededBinary"
+# INCLUDE Backup::file AS "\${BIN_DIR}/backupFile"
+sudo "\${BIN_DIR}/backupFile" ...
+"\${BIN_DIR}/otherNeededBinary"${__HELP_NORMAL}
 
-$(envsubst <"${SRC_DIR}/_includes/author.tpl")
+$(SRC_FILE_PATH=bin/constructBinFile envsubst <"${SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF
 }
 
@@ -120,8 +136,12 @@ getRootDirRelativeToBinDirFromSrcFile() {
   grep -E '# ROOT_DIR_RELATIVE_TO_BIN_DIR=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :
 }
 
-removeMetaDataFilter() {
-  sed -E '/^# (BIN_FILE|ROOT_DIR_RELATIVE_TO_BIN_DIR|META_)=.*$/d'
+removeConstructBinFileMetaDataFilter() {
+  sed -E '/^# (BIN_FILE=|ROOT_DIR_RELATIVE_TO_BIN_DIR=|INCLUDE ).*$/d'
+}
+
+removeAllMetaDataFilter() {
+  sed -E '/^# (BIN_FILE=|ROOT_DIR_RELATIVE_TO_BIN_DIR=|META_[^=]*=|INCLUDE ).*$/d'
 }
 
 getFileRelativeToDir() {
@@ -144,10 +164,18 @@ constructBinFile() {
     return 0
   fi
   mkdir -p "$(realpath -m "$(dirname "${BIN_FILE}")")" || true
+  Log::displayInfo "Binfile ${BIN_FILE} from ${srcFile}"
 
-  Log::displayInfo "Writing file ${BIN_FILE} from ${srcFile}"
+  # pass through an intermediate file to avoid bash tools framewwork functions injection
+  # that could be implied by INCLUDE usage (eg: INCLUDE Backup::file)
+  local TEMP_SRC_FILE
+  TEMP_SRC_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-constructBinFiles-before-XXXXXX)"
+  removeConstructBinFileMetaDataFilter <"${srcFile}" >"${TEMP_SRC_FILE}"
+  Log::displayDebug "Binfile ${BIN_FILE} Writing intermediate src file without metadata from ${srcFile}"
+
+  Log::displayInfo "Binfile ${BIN_FILE} from ${srcFile}"
   local -a compileArgs=(
-    "${srcFile}"
+    "${TEMP_SRC_FILE}"
     "$(getFileRelativeToDir "${srcFile}" "${rootDir}")"
     "$(getRootDirRelativeToBinDirFromSrcFile "${srcFile}")"
     "${rootDir}"
@@ -157,7 +185,7 @@ constructBinFile() {
     compileArgs+=(--src-dir "${srcDir}")
   done
   "${BIN_DIR}/compile" "${compileArgs[@]}" |
-    removeMetaDataFilter >"${BIN_FILE}"
+    removeAllMetaDataFilter >"${BIN_FILE}"
   chmod +x "${BIN_FILE}"
 }
 

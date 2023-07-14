@@ -112,7 +112,7 @@ ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -
 Here you want to override the default templates too
 ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
 
-$(envsubst <"${_COMPILE_SRC_DIR}/_includes/author.tpl")
+$(SRC_FILE_PATH=bin/compile envsubst <"${_COMPILE_SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF
 }
 
