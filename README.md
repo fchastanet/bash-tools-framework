@@ -63,6 +63,7 @@
   - [1.3. Internal tools](#13-internal-tools)
 - [2. Development Environment](#2-development-environment)
   - [2.1. Install dev dependencies](#21-install-dev-dependencies)
+  - [Precommit hook](#precommit-hook)
   - [2.2. UT](#22-ut)
     - [2.2.1. Debug bats](#221-debug-bats)
   - [2.3. connect to container manually](#23-connect-to-container-manually)
@@ -119,6 +120,18 @@ is created in vendor dir.
 - `vendor/.tomdocInstalled`
 - `vendor/.batsInstalled` You can remove these files to force the update of the
   libraries, or just wait 24 hours that the timeout expires.
+
+### Precommit hook
+
+This repository uses pre-commit software to ensure every commits respects a set
+of rules specified by the `.pre-commit-config.yaml` file. It supposes pre-commit
+software is [installed](https://pre-commit.com/#install) in your environment.
+
+You also have to execute the following command to enable it:
+
+```bash
+pre-commit install --hook-type pre-commit --hook-type pre-push
+```
 
 ### 2.2. UT
 

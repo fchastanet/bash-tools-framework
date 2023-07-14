@@ -10,24 +10,34 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [commit]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: mixed-line-ending
+        stages: [commit]
       - id: end-of-file-fixer
+        stages: [commit]
       - id: check-executables-have-shebangs
+        stages: [commit]
       - id: check-shebang-scripts-are-executable
+        stages: [commit]
       - id: check-xml
+        stages: [commit]
       - id: check-yaml
+        stages: [commit]
       - id: forbid-new-submodules
+        stages: [commit]
       - id: mixed-line-ending
         args: [--fix=lf]
+        stages: [commit]
       - id: check-json
         exclude: |
           (?x)^(
             conf\/.vscode\/settings.json
           )$
+        stages: [commit]
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
@@ -35,16 +45,19 @@ repos:
       - id: shfmt
         args: [-i, '2', -ci]
         exclude: ^vendor/.*$|^tests/data/.*$|^bin/bash-tpl$
+        stages: [commit]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
       # and conflict-marker-size configuration in a git repo.
       - id: git-check
+        stages: [commit]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.0
     hooks:
       - id: prettier
+        stages: [commit]
 
   - repo: local
     hooks:
@@ -56,6 +69,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [commit]
 
   - repo: local
     hooks:
@@ -67,6 +81,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [commit]
 
   - repo: local
     hooks:
@@ -78,6 +93,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [push]
 
   - repo: local
     hooks:
@@ -89,6 +105,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [push]
 
   - repo: local
     hooks:
@@ -100,6 +117,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [commit]
 
   - repo: local
     hooks:
@@ -111,3 +129,4 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
+        stages: [push]
