@@ -83,6 +83,7 @@
 
 ## 3. Other improvements
 
+- optimize doc generation (parellelization)
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
   and exported
   - it is used by called scripts
