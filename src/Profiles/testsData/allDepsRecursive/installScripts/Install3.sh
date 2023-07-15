@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 installScripts_Install3_helpDescription() {
   echo "installScripts_Install3_helpDescription"

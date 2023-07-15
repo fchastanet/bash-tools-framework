@@ -21,8 +21,10 @@ export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 # srcDirs     : additional directories where to find the functions
 declare -a params=("${SRC_DIR}" "${BIN_DIR}" "${ROOT_DIR}")
 if (($# == 0)); then
-  find "${SRC_DIR}/_binaries" -name "*.sh" -print0 | xargs -0 -n1 -P8 -I{} \
-    "${FRAMEWORK_DIR}/bin/constructBinFile" "{}" "${params[@]}"
+  find "${SRC_DIR}/_binaries" -name "*.sh" -print |
+    (grep -v -E '/testsData/' || true) |
+    xargs -n1 -P8 -I{} \
+      "${FRAMEWORK_DIR}/bin/constructBinFile" "{}" "${params[@]}"
 else
   for file in "$@"; do
     file="$(realpath "${file}")"

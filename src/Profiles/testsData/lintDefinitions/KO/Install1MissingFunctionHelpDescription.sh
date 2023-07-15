@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 installScripts_Install1MissingFunctionHelpDescription_helpVariables() {
   echo "installScripts_Install1MissingFunctionHelpDescription_helpVariables"

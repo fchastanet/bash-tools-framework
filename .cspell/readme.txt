@@ -35,3 +35,7 @@ manpages
 asciidoctor
 unserialize
 untar
+Michał
+Zieliński
+Tratif
+BinFile

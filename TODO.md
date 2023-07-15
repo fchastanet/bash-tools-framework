@@ -1,96 +1,75 @@
 # Todo
 
-- check if 2 files have the same BINARY_FILE target
+- [1. Framework functions changes](#1-framework-functions-changes)
+- [2. Binaries improvement](#2-binaries-improvement)
+  - [2.1. FrameworkLint](#21-frameworklint)
+  - [2.2. compile](#22-compile)
+    - [2.2.1. add compilation checks](#221-add-compilation-checks)
+    - [2.2.2. Generate `__all.sh` file](#222-generate-__allsh-file)
+- [3. Other improvements](#3-other-improvements)
+  - [3.1. run precommit on github action](#31-run-precommit-on-github-action)
+  - [3.2. Other libraries integration](#32-other-libraries-integration)
+  - [Options/Args management](#optionsargs-management)
+  - [3.3. Robustness](#33-robustness)
+  - [3.4. Doc](#34-doc)
+  - [3.5. Improve UT](#35-improve-ut)
+  - [3.6. Refact - Move binaries to bash-tools](#36-refact---move-binaries-to-bash-tools)
+  - [3.7. dev-env](#37-dev-env)
+- [5. Compilation](#5-compilation)
+
+## 1. Framework functions changes
+
 - Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
-- src/\_binaries/shellcheckLint.sh create function Array::remove
-- refact src/\_binaries/frameworkLint.sh formatter for plain or checkstyle
-- integrate <https://argbash.dev> ?
+- create function Array::remove
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the user
-- bats assert that no new variable pollute environment to check that every
-  variable is used as local
 - Conf::list findOptions as last arg so any number of args
-- UT ensure /tmp files are deleted after UT run
 - Args::version to display binary version
-
-```bash
-  if [[ "${TMPDIR:-/tmp}" = "/tmp" ]]; then
-    local i=1 line file func
-    while read -r line func file < <(caller $i); do
-      echo >&3 "[$i] $file:$line $func(): $(sed -n ${line}p $file)"
-      ((i++))
-    done
-  fi
-```
-
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface
   - would it be possible to implement inheritance ?
-- add UT
-- update bashDoc
 - replace Command::captureOutputAndExitCode with Framework::run
 - add Framework::timeElapsed to display elapsed time of the command run
   - eg: ShellDoc::generateShellDocsFromDir
   - could compute time elapsed of subShell ?
+- new function Env::get "HOME"
+- ensure filters functions never fails (check bashFrameworkFunctions) and ensure
+  filters functions are not used as Assert function
+
+## 2. Binaries improvement
+
 - refact buildPushDockerImages.sh with Docker/functions... and using correct
   tagging
-  - update test consequently
-- add <https://github.com/fchastanet/bash-tools-framework> in help of each
-  command
+- add <https://github.com/fchastanet/bash-tools-framework> link inside help of
+  each command
 - awkLint/shellcheckLint use xargs
-- workflow
-  - register to <https://repology.org/projects/> in order to show matrix image
-    <https://github.com/jirutka/esh/blob/master/README.adoc>
-- test Env::load
-  - Env::load with invalid .env file => should display a warning message
-  - Env::load with missing .env file => fatal
-  - Env::load twice do not source again the files
-  - Env::load with 1 env file as parameter
-  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
-  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
-    BASH_FRAMEWORK_ENV_FILEPATH="${ROOT_DIR}/.env"
-  - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
 - do I add Env::load to \_header.tpl ?
   - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
-- compile exit 1 if at least 1 warning
-  - error if bash-tpl template not found
-    - File not found: '/dbQueryAllDatabases.awk'
-  - manage whitelist or add comment ignore
-    - File
-      /home/wsl/projects/bash-tools/vendor/bash-tools-framework/src/Acquire/ForceIPv4.sh
-      does not exist
-- new function Env::get "HOME"
-
-  - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
-    global HOME variable
-  - replace all ${HOME} by $(Env::get "HOME")
-  - generate automatically .env.template from Env::get
-  - variables can be overridden by env variables using OVERRIDE_VARIABLE_NAME
-
-- generate github page from Readme.tmpl.md using github workflow
-  - include bin help
-  - include bash doc
-- install.sh will get last version of build tools from bash-tools
-- Update libraries command
-
+- Update vendor command
   - command that allows to update the libraries in the repo
   - github cron that checks if library updates exists
+- compile and constructBinFile should use FRAMEWORK_SRC_DIRS from
+  .framework-config
 
-- doc.sh, linters and other build tools will be defined in bash-tools
-- support nested namespace
-- import bash-tools commands + libs
-- import ck_ip_dev_env commands
-- add megalinter github action
-  <https://github.com/marketplace/actions/megalinter>
-- <https://github.com/adoyle-h/lobash>
-- <https://github.com/elibs/ebash>
-- <https://github.com/pre-commit/action>
+### 2.1. FrameworkLint
 
-## Big Features/Studies
+- check if 2 files have the same BINARY_FILE target
+- refact src/\_binaries/frameworkLint.sh formatter for plain or checkstyle
 
-- generate automatically the \_\_all.sh file
+### 2.2. compile
 
+- check if nested namespaces are supported
+
+#### 2.2.1. add compilation checks
+
+- compile exit 1 if at least 1 warning
+- error if bash-tpl template not found
+  - File not found: '/dbQueryAllDatabases.awk'
+
+#### 2.2.2. Generate `__all.sh` file
+
+- generate automatically the `__all.sh` file
   - by including all the sh files of the directory except the ZZZ.sh
   - by including also dependent functions
   - it would mean to include dependent functions of the dependent function
@@ -102,13 +81,48 @@
     current bin file (inception) and so get rid of \_\_all.sh
   - could it be solved with dependency injection system ?
 
+## 3. Other improvements
+
+- optimize doc generation (parallelization)
+- rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
+  and exported
+  - it is used by called scripts
+- migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc> ?
+- bash-tpl should be a vendor dependency
+
+### 3.1. run precommit on github action
+
+- add megalinter github action
+  <https://github.com/marketplace/actions/megalinter>
+- <https://github.com/pre-commit/action>
+
+### 3.2. Other libraries integration
+
+- integrate <https://github.com/adoyle-h/lobash> ?
+- integrate <https://github.com/elibs/ebash> ?
+
+### Options/Args management
+
 - generate options parsing + doc from template
 
   - <https://github.com/ko1nksm/getoptions>
   - <https://github.com/matejak/argbash>
+  - <https://argbash.dev>
+  - <https://github.com/adoyle-h/lobash>
+  - <https://github.com/elibs/ebash>
 
-- migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc>
+### 3.3. Robustness
 
+- <https://dougrichardson.us/notes/fail-fast-bash-scripting.html>
+  - add `shopt -s inherit_errexit`
+  - add `set -u`
+  - add this page comments to `BestPractices.md`
+
+### 3.4. Doc
+
+- register to <https://repology.org/projects/> in order to show matrix image
+  <https://github.com/jirutka/esh/blob/master/README.adoc>
+- update bashDoc
 - bash documentation
   - <https://www.sphinx-doc.org/en/master/>
   - <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/> add man page
@@ -121,63 +135,76 @@
     - @param $1 after @param $2
     - @paramDefault $1 just after @param $2
 
-## SUDO feature
+### 3.5. Improve UT
 
-```bash
-sudo sudoParams (inline "<% ${SCRIPT_DIR} %>/installFile") params
+- replace BATS_TMP_DIR by BATS_RUN_TMPDIR that is automatically deleted
+- bats assert that no new variable pollute environment to check that every
+  variable is used as local
+- UT ensure /tmp files are deleted after UT run
+- test Env::load
+  - Env::load with invalid .env file => should display a warning message
+  - Env::load with missing .env file => fatal
+  - Env::load twice do not source again the files
+  - Env::load with 1 env file as parameter
+  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
+  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
+    BASH_FRAMEWORK_ENV_FILEPATH="${ROOT_DIR}/.env"
+  - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
+  - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
+    global HOME variable
+  - replace all ${HOME} by $(Env::get "HOME")
+  - generate automatically .env.template from Env::get
+  - variables can be overridden by env variables using OVERRIDE_VARIABLE_NAME
 
-sudo@@Install::file [sudo args] -- [function args]
+### 3.6. Refact - Move binaries to bash-tools
 
-sudo@@Install::file
+- move doc.sh, linters and other build tools to bash-tools
+  - install.sh will get last version of build tools from bash-tools
+  - import bash-tools commands + libs
 
+### 3.7. dev-env
 
-inline@@sudo "<%${SCRIPT_DIR} %>/installFile" [sudo args] -- [scripts args]
-inline@@exec "<% ${SCRIPT_DIR} %>/installFile" [scripts args]
-inline_installFile() {
-  script="""
-  """
-  if [[ ! -f /tmp/installFile ]]; then
-    echo "${script}" > /tmp/installFile fi /tmp/installFile "$@"
-  fi
-}
-inline_installFile params
-```
+- import ck_ip_dev_env commands
 
-- alternative to compile
-  <https://blog.tratif.com/2023/02/17/bash-tips-6-embedding-files-in-a-single-bash-script/>
+## 5. Compilation
+
+- merge constructBinFile and compile
+
+it doesn't matter if the command to execute is a sudo or not we just want to
+encapsulate a dependent binary(bash or not) inside the executable.
+
+- <https://blog.tratif.com/2023/02/17/bash-tips-6-embedding-files-in-a-single-bash-script/>
   - from bin file, generate a directory will all the necessary bin files and
     assets
   - tar the entire directory
   - create a bootstrap script able to untar and execute the entrypoint
-- rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
-  and exported
-  - it is used by called scripts
-- actually what I want is to be able to launch another command but inlining this
-  command inside the final sh file
-  - sudo sudoParams (inline "<% ${SCRIPT_DIR} %>/installFile") params
-    - inlineAs @installFile "<% ${SCRIPT_DIR} %>/installFile"
-    - sudo sudoParams @installFile params
-    - @installFile would be replaced by the generated file
-- constructBinFile will just rename sudo@@function to @@sudo_function@@
-  - then it's the responsibility of the constructBinFile to construct the
-    sudo_function in the right directory and build it
-  - TODO inject in the binFile the PATH
-- compile if a function is called as sudo
-  - eg: sudo@@Install::file [sudo args] -- [function args]
-    - compile will rewrite it as unserialize_Install_file &&
-      "${SCRIPTS_DIR}/sudo_Install_file
-    - compile will create a temporary file sudo_Install_file with the content of
-      the Install::file function and default header file and call to
-      Install::file "$@"
-    - compile will compile this file so all functions will be imported
-    - then base64 of this file and store it in a variable inside original
-      compiled file
-    - finally a function unserialize_Install_file will be generated
-    - unserialize_Install_file will create a temp file using the base64 string
-    - and sudo_Install_file will call this file as sudo (-E?)
+- add INCLUDE meta data
+- INCLUDE of a function of the framework will automatically generate a bin file
+  called with the name of the function and calling this function
+- using INCLUDE supposes to unsure the targeted binary has been constructed
+- using INCLUDE with a framework function (eg: Backup::file) will first
+  construct a bin file using that function directly
+- inject Embed::extract\_${asName} just before the use of the alias(lazy
+  loading)
+  - remove the call in `src/Embed/includeFileFunction.tpl`
 
-even better that that, it doesn't matter if the command to execute is a sudo or
-not we just want to encapsulate a dependent binary(bash or not) inside the
-executable add INCLUDE_BINARY meta data - external binary - sh file with
-metadata, means we need to build this binary if not done yet - then generate a
-tar file with all the binaries included
+eg: Backup::file so it would allow to use `sudo Backup::file ...`
+
+```bash
+# INCLUDE Backup::file
+```
+
+frameworkLint could generate a warning :
+
+- if sudo called on Backup::file without using INCLUDE
+- if INCLUDE is used but the binary is not used
+
+- constructBinfile - remove binDir not used
+- frameworkLint: ensure BIN_FILE is provided
+
+- INCLUDE include one file, rest of the script is as usual
+
+  - function allow to unzip the file
+
+- INCLUDE "as" names should be unique + some forbidden names (existing bash
+  functions)

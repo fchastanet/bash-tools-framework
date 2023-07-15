@@ -35,6 +35,8 @@ source "${_COMPILE_SRC_DIR}/Filters/catFileCleaned.sh"
 source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 # shellcheck source=/src/Filters/bashFrameworkFunctions.sh
 source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
+# shellcheck source=/src/Filters/bashCommentLines.sh
+source "${_COMPILE_SRC_DIR}/Filters/bashCommentLines.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -112,7 +114,7 @@ ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -
 Here you want to override the default templates too
 ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
 
-$(envsubst <"${_COMPILE_SRC_DIR}/_includes/author.tpl")
+$(SRC_FILE_PATH=bin/compile envsubst <"${_COMPILE_SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF
 }
 
@@ -270,7 +272,8 @@ importFunctions() {
   local functionToImport
 
   readarray -t functionsToImport < <(
-    Filters::bashFrameworkFunctions "${file}" |
+    Filters::bashCommentLines "${file}" |
+      Filters::bashFrameworkFunctions |
       awk '{$1=$1};1' |
       sort |
       uniq
@@ -357,7 +360,12 @@ injectImportedFunctions() {
     importFunctions "${file}" "${importedFunctionsTempFile}" "${importedZZZTempFile}" filesImported needAnotherPass failures
 
     # insert functions before # FUNCTIONS
-    sed -E -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
+    sed -E -i "/# FUNCTIONS/ {
+      h
+      r ${importedFunctionsTempFile}
+      g
+      N
+    }" "${file}"
 
     # insert zzz files after # FUNCTIONS
     sed -E -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"

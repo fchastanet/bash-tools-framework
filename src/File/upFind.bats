@@ -33,6 +33,12 @@ function File::upFindUntilNotFound { #@test
   assert_output ""
 }
 
+function File::upFindCurrentDirectory { #@test
+  run File::upFind "${srcDir}/File" "upFind.bats" "${srcDir}"
+  assert_success
+  assert_output "${srcDir}/File/upFind.bats"
+}
+
 function File::upFindUntilFound { #@test
   run File::upFind "${srcDir}/File" ".framework-config" "${FRAMEWORK_DIR}"
   assert_success

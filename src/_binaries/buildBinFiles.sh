@@ -26,7 +26,12 @@ computeMd5File() {
   local md5File="$1"
   while IFS= read -r file; do
     md5sum "${file}" >>"${md5File}" 2>&1 || true
-  done < <(grep -R "^# BIN_FILE" "${SRC_DIR}" | sed -E 's#^.*IN_FILE=(.*)$#\1#' | envsubst)
+  done < <(
+    grep -R "^# BIN_FILE" "${SRC_DIR}/_binaries" |
+      (grep -v -E '/testsData/' || true) |
+      sed -E 's#^.*IN_FILE=(.*)$#\1#' |
+      envsubst
+  )
 }
 
 beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
