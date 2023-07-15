@@ -115,8 +115,6 @@ fi
       git ls-files --exclude-standard -c -o -m
     fi
   ) |
-    grep -E -v "${exclude}" |
-    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
-    uniq |
-    LC_ALL=C.UTF-8 xargs -r "${VENDOR_BIN_DIR}/shellcheck" "$@"
+    (grep -E -v "${exclude}" || true) |
+    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "if File::detectBashFile '@'; then ${VENDOR_BIN_DIR}/shellcheck '@'; fi"
 )
