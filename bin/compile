@@ -360,7 +360,12 @@ injectImportedFunctions() {
     importFunctions "${file}" "${importedFunctionsTempFile}" "${importedZZZTempFile}" filesImported needAnotherPass failures
 
     # insert functions before # FUNCTIONS
-    sed -E -i "/# FUNCTIONS/ e cat ${importedFunctionsTempFile}\n" "${file}"
+    sed -E -i "/# FUNCTIONS/ {
+      h
+      r ${importedFunctionsTempFile}
+      g
+      N
+    }" "${file}"
 
     # insert zzz files after # FUNCTIONS
     sed -E -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"

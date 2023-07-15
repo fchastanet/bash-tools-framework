@@ -13,6 +13,8 @@ RUN \
       "coreutils=~9" \
       "curl=~8" \
       "gawk=~5.1" \
+      # needed for envsubst
+      "gettext=~0.21" \
       "git=~2" \
       "jq=~1.6" \
       "parallel=20221022-r0" \
