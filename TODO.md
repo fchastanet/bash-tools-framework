@@ -87,6 +87,7 @@
   and exported
   - it is used by called scripts
 - migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc> ?
+- bash-tpl should be a vendor dependency
 
 ### 3.1. run precommit on github action
 

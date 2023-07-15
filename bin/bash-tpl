@@ -7,7 +7,7 @@
 # See the accompanying LICENSE file, if present, or visit:
 #   https://opensource.org/licenses/MIT
 #######################################################################
-VERSION="v0.7.0"
+VERSION="v0.7.1"
 #######################################################################
 # Bash-TPL: A Smart, Lightweight shell script templating engine
 #
@@ -596,7 +596,7 @@ function process_directive() {
       args="${3}"
       trim args
       declare -a args_arr="(${args})"
-      # shellcheck disable=SC2128  # We choose BASH_SOURCE vs BASH_SOURCE[0] for compatibility
+      # shellcheck disable=SC2128  # We choose BASH_SOURCE vs BASH_SOURCE[0] for compatability
       "${BASH_SOURCE}" \
         --text-indent "${BASE_TEXT_INDENT}${TEXT_INDENT}${indent}" \
         --stmt-indent "${BASE_STMT_INDENT}${STATEMENT_INDENT}${indent}" \
@@ -1289,6 +1289,8 @@ function main() {
   fi
 
   process_stdin
+
+  return 0 # ALL OK
 }
 
 # Only process main logic if not being sourced (ie tested)
