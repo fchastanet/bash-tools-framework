@@ -35,6 +35,8 @@ source "${_COMPILE_SRC_DIR}/Filters/catFileCleaned.sh"
 source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 # shellcheck source=/src/Filters/bashFrameworkFunctions.sh
 source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
+# shellcheck source=/src/Filters/bashCommentLines.sh
+source "${_COMPILE_SRC_DIR}/Filters/bashCommentLines.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -270,7 +272,8 @@ importFunctions() {
   local functionToImport
 
   readarray -t functionsToImport < <(
-    Filters::bashFrameworkFunctions "${file}" |
+    Filters::bashCommentLines "${file}" |
+      Filters::bashFrameworkFunctions |
       awk '{$1=$1};1' |
       sort |
       uniq

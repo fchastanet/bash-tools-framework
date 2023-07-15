@@ -84,7 +84,8 @@ FRAMEWORK_SRC_DIRS+=("${ROOT_DIR}/src")
 checkEachFunctionHasSrcFile() {
   local file="$1"
   readarray -t functionsToImport < <(
-    Filters::bashFrameworkFunctions "${file}" |
+    Filters::bashCommentLines "${file}" |
+      Filters::bashFrameworkFunctions |
       awk '{$1=$1};1' |
       sort |
       uniq || true
