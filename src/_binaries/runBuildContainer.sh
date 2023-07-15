@@ -52,6 +52,7 @@ if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
   args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
 fi
 
+set -x
 docker run \
   --rm \
   "${args[@]}" \
