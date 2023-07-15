@@ -15,7 +15,7 @@
   - [3.5. Improve UT](#35-improve-ut)
   - [3.6. Refact - Move binaries to bash-tools](#36-refact---move-binaries-to-bash-tools)
   - [3.7. dev-env](#37-dev-env)
-- [5. SUDO feature](#5-sudo-feature)
+- [5. Compilation](#5-compilation)
 
 ## 1. Framework functions changes
 
@@ -33,6 +33,8 @@
   - eg: ShellDoc::generateShellDocsFromDir
   - could compute time elapsed of subShell ?
 - new function Env::get "HOME"
+- ensure filters functions never fails (check bashFrameworkFunctions) and ensure
+  filters functions are not used as Assert function
 
 ## 2. Binaries improvement
 
@@ -47,6 +49,8 @@
 - Update vendor command
   - command that allows to update the libraries in the repo
   - github cron that checks if library updates exists
+- compile and constructBinFile should use FRAMEWORK_SRC_DIRS from
+  .framework-config
 
 ### 2.1. FrameworkLint
 
@@ -131,6 +135,7 @@
 
 ### 3.5. Improve UT
 
+- replace BATS_TMP_DIR by BATS_RUN_TMPDIR that is automatically deleted
 - bats assert that no new variable pollute environment to check that every
   variable is used as local
 - UT ensure /tmp files are deleted after UT run
@@ -159,7 +164,9 @@
 
 - import ck_ip_dev_env commands
 
-## 5. SUDO feature
+## 5. Compilation
+
+- merge constructBinFile and compile
 
 it doesn't matter if the command to execute is a sudo or not we just want to
 encapsulate a dependent binary(bash or not) inside the executable.
@@ -175,6 +182,9 @@ encapsulate a dependent binary(bash or not) inside the executable.
 - using INCLUDE supposes to unsure the targeted binary has been constructed
 - using INCLUDE with a framework function (eg: Backup::file) will first
   construct a bin file using that function directly
+- inject Embed::extract\_${asName} just before the use of the alias(lazy
+  loading)
+  - remove the call in `src/Embed/includeFileFunction.tpl`
 
 eg: Backup::file so it would allow to use `sudo Backup::file ...`
 
@@ -186,3 +196,13 @@ frameworkLint could generate a warning :
 
 - if sudo called on Backup::file without using INCLUDE
 - if INCLUDE is used but the binary is not used
+
+- constructBinfile - remove binDir not used
+- frameworklint: ensure BIN_FILE is provided
+
+- INCLUDE include one file, rest of the script is as usual
+
+  - function allow to unzip the file
+
+- INCLUDE "as" names should be unique + some forbidden names (existing bash
+  functions)

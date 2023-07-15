@@ -60,10 +60,10 @@ ${__HELP_TITLE}File header example:${__HELP_NORMAL}${__HELP_EXAMPLE}
 # BIN_FILE=\${ROOT_DIR}/bin/myBinary
 # ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 # META_SCRIPT=MinimumRequirements
-# INCLUDE "\${ROOT_DIR}/bin/otherNeededBinary" AS "\${BIN_DIR}/otherNeededBinary"
-# INCLUDE Backup::file AS "\${BIN_DIR}/backupFile"
-sudo "\${BIN_DIR}/backupFile" ...
-"\${BIN_DIR}/otherNeededBinary"${__HELP_NORMAL}
+# INCLUDE "\${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
+# INCLUDE Backup::file AS "backupFile"
+sudo "\${embed_file_backupFile}" ...
+"\${embed_file_otherNeededBinary}"${__HELP_NORMAL}
 
 $(SRC_FILE_PATH=bin/constructBinFile envsubst <"${SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF
