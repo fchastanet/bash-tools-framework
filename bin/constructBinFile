@@ -98,6 +98,7 @@ while true; do
   shift || true
 done
 
+declare -agx CONSTRUCT_BIN_FILE_ARGUMENTS=("$@")
 declare srcFile="$1"
 declare templateDir="$2"
 declare binDir="$3"
@@ -118,7 +119,7 @@ getBinFileFromSrcFile() {
   local BIN_FILE
 
   BIN_FILE="$(grep -E '# BIN_FILE=' "${srcFile}" | sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' || :)"
-  BIN_FILE="$(echo "${BIN_FILE}" | ROOT_DIR="${rootDir}" envsubst)"
+  BIN_FILE="$(echo "${BIN_FILE}" | BIN_DIR="${binDir}" ROOT_DIR="${rootDir}" envsubst)"
   if [[ -z "${BIN_FILE}" ]]; then
     Log::displaySkipped "${srcFile} does not contains BIN_FILE metadata"
     return 0
@@ -161,19 +162,19 @@ constructBinFile() {
   BIN_FILE=$(getBinFileFromSrcFile "${srcFile}" "${binDir}" "${rootDir}")
   if [[ -z "${BIN_FILE}" ]]; then
     # BIN_FILE metadata not provided => skipped
+    Log::displaySkipped "File '${srcFile}' - BIN_FILE metadata not provided"
     return 0
   fi
-  mkdir -p "$(realpath -m "$(dirname "${BIN_FILE}")")" || true
   Log::displayInfo "Binfile ${BIN_FILE} from ${srcFile}"
 
   # pass through an intermediate file to avoid bash tools framewwork functions injection
   # that could be implied by INCLUDE usage (eg: INCLUDE Backup::file)
   local TEMP_SRC_FILE
   TEMP_SRC_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-constructBinFiles-before-XXXXXX)"
+  Log::displayDebug "Binfile ${BIN_FILE} Writing intermediate src file without metadata from ${srcFile} - ${TEMP_SRC_FILE}"
   removeConstructBinFileMetaDataFilter <"${srcFile}" >"${TEMP_SRC_FILE}"
-  Log::displayDebug "Binfile ${BIN_FILE} Writing intermediate src file without metadata from ${srcFile}"
 
-  Log::displayInfo "Binfile ${BIN_FILE} from ${srcFile}"
+  Log::displayInfo "compile Binfile ${BIN_FILE} from ${srcFile}"
   local -a compileArgs=(
     "${TEMP_SRC_FILE}"
     "$(getFileRelativeToDir "${srcFile}" "${rootDir}")"
@@ -184,8 +185,7 @@ constructBinFile() {
   for srcDir in "${srcDirs[@]}"; do
     compileArgs+=(--src-dir "${srcDir}")
   done
-  "${BIN_DIR}/compile" "${compileArgs[@]}" |
-    removeAllMetaDataFilter >"${BIN_FILE}"
+  "${BIN_DIR}/compile" "${compileArgs[@]}" | removeAllMetaDataFilter >"${BIN_FILE}"
   chmod +x "${BIN_FILE}"
 }
 

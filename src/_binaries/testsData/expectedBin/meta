@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Header
+declare SCRIPT="myScript"
+
+Args::defaultHelp() {
+  echo "$1"
+}
+
+# FUNCTIONS
+
+Args::defaultHelp "Help"
+
+echo "${SCRIPT}"
