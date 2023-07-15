@@ -30,7 +30,7 @@ function Embed::includeFrameworkFunction { #@test
     "${rootDir}/src"
   )
   (
-    echo "#!/bin/bash"
+    echo "#!/usr/bin/env bash"
     Embed::includeFrameworkFunction "Filters::bashFrameworkFunctions" "bashFrameworkFunctions"
   ) >"${BATS_RUN_TMPDIR}/functionIncluded"
   # shellcheck source=/dev/null

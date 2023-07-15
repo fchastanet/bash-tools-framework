@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 installScripts_Install1MissingFunctionConfigure_helpDescription() {
   echo "installScripts_Install1MissingFunctionConfigure_helpDescription"

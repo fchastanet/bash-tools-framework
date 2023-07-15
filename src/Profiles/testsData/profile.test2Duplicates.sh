@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ -z "${CONFIG_LIST+xxx}" ]]; then
   CONFIG_LIST=()

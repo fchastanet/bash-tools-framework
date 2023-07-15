@@ -22,7 +22,7 @@ export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 declare -a params=("${SRC_DIR}" "${BIN_DIR}" "${ROOT_DIR}")
 if (($# == 0)); then
   find "${SRC_DIR}/_binaries" -name "*.sh" -print |
-    ( grep -v -E '/testsData/' || true ) |
+    (grep -v -E '/testsData/' || true) |
     xargs -n1 -P8 -I{} \
       "${FRAMEWORK_DIR}/bin/constructBinFile" "{}" "${params[@]}"
 else

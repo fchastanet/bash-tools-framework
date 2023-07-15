@@ -83,7 +83,7 @@
 
 ## 3. Other improvements
 
-- optimize doc generation (parellelization)
+- optimize doc generation (parallelization)
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
   and exported
   - it is used by called scripts
@@ -200,7 +200,7 @@ frameworkLint could generate a warning :
 - if INCLUDE is used but the binary is not used
 
 - constructBinfile - remove binDir not used
-- frameworklint: ensure BIN_FILE is provided
+- frameworkLint: ensure BIN_FILE is provided
 
 - INCLUDE include one file, rest of the script is as usual
 

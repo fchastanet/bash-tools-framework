@@ -10,7 +10,7 @@ Embed::includeFrameworkFunction() {
 
   (
     trap 'rm -Rf "${binSrcFile}" "${binFile}" >/dev/null 2>&1' EXIT HUP QUIT ABRT TERM
-    # create binfile
+    # create binFile
     binSrcFile="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-includeFrameworkFunction-XXXXXX)"
     binFile="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-includeFrameworkFunction-XXXXXX)"
 

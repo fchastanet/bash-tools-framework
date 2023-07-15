@@ -11,7 +11,7 @@ setup() {
 
 function Embed::includeDir::testsData { #@test
   (
-    echo "#!/bin/bash"
+    echo "#!/usr/bin/env bash"
     Embed::includeDir "${BATS_TEST_DIRNAME}/testsData" "testsData"
   ) >"${BATS_RUN_TMPDIR}/dirIncluded"
   source "${BATS_RUN_TMPDIR}/dirIncluded"

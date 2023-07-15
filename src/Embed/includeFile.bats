@@ -12,7 +12,7 @@ setup() {
 
 function Embed::includeFile::binaryFile { #@test
   (
-    echo "#!/bin/bash"
+    echo "#!/usr/bin/env bash"
     Embed::includeFile "${BATS_TEST_DIRNAME}/testsData/binaryFile" "binaryFile"
   ) >"${BATS_RUN_TMPDIR}/fileIncluded"
   source "${BATS_RUN_TMPDIR}/fileIncluded"
@@ -28,7 +28,7 @@ function Embed::includeFile::binaryFile { #@test
 
 function Embed::includeFile::normalFile { #@test
   (
-    echo "#!/bin/bash"
+    echo "#!/usr/bin/env bash"
     Embed::includeFile "${BATS_TEST_DIRNAME}/testsData/normalFile" "normalFile"
   ) >"${BATS_RUN_TMPDIR}/fileIncluded"
   source "${BATS_RUN_TMPDIR}/fileIncluded"

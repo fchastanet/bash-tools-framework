@@ -53,12 +53,12 @@ framework function Embed::include allows to:
 
 - include a file(binary or not) as md5 encoded, the file can then be extracted
   using the automatically generated method Embed::extractFile_asName where
-  asName is the name chosen above the orginal filemode will be restored after
-  extraction. The variable embed_file_asName contains the targetted filepath.
+  asName is the name chosen above the original file mode will be restored after
+  extraction. The variable embed_file_asName contains the targeted filepath.
 - include a directory, the directory will be tar gz and added to the compiled
   file as md5 encoded string. The directory can then be extracted using the
   automatically generated method Embed::extractDir_asName where asName is the
-  name chosen above. The variable embed_dir_asName contains the targetted
+  name chosen above. The variable embed_dir_asName contains the targeted
   directory path.
 - include a bash framework function, a special binary file that simply calls
   this function will be automatically generated. This binary file will be added
@@ -69,7 +69,7 @@ framework function Embed::include allows to:
 ## 3. ConstructBinFile tool
 
 compile is almost never used alone but it can, ConstructBinFile allows to
-generate a binary file using some metadata directly isinde the src file.
+generate a binary file using some metadata directly inside the src file.
 
 Eg:
 
@@ -120,7 +120,8 @@ if INCLUDE metadata is provided, the file/dir provided will be added inside the
 resulting bin file as a tar gz file(base64 encoded) and automatically extracted
 when executed.
 
-See [compiler - Embed::include](#embedInclude) above for more information.
+See [compiler - Embed::include](CompilationTools.md#embedInclude) above for more
+information.
 
 ### 3.4. META\_\* metadata (optional)
 
