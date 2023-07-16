@@ -45,6 +45,10 @@ source "${_COMPILE_SRC_DIR}/Compiler/extractUniqueFrameworkFunctions.sh"
 source "${_COMPILE_SRC_DIR}/Compiler/findFunctionInSrcDirs.sh"
 # shellcheck source=/src/Compiler/injectFileOnce.sh
 source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
+# shellcheck source=/src/File/insertFileBeforeToken.sh
+source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
+# shellcheck source=/src/File/insertFileAfterToken.sh
+source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -323,30 +327,33 @@ importFunctions() {
       continue
     }
 
-    if ! Array::contains "${fileToImport}" "${filesImportedWithFunctions[@]}"; then
-      if [[ -f "${fileToImport}" ]]; then
-        local fileToImportDir
-        fileToImportDir="$(dirname "${fileToImport}")"
-        # check if we need to import _.sh
-        if [[ -f "${fileToImportDir}/_.sh" ]]; then
-          Compiler::injectFileOnce "${fileToImportDir}/_.sh" \
-            filesImportedWithFunctions >>"${importedFunctionsTempFile}"
-        fi
-        # check if we need to import ZZZ.sh
-        if [[ -f "${fileToImportDir}/ZZZ.sh" ]]; then
-          Compiler::injectFileOnce "${fileToImportDir}/ZZZ.sh" \
-            filesImportedWithFunctions >>"${importedZZZTempFile}"
-        fi
-        Compiler::injectFileOnce "${fileToImport}" \
+    if Array::contains "${fileToImport}" "${filesImportedWithFunctions[@]}"; then
+      continue
+    fi
+
+    if [[ -f "${fileToImport}" ]]; then
+      local fileToImportDir
+      fileToImportDir="$(dirname "${fileToImport}")"
+      # check if we need to import _.sh
+      if [[ -f "${fileToImportDir}/_.sh" ]]; then
+        Compiler::injectFileOnce "${fileToImportDir}/_.sh" \
           filesImportedWithFunctions >>"${importedFunctionsTempFile}"
-      else
-        (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
-        # even if not existing, consider the file as imported to avoid other same errors
-        filesImportedWithFunctions+=("${fileToImport}")
-        ((importFailures++)) || true
       fi
+      # check if we need to import ZZZ.sh
+      if [[ -f "${fileToImportDir}/ZZZ.sh" ]]; then
+        Compiler::injectFileOnce "${fileToImportDir}/ZZZ.sh" \
+          filesImportedWithFunctions >>"${importedZZZTempFile}"
+      fi
+      Compiler::injectFileOnce "${fileToImport}" \
+        filesImportedWithFunctions >>"${importedFunctionsTempFile}"
+
       # shellcheck disable=SC2034
       ((newFilesAdded = 1)) # as we added some files, we need to do another pass
+    else
+      (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+      # even if not existing, consider the file as imported to avoid other same errors
+      filesImportedWithFunctions+=("${fileToImport}")
+      ((importFailures++)) || true
     fi
   done
 }
@@ -360,9 +367,9 @@ injectImportedFunctions() {
   local -a functionsToImport
   local iteration
   local fileToImport
+
   local importedFunctionsTempFile
   importedFunctionsTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_functions.XXXXXXX")"
-
   local importedZZZTempFile
   importedZZZTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_zzz_files.XXXXXXX")"
 
@@ -375,18 +382,14 @@ injectImportedFunctions() {
     echo >"${importedFunctionsTempFile}"
     echo >"${importedZZZTempFile}"
 
-    importFunctions "${file}" "${importedFunctionsTempFile}" "${importedZZZTempFile}" filesImported needAnotherPass failures
+    importFunctions "${file}" "${importedFunctionsTempFile}" "${importedZZZTempFile}" \
+      filesImported needAnotherPass failures
 
     # insert functions before # FUNCTIONS
-    sed -E -i "/# FUNCTIONS/ {
-      h
-      r ${importedFunctionsTempFile}
-      g
-      N
-    }" "${file}"
+    File::insertFileBeforeToken "${file}" "${importedFunctionsTempFile}" "# FUNCTIONS"
 
     # insert zzz files after # FUNCTIONS
-    sed -E -i "/# FUNCTIONS/ r ${importedZZZTempFile}" "${file}"
+    File::insertFileAfterToken "${file}" "${importedZZZTempFile}" "# FUNCTIONS"
 
     ((iteration++))
   done

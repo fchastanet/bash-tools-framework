@@ -1,0 +1,6 @@
+stuff before
+insertFileBeforeToken injected
+# FUNCTIONS
+stuff after
+# FUNCTIONS
+stuff again after

@@ -1,0 +1,5 @@
+stuff before
+# FUNCTIONS
+stuff after
+# FUNCTIONS
+stuff again after
