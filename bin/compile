@@ -6,7 +6,7 @@
 #  - auto import \_.sh before if at least one function imported in the directory
 #  - auto import ZZZ.sh after loading functions if at least one function imported in the directory
 
-_COMPILE_BIN_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+_COMPILE_BIN_DIR="$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)"
 _COMPILE_ROOT_DIR="$(cd "${_COMPILE_BIN_DIR}/.." && pwd -P)"
 _COMPILE_SRC_DIR="$(cd "${_COMPILE_ROOT_DIR}/src" && pwd -P)"
 export FRAMEWORK_DIR="${_COMPILE_ROOT_DIR}"
@@ -37,6 +37,14 @@ source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
 # shellcheck source=/src/Filters/bashCommentLines.sh
 source "${_COMPILE_SRC_DIR}/Filters/bashCommentLines.sh"
+# shellcheck source=/src/Compiler/extractMetaForExport.sh
+source "${_COMPILE_SRC_DIR}/Compiler/extractMetaForExport.sh"
+# shellcheck source=/src/Compiler/extractUniqueFrameworkFunctions.sh
+source "${_COMPILE_SRC_DIR}/Compiler/extractUniqueFrameworkFunctions.sh"
+# shellcheck source=/src/Compiler/findFunctionInSrcDirs.sh
+source "${_COMPILE_SRC_DIR}/Compiler/findFunctionInSrcDirs.sh"
+# shellcheck source=/src/Compiler/injectFileOnce.sh
+source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -52,67 +60,117 @@ TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 showHelp() {
   SCRIPT_NAME=${0##*/}
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the script given in parameter
+${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the
+script given in parameter
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath> <relativePath> <rootDir> [--src-dir|-s <srcDir>] [--template <templateName>]
-    --help,-h prints this help and exits
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath>
+    <relativePath> <rootDir> [--src-dir|-s <srcDir>]
+    [--template <templateName>]
 
-    <fileToCompile> the relative or absolute path to compile into one file
+${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
 
-    <srcFilePath> the src file you want to show at the top of generated file to indicate
-      from which source file the binary has been generated.
+    <fileToCompile> the relative or absolute path to compile into
+      one file
+
+    <srcFilePath> the src file you want to show at the top of
+      generated file to indicate from which source file the binary
+      has been generated.
       You can use the variable SRC_FILE_PATH in your template.
 
-    <relativePath> some binary files needs to deduce root path relative to where they
-      are installed.
-      Eg: this is useful for these binary files to know that to get some configuration files.
-      You can use the variable ROOT_DIR_RELATIVE_TO_BIN_DIR in your template.
+    <relativePath> some binary files needs to deduce root path
+      relative to where they are installed.
+      Eg: this is useful for these binary files to know that to get
+      some configuration files.
+      You can use the variable ROOT_DIR_RELATIVE_TO_BIN_DIR in your
+      template.
 
     <rootDir> useful to include some files during compilation
 
-    --src-dir|-s <srcDir> provide the directory where to find the functions source code.
+${__HELP_TITLE}Options:${__HELP_NORMAL}
+    --help,-h prints this help and exits
+
+    --src-dir|-s <srcDir> provide the directory where to find the
+      functions source code.
       By default this project src directory is used.
 
-      You can add as much --src-dir options as needed to define other source dirs.
-      The functions will be searched in the order defined (it allows function redefinition)
+      You can add as much --src-dir options as needed to define
+      other source dirs.
+      The functions will be searched in the order defined (it
+      allows function redefinition)
       Example: --src-dir src --src-dir otherSrc
       Functions::myFunction will be searched in
         - src/Functions/myFunction.sh
         - otherSrc/Functions/myFunction.sh
 
-      ${__HELP_TITLE}Important Note:${__HELP_NORMAL} if you provide a --src-dir and you need also functions
-      defined in this project, think about adding a --src-dir for this project too
+      ${__HELP_TITLE}Important Note:${__HELP_NORMAL} if you provide
+      a --src-dir and you need also functions defined in this
+      project, think about adding a --src-dir for this project too
 
-    --template-dir|-t <templateDir> the template directory to use to override some template includes
+    --template-dir|-t <templateDir> the template directory to use
+      to override some template includes.
       Check environment variables below.
 
-${__HELP_TITLE}Environment variables:${__HELP_NORMAL}
-  * REPOSITORY_URL: used in template to indicate from which github repo the file has been generated
-  * SRC_ABSOLUTE_PATH: absolute path to the template file being computed
-  * ORIGINAL_TEMPLATE_DIR allowing you to include the template relative to the script being interpreted
-  * TEMPLATE_DIR the template directory in which you can override the templates defined in ORIGINAL_TEMPLATE_DIR
+${__HELP_TITLE}.framework-config environment variables:${__HELP_NORMAL}
+You can define global environement variables inside
+.framework-config file that could be used in your templates:
+Eg:
+  * REPOSITORY_URL: used in template to indicate from which github
+    repo the file has been generated
+
+${__HELP_TITLE}Template variables:${__HELP_NORMAL}
+Other variables are automatically generated to be used in your
+templates:
+  * ORIGINAL_TEMPLATE_DIR allowing you to include the template
+    relative to the script being interpreted
+  * TEMPLATE_DIR the template directory in which you can override
+    the templates defined in ORIGINAL_TEMPLATE_DIR
+  * ROOT_DIR_RELATIVE_TO_BIN_DIR based on the metadata of the same
+    name in the header of your source file. It allows you to join
+    ROOT_DIR from target BIN_FILE directory. Kept for compatibility
+    reason but prefer to use Embed feature instead.
+
+The following variables depends upon parameters passed to this
+script:
+  * SRC_FILE_PATH the src file you want to show at the top of
+    generated file to indicate from which source file the binary
+    has been generated.
+  * SRC_ABSOLUTE_PATH is the path of the file being compiled, it
+    can be useful if you need to access a path relative to this
+    file during compilation.
+    ${__HELP_EXAMPLE}Eg: inline a awk script inside the resulting
+    binary
+awkScript="\$(
+  cat <<'AWK_EOF'
+.INCLUDE "\$(cd "\$(dirname \${SRC_ABSOLUTE_PATH})" && pwd -P)/mysql2puml.awk"
+AWK_EOF
+)"${__HELP_NORMAL}
 
 ${__HELP_TITLE}META variables:${__HELP_NORMAL}
-It's possible to inject some variables that will be used to interpret the template
-Eg: add this line to the beginning of the file without breaking comment section (no newlines between #)
-${__HELP_EXAMPLE}
-#!/usr/bin/env bash
-# META_SCRIPT=MinimumRequirements
+It's also possible to inject some variables speficic to the binary
+file you are generating and that will be used to interpret your
+templates.
+
+Eg: add this line to the beginning of the source file without
+breaking comment section (no newlines between #)
+${__HELP_EXAMPLE}#!/usr/bin/env bash
+# META_SCRIPT=MinimumRequirements${__HELP_NORMAL}
 The variable SCRIPT can then be used in the template using
-SCRIPT="<% \${SCRIPT} %>"
-${__HELP_NORMAL}
+${__HELP_EXAMPLE}SCRIPT="<% \${SCRIPT} %>"${__HELP_NORMAL}
 
 ${__HELP_TITLE}Example:${__HELP_NORMAL}
-Let's say you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
+Let's say you want to generate the binary file \`bin/buildDoc\`
+from the source file \`src/build/buildDoc.sh\`
 ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
 
-Here you want to generate the binary file bin/buildDoc from the source file src/build/buildDoc.sh
-but overriding some or all functions of bash-tools-framework/src
-${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src${__HELP_NORMAL}
+Here you want to generate the binary but overriding some or
+all functions of bash-tools-framework/src
+${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..\\
+  -s ./src -s ../bash-tools-framework/src${__HELP_NORMAL}
 
 Here you want to override the default templates too
-${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
+${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. \\
+  -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
 
 $(SRC_FILE_PATH=bin/compile envsubst <"${_COMPILE_SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF
@@ -218,43 +276,17 @@ export -f dynamicTemplateDir
 evalTemplate() {
   local FILE="$1"
   local metaExports
-  # https://regex101.com/r/7zDYFK/1
-  metaExports="$(
-    sed -E -n '/^#/!q;p' "${FILE}" |
-      grep -E '# META_.*=' |
-      sed -E 's/^#[ \t]+META_([^=]+)=[ \t]*([^\n\r]*)/\1="\2"\nexport \1\n/g' |
-      tr '\n' ' ' ||
-      :
-  )"
-  if [[ "${DEBUG:-0}" = "1" ]]; then
-    (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate source <(
-      ${metaExports}
-      SRC_FILE_PATH='${SRC_FILE_PATH}'
-      REPOSITORY_URL='${REPOSITORY_URL}'
-      ORIGINAL_TEMPLATE_DIR='${_COMPILE_SRC_DIR}'
-      TEMPLATE_DIR='${TEMPLATE_DIR}'
-      ROOT_DIR='${ROOT_DIR}'
-      ROOT_DIR_RELATIVE_TO_BIN_DIR='${ROOT_DIR_RELATIVE_TO_BIN_DIR}'
-      FRAMEWORK_ROOT_DIR='${_COMPILE_ROOT_DIR}'
-      SRC_ABSOLUTE_PATH='${SRC_ABSOLUTE_PATH}'
-      ${_COMPILE_ROOT_DIR}/bin/bash-tpl '${FILE}'
-      ) > binFile${__RESET_COLOR}")
-  fi
+  metaExports="$(Compiler::extractMetaForExport "${FILE}")"
   SRC_ABSOLUTE_PATH="$(realpath "${SRC_FILE_PATH}")"
-  (# shellcheck disable=SC2034
+  (
     cd "${TEMPLATE_DIR}"
     eval "${metaExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
-    FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}"
-    export TEMPLATE_DIR
-    export SRC_FILE_PATH
-    export REPOSITORY_URL
     export ORIGINAL_TEMPLATE_DIR
     export TEMPLATE_DIR
-    export ROOT_DIR
-    export ROOT_DIR_RELATIVE_TO_BIN_DIR
-    export FRAMEWORK_ROOT_DIR
     export SRC_ABSOLUTE_PATH
+    export SRC_FILE_PATH
+    export ROOT_DIR_RELATIVE_TO_BIN_DIR
     # shellcheck source=/dev/null
     source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
   ) | Filters::removeDuplicatedShebangs
@@ -267,69 +299,54 @@ importFunctions() {
   local importedFunctionsTempFile="$2"
   local importedZZZTempFile="$3"
   local -n filesImportedWithFunctions=$4
-  local -n functionsNeedToBeImported=$5
+  local -n newFilesAdded=$5
   local -n importFailures=$6
+  local -a functionsToImport
   local functionToImport
 
-  readarray -t functionsToImport < <(
-    Filters::bashCommentLines "${file}" |
-      Filters::bashFrameworkFunctions |
-      awk '{$1=$1};1' |
-      sort |
-      uniq
-  )
-  ((functionsNeedToBeImported = 0)) || true
+  readarray -t functionsToImport < <(Compiler::extractUniqueFrameworkFunctions "${file}")
+
+  ((newFilesAdded = 0)) || true
+  if [[ "${DEBUG:-0}" = "1" ]]; then
+    echo >&2 "importing ${file} with ${#functionsToImport[@]} functions to import"
+  fi
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
       (echo >&2 -e "${__DEBUG_COLOR}\tFunction ${functionToImport} ignored, because of rule defined in ${configFile}${__RESET_COLOR}")
       continue
     fi
 
-    local fileNameToImport
-    fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
-    # search through srcDirs the file to import
-    for srcDir in "${srcDirs[@]}"; do
-      fileToImport="${srcDir}/${fileNameToImport}"
-      if [[ -f "${fileToImport}" ]]; then
-        # we found it
-        break
-      fi
-    done
+    local fileToImport
+    fileToImport="$(Compiler::findFunctionInSrcDirs "${functionToImport}" "${srcDirs[@]}")" || {
+      (echo >&2 -e "${__ERROR_COLOR}\tFunction ${functionToImport} not found in any src directories${__RESET_COLOR}")
+      ((importFailures++)) || true
+      continue
+    }
 
     if ! Array::contains "${fileToImport}" "${filesImportedWithFunctions[@]}"; then
       if [[ -f "${fileToImport}" ]]; then
+        local fileToImportDir
+        fileToImportDir="$(dirname "${fileToImport}")"
         # check if we need to import _.sh
-        underscoreFile="$(dirname "${fileToImport}")/_.sh"
-        if ! Array::contains "${underscoreFile}" "${filesImportedWithFunctions[@]}" &&
-          [[ -f "${underscoreFile}" ]]; then
-          if [[ "${DEBUG:-0}" = "1" ]]; then
-            (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${underscoreFile} ...${__RESET_COLOR}")
-          fi
-          Filters::catFileCleaned "${underscoreFile}" >>"${importedFunctionsTempFile}"
-          filesImportedWithFunctions+=("${underscoreFile}")
+        if [[ -f "${fileToImportDir}/_.sh" ]]; then
+          Compiler::injectFileOnce "${fileToImportDir}/_.sh" \
+            filesImportedWithFunctions >>"${importedFunctionsTempFile}"
         fi
         # check if we need to import ZZZ.sh
-        zzzFile="$(dirname "${fileToImport}")/ZZZ.sh"
-        if ! Array::contains "${zzzFile}" "${filesImportedWithFunctions[@]}" &&
-          [[ -f "${zzzFile}" ]]; then
-          if [[ "${DEBUG:-0}" = "1" ]]; then
-            (echo >&2 -e "${__DEBUG_COLOR}\tImporting ${zzzFile} ...${__RESET_COLOR}")
-          fi
-          Filters::catFileCleaned "${zzzFile}" >>"${importedZZZTempFile}"
-          filesImportedWithFunctions+=("${zzzFile}")
+        if [[ -f "${fileToImportDir}/ZZZ.sh" ]]; then
+          Compiler::injectFileOnce "${fileToImportDir}/ZZZ.sh" \
+            filesImportedWithFunctions >>"${importedZZZTempFile}"
         fi
-
-        if [[ "${DEBUG:-0}" = "1" ]]; then
-          (echo >&2 -e "\t${__DEBUG_COLOR}Importing ${fileToImport} ...${__RESET_COLOR}")
-        fi
-        Filters::catFileCleaned "${fileToImport}" >>"${importedFunctionsTempFile}"
+        Compiler::injectFileOnce "${fileToImport}" \
+          filesImportedWithFunctions >>"${importedFunctionsTempFile}"
       else
         (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+        # even if not existing, consider the file as imported to avoid other same errors
+        filesImportedWithFunctions+=("${fileToImport}")
         ((importFailures++)) || true
       fi
-      filesImportedWithFunctions+=("${fileToImport}")
       # shellcheck disable=SC2034
-      ((functionsNeedToBeImported = 1)) # as we added some files, we need to do another pass
+      ((newFilesAdded = 1)) # as we added some files, we need to do another pass
     fi
   done
 }
@@ -341,7 +358,8 @@ injectImportedFunctions() {
 
   local needAnotherPass
   local -a functionsToImport
-  local iteration zzzFile fileToImport underscoreFile
+  local iteration
+  local fileToImport
   local importedFunctionsTempFile
   importedFunctionsTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_functions.XXXXXXX")"
 

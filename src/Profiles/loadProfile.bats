@@ -40,8 +40,7 @@ function Profiles::loadProfileUnknown { #@test
     "${BATS_TEST_DIRNAME}/testsData" "unknown"
 
   assert_failure 1
-  # shellcheck disable=SC2154
-  [[ "${#lines[@]}" = "2" ]]
+  assert_lines_count 2
   assert_line --index 0 --partial "INFO    - Loading profile '${BATS_TEST_DIRNAME}/testsData/profile.unknown.sh'"
   assert_line --index 1 --partial "profile profile.unknown.sh not found in '${BATS_TEST_DIRNAME}/testsData'"
 }
@@ -51,8 +50,7 @@ function Profiles::loadProfileMissingProfileArg { #@test
     "${BATS_TEST_DIRNAME}/testsData"
 
   assert_failure 1
-  # shellcheck disable=SC2154
-  [[ "${#lines[@]}" = "1" ]]
+  assert_lines_count 1
   assert_line --index 0 --partial "ERROR   - This method needs exactly 2 parameters"
 }
 
@@ -60,7 +58,6 @@ function Profiles::loadProfileMissingArgs { #@test
   run Profiles::loadProfile
 
   assert_failure 1
-  # shellcheck disable=SC2154
-  [[ "${#lines[@]}" = "1" ]]
+  assert_lines_count 1
   assert_line --index 0 --partial "ERROR   - This method needs exactly 2 parameters"
 }

@@ -156,6 +156,13 @@ Lint files of the current repository
 This linter is used as one the precommit hooks, see
 [.pre-commit-config.yaml](.pre-commit-config.yaml).
 
+## Best practices
+
+`INCLUDE` keyword is really useful to inline configuration files. However to run
+framework function using sudo, it is recommended to call the same binary but
+passing options to change the behaviour. This way the content of the script file
+does not seem to be obfuscated.
+
 ## 6. Acknowledgements
 
 I want to thank a lot Michał Zieliński(Tratif company) for this wonderful

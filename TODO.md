@@ -83,6 +83,7 @@
 
 ## 3. Other improvements
 
+- replace all envsubs by the usage of bash-tpl
 - optimize doc generation (parallelization)
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
   and exported

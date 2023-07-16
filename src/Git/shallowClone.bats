@@ -79,7 +79,7 @@ function Git::shallowClone::onNonGitFolderForced { #@test
 
   assert_success
   # shellcheck disable=SC2154
-  [[ "${#lines[@]}" = "2" ]]
+  assert_lines_count 2
   assert_line --index 0 --partial "WARN    - Removing ${BATS_TMP_DIR}/fakeRepo ..."
   assert_line --index 1 --partial "INFO    - Installing ${BATS_TMP_DIR}/fakeRepo ..."
 }

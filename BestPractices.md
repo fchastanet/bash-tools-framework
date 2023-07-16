@@ -23,6 +23,8 @@
 - `cat << 'EOF'` avoid to interpolate variables
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the user
+- use the right shebang, avoid `#!/bin/bash` as bash binary could be in another
+  folder (expecially on alpine), use this instead `#!/usr/bin/env bash`
 
 ## Variables
 
@@ -56,6 +58,39 @@ alternatively you can use this framework function `Assert::validVariableName`
   expands to the value of PARAMETER, as if it just was ${PARAMETER}. If you omit
   the : (colon), like shown in the second form, the default value is only used
   when the parameter was unset, not when it was empty.
+
+## Capture output
+
+You can use
+[command substitution](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Command-Substitution).
+
+Eg:
+
+```bash
+local output
+output="$(functionThatOutputSomething "${arg1}")"
+```
+
+### Capture output and test result
+
+```bash
+local output
+output="$(functionThatOutputSomething "${arg1}")" || {
+  echo "error"
+  exit 1
+}
+```
+
+### Capture output and retrieve status code
+
+It's advised to put it on the same line using `;`. If it was on 2 lines, other
+commands could be put between the command and the status code retrieval, the
+status would not be the same command status.
+
+```bash
+local output
+output="$(functionThatOutputSomething "${arg1}")"; status=$?
+```
 
 ## Array
 

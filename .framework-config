@@ -9,3 +9,6 @@ NON_FRAMEWORK_FILES_REGEXP="(.bats$|/testsData/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^build.sh$|^tests/|\.tpl$|testsData/binaryFile$"
 # Source directories
 FRAMEWORK_SRC_DIRS=()
+
+# export here all the variables that will be used in your templates
+export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
