@@ -129,12 +129,14 @@ missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-b
 export missingBashFileList
 
 File::detectBashFile() {
-  file="$1"
+  local file="$1"
+  local head=""
   if [[ ! -f "${file}" ]]; then
     echo "${file}" >>"${missingBashFileList}"
-  else
-    awk 'FNR==1{if ($0~"^#!.*bash") print FILENAME}' "${file}"
+    return 1
   fi
+  head="$(head -n 1 "${file}")"
+  [[ "${head}" =~ ^#!.*bash ]]
 }
 
 export -f File::detectBashFile
