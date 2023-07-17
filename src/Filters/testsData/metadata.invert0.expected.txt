@@ -1,0 +1,2 @@
+# BIN_FILE=<% ${ROOT_DIR} %>/bin/awkLint
+# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
