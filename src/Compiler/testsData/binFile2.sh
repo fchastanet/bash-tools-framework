@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${BATS_RUN_TMPDIR}/bin/awkLint
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 # META_VAR=VALUE
 # META_VAR2=VALUE2
 # BIN_FILE=${BATS_RUN_TMPDIR}/bin/awkLint2
