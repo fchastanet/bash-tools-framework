@@ -101,7 +101,6 @@ lint files, generate shell documentation and compile bash files.
 ### 1.2. Compilation tools
 
 - **compile** : Inlines all the functions used in the script given in parameter
-- **constructBinFile** : create binary file from a srcFile
 
 see related documentation [Compilation tools](CompilationTools.md).
 

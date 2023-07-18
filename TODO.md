@@ -38,6 +38,11 @@
 
 ## 2. Binaries improvement
 
+- rename metadata to annotation
+- ROOT_DIR_RELATIVE_TO_BIN_DIR
+  - Mandatory information allowing the compiler to deduce bash-tools-framework
+    root directory.
+  - deprecate usage of ROOT_DIR_RELATIVE_TO_BIN_DIR as all files can be embedded
 - refact buildPushDockerImages.sh with Docker/functions... and using correct
   tagging
 - add <https://github.com/fchastanet/bash-tools-framework> link inside help of
@@ -49,8 +54,7 @@
 - Update vendor command
   - command that allows to update the libraries in the repo
   - github cron that checks if library updates exists
-- compile and constructBinFile should use FRAMEWORK_SRC_DIRS from
-  .framework-config
+- compile should use FRAMEWORK_SRC_DIRS from .framework-config
 
 ### 2.1. FrameworkLint
 
@@ -169,8 +173,6 @@
 
 ## 5. Compilation
 
-- merge constructBinFile and compile
-
 it doesn't matter if the command to execute is a sudo or not we just want to
 encapsulate a dependent binary(bash or not) inside the executable.
 
@@ -200,7 +202,6 @@ frameworkLint could generate a warning :
 - if sudo called on Backup::file without using INCLUDE
 - if INCLUDE is used but the binary is not used
 
-- constructBinfile - remove binDir not used
 - frameworkLint: ensure BIN_FILE is provided
 
 - INCLUDE include one file, rest of the script is as usual

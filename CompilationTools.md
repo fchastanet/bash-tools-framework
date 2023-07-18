@@ -1,9 +1,7 @@
 # Compilation tools
 
-Compilation tools is made with these 2 commands:
-
-- **compile** : Inlines all the functions used in the script given in parameter
-- **constructBinFile** : create binary file from a srcFile
+Compilation tools is made with the command **compile**. It inline all the
+functions used in the script given in parameter.
 
 ## 1. Why ?
 
@@ -66,17 +64,16 @@ framework function Embed::include allows to:
   to temporary directory and is callable directly using "asName" chosen above
   because path of the temporary directory is in the PATH variable.
 
-## 3. ConstructBinFile tool
+## 3. Annotations and templating
 
-compile is almost never used alone but it can, ConstructBinFile allows to
-generate a binary file using some metadata directly inside the src file.
+Compile command allows to generate a binary file using some annotations directly
+inside the src file.
 
 Eg:
 
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/binaryExample
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 # META_SCRIPT=MinimumRequirements
 # INCLUDE "Backup::file" as backupFile
 # INCLUDE "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
@@ -92,13 +89,8 @@ The above file header allows to generate the `bin/binaryExample` binary file. It
 uses INCLUDE macro to allow the usage of Backup::file function as a binary named
 backupFile that can even be called using `sudo`.
 
-The srcFile should contains at least the metadata BIN_FILE and
-ROOT_DIR_RELATIVE_TO_BIN_DIR at top of the bash script file (see example above).
-
-### 3.1. ROOT_DIR_RELATIVE_TO_BIN_DIR metadata
-
-Mandatory information allowing the compiler to deduce bash-tools-framework root
-directory.
+The srcFile should contains at least the metadata BIN_FILE at top of the bash
+script file (see example above).
 
 ### 3.2. BIN_FILE metadata (optional)
 

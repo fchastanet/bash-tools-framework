@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BIN_FILE=<% ${ROOT_DIR} %>/bin/awkLint
+# BIN_FILE=${ROOT_DIR}/bin/awkLint
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 

@@ -17,17 +17,17 @@ setup() {
 }
 
 function Embed::includeFrameworkFunction { #@test
-  declare -agx CONSTRUCT_BIN_FILE_ARGUMENTS=(
+  declare -agx _COMPILE_FILE_ARGUMENTS=(
     # srcFile     : file that needs to be compiled
     "" # any value will be replaced by the generated file
     # templateDir : directory from which bash-tpl templates will be searched
-    "${rootDir}/src/_includes"
+    --template-dir "${rootDir}/src/_includes"
     # binDir      : fallback bin directory in case BIN_FILE has not been provided
-    "${BATS_TMP_DIR}"
+    --bin-dir "${BATS_TMP_DIR}"
     # rootDir     : directory used to compute src file relative path
-    "${rootDir}"
+    --root-dir "${rootDir}"
     # srcDirs : (optional) you can provide multiple directories
-    "${rootDir}/src"
+    --src-dir "${rootDir}/src"
   )
   (
     echo "#!/usr/bin/env bash"

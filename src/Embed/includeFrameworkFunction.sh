@@ -24,7 +24,7 @@ Embed::includeFrameworkFunction() {
       >"${binSrcFile}"
 
     # compile the bin file
-    "${rootDir}/bin/constructBinFile" "${binSrcFile}" "${CONSTRUCT_BIN_FILE_ARGUMENTS[@]:1}"
+    "${rootDir}/bin/compile" "${binSrcFile}" "${_COMPILE_FILE_ARGUMENTS[@]:1}"
 
     # encode bin file as md5
     md5="$(base64 -w 0 "${binFile}")" \

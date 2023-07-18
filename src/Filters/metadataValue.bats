@@ -55,7 +55,6 @@ function Filters::metadataValue::matchSimpleWithSpacesAndQuotes { #@test
   }
 }
 
-
 function Filters::metadataValue::multiLines { #@test
   echo -e "
 # TEST =value1

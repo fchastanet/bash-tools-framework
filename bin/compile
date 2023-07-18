@@ -15,6 +15,8 @@ export FRAMEWORK_DIR="${_COMPILE_ROOT_DIR}"
 source "${_COMPILE_SRC_DIR}/_includes/_header.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${_COMPILE_SRC_DIR}/Array/contains.sh"
+# shellcheck source=/src/Assert/validPath.sh
+source "${_COMPILE_SRC_DIR}/Assert/validPath.sh"
 # shellcheck source=/src/File/upFind.sh
 source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 # shellcheck source=/src/Conf/loadNearestFile.sh
@@ -25,6 +27,8 @@ source "${_COMPILE_SRC_DIR}/Framework/loadConfig.sh"
 source "${_COMPILE_SRC_DIR}/Env/load.sh"
 # shellcheck source=src/File/upFind.sh
 source "${_COMPILE_SRC_DIR}/File/upFind.sh"
+# shellcheck source=src/File/relativeToDir.sh
+source "${_COMPILE_SRC_DIR}/File/relativeToDir.sh"
 # shellcheck source=src/Log/__all.sh
 source "${_COMPILE_SRC_DIR}/Log/__all.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
@@ -37,12 +41,18 @@ source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
 # shellcheck source=/src/Filters/bashCommentLines.sh
 source "${_COMPILE_SRC_DIR}/Filters/bashCommentLines.sh"
+# shellcheck source=/src/Filters/metadata.sh
+source "${_COMPILE_SRC_DIR}/Filters/metadata.sh"
+# shellcheck source=/src/Filters/metadataValue.sh
+source "${_COMPILE_SRC_DIR}/Filters/metadataValue.sh"
 # shellcheck source=/src/Compiler/extractMetaForExport.sh
 source "${_COMPILE_SRC_DIR}/Compiler/extractMetaForExport.sh"
 # shellcheck source=/src/Compiler/extractUniqueFrameworkFunctions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/extractUniqueFrameworkFunctions.sh"
 # shellcheck source=/src/Compiler/findFunctionInSrcDirs.sh
 source "${_COMPILE_SRC_DIR}/Compiler/findFunctionInSrcDirs.sh"
+# shellcheck source=/src/Compiler/getBinFile.sh
+source "${_COMPILE_SRC_DIR}/Compiler/getBinFile.sh"
 # shellcheck source=/src/Compiler/injectFileOnce.sh
 source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 # shellcheck source=/src/File/insertFileBeforeToken.sh
@@ -56,6 +66,8 @@ declare -a srcDirs=()
 # shellcheck disable=SC2034
 ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+# root dir absolute path
+ROOT_DIR="${_COMPILE_ROOT_DIR}"
 
 ################################################
 # Parse options
@@ -68,9 +80,9 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in th
 script given in parameter
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile> <srcFilePath>
-    <relativePath> <rootDir> [--src-dir|-s <srcDir>]
-    [--template <templateName>]
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
+    [--src-dir|-s <srcDir>] [--bin-dir|-b <binDir>] [--template <templateName>]
+    [--root-dir|-r <rootDir>] [--src-path <srcPath>]
 
 ${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
 
@@ -81,15 +93,6 @@ ${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
       generated file to indicate from which source file the binary
       has been generated.
       You can use the variable SRC_FILE_PATH in your template.
-
-    <relativePath> some binary files needs to deduce root path
-      relative to where they are installed.
-      Eg: this is useful for these binary files to know that to get
-      some configuration files.
-      You can use the variable ROOT_DIR_RELATIVE_TO_BIN_DIR in your
-      template.
-
-    <rootDir> useful to include some files during compilation
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
     --help,-h prints this help and exits
@@ -111,70 +114,115 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
       a --src-dir and you need also functions defined in this
       project, think about adding a --src-dir for this project too
 
+    --bin-dir|-b <binDir> allows to override the value of BIN_DIR
+      by default BIN_DIR is set to '${ROOT_DIR}/bin'
+
     --template-dir|-t <templateDir> the template directory to use
       to override some template includes.
       Check environment variables below.
 
+    --root-dir|-r <rootDir> if you whish to override ROOT_DIR
+      variable (default value is '${ROOT_DIR}'
+
+    --src-path <path> if you wish to override the filepath that will
+      be displayed in the header to indicate the src filepath that
+      has been compiled (SRC_FILE_PATH).
+      By default, it is initialized with path relative to ROOT_DIR
+
 ${__HELP_TITLE}.framework-config environment variables:${__HELP_NORMAL}
-You can define global environement variables inside
-.framework-config file that could be used in your templates:
-Eg:
-  * REPOSITORY_URL: used in template to indicate from which github
-    repo the file has been generated
+  You can define global environement variables inside
+  .framework-config file that could be used in your templates:
+  Eg:
+    * REPOSITORY_URL: used in template to indicate from which github
+      repo the file has been generated
 
 ${__HELP_TITLE}Template variables:${__HELP_NORMAL}
-Other variables are automatically generated to be used in your
-templates:
-  * ORIGINAL_TEMPLATE_DIR allowing you to include the template
-    relative to the script being interpreted
-  * TEMPLATE_DIR the template directory in which you can override
-    the templates defined in ORIGINAL_TEMPLATE_DIR
-  * ROOT_DIR_RELATIVE_TO_BIN_DIR based on the metadata of the same
-    name in the header of your source file. It allows you to join
-    ROOT_DIR from target BIN_FILE directory. Kept for compatibility
-    reason but prefer to use Embed feature instead.
+  Other variables are automatically generated to be used in your
+  templates:
+    * ORIGINAL_TEMPLATE_DIR allowing you to include the template
+      relative to the script being interpreted
+    * TEMPLATE_DIR the template directory in which you can override
+      the templates defined in ORIGINAL_TEMPLATE_DIR
+    * ROOT_DIR_RELATIVE_TO_BIN_DIR is automatically computed from
+      BIN_FILE metadata. It allows to generate the framework root dir
+      during runtime.
+      Kept for compatibility reason but prefer to use Embed feature
+      instead.
 
-The following variables depends upon parameters passed to this
-script:
-  * SRC_FILE_PATH the src file you want to show at the top of
-    generated file to indicate from which source file the binary
-    has been generated.
-  * SRC_ABSOLUTE_PATH is the path of the file being compiled, it
-    can be useful if you need to access a path relative to this
-    file during compilation.
-    ${__HELP_EXAMPLE}Eg: inline a awk script inside the resulting
-    binary
-awkScript="\$(
-  cat <<'AWK_EOF'
-.INCLUDE "\$(cd "\$(dirname \${SRC_ABSOLUTE_PATH})" && pwd -P)/mysql2puml.awk"
-AWK_EOF
-)"${__HELP_NORMAL}
+  The following variables depends upon parameters passed to this
+  script:
+    * SRC_FILE_PATH the src file you want to show at the top of
+      generated file to indicate from which source file the binary
+      has been generated.
+    * SRC_ABSOLUTE_PATH is the path of the file being compiled, it
+      can be useful if you need to access a path relative to this
+      file during compilation.
+
+${__HELP_TITLE}Bash-tpl Templating:${__HELP_NORMAL}
+  your compiled source file will be interpreted using bash-tpl
+  https://github.com/TekWizely/bash-tpl
+  You can use this feature to inline external file, interpreting
+  environment variable during compilation, ...
+  ${__HELP_EXAMPLE}
+  Eg: inline a awk script inside the resulting
+  binary
+  awkScript="\$(
+    cat <<'AWK_EOF'
+  .INCLUDE "\$(cd "\$(dirname \${SRC_ABSOLUTE_PATH})" && pwd -P)/mysql2puml.awk"
+  AWK_EOF
+  )"${__HELP_NORMAL}
 
 ${__HELP_TITLE}META variables:${__HELP_NORMAL}
-It's also possible to inject some variables speficic to the binary
-file you are generating and that will be used to interpret your
-templates.
+  It's also possible to inject some variables speficic to the binary
+  file you are generating and that will be used to interpret your
+  templates.
+${__HELP_EXAMPLE}
+  Eg: add this line to the beginning of the source file without
+  breaking comment section (no newlines between #)
 
-Eg: add this line to the beginning of the source file without
-breaking comment section (no newlines between #)
-${__HELP_EXAMPLE}#!/usr/bin/env bash
-# META_SCRIPT=MinimumRequirements${__HELP_NORMAL}
-The variable SCRIPT can then be used in the template using
-${__HELP_EXAMPLE}SCRIPT="<% \${SCRIPT} %>"${__HELP_NORMAL}
+  #!/usr/bin/env bash
+  # META_SCRIPT=MinimumRequirements${__HELP_NORMAL}
 
-${__HELP_TITLE}Example:${__HELP_NORMAL}
-Let's say you want to generate the binary file \`bin/buildDoc\`
-from the source file \`src/build/buildDoc.sh\`
-${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
+  The variable SCRIPT can then be used in the template using
+  ${__HELP_EXAMPLE}SCRIPT="<% \${SCRIPT} %>"${__HELP_NORMAL}
 
-Here you want to generate the binary but overriding some or
-all functions of bash-tools-framework/src
-${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..\\
+${__HELP_TITLE}Examples:${__HELP_NORMAL}
+  Let's say you want to generate the binary file \`bin/buildDoc\`
+  from the source file \`src/build/buildDoc.sh\`
+  ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
+
+  Here you want to generate the binary but overriding some or
+  all functions of bash-tools-framework/src
+  ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..\\
   -s ./src -s ../bash-tools-framework/src${__HELP_NORMAL}
 
-Here you want to override the default templates too
-${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. \\
+  Here you want to override the default templates too
+  ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. \\
   -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
+
+${__HELP_TITLE}Src file annotation:${__HELP_NORMAL}
+  You can use special annotations in src file
+
+  ${__HELP_TITLE}BIN_FILE annotation (optional):${__HELP_NORMAL}
+  allows to indicate where the resulting bin file will be generated
+  if not provided, the binary file will be copied to {binDir} without sh extension
+
+  ${__HELP_TITLE}INCLUDE annotation (optional):${__HELP_NORMAL}
+    ${__HELP_EXAMPLE}Syntax: # INCLUDE "srcFile" AS "targetFile"${__HELP_NORMAL}
+    ${__HELP_EXAMPLE}Syntax: # INCLUDE "srcDir" AS "targetDir"${__HELP_NORMAL}
+    ${__HELP_EXAMPLE}Syntax: # INCLUDE namespace::functions AS "myFunction"${__HELP_NORMAL}
+    if INCLUDE annotation is provided, the file/dir provided will be added inside the resulting
+    bin file as a tar gz file(base64 encoded) and automatically extracted when executed.
+
+${__HELP_TITLE}File header example:${__HELP_NORMAL}
+${__HELP_EXAMPLE}
+#!/usr/bin/env bash
+# BIN_FILE=\${ROOT_DIR}/bin/myBinary
+# META_SCRIPT=MinimumRequirements
+# INCLUDE "\${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
+# INCLUDE Backup::file AS "backupFile"
+sudo "\${embed_file_backupFile}" ...
+"\${embed_file_otherNeededBinary}"${__HELP_NORMAL}
 
 $(SRC_FILE_PATH=bin/compile envsubst <"${_COMPILE_SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF
@@ -185,7 +233,7 @@ EOF
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-options=$(getopt -l help,src-dir:,template-dir: -o hs:t: -- "$@" 2>/dev/null) || {
+options=$(getopt -l help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path: -o hs:t:b:r: -- "$@" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
 }
@@ -211,6 +259,27 @@ while true; do
       fi
       TEMPLATE_DIR="$(realpath --physical "$1")"
       ;;
+    --bin-dir | -b)
+      shift || true
+      if [[ ! -d "$1" ]]; then
+        Log::fatal "Directory '$1' does not exists"
+      fi
+      BIN_DIR="$(realpath --physical "$1")"
+      ;;
+    --root-dir | -r)
+      shift || true
+      if [[ ! -d "$1" ]]; then
+        Log::fatal "Directory '$1' does not exists"
+      fi
+      ROOT_DIR="$(realpath --physical "$1")"
+      ;;
+    --src-path)
+      shift || true
+      if ! Assert::validPath "$1"; then
+        Log::fatal "Src path '$1' is not a valid path"
+      fi
+      SRC_FILE_PATH="$1"
+      ;;
     --)
       shift || true
       break
@@ -225,41 +294,28 @@ done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 
-if (($# != 4)); then
-  Log::fatal "You must provide exactly 4 fixed parameters"
+if (($# != 1)); then
+  Log::fatal "You must provide exactly 1 fixed parameter"
 fi
 
+# The file to compile
 INPUT_FILE="$1"
 # the src file you want to show at the top of generated file to indicate
 # from which source file the binary has been generated
-SRC_FILE_PATH="$2"
-# how to join ROOT_DIR from target BIN_FILE directory
-ROOT_DIR_RELATIVE_TO_BIN_DIR="$3"
-# root dir absolute path
-ROOT_DIR="$4"
+if [[ -z "${SRC_FILE_PATH+xxx}" ]]; then
+  SRC_FILE_PATH="$(File::relativeToDir "${INPUT_FILE}" "${ROOT_DIR}")"
+fi
 
+# if bin dir has not been set, set a default value
+if [[ -z "${BIN_DIR+xxx}" ]]; then
+  BIN_DIR="${ROOT_DIR}/bin"
+fi
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 
 # load .framework-config
 configFile=""
 # shellcheck source=/.framework-config
 Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while loading .framework-config file"
-
-################################################
-# compile Algo
-################################################
-
-# Loop until no more file to import
-# 1. generate code from template
-# 2. remove duplicated #!/usr/bin/env bash
-# 3. deduce files to import based on [A-Za-z0-9]+::[A-Za-z0-9]+ pattern
-#    (skip files already imported and those that do not exist)
-# 4. inject import files at the beginning of the file
-# TODO I could get rid of bash-tpl by providing special function IMPORT::dir::file
-#    this function should be replaced inline
-
-COMPILED_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file.XXXXXXX")"
-COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
 
 # shellcheck disable=SC2317
 dynamicTemplateDir() {
@@ -286,6 +342,8 @@ evalTemplate() {
     cd "${TEMPLATE_DIR}"
     eval "${metaExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+    export BIN_DIR
+    export ROOT_DIR
     export ORIGINAL_TEMPLATE_DIR
     export TEMPLATE_DIR
     export SRC_ABSOLUTE_PATH
@@ -295,8 +353,6 @@ evalTemplate() {
     source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
   ) | Filters::removeDuplicatedShebangs
 }
-
-evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
 
 importFunctions() {
   local file="$1"
@@ -395,28 +451,60 @@ injectImportedFunctions() {
   done
 }
 
-# shellcheck disable=SC2034
-declare -a FILES_IMPORTED=("${INPUT_FILE}")
+################################################
+# compile Algo
+################################################
 
-injectImportedFunctions "${COMPILED_FILE}" FILES_IMPORTED
+# Loop until no more file to import
+# 1. generate code from template
+# 2. remove duplicated #!/usr/bin/env bash
+# 3. deduce files to import based on [A-Za-z0-9]+::[A-Za-z0-9]+ pattern
+#    (skip files already imported and those that do not exist)
+# 4. inject import files at the beginning of the file
+
+COMPILED_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file.XXXXXXX")"
+COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
+
+# share this command arguments to allow Embed to compile files using same
+# parameters
+declare -agx _COMPILE_FILE_ARGUMENTS=("$@")
+
+# shellcheck disable=SC2034
+declare -a filesAlreadyImported=("${INPUT_FILE}")
+ROOT_DIR_RELATIVE_TO_BIN_DIR=$'<%% echo "${ROOT_DIR_RELATIVE_TO_BIN_DIR}" %>'
+evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
+
+# compute BIN_FILE
+BIN_FILE=$(Compiler::getBinFile "${INPUT_FILE}")
+export BIN_FILE
+if [[ -z "${BIN_FILE}" ]]; then
+  # BIN_FILE metadata not provided => skipped
+  Log::displaySkipped "File '${INPUT_FILE}' - BIN_FILE metadata not provided"
+  return 0
+fi
+Log::displayInfo "Binfile ${BIN_FILE} from ${INPUT_FILE}"
+
+# now we can evaluate ROOT_DIR_RELATIVE_TO_BIN_DIR as BIN_DIR is known from
+# first evalTemplate using BIN_FILE
+binDirRelativeToRootDir="$(File::relativeToDir "${_COMPILE_ROOT_DIR}" "$(dirname "${BIN_FILE}")")"
+# shellcheck disable=SC1083
+ROOT_DIR_RELATIVE_TO_BIN_DIR="\$(cd \"\${BIN_DIR}/${binDirRelativeToRootDir}\" && pwd -P)"
+
+# import the framework functions
+injectImportedFunctions "${COMPILED_FILE}" filesAlreadyImported
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Env::load
-if [[ "${DEBUG:-0}" = "1" ]]; then
-  (echo >&2 -e "${__DEBUG_COLOR}\tevalTemplate2${__RESET_COLOR}")
-fi
 evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
-# FILES_IMPORTED is global variable so we will not reimport already included functions
-if [[ "${DEBUG:-0}" = "1" ]]; then
-  (echo >&2 -e "${__DEBUG_COLOR}\tinjectImportedFunctions2${__RESET_COLOR}")
-fi
-injectImportedFunctions "${COMPILED_FILE2}" FILES_IMPORTED
+# filesAlreadyImported is global variable so we will not reimport already included functions
+injectImportedFunctions "${COMPILED_FILE2}" filesAlreadyImported
 
 # remove spaces at the end of the lines
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 
-cat -s "${COMPILED_FILE2}"
+cat -s "${COMPILED_FILE2}" | Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}" >"${BIN_FILE}"
+chmod +x "${BIN_FILE}"
 
 exit "${failures}"

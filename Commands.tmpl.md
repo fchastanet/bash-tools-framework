@@ -7,7 +7,6 @@
   - [1.4. bin/runBuildContainer](#14-binrunbuildcontainer)
   - [1.5. bin/buildPushDockerImages](#15-binbuildpushdockerimages)
   - [1.6. bin/doc](#16-bindoc)
-  - [1.7. bin/constructBinFile](#17-binconstructbinfile)
   - [1.8. bin/compile](#18-bincompile)
 - [2. Linters](#2-linters)
   - [2.1. bin/dockerLint](#21-bindockerlint)
@@ -55,12 +54,6 @@
 
 ```text
 @@@doc_help@@@
-```
-
-### 1.7. bin/constructBinFile
-
-```text
-@@@constructBinFile_help@@@
 ```
 
 ### 1.8. bin/compile

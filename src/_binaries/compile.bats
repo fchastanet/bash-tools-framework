@@ -18,7 +18,7 @@ teardown() {
   rm -Rf "${BATS_TMP_DIR}" || true
 }
 
-function constructBinFile() {
+function compile() {
   local -a params=(
     # srcFile     : file that needs to be compiled
     "${testDir}/testsData/bin/$1"
@@ -31,27 +31,27 @@ function constructBinFile() {
     # srcDirs : (optional) you can provide multiple directories
     "${testDir}/testsData/src"
   )
-  run "${binDir}/constructBinFile" "${params[@]}"
+  run "${binDir}/compile" "${params[@]}"
 }
 
-function constructBinFileSimple { #@test
-  run constructBinFile "simpleBinary.sh"
+function compile::Simple { #@test
+  run compile "simpleBinary.sh"
   assert_success
   [[ -f "${BATS_TMP_DIR}/simpleBinary" ]]
   [[ -x "${BATS_TMP_DIR}/simpleBinary" ]]
   diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_TMP_DIR}/simpleBinary"
 }
 
-function constructBinFileMeta { #@test
-  run constructBinFile "meta.sh"
+function compile::Meta { #@test
+  run compile "meta.sh"
   assert_success
   [[ -f "${BATS_TMP_DIR}/meta" ]]
   [[ -x "${BATS_TMP_DIR}/meta" ]]
   diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/meta" "${BATS_TMP_DIR}/meta"
 }
 
-function constructBinFileIncludeSimpleFile { #@test
-  run constructBinFile "simpleBinary.sh"
+function compile::IncludeSimpleFile { #@test
+  run compile "simpleBinary.sh"
   assert_success
   [[ -f "${BATS_TMP_DIR}/simpleBinary" ]]
   [[ -x "${BATS_TMP_DIR}/simpleBinary" ]]
