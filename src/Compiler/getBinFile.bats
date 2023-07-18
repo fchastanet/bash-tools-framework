@@ -7,6 +7,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${BATS_TEST_DIRNAME}/getBinFile.sh"
 # shellcheck source=/src/Filters/metadata.sh
 source "${srcDir}/Filters/metadata.sh"
+# shellcheck source=/src/Filters/metadataValue.sh
+source "${srcDir}/Filters/metadataValue.sh"
 # shellcheck source=/src/Assert/validPath.sh
 source "${srcDir}/Assert/validPath.sh"
 

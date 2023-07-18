@@ -9,8 +9,7 @@ Compiler::getBinFile() {
   local srcFile="$1"
   local BIN_FILE
 
-  BIN_FILE="$(Filters::metadata 0 "${srcFile}" |
-    grep -E '# BIN_FILE=' -m 1 |
+  BIN_FILE="$(Filters::metadataValue "BIN_FILE" "${srcFile}" |
     sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' |
     envsubst ||
     :)"
