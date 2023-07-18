@@ -7,12 +7,12 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${BATS_TEST_DIRNAME}/metadata.sh"
 
 function Filters::metadata::keepOnlyMetadata { #@test
-  run Filters::metadata 0 "${BATS_TEST_DIRNAME}/testsData/metadata.sh"
+  run Filters::metadata "${FILTER_META_DATA_KEEP_ONLY_HEADERS}" "${BATS_TEST_DIRNAME}/testsData/metadata.sh"
   assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/metadata.invert0.expected.txt")"
 }
 
 function Filters::metadata::removeOnlyMetadata { #@test
-  run Filters::metadata 1 "${BATS_TEST_DIRNAME}/testsData/metadata.sh"
+  run Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}" "${BATS_TEST_DIRNAME}/testsData/metadata.sh"
   assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/metadata.invert1.expected.sh")"
 }
 

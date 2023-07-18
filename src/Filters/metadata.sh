@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+readonly FILTER_META_DATA_KEEP_ONLY_HEADERS="0"
+# shellcheck disable=SC2034
+readonly FILTER_META_DATA_REMOVE_HEADERS="1"
+
 # filter the metadata only at the beginning of the file
 # we do not want to filter eventual documentation in the
 # rest of the script
@@ -9,7 +13,7 @@
 # - 1 to remove metadata and keep the rest of the file
 # shellcheck disable=SC2120
 Filters::metadata() {
-  local invert="${1:-0}"
+  local invert="${1:-${FILTER_META_DATA_KEEP_ONLY_HEADERS}}"
   shift || true
   awk -v invert="${invert}" '
     BEGIN {
@@ -18,7 +22,7 @@ Filters::metadata() {
     }
     {
       line = $0
-      if (/^# (BIN_FILE=|ROOT_DIR_RELATIVE_TO_BIN_DIR=|META_[^=]*=|INCLUDE ).*$/) {
+      if (/^# (BIN_FILE=|META_[^=]*=|INCLUDE ).*$/) {
         write=(invert==0) || (headerProcessed==1)
       } else if (/^#!/) {
         write=invert

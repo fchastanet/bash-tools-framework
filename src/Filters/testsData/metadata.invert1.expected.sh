@@ -7,6 +7,5 @@ test
 true
 
 # BIN_FILE=<% ${ROOT_DIR} %>/bin/awkLint2
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
 otherTest
