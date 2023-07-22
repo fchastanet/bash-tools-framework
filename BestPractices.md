@@ -95,3 +95,8 @@ output="$(functionThatOutputSomething "${arg1}")"; status=$?
 ## Array
 
 - read each line of a file to an array `readarray -t var < /path/to/filename`
+
+## Temporary directory
+
+use `${TMPDIR:-/tmp}`, TMDIR variable does not always exist.
+or when mktemp is available, use `dirname $(mktemp -u --tmpdir)`

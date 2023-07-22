@@ -9,7 +9,11 @@ export PATH="${TMPDIR}/bin":${PATH}
 
 # temp dir cleaning
 cleanOnExit() {
-  rm -Rf "${TMPDIR}" >/dev/null 2>&1
+  if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
+    Log::displayInfo "temp files kept here '${TMPDIR}'"
+  else
+    rm -Rf "${TMPDIR:-/tmp/fake}" >/dev/null 2>&1
+  fi
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 

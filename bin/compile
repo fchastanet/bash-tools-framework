@@ -68,6 +68,8 @@ ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 # root dir absolute path
 ROOT_DIR="${_COMPILE_ROOT_DIR}"
+KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
+export KEEP_TEMP_FILES
 
 ################################################
 # Parse options
@@ -82,7 +84,7 @@ script given in parameter
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
     [--src-dir|-s <srcDir>] [--bin-dir|-b <binDir>] [--template <templateName>]
-    [--root-dir|-r <rootDir>] [--src-path <srcPath>]
+    [--root-dir|-r <rootDir>] [--src-path <srcPath>] [--keep-temp-files|-k]
 
 ${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
 
@@ -128,6 +130,8 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
       be displayed in the header to indicate the src filepath that
       has been compiled (SRC_FILE_PATH).
       By default, it is initialized with path relative to ROOT_DIR
+
+    --keep-temp-files|-k keep temporary files for debug purpose
 
 ${__HELP_TITLE}.framework-config environment variables:${__HELP_NORMAL}
   You can define global environement variables inside
@@ -233,7 +237,9 @@ EOF
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-options=$(getopt -l help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path: -o hs:t:b:r: -- "$@" 2>/dev/null) || {
+longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path,keep-temp-files"
+shortOpts="hks:t:b:r:"
+options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "$@" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
 }
@@ -279,6 +285,9 @@ while true; do
         Log::fatal "Src path '$1' is not a valid path"
       fi
       SRC_FILE_PATH="$1"
+      ;;
+    --keep-temp-files | -k)
+      KEEP_TEMP_FILES=1
       ;;
     --)
       shift || true
