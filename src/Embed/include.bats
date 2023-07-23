@@ -8,8 +8,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/Embed/include.sh"
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/Assert/validVariableName.sh"
 # shellcheck source=src/Assert/bashFrameworkFunction.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/Assert/bashFrameworkFunction.sh"
-# shellcheck source=src/Filters/bashCommentLines.sh
-source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/Filters/bashCommentLines.sh"
+# shellcheck source=src/Filters/commentLines.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/Filters/commentLines.sh"
 
 teardown() {
   unstub_all

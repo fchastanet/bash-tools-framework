@@ -2,10 +2,8 @@
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
-test # comment after command
+test
 
 true
-
-# BIN_FILE=<% ${ROOT_DIR} %>/bin/awkLint2
 
 otherTest

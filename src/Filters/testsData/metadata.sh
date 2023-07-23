@@ -3,7 +3,7 @@
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
-test
+test # comment after command
 
 true
 

@@ -83,13 +83,13 @@ File::detectBashFile() {
 }
 
 # shellcheck disable=SC2120
-Filters::bashCommentLines() {
-  grep -vxE '[[:blank:]]*([#].*)?' "$@" || test $? = 1
+Filters::bashFrameworkFunctions() {
+  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
 }
 
 # shellcheck disable=SC2120
-Filters::bashFrameworkFunctions() {
-  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
+Filters::commentLines() {
+  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
 }
 
 # @param {string[]} $@ the src directories in which .framework-config file will be searched
@@ -674,7 +674,7 @@ FRAMEWORK_SRC_DIRS+=("${ROOT_DIR}/src")
 checkEachFunctionHasSrcFile() {
   local file="$1"
   readarray -t functionsToImport < <(
-    Filters::bashCommentLines "${file}" |
+    Filters::commentLines "${file}" |
       Filters::bashFrameworkFunctions |
       awk '{$1=$1};1' |
       sort |

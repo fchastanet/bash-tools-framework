@@ -60,5 +60,5 @@ JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/setti
 
 MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: (report)
 
-SPELL_CSPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|.*-megalinter_file_names_cspell.txt|bin/bash-tpl|src/Filters/testsData/bashCommentLines.txt)
+SPELL_CSPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|.*-megalinter_file_names_cspell.txt|bin/bash-tpl|src/Filters/testsData/commentLines.txt)
 SPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|bin/bash-tpl)

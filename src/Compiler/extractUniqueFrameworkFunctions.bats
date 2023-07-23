@@ -5,8 +5,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Compiler/extractUniqueFrameworkFunctions.sh
 source "${BATS_TEST_DIRNAME}/extractUniqueFrameworkFunctions.sh"
-# shellcheck source=/src/Filters/bashCommentLines.sh
-source "${srcDir}/Filters/bashCommentLines.sh"
+# shellcheck source=/src/Filters/commentLines.sh
+source "${srcDir}/Filters/commentLines.sh"
 # shellcheck source=/src/Filters/bashFrameworkFunctions.sh
 source "${srcDir}/Filters/bashFrameworkFunctions.sh"
 
@@ -15,8 +15,8 @@ function Compiler::extractUniqueFrameworkFunctions { #@test
   assert_success
   assert_lines_count 3
   assert_line --index 0 'Compiler::extractUniqueFrameworkFunctions'
-  assert_line --index 1 'Filters::bashCommentLines'
-  assert_line --index 2 'Filters::bashFrameworkFunctions'
+  assert_line --index 1 'Filters::bashFrameworkFunctions'
+  assert_line --index 2 'Filters::commentLines'
 }
 
 function Compiler::extractUniqueFrameworkFunctions::self { #@test

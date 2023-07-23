@@ -3,8 +3,8 @@ Conf::loadNearestFile
 Env::load
 File::detectBashFile
 File::upFind
-Filters::bashCommentLines
 Filters::bashFrameworkFunctions
+Filters::commentLines
 Framework::loadConfig
 Log::displayDebug
 Log::displayError

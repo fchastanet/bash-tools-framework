@@ -7,7 +7,7 @@
 # or strings are not removed from the final list
 Compiler::extractUniqueFrameworkFunctions() {
   local file="$1"
-  Filters::bashCommentLines "${file}" |
+  Filters::commentLines "${file}" |
     Filters::bashFrameworkFunctions |
     awk '{$1=$1};1' |
     sort |

@@ -39,8 +39,8 @@ source "${_COMPILE_SRC_DIR}/Filters/catFileCleaned.sh"
 source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 # shellcheck source=/src/Filters/bashFrameworkFunctions.sh
 source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
-# shellcheck source=/src/Filters/bashCommentLines.sh
-source "${_COMPILE_SRC_DIR}/Filters/bashCommentLines.sh"
+# shellcheck source=/src/Filters/commentLines.sh
+source "${_COMPILE_SRC_DIR}/Filters/commentLines.sh"
 # shellcheck source=/src/Filters/metadata.sh
 source "${_COMPILE_SRC_DIR}/Filters/metadata.sh"
 # shellcheck source=/src/Filters/metadataValue.sh

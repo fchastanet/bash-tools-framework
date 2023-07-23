@@ -25,6 +25,7 @@
   "words": ["megalinter", "oxsecurity"],
   "dictionaryDefinitions": [
     {"name": "bashCustom", "path": ".cspell/bash.txt"},
+    {"name": "loremIpsum", "path": ".cspell/loremIpsum.txt"},
     {"name": "config", "path": ".cspell/config.txt"},
     {"name": "softwares", "path": ".cspell/softwares.txt"},
     {"name": "readme", "path": ".cspell/readme.txt"},
@@ -33,6 +34,7 @@
   "dictionaries": [
     "bash",
     "bashCustom",
+    "loremIpsum",
     "config",
     "softwares",
     "softwareTerms"
@@ -47,6 +49,11 @@
       "languageId": "bashCustom",
       "locale": "*",
       "dictionaries": ["bashCustom"]
+    },
+    {
+      "languageId": "loremIpsum",
+      "locale": "*",
+      "dictionaries": ["loremIpsum"]
     },
     {
       "languageId": "config",
@@ -68,6 +75,10 @@
     {
       "filename": "**/conf/bash_profile/.dir_colors",
       "languageId": "dirColors"
+    },
+    {
+      "filename": "**/testsData/**",
+      "languageId": "loremIpsum"
     },
     {
       "filename": "*.md",

@@ -54,6 +54,24 @@ function Assert::validPath::invalidRelativePath { #@test
   assert_output ""
 }
 
+function Assert::validPath::invalidParentDir { #@test
+  run Assert::validPath ".."
+  assert_failure
+  assert_output ""
+}
+
+function Assert::validPath::invalidCurrentDir { #@test
+  run Assert::validPath "."
+  assert_failure
+  assert_output ""
+}
+
+function Assert::validPath::invalidSubCurrentDir { #@test
+  run Assert::validPath "./relative"
+  assert_failure
+  assert_output ""
+}
+
 function Assert::validPath::invalidInsideRelativePath { #@test
   run Assert::validPath "/root/../relative/dir"
   assert_failure
@@ -68,6 +86,12 @@ function Assert::validPath::validNonPosixPath { #@test
 
 function Assert::validPath::valid { #@test
   run Assert::validPath "/valid/Path"
+  assert_success
+  assert_output ""
+}
+
+function Assert::validPath::validReal { #@test
+  run Assert::validPath "/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework/src/Filters/testsData/commentLines.txt"
   assert_success
   assert_output ""
 }

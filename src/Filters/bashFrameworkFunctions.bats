@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 
-vendorDir="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)/vendor"
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=src/Filters/bashFrameworkFunctions.sh
 source "${BATS_TEST_DIRNAME}/bashFrameworkFunctions.sh"
-
-# shellcheck source=src/Filters/bashCommentLines.sh
-source "${BATS_TEST_DIRNAME}/bashCommentLines.sh"
+# shellcheck source=src/Filters/commentLines.sh
+source "${BATS_TEST_DIRNAME}/commentLines.sh"
 
 function Filters::bashFrameworkFunctions::noMatch { #@test
   echo "TEST" | {
@@ -31,7 +27,7 @@ function Filters::bashFrameworkFunctions::noMatch2 { #@test
 function Filters::bashFrameworkFunctions::noMatchComments1 { #@test
   local status=0
   local result=""
-  result=$(echo "# Log::fatal" | Filters::bashCommentLines | Filters::bashFrameworkFunctions) || status=$?
+  result=$(echo "# Log::fatal" | Filters::commentLines | Filters::bashFrameworkFunctions) || status=$?
   [[ ${status} -eq 0 ]]
   [[ -z "${result}" ]]
 }
@@ -39,14 +35,14 @@ function Filters::bashFrameworkFunctions::noMatchComments1 { #@test
 function Filters::bashFrameworkFunctions::noMatchComments2 { #@test
   local status=0
   local result=""
-  result=$(echo -e "  \t # Log::fatal" | Filters::bashCommentLines | Filters::bashFrameworkFunctions) || status=$?
+  result=$(echo -e "  \t # Log::fatal" | Filters::commentLines | Filters::bashFrameworkFunctions) || status=$?
   [[ ${status} -eq 0 ]]
   [[ -z "${result}" ]]
 }
 
 function Filters::bashFrameworkFunctions::noMatchComments3 { #@test
   local status=0
-  Filters::bashCommentLines "${BATS_TEST_DIRNAME}/testsData/bashFrameworkFunctions.txt" |
+  Filters::commentLines "${BATS_TEST_DIRNAME}/testsData/bashFrameworkFunctions.txt" |
     Filters::bashFrameworkFunctions \
       >"${BATS_RUN_TMPDIR}/bashFrameworkFunctions.result.txt" || status=$?
   [[ ${status} -eq 0 ]]

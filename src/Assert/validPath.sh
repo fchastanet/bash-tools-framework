@@ -8,10 +8,11 @@
 # - invalid characters
 # - component beginning by a - (because option)
 # - not beginning with a slash
-# - path not matching pathchk -P command
+# - relative
 Assert::validPath() {
   local path="$1"
 
-  # https://regex101.com/r/afLrmM/1
-  [[ "${path}" =~ ^\/$|^(\/[a-zA-Z_0-9][a-zA-Z_0-9-]*)+$ ]] && pathchk -P "${path}"
+  # https://regex101.com/r/afLrmM/2
+  [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
+    [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }

@@ -22,3 +22,8 @@ function Filters::metadata::defaultInvertValue { #@test
     assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/metadata.invert0.expected.txt")"
   } <"${BATS_TEST_DIRNAME}/testsData/metadata.sh"
 }
+
+function Filters::metadata::noMetadata { #@test
+  run Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}" "${BATS_TEST_DIRNAME}/testsData/noMetadata.sh"
+  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/noMetadata.sh")"
+}

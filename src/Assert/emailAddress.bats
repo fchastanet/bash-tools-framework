@@ -1,43 +1,36 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Assert/emailAddress.sh
 source "${srcDir}/Assert/emailAddress.sh"
 
-function Assert::emailAddressEmpty { #@test
+function Assert::emailAddress::Empty { #@test
   run Assert::emailAddress ""
   assert_failure
   assert_output ""
 }
 
-function Assert::emailAddress@ { #@test
+function Assert::emailAddress::@ { #@test
   run Assert::emailAddress "@"
   assert_failure
   assert_output ""
 }
 
-function Assert::emailAddressMissingPrefix { #@test
+function Assert::emailAddress::MissingPrefix { #@test
   run Assert::emailAddress "@domain.com"
   assert_failure
   assert_output ""
 }
 
-function Assert::emailAddressMissingSuffix { #@test
+function Assert::emailAddress::MissingSuffix { #@test
   run Assert::emailAddress "prefix@"
   assert_failure
   assert_output ""
 }
 
-function Assert::emailAddressValid { #@test
+function Assert::emailAddress::Valid { #@test
   run Assert::emailAddress "prefix@domain.com"
   assert_success
   assert_output ""

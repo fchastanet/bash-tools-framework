@@ -19,10 +19,6 @@
 
 ## 1. Framework functions changes
 
-- Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
-- create function Array::remove
-- use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
-  using customized aliased commands by the user
 - Conf::list findOptions as last arg so any number of args
 - Args::version to display binary version
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
@@ -35,6 +31,12 @@
 - new function Env::get "HOME"
 - ensure filters functions never fails (check bashFrameworkFunctions) and ensure
   filters functions are not used as Assert function
+- Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
+  - but no way to know if variable exists except by using `wslvar -S` or
+    `wslvar -L`
+- create function Array::remove
+- use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
+  using customized aliased commands by the user
 
 ## 2. Binaries improvement
 
@@ -63,6 +65,7 @@
 
 ### 2.2. compile
 
+- use Filters::optimizeShFile
 - check if nested namespaces are supported
 
 #### 2.2.1. add compilation checks

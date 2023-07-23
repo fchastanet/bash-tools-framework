@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-rootDir="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${rootDir}/vendor"
-srcDir="${rootDir}/src"
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Compiler/findFunctionInSrcDirs.sh
 source "${BATS_TEST_DIRNAME}/findFunctionInSrcDirs.sh"

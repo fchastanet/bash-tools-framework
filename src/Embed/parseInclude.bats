@@ -2,7 +2,7 @@
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
-# shellcheck source=src/batsHeaders.sh
+# shellcheck source=src/Embed/parseInclude.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/Embed/parseInclude.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/Filters/removeExternalQuotes.sh"
