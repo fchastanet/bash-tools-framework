@@ -27,8 +27,8 @@ this project because I wrote some of them while writing this project.
 - grep regular expression [A-Za-z] matches by default accentuated character, it
   you don't want to match them, use the environment variable `LC_ALL=POSIX`,
   - Eg: `LC_ALL=POSIX grep -E -q '^[A-Za-z_0-9:]+$'`
-  - I added `export LC_ALL=POSIX` in all my headers, it can be overriden using a
-    subshell
+  - I added `export LC_ALL=POSIX` in all my headers, it can be overridden using
+    a subShell
 
 ## General tips
 
@@ -36,7 +36,7 @@ this project because I wrote some of them while writing this project.
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the user
 - use the right shebang, avoid `#!/bin/bash` as bash binary could be in another
-  folder (expecially on alpine), use this instead `#!/usr/bin/env bash`
+  folder (especially on alpine), use this instead `#!/usr/bin/env bash`
 
 ## Variables
 
@@ -110,7 +110,7 @@ output="$(functionThatOutputSomething "${arg1}")"; status=$?
 
 ## Temporary directory
 
-use `${TMPDIR:-/tmp}`, TMDIR variable does not always exist. or when mktemp is
+use `${TMPDIR:-/tmp}`, TMPDIR variable does not always exist. or when mktemp is
 available, use `dirname $(mktemp -u --tmpdir)`
 
 ## Bin file best practices

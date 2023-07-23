@@ -64,7 +64,7 @@ framework function Embed::include allows to:
   to temporary directory and is callable directly using "asName" chosen above
   because path of the temporary directory is in the PATH variable.
 
-## 3. Annotations and templating
+## 3. Annotations and template
 
 Compile command allows to generate a binary file using some annotations directly
 inside the src file.
@@ -152,7 +152,7 @@ This linter is used as one the precommit hooks, see
 
 `INCLUDE` keyword is really useful to inline configuration files. However to run
 framework function using sudo, it is recommended to call the same binary but
-passing options to change the behaviour. This way the content of the script file
+passing options to change the behavior. This way the content of the script file
 does not seem to be obfuscated.
 
 ## 6. Acknowledgements

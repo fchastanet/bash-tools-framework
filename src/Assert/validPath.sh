@@ -6,8 +6,8 @@
 # @return 1 if path is invalid
 # invalid path are those with:
 # - invalid characters
-# - component beggining by a - (because option)
-# - not beggining with a slash
+# - component beginning by a - (because option)
+# - not beginning with a slash
 # - path not matching pathchk -P command
 Assert::validPath() {
   local path="$1"

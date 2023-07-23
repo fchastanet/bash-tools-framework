@@ -51,6 +51,7 @@ declare -agx _COMPILE_FILE_ARGUMENTS=(
   # srcDirs : (optional) you can provide multiple directories
   --src-dir "${srcDir}"
 )
+# shellcheck disable=SC2031
 export KEEP_TEMP_FILES=1
 
 Embed::includeFrameworkFunction \

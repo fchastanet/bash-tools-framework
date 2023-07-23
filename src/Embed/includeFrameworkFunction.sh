@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# Allows to generate a bin file that will call the mentionned
+# Allows to generate a bin file that will call the mentioned
 # bash framework function(md5 encoded) wrapped in an extractor
 # function
 # Note:
 #   You cannot call this function directly
-#   it shoult be called using '# INCLUDE ... AS ...' annotation
+#   it should be called using '# INCLUDE ... AS ...' annotation
 # @param {string} functionToCall $1
 # @param {string} functionAlias $2
 # @output the generated bin file extractor

@@ -15,14 +15,14 @@ source "${srcDir}/Assert/validPath.sh"
 function teardown() {
   rm -Rf "${BATS_RUN_TMPDIR:?}/bin" || true
 }
-function Compiler::getBinFile::oneOccurence { #@test
+function Compiler::getBinFile::oneOccurrence { #@test
   run Compiler::getBinFile "${BATS_TEST_DIRNAME}/testsData/binFile1.sh"
   assert_success
   assert_output "${BATS_RUN_TMPDIR}/bin/awkLint"
   [[ -d "${BATS_RUN_TMPDIR:?}/bin" ]]
 }
 
-function Compiler::getBinFile::twoOccurences { #@test
+function Compiler::getBinFile::twoOccurrences { #@test
   export BATS_RUN_TMPDIR
   # only first one is taken into account
   run Compiler::getBinFile "${BATS_TEST_DIRNAME}/testsData/binFile2.sh"
@@ -31,7 +31,7 @@ function Compiler::getBinFile::twoOccurences { #@test
   [[ -d "${BATS_RUN_TMPDIR:?}/bin" ]]
 }
 
-function Compiler::getBinFile::zeroOccurence { #@test
+function Compiler::getBinFile::zeroOccurrence { #@test
   export BATS_RUN_TMPDIR
   run Compiler::getBinFile "${BATS_TEST_DIRNAME}/testsData/meta1.sh" >&2
   assert_success

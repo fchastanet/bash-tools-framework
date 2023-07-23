@@ -14,7 +14,7 @@ File::insertFileBeforeToken() {
   local fileToImport="$2"
   local token="$3"
 
-  # old version inserts at each occurrentce
+  # old version inserts at each occurrence
   # sed -E -i "0,/${token}/ {
   #     h
   #     r ${fileToImport}

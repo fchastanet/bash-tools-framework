@@ -98,3 +98,5 @@ addgroup
 Chastanet
 Scrasnups
 nodoc
+pathchk
+nonportable
