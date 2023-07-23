@@ -87,6 +87,10 @@
 
 ## 3. Other improvements
 
+- Remove ROOT_DIR/SRC_DIR requirements from binaries
+  - replace it by optional argument automatically added --root-dir
+  - other default options to the binaries, log-level, display-log-level, ...
+  - add options to `src/_includes/_headerNoRootDir.tpl`
 - replace all envsubs by the usage of bash-tpl
 - optimize doc generation (parallelization)
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
