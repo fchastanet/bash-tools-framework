@@ -50,7 +50,6 @@ function Filters::metadataValue::matchSimpleWithSpacesAndQuotes { #@test
   echo -e $"# TEST = \t\"'value test\"' \t " | {
     run Filters::metadataValue "TEST"
     assert_success
-    echo "'${output}'" >&3
     assert_output "value test"
   }
 }

@@ -322,6 +322,7 @@ INPUT_FILE="$1"
 if [[ -z "${BIN_DIR+xxx}" ]]; then
   BIN_DIR="${ROOT_DIR}/bin"
 fi
+export BIN_DIR
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 
 # load .framework-config

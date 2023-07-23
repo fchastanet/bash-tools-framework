@@ -1,5 +1,8 @@
 # Best practices and recipes
 
+**DISCLAIMER:** Some of the best practices mentioned here are not applied in
+this project because I wrote some of them while writing this project.
+
 ## Arguments
 
 - shift each arg to avoid not shifting at all
@@ -7,6 +10,13 @@
   - `declare -a cmd=(git push origin :${branch})`
   - then you can display the result using echo `"${cmd[*]}"`
   - you can execute the command using `"${cmd[@]}"`
+- boolean arguments, to avoid seeing some calls like this `myFunction 0 1 0`
+  here a myFunction with 3 boolean values. prefer to provide constants(using
+  readonly) to make the call more clear like
+  `myFunction arg1False arg2True arg3False` of course replacing argX with the
+  real argument name Eg:
+  `Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}"` You have to prefix
+  all your constants to avoid conflicts.
 
 ## some commands default options to use
 
@@ -100,5 +110,26 @@ output="$(functionThatOutputSomething "${arg1}")"; status=$?
 
 ## Temporary directory
 
-use `${TMPDIR:-/tmp}`, TMDIR variable does not always exist.
-or when mktemp is available, use `dirname $(mktemp -u --tmpdir)`
+use `${TMPDIR:-/tmp}`, TMDIR variable does not always exist. or when mktemp is
+available, use `dirname $(mktemp -u --tmpdir)`
+
+## Bin file best practices
+
+### Bash-tpl best practice
+
+To avoid shellcheck reporting errors about malformed script, try to always put
+your variable replacements inside bash variable, so instead of doing:
+
+```bash
+<%% echo "${functionToCall}" %> "$@"
+```
+
+which results in shellcheck error, you can do this instead
+
+```bash
+# shellcheck disable=SC2016 # SC2016 needed because functionToCall inside quotes
+#   is known when bash-tpl is interpreted but not inside the bash script being
+# generated
+functionToCall='<%% echo "${functionToCall}" %>'
+"${functionToCall}" "$@"
+```

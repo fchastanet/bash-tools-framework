@@ -44,7 +44,7 @@ repos:
     hooks:
       - id: shfmt
         args: [-i, '2', -ci]
-        exclude: ^vendor/.*$|^tests/data/.*$|^bin/bash-tpl$
+        exclude: ^vendor/.*$|^tests/data/.*$|^bin/bash-tpl$|\.tpl$
         stages: [commit]
 
       # Check both committed and uncommitted files for git conflict
