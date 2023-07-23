@@ -29,6 +29,16 @@ Args::defaultHelp() {
   fi
 }
 
+Assert::bashFile() {
+  local file="$1"
+  local head=""
+  if [[ ! -f "${file}" ]]; then
+    return 2
+  fi
+  head="$(head -n 1 "${file}")"
+  [[ "${head}" =~ ^#\!.*bash ]]
+}
+
 Env::pathPrepend() {
   local arg
   for arg in "$@"; do
@@ -42,21 +52,23 @@ Env::pathPrepend() {
 # File::detectBashFile is used in conjunction with git ls-files
 # typical case for missing file is when a file is marked as deleted but not staged
 declare missingBashFileList
-missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+missingBashFileList=""
 export missingBashFileList
 
 File::detectBashFile() {
   local file="$1"
-  local head=""
-  if [[ ! -f "${file}" ]]; then
-    echo "${file}" >>"${missingBashFileList}"
-    return 1
-  fi
-  head="$(head -n 1 "${file}")"
-  [[ "${head}" =~ ^#!.*bash ]]
-}
 
-export -f File::detectBashFile
+  if [[ ! -f "${file}" ]]; then
+    if [[ -z "${missingBashFileList}" ]]; then
+      missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+    fi
+    echo "${file}" >>"${missingBashFileList}"
+    return 0
+  fi
+  if Assert::bashFile "${file}"; then
+    echo "${file}"
+  fi
+}
 
 # Public: log level off
 export __LEVEL_OFF=0
@@ -525,6 +537,7 @@ EOF
 Args::defaultHelp "${HELP}" "$@"
 
 export -f File::detectBashFile
+export -f Assert::bashFile
 git ls-files --exclude-standard -c -o -m |
-  xargs -r -L 1 -n 1 -I@ bash -c 'if File::detectBashFile "@"; then echo "@"; fi' |
+  xargs -r -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
   xargs -r "$@"

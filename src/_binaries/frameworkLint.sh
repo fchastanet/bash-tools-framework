@@ -17,6 +17,7 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
 - check if all namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
+- check each function has a bats file associated
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
@@ -114,6 +115,19 @@ checkEachFunctionHasSrcFile() {
   done
 }
 
+checkEachSrcFileHasBatsFile() {
+  local file="$1"
+  local batsFile="${file%.*}.bats"
+  if [[ -f "${ROOT_DIR}/${batsFile}" ]]; then
+    if [[ "${FORMAT}" = "plain" ]]; then
+      Log::displayWarning "File '${file}', missing bats file '${batsFile}'"
+    else
+      echo "<error severity='warning' message='missing bats file '${batsFile}'/>"
+    fi
+    ((++warningCount))
+  fi
+}
+
 # search for at least one function that is matching the filename
 checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local srcFile="$1"
@@ -152,6 +166,8 @@ if [[ "${FORMAT}" = "checkstyle" ]]; then
   echo "<?xml version='1.0' encoding='UTF-8'?>"
   echo "<checkstyle>"
 fi
+export -f File::detectBashFile
+export -f Assert::bashFile
 
 # shellcheck disable=SC2016
 while IFS='' read -r file; do
@@ -161,6 +177,7 @@ while IFS='' read -r file; do
 
   checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
 
   if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"

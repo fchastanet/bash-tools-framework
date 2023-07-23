@@ -26,6 +26,16 @@ Args::showHelp() {
   echo -e "${helpArg}"
 }
 
+Assert::bashFile() {
+  local file="$1"
+  local head=""
+  if [[ ! -f "${file}" ]]; then
+    return 2
+  fi
+  head="$(head -n 1 "${file}")"
+  [[ "${head}" =~ ^#\!.*bash ]]
+}
+
 Env::pathPrepend() {
   local arg
   for arg in "$@"; do
@@ -39,21 +49,23 @@ Env::pathPrepend() {
 # File::detectBashFile is used in conjunction with git ls-files
 # typical case for missing file is when a file is marked as deleted but not staged
 declare missingBashFileList
-missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+missingBashFileList=""
 export missingBashFileList
 
 File::detectBashFile() {
   local file="$1"
-  local head=""
-  if [[ ! -f "${file}" ]]; then
-    echo "${file}" >>"${missingBashFileList}"
-    return 1
-  fi
-  head="$(head -n 1 "${file}")"
-  [[ "${head}" =~ ^#!.*bash ]]
-}
 
-export -f File::detectBashFile
+  if [[ ! -f "${file}" ]]; then
+    if [[ -z "${missingBashFileList}" ]]; then
+      missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+    fi
+    echo "${file}" >>"${missingBashFileList}"
+    return 0
+  fi
+  if Assert::bashFile "${file}"; then
+    echo "${file}"
+  fi
+}
 
 # upgrade given binary to latest github release using retry
 # @param {String}   targetFile target binary file (eg: /usr/local/bin/kind)
@@ -839,6 +851,7 @@ fi
     exclude='^$'
   fi
   export -f File::detectBashFile
+  export -f Assert::bashFile
 
   (
     if [[ "${ONLY_STAGED}" = "1" ]]; then
@@ -848,5 +861,5 @@ fi
     fi
   ) |
     (grep -E -v "${exclude}" || true) |
-    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "if File::detectBashFile '@'; then ${VENDOR_BIN_DIR}/shellcheck '@'; fi"
+    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "File::detectBashFile '@'"
 )

@@ -112,7 +112,7 @@ repos:
     hooks:
       - id: run-unit-tests
         name: run-unit-tests
-        entry: bash -c './bin/test -r src -j 8'
+        entry: bash -c './bin/test -r src -j 30'
         language: system
         always_run: true
         require_serial: true

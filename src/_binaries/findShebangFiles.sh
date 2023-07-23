@@ -25,6 +25,7 @@ EOF
 Args::defaultHelp "${HELP}" "$@"
 
 export -f File::detectBashFile
+export -f Assert::bashFile
 git ls-files --exclude-standard -c -o -m |
-  xargs -r -L 1 -n 1 -I@ bash -c 'if File::detectBashFile "@"; then echo "@"; fi' |
+  xargs -r -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
   xargs -r "$@"
