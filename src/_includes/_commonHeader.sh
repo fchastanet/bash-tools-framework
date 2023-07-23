@@ -37,6 +37,9 @@ set -o errtrace
 # use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
 shopt -s nullglob
 
+# ensure regexp are interpreted without accentuated characters
+export LC_ALL=POSIX
+
 export TERM=xterm-256color
 
 #avoid interactive install

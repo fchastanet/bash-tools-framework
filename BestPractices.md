@@ -17,6 +17,8 @@
 - grep regular expression [A-Za-z] matches by default accentuated character, it
   you don't want to match them, use the environment variable `LC_ALL=POSIX`,
   - Eg: `LC_ALL=POSIX grep -E -q '^[A-Za-z_0-9:]+$'`
+  - I added `export LC_ALL=POSIX` in all my headers, it can be overriden using a
+    subshell
 
 ## General tips
 

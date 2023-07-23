@@ -8,6 +8,7 @@ export FRAMEWORK_DIR="${ROOT_DIR}"
 # shellcheck disable=SC2034
 TMPDIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-bats-$$-XXXXXX)"
 export TMPDIR
+export LC_ALL=POSIX
 
 set -o errexit
 set -o pipefail
