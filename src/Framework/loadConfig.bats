@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Conf/loadNearestFile.sh
 source "${srcDir}/Conf/loadNearestFile.sh"
@@ -24,15 +17,10 @@ source "${srcDir}/Env/load.sh"
 source "${srcDir}/Log/__all.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
-  mkdir -p "${BATS_TMP_DIR}/dir1/dir/dir1.1"
-  mkdir -p "${BATS_TMP_DIR}/dir2/dir/dir2.1"
-  echo "echo '.framework-config loaded'" >"${BATS_TMP_DIR}/dir1/.framework-config"
-}
-
-teardown() {
-  rm -Rf "${BATS_TMP_DIR}" || true
+  export TMPDIR="${BATS_RUN_TMPDIR}"
+  mkdir -p "${BATS_RUN_TMPDIR}/dir1/dir/dir1.1"
+  mkdir -p "${BATS_RUN_TMPDIR}/dir2/dir/dir2.1"
+  echo "echo '.framework-config loaded'" >"${BATS_RUN_TMPDIR}/dir1/.framework-config"
 }
 
 function Framework::loadConfigNoSrcDir { #@test
@@ -42,13 +30,13 @@ function Framework::loadConfigNoSrcDir { #@test
 }
 
 function Framework::loadConfigNotFound { #@test
-  run Framework::loadConfig configFile "${BATS_TMP_DIR}/dir2/dir/dir2.1"
+  run Framework::loadConfig configFile "${BATS_RUN_TMPDIR}/dir2/dir/dir2.1"
   assert_failure 1
   assert_line --index 0 --partial "Config file '.framework-config' not found in any source directories provided"
 }
 
 function Framework::loadConfigFoundInDir1 { #@test
   configFile=""
-  Framework::loadConfig configFile "${BATS_TMP_DIR}/dir1/dir/dir1.1"
-  [[ "${configFile}" = "${BATS_TMP_DIR}/dir1/.framework-config" ]]
+  Framework::loadConfig configFile "${BATS_RUN_TMPDIR}/dir1/dir/dir1.1"
+  [[ "${configFile}" = "${BATS_RUN_TMPDIR}/dir1/.framework-config" ]]
 }

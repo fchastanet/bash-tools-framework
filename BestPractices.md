@@ -3,7 +3,124 @@
 **DISCLAIMER:** Some of the best practices mentioned here are not applied in
 this project because I wrote some of them while writing this project.
 
-## Arguments
+- [1. Bash Best practices](#1-bash-best-practices)
+  - [1.1. Bash environment options](#11-bash-environment-options)
+    - [1.1.1. errexit (set -e | set -o errexit)](#111-errexit-set--e--set--o-errexit)
+    - [1.1.2. pipefail (set -E | set -o pipefail)](#112-pipefail-set--e--set--o-pipefail)
+    - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
+    - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
+    - [1.1.5. posix (set -o posix)](#115-posix-set--o-posix)
+  - [1.2. Arguments](#12-arguments)
+  - [1.3. some commands default options to use](#13-some-commands-default-options-to-use)
+  - [1.4. Bash and grep regular expressions](#14-bash-and-grep-regular-expressions)
+  - [1.5. General tips](#15-general-tips)
+  - [1.6. Variables](#16-variables)
+    - [1.6.1. Variable declaration](#161-variable-declaration)
+    - [1.6.2. Check if a variable is defined](#162-check-if-a-variable-is-defined)
+    - [1.6.3. variable naming convention](#163-variable-naming-convention)
+    - [1.6.4. Variable expansion](#164-variable-expansion)
+    - [1.6.5. Variable default value](#165-variable-default-value)
+  - [1.7. Capture output](#17-capture-output)
+    - [1.7.1. Capture output and test result](#171-capture-output-and-test-result)
+    - [1.7.2. Capture output and retrieve status code](#172-capture-output-and-retrieve-status-code)
+  - [1.8. Array](#18-array)
+  - [1.9. Temporary directory](#19-temporary-directory)
+- [2. Bin file best practices](#2-bin-file-best-practices)
+  - [2.1. Bash-tpl best practice](#21-bash-tpl-best-practice)
+- [3. Bats best practices](#3-bats-best-practices)
+  - [3.1. use of default temp directory created by bats](#31-use-of-default-temp-directory-created-by-bats)
+  - [3.2. avoid boilerplate code](#32-avoid-boilerplate-code)
+
+## 1. Bash Best practices
+
+### 1.1. Bash environment options
+
+See
+[Set bash builtin documentation](https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html)
+
+This framework uses these mode by default:
+
+- errexit
+- pipefail
+- errtrace
+
+#### 1.1.1. errexit (set -e | set -o errexit)
+
+Check official doc but it can be summarized like this:
+
+> Exit immediately command returns a non-zero status.
+
+This mode is a best practice because every non controlled command failure will
+stop your program. But sometimes you need or expect a command to fail
+
+**Eg1**: delete a folder that actually doesn't exists. Use `|| true` to ignore
+the error.
+
+```bash
+rm -Rf folder || true
+```
+
+**Eg2**: a command that expects to fail if conditions are not met. Using `if`
+will not stop the program on non-zero exit code.
+
+```bash
+if git diff-index --quiet HEAD --; then
+  Log::displayInfo "Pull git repository '${dir}' as no changes detected"
+  git pull --progress
+  return 0
+else
+  Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
+fi
+```
+
+#### 1.1.2. pipefail (set -E | set -o pipefail)
+
+> If set, the return value of a pipeline is the value of the last (rightmost)
+> command to exit with a non-zero status, or zero if all commands in the
+> pipeline exit successfully. This option is disabled by default.
+
+It is complementary with errexit, as if it not activated, the failure of command
+in pipe could hide an the error.
+
+**Eg**: without `pipefail` this command succeed
+
+```bash
+set -o errexit
+set +o pipefail # deactivate pipefail mode
+foo | echo "a" # 'foo' is a non-existing command
+# Output:
+# a
+# bash: foo: command not found
+# echo $? # exit code is 0
+# 0
+```
+
+#### 1.1.3. errtrace (set -E | set -o errtrace)
+
+> If set, any trap on ERR is inherited by shell functions, command
+> substitutions, and commands executed in a subShell environment. The ERR trap
+> is normally not inherited in such cases.
+
+#### 1.1.4. nounset (set -u | set -o nounset)
+
+This is not implemented in current framework (TODO in future version).
+
+> Treat unset variables and parameters other than the special parameters ‘@’ or
+> ‘_’, or array variables subscripted with ‘@’ or ‘_’, as an error when
+> performing parameter expansion. An error message will be written to the
+> standard error, and a non-interactive shell will exit.
+
+#### 1.1.5. posix (set -o posix)
+
+This is not implemented in current framework (TODO in future version ? To check
+if it is a good idea to implement it and what would be the impact).
+
+> Change the behavior of Bash where the default operation differs from the POSIX
+> standard to match the standard (see
+> [Bash POSIX Mode](https://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html)).
+> This is intended to make Bash behave as a strict superset of that standard.
+
+### 1.2. Arguments
 
 - shift each arg to avoid not shifting at all
 - to construct complex command line, prefer to use an array
@@ -18,19 +135,27 @@ this project because I wrote some of them while writing this project.
   `Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}"` You have to prefix
   all your constants to avoid conflicts.
 
-## some commands default options to use
+### 1.3. some commands default options to use
 
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html> but set -o
   nounset is not usable because empty array are considered unset
 - always use `sed -E`
 - avoid using grep -P as it is not supported on alpine, prefer using -E
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+### 1.4. <a name="regularExpressions"></a>Bash and grep regular expressions
+
+<!-- markdownlint-restore -->
+
 - grep regular expression [A-Za-z] matches by default accentuated character, it
   you don't want to match them, use the environment variable `LC_ALL=POSIX`,
   - Eg: `LC_ALL=POSIX grep -E -q '^[A-Za-z_0-9:]+$'`
   - I added `export LC_ALL=POSIX` in all my headers, it can be overridden using
     a subShell
 
-## General tips
+### 1.5. General tips
 
 - `cat << 'EOF'` avoid to interpolate variables
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
@@ -38,9 +163,9 @@ this project because I wrote some of them while writing this project.
 - use the right shebang, avoid `#!/bin/bash` as bash binary could be in another
   folder (especially on alpine), use this instead `#!/usr/bin/env bash`
 
-## Variables
+### 1.6. Variables
 
-### Variable declaration
+#### 1.6.1. Variable declaration
 
 - ensure we don't have any globals, all variables should be passed to the
   functions
@@ -48,7 +173,7 @@ this project because I wrote some of them while writing this project.
 - local or declare multiple local a z
 - `export readonly` does not work, first `readonly` then `export`
 
-### Check if a variable is defined
+#### 1.6.2. Check if a variable is defined
 
 ```bash
 if [[ -z ${varName+xxx} ]]; then
@@ -58,12 +183,12 @@ fi
 
 alternatively you can use this framework function `Assert::validVariableName`
 
-### variable naming convention
+#### 1.6.3. variable naming convention
 
 - env variable that aims to be exported should be capitalized with underscore
 - local variables should conform to camelCase
 
-### Variable expansion
+#### 1.6.4. Variable expansion
 
 - `${PARAMETER:-WORD}` `${PARAMETER-WORD}` If the parameter PARAMETER is unset
   (never was defined) or null (empty), this one expands to WORD, otherwise it
@@ -71,7 +196,27 @@ alternatively you can use this framework function `Assert::validVariableName`
   the : (colon), like shown in the second form, the default value is only used
   when the parameter was unset, not when it was empty.
 
-## Capture output
+#### 1.6.5. Variable default value
+
+Always consider to set a default value to the variable that you are using.
+
+**Eg.**: Let's see this dangerous example
+
+```bash
+# Don't Do that !!!!
+rm -Rf "${TMPDIR}/etc" || true
+```
+
+This could end very badly if your script runs as root and if `${TMPDIR}` is not
+set, this script will result to do a `rm -Rf /etc`
+
+Instead you can do that
+
+```bash
+rm -Rf "${TMPDIR:-/tmp}/etc" || true
+```
+
+### 1.7. Capture output
 
 You can use
 [command substitution](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Command-Substitution).
@@ -83,7 +228,7 @@ local output
 output="$(functionThatOutputSomething "${arg1}")"
 ```
 
-### Capture output and test result
+#### 1.7.1. Capture output and test result
 
 ```bash
 local output
@@ -93,7 +238,7 @@ output="$(functionThatOutputSomething "${arg1}")" || {
 }
 ```
 
-### Capture output and retrieve status code
+#### 1.7.2. Capture output and retrieve status code
 
 It's advised to put it on the same line using `;`. If it was on 2 lines, other
 commands could be put between the command and the status code retrieval, the
@@ -104,18 +249,18 @@ local output
 output="$(functionThatOutputSomething "${arg1}")"; status=$?
 ```
 
-## Array
+### 1.8. Array
 
 - read each line of a file to an array `readarray -t var < /path/to/filename`
 
-## Temporary directory
+### 1.9. Temporary directory
 
 use `${TMPDIR:-/tmp}`, TMPDIR variable does not always exist. or when mktemp is
 available, use `dirname $(mktemp -u --tmpdir)`
 
-## Bin file best practices
+## 2. Bin file best practices
 
-### Bash-tpl best practice
+### 2.1. Bash-tpl best practice
 
 To avoid shellcheck reporting errors about malformed script, try to always put
 your variable replacements inside bash variable, so instead of doing:
@@ -133,3 +278,40 @@ which results in shellcheck error, you can do this instead
 functionToCall='<%% echo "${functionToCall}" %>'
 "${functionToCall}" "$@"
 ```
+
+## 3. Bats best practices
+
+### 3.1. use of default temp directory created by bats
+
+Instead of creating yourself your temp directory, you can use the special
+variable `BATS_RUN_TMPDIR`, this directory is automatically destroyed at the end
+of the test except if the option `--no-tempdir-cleanup` is provided to bats
+command.
+
+**Exception**: if you are testing bash traps, you would need to create your own
+directories to avoid unexpected errors.
+
+### 3.2. avoid boilerplate code
+
+using this include, includes most of the features needed when using bats
+
+```bash
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
+```
+
+It sets those bash features:
+
+- set -o errexit
+- set -o pipefail
+
+It imports several common files like some additional bats features.
+
+And makes several variables available:
+
+- ROOT_DIR
+- vendorDir
+- srcDir
+- FRAMEWORK_DIR (same as ROOT_DIR but used by some bash framework functions)
+- LC_ALL=POSIX see
+  [Bash and grep regular expressions best practices](BestPractices.md#regularExpressions)

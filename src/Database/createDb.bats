@@ -17,19 +17,17 @@ source "${srcDir}/Conf/getAbsoluteFile.sh"
 source "${srcDir}/File/concatenatePath.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
+  export TMPDIR="${BATS_RUN_TMPDIR}"
 }
 
 teardown() {
   unstub_all
-  rm -Rf "${BATS_TMP_DIR}" || true
 }
 
 function Database::createDb { #@test
   # shellcheck disable=SC2016
   stub mysql \
-    "--defaults-extra-file=  -e * : echo \$3 > '${BATS_TMP_DIR}/query' ; echo 'Database: myDb'"
+    "--defaults-extra-file=  -e * : echo \$3 > '${BATS_RUN_TMPDIR}/query' ; echo 'Database: myDb'"
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
@@ -37,6 +35,6 @@ function Database::createDb { #@test
   run Database::createDb dbFromInstance 'myDb'
   assert_success
   assert_output --partial "Db myDb has been created"
-  [[ -f "${BATS_TMP_DIR}/query" ]]
-  [[ "$(cat "${BATS_TMP_DIR}/query")" == "$(cat "${BATS_TEST_DIRNAME}/testsData/createDb.query")" ]]
+  [[ -f "${BATS_RUN_TMPDIR}/query" ]]
+  [[ "$(cat "${BATS_RUN_TMPDIR}/query")" == "$(cat "${BATS_TEST_DIRNAME}/testsData/createDb.query")" ]]
 }

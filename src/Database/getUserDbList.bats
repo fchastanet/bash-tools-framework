@@ -17,19 +17,17 @@ source "${srcDir}/Conf/getAbsoluteFile.sh"
 source "${srcDir}/File/concatenatePath.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
+  export TMPDIR="${BATS_RUN_TMPDIR}"
 }
 
 teardown() {
   unstub_all
-  rm -Rf "${BATS_TMP_DIR}" || true
 }
 
 function Database::getUserDbList { #@test
   # shellcheck disable=SC2016
   stub mysql \
-    "--defaults-extra-file= -e * : echo \$3 > '${BATS_TMP_DIR}/query'; exit 0"
+    "--defaults-extra-file= -e * : echo \$3 > '${BATS_RUN_TMPDIR}/query'; exit 0"
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
@@ -37,5 +35,5 @@ function Database::getUserDbList { #@test
   run Database::getUserDbList dbFromInstance
   assert_success
   assert_output --partial "DEBUG   - execute command: 'mysql --defaults-extra-file= -e SELECT \`schema_name\` from INFORMATION_SCHEMA.SCHEMATA WHERE \`schema_name\` NOT IN(\"information_schema\", \"mysql\", \"performance_schema\", \"sys\")"
-  [[ "$(cat "${BATS_TMP_DIR}/query")" = "$(cat "${BATS_TEST_DIRNAME}/testsData/getUserDbList.query")" ]]
+  [[ "$(cat "${BATS_RUN_TMPDIR}/query")" = "$(cat "${BATS_TEST_DIRNAME}/testsData/getUserDbList.query")" ]]
 }

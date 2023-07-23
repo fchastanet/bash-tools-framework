@@ -6,8 +6,7 @@
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
+  export TMPDIR="${BATS_RUN_TMPDIR}"
 
   unset HOME
   unset ROOT_DIR
@@ -17,7 +16,6 @@ setup() {
 
 teardown() {
   unstub_all
-  rm -Rf "${BATS_TMP_DIR}" || true
 }
 
 generateLogs() {

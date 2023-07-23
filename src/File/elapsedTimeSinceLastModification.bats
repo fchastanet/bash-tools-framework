@@ -1,24 +1,13 @@
 #!/usr/bin/env bash
-vendorDir="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)/vendor"
-srcDir="$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)"
 
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=src/File/elapsedTimeSinceLastModification.sh
 source "${srcDir}/File/elapsedTimeSinceLastModification.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
-}
-
-teardown() {
-  rm -Rf "${BATS_TMP_DIR}" || true
+  export TMPDIR="${BATS_RUN_TMPDIR}"
 }
 
 function File::elapsedTimeSinceLastModificationNoFileProvided { #@test
@@ -28,14 +17,14 @@ function File::elapsedTimeSinceLastModificationNoFileProvided { #@test
 }
 
 function File::elapsedTimeSinceLastModificationFileNotExists { #@test
-  run File::elapsedTimeSinceLastModification "${BATS_TMP_DIR}/fileNotExists"
+  run File::elapsedTimeSinceLastModification "${BATS_RUN_TMPDIR}/fileNotExists"
   assert_failure 1
   assert_output ""
 }
 
 function File::elapsedTimeSinceLastModification { #@test
-  touch -d "1 hour ago" "${BATS_TMP_DIR}/fileExists"
-  run File::elapsedTimeSinceLastModification "${BATS_TMP_DIR}/fileExists"
+  touch -d "1 hour ago" "${BATS_RUN_TMPDIR}/fileExists"
+  run File::elapsedTimeSinceLastModification "${BATS_RUN_TMPDIR}/fileExists"
   assert_success
   # shellcheck disable=SC2154
   ((output >= 3600 && output <= 3602))

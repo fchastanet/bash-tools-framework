@@ -8,6 +8,10 @@ setup() {
   export TMPDIR
 }
 
+teardown() {
+  rm -Rf "${TMPDIR}" || true
+}
+
 function compile() {
   local binDir="${ROOT_DIR}/bin"
   local -a params=(

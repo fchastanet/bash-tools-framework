@@ -135,7 +135,7 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
     --keep-temp-files|-k keep temporary files for debug purpose
 
 ${__HELP_TITLE}.framework-config environment variables:${__HELP_NORMAL}
-  You can define global environement variables inside
+  You can define global environment variables inside
   .framework-config file that could be used in your templates:
   Eg:
     * REPOSITORY_URL: used in template to indicate from which github

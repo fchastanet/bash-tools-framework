@@ -146,10 +146,8 @@
 
 ### 3.5. Improve UT
 
-- replace BATS_TMP_DIR by BATS_RUN_TMPDIR that is automatically deleted
 - bats assert that no new variable pollute environment to check that every
   variable is used as local
-- UT ensure /tmp files are deleted after UT run
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
   - Env::load with missing .env file => fatal

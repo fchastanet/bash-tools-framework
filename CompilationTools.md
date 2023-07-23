@@ -1,5 +1,17 @@
 # Compilation tools
 
+- [1. Why ?](#1-why-)
+- [2. Compile tool](#2-compile-tool)
+  - [2.1. Compiler - Embed::include](#21-compiler---embedinclude)
+- [3. Annotations and template](#3-annotations-and-template)
+  - [3.2. BIN_FILE metadata (optional)](#32-bin_file-metadata-optional)
+  - [3.3. INCLUDE metadata (optional)](#33-include-metadata-optional)
+  - [3.4. META\_\* metadata (optional)](#34-meta_-metadata-optional)
+- [4. .framework-config](#4-framework-config)
+- [5. FrameworkLint](#5-frameworklint)
+- [Best practices](#best-practices)
+- [6. Acknowledgements](#6-acknowledgements)
+
 Compilation tools is made with the command **compile**. It inline all the
 functions used in the script given in parameter.
 
@@ -42,7 +54,7 @@ You can see several examples of compiled files by checking
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-### 2.1. <a name="embedInclude"></a>compiler - Embed::include
+### 2.1. <a name="embedInclude"></a>Compiler - Embed::include
 
 <!-- markdownlint-restore -->
 

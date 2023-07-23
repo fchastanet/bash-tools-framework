@@ -100,3 +100,4 @@ Scrasnups
 nodoc
 pathchk
 nonportable
+tempdir
