@@ -11,5 +11,9 @@ Embed::parseInclude() {
     ref_file="$(echo "${BASH_REMATCH[1]}" | Filters::removeExternalQuotes)"
     # shellcheck disable=SC2034
     ref_asName="$(echo "${BASH_REMATCH[2]}" | Filters::removeExternalQuotes)"
+    if [[ ! "${ref_asName}" =~ ^[A-Za-z0-9_]+$ ]]; then
+      Log::displayError "Invalid instruction '${str}'. AS property name can only be composed by letters, numbers, underscore."
+      return 1
+    fi
   fi
 }
