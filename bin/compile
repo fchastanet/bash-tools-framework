@@ -68,6 +68,8 @@ ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 # root dir absolute path
 ROOT_DIR="${_COMPILE_ROOT_DIR}"
+BIN_FILE=""
+export BIN_FILE
 KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
 export KEEP_TEMP_FILES
 
@@ -83,18 +85,14 @@ script given in parameter
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
-    [--src-dir|-s <srcDir>] [--bin-dir|-b <binDir>] [--template <templateName>]
-    [--root-dir|-r <rootDir>] [--src-path <srcPath>] [--keep-temp-files|-k]
+    [--src-dir|-s <srcDir>] [--bin-dir|-b <binDir>] [--bin-file|-f <binFile>]
+    [--root-dir|-r <rootDir>] [--src-path <srcPath>]
+    [--template <templateName>] [--keep-temp-files|-k]
 
 ${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
 
     <fileToCompile> the relative or absolute path to compile into
       one file
-
-    <srcFilePath> the src file you want to show at the top of
-      generated file to indicate from which source file the binary
-      has been generated.
-      You can use the variable SRC_FILE_PATH in your template.
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
     --help,-h prints this help and exits
@@ -118,6 +116,9 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
 
     --bin-dir|-b <binDir> allows to override the value of BIN_DIR
       by default BIN_DIR is set to '${ROOT_DIR}/bin'
+
+    --bin-file|-f <binFile> BIN_FILE annotation will be overridden
+      by binFile value
 
     --template-dir|-t <templateDir> the template directory to use
       to override some template includes.
@@ -237,8 +238,8 @@ EOF
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path,keep-temp-files"
-shortOpts="hks:t:b:r:"
+longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path:,bin-file:,keep-temp-files"
+shortOpts="hks:t:b:r:f:"
 options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "$@" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
@@ -271,6 +272,13 @@ while true; do
         Log::fatal "Directory '$1' does not exists"
       fi
       BIN_DIR="$(realpath --physical "$1")"
+      ;;
+    --bin-file | -f)
+      shift || true
+      if ! Assert::validPath "$1"; then
+        Log::fatal "Bin file path '$1' is not a valid path"
+      fi
+      BIN_FILE="$1"
       ;;
     --root-dir | -r)
       shift || true
@@ -309,11 +317,6 @@ fi
 
 # The file to compile
 INPUT_FILE="$1"
-# the src file you want to show at the top of generated file to indicate
-# from which source file the binary has been generated
-if [[ -z "${SRC_FILE_PATH+xxx}" ]]; then
-  SRC_FILE_PATH="$(File::relativeToDir "${INPUT_FILE}" "${ROOT_DIR}")"
-fi
 
 # if bin dir has not been set, set a default value
 if [[ -z "${BIN_DIR+xxx}" ]]; then
@@ -346,7 +349,14 @@ evalTemplate() {
   local FILE="$1"
   local metaExports
   metaExports="$(Compiler::extractMetaForExport "${FILE}")"
-  SRC_ABSOLUTE_PATH="$(realpath "${SRC_FILE_PATH}")"
+
+  # the src file you want to show at the top of generated file to indicate
+  # from which source file the binary has been generated
+  if [[ -z "${SRC_FILE_PATH+xxx}" ]]; then
+    SRC_FILE_PATH="$(File::relativeToDir "${INPUT_FILE}" "${ROOT_DIR}")"
+  fi
+
+  SRC_ABSOLUTE_PATH="$(realpath "${INPUT_FILE}")"
   (
     cd "${TEMPLATE_DIR}"
     eval "${metaExports}"
@@ -484,17 +494,19 @@ ROOT_DIR_RELATIVE_TO_BIN_DIR=$'<%% echo "${ROOT_DIR_RELATIVE_TO_BIN_DIR}" %>'
 evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
 
 # compute BIN_FILE
-BIN_FILE=$(Compiler::getBinFile "${INPUT_FILE}")
-export BIN_FILE
 if [[ -z "${BIN_FILE}" ]]; then
-  # BIN_FILE metadata not provided => skipped
-  Log::displaySkipped "File '${INPUT_FILE}' - BIN_FILE metadata not provided"
-  return 0
+  BIN_FILE=$(Compiler::getBinFile "${INPUT_FILE}")
+  if [[ -z "${BIN_FILE}" ]]; then
+    # BIN_FILE metadata not provided => skipped
+    Log::displaySkipped "File '${INPUT_FILE}' - BIN_FILE metadata not provided"
+    exit 0
+  fi
 fi
 Log::displayInfo "Binfile ${BIN_FILE} from ${INPUT_FILE}"
 
 # now we can evaluate ROOT_DIR_RELATIVE_TO_BIN_DIR as BIN_DIR is known from
 # first evalTemplate using BIN_FILE
+
 binDirRelativeToRootDir="$(File::relativeToDir "${_COMPILE_ROOT_DIR}" "$(dirname "${BIN_FILE}")")"
 # shellcheck disable=SC1083
 ROOT_DIR_RELATIVE_TO_BIN_DIR="\$(cd \"\${BIN_DIR}/${binDirRelativeToRootDir}\" && pwd -P)"
