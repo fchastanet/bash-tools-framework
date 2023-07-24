@@ -118,7 +118,7 @@ checkEachFunctionHasSrcFile() {
 checkEachSrcFileHasBatsFile() {
   local file="$1"
   local batsFile="${file%.*}.bats"
-  if [[ -f "${ROOT_DIR}/${batsFile}" ]]; then
+  if [[ ! -f "${ROOT_DIR}/${batsFile}" ]]; then
     if [[ "${FORMAT}" = "plain" ]]; then
       Log::displayWarning "File '${file}', missing bats file '${batsFile}'"
     else
@@ -199,7 +199,7 @@ while IFS='' read -r file; do
     echo "</file>"
   fi
   ((++warningCount))
-done < <(cat "${missingBashFileList}")
+done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 
 if [[ "${FORMAT}" = "checkstyle" ]]; then
   echo "</checkstyle>"

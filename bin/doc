@@ -390,17 +390,23 @@ Log::logWarning() {
 }
 
 # To be called before logging in the log file
-# @param $1 log file name
-# @param $2 maximum number of log files
+# @param {string} file $1 log file name
+# @param {int} maxLogFilesCount $2 maximum number of log files
 Log::rotate() {
-  local FILENAME="$1"
-  local MAX_LOG="${2:-5}"
-  for i in $(seq $((MAX_LOG - 1)) -1 1); do
-    Log::displayInfo "Log rotation ${FILENAME}.${i} to ${FILENAME}.$((i + 1))"
-    mv "${FILENAME}."{"${i}","$((i + 1))"} &>/dev/null || true
+  local file="$1"
+  local maxLogFilesCount="${2:-5}"
+
+  if [[ ! -f "${file}" ]]; then
+    Log::displaySkipped "Log file ${file} doesn't exist yet"
+    return 0
+  fi
+  for i in $(seq $((maxLogFilesCount - 1)) -1 1); do
+    Log::displayInfo "Log rotation ${file}.${i} to ${file}.$((i + 1))"
+    mv "${file}."{"${i}","$((i + 1))"} &>/dev/null || true
   done
-  if mv "${FILENAME}" "${FILENAME}.1" &>/dev/null; then
-    Log::displayInfo "Log rotation ${FILENAME} to ${FILENAME}.1"
+  if cp "${file}" "${file}.1" &>/dev/null; then
+    echo >"${file}" # reset log file
+    Log::displayInfo "Log rotation ${file} to ${file}.1"
   fi
 }
 
@@ -478,9 +484,17 @@ Log::logMessage() {
   local msg="$2"
   local date
 
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    date="$(date '+%Y-%m-%d %H:%M:%S')"
-    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    return 0
+  fi
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) || [[ "${levelMsg}" = "FATAL" ]]; then
+    if Assert::fileWritable "${BASH_FRAMEWORK_LOG_FILE}"; then
+      date="$(date '+%Y-%m-%d %H:%M:%S')"
+      touch "${BASH_FRAMEWORK_LOG_FILE}"
+      printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+    else
+      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+    fi
   fi
 }
 
@@ -498,6 +512,17 @@ ShellDoc::generateShellDoc() {
     cd "${currentDir}" || exit 1
     "${ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
   )
+}
+
+# Checks if file can be created in folder
+# The file does not need to exist
+Assert::fileWritable() {
+  local file="$1"
+  local dir
+
+  dir="$(dirname "${file}")"
+
+  Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
 BASH_FRAMEWORK_TOMDOC_INSTALLED="${ROOT_DIR}/vendor/.tomdocInstalled"
@@ -521,6 +546,23 @@ ShellDoc::installRequirementsIfNeeded() {
       Log::fatal "unable to install tomdoc.sh library"
     fi
   fi
+}
+
+# Public: check if argument is a valid linux path
+#
+# @param {string} path $1 path that needs to be checked
+# @return 1 if path is invalid
+# invalid path are those with:
+# - invalid characters
+# - component beginning by a - (because option)
+# - not beginning with a slash
+# - relative
+Assert::validPath() {
+  local path="$1"
+
+  # https://regex101.com/r/afLrmM/2
+  [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
+    [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }
 
 # get file content if file not expired

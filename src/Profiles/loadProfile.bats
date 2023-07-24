@@ -5,6 +5,10 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Profiles/loadProfile.sh
 source "${srcDir}/Profiles/loadProfile.sh"
+# shellcheck source=/src/Assert/fileWritable.sh
+source "${srcDir}/Assert/fileWritable.sh"
+# shellcheck source=/src/Assert/validPath.sh
+source "${srcDir}/Assert/validPath.sh"
 
 teardown() {
   unstub_all
