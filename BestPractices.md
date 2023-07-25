@@ -30,6 +30,8 @@ this project because I wrote some of them while writing this project.
 - [3. Bats best practices](#3-bats-best-practices)
   - [3.1. use of default temp directory created by bats](#31-use-of-default-temp-directory-created-by-bats)
   - [3.2. avoid boilerplate code](#32-avoid-boilerplate-code)
+  - [3.3. Override an environment variable when using bats run](#33-override-an-environment-variable-when-using-bats-run)
+  - [3.4. Override a bash framework function](#34-override-a-bash-framework-function)
 
 ## 1. Bash Best practices
 
@@ -315,3 +317,16 @@ And makes several variables available:
 - FRAMEWORK_DIR (same as ROOT_DIR but used by some bash framework functions)
 - LC_ALL=POSIX see
   [Bash and grep regular expressions best practices](BestPractices.md#regularExpressions)
+
+### 3.3. Override an environment variable when using bats run
+
+```bash
+SUDO="" run Apt::update
+```
+
+### 3.4. Override a bash framework function
+
+using stub is not possible because it does not support executable with special
+characters like `::`. So the solution is just to override the function inside
+your test function without importing the original function of course. In
+tearDown method do not forget to use `unset -f yourFunction`

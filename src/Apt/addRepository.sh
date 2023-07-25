@@ -2,5 +2,5 @@
 
 Apt::addRepository() {
   Retry::default add-apt-repository -y "$1"
-  Apt::update
+  Retry::default Apt::update
 }
