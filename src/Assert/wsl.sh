@@ -4,9 +4,5 @@
 #
 # @return 1 on error
 Assert::wsl() {
-  if grep -qEi "(Microsoft|WSL)" /proc/version &>/dev/null; then
-    return 0
-  else
-    return 1
-  fi
+  grep -qEi "(Microsoft|WSL)" /proc/version &>/dev/null || return 1
 }

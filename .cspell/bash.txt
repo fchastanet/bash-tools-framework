@@ -101,3 +101,6 @@ nodoc
 pathchk
 nonportable
 tempdir
+hétérogénéité
+frégate
+zfxyuip
