@@ -14,6 +14,7 @@
     "vendor/bats*/**",
     "pages/BestPractices.md",
     "pages/README.md",
+    "pages/CompileCommand.md",
     "pages/Commands.md",
     "pages/Framework.md",
     "pages/bashDoc/**",

@@ -11,7 +11,6 @@ DISABLE_LINTERS:
   - JAVASCRIPT_ES
   - JAVASCRIPT_PRETTIER
   - RUBY_RUBOCOP
-  - TERRAFORM_CHECKOV
   - REPOSITORY_CHECKOV
   - REPOSITORY_TRIVY
 # DISABLE_ERRORS: true # Uncomment if you want MegaLinter to detect errors but not block CI to pass

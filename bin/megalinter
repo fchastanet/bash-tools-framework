@@ -517,7 +517,7 @@ export __HELP_NORMAL
 Env::pathPrepend "${VENDOR_BIN_DIR}"
 Env::pathPrepend "${BIN_DIR}"
 
-IMAGE_NAME=oxsecurity/megalinter-terraform:v6.16.0
+IMAGE_NAME=oxsecurity/megalinter-terraform:v7.2.0
 
 HELP="$(
   cat <<EOF

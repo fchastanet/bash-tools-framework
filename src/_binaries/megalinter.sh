@@ -3,7 +3,7 @@
 
 .INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
 
-IMAGE_NAME=oxsecurity/megalinter-terraform:v6.16.0
+IMAGE_NAME=oxsecurity/megalinter-terraform:v7.2.0
 
 HELP="$(
   cat <<EOF
