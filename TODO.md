@@ -66,8 +66,9 @@
 
 TODOs linked to bin/compiler:
 
-- move compiler doc to markdown
-- rename metadata to annotation
+- make compile options works with relative files
+  - update CompileCommand.md examples
+- rename metadata/annotation to directive
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface
   - would it be possible to implement inheritance ?
@@ -75,7 +76,7 @@ TODOs linked to bin/compiler:
 - compile should use FRAMEWORK_SRC_DIRS from .framework-config
 - use Filters::optimizeShFile
 - check if nested namespaces are supported
-- get rid of `__all.sh` files
+- get rid of `__all.sh` files, useless because of compiler auto include
 
 ### 5.1. Embed::include
 

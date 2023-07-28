@@ -99,20 +99,6 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
 
     --src-dir|-s <srcDir> provide the directory where to find the
       functions source code.
-      By default this project src directory is used.
-
-      You can add as much --src-dir options as needed to define
-      other source dirs.
-      The functions will be searched in the order defined (it
-      allows function redefinition)
-      Example: --src-dir src --src-dir otherSrc
-      Functions::myFunction will be searched in
-        - src/Functions/myFunction.sh
-        - otherSrc/Functions/myFunction.sh
-
-      ${__HELP_TITLE}Important Note:${__HELP_NORMAL} if you provide
-      a --src-dir and you need also functions defined in this
-      project, think about adding a --src-dir for this project too
 
     --bin-dir|-b <binDir> allows to override the value of BIN_DIR
       by default BIN_DIR is set to '${ROOT_DIR}/bin'
@@ -122,7 +108,6 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
 
     --template-dir|-t <templateDir> the template directory to use
       to override some template includes.
-      Check environment variables below.
 
     --root-dir|-r <rootDir> if you whish to override ROOT_DIR
       variable (default value is '${ROOT_DIR}'
@@ -134,100 +119,9 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
 
     --keep-temp-files|-k keep temporary files for debug purpose
 
-${__HELP_TITLE}.framework-config environment variables:${__HELP_NORMAL}
-  You can define global environment variables inside
-  .framework-config file that could be used in your templates:
-  Eg:
-    * REPOSITORY_URL: used in template to indicate from which github
-      repo the file has been generated
-
-${__HELP_TITLE}Template variables:${__HELP_NORMAL}
-  Other variables are automatically generated to be used in your
-  templates:
-    * ORIGINAL_TEMPLATE_DIR allowing you to include the template
-      relative to the script being interpreted
-    * TEMPLATE_DIR the template directory in which you can override
-      the templates defined in ORIGINAL_TEMPLATE_DIR
-    * ROOT_DIR_RELATIVE_TO_BIN_DIR is automatically computed from
-      BIN_FILE metadata. It allows to generate the framework root dir
-      during runtime.
-      Kept for compatibility reason but prefer to use Embed feature
-      instead.
-
-  The following variables depends upon parameters passed to this
-  script:
-    * SRC_FILE_PATH the src file you want to show at the top of
-      generated file to indicate from which source file the binary
-      has been generated.
-    * SRC_ABSOLUTE_PATH is the path of the file being compiled, it
-      can be useful if you need to access a path relative to this
-      file during compilation.
-
-${__HELP_TITLE}Bash-tpl Templating:${__HELP_NORMAL}
-  your compiled source file will be interpreted using bash-tpl
-  https://github.com/TekWizely/bash-tpl
-  You can use this feature to inline external file, interpreting
-  environment variable during compilation, ...
-  ${__HELP_EXAMPLE}
-  Eg: inline a awk script inside the resulting
-  binary
-  awkScript="\$(
-    cat <<'AWK_EOF'
-  .INCLUDE "\$(cd "\$(dirname \${SRC_ABSOLUTE_PATH})" && pwd -P)/mysql2puml.awk"
-  AWK_EOF
-  )"${__HELP_NORMAL}
-
-${__HELP_TITLE}META variables:${__HELP_NORMAL}
-  It's also possible to inject some variables speficic to the binary
-  file you are generating and that will be used to interpret your
-  templates.
-${__HELP_EXAMPLE}
-  Eg: add this line to the beginning of the source file without
-  breaking comment section (no newlines between #)
-
-  #!/usr/bin/env bash
-  # META_SCRIPT=MinimumRequirements${__HELP_NORMAL}
-
-  The variable SCRIPT can then be used in the template using
-  ${__HELP_EXAMPLE}SCRIPT="<% \${SCRIPT} %>"${__HELP_NORMAL}
-
-${__HELP_TITLE}Examples:${__HELP_NORMAL}
-  Let's say you want to generate the binary file \`bin/buildDoc\`
-  from the source file \`src/build/buildDoc.sh\`
-  ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..${__HELP_NORMAL}
-
-  Here you want to generate the binary but overriding some or
-  all functions of bash-tools-framework/src
-  ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh ..\\
-  -s ./src -s ../bash-tools-framework/src${__HELP_NORMAL}
-
-  Here you want to override the default templates too
-  ${__HELP_EXAMPLE}${SCRIPT_NAME} src/build/buildDoc.sh src/build/buildDoc.sh .. \\
-  -s ./src -s ../bash-tools-framework/src -t src/templates${__HELP_NORMAL}
-
-${__HELP_TITLE}Src file annotation:${__HELP_NORMAL}
-  You can use special annotations in src file
-
-  ${__HELP_TITLE}BIN_FILE annotation (optional):${__HELP_NORMAL}
-  allows to indicate where the resulting bin file will be generated
-  if not provided, the binary file will be copied to {binDir} without sh extension
-
-  ${__HELP_TITLE}INCLUDE annotation (optional):${__HELP_NORMAL}
-    ${__HELP_EXAMPLE}Syntax: # INCLUDE "srcFile" AS "targetFile"${__HELP_NORMAL}
-    ${__HELP_EXAMPLE}Syntax: # INCLUDE "srcDir" AS "targetDir"${__HELP_NORMAL}
-    ${__HELP_EXAMPLE}Syntax: # INCLUDE namespace::functions AS "myFunction"${__HELP_NORMAL}
-    if INCLUDE annotation is provided, the file/dir provided will be added inside the resulting
-    bin file as a tar gz file(base64 encoded) and automatically extracted when executed.
-
-${__HELP_TITLE}File header example:${__HELP_NORMAL}
-${__HELP_EXAMPLE}
-#!/usr/bin/env bash
-# BIN_FILE=\${ROOT_DIR}/bin/myBinary
-# META_SCRIPT=MinimumRequirements
-# INCLUDE "\${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
-# INCLUDE Backup::file AS "backupFile"
-sudo "\${embed_file_backupFile}" ...
-"\${embed_file_otherNeededBinary}"${__HELP_NORMAL}
+${__HELP_TITLE}More information on options and annotations:${__HELP_NORMAL}
+  You can find more information on
+  https://fchastanet.github.io/bash-tools-framework/#/CompileCommand?id=compileCommandHelp
 
 $(SRC_FILE_PATH=bin/compile envsubst <"${_COMPILE_SRC_DIR}/_includes/authorHardCoded.tpl")
 EOF

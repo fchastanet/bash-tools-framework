@@ -874,7 +874,7 @@ sed -i -E \
   "${DOC_DIR}/README.md"
 
 cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
-cp "${ROOT_DIR}/Framework.tmpl.md" "${DOC_DIR}/Framework.md"
+cp "${ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
 cp "${ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
