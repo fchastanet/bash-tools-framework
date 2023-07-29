@@ -556,8 +556,8 @@ if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/Dock
     --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
     --build-arg "BASH_IMAGE=bash-tools-${VENDOR}-${BASH_TAR_VERSION}:latest" \
     --build-arg SKIP_USER="${SKIP_USER:-0}" \
-    --build-arg USER_ID="$(id -u)" \
-    --build-arg GROUP_ID="$(id -g)" \
+    --build-arg USER_ID="${USER_ID:-$(id -u)}" \
+    --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
     -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/DockerfileUser" \
     -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
     "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker"

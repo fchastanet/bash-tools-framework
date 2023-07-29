@@ -30,6 +30,8 @@ ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
 ONBUILD RUN \
     if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
+      deluser www-data || true ;\
+      delgroup www-data || true ;\
       addgroup -g ${GROUP_ID} -S www-data ;\
       adduser -u ${USER_ID} -D -S -h /app -s /sbin/nologin -G www-data www-data ;\
       # remove parallel nagware

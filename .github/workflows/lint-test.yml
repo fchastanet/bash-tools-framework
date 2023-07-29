@@ -130,8 +130,9 @@ jobs:
           VENDOR="${{ matrix.vendor }}" \
           BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
           BASH_IMAGE="${{ matrix.bashImage }}" \
+          USER_ID=1000 \
+          GROUP_ID=1000 \
           SKIP_BUILD=0 \
-          SKIP_USER=1 \
           ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src
 
       - name: Publish Unit Test Results
