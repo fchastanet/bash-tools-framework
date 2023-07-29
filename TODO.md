@@ -68,7 +68,7 @@ TODOs linked to bin/compiler:
 
 - make compile options works with relative files
   - update CompileCommand.md examples
-- rename metadata/annotation to directive
+- rename metadata/meta data/annotation to directive
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface
   - would it be possible to implement inheritance ?
