@@ -37,12 +37,12 @@ function compile::Simple { #@test
   diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_TEST_TMPDIR}/simpleBinary"
 }
 
-function compile::Meta { #@test
-  run compile "meta.sh"
+function compile::var { #@test
+  run compile "var.sh"
   assert_success
-  [[ -f "${BATS_TEST_TMPDIR}/meta" ]]
-  [[ -x "${BATS_TEST_TMPDIR}/meta" ]]
-  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/meta" "${BATS_TEST_TMPDIR}/meta"
+  [[ -f "${BATS_TEST_TMPDIR}/var" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/var" ]]
+  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/var" "${BATS_TEST_TMPDIR}/var"
 }
 
 function compile::IncludeSimpleFile { #@test

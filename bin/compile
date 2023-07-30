@@ -45,8 +45,8 @@ source "${_COMPILE_SRC_DIR}/Filters/commentLines.sh"
 source "${_COMPILE_SRC_DIR}/Filters/directive.sh"
 # shellcheck source=/src/Filters/directiveValue.sh
 source "${_COMPILE_SRC_DIR}/Filters/directiveValue.sh"
-# shellcheck source=/src/Compiler/extractMetaForExport.sh
-source "${_COMPILE_SRC_DIR}/Compiler/extractMetaForExport.sh"
+# shellcheck source=/src/Compiler/extractVarForExport.sh
+source "${_COMPILE_SRC_DIR}/Compiler/extractVarForExport.sh"
 # shellcheck source=/src/Compiler/extractUniqueFrameworkFunctions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/extractUniqueFrameworkFunctions.sh"
 # shellcheck source=/src/Compiler/findFunctionInSrcDirs.sh
@@ -242,8 +242,8 @@ export -f dynamicTemplateDir
 
 evalTemplate() {
   local FILE="$1"
-  local metaExports
-  metaExports="$(Compiler::extractMetaForExport "${FILE}")"
+  local varExports
+  varExports="$(Compiler::extractVarForExport "${FILE}")"
 
   # the src file you want to show at the top of generated file to indicate
   # from which source file the binary has been generated
@@ -254,7 +254,7 @@ evalTemplate() {
   SRC_ABSOLUTE_PATH="$(realpath "${INPUT_FILE}")"
   (
     cd "${TEMPLATE_DIR}"
-    eval "${metaExports}"
+    eval "${varExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
     export BIN_DIR
     export ROOT_DIR

@@ -69,7 +69,6 @@ TODOs linked to bin/compiler:
 
 - make compile options works with relative files
   - update CompileCommand.md examples
-- rename directive/meta data/annotation to directive
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface
   - would it be possible to implement inheritance ?
@@ -93,7 +92,7 @@ encapsulate a dependent binary(bash or not) inside the executable.
     assets
   - tar the entire directory
   - create a bootstrap script able to untar and execute the entrypoint
-- add EMBED meta data
+- add EMBED var
 - EMBED of a function of the framework will automatically generate a bin file
   called with the name of the function and calling this function
 - using EMBED supposes to unsure the targeted binary has been constructed

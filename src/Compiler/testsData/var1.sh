@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-# META_VAR=VALUE
+# VAR_VAR=VALUE

@@ -2,13 +2,13 @@
 
 - [1. Why ?](#1-why-)
 - [2. Compile tool](#2-compile-tool)
-- [3.  compile command help](#3--compile-command-help)
+- [3. compile command help](#3--compile-command-help)
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
   - [3.4. directives and template](#34-directives-and-template)
     - [3.4.1. `# FUNCTIONS` directive](#341--functions-directive)
-    - [3.4.2. `META_*` directive (optional)](#342-meta_-directive-optional)
+    - [3.4.2. `VAR_*` directive (optional)](#342-var_-directive-optional)
     - [3.4.3. `BIN_FILE` directive (optional)](#343-bin_file-directive-optional)
     - [3.4.4. Compiler - Embed::embed](#344-compiler---embedembed)
     - [3.4.5. `EMBED` directive (optional)](#345-embed-directive-optional)
@@ -181,7 +181,7 @@ AWK_EOF
 You can use special optional directives in src file
 
 - `BIN_FILE` directive
-- `META_*` directive
+- `VAR_*` directive
 - `EMBED` directive
 
 One mandatory directive:
@@ -196,7 +196,7 @@ Eg:
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/binaryExample
-# META_SCRIPT=MinimumRequirements
+# VAR_SCRIPT=MinimumRequirements
 # EMBED "Backup::file" as backupFile
 # EMBED "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
 
@@ -222,7 +222,7 @@ script file (see example above).
 It is the most important directive as it will inform the compiler where
 dependent framework functions will be injected in your resulting bash file.
 
-#### 3.4.2. `META_*` directive (optional)
+#### 3.4.2. `VAR_*` directive (optional)
 
 it is a directive variable used during compilation time (not during execution),
 it can be used to generate binary files based generic template files.
@@ -238,7 +238,7 @@ section (no newlines between #)
 
 ```bash
 #!/usr/bin/env bash
-# META_SCRIPT=MinimumRequirements**
+# VAR_SCRIPT=MinimumRequirements**
 ```
 
 The variable SCRIPT can then be used in the template using
@@ -327,7 +327,7 @@ _`EMBED` directive usage example:_
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/myBinary
-# META_SCRIPT=MinimumRequirements
+# VAR_SCRIPT=MinimumRequirements
 # EMBED "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
 # EMBED Backup::file AS "backupFile"
 sudo "${embed_file_backupFile}" ...
@@ -357,7 +357,7 @@ FRAMEWORK_SRC_DIRS=()
 
 # export here all the variables that will be used in your templates
 # Use this when variables are common to most of your bin files
-# You can alternatively use META directive to declare a constant
+# You can alternatively use VAR_* directive to declare a constant
 # specific to your bin file
 export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 ```

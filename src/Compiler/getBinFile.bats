@@ -33,9 +33,9 @@ function Compiler::getBinFile::twoOccurrences { #@test
 
 function Compiler::getBinFile::zeroOccurrence { #@test
   export BATS_TEST_TMPDIR
-  run Compiler::getBinFile "${BATS_TEST_DIRNAME}/testsData/meta1.sh" >&2
+  run Compiler::getBinFile "${BATS_TEST_DIRNAME}/testsData/var1.sh" >&2
   assert_success
-  assert_output --partial "SKIPPED - ${BATS_TEST_DIRNAME}/testsData/meta1.sh does not contains BIN_FILE directive"
+  assert_output --partial "SKIPPED - ${BATS_TEST_DIRNAME}/testsData/var1.sh does not contains BIN_FILE directive"
   [[ ! -d "${BATS_TEST_TMPDIR:?}/bin" ]]
 }
 

@@ -854,7 +854,7 @@ ShellDoc::generateMdFileFromTemplate \
   "${DOC_DIR}/Commands.md" \
   "${BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
-  '(bash-tpl|meta|simpleBinary)$'
+  '(bash-tpl|var|simpleBinary)$'
 
 # clean folder before generate
 rm -f "${DOC_DIR}/Index.md" || true
