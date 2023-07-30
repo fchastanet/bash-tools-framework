@@ -41,10 +41,10 @@ source "${_COMPILE_SRC_DIR}/Filters/trimEmptyLines.sh"
 source "${_COMPILE_SRC_DIR}/Filters/bashFrameworkFunctions.sh"
 # shellcheck source=/src/Filters/commentLines.sh
 source "${_COMPILE_SRC_DIR}/Filters/commentLines.sh"
-# shellcheck source=/src/Filters/metadata.sh
-source "${_COMPILE_SRC_DIR}/Filters/metadata.sh"
-# shellcheck source=/src/Filters/metadataValue.sh
-source "${_COMPILE_SRC_DIR}/Filters/metadataValue.sh"
+# shellcheck source=/src/Filters/directive.sh
+source "${_COMPILE_SRC_DIR}/Filters/directive.sh"
+# shellcheck source=/src/Filters/directiveValue.sh
+source "${_COMPILE_SRC_DIR}/Filters/directiveValue.sh"
 # shellcheck source=/src/Compiler/extractMetaForExport.sh
 source "${_COMPILE_SRC_DIR}/Compiler/extractMetaForExport.sh"
 # shellcheck source=/src/Compiler/extractUniqueFrameworkFunctions.sh
@@ -103,7 +103,7 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
     --bin-dir|-b <binDir> allows to override the value of BIN_DIR
       by default BIN_DIR is set to '${ROOT_DIR}/bin'
 
-    --bin-file|-f <binFile> BIN_FILE annotation will be overridden
+    --bin-file|-f <binFile> BIN_FILE directive will be overridden
       by binFile value
 
     --template-dir|-t <templateDir> the template directory to use
@@ -119,7 +119,7 @@ ${__HELP_TITLE}Options:${__HELP_NORMAL}
 
     --keep-temp-files|-k keep temporary files for debug purpose
 
-${__HELP_TITLE}More information on options and annotations:${__HELP_NORMAL}
+${__HELP_TITLE}More information on options and directives:${__HELP_NORMAL}
   You can find more information on
   https://fchastanet.github.io/bash-tools-framework/#/CompileCommand?id=compileCommandHelp
 
@@ -392,8 +392,8 @@ evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
 if [[ -z "${BIN_FILE}" ]]; then
   BIN_FILE=$(Compiler::getBinFile "${INPUT_FILE}")
   if [[ -z "${BIN_FILE}" ]]; then
-    # BIN_FILE metadata not provided => skipped
-    Log::displaySkipped "File '${INPUT_FILE}' - BIN_FILE metadata not provided"
+    # BIN_FILE directive not provided => skipped
+    Log::displaySkipped "File '${INPUT_FILE}' - BIN_FILE directive not provided"
     exit 0
   fi
 fi
@@ -420,7 +420,7 @@ injectImportedFunctions "${COMPILED_FILE2}" filesAlreadyImported
 # remove spaces at the end of the lines
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 
-cat -s "${COMPILED_FILE2}" | Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}" >"${BIN_FILE}"
+cat -s "${COMPILED_FILE2}" | Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" >"${BIN_FILE}"
 chmod +x "${BIN_FILE}"
 
 exit "${failures}"

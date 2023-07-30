@@ -5,7 +5,7 @@
 # function
 # Note:
 #   You cannot call this function directly
-#   it should be called using '# EMBED ... AS ...' annotation
+#   it should be called using '# EMBED ... AS ...' directive
 # @param {string} functionToCall $1
 # @param {string} functionAlias $2
 # @output the generated bin file extractor

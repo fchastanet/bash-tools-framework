@@ -69,7 +69,7 @@ TODOs linked to bin/compiler:
 
 - make compile options works with relative files
   - update CompileCommand.md examples
-- rename metadata/meta data/annotation to directive
+- rename directive/meta data/annotation to directive
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface
   - would it be possible to implement inheritance ?
@@ -81,7 +81,7 @@ TODOs linked to bin/compiler:
 
 ### 5.1. Embed::embed
 
-- implement EMBED AS annotation
+- implement EMBED AS directive
   - new bash-framework function to call bash-tpl (embedded)
   - replace all envsubst by the usage of bash-tpl
 

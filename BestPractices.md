@@ -134,7 +134,7 @@ if it is a good idea to implement it and what would be the impact).
   readonly) to make the call more clear like
   `myFunction arg1False arg2True arg3False` of course replacing argX with the
   real argument name Eg:
-  `Filters::metadata "${FILTER_META_DATA_REMOVE_HEADERS}"` You have to prefix
+  `Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}"` You have to prefix
   all your constants to avoid conflicts.
 
 ### 1.3. some commands default options to use

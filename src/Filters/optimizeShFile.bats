@@ -18,6 +18,6 @@ function Filters::optimizeShFile::stdin { #@test
 }
 
 function Filters::optimizeShFile::fromFile { #@test
-  run Filters::optimizeShFile "${BATS_TEST_DIRNAME}/testsData/metadata.sh"
-  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/optimizeShFile.metadata.txt")"
+  run Filters::optimizeShFile "${BATS_TEST_DIRNAME}/testsData/directive.sh"
+  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/optimizeShFile.directive.txt")"
 }

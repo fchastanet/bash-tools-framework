@@ -18,6 +18,6 @@ function Filters::catFileCleaned::stdin { #@test
 function Filters::catFileCleaned::SeveralUppercase { #@test
   {
     run Filters::catFileCleaned
-    assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/catFileCleaned.metadata.txt")"
-  } <"${BATS_TEST_DIRNAME}/testsData/metadata.sh"
+    assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/catFileCleaned.directive.txt")"
+  } <"${BATS_TEST_DIRNAME}/testsData/directive.sh"
 }

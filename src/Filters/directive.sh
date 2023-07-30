@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-readonly FILTER_META_DATA_KEEP_ONLY_HEADERS="0"
+readonly FILTER_DIRECTIVE_KEEP_ONLY_HEADERS="0"
 # shellcheck disable=SC2034
-readonly FILTER_META_DATA_REMOVE_HEADERS="1"
+readonly FILTER_DIRECTIVE_REMOVE_HEADERS="1"
 
-# filter the metadata only at the beginning of the file
+# filter the directive only at the beginning of the file
 # we do not want to filter eventual documentation in the
 # rest of the script
 # @param {bool} invert $1 Invert the sense of matching,
 # to select non-matching lines:
-# - 0 to keep only metadata
-# - 1 to remove metadata and keep the rest of the file
+# - 0 to keep only directive
+# - 1 to remove directive and keep the rest of the file
 # shellcheck disable=SC2120
-Filters::metadata() {
-  local invert="${1:-${FILTER_META_DATA_KEEP_ONLY_HEADERS}}"
+Filters::directive() {
+  local invert="${1:-${FILTER_DIRECTIVE_KEEP_ONLY_HEADERS}}"
   shift || true
   awk -v invert="${invert}" '
     BEGIN {

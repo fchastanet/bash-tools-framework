@@ -22,8 +22,8 @@ function Filters::removeEmptyLines::stdinEmpty { #@test
   }
 }
 
-function Filters::removeEmptyLines::metadata { #@test
-  run Filters::removeEmptyLines "${BATS_TEST_DIRNAME}/testsData/metadata.sh"
+function Filters::removeEmptyLines::directive { #@test
+  run Filters::removeEmptyLines "${BATS_TEST_DIRNAME}/testsData/directive.sh"
   assert_success
-  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/removeEmptyLines.metadata.txt")"
+  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/removeEmptyLines.directive.txt")"
 }

@@ -5,10 +5,10 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Compiler/getBinFile.sh
 source "${BATS_TEST_DIRNAME}/getBinFile.sh"
-# shellcheck source=/src/Filters/metadata.sh
-source "${srcDir}/Filters/metadata.sh"
-# shellcheck source=/src/Filters/metadataValue.sh
-source "${srcDir}/Filters/metadataValue.sh"
+# shellcheck source=/src/Filters/directive.sh
+source "${srcDir}/Filters/directive.sh"
+# shellcheck source=/src/Filters/directiveValue.sh
+source "${srcDir}/Filters/directiveValue.sh"
 # shellcheck source=/src/Assert/validPath.sh
 source "${srcDir}/Assert/validPath.sh"
 
@@ -35,7 +35,7 @@ function Compiler::getBinFile::zeroOccurrence { #@test
   export BATS_TEST_TMPDIR
   run Compiler::getBinFile "${BATS_TEST_DIRNAME}/testsData/meta1.sh" >&2
   assert_success
-  assert_output --partial "SKIPPED - ${BATS_TEST_DIRNAME}/testsData/meta1.sh does not contains BIN_FILE metadata"
+  assert_output --partial "SKIPPED - ${BATS_TEST_DIRNAME}/testsData/meta1.sh does not contains BIN_FILE directive"
   [[ ! -d "${BATS_TEST_TMPDIR:?}/bin" ]]
 }
 
