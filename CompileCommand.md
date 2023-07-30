@@ -2,7 +2,7 @@
 
 - [1. Why ?](#1-why-)
 - [2. Compile tool](#2-compile-tool)
-- [3. compile command help](#3--compile-command-help)
+- [3.  compile command help](#3--compile-command-help)
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
@@ -10,8 +10,8 @@
     - [3.4.1. `# FUNCTIONS` directive](#341--functions-directive)
     - [3.4.2. `META_*` directive (optional)](#342-meta_-directive-optional)
     - [3.4.3. `BIN_FILE` directive (optional)](#343-bin_file-directive-optional)
-    - [3.4.4. Compiler - Embed::include](#344-compiler---embedinclude)
-    - [3.4.5. `INCLUDE` directive (optional)](#345-include-directive-optional)
+    - [3.4.4. Compiler - Embed::embed](#344-compiler---embedembed)
+    - [3.4.5. `EMBED` directive (optional)](#345-embed-directive-optional)
   - [3.5. `.framework-config` framework configuration file](#35-framework-config-framework-configuration-file)
 - [4. FrameworkLint](#4-frameworklint)
 - [5. Best practices](#5-best-practices)
@@ -182,7 +182,7 @@ You can use special optional directives in src file
 
 - `BIN_FILE` directive
 - `META_*` directive
-- `INCLUDE` directive
+- `EMBED` directive
 
 One mandatory directive:
 
@@ -197,8 +197,8 @@ Eg:
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/binaryExample
 # META_SCRIPT=MinimumRequirements
-# INCLUDE "Backup::file" as backupFile
-# INCLUDE "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
+# EMBED "Backup::file" as backupFile
+# EMBED "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
@@ -208,7 +208,7 @@ sudo "${embed_file_backupFile}" # ...
 ```
 
 The above file header allows to generate the `bin/binaryExample` binary file. It
-uses `INCLUDE` macro to allow the usage of `Backup::file` function as a binary
+uses `EMBED` directive to allow the usage of `Backup::file` function as a binary
 named backupFile that can even be called using `sudo`.
 
 In previous example, the directive `# FUNCTIONS` is injected via the file
@@ -281,12 +281,12 @@ provided, the binary file will be copied to `binDir` without sh extension
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-#### 3.4.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::include
+#### 3.4.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
 
 <!-- markdownlint-restore -->
 
 A new feature in the compiler is the ability to embed files, directories or a
-framework function `Embed::include` allows to:
+framework function `Embed::embed` allows to:
 
 - include a file(binary or not) as md5 encoded, the file can then be extracted
   using the automatically generated method `Embed::extractFile_asName` where
@@ -303,42 +303,42 @@ framework function `Embed::include` allows to:
   to temporary directory and is callable directly using `asName` chosen above
   because path of the temporary directory is in the PATH variable.
 
-![activity diagram to explain how INCLUDE directives are injected](pages/assets/images/compilerEmbedInjection.svg)
+![activity diagram to explain how EMBED directives are injected](pages/assets/images/compilerEmbedInjection.svg)
 
 [activity diagram source code](src/Embed/activityDiagram.puml).
 
-#### 3.4.5. `INCLUDE` directive (optional)
+#### 3.4.5. `EMBED` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax
 can be used:
 
-_Syntax:_ `# INCLUDE "srcFile" AS "targetFile"`
+_Syntax:_ `# EMBED "srcFile" AS "targetFile"`
 
-_Syntax:_ `# INCLUDE "srcDir" AS "targetDir"`
+_Syntax:_ `# EMBED "srcDir" AS "targetDir"`
 
-_Syntax:_ `# INCLUDE namespace::functions AS "myFunction"`
+_Syntax:_ `# EMBED namespace::functions AS "myFunction"`
 
-if `INCLUDE` directive is provided, the file/dir provided will be added inside
-the resulting bin file as a tar gz file(base64 encoded) and automatically
-extracted when executed.
+if `EMBED` directive is provided, the file/dir provided will be added inside the
+resulting bin file as a tar gz file(base64 encoded) and automatically extracted
+when executed.
 
-_`INCLUDE` directive usage example:_
+_`EMBED` directive usage example:_
 
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/myBinary
 # META_SCRIPT=MinimumRequirements
-# INCLUDE "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
-# INCLUDE Backup::file AS "backupFile"
+# EMBED "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
+# EMBED Backup::file AS "backupFile"
 sudo "${embed_file_backupFile}" ...
 "${embed_file_otherNeededBinary}"
 ```
 
-if `INCLUDE` directive is provided, the file/dir provided will be added inside
-the resulting bin file as a tar gz file(base64 encoded) and automatically
-extracted when executed.
+if `EMBED` directive is provided, the file/dir provided will be added inside the
+resulting bin file as a tar gz file(base64 encoded) and automatically extracted
+when executed.
 
-See [compiler - Embed::include]#embed_include) above for more information.
+See [compiler - Embed::embed]#embed_include) above for more information.
 
 ### 3.5. `.framework-config` framework configuration file
 
@@ -375,7 +375,7 @@ This linter is used as one the precommit hooks, see
 
 ## 5. Best practices
 
-`INCLUDE` keyword is really useful to inline configuration files. However to run
+`EMBED` keyword is really useful to inline configuration files. However to run
 framework function using sudo, it is recommended to call the same binary but
 passing options to change the behavior. This way the content of the script file
 does not seem to be obfuscated.

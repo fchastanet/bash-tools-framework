@@ -2,8 +2,8 @@
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/batsHeaders.sh"
 
-# shellcheck source=src/Embed/includeFile.sh
-source "${BATS_TEST_DIRNAME}/includeFile.sh"
+# shellcheck source=src/Embed/embedFile.sh
+source "${BATS_TEST_DIRNAME}/embedFile.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
@@ -12,10 +12,10 @@ setup() {
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
-function Embed::includeFile::binaryFile { #@test
+function Embed::embedFile::binaryFile { #@test
   (
     echo "#!/usr/bin/env bash"
-    Embed::includeFile "${BATS_TEST_DIRNAME}/testsData/binaryFile" "binaryFile"
+    Embed::embedFile "${BATS_TEST_DIRNAME}/testsData/binaryFile" "binaryFile"
   ) >"${BATS_TEST_TMPDIR}/fileIncluded"
   source "${BATS_TEST_TMPDIR}/fileIncluded"
 
@@ -28,10 +28,10 @@ function Embed::includeFile::binaryFile { #@test
   [[ "${embed_file_binaryFile}" = "${BATS_TEST_TMPDIR}/bin/binaryFile" ]]
 }
 
-function Embed::includeFile::normalFile { #@test
+function Embed::embedFile::normalFile { #@test
   (
     echo "#!/usr/bin/env bash"
-    Embed::includeFile "${BATS_TEST_DIRNAME}/testsData/normalFile" "normalFile"
+    Embed::embedFile "${BATS_TEST_DIRNAME}/testsData/normalFile" "normalFile"
   ) >"${BATS_TEST_TMPDIR}/fileIncluded"
   source "${BATS_TEST_TMPDIR}/fileIncluded"
 

@@ -2,8 +2,8 @@
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/batsHeaders.sh"
 
-# shellcheck source=src/Embed/includeDir.sh
-source "${BATS_TEST_DIRNAME}/includeDir.sh"
+# shellcheck source=src/Embed/embedDir.sh
+source "${BATS_TEST_DIRNAME}/embedDir.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
@@ -11,10 +11,10 @@ setup() {
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
-function Embed::includeDir::testsData { #@test
+function Embed::embedDir::testsData { #@test
   (
     echo "#!/usr/bin/env bash"
-    Embed::includeDir "${BATS_TEST_DIRNAME}/testsData" "testsData"
+    Embed::embedDir "${BATS_TEST_DIRNAME}/testsData" "testsData"
   ) >"${BATS_TEST_TMPDIR}/dirIncluded"
   source "${BATS_TEST_TMPDIR}/dirIncluded"
 

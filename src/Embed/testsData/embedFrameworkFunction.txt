@@ -1,5 +1,5 @@
 File::backupFile
 call something
-Embed::includeFile
+Embed::embedFile
 
 hello

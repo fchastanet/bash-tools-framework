@@ -22,7 +22,7 @@ Filters::metadata() {
     }
     {
       line = $0
-      if (/^# (BIN_FILE=|META_[^=]*=|INCLUDE ).*$/) {
+      if (/^# (BIN_FILE=|META_[^=]*=|EMBED ).*$/) {
         write=(invert==0) || (headerProcessed==1)
       } else if (/^#!/) {
         write=invert

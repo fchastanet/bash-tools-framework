@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
-# finds all INCLUDE directives in the given script (stdin)
+# finds all EMBED directives in the given script (stdin)
 # and generates embedded script for each
-# @param {array} injectIncludesEmbeddedNames $1 (passed by reference) list of names that have been embedded
-# @param {array} injectIncludesEmbeddedResources $2 (passed by reference) list of resources that have been embedded
+# @param {array} injectEmbeddedNames $1 (passed by reference) list of names that have been embedded
+# @param {array} injectEmbeddedResources $2 (passed by reference) list of resources that have been embedded
 # @stdin pass the file in which the replacements will be done as stdin
 # @stderr display list of skipped embed when importing the same asName twice
 # @stderr if asName or resource is not correct
 # @stderr if fail to embed resource
 # @stdout embedded resources
-# @return 1 on first include directive with invalid data
-# @return 2 on first include directive embedding that fails
+# @return 1 on first embed directive with invalid data
+# @return 2 on first embed directive embedding that fails
 # @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments
-# @see Embed::includeBashFrameworkFunction
-Embed::injectIncludes() {
-  local -n injectIncludesEmbeddedNames=$1
-  local -n injectIncludesEmbeddedResources=$2
+# @see Embed::embedBashFrameworkFunction
+Embed::inject() {
+  local -n injectEmbeddedNames=$1
+  local -n injectEmbeddedResources=$2
   if [[ -z "${_EMBED_COMPILE_ARGUMENTS+xxx}" ]]; then
     local -a _EMBED_COMPILE_ARGUMENTS=(
       # templateDir : directory from which bash-tpl templates will be searched
@@ -29,25 +29,25 @@ Embed::injectIncludes() {
     )
   fi
 
-  Embed::filterIncludes | {
+  Embed::filter | {
     local line
     local resource
     local asName
     while IFS="" read -r line || [[ -n "${line}" ]]; do
-      Embed::parseInclude "${line}" resource asName || return 1
-      if Array::contains "${asName}" "${injectIncludesEmbeddedNames[@]}"; then
+      Embed::parse "${line}" resource asName || return 1
+      if Array::contains "${asName}" "${injectEmbeddedNames[@]}"; then
         Log::displaySkipped "Embed asName ${asName} has already been imported previously"
         continue
       fi
-      if Array::contains "${resource}" "${injectIncludesEmbeddedResources[@]}"; then
+      if Array::contains "${resource}" "${injectEmbeddedResources[@]}"; then
         Log::displayWarning "Embed resource ${resource} has already been imported previously with a different name, ensure to deduplicate"
       fi
-      if ! Embed::include "${resource}" "${asName}"; then
+      if ! Embed::embed "${resource}" "${asName}"; then
         Log::displayError "Failed to Embed ${asName} with resource ${resource}"
         return 2
       fi
-      injectIncludesEmbeddedNames+=("${asName}")
-      injectIncludesEmbeddedResources+=("${resource}")
+      injectEmbeddedNames+=("${asName}")
+      injectEmbeddedResources+=("${resource}")
     done
   }
 }

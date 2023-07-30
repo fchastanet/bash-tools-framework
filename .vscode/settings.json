@@ -16,7 +16,8 @@
     "bin/runBuildContainer": true,
     "bin/shellcheckLint": true,
     "bin/frameworkLint": true,
-    "bin/test": true
+    "bin/test": true,
+    "pages/assets/images/compilerEmbedInjection.svg": true
   },
   "files.exclude": {
     "_site/**": true

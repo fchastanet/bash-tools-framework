@@ -9,56 +9,57 @@ start
 
 :compiler;
 
-#SpringGreen:Embed::injectIncludes fromFile;
+#SpringGreen:Embed::inject fromFile;
 
-#SpringGreen:Embed::filterIncludes fromFile;
-while (include?) is (<color:green>include found)
+#SpringGreen:Embed::filter fromFile;
+while (embedDirective?) is (<color:green>embed found)
   -[#green]->
-  partition Embed::include #SpringGreen {
-    #SpringGreen:Embed::parseInclude $include
+  partition Embed::embed #SpringGreen {
+    #SpringGreen:Embed::parse $embedDirective
       ~~uses Embed::assertAsName~~
       ~~uses Embed::assertResource~~
     ;
-    if (include directive can be parsed?) is (<color:green>valid directive) then
+    if (embed directive can be parsed?) is (<color:green>valid directive) then
       -[#green]->
-    else (<color:red>invalid include directive)
+    else (<color:red>invalid embed\n<color:red>directive)
       -[#red]->
       end
     endif
     -[#green]->
   }
 
-  if (include name already injected?) then (yes)
+  if (embed name already injected?) then (yes)
     :display skip;
-  elseif (include resources already injected?) then (yes)
-    :display warning;
-  else (<color:green>embed can be included)
-    -[#green]->
-    partition Embed::include #LightGray {
-      #SpringGreen:__Embed::include__ **$resource** **$asName**;
+  else (<color:green>embed resource can be injected)
+    if (embed resources already injected?) then (yes)
+      :display warning;
+    endif
+    partition Embed::embed #LightGray {
+      #SpringGreen:__Embed::embed__ **$resource** **$asName**;
       switch (resource type?)
       case ( resource is a file )
-        #SpringGreen:Embed::includeFile;
+        #SpringGreen:Embed::embedFile;
       case ( resource is a directory )
-        #SpringGreen:Embed::includeDir;
-      case ( resource is a bash framework function )
-        #SpringGreen:Embed::includeFrameworkFunction;
+        #SpringGreen:Embed::embedDir;
+      case ( resource is a bash\nframework function )
+        #SpringGreen:Embed::embedFrameworkFunction;
         #SpringGreen:bin/compile;
-      case ( error )
+      case ( <color:red>error )
         -[#red]->
         end
       endswitch
     }
-    if (include success ?) then
-      -[#green]->
-    else
+    if (embed resource injection failure ?) then
       -[#red]-> <color:red>display error\n<color:red>and return 2;
       end
+    else
+      -[#green]->
     endif
-    -[#green]->
-  endif
 
-endwhile (no more include to process)
+  endif
+  -[#green]-> <color:green>process next embed directive;
+
+endwhile (no more embed directive to process)
 
 :Output result;
 

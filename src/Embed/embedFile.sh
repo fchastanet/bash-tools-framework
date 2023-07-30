@@ -5,7 +5,7 @@
 # @param {string} dirAlias $2
 # @env _COMPILE_ROOT_DIR
 # @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
-Embed::includeFile() {
+Embed::embedFile() {
   local file="$1"
   local fileAlias="$2"
 
@@ -14,6 +14,6 @@ Embed::includeFile() {
     asName="${fileAlias}" \
     fileMode="$(stat -c "%a %n" "${file}" | awk '{print $1}')" \
     targetFile="\${PERSISTENT_TMPDIR:-/tmp}/bin/${fileAlias}" \
-      envsubst <"${_COMPILE_ROOT_DIR}/src/Embed/includeFile.tpl"
+      envsubst <"${_COMPILE_ROOT_DIR}/src/Embed/embedFile.tpl"
   )
 }

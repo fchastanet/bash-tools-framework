@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Find all INCLUDE directives
+# @param {array} options $@ the list of options in which srcDir options
+# will be searched
 # @env getSrcDirsFromOptionsRegexp the regexp to use to detect the srcDir
 #   arguments (default value: '^--src-dir|-s$'
 Embed::getSrcDirsFromOptions() {

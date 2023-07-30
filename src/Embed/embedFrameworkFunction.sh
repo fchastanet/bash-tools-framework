@@ -5,7 +5,7 @@
 # function
 # Note:
 #   You cannot call this function directly
-#   it should be called using '# INCLUDE ... AS ...' annotation
+#   it should be called using '# EMBED ... AS ...' annotation
 # @param {string} functionToCall $1
 # @param {string} functionAlias $2
 # @output the generated bin file extractor
@@ -24,7 +24,7 @@
 # )
 # @env _COMPILE_ROOT_DIR
 # @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
-Embed::includeFrameworkFunction() {
+Embed::embedFrameworkFunction() {
   local functionToCall="$1"
   local functionAlias="$2"
 
@@ -33,9 +33,9 @@ Embed::includeFrameworkFunction() {
 
     # create binFile
     binSrcFile="$(mktemp -p "${TMPDIR:-/tmp}" \
-      -t bash-tools-includeFrameworkFunction-binSrcFile-XXXXXX)"
+      -t bash-tools-embedFrameworkFunction-binSrcFile-XXXXXX)"
     binFileExtractor="$(mktemp -p "${TMPDIR:-/tmp}" \
-      -t bash-tools-includeFrameworkFunction-binFileExtractor-XXXXXX)"
+      -t bash-tools-embedFrameworkFunction-binFileExtractor-XXXXXX)"
 
     # generate bin src file content
     (
@@ -46,7 +46,7 @@ Embed::includeFrameworkFunction() {
         "${_COMPILE_ROOT_DIR}/bin/compile" \
         --bin-file "${binSrcFile}" \
         "${_EMBED_COMPILE_ARGUMENTS[@]}" \
-        "${_COMPILE_ROOT_DIR}/src/Embed/includeFrameworkFunction.binFile.tpl"
+        "${_COMPILE_ROOT_DIR}/src/Embed/embedFrameworkFunction.binFile.tpl"
     )
 
     # compute binFile md5 checksum to allow multiple binary with different file versions
@@ -62,7 +62,7 @@ Embed::includeFrameworkFunction() {
         "${_COMPILE_ROOT_DIR}/bin/compile" \
         --bin-file "${binFileExtractor}" \
         "${_EMBED_COMPILE_ARGUMENTS[@]}" \
-        "${_COMPILE_ROOT_DIR}/src/Embed/includeFrameworkFunction.tpl"
+        "${_COMPILE_ROOT_DIR}/src/Embed/embedFrameworkFunction.tpl"
     )
 
     cat "${binFileExtractor}"

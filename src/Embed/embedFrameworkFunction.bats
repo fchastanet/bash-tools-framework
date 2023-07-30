@@ -3,8 +3,8 @@
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/batsHeaders.sh"
 
-# shellcheck source=src/Embed/includeFrameworkFunction.sh
-source "${srcDir}/Embed/includeFrameworkFunction.sh"
+# shellcheck source=src/Embed/embedFrameworkFunction.sh
+source "${srcDir}/Embed/embedFrameworkFunction.sh"
 # shellcheck source=src/Embed/extractFileFromMd5.sh
 source "${srcDir}/Embed/extractFileFromMd5.sh"
 # shellcheck source=src/Env/pathPrepend.sh
@@ -16,7 +16,7 @@ setup() {
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
-function Embed::includeFrameworkFunction { #@test
+function Embed::embedFrameworkFunction { #@test
   local -a _EMBED_COMPILE_ARGUMENTS=(
     # templateDir : directory from which bash-tpl templates will be searched
     --template-dir "${srcDir}/_includes"
@@ -28,10 +28,10 @@ function Embed::includeFrameworkFunction { #@test
     --src-dir "${srcDir}"
   )
 
-  Embed::includeFrameworkFunction \
+  Embed::embedFrameworkFunction \
     "Filters::bashFrameworkFunctions" \
     "bashFrameworkFunctions" \
-    >"${BATS_TEST_TMPDIR}/functionIncluded"
+    >"${BATS_TEST_TMPDIR}/functionEmbedded"
 
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
   export TMPDIR="${BATS_TEST_TMPDIR}"
@@ -39,7 +39,7 @@ function Embed::includeFrameworkFunction { #@test
   export KEEP_TEMP_FILES=1
 
   # shellcheck source=/dev/null
-  source "${BATS_TEST_TMPDIR}/functionIncluded"
+  source "${BATS_TEST_TMPDIR}/functionEmbedded"
 
   # shellcheck disable=SC2154
   [[ -x "${embed_function_BashFrameworkFunctions}" ]]
@@ -48,10 +48,10 @@ function Embed::includeFrameworkFunction { #@test
 
   command -v bashFrameworkFunctions || return 1
   bashFrameworkFunctions \
-    "${BATS_TEST_DIRNAME}/testsData/includeFrameworkFunction.txt" \
-    >"${BATS_TEST_TMPDIR}/includeFrameworkFunction.result.txt"
+    "${BATS_TEST_DIRNAME}/testsData/embedFrameworkFunction.txt" \
+    >"${BATS_TEST_TMPDIR}/embedFrameworkFunction.result.txt"
 
   diff \
-    "${BATS_TEST_TMPDIR}/includeFrameworkFunction.result.txt" \
-    "${BATS_TEST_DIRNAME}/testsData/includeFrameworkFunction.expected.txt"
+    "${BATS_TEST_TMPDIR}/embedFrameworkFunction.result.txt" \
+    "${BATS_TEST_DIRNAME}/testsData/embedFrameworkFunction.expected.txt"
 }

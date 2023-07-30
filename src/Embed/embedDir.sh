@@ -5,7 +5,7 @@
 # @param {string} dirAlias $2
 # @env _COMPILE_ROOT_DIR
 # @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
-Embed::includeDir() {
+Embed::embedDir() {
   local dir="$1"
   local dirAlias="$2"
 
@@ -16,6 +16,6 @@ Embed::includeDir() {
     )" \
     asName="${dirAlias}" \
     targetDir="\${TMPDIR:-/tmp}/${dirAlias}" \
-      envsubst <"${_COMPILE_ROOT_DIR}/src/Embed/includeDir.tpl"
+      envsubst <"${_COMPILE_ROOT_DIR}/src/Embed/embedDir.tpl"
   )
 }

@@ -2,13 +2,13 @@
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
-# shellcheck source=src/Embed/parseInclude.sh
-source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/Embed/parseInclude.sh"
+# shellcheck source=src/Embed/parse.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/Embed/parse.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/Filters/removeExternalQuotes.sh"
 
-# INCLUDE "srcDir" AS "targetDir"
-# INCLUDE namespace::functions AS "myFunction"
+# EMBED "srcDir" AS "targetDir"
+# EMBED namespace::functions AS "myFunction"
 
 assertAsNameReturnStatus=0
 assertResourceReturnStatus=0
@@ -31,10 +31,10 @@ teardown() {
   unset -f Embed::assertResource
 }
 
-function Embed::parseInclude::targetFile::simple { #@test
+function Embed::parse::targetFile::simple { #@test
   local file=""
   local asName=""
-  Embed::parseInclude '# INCLUDE "srcFile" AS "targetFile"' file asName >${BATS_TEST_TMPDIR}/result 2>&1
+  Embed::parse '# EMBED "srcFile" AS "targetFile"' file asName >${BATS_TEST_TMPDIR}/result 2>&1
   [[ "${file}" = 'srcFile' ]]
   [[ "${asName}" = 'targetFile' ]]
   run cat "${BATS_TEST_TMPDIR}/result"
@@ -43,10 +43,10 @@ function Embed::parseInclude::targetFile::simple { #@test
   assert_line --index 1 "Embed::assertResource called"
 }
 
-function Embed::parseInclude::targetFile::withVars { #@test
+function Embed::parse::targetFile::withVars { #@test
   local file=""
   local asName=""
-  Embed::parseInclude $'# INCLUDE "${BATS_TEST_DIRNAME}/test" AS targetFile' file asName >${BATS_TEST_TMPDIR}/result 2>&1
+  Embed::parse $'# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile' file asName >${BATS_TEST_TMPDIR}/result 2>&1
   [[ "${file}" = $'${BATS_TEST_DIRNAME}/test' ]]
   [[ "${asName}" = 'targetFile' ]]
   run cat "${BATS_TEST_TMPDIR}/result"
@@ -55,11 +55,11 @@ function Embed::parseInclude::targetFile::withVars { #@test
   assert_line --index 1 "Embed::assertResource called"
 }
 
-function Embed::parseInclude::invalidAsName { #@test
+function Embed::parse::invalidAsName { #@test
   assertAsNameReturnStatus=1
   local file=""
   local asName=""
-  Embed::parseInclude $'# INCLUDE "${BATS_TEST_DIRNAME}/test" AS targetFile0-7ù' \
+  Embed::parse $'# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile0-7ù' \
     file asName >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   [[ "${file}" = $'${BATS_TEST_DIRNAME}/test' ]]
@@ -69,11 +69,11 @@ function Embed::parseInclude::invalidAsName { #@test
   assert_output "Embed::assertAsName called"
 }
 
-function Embed::parseInclude::invalidResource { #@test
+function Embed::parse::invalidResource { #@test
   assertResourceReturnStatus=1
   local file=""
   local asName=""
-  Embed::parseInclude $'# INCLUDE "invalid" AS targetFile' \
+  Embed::parse $'# EMBED "invalid" AS targetFile' \
     file asName >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "2" ]]
   [[ "${file}" = 'invalid' ]]

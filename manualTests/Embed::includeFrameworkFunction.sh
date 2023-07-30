@@ -24,8 +24,8 @@ export TMPDIR
 
 # shellcheck source=src/Env/pathPrepend.sh
 source "${srcDir}/Env/pathPrepend.sh"
-# shellcheck source=src/Embed/includeFrameworkFunction.sh
-source "${srcDir}/Embed/includeFrameworkFunction.sh"
+# shellcheck source=src/Embed/embedFrameworkFunction.sh
+source "${srcDir}/Embed/embedFrameworkFunction.sh"
 # shellcheck source=src/Embed/extractFileFromMd5.sh
 source "${srcDir}/Embed/extractFileFromMd5.sh"
 # shellcheck source=src/_includes/_commonHeader.sh
@@ -54,18 +54,18 @@ declare -agx _COMPILE_FILE_ARGUMENTS=(
 # shellcheck disable=SC2031
 export KEEP_TEMP_FILES=1
 
-Embed::includeFrameworkFunction \
+Embed::embedFrameworkFunction \
   "Filters::bashFrameworkFunctions" \
   "bashFrameworkFunctions" \
-  >"${BATS_TEST_TMPDIR}/functionIncluded"
+  >"${BATS_TEST_TMPDIR}/functionEmbedded"
 
 # shellcheck source=/dev/null
-source "${BATS_TEST_TMPDIR}/functionIncluded"
+source "${BATS_TEST_TMPDIR}/functionEmbedded"
 
 bashFrameworkFunctions \
-  "${srcDir}/Embed/testsData/includeFrameworkFunction.txt" \
-  >"${BATS_TEST_TMPDIR}/includeFrameworkFunction.result.txt"
+  "${srcDir}/Embed/testsData/embedFrameworkFunction.txt" \
+  >"${BATS_TEST_TMPDIR}/embedFrameworkFunction.result.txt"
 
 diff \
-  "${BATS_TEST_TMPDIR}/includeFrameworkFunction.result.txt" \
-  "${BATS_TEST_DIRNAME}/testsData/includeFrameworkFunction.expected.txt"
+  "${BATS_TEST_TMPDIR}/embedFrameworkFunction.result.txt" \
+  "${BATS_TEST_DIRNAME}/testsData/embedFrameworkFunction.expected.txt"

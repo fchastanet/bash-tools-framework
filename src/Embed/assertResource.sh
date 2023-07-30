@@ -6,7 +6,7 @@
 # @return 1 on invalid file or directory
 # @return 2 on invalid bash framework function
 # @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments
-# @see Embed::includeBashFrameworkFunction
+# @see Embed::embedBashFrameworkFunction
 Embed::assertResource() {
   local resource="$1"
   local -a srcDirs

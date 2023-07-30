@@ -1,12 +1,11 @@
 # Todo
 
-- [NOW](#now)
 - [1. Improve UT](#1-improve-ut)
 - [2. merge bash-tools into bash-tools-framework](#2-merge-bash-tools-into-bash-tools-framework)
 - [3. Framework functions changes](#3-framework-functions-changes)
 - [4. Update Bash-tools-framework dependencies](#4-update-bash-tools-framework-dependencies)
 - [5. Compiler and bash Object oriented](#5-compiler-and-bash-object-oriented)
-  - [5.1. Embed::include](#51-embedinclude)
+  - [5.1. Embed::embed](#51-embedembed)
   - [5.2. FrameworkLint](#52-frameworklint)
 - [6. Binaries](#6-binaries)
   - [6.1. BashDoc](#61-bashdoc)
@@ -19,10 +18,6 @@
   - [7.3. Options/Args management](#73-optionsargs-management)
 - [8. best practices](#8-best-practices)
   - [8.1. Robustness](#81-robustness)
-
-## NOW
-
-- rename INCLUDE to EMBED
 
 ## 1. Improve UT
 
@@ -84,9 +79,9 @@ TODOs linked to bin/compiler:
 - check if nested namespaces are supported
 - get rid of `__all.sh` files, useless because of compiler auto include
 
-### 5.1. Embed::include
+### 5.1. Embed::embed
 
-- implement INCLUDE AS annotation
+- implement EMBED AS annotation
   - new bash-framework function to call bash-tpl (embedded)
   - replace all envsubst by the usage of bash-tpl
 
@@ -98,20 +93,20 @@ encapsulate a dependent binary(bash or not) inside the executable.
     assets
   - tar the entire directory
   - create a bootstrap script able to untar and execute the entrypoint
-- add INCLUDE meta data
-- INCLUDE of a function of the framework will automatically generate a bin file
+- add EMBED meta data
+- EMBED of a function of the framework will automatically generate a bin file
   called with the name of the function and calling this function
-- using INCLUDE supposes to unsure the targeted binary has been constructed
-- using INCLUDE with a framework function (eg: Backup::file) will first
-  construct a bin file using that function directly
+- using EMBED supposes to unsure the targeted binary has been constructed
+- using EMBED with a framework function (eg: Backup::file) will first construct
+  a bin file using that function directly
 - inject Embed::extract\_${asName} just before the use of the alias(lazy
   loading)
-  - remove the call in `src/Embed/includeFileFunction.tpl`
+  - remove the call in `src/Embed/embedFileFunction.tpl`
 
 eg: Backup::file so it would allow to use `sudo Backup::file ...`
 
 ```bash
-# INCLUDE Backup::file
+# EMBED Backup::file
 ```
 
 ### 5.2. FrameworkLint
@@ -119,12 +114,12 @@ eg: Backup::file so it would allow to use `sudo Backup::file ...`
 - check no use of ${TMPDIR} without default value
 - check if 2 files have the same BINARY_FILE target
 - refact `src/_binaries/frameworkLint.sh` formatter for plain or checkstyle
-- if sudo called on Backup::file without using INCLUDE
-- if INCLUDE is used but the binary is not used
+- if sudo called on Backup::file without using EMBED
+- if EMBED is used but the binary is not used
 - ensure BIN_FILE is provided
-- INCLUDE include one file, rest of the script is as usual
+- EMBED include one file, rest of the script is as usual
   - function allow to unzip the file
-- INCLUDE "as" names should be unique + some forbidden names (existing bash
+- EMBED "as" names should be unique + some forbidden names (existing bash
   functions)
 
 ## 6. Binaries
