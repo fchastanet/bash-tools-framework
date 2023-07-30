@@ -22,7 +22,7 @@ declare -a params=(--src-dir "${SRC_DIR}" --bin-dir "${BIN_DIR}" --root-dir "${R
 if (($# == 0)); then
   find "${SRC_DIR}/_binaries" -name "*.sh" -print |
     (grep -v -E '/testsData/' || true) |
-    xargs -n1 -P8 -I{} \
+    xargs -L1 -P8 -I{} \
       "${FRAMEWORK_DIR}/bin/compile" "{}" "${params[@]}"
 else
   for file in "$@"; do
