@@ -9,8 +9,8 @@ source "${srcDir}/Assert/fileWritable.sh"
 teardown() {
   unstub_all
   unset -f Assert::validPath
-  rm -f "${BATS_RUN_TMPDIR}/myFile" || true
-  rm -Rf "${BATS_RUN_TMPDIR}/myDir" || true
+  rm -f "${BATS_TEST_TMPDIR}/myFile" || true
+  rm -Rf "${BATS_TEST_TMPDIR}/myDir" || true
 }
 
 function Assert::fileWritable::invalidPath { #@test
@@ -23,7 +23,7 @@ function Assert::fileWritable::invalidPath { #@test
 }
 
 function Assert::fileWritable::validPathDirNotWritable { #@test
-  local dir="${BATS_RUN_TMPDIR}/myDir"
+  local dir="${BATS_TEST_TMPDIR}/myDir"
   mkdir -p "${dir}"
   chmod 444 "${dir}"
   local file="${dir}/myFile"
@@ -36,7 +36,7 @@ function Assert::fileWritable::validPathDirNotWritable { #@test
 }
 
 function Assert::fileWritable::valid { #@test
-  local dir="${BATS_RUN_TMPDIR}/myDir"
+  local dir="${BATS_TEST_TMPDIR}/myDir"
   mkdir -p "${dir}"
   local file="${dir}/myFile"
   Assert::validPath() {

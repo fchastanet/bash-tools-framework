@@ -43,14 +43,14 @@ function Profiles::allDepsRecursiveMissingDependencies { #@test
     Profiles::allDepsRecursive \
       "${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts" "your software selection" \
       "Install5"
-    declare -p allDepsResultSeen >"${BATS_RUN_TMPDIR}/allDepsResultSeen.txt"
-    declare -p allDepsResult >"${BATS_RUN_TMPDIR}/allDepsResult.txt"
+    declare -p allDepsResultSeen >"${BATS_TEST_TMPDIR}/allDepsResultSeen.txt"
+    declare -p allDepsResult >"${BATS_TEST_TMPDIR}/allDepsResult.txt"
   }
 
   run testWithArrays
   assert_line --index 0 --partial "SKIPPED - ${BATS_TEST_DIRNAME}/testsData/allDepsRecursive/installScripts/Install6MissingDependencies.sh does not define the function installScripts_Install6MissingDependencies_dependencies"
   assert_line --index 1 --partial "INFO    - Install5 is a dependency of your software selection"
 
-  [[ "$(cat "${BATS_RUN_TMPDIR}/allDepsResultSeen.txt")" = 'declare -A allDepsResultSeen=([Install5]="stored" )' ]]
-  [[ "$(cat "${BATS_RUN_TMPDIR}/allDepsResult.txt")" = 'declare -a allDepsResult=([0]="Install5")' ]]
+  [[ "$(cat "${BATS_TEST_TMPDIR}/allDepsResultSeen.txt")" = 'declare -A allDepsResultSeen=([Install5]="stored" )' ]]
+  [[ "$(cat "${BATS_TEST_TMPDIR}/allDepsResult.txt")" = 'declare -a allDepsResult=([0]="Install5")' ]]
 }

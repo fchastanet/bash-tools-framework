@@ -11,12 +11,12 @@ source "${srcDir}/Env/load.sh"
 source "${srcDir}/Log/__all.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
-  mkdir -p "${BATS_RUN_TMPDIR}/home/.bash-tools/cliProfiles"
-  cp "${BATS_TEST_DIRNAME}/testsData/cliProfiles/default.sh" "${BATS_RUN_TMPDIR}/home/.bash-tools/cliProfiles"
-  mkdir -p "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn"
-  cp "${BATS_TEST_DIRNAME}/testsData/dsn/"* "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn"
-  export HOME="${BATS_RUN_TMPDIR}/home"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
+  mkdir -p "${BATS_TEST_TMPDIR}/home/.bash-tools/cliProfiles"
+  cp "${BATS_TEST_DIRNAME}/testsData/cliProfiles/default.sh" "${BATS_TEST_TMPDIR}/home/.bash-tools/cliProfiles"
+  mkdir -p "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn"
+  cp "${BATS_TEST_DIRNAME}/testsData/dsn/"* "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn"
+  export HOME="${BATS_TEST_TMPDIR}/home"
 }
 
 teardown() {
@@ -24,7 +24,7 @@ teardown() {
 }
 
 function Conf::loadAbsoluteFile { #@test
-  Conf::load "anyFolder" "${BATS_RUN_TMPDIR}/home/.bash-tools/cliProfiles/default.sh"
+  Conf::load "anyFolder" "${BATS_TEST_TMPDIR}/home/.bash-tools/cliProfiles/default.sh"
   # shellcheck disable=SC2154
   [[ "${finalUserArg}" = "www-data" ]]
   # shellcheck disable=SC2154

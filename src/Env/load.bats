@@ -3,7 +3,7 @@
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   unset BASH_FRAMEWORK_INITIALIZED
 }
 
@@ -19,15 +19,15 @@ function Env::load::alreadyInitialized { #@test
 }
 
 function Env::load::forceLoadNonExistentFile { #@test
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_RUN_TMPDIR}/notExists"
+  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_TMPDIR}/notExists"
   run Env::load
   assert_success
-  assert_output --partial "WARN    - env file not not found - ${BATS_RUN_TMPDIR}/notExists"
+  assert_output --partial "WARN    - env file not not found - ${BATS_TEST_TMPDIR}/notExists"
 }
 
 function Env::load::forceLoadExistentFile { #@test
-  cp "${BATS_TEST_DIRNAME}/testsData/.env" "${BATS_RUN_TMPDIR}/.env"
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_RUN_TMPDIR}/.env"
+  cp "${BATS_TEST_DIRNAME}/testsData/.env" "${BATS_TEST_TMPDIR}/.env"
+  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_TMPDIR}/.env"
   unset HOME
   Env::load || return 1
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
@@ -38,9 +38,9 @@ function Env::load::forceLoadExistentFile { #@test
 }
 
 function Env::load::loadRootDirConfEnvFile { #@test
-  mkdir -p "${BATS_RUN_TMPDIR}/rootDir/conf"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_RUN_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_RUN_TMPDIR}/rootDir"
+  mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
+  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   unset HOME
   Env::load || return 1
   echo "${BASH_FRAMEWORK_LOG_FILE}"
@@ -52,12 +52,12 @@ function Env::load::loadRootDirConfEnvFile { #@test
 }
 
 function Env::load::loadHomeEnvFileOverrideRootDirConfEnvFile { #@test
-  mkdir -p "${BATS_RUN_TMPDIR}/rootDir/conf"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_RUN_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_RUN_TMPDIR}/rootDir"
-  mkdir -p "${BATS_RUN_TMPDIR}/home"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_RUN_TMPDIR}/home/.env"
-  export HOME="${BATS_RUN_TMPDIR}/home"
+  mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
+  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  mkdir -p "${BATS_TEST_TMPDIR}/home"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_TEST_TMPDIR}/home/.env"
+  export HOME="${BATS_TEST_TMPDIR}/home"
 
   Env::load || return 1
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
@@ -68,14 +68,14 @@ function Env::load::loadHomeEnvFileOverrideRootDirConfEnvFile { #@test
 }
 
 function Env::load::forceLoadExistentFileWithHomeAndRootEnvFiles { #@test
-  mkdir -p "${BATS_RUN_TMPDIR}/rootDir/conf"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_RUN_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_RUN_TMPDIR}/rootDir"
-  mkdir -p "${BATS_RUN_TMPDIR}/home"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_RUN_TMPDIR}/home/.env"
-  export HOME="${BATS_RUN_TMPDIR}/home"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envForced" "${BATS_RUN_TMPDIR}/.env"
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_RUN_TMPDIR}/.env"
+  mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
+  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  mkdir -p "${BATS_TEST_TMPDIR}/home"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_TEST_TMPDIR}/home/.env"
+  export HOME="${BATS_TEST_TMPDIR}/home"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envForced" "${BATS_TEST_TMPDIR}/.env"
+  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_TMPDIR}/.env"
 
   Env::load || return 1
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
@@ -86,14 +86,14 @@ function Env::load::forceLoadExistentFileWithHomeAndRootEnvFiles { #@test
 }
 
 function Env::load::overrideWithParameter { #@test
-  mkdir -p "${BATS_RUN_TMPDIR}/rootDir/conf"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_RUN_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_RUN_TMPDIR}/rootDir"
-  mkdir -p "${BATS_RUN_TMPDIR}/home"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_RUN_TMPDIR}/home/.env"
-  export HOME="${BATS_RUN_TMPDIR}/home"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envForced" "${BATS_RUN_TMPDIR}/.env"
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_RUN_TMPDIR}/.env"
+  mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
+  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  mkdir -p "${BATS_TEST_TMPDIR}/home"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_TEST_TMPDIR}/home/.env"
+  export HOME="${BATS_TEST_TMPDIR}/home"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envForced" "${BATS_TEST_TMPDIR}/.env"
+  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_TMPDIR}/.env"
 
   Env::load "${BATS_TEST_DIRNAME}/testsData/.envParam" || return 1
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
@@ -116,9 +116,9 @@ function Env::load::noEnvFilesDefaultValues { #@test
 }
 
 function Env::load::loadRootDirConfEnvFileAndOverride { #@test
-  mkdir -p "${BATS_RUN_TMPDIR}/rootDir/conf"
-  cp "${BATS_TEST_DIRNAME}/testsData/.envOverride" "${BATS_RUN_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_RUN_TMPDIR}/rootDir"
+  mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
+  cp "${BATS_TEST_DIRNAME}/testsData/.envOverride" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
+  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   unset HOME
   export OVERRIDE_BASH_FRAMEWORK_DISPLAY_LEVEL=overriddenDisplayLevel
   export OVERRIDE_BASH_FRAMEWORK_LOG_LEVEL=overriddenLogLevel

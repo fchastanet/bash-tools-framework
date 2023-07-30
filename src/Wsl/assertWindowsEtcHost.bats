@@ -41,8 +41,8 @@ function Wsl::assertWindowsEtcHost::hostNotFound { #@test
 }
 
 function Wsl::assertWindowsEtcHost::hostFound { #@test
-  mkdir -p "${BATS_RUN_TMPDIR}/Windows/System32/drivers/etc"
-  touch "${BATS_RUN_TMPDIR}/Windows/System32/drivers/etc/hosts"
+  mkdir -p "${BATS_TEST_TMPDIR}/Windows/System32/drivers/etc"
+  touch "${BATS_TEST_TMPDIR}/Windows/System32/drivers/etc/hosts"
   dos2unix() {
     return 0
   }
@@ -52,7 +52,7 @@ function Wsl::assertWindowsEtcHost::hostFound { #@test
   Assert::fileExists() {
     return 0
   }
-  BASE_MNT_C="${BATS_RUN_TMPDIR}" run Wsl::assertWindowsEtcHost "host"
+  BASE_MNT_C="${BATS_TEST_TMPDIR}" run Wsl::assertWindowsEtcHost "host"
   assert_success
   assert_output ""
 }

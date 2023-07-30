@@ -10,7 +10,7 @@ source "${srcDir}/Assert/fileWritable.sh"
 source "${srcDir}/Assert/validPath.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   logFile=""$(mktemp -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)""
 
   unset HOME

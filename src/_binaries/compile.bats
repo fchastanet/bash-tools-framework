@@ -20,7 +20,7 @@ function compile() {
     # templateDir : directory from which bash-tpl templates will be searched
     --template-dir "${BATS_TEST_DIRNAME}/testsData/templates"
     # binDir      : fallback bin directory in case BIN_FILE has not been provided
-    --bin-dir "${BATS_RUN_TMPDIR}"
+    --bin-dir "${BATS_TEST_TMPDIR}"
     # rootDir     : directory used to compute src file relative path
     --root-dir "${ROOT_DIR}"
     # srcDirs : (optional) you can provide multiple directories
@@ -32,23 +32,23 @@ function compile() {
 function compile::Simple { #@test
   run compile "simpleBinary.sh"
   assert_success
-  [[ -f "${BATS_RUN_TMPDIR}/simpleBinary" ]]
-  [[ -x "${BATS_RUN_TMPDIR}/simpleBinary" ]]
-  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_RUN_TMPDIR}/simpleBinary"
+  [[ -f "${BATS_TEST_TMPDIR}/simpleBinary" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/simpleBinary" ]]
+  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_TEST_TMPDIR}/simpleBinary"
 }
 
 function compile::Meta { #@test
   run compile "meta.sh"
   assert_success
-  [[ -f "${BATS_RUN_TMPDIR}/meta" ]]
-  [[ -x "${BATS_RUN_TMPDIR}/meta" ]]
-  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/meta" "${BATS_RUN_TMPDIR}/meta"
+  [[ -f "${BATS_TEST_TMPDIR}/meta" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/meta" ]]
+  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/meta" "${BATS_TEST_TMPDIR}/meta"
 }
 
 function compile::IncludeSimpleFile { #@test
   run compile "simpleBinary.sh"
   assert_success
-  [[ -f "${BATS_RUN_TMPDIR}/simpleBinary" ]]
-  [[ -x "${BATS_RUN_TMPDIR}/simpleBinary" ]]
-  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_RUN_TMPDIR}/simpleBinary"
+  [[ -f "${BATS_TEST_TMPDIR}/simpleBinary" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/simpleBinary" ]]
+  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_TEST_TMPDIR}/simpleBinary"
 }

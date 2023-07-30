@@ -286,8 +286,8 @@ functionToCall='<%% echo "${functionToCall}" %>'
 ### 3.1. use of default temp directory created by bats
 
 Instead of creating yourself your temp directory, you can use the special
-variable `BATS_RUN_TMPDIR`, this directory is automatically destroyed at the end
-of the test except if the option `--no-tempdir-cleanup` is provided to bats
+variable `BATS_TEST_TMPDIR`, this directory is automatically destroyed at the
+end of the test except if the option `--no-tempdir-cleanup` is provided to bats
 command.
 
 **Exception**: if you are testing bash traps, you would need to create your own

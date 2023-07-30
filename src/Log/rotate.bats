@@ -12,7 +12,7 @@ source "${srcDir}/Assert/validPath.sh"
 declare logFile
 setup() {
   logFile="$(mktemp -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   export BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_DEBUG}
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
 }
@@ -22,9 +22,9 @@ teardown() {
 }
 
 function Log::rotate::noLogFile { #@test
-  run Log::rotate "${BATS_RUN_TMPDIR}/unknownLogFile" "1"
+  run Log::rotate "${BATS_TEST_TMPDIR}/unknownLogFile" "1"
   assert_success
-  assert_output --partial "SKIPPED - Log file ${BATS_RUN_TMPDIR}/unknownLogFile doesn't exist yet"
+  assert_output --partial "SKIPPED - Log file ${BATS_TEST_TMPDIR}/unknownLogFile doesn't exist yet"
 }
 
 function Log::rotate::oneLogFile { #@test

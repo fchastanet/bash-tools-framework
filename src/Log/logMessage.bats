@@ -13,7 +13,7 @@ source "${srcDir}/Assert/validPath.sh"
 
 declare logFile
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   logFile=""$(mktemp -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)""
 }
 
@@ -24,12 +24,12 @@ teardown() {
 
 function Log::logMessage::logFileNotExistingYet { #@test
   stub date '* : echo "dateMocked"'
-  export BASH_FRAMEWORK_LOG_FILE="${BATS_RUN_TMPDIR}/logFile"
+  export BASH_FRAMEWORK_LOG_FILE="${BATS_TEST_TMPDIR}/logFile"
   export BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_DEBUG
 
   Log::logMessage "LEVEL" "message"
-  [[ -f "${BATS_RUN_TMPDIR}/logFile" ]]
-  [[ "$(cat "${BATS_RUN_TMPDIR}/logFile")" = "dateMocked|  LEVEL|message" ]]
+  [[ -f "${BATS_TEST_TMPDIR}/logFile" ]]
+  [[ "$(cat "${BATS_TEST_TMPDIR}/logFile")" = "dateMocked|  LEVEL|message" ]]
 }
 
 function Log::logMessage::debugLevel { #@test

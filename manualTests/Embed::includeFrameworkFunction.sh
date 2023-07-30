@@ -2,7 +2,7 @@
 
 set -x
 CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
-BATS_RUN_TMPDIR=/tmp/bats
+BATS_TEST_TMPDIR=/tmp/bats
 mkdir -p /tmp/bats
 
 # shellcheck disable=SC2034
@@ -45,7 +45,7 @@ declare -agx _COMPILE_FILE_ARGUMENTS=(
   # templateDir : directory from which bash-tpl templates will be searched
   --template-dir "${srcDir}/_includes"
   # binDir      : fallback bin directory in case BIN_FILE has not been provided
-  --bin-dir "${BATS_RUN_TMPDIR}"
+  --bin-dir "${BATS_TEST_TMPDIR}"
   # rootDir     : directory used to compute src file relative path
   --root-dir "${ROOT_DIR}"
   # srcDirs : (optional) you can provide multiple directories
@@ -57,15 +57,15 @@ export KEEP_TEMP_FILES=1
 Embed::includeFrameworkFunction \
   "Filters::bashFrameworkFunctions" \
   "bashFrameworkFunctions" \
-  >"${BATS_RUN_TMPDIR}/functionIncluded"
+  >"${BATS_TEST_TMPDIR}/functionIncluded"
 
 # shellcheck source=/dev/null
-source "${BATS_RUN_TMPDIR}/functionIncluded"
+source "${BATS_TEST_TMPDIR}/functionIncluded"
 
 bashFrameworkFunctions \
   "${srcDir}/Embed/testsData/includeFrameworkFunction.txt" \
-  >"${BATS_RUN_TMPDIR}/includeFrameworkFunction.result.txt"
+  >"${BATS_TEST_TMPDIR}/includeFrameworkFunction.result.txt"
 
 diff \
-  "${BATS_RUN_TMPDIR}/includeFrameworkFunction.result.txt" \
+  "${BATS_TEST_TMPDIR}/includeFrameworkFunction.result.txt" \
   "${BATS_TEST_DIRNAME}/testsData/includeFrameworkFunction.expected.txt"

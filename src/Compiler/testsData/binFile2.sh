@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# BIN_FILE=${BATS_RUN_TMPDIR}/bin/awkLint
+# BIN_FILE=${BATS_TEST_TMPDIR}/bin/awkLint
 # META_VAR=VALUE
 # META_VAR2=VALUE2
-# BIN_FILE=${BATS_RUN_TMPDIR}/bin/awkLint2
+# BIN_FILE=${BATS_TEST_TMPDIR}/bin/awkLint2
 
 other code
 

@@ -22,14 +22,11 @@
 
 ## NOW
 
-- github activity diagram
-- report shellcheck feature request about local variables
 - rename INCLUDE to EMBED
 
 ## 1. Improve UT
 
-- replace BATS_RUN_TMPDIR with BATS_TEST_TMPDIR ?
-  - remove TMPDIR overload as it could impact bats
+- remove TMPDIR overload as it could impact bats ?
 - ensure filters functions never fails (check bashFrameworkFunctions) and ensure
   filters functions are not used as Assert function
 - bats assert that no new variable pollute environment to check that every

@@ -11,7 +11,7 @@ source "${srcDir}/Database/skipColumnNames.sh"
 source "${srcDir}/Database/query.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
 teardown() {

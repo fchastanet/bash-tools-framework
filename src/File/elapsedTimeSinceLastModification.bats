@@ -7,7 +7,7 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/File/elapsedTimeSinceLastModification.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
 function File::elapsedTimeSinceLastModificationNoFileProvided { #@test
@@ -17,14 +17,14 @@ function File::elapsedTimeSinceLastModificationNoFileProvided { #@test
 }
 
 function File::elapsedTimeSinceLastModificationFileNotExists { #@test
-  run File::elapsedTimeSinceLastModification "${BATS_RUN_TMPDIR}/fileNotExists"
+  run File::elapsedTimeSinceLastModification "${BATS_TEST_TMPDIR}/fileNotExists"
   assert_failure 1
   assert_output ""
 }
 
 function File::elapsedTimeSinceLastModification { #@test
-  touch -d "1 hour ago" "${BATS_RUN_TMPDIR}/fileExists"
-  run File::elapsedTimeSinceLastModification "${BATS_RUN_TMPDIR}/fileExists"
+  touch -d "1 hour ago" "${BATS_TEST_TMPDIR}/fileExists"
+  run File::elapsedTimeSinceLastModification "${BATS_TEST_TMPDIR}/fileExists"
   assert_success
   # shellcheck disable=SC2154
   ((output >= 3600 && output <= 3602))

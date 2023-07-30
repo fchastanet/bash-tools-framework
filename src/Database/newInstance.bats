@@ -15,13 +15,13 @@ source "${srcDir}/Conf/getAbsoluteFile.sh"
 source "${srcDir}/File/concatenatePath.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
-  mkdir -p "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn"
-  #cd "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn" || exit 1
-  cp "${BATS_TEST_DIRNAME}/testsData/dsn_"* "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn"
-  touch "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn/default.local.env"
-  touch "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn/other.local.env"
-  export HOME=${BATS_RUN_TMPDIR}/home
+  export TMPDIR="${BATS_TEST_TMPDIR}"
+  mkdir -p "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn"
+  #cd "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn" || exit 1
+  cp "${BATS_TEST_DIRNAME}/testsData/dsn_"* "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn"
+  touch "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn/default.local.env"
+  touch "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn/other.local.env"
+  export HOME=${BATS_TEST_TMPDIR}/home
 }
 
 teardown() {
@@ -115,7 +115,7 @@ function Database::newInstance::valid_dsnFile_from_home { #@test
   [[ "${dbFromInstance['SSL_OPTIONS']}" = "--ssl-mode=DISABLED" ]]
   [[ "${dbFromInstance['QUERY_OPTIONS']}" = "--batch --raw --default-character-set=utf8" ]]
   [[ "${dbFromInstance['DUMP_OPTIONS']}" = "--default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED" ]]
-  [[ "${dbFromInstance['DSN_FILE']}" = "${BATS_RUN_TMPDIR}/home/.bash-tools/dsn/dsn_valid.env" ]]
+  [[ "${dbFromInstance['DSN_FILE']}" = "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn/dsn_valid.env" ]]
   [[ "${dbFromInstance['DB_IMPORT_OPTIONS']}" = "--connect-timeout=5 --batch --raw --default-character-set=utf8" ]]
 
   # shellcheck disable=SC2031

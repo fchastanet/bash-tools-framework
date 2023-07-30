@@ -27,7 +27,7 @@ function File::detectBashFile::markdown { #@test
 }
 
 function File::detectBashFile::missingFile { #@test
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   run File::detectBashFile "${BATS_TEST_DIRNAME}/testsData/missingFile.sh"
   assert_success
   assert_output ""

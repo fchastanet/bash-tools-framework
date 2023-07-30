@@ -17,10 +17,10 @@ source "${srcDir}/Env/load.sh"
 source "${srcDir}/Log/__all.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
-  mkdir -p "${BATS_RUN_TMPDIR}/dir1/dir/dir1.1"
-  mkdir -p "${BATS_RUN_TMPDIR}/dir2/dir/dir2.1"
-  echo "echo '.framework-config loaded'" >"${BATS_RUN_TMPDIR}/dir1/.framework-config"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
+  mkdir -p "${BATS_TEST_TMPDIR}/dir1/dir/dir1.1"
+  mkdir -p "${BATS_TEST_TMPDIR}/dir2/dir/dir2.1"
+  echo "echo '.framework-config loaded'" >"${BATS_TEST_TMPDIR}/dir1/.framework-config"
 }
 
 function Framework::loadConfigNoSrcDir { #@test
@@ -30,13 +30,13 @@ function Framework::loadConfigNoSrcDir { #@test
 }
 
 function Framework::loadConfigNotFound { #@test
-  run Framework::loadConfig configFile "${BATS_RUN_TMPDIR}/dir2/dir/dir2.1"
+  run Framework::loadConfig configFile "${BATS_TEST_TMPDIR}/dir2/dir/dir2.1"
   assert_failure 1
   assert_line --index 0 --partial "Config file '.framework-config' not found in any source directories provided"
 }
 
 function Framework::loadConfigFoundInDir1 { #@test
   configFile=""
-  Framework::loadConfig configFile "${BATS_RUN_TMPDIR}/dir1/dir/dir1.1"
-  [[ "${configFile}" = "${BATS_RUN_TMPDIR}/dir1/.framework-config" ]]
+  Framework::loadConfig configFile "${BATS_TEST_TMPDIR}/dir1/dir/dir1.1"
+  [[ "${configFile}" = "${BATS_TEST_TMPDIR}/dir1/.framework-config" ]]
 }

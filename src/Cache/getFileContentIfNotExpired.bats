@@ -15,23 +15,23 @@ function Cache::getFileContentIfNotExpiredNoFileProvided { #@test
 }
 
 function Cache::getFileContentIfNotExpiredFileNotExists { #@test
-  run Cache::getFileContentIfNotExpired "${BATS_RUN_TMPDIR}/fileNotExists"
+  run Cache::getFileContentIfNotExpired "${BATS_TEST_TMPDIR}/fileNotExists"
   assert_failure 1
   assert_output ""
 }
 
 function Cache::getFileContentIfNotExpiredNotExpired { #@test
-  echo "content" >"${BATS_RUN_TMPDIR}/fileExists"
-  touch -d "1 hour ago" "${BATS_RUN_TMPDIR}/fileExists"
-  run Cache::getFileContentIfNotExpired "${BATS_RUN_TMPDIR}/fileExists" "7200"
+  echo "content" >"${BATS_TEST_TMPDIR}/fileExists"
+  touch -d "1 hour ago" "${BATS_TEST_TMPDIR}/fileExists"
+  run Cache::getFileContentIfNotExpired "${BATS_TEST_TMPDIR}/fileExists" "7200"
   assert_success
   assert_output "content"
 }
 
 function Cache::getFileContentIfNotExpiredExpired { #@test
-  echo "content" >"${BATS_RUN_TMPDIR}/fileExists"
-  touch -d "1 hour ago" "${BATS_RUN_TMPDIR}/fileExists"
-  run Cache::getFileContentIfNotExpired "${BATS_RUN_TMPDIR}/fileExists" "600"
+  echo "content" >"${BATS_TEST_TMPDIR}/fileExists"
+  touch -d "1 hour ago" "${BATS_TEST_TMPDIR}/fileExists"
+  run Cache::getFileContentIfNotExpired "${BATS_TEST_TMPDIR}/fileExists" "600"
   assert_failure 2
   assert_output ""
 }

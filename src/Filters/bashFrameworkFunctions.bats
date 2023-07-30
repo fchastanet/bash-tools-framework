@@ -44,11 +44,11 @@ function Filters::bashFrameworkFunctions::noMatchComments3 { #@test
   local status=0
   Filters::commentLines "${BATS_TEST_DIRNAME}/testsData/bashFrameworkFunctions.txt" |
     Filters::bashFrameworkFunctions \
-      >"${BATS_RUN_TMPDIR}/bashFrameworkFunctions.result.txt" || status=$?
+      >"${BATS_TEST_TMPDIR}/bashFrameworkFunctions.result.txt" || status=$?
   [[ ${status} -eq 0 ]]
   diff \
     "${BATS_TEST_DIRNAME}/testsData/bashFrameworkFunctions.expected.txt" \
-    "${BATS_RUN_TMPDIR}/bashFrameworkFunctions.result.txt"
+    "${BATS_TEST_TMPDIR}/bashFrameworkFunctions.result.txt"
 }
 
 function Filters::bashFrameworkFunctions::fromFile { #@test

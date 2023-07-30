@@ -16,7 +16,7 @@ source "${srcDir}/Conf/getAbsoluteFile.sh"
 source "${srcDir}/File/concatenatePath.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
 teardown() {

@@ -11,7 +11,7 @@ source "${srcDir}/Assert/validPath.sh"
 
 declare logFile
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   logFile=""$(mktemp -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)""
 
   unset HOME
