@@ -30,19 +30,25 @@ function Assert::bashFrameworkFunction::noMatchComments2 { #@test
   assert_output ""
 }
 
-function Assert::bashFrameworkFunction::simple { #@test
+function Assert::bashFrameworkFunction::noMatchAccents { #@test
+  run Assert::bashFrameworkFunction "Log::fatal::François"
+  assert_failure
+  assert_output ""
+}
+
+function Assert::bashFrameworkFunction::validSimple { #@test
   run Assert::bashFrameworkFunction "Log::fatal"
   assert_success
   assert_output ""
 }
 
-function Assert::bashFrameworkFunction::multiple { #@test
+function Assert::bashFrameworkFunction::validMultiple { #@test
   run Assert::bashFrameworkFunction "Namespace1::Namespace2::function"
   assert_success
   assert_output ""
 }
 
-function Assert::bashFrameworkFunction::withPrefix { #@test
+function Assert::bashFrameworkFunction::validWithPrefix { #@test
   PREFIX="sudo::" run Assert::bashFrameworkFunction "sudo::Namespace1::Namespace2::function"
   assert_success
   assert_output ""

@@ -25,6 +25,7 @@
   "words": ["megalinter", "oxsecurity"],
   "dictionaryDefinitions": [
     {"name": "bashCustom", "path": ".cspell/bash.txt"},
+    {"name": "plantuml", "path": ".cspell/plantuml.txt"},
     {"name": "loremIpsum", "path": ".cspell/loremIpsum.txt"},
     {"name": "config", "path": ".cspell/config.txt"},
     {"name": "softwares", "path": ".cspell/softwares.txt"},
@@ -33,6 +34,7 @@
   ],
   "dictionaries": [
     "bash",
+    "plantuml",
     "bashCustom",
     "loremIpsum",
     "config",
@@ -49,6 +51,11 @@
       "languageId": "bashCustom",
       "locale": "*",
       "dictionaries": ["bashCustom"]
+    },
+    {
+      "languageId": "plantuml",
+      "locale": "*",
+      "dictionaries": ["plantuml"]
     },
     {
       "languageId": "loremIpsum",
@@ -79,6 +86,10 @@
     {
       "filename": "**/testsData/**",
       "languageId": "loremIpsum"
+    },
+    {
+      "filename": "**/*.puml",
+      "languageId": "plantuml"
     },
     {
       "filename": "*.md",

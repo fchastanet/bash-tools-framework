@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 
+# allow to embed selected directory providing the given dirAlias
+# @param {string} dir $1
+# @param {string} dirAlias $2
+# @env _COMPILE_ROOT_DIR
+# @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
 Embed::includeFile() {
   local file="$1"
   local fileAlias="$2"
-  local currentDir
-  currentDir="$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)"
 
   (
-    # shellcheck disable=SC2016
     md5="$(base64 -w 0 "${file}")" \
     asName="${fileAlias}" \
     fileMode="$(stat -c "%a %n" "${file}" | awk '{print $1}')" \
-    targetFile="\${TMPDIR}/bin/${fileAlias}" \
-      envsubst <"${currentDir}/includeFile.tpl"
+    targetFile="\${PERSISTENT_TMPDIR:-/tmp}/bin/${fileAlias}" \
+      envsubst <"${_COMPILE_ROOT_DIR}/src/Embed/includeFile.tpl"
   )
 }

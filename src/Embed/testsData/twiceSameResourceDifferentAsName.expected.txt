@@ -1,0 +1,22 @@
+Embed::extractFile_valid1() {
+  if [[ ! -f "${PERSISTENT_TMPDIR:-/tmp}/bin/valid1" ]]; then
+    mkdir -p "$(dirname "${PERSISTENT_TMPDIR:-/tmp}/bin/valid1")"
+    base64 -d >"${PERSISTENT_TMPDIR:-/tmp}/bin/valid1" <<<"IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK"
+    chmod "755" "${PERSISTENT_TMPDIR:-/tmp}/bin/valid1"
+  fi
+}
+
+Embed::extractFile_valid1
+
+declare -gx embed_file_valid1="${PERSISTENT_TMPDIR:-/tmp}/bin/valid1"
+Embed::extractFile_valid2() {
+  if [[ ! -f "${PERSISTENT_TMPDIR:-/tmp}/bin/valid2" ]]; then
+    mkdir -p "$(dirname "${PERSISTENT_TMPDIR:-/tmp}/bin/valid2")"
+    base64 -d >"${PERSISTENT_TMPDIR:-/tmp}/bin/valid2" <<<"IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK"
+    chmod "755" "${PERSISTENT_TMPDIR:-/tmp}/bin/valid2"
+  fi
+}
+
+Embed::extractFile_valid2
+
+declare -gx embed_file_valid2="${PERSISTENT_TMPDIR:-/tmp}/bin/valid2"

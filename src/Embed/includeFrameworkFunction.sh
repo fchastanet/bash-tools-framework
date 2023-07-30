@@ -11,13 +11,22 @@
 # @output the generated bin file extractor
 #   this bin file extractor actually calls a function that will
 #   extract the real binFile(md5 encoded) that
+# @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments
+# declare -a _EMBED_COMPILE_ARGUMENTS=(
+#      # templateDir : directory from which bash-tpl templates will be searched
+#      --template-dir "${_COMPILE_SRC_DIR}/_includes"
+#      # binDir      : fallback bin directory in case BIN_FILE has not been provided
+#      --bin-dir "${_COMPILE_BIN_DIR}"
+#      # rootDir     : directory used to compute src file relative path
+#      --root-dir "${_COMPILE_ROOT_DIR}"
+#      # srcDirs : (optional) you can provide multiple directories
+#      --src-dir "${_COMPILE_SRC_DIR}"
+# )
+# @env _COMPILE_ROOT_DIR
+# @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
 Embed::includeFrameworkFunction() {
   local functionToCall="$1"
   local functionAlias="$2"
-  local currentDir
-  local rootDir
-  currentDir="$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)"
-  rootDir="$(cd "${currentDir}/../.." && pwd -P)"
 
   (
     export KEEP_TEMP_FILES=1
@@ -29,18 +38,16 @@ Embed::includeFrameworkFunction() {
       -t bash-tools-includeFrameworkFunction-binFileExtractor-XXXXXX)"
 
     # generate bin src file content
-    # shellcheck disable=SC2016
     (
       export functionToCall
+      # shellcheck disable=SC2016
       export ORIGINAL_TEMPLATE_DIR='${ORIGINAL_TEMPLATE_DIR}'
       functionToCall="${functionToCall}" \
-        "${rootDir}/bin/compile" \
+        "${_COMPILE_ROOT_DIR}/bin/compile" \
         --bin-file "${binSrcFile}" \
-        "${currentDir}/includeFrameworkFunction.binFile.tpl" \
-        "${_COMPILE_FILE_ARGUMENTS[@]:1}"
+        "${_EMBED_COMPILE_ARGUMENTS[@]}" \
+        "${_COMPILE_ROOT_DIR}/src/Embed/includeFrameworkFunction.binFile.tpl"
     )
-
-    # TODO do not take all arguments from _COMPILE_FILE_ARGUMENTS
 
     # compute binFile md5 checksum to allow multiple binary with different file versions
     # to run in parallel
@@ -52,10 +59,10 @@ Embed::includeFrameworkFunction() {
       binFileMd5="$(base64 -w 0 "${binSrcFile}")" \
       targetFile="\${PERSISTENT_TMPDIR:-/tmp}/bin/${binFileMd5Sum}/${functionAlias}" \
       asName="${functionAlias^}" \
-        "${rootDir}/bin/compile" \
-        "${currentDir}/includeFrameworkFunction.tpl" \
+        "${_COMPILE_ROOT_DIR}/bin/compile" \
         --bin-file "${binFileExtractor}" \
-        "${_COMPILE_FILE_ARGUMENTS[@]:1}"
+        "${_EMBED_COMPILE_ARGUMENTS[@]}" \
+        "${_COMPILE_ROOT_DIR}/src/Embed/includeFrameworkFunction.tpl"
     )
 
     cat "${binFileExtractor}"

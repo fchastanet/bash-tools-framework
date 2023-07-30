@@ -6,35 +6,37 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/batsHeaders.sh"
 source "${BATS_TEST_DIRNAME}/includeFile.sh"
 
 setup() {
-  export TMPDIR="${BATS_RUN_TMPDIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
   export PATH="${TMPDIR}/bin":${PATH}
+  export _COMPILE_ROOT_DIR="${ROOT_DIR}"
+  export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
 function Embed::includeFile::binaryFile { #@test
   (
     echo "#!/usr/bin/env bash"
     Embed::includeFile "${BATS_TEST_DIRNAME}/testsData/binaryFile" "binaryFile"
-  ) >"${BATS_RUN_TMPDIR}/fileIncluded"
-  source "${BATS_RUN_TMPDIR}/fileIncluded"
+  ) >"${BATS_TEST_TMPDIR}/fileIncluded"
+  source "${BATS_TEST_TMPDIR}/fileIncluded"
 
-  run binaryFile arg1 arg2
+  _COMPILE_ROOT_DIR="${ROOT_DIR}" run binaryFile arg1 arg2
 
   assert_success
   assert_output "binaryFile arg1 arg2"
-  [[ -x "${BATS_RUN_TMPDIR}/bin/binaryFile" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/bin/binaryFile" ]]
   # shellcheck disable=SC2154
-  [[ "${embed_file_binaryFile}" = "${BATS_RUN_TMPDIR}/bin/binaryFile" ]]
+  [[ "${embed_file_binaryFile}" = "${BATS_TEST_TMPDIR}/bin/binaryFile" ]]
 }
 
 function Embed::includeFile::normalFile { #@test
   (
     echo "#!/usr/bin/env bash"
     Embed::includeFile "${BATS_TEST_DIRNAME}/testsData/normalFile" "normalFile"
-  ) >"${BATS_RUN_TMPDIR}/fileIncluded"
-  source "${BATS_RUN_TMPDIR}/fileIncluded"
+  ) >"${BATS_TEST_TMPDIR}/fileIncluded"
+  source "${BATS_TEST_TMPDIR}/fileIncluded"
 
-  [[ ! -x "${BATS_RUN_TMPDIR}/bin/normalFile" ]]
-  [[ "$(head -1 "${BATS_RUN_TMPDIR}/bin/normalFile")" = "normalFileContent" ]]
+  [[ ! -x "${BATS_TEST_TMPDIR}/bin/normalFile" ]]
+  [[ "$(head -1 "${BATS_TEST_TMPDIR}/bin/normalFile")" = "normalFileContent" ]]
   # shellcheck disable=SC2154
-  [[ "${embed_file_normalFile}" = "${BATS_RUN_TMPDIR}/bin/normalFile" ]]
+  [[ "${embed_file_normalFile}" = "${BATS_TEST_TMPDIR}/bin/normalFile" ]]
 }

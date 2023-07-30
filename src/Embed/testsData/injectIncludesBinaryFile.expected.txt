@@ -1,0 +1,11 @@
+Embed::extractFile_valid() {
+  if [[ ! -f "${PERSISTENT_TMPDIR:-/tmp}/bin/valid" ]]; then
+    mkdir -p "$(dirname "${PERSISTENT_TMPDIR:-/tmp}/bin/valid")"
+    base64 -d >"${PERSISTENT_TMPDIR:-/tmp}/bin/valid" <<<"IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK"
+    chmod "755" "${PERSISTENT_TMPDIR:-/tmp}/bin/valid"
+  fi
+}
+
+Embed::extractFile_valid
+
+declare -gx embed_file_valid="${PERSISTENT_TMPDIR:-/tmp}/bin/valid"

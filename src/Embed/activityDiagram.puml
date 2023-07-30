@@ -30,7 +30,7 @@ while (include?) is (<color:green>include found)
 
   if (include name already injected?) then (yes)
     :display skip;
-  elseif (include resourse already injected?) then (yes)
+  elseif (include resources already injected?) then (yes)
     :display warning;
   else (<color:green>embed can be included)
     -[#green]->
