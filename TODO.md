@@ -1,5 +1,6 @@
 # Todo
 
+- [NOW](#now)
 - [1. Improve UT](#1-improve-ut)
 - [2. merge bash-tools into bash-tools-framework](#2-merge-bash-tools-into-bash-tools-framework)
 - [3. Framework functions changes](#3-framework-functions-changes)
@@ -18,6 +19,12 @@
   - [7.3. Options/Args management](#73-optionsargs-management)
 - [8. best practices](#8-best-practices)
   - [8.1. Robustness](#81-robustness)
+
+## NOW
+
+- github activity diagram
+- report shellcheck feature request about local variables
+- rename INCLUDE to EMBED
 
 ## 1. Improve UT
 

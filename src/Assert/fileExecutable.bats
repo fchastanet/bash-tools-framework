@@ -9,7 +9,7 @@ source "${srcDir}/Assert/fileExecutable.sh"
 teardown() {
   unstub_all
   unset -f Assert::fileExists || true
-  rm -f "${BATS_RUN_TMPDIR}/myFile" || true
+  rm -f "${BATS_TEST_TMPDIR}/myFile" || true
 }
 
 function Assert::fileExecutable::notExists { #@test
@@ -22,25 +22,25 @@ function Assert::fileExecutable::notExists { #@test
 }
 
 function Assert::fileExecutable::notExecutable { #@test
-  local file="${BATS_RUN_TMPDIR}/myFile"
+  local file="${BATS_TEST_TMPDIR}/myFile"
   touch "${file}"
   chmod -x "${file}"
   Assert::fileExists() {
     return 0
   }
-  run Assert::fileExecutable "${file}" "user" "user"
+  run Assert::fileExecutable "${file}" "$(id -un)" "$(id -gn)"
   assert_failure 1
   assert_output --partial "file ${file} is expected to be executable"
 }
 
 function Assert::fileExecutable::executable { #@test
-  local file="${BATS_RUN_TMPDIR}/myFile"
+  local file="${BATS_TEST_TMPDIR}/myFile"
   touch "${file}"
   chmod +x "${file}"
   Assert::fileExists() {
     return 0
   }
-  run Assert::fileExecutable "${file}" "user" "user"
+  run Assert::fileExecutable "${file}" "$(id -un)" "$(id -gn)"
   assert_success
   assert_output ""
 }

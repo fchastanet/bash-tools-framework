@@ -9,6 +9,7 @@
   - [2.4. bin/runBuildContainer](#24-binrunbuildcontainer)
   - [2.5. bin/buildPushDockerImages](#25-binbuildpushdockerimages)
   - [2.6. bin/doc](#26-bindoc)
+  - [2.6. bin/plantuml](#26-binplantuml)
 - [3. Linters](#3-linters)
   - [3.1. bin/frameworkLint](#31-binframeworklint)
   - [3.2. bin/dockerLint](#32-bindockerlint)
@@ -67,6 +68,12 @@ Here the command's help output:
 
 ```text
 @@@doc_help@@@
+```
+
+### 2.6. bin/plantuml
+
+```text
+@@@plantuml_help@@@
 ```
 
 ## 3. Linters

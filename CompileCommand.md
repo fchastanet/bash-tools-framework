@@ -2,7 +2,7 @@
 
 - [1. Why ?](#1-why-)
 - [2. Compile tool](#2-compile-tool)
-- [3.  compile command help](#3--compile-command-help)
+- [3. compile command help](#3--compile-command-help)
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
@@ -303,7 +303,9 @@ framework function `Embed::include` allows to:
   to temporary directory and is callable directly using `asName` chosen above
   because path of the temporary directory is in the PATH variable.
 
-Here [activity diagram to explain how INCLUDE directives are injected](src/Embed/activityDiagram.puml).
+![activity diagram to explain how INCLUDE directives are injected](pages/assets/images/compilerEmbedInjection.svg)
+
+[activity diagram source code](src/Embed/activityDiagram.puml).
 
 #### 3.4.5. `INCLUDE` directive (optional)
 

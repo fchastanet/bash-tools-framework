@@ -28,7 +28,7 @@ function Assert::fileNotExecutable::notExecutable { #@test
   Assert::fileExists() {
     return 0
   }
-  run Assert::fileNotExecutable "${file}" "user" "user"
+  run Assert::fileNotExecutable "${file}" "$(id -un)" "$(id -gn)"
   assert_success
   assert_output ""
 }
@@ -40,7 +40,7 @@ function Assert::fileNotExecutable::executable { #@test
   Assert::fileExists() {
     return 0
   }
-  run Assert::fileNotExecutable "${file}" "user" "user"
+  run Assert::fileNotExecutable "${file}" "$(id -un)" "$(id -gn)"
   assert_failure 1
   assert_output --partial "file ${file} is expected to be not executable"
 }

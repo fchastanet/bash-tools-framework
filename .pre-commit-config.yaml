@@ -19,6 +19,10 @@ repos:
         stages: [commit]
       - id: end-of-file-fixer
         stages: [commit]
+        exclude: |
+          (?x)^(
+            pages\/assets\/images/.*\.svg
+          )$
       - id: check-executables-have-shebangs
         stages: [commit]
       - id: check-shebang-scripts-are-executable
@@ -77,6 +81,18 @@ repos:
       - id: frameworkLint
         name: frameworkLint
         entry: bash -c './bin/frameworkLint -f plain'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+        stages: [commit]
+
+  - repo: local
+    hooks:
+      - id: plantuml
+        name: plantuml
+        entry: bash -c './bin/plantuml -f png -f svg'
         language: system
         always_run: true
         require_serial: true

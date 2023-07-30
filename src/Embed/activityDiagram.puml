@@ -1,4 +1,4 @@
-@startuml
+@startuml "compilerEmbedInjection"
 title compiler embed injection
 skinparam {
   ' https://github.com/plantuml/plantuml/blob/49115dfc7d4156961e5b49a81c09b474daa79823/src/net/sourceforge/plantuml/style/FromSkinparamToStyle.java#L145

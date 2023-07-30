@@ -19,7 +19,8 @@
     ".jscpd.json",
     ".mega-linter.yml",
     ".shellcheckrc",
-    ".env"
+    ".env",
+    "**/*/svg"
   ],
   "noConfigSearch": true,
   "words": ["megalinter", "oxsecurity"],
