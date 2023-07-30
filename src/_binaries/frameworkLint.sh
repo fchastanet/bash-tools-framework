@@ -117,6 +117,9 @@ checkEachFunctionHasSrcFile() {
 
 checkEachSrcFileHasBatsFile() {
   local file="$1"
+  if [[ ! "${file}" =~ .sh$ ]]; then
+    return 0
+  fi
   local batsFile="${file%.*}.bats"
   if [[ ! -f "${ROOT_DIR}/${batsFile}" ]]; then
     if [[ "${FORMAT}" = "plain" ]]; then
