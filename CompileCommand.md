@@ -303,6 +303,8 @@ framework function `Embed::include` allows to:
   to temporary directory and is callable directly using `asName` chosen above
   because path of the temporary directory is in the PATH variable.
 
+Here [activity diagram to explain how INCLUDE directives are injected](src/Embed/activityDiagram.puml).
+
 #### 3.4.5. `INCLUDE` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax

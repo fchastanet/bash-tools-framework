@@ -21,6 +21,8 @@
 
 ## 1. Improve UT
 
+- replace BATS_RUN_TMPDIR with BATS_TEST_TMPDIR ?
+  - remove TMPDIR overload as it could impact bats
 - ensure filters functions never fails (check bashFrameworkFunctions) and ensure
   filters functions are not used as Assert function
 - bats assert that no new variable pollute environment to check that every
@@ -110,6 +112,7 @@ eg: Backup::file so it would allow to use `sudo Backup::file ...`
 
 ### 5.2. FrameworkLint
 
+- check no use of ${TMPDIR} without default value
 - check if 2 files have the same BINARY_FILE target
 - refact `src/_binaries/frameworkLint.sh` formatter for plain or checkstyle
 - if sudo called on Backup::file without using INCLUDE

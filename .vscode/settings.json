@@ -25,5 +25,6 @@
     "*.md": ["# %%"]
   },
   "markdown.extension.toc.levels": "2..6",
-  "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"]
+  "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"],
+  "plantuml.server": "http://localhost:8080/"
 }
