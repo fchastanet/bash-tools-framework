@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/buildBinFiles
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_headerNoRootDir.tpl"
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
+SRC_DIR="${ROOT_DIR}/src"
 
 HELP="$(
   cat <<EOF

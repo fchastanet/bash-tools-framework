@@ -21,9 +21,9 @@ VENDOR_DIR="<%% echo '${ROOT_DIR}/vendor' %>"
 # shellcheck disable=SC2034
 VENDOR_BIN_DIR="<%% echo '${ROOT_DIR}/vendor/bin' %>"
 
-# FUNCTIONS
-
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
+
+# FUNCTIONS
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
 
