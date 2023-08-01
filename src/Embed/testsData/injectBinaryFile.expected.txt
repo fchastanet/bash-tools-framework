@@ -1,11 +1,3 @@
-Embed::extractFile_valid() {
-  if [[ ! -f "${PERSISTENT_TMPDIR:-/tmp}/bin/valid" ]]; then
-    mkdir -p "$(dirname "${PERSISTENT_TMPDIR:-/tmp}/bin/valid")"
-    base64 -d >"${PERSISTENT_TMPDIR:-/tmp}/bin/valid" <<<"IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK"
-    chmod "755" "${PERSISTENT_TMPDIR:-/tmp}/bin/valid"
-  fi
-}
+Embed::extractFileFromBase64 "${PERSISTENT_TMPDIR:-/tmp}/7be7bfaf6ff1d2836119b22ae8881346/valid" "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK" "755"
 
-Embed::extractFile_valid
-
-declare -gx embed_file_valid="${PERSISTENT_TMPDIR:-/tmp}/bin/valid"
+declare -gx embed_file_valid="${PERSISTENT_TMPDIR:-/tmp}/7be7bfaf6ff1d2836119b22ae8881346/valid"

@@ -30,7 +30,8 @@ function compile() {
 }
 
 function compile::Simple { #@test
-  run compile "simpleBinary.sh"
+  run compile "simpleBinary.sh" 2>&1
+  assert_output ""
   assert_success
   [[ -f "${BATS_TEST_TMPDIR}/simpleBinary" ]]
   [[ -x "${BATS_TEST_TMPDIR}/simpleBinary" ]]
@@ -51,4 +52,20 @@ function compile::IncludeSimpleFile { #@test
   [[ -f "${BATS_TEST_TMPDIR}/simpleBinary" ]]
   [[ -x "${BATS_TEST_TMPDIR}/simpleBinary" ]]
   diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_TEST_TMPDIR}/simpleBinary"
+}
+
+function compile::embed { #@test
+  run compile "embed.sh" 2>&1
+  assert_success
+  assert_output ""
+  [[ -f "${BATS_TEST_TMPDIR}/embedBinary" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/embedBinary" ]]
+  run "${BATS_TEST_TMPDIR}/embedBinary" 2>&1
+  assert_lines_count 5
+  assert_line --index 0 '----------------------------------------------------------------------------------------------------'
+  assert_line --index 1 --partial "INFO    - KEEP_TEMP_FILES=0 removing temp files"
+  assert_line --index 2 'embedFile1'
+  assert_line --index 3 'embedFile1'
+  assert_line --index 4 'embedFile2'
+
 }

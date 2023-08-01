@@ -5,8 +5,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/batsHeaders.sh"
 
 # shellcheck source=src/Embed/embedFrameworkFunction.sh
 source "${srcDir}/Embed/embedFrameworkFunction.sh"
-# shellcheck source=src/Embed/extractFileFromMd5.sh
-source "${srcDir}/Embed/extractFileFromMd5.sh"
+# shellcheck source=src/Embed/extractFileFromBase64.sh
+source "${srcDir}/Embed/extractFileFromBase64.sh"
 # shellcheck source=src/Env/pathPrepend.sh
 source "${srcDir}/Env/pathPrepend.sh"
 

@@ -109,3 +109,5 @@ embeddable
 deluser
 delgroup
 failfast
+untar
+untarred

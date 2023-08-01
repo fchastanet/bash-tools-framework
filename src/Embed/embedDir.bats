@@ -4,6 +4,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)/batsHeaders.sh"
 
 # shellcheck source=src/Embed/embedDir.sh
 source "${BATS_TEST_DIRNAME}/embedDir.sh"
+# shellcheck source=src/Embed/extractDirFromBase64.sh
+source "${BATS_TEST_DIRNAME}/extractDirFromBase64.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"

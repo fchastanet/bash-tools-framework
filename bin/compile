@@ -59,6 +59,32 @@ source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
 # shellcheck source=/src/File/insertFileAfterToken.sh
 source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
+# shellcheck source=src/Embed/inject.sh
+source "${_COMPILE_SRC_DIR}/Embed/inject.sh"
+# shellcheck source=src/Embed/filter.sh
+source "${_COMPILE_SRC_DIR}/Embed/filter.sh"
+# shellcheck source=src/Embed/parse.sh
+source "${_COMPILE_SRC_DIR}/Embed/parse.sh"
+# shellcheck source=src/Embed/assertAsName.sh
+source "${_COMPILE_SRC_DIR}/Embed/assertAsName.sh"
+# shellcheck source=src/Embed/assertResource.sh
+source "${_COMPILE_SRC_DIR}/Embed/assertResource.sh"
+# shellcheck source=src/Embed/embed.sh
+source "${_COMPILE_SRC_DIR}/Embed/embed.sh"
+# shellcheck source=src/Assert/validVariableName.sh
+source "${_COMPILE_SRC_DIR}/Assert/validVariableName.sh"
+# shellcheck source=src/Embed/embedFile.sh
+source "${_COMPILE_SRC_DIR}/Embed/embedFile.sh"
+# shellcheck source=src/Embed/embedDir.sh
+source "${_COMPILE_SRC_DIR}/Embed/embedDir.sh"
+# shellcheck source=src/Embed/embedFrameworkFunction.sh
+source "${_COMPILE_SRC_DIR}/Embed/embedFrameworkFunction.sh"
+# shellcheck source=src/Filters/removeExternalQuotes.sh
+source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
+# shellcheck source=/src/Assert/bashFrameworkFunction.sh
+source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
+# shellcheck source=/src/Embed/getSrcDirsFromOptions.sh
+source "${_COMPILE_SRC_DIR}/Embed/getSrcDirsFromOptions.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -125,6 +151,10 @@ $(SRC_FILE_PATH=bin/compile envsubst <"${_COMPILE_SRC_DIR}/_includes/authorHardC
 EOF
 }
 
+# share this command arguments to allow Embed to compile files using same
+# parameters
+declare -agx _COMPILE_FILE_ARGUMENTS=()
+
 # read command parameters
 # $@ is all command line parameters passed to the script.
 # -o is for short options like -h
@@ -149,6 +179,7 @@ while true; do
       if [[ ! -d "$1" ]]; then
         Log::fatal "Directory '$1' does not exists"
       fi
+      _COMPILE_FILE_ARGUMENTS+=(-s "$1")
       srcDirs+=("$(realpath --physical "$1")")
       ;;
     --template-dir | -t)
@@ -156,6 +187,7 @@ while true; do
       if [[ ! -d "$1" ]]; then
         Log::fatal "Directory '$1' does not exists"
       fi
+      _COMPILE_FILE_ARGUMENTS+=(-t "$1")
       TEMPLATE_DIR="$(realpath --physical "$1")"
       ;;
     --bin-dir | -b)
@@ -163,6 +195,7 @@ while true; do
       if [[ ! -d "$1" ]]; then
         Log::fatal "Directory '$1' does not exists"
       fi
+      _COMPILE_FILE_ARGUMENTS+=(-b "$1")
       BIN_DIR="$(realpath --physical "$1")"
       ;;
     --bin-file | -f)
@@ -170,6 +203,7 @@ while true; do
       if ! Assert::validPath "$1"; then
         Log::fatal "Bin file path '$1' is not a valid path"
       fi
+      _COMPILE_FILE_ARGUMENTS+=(-f "$1")
       BIN_FILE="$1"
       ;;
     --root-dir | -r)
@@ -177,6 +211,7 @@ while true; do
       if [[ ! -d "$1" ]]; then
         Log::fatal "Directory '$1' does not exists"
       fi
+      _COMPILE_FILE_ARGUMENTS+=(-r "$1")
       ROOT_DIR="$(realpath --physical "$1")"
       ;;
     --src-path)
@@ -188,6 +223,7 @@ while true; do
       ;;
     --keep-temp-files | -k)
       KEEP_TEMP_FILES=1
+      _COMPILE_FILE_ARGUMENTS+=(-k)
       ;;
     --)
       shift || true
@@ -202,6 +238,7 @@ while true; do
 done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
+_COMPILE_FILE_ARGUMENTS+=(-s "${_COMPILE_SRC_DIR}")
 
 if (($# != 1)); then
   Log::fatal "You must provide exactly 1 fixed parameter"
@@ -237,6 +274,34 @@ dynamicTemplateDir() {
   echo "${file}"
 }
 export -f dynamicTemplateDir
+
+# shellcheck disable=SC2317
+dynamicSrcFile() {
+  local file="$1"
+  local srcDir
+  for srcDir in "${srcDirs[@]}"; do
+    if [[ -f "${srcDir}/${file}" ]]; then
+      echo "${srcDir}/${file}"
+      return 0
+    fi
+  done
+  echo "${file}"
+}
+export -f dynamicSrcFile
+
+# shellcheck disable=SC2317
+dynamicSrcDir() {
+  local dir="$1"
+  local srcDir
+  for srcDir in "${srcDirs[@]}"; do
+    if [[ -d "${srcDir}/${dir}" ]]; then
+      echo "${srcDir}/${dir}"
+      return 0
+    fi
+  done
+  echo "${dir}"
+}
+export -f dynamicSrcDir
 
 evalTemplate() {
   local FILE="$1"
@@ -363,6 +428,19 @@ injectImportedFunctions() {
   done
 }
 
+injectEmbed() {
+  local file="$1"
+  local embedFile
+  embedFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "embed_file.XXXXXXX")"
+  local -a _EMBED_COMPILE_ARGUMENTS=("${_COMPILE_FILE_ARGUMENTS[@]}")
+  # shellcheck disable=SC2034
+  local -a embeddedNames=()
+  # shellcheck disable=SC2034
+  local -a embeddedResources=()
+  Embed::inject embeddedNames embeddedResources <"${file}" >"${embedFile}"
+  File::insertFileAfterToken "${file}" "${embedFile}" "# FUNCTIONS"
+}
+
 ################################################
 # compile Algo
 ################################################
@@ -375,11 +453,7 @@ injectImportedFunctions() {
 # 4. inject import files at the beginning of the file
 
 COMPILED_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file.XXXXXXX")"
-COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_fil2e.XXXXXXX")"
-
-# share this command arguments to allow Embed to compile files using same
-# parameters
-declare -agx _COMPILE_FILE_ARGUMENTS=("$@")
+COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file2.XXXXXXX")"
 
 # shellcheck disable=SC2034
 declare -a filesAlreadyImported=("${INPUT_FILE}")
@@ -396,6 +470,9 @@ if [[ -z "${BIN_FILE}" ]]; then
   fi
 fi
 Log::displayInfo "Binfile ${BIN_FILE} from ${INPUT_FILE}"
+
+# inject embed
+injectEmbed "${COMPILED_FILE}"
 
 # now we can evaluate ROOT_DIR_RELATIVE_TO_BIN_DIR as BIN_DIR is known from
 # first evalTemplate using BIN_FILE

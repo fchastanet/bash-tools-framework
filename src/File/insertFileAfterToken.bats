@@ -27,7 +27,7 @@ function File::insertFileAfterToken::TwoTokens { #@test
     "# FUNCTIONS"
 
   diff "${BATS_TEST_DIRNAME}/testsData/insertFileAfterToken2.expected.txt" \
-    "${BATS_TEST_TMPDIR}/insertFileAfterToken2.txt"
+    "${BATS_TEST_TMPDIR}/insertFileAfterToken2.txt" >&3
 }
 
 function File::insertFileAfterToken::InsertTwice { #@test

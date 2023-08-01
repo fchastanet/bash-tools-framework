@@ -21,11 +21,13 @@
 
 ## 1. Improve UT
 
-- remove TMPDIR overload as it could impact bats ?
 - ensure filters functions never fails (check bashFrameworkFunctions) and ensure
   filters functions are not used as Assert function
 - bats assert that no new variable pollute environment to check that every
   variable is used as local
+  - <https://github.com/bats-core/bats-core/issues/726>
+  - <https://github.com/koalaman/shellcheck/issues/1395>
+  - <https://github.com/koalaman/shellcheck/issues/468>
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
   - Env::load with missing .env file => fatal

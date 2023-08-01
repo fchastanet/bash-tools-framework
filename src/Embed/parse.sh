@@ -8,9 +8,10 @@ Embed::parse() {
   local regexp="^# EMBED (.+) (AS|as|As) (.+)$"
   if [[ ${str} =~ ${regexp} ]]; then
     # shellcheck disable=SC2034
-    ref_resource="$(echo "${BASH_REMATCH[1]}" | Filters::removeExternalQuotes)"
+    ref_resource="$(echo "${BASH_REMATCH[1]}" | Filters::removeExternalQuotes | envsubst)"
     # shellcheck disable=SC2034
-    ref_asName="$(echo "${BASH_REMATCH[3]}" | Filters::removeExternalQuotes)"
+    ref_asName="$(echo "${BASH_REMATCH[3]}" | Filters::removeExternalQuotes | envsubst)"
+
     Embed::assertAsName "${ref_asName}" || return 1
     Embed::assertResource "${ref_resource}" || return 2
   fi

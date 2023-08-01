@@ -26,8 +26,8 @@ export TMPDIR
 source "${srcDir}/Env/pathPrepend.sh"
 # shellcheck source=src/Embed/embedFrameworkFunction.sh
 source "${srcDir}/Embed/embedFrameworkFunction.sh"
-# shellcheck source=src/Embed/extractFileFromMd5.sh
-source "${srcDir}/Embed/extractFileFromMd5.sh"
+# shellcheck source=src/Embed/extractFileFromBase64.sh
+source "${srcDir}/Embed/extractFileFromBase64.sh"
 # shellcheck source=src/_includes/_commonHeader.sh
 source "${srcDir}/_includes/_commonHeader.sh"
 # shellcheck source=src/_includes/_colors.sh

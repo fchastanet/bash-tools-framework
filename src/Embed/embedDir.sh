@@ -10,7 +10,7 @@ Embed::embedDir() {
   local dirAlias="$2"
 
   (
-    md5="$(
+    base64="$(
       cd "${dir}" || exit 1
       tar -cz -O . | base64 -w 0
     )" \

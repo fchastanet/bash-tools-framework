@@ -34,6 +34,9 @@ teardown() {
 function Embed::parse::targetFile::simple { #@test
   local file=""
   local asName=""
+  assertAsNameReturnStatus=0
+  assertResourceReturnStatus=0
+
   Embed::parse '# EMBED "srcFile" AS "targetFile"' file asName >${BATS_TEST_TMPDIR}/result 2>&1
   [[ "${file}" = 'srcFile' ]]
   [[ "${asName}" = 'targetFile' ]]
@@ -46,8 +49,11 @@ function Embed::parse::targetFile::simple { #@test
 function Embed::parse::targetFile::withVars { #@test
   local file=""
   local asName=""
+  assertAsNameReturnStatus=0
+  assertResourceReturnStatus=0
+
   Embed::parse $'# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile' file asName >${BATS_TEST_TMPDIR}/result 2>&1
-  [[ "${file}" = $'${BATS_TEST_DIRNAME}/test' ]]
+  [[ "${file}" = "${BATS_TEST_DIRNAME}/test" ]]
   [[ "${asName}" = 'targetFile' ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 2
@@ -62,7 +68,7 @@ function Embed::parse::invalidAsName { #@test
   Embed::parse $'# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile0-7ù' \
     file asName >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
-  [[ "${file}" = $'${BATS_TEST_DIRNAME}/test' ]]
+  [[ "${file}" = "${BATS_TEST_DIRNAME}/test" ]]
   [[ "${asName}" = 'targetFile0-7ù' ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1

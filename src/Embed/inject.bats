@@ -105,6 +105,6 @@ function Embed::inject::twiceSameResourceDifferentAsName { #@test
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/injectError"
   assert_output --partial "WARN    - Embed resource ${BATS_TEST_DIRNAME}/testsData/binaryFile has already been imported previously with a different name, ensure to deduplicate"
-  run diff "${BATS_TEST_TMPDIR}/inject" "${BATS_TEST_DIRNAME}/testsData/twiceSameResourceDifferentAsName.expected.txt"
+  run diff "${BATS_TEST_TMPDIR}/inject" "${BATS_TEST_DIRNAME}/testsData/twiceSameResourceDifferentAsName.expected.txt" >&3
   assert_success
 }

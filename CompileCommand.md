@@ -6,13 +6,17 @@
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
-  - [3.4. directives and template](#34-directives-and-template)
-    - [3.4.1. `# FUNCTIONS` directive](#341--functions-directive)
-    - [3.4.2. `VAR_*` directive (optional)](#342-var_-directive-optional)
-    - [3.4.3. `BIN_FILE` directive (optional)](#343-bin_file-directive-optional)
-    - [3.4.4. Compiler - Embed::embed](#344-compiler---embedembed)
-    - [3.4.5. `EMBED` directive (optional)](#345-embed-directive-optional)
-  - [3.5. `.framework-config` framework configuration file](#35-framework-config-framework-configuration-file)
+  - [3.4. Bash-tpl macros](#34-bash-tpl-macros)
+    - [3.4.1. dynamicTemplateDir](#341-dynamictemplatedir)
+    - [3.4.2. dynamicSrcFile](#342-dynamicsrcfile)
+    - [3.4.3. dynamicSrcDir](#343-dynamicsrcdir)
+  - [3.5. directives and template](#35-directives-and-template)
+    - [3.5.1. `# FUNCTIONS` directive](#351--functions-directive)
+    - [3.5.2. `VAR_*` directive (optional)](#352-var_-directive-optional)
+    - [3.5.3. `BIN_FILE` directive (optional)](#353-bin_file-directive-optional)
+    - [3.5.4. Compiler - Embed::embed](#354-compiler---embedembed)
+    - [3.5.5. `EMBED` directive (optional)](#355-embed-directive-optional)
+  - [3.6. `.framework-config` framework configuration file](#36-framework-config-framework-configuration-file)
 - [4. FrameworkLint](#4-frameworklint)
 - [5. Best practices](#5-best-practices)
 - [6. Acknowledgements](#6-acknowledgements)
@@ -176,7 +180,47 @@ AWK_EOF
 )"
 ```
 
-### 3.4. directives and template
+### 3.4. Bash-tpl macros
+
+Some macros are available to ease file path resolution according to options
+passed to the compiler:
+
+#### 3.4.1. dynamicTemplateDir
+
+Following `-t|--template-dir` option provided to compiler command, this function
+will return the file in template-dir provided if it exists or the file in
+bash-tools-framework template dir if it exists, the file provided otherwise,
+letting bash-tpl to manage it.
+
+Example:
+
+```bash
+.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
+```
+
+#### 3.4.2. dynamicSrcFile
+
+Following `-s|--src-dir` option provided to compiler command, this function will
+return the file in the first src-dir provided if it exists or the file in
+bash-tools-framework src dir if it exists, the file provided otherwise, letting
+bash-tpl to manage it.
+
+```bash
+# EMBED "<%% dynamicSrcFile embedDir/embedFile1 %>" as embedFile1
+```
+
+#### 3.4.3. dynamicSrcDir
+
+Following `-s|--src-dir` option provided to compiler command, this function will
+return the directory in the first src-dir provided if it exists or the directory
+in bash-tools-framework src dir if it exists, the file provided otherwise,
+letting bash-tpl to manage it.
+
+```bash
+# EMBED "<%% dynamicSrcDir embedDir %>" as embedDir
+```
+
+### 3.5. directives and template
 
 You can use special optional directives in src file
 
@@ -217,12 +261,12 @@ In previous example, the directive `# FUNCTIONS` is injected via the file
 The srcFile should contains at least the directive `BIN_FILE` at top of the bash
 script file (see example above).
 
-#### 3.4.1. `# FUNCTIONS` directive
+#### 3.5.1. `# FUNCTIONS` directive
 
 It is the most important directive as it will inform the compiler where
 dependent framework functions will be injected in your resulting bash file.
 
-#### 3.4.2. `VAR_*` directive (optional)
+#### 3.5.2. `VAR_*` directive (optional)
 
 it is a directive variable used during compilation time (not during execution),
 it can be used to generate binary files based generic template files.
@@ -273,7 +317,7 @@ bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
   --root-dir "$(pwd)" --template-dir "$(pwd)/src/templates"
 ```
 
-#### 3.4.3. `BIN_FILE` directive (optional)
+#### 3.5.3. `BIN_FILE` directive (optional)
 
 allows to indicate where the resulting bin file will be generated if not
 provided, the binary file will be copied to `binDir` without sh extension
@@ -281,7 +325,7 @@ provided, the binary file will be copied to `binDir` without sh extension
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-#### 3.4.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
+#### 3.5.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
 
 <!-- markdownlint-restore -->
 
@@ -307,7 +351,7 @@ framework function `Embed::embed` allows to:
 
 [activity diagram source code](src/Embed/activityDiagram.puml).
 
-#### 3.4.5. `EMBED` directive (optional)
+#### 3.5.5. `EMBED` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax
 can be used:
@@ -340,7 +384,7 @@ when executed.
 
 See [compiler - Embed::embed]#embed_include) above for more information.
 
-### 3.5. `.framework-config` framework configuration file
+### 3.6. `.framework-config` framework configuration file
 
 The special file `.framework-config` allows to change some behaviors of the
 compiler or the framework linter.
