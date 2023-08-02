@@ -52,7 +52,9 @@ function Embed::parse::targetFile::withVars { #@test
   assertAsNameReturnStatus=0
   assertResourceReturnStatus=0
 
+  export BATS_TEST_DIRNAME
   Embed::parse $'# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile' file asName >${BATS_TEST_TMPDIR}/result 2>&1
+
   [[ "${file}" = "${BATS_TEST_DIRNAME}/test" ]]
   [[ "${asName}" = 'targetFile' ]]
   run cat "${BATS_TEST_TMPDIR}/result"
@@ -65,6 +67,7 @@ function Embed::parse::invalidAsName { #@test
   assertAsNameReturnStatus=1
   local file=""
   local asName=""
+  export BATS_TEST_DIRNAME
   Embed::parse $'# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile0-7ù' \
     file asName >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]

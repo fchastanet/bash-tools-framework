@@ -62,11 +62,13 @@ ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
 ONBUILD SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
 ONBUILD RUN \
-    if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
-      EXISTING_GROUP="$(awk -v val="${GROUP_ID}" -F ":" '$3==val{print $1}' /etc/group)" ;\
-      if [ -n "${EXISTING_GROUP}" ] ; then groupdel "${EXISTING_GROUP}" ; fi ;\
-      userdel -f www-data ;\
-      if getent group www-data ; then groupdel www-data; fi ;\
+    if [[ "${SKIP_USER:-0}" = "0" && "${USER_ID:-0}" != "0" && "${GROUP_ID:-0}" != "0" ]]; then \
+      # del all users with group Id and the del group id
+      awk -F: "\$4 == ${GROUP_ID} {print \$1}" /etc/passwd | while read -r user; do userdel "${user}"; done ;\
+      groupdel "${GROUP_ID}" || true ;\
+      # create www-data user and group from scratch
+      userdel -f www-data || true ;\
+      groupdel www-data || true ;\
       groupadd -g "${GROUP_ID}" www-data ;\
       useradd -l -u "${USER_ID}" -g www-data www-data ;\
       install -d -m 0755 -o www-data -g www-data /home/www-data ;\

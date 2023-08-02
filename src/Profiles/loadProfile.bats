@@ -10,8 +10,18 @@ source "${srcDir}/Assert/fileWritable.sh"
 # shellcheck source=/src/Assert/validPath.sh
 source "${srcDir}/Assert/validPath.sh"
 
+setup() {
+  export TMPDIR="${BATS_TEST_TMPDIR}"
+  logFile=""$(mktemp -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)""
+
+  export BASH_FRAMEWORK_INITIALIZED=0
+  export BASH_FRAMEWORK_LOG_FILE="${logFile}"
+  export BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=0
+}
+
 teardown() {
   unstub_all
+  rm -f "${logFile}" || true
 }
 
 function Profiles::loadProfileOK { #@test

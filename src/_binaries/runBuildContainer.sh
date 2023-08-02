@@ -57,6 +57,6 @@ docker run \
   "${args[@]}" \
   -w /bash \
   -v "$(pwd):/bash" \
-  --user "$(id -u):$(id -g)" \
+  --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
   "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
   "$@"
