@@ -25,6 +25,7 @@
     "**/.github/**",
     "**/.idea/**",
     "**/report/**",
-    "**/*.svg"
+    "**/*.svg",
+    "src/_includes/_header.tpl"
   ]
 }
