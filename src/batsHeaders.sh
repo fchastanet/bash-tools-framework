@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# ensure that no user aliases could interfere with
+# commands used in this script
+unalias -a || true
+
 export SCRIPT_NAME="test"
 ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)
 vendorDir="${ROOT_DIR}/vendor"

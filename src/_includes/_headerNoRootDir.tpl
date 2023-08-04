@@ -5,6 +5,10 @@
 # DO NOT EDIT IT
 #####################################
 
+# ensure that no user aliases could interfere with
+# commands used in this script
+unalias -a || true
+
 # shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
