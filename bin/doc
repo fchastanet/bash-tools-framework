@@ -893,6 +893,8 @@ sed -i -E \
   -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
   "${DOC_DIR}/README.md"
 
+mkdir -p "${DOC_DIR}/images" || true
+cp -R "${ROOT_DIR}/images/"* "${DOC_DIR}/images"
 cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
 cp "${ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
 cp "${ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"

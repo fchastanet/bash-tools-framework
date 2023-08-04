@@ -380,9 +380,9 @@ framework function. `Embed::embed` allows to:
   chosen above because path of the temporary directory has been added into the
   PATH variable.
 
-![activity diagram to explain how EMBED directives are injected](pages/assets/images/compilerEmbedInjection.svg)
+![activity diagram to explain how EMBED directives are injected](images/compilerEmbedInjection.svg)
 
-[activity diagram source code](src/Embed/activityDiagram.puml).
+[activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Embed/activityDiagram.puml).
 
 ### 3.6. `.framework-config` framework configuration file
 
