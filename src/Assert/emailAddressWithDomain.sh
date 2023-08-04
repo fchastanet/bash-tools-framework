@@ -5,12 +5,15 @@
 # @param $@ the expected email address domains
 # @return 1 if email invalid
 Assert::emailAddressWithDomain() {
-  local email expectedDomain
+  local email="$1"
+  local expectedDomain
   local -a splitEmail
-  email="$1"
+
   shift || true
 
-  Assert::emailAddress "${email}" || return 1
+  if ! Assert::emailAddress "${email}"; then
+    return 1
+  fi
 
   if [[ $# = 0 ]]; then
     # no expected domain provided

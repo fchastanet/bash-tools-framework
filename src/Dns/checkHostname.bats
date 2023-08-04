@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Dns/checkHostname.sh
 source "${srcDir}/Dns/checkHostname.sh"

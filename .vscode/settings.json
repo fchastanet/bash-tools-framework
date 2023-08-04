@@ -16,7 +16,8 @@
     "bin/runBuildContainer": true,
     "bin/shellcheckLint": true,
     "bin/frameworkLint": true,
-    "bin/test": true
+    "bin/test": true,
+    "pages/assets/images/compilerEmbedInjection.svg": true
   },
   "files.exclude": {
     "_site/**": true
@@ -25,5 +26,6 @@
     "*.md": ["# %%"]
   },
   "markdown.extension.toc.levels": "2..6",
-  "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"]
+  "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"],
+  "plantuml.server": "http://localhost:8080/"
 }

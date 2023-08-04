@@ -98,3 +98,16 @@ addgroup
 Chastanet
 Scrasnups
 nodoc
+pathchk
+nonportable
+tempdir
+hétérogénéité
+frégate
+zfxyuip
+templating
+embeddable
+deluser
+delgroup
+failfast
+untar
+untarred

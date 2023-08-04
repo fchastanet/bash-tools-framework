@@ -74,22 +74,22 @@ jobs:
         include:
           - vendor: ubuntu
             bashImage: ubuntu:20.04
-            options: -j 1
+            options: -j 30
           - vendor: alpine
             bashTarVersion: 4.4
             bashImage: amd64/bash:4.4-alpine3.18
             # when using 8 jobs, junit report.xml is empty
-            options: -j 1
+            options: -j 30
           - vendor: alpine
             bashTarVersion: 5.0
             bashImage: amd64/bash:5.0-alpine3.18
             # when using 8 jobs, junit report.xml is empty
-            options: -j 1
+            options: -j 30
           - vendor: alpine
             bashTarVersion: 5.1
             bashImage: amd64/bash:5.1-alpine3.18
             # when using 8 jobs, junit report.xml is empty
-            options: -j 1
+            options: -j 30
 
     steps:
       - name: Checkout
@@ -130,8 +130,9 @@ jobs:
           VENDOR="${{ matrix.vendor }}" \
           BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
           BASH_IMAGE="${{ matrix.bashImage }}" \
+          USER_ID=$(id -u) \
+          GROUP_ID=$(id -g) \
           SKIP_BUILD=0 \
-          SKIP_USER=1 \
           ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src
 
       - name: Publish Unit Test Results

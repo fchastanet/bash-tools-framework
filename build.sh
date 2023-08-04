@@ -13,21 +13,20 @@ source "${SRC_DIR}/Env/load.sh"
 # shellcheck source=src/Log/__all.sh
 source "${SRC_DIR}/Log/__all.sh"
 
-export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched
 # binDir      : fallback bin directory in case BIN_FILE has not been provided
 # rootDir     : directory used to compute src file relative path
 # srcDirs     : additional directories where to find the functions
-declare -a params=("${SRC_DIR}" "${BIN_DIR}" "${ROOT_DIR}")
+declare -a params=(--src-dir "${SRC_DIR}" --bin-dir "${BIN_DIR}" --root-dir "${ROOT_DIR}")
 if (($# == 0)); then
   find "${SRC_DIR}/_binaries" -name "*.sh" -print |
     (grep -v -E '/testsData/' || true) |
-    xargs -n1 -P8 -I{} \
-      "${FRAMEWORK_DIR}/bin/constructBinFile" "{}" "${params[@]}"
+    xargs -L1 -P8 -I{} \
+      "${FRAMEWORK_DIR}/bin/compile" "{}" "${params[@]}"
 else
   for file in "$@"; do
     file="$(realpath "${file}")"
-    "${FRAMEWORK_DIR}/bin/constructBinFile" "${file}" "${params[@]}"
+    "${FRAMEWORK_DIR}/bin/compile" "${file}" "${params[@]}"
   done
 fi

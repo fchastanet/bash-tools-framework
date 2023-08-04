@@ -19,12 +19,15 @@
     ".jscpd.json",
     ".mega-linter.yml",
     ".shellcheckrc",
-    ".env"
+    ".env",
+    "**/*/svg"
   ],
   "noConfigSearch": true,
   "words": ["megalinter", "oxsecurity"],
   "dictionaryDefinitions": [
     {"name": "bashCustom", "path": ".cspell/bash.txt"},
+    {"name": "plantuml", "path": ".cspell/plantuml.txt"},
+    {"name": "loremIpsum", "path": ".cspell/loremIpsum.txt"},
     {"name": "config", "path": ".cspell/config.txt"},
     {"name": "softwares", "path": ".cspell/softwares.txt"},
     {"name": "readme", "path": ".cspell/readme.txt"},
@@ -32,7 +35,9 @@
   ],
   "dictionaries": [
     "bash",
+    "plantuml",
     "bashCustom",
+    "loremIpsum",
     "config",
     "softwares",
     "softwareTerms"
@@ -47,6 +52,16 @@
       "languageId": "bashCustom",
       "locale": "*",
       "dictionaries": ["bashCustom"]
+    },
+    {
+      "languageId": "plantuml",
+      "locale": "*",
+      "dictionaries": ["plantuml"]
+    },
+    {
+      "languageId": "loremIpsum",
+      "locale": "*",
+      "dictionaries": ["loremIpsum"]
     },
     {
       "languageId": "config",
@@ -68,6 +83,14 @@
     {
       "filename": "**/conf/bash_profile/.dir_colors",
       "languageId": "dirColors"
+    },
+    {
+      "filename": "**/testsData/**",
+      "languageId": "loremIpsum"
+    },
+    {
+      "filename": "**/*.puml",
+      "languageId": "plantuml"
     },
     {
       "filename": "*.md",

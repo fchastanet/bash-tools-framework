@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Conf/load.sh
 source "${srcDir}/Conf/load.sh"
@@ -18,22 +11,20 @@ source "${srcDir}/Env/load.sh"
 source "${srcDir}/Log/__all.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
-  mkdir -p "${BATS_TMP_DIR}/home/.bash-tools/cliProfiles"
-  cp "${BATS_TEST_DIRNAME}/testsData/cliProfiles/default.sh" "${BATS_TMP_DIR}/home/.bash-tools/cliProfiles"
-  mkdir -p "${BATS_TMP_DIR}/home/.bash-tools/dsn"
-  cp "${BATS_TEST_DIRNAME}/testsData/dsn/"* "${BATS_TMP_DIR}/home/.bash-tools/dsn"
-  export HOME="${BATS_TMP_DIR}/home"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
+  mkdir -p "${BATS_TEST_TMPDIR}/home/.bash-tools/cliProfiles"
+  cp "${BATS_TEST_DIRNAME}/testsData/cliProfiles/default.sh" "${BATS_TEST_TMPDIR}/home/.bash-tools/cliProfiles"
+  mkdir -p "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn"
+  cp "${BATS_TEST_DIRNAME}/testsData/dsn/"* "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn"
+  export HOME="${BATS_TEST_TMPDIR}/home"
 }
 
 teardown() {
   unstub_all
-  rm -Rf "${BATS_TMP_DIR}" || true
 }
 
 function Conf::loadAbsoluteFile { #@test
-  Conf::load "anyFolder" "${BATS_TMP_DIR}/home/.bash-tools/cliProfiles/default.sh"
+  Conf::load "anyFolder" "${BATS_TEST_TMPDIR}/home/.bash-tools/cliProfiles/default.sh"
   # shellcheck disable=SC2154
   [[ "${finalUserArg}" = "www-data" ]]
   # shellcheck disable=SC2154

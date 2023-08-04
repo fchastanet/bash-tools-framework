@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/shellcheckLint
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
@@ -107,6 +106,7 @@ fi
     exclude='^$'
   fi
   export -f File::detectBashFile
+  export -f Assert::bashFile
 
   (
     if [[ "${ONLY_STAGED}" = "1" ]]; then
@@ -116,5 +116,5 @@ fi
     fi
   ) |
     (grep -E -v "${exclude}" || true) |
-    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "if File::detectBashFile '@'; then ${VENDOR_BIN_DIR}/shellcheck '@'; fi"
+    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "File::detectBashFile '@'"
 )

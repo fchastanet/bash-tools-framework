@@ -1,9 +1,9 @@
 <!-- docs/_sidebar.md -->
 
-- [Home](/)
+- [Home - Bash Tools Framework](/ 'Bash Tools Framework')
+- [Compile Command](CompileCommand.md 'compile your sh files as one file')
 - [Commands](Commands.md 'The greatest commands in the world')
-- [Framework](Framework.md 'Bash Tools Framework')
-- [Framework Full Documentation](FrameworkFullDoc.md 'Bash Tools Framework')
+- [Framework Full Documentation](FrameworkFullDoc.md 'Bash Tools Framework documentation')
 - [Bash Best Practices & Recipes](BestPractices.md)
 - Other projects
   - [Bash Tools](https://fchastanet.github.io/bash-tools/)

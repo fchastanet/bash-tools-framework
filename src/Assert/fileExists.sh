@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 Assert::fileExists() {
-  local file user group
-  file="$1"
-  user="${2:-${USERNAME}}"
-  group="${3:-${USERGROUP}}"
+  local file="$1"
+  local user="${2:-${USERNAME}}"
+  local group="${3:-${USERGROUP}}"
   Log::displayInfo "Check ${file} exists with user ${user}:${group}"
   if [[ ! -f "${file}" ]]; then
     Log::displayError "missing file ${file}"

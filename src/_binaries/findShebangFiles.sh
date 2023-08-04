@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/findShebangFiles
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
@@ -26,6 +25,7 @@ EOF
 Args::defaultHelp "${HELP}" "$@"
 
 export -f File::detectBashFile
+export -f Assert::bashFile
 git ls-files --exclude-standard -c -o -m |
-  xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
-  xargs "$@"
+  xargs -r -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
+  xargs -r "$@"

@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Conf/list.sh
 source "${srcDir}/Conf/list.sh"
@@ -26,7 +19,7 @@ function Conf::listPrefixProfileExtSh { #@test
   run Conf::list "${BATS_TEST_DIRNAME}/testsData/dataGetList" "profile-" ".sh"
   assert_success
   # shellcheck disable=SC2154
-  [[ "${#lines[@]}" = "2" ]]
+  assert_lines_count 2
   assert_line --index 0 "       - 1"
   assert_line --index 1 "       - 2"
 }
@@ -34,7 +27,7 @@ function Conf::listPrefixProfileExtSh { #@test
 function Conf::listDirectories { #@test
   run Conf::list "${BATS_TEST_DIRNAME}/testsData/dirGetList" "" "" "-mindepth 1 -type d" "*"
   assert_success
-  [[ "${#lines[@]}" = "2" ]]
+  assert_lines_count 2
   assert_line --index 0 "*profile1"
   assert_line --index 1 "*profile2"
 }
@@ -42,7 +35,7 @@ function Conf::listDirectories { #@test
 function Conf::listDsnDashPrefix { #@test
   run Conf::list "${BATS_TEST_DIRNAME}/testsData/dataGetList" "" ".dsn" "-type f" "-"
   assert_success
-  [[ "${#lines[@]}" = "1" ]]
+  assert_lines_count 1
   assert_line --index 0 "-hello"
 }
 

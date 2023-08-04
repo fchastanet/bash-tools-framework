@@ -5,7 +5,8 @@
 Assert::fileWritable() {
   local file="$1"
   local dir
+
   dir="$(dirname "${file}")"
 
-  [[ -w "${dir}" ]]
+  Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }

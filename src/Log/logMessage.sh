@@ -18,8 +18,16 @@ Log::logMessage() {
   local msg="$2"
   local date
 
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    date="$(date '+%Y-%m-%d %H:%M:%S')"
-    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+    return 0
+  fi
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) || [[ "${levelMsg}" = "FATAL" ]]; then
+    if Assert::fileWritable "${BASH_FRAMEWORK_LOG_FILE}"; then
+      date="$(date '+%Y-%m-%d %H:%M:%S')"
+      touch "${BASH_FRAMEWORK_LOG_FILE}"
+      printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+    else
+      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+    fi
   fi
 }

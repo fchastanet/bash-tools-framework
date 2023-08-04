@@ -1,21 +1,12 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Assert/varExistsAndNotEmpty.sh
 source "${srcDir}/Assert/varExistsAndNotEmpty.sh"
 # shellcheck source=/src/Assert/validVariableName.sh
 source "${srcDir}/Assert/validVariableName.sh"
-# shellcheck source=/src/batsHeaders.sh
-source "${srcDir}/batsHeaders.sh"
 
 function Assert::varExistsAndNotEmpty_EmptyVariableName { #@test
   run Assert::varExistsAndNotEmpty ""

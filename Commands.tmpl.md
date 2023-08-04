@@ -1,115 +1,122 @@
 # The commands
 
-- [1. Build tools](#1-build-tools)
-  - [1.1. bin/buildBinFiles](#11-binbuildbinfiles)
-  - [1.2. bin/findShebangFiles](#12-binfindshebangfiles)
-  - [1.3. bin/test](#13-bintest)
-  - [1.4. bin/runBuildContainer](#14-binrunbuildcontainer)
-  - [1.5. bin/buildPushDockerImages](#15-binbuildpushdockerimages)
-  - [1.6. bin/doc](#16-bindoc)
-  - [1.7. bin/constructBinFile](#17-binconstructbinfile)
-  - [1.8. bin/compile](#18-bincompile)
-- [2. Linters](#2-linters)
-  - [2.1. bin/dockerLint](#21-bindockerlint)
-  - [2.2. bin/shellcheckLint](#22-binshellchecklint)
-  - [2.3. bin/awkLint](#23-binawklint)
-  - [2.4. bin/frameworkLint](#24-binframeworklint)
-  - [2.4. bin/definitionLint](#24-bindefinitionlint)
-  - [2.5. bin/megalinter](#25-binmegalinter)
-- [3. Converter and Generator tools](#3-converter-and-generator-tools)
-  - [3.1. bin/generateShellDoc](#31-bingenerateshelldoc)
+- [1. Compilation tools](#1-compilation-tools)
+  - [1.1. bin/compile](#11-bincompile)
+  - [2.1. bin/buildBinFiles](#21-binbuildbinfiles)
+- [2. build tools](#2-build-tools)
+  - [2.2. bin/findShebangFiles](#22-binfindshebangfiles)
+  - [2.3. bin/test](#23-bintest)
+  - [2.4. bin/runBuildContainer](#24-binrunbuildcontainer)
+  - [2.5. bin/buildPushDockerImages](#25-binbuildpushdockerimages)
+  - [2.6. bin/doc](#26-bindoc)
+  - [2.6. bin/plantuml](#26-binplantuml)
+- [3. Linters](#3-linters)
+  - [3.1. bin/frameworkLint](#31-binframeworklint)
+  - [3.2. bin/dockerLint](#32-bindockerlint)
+  - [3.3. bin/shellcheckLint](#33-binshellchecklint)
+  - [3.4. bin/awkLint](#34-binawklint)
+  - [3.5. bin/definitionLint](#35-bindefinitionlint)
+  - [3.6. bin/megalinter](#36-binmegalinter)
+- [4. Converter and Generator tools](#4-converter-and-generator-tools)
+  - [4.1. bin/generateShellDoc](#41-bingenerateshelldoc)
 
-## 1. Build tools
+## 1. Compilation tools
 
-### 1.1. bin/buildBinFiles
+### 1.1. bin/compile
 
-```text
-@@@buildBinFiles_help@@@
-```
+You check out the [Full documentation Compile documentation](/#/CompileCommand).
 
-### 1.2. bin/findShebangFiles
-
-```text
-@@@findShebangFiles_help@@@
-```
-
-### 1.3. bin/test
-
-```text
-@@@test_help@@@
-```
-
-### 1.4. bin/runBuildContainer
-
-```text
-@@@runBuildContainer_help@@@
-```
-
-### 1.5. bin/buildPushDockerImages
-
-```text
-@@@buildPushDockerImages_help@@@
-```
-
-### 1.6. bin/doc
-
-```text
-@@@doc_help@@@
-```
-
-### 1.7. bin/constructBinFile
-
-```text
-@@@constructBinFile_help@@@
-```
-
-### 1.8. bin/compile
+Here the command's help output:
 
 ```text
 @@@compile_help@@@
 ```
 
-## 2. Linters
-
-### 2.1. bin/dockerLint
+### 2.1. bin/buildBinFiles
 
 ```text
-@@@dockerLint_help@@@
+@@@buildBinFiles_help@@@
 ```
 
-### 2.2. bin/shellcheckLint
+## 2. build tools
+
+### 2.2. bin/findShebangFiles
 
 ```text
-@@@shellcheckLint_help@@@
+@@@findShebangFiles_help@@@
 ```
 
-### 2.3. bin/awkLint
+### 2.3. bin/test
 
 ```text
-@@@awkLint_help@@@
+@@@test_help@@@
 ```
 
-### 2.4. bin/frameworkLint
+### 2.4. bin/runBuildContainer
+
+```text
+@@@runBuildContainer_help@@@
+```
+
+### 2.5. bin/buildPushDockerImages
+
+```text
+@@@buildPushDockerImages_help@@@
+```
+
+### 2.6. bin/doc
+
+```text
+@@@doc_help@@@
+```
+
+### 2.6. bin/plantuml
+
+```text
+@@@plantuml_help@@@
+```
+
+## 3. Linters
+
+### 3.1. bin/frameworkLint
 
 ```text
 @@@frameworkLint_help@@@
 ```
 
-### 2.4. bin/definitionLint
+### 3.2. bin/dockerLint
+
+```text
+@@@dockerLint_help@@@
+```
+
+### 3.3. bin/shellcheckLint
+
+```text
+@@@shellcheckLint_help@@@
+```
+
+### 3.4. bin/awkLint
+
+```text
+@@@awkLint_help@@@
+```
+
+### 3.5. bin/definitionLint
 
 ```text
 @@@definitionLint_help@@@
 ```
 
-### 2.5. bin/megalinter
+### 3.6. bin/megalinter
 
 ```text
 @@@megalinter_help@@@
 ```
 
-## 3. Converter and Generator tools
+## 4. Converter and Generator tools
 
-### 3.1. bin/generateShellDoc
+### 4.1. bin/generateShellDoc
 
 ```text
 @@@generateShellDoc_help@@@

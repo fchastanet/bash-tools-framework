@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/doc
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 DOC_DIR="${ROOT_DIR}/pages"
@@ -33,7 +32,7 @@ ShellDoc::generateMdFileFromTemplate \
   "${DOC_DIR}/Commands.md" \
   "${BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
-  '(bash-tpl|meta|simpleBinary)$'
+  '(bash-tpl|var|simpleBinary)$'
 
 # clean folder before generate
 rm -f "${DOC_DIR}/Index.md" || true
@@ -53,7 +52,7 @@ sed -i -E \
   "${DOC_DIR}/README.md"
 
 cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
-cp "${ROOT_DIR}/Framework.tmpl.md" "${DOC_DIR}/Framework.md"
+cp "${ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
 cp "${ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'

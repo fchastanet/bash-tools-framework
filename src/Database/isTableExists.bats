@@ -17,20 +17,18 @@ source "${srcDir}/Conf/getAbsoluteFile.sh"
 source "${srcDir}/File/concatenatePath.sh"
 
 setup() {
-  BATS_TMP_DIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
-  export TMPDIR="${BATS_TMP_DIR}"
+  export TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
 teardown() {
   unstub_all
-  rm -Rf "${BATS_TMP_DIR}" || true
 }
 
 function Database::isTableExists::yes { #@test
   # check if table exists, this time we answer no
   # shellcheck disable=SC2016
   stub mysql \
-    "--defaults-extra-file= -e * : echo \$3 > ${BATS_TMP_DIR}/query ; echo '1'"
+    "--defaults-extra-file= -e * : echo \$3 > ${BATS_TEST_TMPDIR}/query ; echo '1'"
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
@@ -39,15 +37,15 @@ function Database::isTableExists::yes { #@test
 
   assert_success
   assert_output --partial "DEBUG   - execute command: 'mysql --defaults-extra-file= -e select count(*) from information_schema.tables where table_schema='myDb' and table_name='myTable''"
-  [[ -f "${BATS_TMP_DIR}/query" ]]
-  [[ "$(cat "${BATS_TMP_DIR}/query")" = "$(cat "${BATS_TEST_DIRNAME}/testsData/isTableExists.query")" ]]
+  [[ -f "${BATS_TEST_TMPDIR}/query" ]]
+  [[ "$(cat "${BATS_TEST_TMPDIR}/query")" = "$(cat "${BATS_TEST_DIRNAME}/testsData/isTableExists.query")" ]]
 }
 
 function Database::isTableExists::no { #@test
   # check if table exists, this time we answer no
   # shellcheck disable=SC2016
   stub mysql \
-    "--defaults-extra-file= -e * : echo \$3 > ${BATS_TMP_DIR}/query ; echo ''"
+    "--defaults-extra-file= -e * : echo \$3 > ${BATS_TEST_TMPDIR}/query ; echo ''"
 
   # shellcheck disable=SC2030
   declare -A dbFromInstance
@@ -56,6 +54,6 @@ function Database::isTableExists::no { #@test
 
   assert_failure 1
   assert_output --partial "DEBUG   - execute command: 'mysql --defaults-extra-file= -e select count(*) from information_schema.tables where table_schema='myDb' and table_name='myTable''"
-  [[ -f "${BATS_TMP_DIR}/query" ]]
-  [[ "$(cat "${BATS_TMP_DIR}/query")" = "$(cat "${BATS_TEST_DIRNAME}/testsData/isTableExists.query")" ]]
+  [[ -f "${BATS_TEST_TMPDIR}/query" ]]
+  [[ "$(cat "${BATS_TEST_TMPDIR}/query")" = "$(cat "${BATS_TEST_DIRNAME}/testsData/isTableExists.query")" ]]
 }

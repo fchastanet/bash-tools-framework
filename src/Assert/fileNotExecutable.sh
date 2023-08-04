@@ -5,9 +5,9 @@ Assert::fileNotExecutable() {
   file="$1"
   user="${2:-${USERNAME}}"
   group="${3:-${USERGROUP}}"
-  assertFileExists "${file}" "${user}" "${group}" || return 1
+  Assert::fileExists "${file}" "${user}" "${group}" || return 1
   if [[ -x "${file}" ]]; then
-    Log::displayError "file executable ${file}"
+    Log::displayError "file ${file} is expected to be not executable"
     return 1
   fi
 }

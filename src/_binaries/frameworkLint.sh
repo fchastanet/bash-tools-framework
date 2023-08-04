@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/frameworkLint
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
@@ -18,6 +17,7 @@ ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
 - check if all namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
+- check each function has a bats file associated
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
@@ -84,7 +84,7 @@ FRAMEWORK_SRC_DIRS+=("${ROOT_DIR}/src")
 checkEachFunctionHasSrcFile() {
   local file="$1"
   readarray -t functionsToImport < <(
-    Filters::bashCommentLines "${file}" |
+    Filters::commentLines "${file}" |
       Filters::bashFrameworkFunctions |
       awk '{$1=$1};1' |
       sort |
@@ -113,6 +113,22 @@ checkEachFunctionHasSrcFile() {
       return 1
     fi
   done
+}
+
+checkEachSrcFileHasBatsFile() {
+  local file="$1"
+  if [[ ! "${file}" =~ .sh$ ]]; then
+    return 0
+  fi
+  local batsFile="${file%.*}.bats"
+  if [[ ! -f "${ROOT_DIR}/${batsFile}" ]]; then
+    if [[ "${FORMAT}" = "plain" ]]; then
+      Log::displayWarning "File '${file}', missing bats file '${batsFile}'"
+    else
+      echo "<error severity='warning' message='missing bats file '${batsFile}'/>"
+    fi
+    ((++warningCount))
+  fi
 }
 
 # search for at least one function that is matching the filename
@@ -153,6 +169,8 @@ if [[ "${FORMAT}" = "checkstyle" ]]; then
   echo "<?xml version='1.0' encoding='UTF-8'?>"
   echo "<checkstyle>"
 fi
+export -f File::detectBashFile
+export -f Assert::bashFile
 
 # shellcheck disable=SC2016
 while IFS='' read -r file; do
@@ -162,6 +180,7 @@ while IFS='' read -r file; do
 
   checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
 
   if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
@@ -183,7 +202,7 @@ while IFS='' read -r file; do
     echo "</file>"
   fi
   ((++warningCount))
-done < <(cat "${missingBashFileList}")
+done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 
 if [[ "${FORMAT}" = "checkstyle" ]]; then
   echo "</checkstyle>"

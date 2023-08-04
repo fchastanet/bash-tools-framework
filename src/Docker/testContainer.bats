@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 
-vendorDir="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)/vendor"
-srcDir="$(cd "${BATS_TEST_DIRNAME}/.." && pwd -P)"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Docker/testContainer.sh
 source "${BATS_TEST_DIRNAME}/testContainer.sh"

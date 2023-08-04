@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_DIR="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd -P)"
-vendorDir="${FRAMEWORK_DIR}/vendor"
-srcDir="${FRAMEWORK_DIR}/src"
-set -o errexit
-set -o pipefail
-
-load "${vendorDir}/bats-support/load.bash"
-load "${vendorDir}/bats-assert/load.bash"
-load "${vendorDir}/bats-mock-Flamefire/load.bash"
+# shellcheck source=src/batsHeaders.sh
+source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Assert/emailAddress.sh
 source "${srcDir}/Assert/emailAddress.sh"
@@ -39,7 +32,7 @@ function Assert::emailAddressWithDomainMissingSuffix { #@test
   assert_output ""
 }
 
-function Assert::emailAddressWithDomainValid { #@test
+function Assert::emailAddressWithDomainValid1 { #@test
   run Assert::emailAddressWithDomain "prefix@domain.com"
   assert_success
   assert_output ""

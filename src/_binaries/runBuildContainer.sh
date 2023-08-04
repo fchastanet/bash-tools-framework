@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/runBuildContainer
-# ROOT_DIR_RELATIVE_TO_BIN_DIR=..
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
@@ -35,8 +34,8 @@ if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/Dock
     --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
     --build-arg "BASH_IMAGE=bash-tools-${VENDOR}-${BASH_TAR_VERSION}:latest" \
     --build-arg SKIP_USER="${SKIP_USER:-0}" \
-    --build-arg USER_ID="$(id -u)" \
-    --build-arg GROUP_ID="$(id -g)" \
+    --build-arg USER_ID="${USER_ID:-$(id -u)}" \
+    --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
     -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/DockerfileUser" \
     -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
     "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker"
@@ -58,6 +57,6 @@ docker run \
   "${args[@]}" \
   -w /bash \
   -v "$(pwd):/bash" \
-  --user "$(id -u):$(id -g)" \
+  --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
   "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
   "$@"
