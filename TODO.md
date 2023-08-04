@@ -8,6 +8,7 @@
   - [5.1. Embed::embed](#51-embedembed)
   - [5.2. FrameworkLint](#52-frameworklint)
 - [6. Binaries](#6-binaries)
+  - [New binaries](#new-binaries)
   - [6.1. BashDoc](#61-bashdoc)
     - [6.1.1. add compilation checks](#611-add-compilation-checks)
   - [6.2. all binaries - template](#62-all-binaries---template)
@@ -50,6 +51,7 @@
 
 ## 3. Framework functions changes
 
+- merge Framework::run and Command::captureOutputAndExitCode
 - create function Array::remove
 - Conf::list findOptions as last arg so any number of args
 - replace Command::captureOutputAndExitCode with Framework::run that mimics bats
@@ -125,9 +127,14 @@ eg: Backup::file so it would allow to use `sudo Backup::file ...`
 
 ## 6. Binaries
 
+### New binaries
+
+- add githubUpgradeRelease based on Github::upgradeRelease
+
 ### 6.1. BashDoc
 
 - update bashDoc and include it inside bash-tools-framework
+- generates automatically bash framework functions dependencies recursively
 - register to <https://repology.org/projects/> in order to show matrix image
   <https://github.com/jirutka/esh/blob/master/README.adoc>
 - bash documentation
@@ -179,7 +186,6 @@ TODOs linked to `src/_binaries/*`:
 
 ## 7. Other improvements/Studies
 
-- migrate bash-tpl to <https://github.com/jirutka/esh/blob/master/esh.1.adoc> ?
 - bash-tpl should be a vendor dependency
 
 ### 7.1. run precommit on github action

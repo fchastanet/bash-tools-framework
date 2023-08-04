@@ -19,6 +19,7 @@
     "bin/test": true,
     "pages/assets/images/compilerEmbedInjection.svg": true
   },
+  "explorer.autoReveal": false,
   "files.exclude": {
     "_site/**": true
   },
