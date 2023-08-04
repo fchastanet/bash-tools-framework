@@ -3,6 +3,10 @@
 # shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}
 
+# ensure that no user aliases could interfere with
+# commands used in this script
+unalias -a || true
+
 if [[ -n "${BIN_DIR}" ]]; then
   export PATH="${BIN_DIR}":${PATH}
 fi

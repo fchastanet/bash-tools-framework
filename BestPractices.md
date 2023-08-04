@@ -6,7 +6,7 @@ this project because I wrote some of them while writing this project.
 - [1. Bash Best practices](#1-bash-best-practices)
   - [1.1. Bash environment options](#11-bash-environment-options)
     - [1.1.1. errexit (set -e | set -o errexit)](#111-errexit-set--e--set--o-errexit)
-    - [1.1.2. pipefail (set -E | set -o pipefail)](#112-pipefail-set--e--set--o-pipefail)
+    - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
     - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
     - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
     - [1.1.5. posix (set -o posix)](#115-posix-set--o-posix)
@@ -16,9 +16,9 @@ this project because I wrote some of them while writing this project.
   - [1.5. General tips](#15-general-tips)
   - [1.6. Variables](#16-variables)
     - [1.6.1. Variable declaration](#161-variable-declaration)
-    - [1.6.2. Check if a variable is defined](#162-check-if-a-variable-is-defined)
-    - [1.6.3. variable naming convention](#163-variable-naming-convention)
-    - [1.6.4. Variable expansion](#164-variable-expansion)
+    - [1.6.2. variable naming convention](#162-variable-naming-convention)
+    - [1.6.3. Variable expansion](#163-variable-expansion)
+    - [1.6.4. Check if a variable is defined](#164-check-if-a-variable-is-defined)
     - [1.6.5. Variable default value](#165-variable-default-value)
   - [1.7. Capture output](#17-capture-output)
     - [1.7.1. Capture output and test result](#171-capture-output-and-test-result)
@@ -75,14 +75,14 @@ else
 fi
 ```
 
-#### 1.1.2. pipefail (set -E | set -o pipefail)
+#### 1.1.2. pipefail (set -o pipefail)
 
 > If set, the return value of a pipeline is the value of the last (rightmost)
 > command to exit with a non-zero status, or zero if all commands in the
 > pipeline exit successfully. This option is disabled by default.
 
 It is complementary with errexit, as if it not activated, the failure of command
-in pipe could hide an the error.
+in pipe could hide the error.
 
 **Eg**: without `pipefail` this command succeed
 
@@ -124,16 +124,14 @@ if it is a good idea to implement it and what would be the impact).
 
 ### 1.2. Arguments
 
-- shift each arg to avoid not shifting at all
 - to construct complex command line, prefer to use an array
   - `declare -a cmd=(git push origin :${branch})`
   - then you can display the result using echo `"${cmd[*]}"`
   - you can execute the command using `"${cmd[@]}"`
 - boolean arguments, to avoid seeing some calls like this `myFunction 0 1 0`
-  here a myFunction with 3 boolean values. prefer to provide constants(using
-  readonly) to make the call more clear like
-  `myFunction arg1False arg2True arg3False` of course replacing argX with the
-  real argument name Eg:
+  with 3 boolean values. prefer to provide constants(using readonly) to make the
+  call more clear like `myFunction arg1False arg2True arg3False` of course
+  replacing argX with the real argument name. Eg:
   `Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}"` You have to prefix
   all your constants to avoid conflicts.
 
@@ -161,7 +159,8 @@ if it is a good idea to implement it and what would be the impact).
 
 - `cat << 'EOF'` avoid to interpolate variables
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
-  using customized aliased commands by the user
+  using customized aliased commands by the user In this framework, I added the
+  command `unalias -a || true` to remove all eventual aliases.
 - use the right shebang, avoid `#!/bin/bash` as bash binary could be in another
   folder (especially on alpine), use this instead `#!/usr/bin/env bash`
 
@@ -175,7 +174,23 @@ if it is a good idea to implement it and what would be the impact).
 - local or declare multiple local a z
 - `export readonly` does not work, first `readonly` then `export`
 
-#### 1.6.2. Check if a variable is defined
+#### 1.6.2. variable naming convention
+
+- env variable that aims to be exported should be capitalized with underscore
+- local variables should conform to camelCase
+
+#### 1.6.3. Variable expansion
+
+`${PARAMETER:-WORD}` vs `${PARAMETER-WORD}`:
+
+If the parameter PARAMETER is unset (was never defined) or null (empty),
+`${PARAMETER:-WORD}` expands to WORD, otherwise it expands to the value of
+PARAMETER, as if it just was ${PARAMETER}.
+
+If you omit the `:`(colon) like in `${PARAMETER-WORD}`, the default value is
+only used when the parameter is unset, not when it was empty.
+
+#### 1.6.4. Check if a variable is defined
 
 ```bash
 if [[ -z ${varName+xxx} ]]; then
@@ -183,20 +198,7 @@ if [[ -z ${varName+xxx} ]]; then
 fi
 ```
 
-alternatively you can use this framework function `Assert::validVariableName`
-
-#### 1.6.3. variable naming convention
-
-- env variable that aims to be exported should be capitalized with underscore
-- local variables should conform to camelCase
-
-#### 1.6.4. Variable expansion
-
-- `${PARAMETER:-WORD}` `${PARAMETER-WORD}` If the parameter PARAMETER is unset
-  (never was defined) or null (empty), this one expands to WORD, otherwise it
-  expands to the value of PARAMETER, as if it just was ${PARAMETER}. If you omit
-  the : (colon), like shown in the second form, the default value is only used
-  when the parameter was unset, not when it was empty.
+Alternatively you can use this framework function `Assert::varExistsAndNotEmpty`
 
 #### 1.6.5. Variable default value
 
@@ -259,6 +261,9 @@ output="$(functionThatOutputSomething "${arg1}")"; status=$?
 
 use `${TMPDIR:-/tmp}`, TMPDIR variable does not always exist. or when mktemp is
 available, use `dirname $(mktemp -u --tmpdir)`
+
+The variable TMPDIR is initialized in `src/_includes/_commonHeader.sh` used by
+all the binaries used in this framework.
 
 ## 2. Bin file best practices
 

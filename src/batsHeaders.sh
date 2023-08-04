@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# ensure that no user aliases could interfere with
+# commands used in this script
+unalias -a || true
+
 export SCRIPT_NAME="test"
 ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)
 vendorDir="${ROOT_DIR}/vendor"
@@ -15,8 +19,8 @@ load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"
 load "${vendorDir}/bats-mock-Flamefire/load.bash"
 
-# shellcheck source=/src/_standalones/Bats/assert_lines_count.sh
-source "${srcDir}/_standalones/Bats/assert_lines_count.sh"
+# shellcheck source=/src/_standalone/Bats/assert_lines_count.sh
+source "${srcDir}/_standalone/Bats/assert_lines_count.sh"
 # shellcheck source=/src/Env/load.sh
 source "${srcDir}/Env/load.sh"
 # shellcheck source=src/Log/_.sh

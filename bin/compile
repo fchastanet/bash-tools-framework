@@ -448,9 +448,15 @@ injectEmbed() {
 # Loop until no more file to import
 # 1. generate code from template
 # 2. remove duplicated #!/usr/bin/env bash
-# 3. deduce files to import based on [A-Za-z0-9]+::[A-Za-z0-9]+ pattern
+# 3. inject embeds
+# 4. deduce files to import based on [A-Za-z0-9]+::[A-Za-z0-9]+ pattern
 #    (skip files already imported and those that do not exist)
-# 4. inject import files at the beginning of the file
+# 5. inject import files at the beginning of the file using '# FUNCTIONS'
+#    marker
+# 6. evaluate again the current compiledFile as a template in the case
+#    where injected function are using template function
+#    and do again steps 4 and 5
+# 7 write compiled file cleaning it a little bit
 
 COMPILED_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file.XXXXXXX")"
 COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file2.XXXXXXX")"

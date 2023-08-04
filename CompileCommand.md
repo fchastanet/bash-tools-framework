@@ -14,8 +14,8 @@
     - [3.5.1. `# FUNCTIONS` directive](#351--functions-directive)
     - [3.5.2. `VAR_*` directive (optional)](#352-var_-directive-optional)
     - [3.5.3. `BIN_FILE` directive (optional)](#353-bin_file-directive-optional)
-    - [3.5.4. Compiler - Embed::embed](#354-compiler---embedembed)
     - [3.5.5. `EMBED` directive (optional)](#355-embed-directive-optional)
+    - [3.5.4. Compiler - Embed::embed](#354-compiler---embedembed)
   - [3.6. `.framework-config` framework configuration file](#36-framework-config-framework-configuration-file)
 - [4. FrameworkLint](#4-frameworklint)
 - [5. Best practices](#5-best-practices)
@@ -35,7 +35,7 @@ Here are the goals:
   even if multiple hops are required
 - Files being embedded can be binary files i.e. can contain non-printable
   characters
-- bash functions reusability
+- The script allow bash functions reusability
 
 The first requirement implies that we should somehow store the contents of other
 files in our main script. The second requires us to avoid non-printable
@@ -64,7 +64,8 @@ You can see several examples of compiled files by checking
 
 <!-- markdownlint-restore -->
 
-**Description:** inlines all the functions used in the script given in parameter
+**Description:** This command inlines all the functions used in the script given
+in parameter
 
 **Usage:**
 
@@ -113,13 +114,14 @@ bin/compile <fileToCompile>
   BIN_DIR is set to `bin` directory below the folder above `bin/compile`.
 
 - `--bin-file|-f <binFile>` `BIN_FILE` directive will be overridden by `binFile`
-  value
+  value. See more information below about directives.
 
 - `--template-dir|-t <templateDir>` the template directory used to override some
-  template includes. Check environment variables below.
+  template includes. See more information below about environment variables.
 
-- `--root-dir|-r <rootDir>` if you whish to override `ROOT_DIR` variable
-  (default value is the folder above `bin/compile`).
+- `--root-dir|-r <rootDir>` if you whish to override `ROOT_DIR` variable.
+
+  By default root directory is the folder above `bin/compile`.
 
 - `--src-path <path>` if you wish to override the filepath that will be
   displayed in the header to indicate the src filepath that has been compiled
@@ -128,6 +130,32 @@ bin/compile <fileToCompile>
   By default, it is initialized with path relative to `ROOT_DIR`
 
 - `--keep-temp-files|-k` keep temporary files for debug purpose
+
+_Examples:_
+
+Let's say you want to generate the binary file `bin/buildDoc` from the source
+file `src/build/buildDoc.sh`
+
+```bash
+bin/compile "$(pwd)/src/_binaries/doc.sh" --src-dir "$(pwd)/src" \
+  --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
+```
+
+Here you want to generate the binary but overriding some or all functions of
+`vendor/bash-tools-framework/src` using `src` folder
+
+```bash
+bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
+  -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
+```
+
+Here you want to override the default templates too
+
+```bash
+bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
+  -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" \
+  --root-dir "$(pwd)" --template-dir "$(pwd)/src/templates"
+```
 
 ### 3.1. .framework-config environment variables
 
@@ -252,8 +280,8 @@ sudo "${embed_file_backupFile}" # ...
 ```
 
 The above file header allows to generate the `bin/binaryExample` binary file. It
-uses `EMBED` directive to allow the usage of `Backup::file` function as a binary
-named backupFile that can even be called using `sudo`.
+uses `EMBED` directive to allow the usage of `Backup::file` function as a
+binary, named backupFile that can even be called using `sudo`.
 
 In previous example, the directive `# FUNCTIONS` is injected via the file
 `_includes/_header.tpl`.
@@ -269,7 +297,7 @@ dependent framework functions will be injected in your resulting bash file.
 #### 3.5.2. `VAR_*` directive (optional)
 
 it is a directive variable used during compilation time (not during execution),
-it can be used to generate binary files based generic template files.
+it can be used to generate binary files based on generic template files.
 [see specific usage in bash-dev-env project](https://github.com/fchastanet/bash-dev-env).
 
 It's also possible to inject some variables specific to the binary file you are
@@ -291,65 +319,10 @@ The variable SCRIPT can then be used in the template using
 SCRIPT="<% ${SCRIPT} %>"
 ```
 
-_Examples:_
-
-Let's say you want to generate the binary file `bin/buildDoc` from the source
-file `src/build/buildDoc.sh`
-
-```bash
-bin/compile "$(pwd)/src/_binaries/doc.sh" --src-dir "$(pwd)/src" \
-  --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
-```
-
-Here you want to generate the binary but overriding some or all functions of
-`vendor/bash-tools-framework/src` using `src` folder
-
-```bash
-bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
-  -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
-```
-
-Here you want to override the default templates too
-
-```bash
-bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
-  -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" \
-  --root-dir "$(pwd)" --template-dir "$(pwd)/src/templates"
-```
-
 #### 3.5.3. `BIN_FILE` directive (optional)
 
-allows to indicate where the resulting bin file will be generated if not
+allows to indicate where the resulting bin file will be generated. If not
 provided, the binary file will be copied to `binDir` without sh extension
-
-<!-- markdownlint-capture -->
-<!-- markdownlint-disable MD033 -->
-
-#### 3.5.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
-
-<!-- markdownlint-restore -->
-
-A new feature in the compiler is the ability to embed files, directories or a
-framework function `Embed::embed` allows to:
-
-- include a file(binary or not) as md5 encoded, the file can then be extracted
-  using the automatically generated method `Embed::extractFile_asName` where
-  asName is the name chosen above the original file mode will be restored after
-  extraction. The variable embed_file_asName contains the targeted filepath.
-- include a directory, the directory will be tar gz and added to the compiled
-  file as md5 encoded string. The directory can then be extracted using the
-  automatically generated method `Embed::extractDir_asName` where asName is the
-  name chosen above. The variable embed_dir_asName contains the targeted
-  directory path.
-- include a bash framework function, a special binary file that simply calls
-  this function will be automatically generated. This binary file will be added
-  to the compiled file as md5 encoded string and will be automatically extracted
-  to temporary directory and is callable directly using `asName` chosen above
-  because path of the temporary directory is in the PATH variable.
-
-![activity diagram to explain how EMBED directives are injected](pages/assets/images/compilerEmbedInjection.svg)
-
-[activity diagram source code](src/Embed/activityDiagram.puml).
 
 #### 3.5.5. `EMBED` directive (optional)
 
@@ -378,11 +351,38 @@ sudo "${embed_file_backupFile}" ...
 "${embed_file_otherNeededBinary}"
 ```
 
-if `EMBED` directive is provided, the file/dir provided will be added inside the
-resulting bin file as a tar gz file(base64 encoded) and automatically extracted
-when executed.
+See [compiler - Embed::embed]#embed_include) below for more information.
 
-See [compiler - Embed::embed]#embed_include) above for more information.
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+#### 3.5.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
+
+<!-- markdownlint-restore -->
+
+A new feature in the compiler is the ability to embed files, directories or a
+framework function. `Embed::embed` allows to:
+
+- **include a file**(binary or not) as base64 encoded, the file can then be
+  extracted using the automatically generated method `Embed::extractFile_asName`
+  where asName is the name chosen using directive explained above. The original
+  file mode will be restored after extraction. The variable `embed_file_asName`
+  contains the targeted filepath.
+- **include a directory**, the directory will be tar gz and added to the
+  compiled file as base64 encoded string. The directory can then be extracted
+  using the automatically generated method `Embed::extractDir_asName` where
+  asName is the name chosen using directive explained above. The variable
+  embed_dir_asName contains the targeted directory path.
+- **include a bash framework function**, a special binary file that simply calls
+  this function will be automatically generated. This binary file will be added
+  to the compiled file as base64 encoded string. Then it will be automatically
+  extracted to temporary directory and is callable directly using `asName`
+  chosen above because path of the temporary directory has been added into the
+  PATH variable.
+
+![activity diagram to explain how EMBED directives are injected](pages/assets/images/compilerEmbedInjection.svg)
+
+[activity diagram source code](src/Embed/activityDiagram.puml).
 
 ### 3.6. `.framework-config` framework configuration file
 
@@ -400,7 +400,7 @@ FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^bui
 FRAMEWORK_SRC_DIRS=()
 
 # export here all the variables that will be used in your templates
-# Use this when variables are common to most of your bin files
+# Use this when variables are common to most of your bin files.
 # You can alternatively use VAR_* directive to declare a constant
 # specific to your bin file
 export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
@@ -414,7 +414,7 @@ Lint files of the current repository
 - check that function defined in a .sh is correctly named
 - check that each framework function has a bats file associated (warning if not)
 
-This linter is used as one the precommit hooks, see
+This linter is used in precommit hooks, see
 [.pre-commit-config.yaml](https://github.com/fchastanet/bash-tools-framework/blob/master/.pre-commit-config.yaml).
 
 ## 5. Best practices

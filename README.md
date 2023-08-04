@@ -1,8 +1,8 @@
 # bash-tools-framework
 
 - [1. Excerpt](#1-excerpt)
-  - [1.1. Build tools](#11-build-tools)
-  - [1.2. Compile command](#12-compile-command)
+  - [1.1. Compile command](#11-compile-command)
+  - [1.2. Build tools](#12-build-tools)
   - [1.3. Internal tools](#13-internal-tools)
 - [2. Framework](#2-framework)
   - [2.1. Excerpt](#21-excerpt)
@@ -76,22 +76,24 @@
 
 ## 1. Excerpt
 
-This is a collection of several bash functions and commands that helps you to
-lint files, generate shell documentation and compile bash files.
+[Full documentation can be found here](/#/FrameworkFullDoc.md) but here an excerpt
+of the capabilities of this framework. This framework is a collection of several
+bash functions and commands that helps you to lint files, generate shell
+documentation, compile bash files, and many more, ...
 
-### 1.1. Build tools
+### 1.1. Compile command
+
+- **compile** : Inlines all the functions used in the script given in parameter
+
+see related documentation [Compile command](CompileCommand.md).
+
+### 1.2. Build tools
 
 - **awkLint** : Lint all files with .awk extension in specified folder.
 - **dockerLint** : hadolint wrapper, auto installing hadolint
 - **shellcheckLint** : shellcheck wrapper, auto installing shellcheck
 - **generateShellDoc**: find all .sh files and generate shDoc in markdown format
   in the specified target directory
-
-### 1.2. Compile command
-
-- **compile** : Inlines all the functions used in the script given in parameter
-
-see related documentation [Compile command](CompileCommand.md).
 
 ### 1.3. Internal tools
 
@@ -105,53 +107,112 @@ see related documentation [Compile command](CompileCommand.md).
 
 ### 2.1. Excerpt
 
-Here an excerpt of the functions available in Bash tools framework:
+Here an excerpt of the namespaces available in Bash tools framework:
 
-- Assert
-  - **Assert::expectUser** exits with message if current user is not the
-    expected one
-  - **Assert::expectNonRootUser** exits with message if current user is root
-  - **Assert::commandExists** check if command specified exists or exits with
-    error message if not
-  - **Assert::windows** determine if the script is executed under windows (git
+- Apt : several functions to abstract the use of ubuntu apt-get function. these
+  functions ar using some default arguments and manage retry automatically.
+  - Apt::addRepository
+  - Apt::install
+  - Apt::remove
+  - Apt::update
+- Args : functions to ease some recurrent arguments like -h|--help to display
+  help
+- Array : functions to ease manipulation of bash arrays like Array::clone or
+  Array::contains that checks if an element is contained in an array
+- Assert : various checks like
+  - Assert::expectUser, Assert::expectNonRootUser, Assert::expectRootUser exits
+    with message if current user is not the expected one
+  - Assert::commandExists checks if command specified exists or exits with error
+    message if not
+  - Assert::windows determines if the script is executed under windows (git
     bash, wsl)
-- Database
-  - **Database::dump** dump db limited to optional table list
-  - **Database::query** mysql query on a given db
-  - **Database::dropTable** drop table if exists
-  - **Database::dropDb** drop database if exists
-  - **Database::createDb** create database if not already existing
-  - **Database::isTableExists** check if table exists on given db
-  - **Database::ifDbExists** check if given database exists
-  - all these methods need to call **Database::newInstance** in order to
-    reference target db connection
-- Array
-  - **Array::contains** check if an element is contained in an array
-- Functions
-  - **Functions::quote** quote a string replace ' with \'
-  - **Functions::addTrap** add a trap to existing trap or simply set the trap if
-    no existing trap
+  - Assert::validPath checks if path provided is a valid linux path, it doesn't
+    have to exist yet
+  - Assert::bashFrameworkFunction checks if given name respects naming
+    convention of this framework's functions
+  - ...
+- Backup::file, Backup::dir allows to create a backup of a file or a directory
+  in a folder configured in a .env file managed by the framework (see Env::load)
+- Aws : Aim is to abstract the use of some aws cli commands, for the moment only
+  Aws::imageExists has been implemented allowing to check that a docker image
+  exists with tags provided on AWS ecr(AWS docker repository)
+- Bats::installRequirementsIfNeeded allows to install bats vendor requirements
+  for this project, it uses mainly the useful function Git::shallowClone
+- Cache : various cache methods to provide files or env variable with expiration
+  management
+- Command::captureOutputAndExitCode calls a command capturing output and exit
+  code and displaying it also to error output to follow command's progress
+- Compiler : various function used by `bin/compiler` script allowing to generate
+  binaries using the functions of this framework (see
+  [Compile command](CompileCommand.md)).
+- Conf : allows to manage the loading of .env file that contains configuration
+  used by some functions of this framework.
+- Database : abstraction of several mysql queries, like:
+  - Database::dump dump db limited to optional table list
+  - Database::query mysql query on a given db
+  - Database::dropTable drop table if exists
+  - Database::dropDb drop database if exists
+  - Database::createDb create database if not already existing
+  - Database::isTableExists check if table exists on given db
+  - Database::ifDbExists check if given database exists
+  - all these methods need to call Database::newInstance in order to reference
+    target db connection
+- Dns : various methods like Dns::pingHost or allowing etc/hosts manipulation.
+- Docker : various docker cli abstractions that allowed to construct
+  `bin/buildPushDockerImages` command.
+- Embed : functions that allows `bin/compiler` to manage `EMBED directives` (see
+  [Compile command](CompileCommand.md)).
+- Env : functions allowing to load env variables or to alter them like
+  Env::pathAppend allowing to add a bin path to `PATH` variable
+- File : files and file paths manipulations.
+- Filters : various functions to filter files using grep, awk or sed eg:
+  Filters::bashFrameworkFunctions allows to find all the bash framework functions
+  used in a file
+- Framework : Framework::loadConfig loads `.framework-config` configuration
+  file.
+- Git : provides git abstractions like Git::cloneOrPullIfNoChange,
+  Git::pullIfNoChanges or Git::shallowClone
+- Install : copy directory or file, backup them before if needed.
+- Github : major feature is install automatically latest binary release using
+  `Github::upgradeRelease`
+- Log::display\* output colored message on error output and log the message
+  - Log::fatal error message in red bold and exits with code 1
+  - Log::displayError error message in red
+  - Log::displayWarning warning message in yellow
+  - Log::displayInfo info message in white on lightBlue
+  - Log::displaySuccess success message in green
+  - Log::displayDebug debug message in grey
+- Log::log\* output message in a log file
+  - Log::logError
+  - Log::logWarning
+  - Log::logInfo
+  - Log::logSuccess
+  - Log::logDebug
+- Log::rotate automatically rotates the log file, this function is used
+  internally by Log::log\* functions.
+- OS : ubuntu related functions
+- Profiles : methods mainly used by
+  [Bash-dev-env project](https://fchastanet.github.io/bash-dev-env/#/) that
+  allows to indicate scripts list to install with the ability to include all the
+  dependencies recursively. This file `src/Profiles/lintDefinitions.sh` is the
+  precursor of a first bash interface implementation.
+- Retry : retry a command on failure easily
+- ShellDoc : this framework shell documentation generation
+- Ssh : mainly Ssh::fixAuthenticityOfHostCantBeEstablished
+- Sudo : executes command as sudo if needed
 - UI
-  - **UI::askToContinue** ask the user if he wishes to continue a process
-  - **UI::askYesNo** ask the user a confirmation
-  - **UI::askToIgnoreOverwriteAbort** ask the user to ignore(i), overwrite(o) or
+  - UI::askToContinue ask the user if he wishes to continue a process
+  - UI::askYesNo ask the user a confirmation
+  - UI::askToIgnoreOverwriteAbort ask the user to ignore(i), overwrite(o) or
     abort(a)
 - Version
-  - **Version::checkMinimal** ensure that command exists with expected version
-  - **Version::compare** compares two versions
-- Log::display\* output colored message on error output and log the message
-  - **Log::fatal** error message in red bold and exits with code 1
-  - **Log::displayError** error message in red
-  - **Log::displayWarning** warning message in yellow
-  - **Log::displayInfo** info message in white on lightBlue
-  - **Log::displaySuccess** success message in green
-  - **Log::displayDebug** debug message in grey
-- Log::log\* output message in a log file
-  - **Log::logError**
-  - **Log::logWarning**
-  - **Log::logInfo**
-  - **Log::logSuccess**
-  - **Log::logDebug**
+  - Version::checkMinimal ensure that command exists with expected version
+  - Version::compare compares two versions
+- Wsl : commands wslvar and wslpath are expensive, avoid multiple calls using
+  cache
+- |`src/_standalone` regroups methods that do not respect framework naming
+  conventions like assert_lines_count that is used to assert the number of lines
+  of output in bats tests
 
 ### 2.2. Usage
 
@@ -183,7 +244,7 @@ export PATH="${BIN_DIR}":"${VENDOR_BIN_DIR}":${PATH}
 
 ```
 
-Then add below the rest of your script.
+Then add below special `# FUNCTIONS` marker, the rest of your script.
 
 Special comments:
 
@@ -203,6 +264,8 @@ following command :
 bin/compile src/_binaries/myCommand.sh
 ```
 
+see related documentation [Compile command](CompileCommand.md).
+
 ## 3. Development Environment
 
 ### 3.1. Install dev dependencies
@@ -216,7 +279,7 @@ Dependencies are automatically installed when used.
 - [bats-core/bats-assert](https://github.com/bats-core/bats-assert.git)
 - [Flamefire/bats-mock](https://github.com/Flamefire/bats-mock.git)
 
-`./bin/doc` script will install:
+`bin/doc` script will install:
 
 - [fchastanet/tomdoc.sh](https://github.com/fchastanet/tomdoc.sh.git)
 
@@ -287,7 +350,7 @@ docker run --rm -it -w /bash -v "$(pwd):/bash" --entrypoint="" --user 1000:1000 
 generated by running
 
 ```bash
-./bin/doc
+bin/doc
 ```
 
 ### 3.6. github page
