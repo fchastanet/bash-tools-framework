@@ -37,7 +37,7 @@ cleanOnExit() {
   if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
     Log::displayInfo "KEEP_TEMP_FILES=1 temp files kept here '${TMPDIR}'"
   elif [[ -n "${TMPDIR+xxx}" ]]; then
-    Log::displayInfo "KEEP_TEMP_FILES=0 removing temp files '${TMPDIR}'"
+    Log::displayDebug "KEEP_TEMP_FILES=0 removing temp files '${TMPDIR}'"
     rm -Rf "${TMPDIR:-/tmp/fake}" >/dev/null 2>&1
   fi
 }
@@ -115,6 +115,13 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
+# Display message using debug color (grey)
+# @param {String} $1 message
+Log::displayDebug() {
+  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  Log::logDebug "$1"
+}
+
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayInfo() {
@@ -151,7 +158,6 @@ Args::defaultHelpNoExit() {
 }
 
 # lazy initialization
-declare -g BASH_FRAMEWORK_INITIALIZED="0"
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
@@ -162,7 +168,7 @@ declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
 Env::load() {
-  if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
+  if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
   fi
   BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
@@ -244,13 +250,6 @@ Env::load() {
   export BASH_FRAMEWORK_INITIALIZED=1
 
   set +o allexport
-}
-
-# Display message using debug color (grey)
-# @param {String} $1 message
-Log::displayDebug() {
-  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
-  Log::logDebug "$1"
 }
 
 # Display message using error color (red)
