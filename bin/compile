@@ -262,44 +262,50 @@ Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while load
 # shellcheck disable=SC2317
 dynamicTemplateDir() {
   local file="$1"
-  if [[ ! -f "${file}" ]]; then
-    if [[ -f "${TEMPLATE_DIR}/${file}" ]]; then
-      echo "${TEMPLATE_DIR}/${file}"
-      return 0
-    elif [[ -f "${ORIGINAL_TEMPLATE_DIR}/${file}" ]]; then
-      echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
-      return 0
-    fi
+  if [[ -f "${TEMPLATE_DIR}/${file}" ]]; then
+    echo "${TEMPLATE_DIR}/${file}"
+    return 0
+  elif [[ -f "${ORIGINAL_TEMPLATE_DIR}/${file}" ]]; then
+    echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
+    return 0
   fi
-  echo "${file}"
+  local msg="dynamicTemplateDir - ${file} does not exist in any template dirs declared"
+  echo -e "\e[31m${msg}\e[0m" >&2
+  return 1
 }
 export -f dynamicTemplateDir
 
 # shellcheck disable=SC2317
 dynamicSrcFile() {
   local file="$1"
-  local srcDir
+  local -a srcDirs=()
+  readarray -t srcDirs <"${TMPDIR:-/tmp}/srcDirs"
   for srcDir in "${srcDirs[@]}"; do
     if [[ -f "${srcDir}/${file}" ]]; then
       echo "${srcDir}/${file}"
       return 0
     fi
   done
-  echo "${file}"
+  local msg="dynamicSrcFile - ${file} does not exist in any src dirs declared"
+  echo -e "\e[31m${msg}\e[0m" >&2
+  return 1
 }
 export -f dynamicSrcFile
 
 # shellcheck disable=SC2317
 dynamicSrcDir() {
   local dir="$1"
-  local srcDir
+  local -a srcDirs=()
+  readarray -t srcDirs <"${TMPDIR:-/tmp}/srcDirs"
   for srcDir in "${srcDirs[@]}"; do
     if [[ -d "${srcDir}/${dir}" ]]; then
       echo "${srcDir}/${dir}"
       return 0
     fi
   done
-  echo "${dir}"
+  local msg="dynamicSrcDir - ${dir} does not exist in any src dirs declared"
+  echo -e "\e[31m${msg}\e[0m" >&2
+  return 1
 }
 export -f dynamicSrcDir
 
@@ -326,6 +332,10 @@ evalTemplate() {
     export SRC_ABSOLUTE_PATH
     export SRC_FILE_PATH
     export ROOT_DIR_RELATIVE_TO_BIN_DIR
+    export TMPDIR
+    # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
+    trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM
+    printf '%s\n' "${srcDirs[@]}" >"${TMPDIR:-/tmp}/srcDirs"
     # shellcheck source=/dev/null
     source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
   ) | Filters::removeDuplicatedShebangs
