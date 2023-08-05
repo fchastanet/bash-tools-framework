@@ -18,15 +18,20 @@ source "${SRC_DIR}/Log/__all.sh"
 # binDir      : fallback bin directory in case BIN_FILE has not been provided
 # rootDir     : directory used to compute src file relative path
 # srcDirs     : additional directories where to find the functions
-declare -a params=(--src-dir "${SRC_DIR}" --bin-dir "${BIN_DIR}" --root-dir "${ROOT_DIR}")
-if (($# == 0)); then
-  find "${SRC_DIR}/_binaries" -name "*.sh" -print |
-    (grep -v -E '/testsData/' || true) |
-    xargs -L1 -P8 -I{} \
-      "${FRAMEWORK_DIR}/bin/compile" "{}" "${params[@]}"
-else
-  for file in "$@"; do
-    file="$(realpath "${file}")"
-    "${FRAMEWORK_DIR}/bin/compile" "${file}" "${params[@]}"
-  done
-fi
+declare -a params=(
+  --src-dir "${SRC_DIR}"
+  --bin-dir "${BIN_DIR}"
+  --root-dir "${ROOT_DIR}"
+)
+
+(
+  if (($# == 0)); then
+    find "${SRC_DIR}/_binaries" -name "*.sh" |
+      (grep -v -E '/testsData/' || true)
+  else
+    for file in "$@"; do
+      realpath "${file}"
+    done
+  fi
+) | xargs -L1 -P8 -I{} \
+  "${FRAMEWORK_DIR}/bin/compile" "{}" "${params[@]}"
