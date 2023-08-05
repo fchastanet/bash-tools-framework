@@ -51,6 +51,8 @@
 
 ## 3. Framework functions changes
 
+- Log/ZZZ.sh to rename as Log/init.sh that will be called by Log::load function
+  - in order to allow levels to be overridden by command opts
 - merge Framework::run and Command::captureOutputAndExitCode
 - create function Array::remove
 - Conf::list findOptions as last arg so any number of args
@@ -71,6 +73,7 @@
 
 TODOs linked to bin/compiler:
 
+- .framework-config should contain the compiler options
 - make compile options works with relative files
   - update CompileCommand.md examples
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented

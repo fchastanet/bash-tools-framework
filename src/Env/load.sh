@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # lazy initialization
-declare -g BASH_FRAMEWORK_INITIALIZED="0"
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
@@ -12,7 +11,7 @@ declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
 Env::load() {
-  if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
+  if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
   fi
   BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"

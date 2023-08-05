@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# avoid to load the .env file too soon
+# shellcheck disable=SC2034
+export BASH_FRAMEWORK_INITIALIZED=1
+
 #####################################
 # GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
 # DO NOT EDIT IT
@@ -46,7 +50,7 @@ cleanOnExit() {
   if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
     Log::displayInfo "KEEP_TEMP_FILES=1 temp files kept here '${TMPDIR}'"
   elif [[ -n "${TMPDIR+xxx}" ]]; then
-    Log::displayInfo "KEEP_TEMP_FILES=0 removing temp files '${TMPDIR}'"
+    Log::displayDebug "KEEP_TEMP_FILES=0 removing temp files '${TMPDIR}'"
     rm -Rf "${TMPDIR:-/tmp/fake}" >/dev/null 2>&1
   fi
 }
@@ -117,155 +121,7 @@ Assert::bashFile() {
   [[ "${head}" =~ ^#\!.*bash ]]
 }
 
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
-}
-
-# missingBashFileList this file will contain the files that are not available when checking them
-# File::detectBashFile is used in conjunction with git ls-files
-# typical case for missing file is when a file is marked as deleted but not staged
-declare missingBashFileList
-missingBashFileList=""
-export missingBashFileList
-
-File::detectBashFile() {
-  local file="$1"
-
-  if [[ ! -f "${file}" ]]; then
-    if [[ -z "${missingBashFileList}" ]]; then
-      missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-    fi
-    echo "${file}" >>"${missingBashFileList}"
-    return 0
-  fi
-  if Assert::bashFile "${file}"; then
-    echo "${file}"
-  fi
-}
-
-# shellcheck disable=SC2120
-Filters::bashFrameworkFunctions() {
-  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
-}
-
-# shellcheck disable=SC2120
-Filters::commentLines() {
-  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
-}
-
-# @param {string[]} $@ the src directories in which .framework-config file will be searched
-# @output the config file path loaded if any
-# @return 0 if .framework-config file has been found in srcDirs provided
-Framework::loadConfig() {
-  # shellcheck disable=SC2034
-  local -n loadedConfigFile=$1
-  shift || true
-  Conf::loadNearestFile ".framework-config" loadedConfigFile "$@"
-}
-
-# Public: log level off
-export __LEVEL_OFF=0
-# Public: log level error
-export __LEVEL_ERROR=1
-# Public: log level warning
-export __LEVEL_WARNING=2
-# Public: log level info
-export __LEVEL_INFO=3
-# Public: log level success
-export __LEVEL_SUCCESS=3
-# Public: log level debug
-export __LEVEL_DEBUG=4
-
-export __LEVEL_OFF
-export __LEVEL_ERROR
-export __LEVEL_WARNING
-export __LEVEL_INFO
-export __LEVEL_SUCCESS
-export __LEVEL_DEBUG
-
-# Display message using error color (red)
-# @param {String} $1 message
-Log::displayError() {
-  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  Log::logError "$1"
-}
-
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
-Log::displayInfo() {
-  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
-  Log::logInfo "$1"
-}
-
-# Display message using skip color (yellow)
-# @param {String} $1 message
-Log::displaySkipped() {
-  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  Log::logSkipped "$1"
-}
-
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
-Log::displaySuccess() {
-  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
-  Log::logSuccess "$1"
-}
-
-# Display message using warning color (yellow)
-# @param {String} $1 message
-Log::displayWarning() {
-  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
-  Log::logWarning "$1"
-}
-
-# Display message using error color (red) and exit immediately with error status 1
-# @param {String} $1 message
-Log::fatal() {
-  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
-  Log::logFatal "$1"
-  exit 1
-}
-
-# Load the nearest config file
-# eg: Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
-# will search first .framework-config file in "srcDir1"
-# then if not found will go in up directories until /
-# then will search in "srcDir2"
-# then if not found will go in up directories until /
-# source the file if found
-# @param {String} $1 config file name to search
-# @param {String} $2 passed by reference, will return the loaded config file name
-# @param {String} $@ source directories in which the config file will be searched
-# @return 0 if file found, 1 if file not found
-# @output the filepath loaded if any
-Conf::loadNearestFile() {
-  local configFileName="$1"
-  local -n loadedFile="$2"
-  shift 2 || true
-  local -a srcDirs=("$@")
-  for srcDir in "${srcDirs[@]}"; do
-    configFile="$(File::upFind "${srcDir}" "${configFileName}" || true)"
-    if [[ -n "${configFile}" ]]; then
-      # shellcheck source=/.framework-config
-      source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
-      Log::displayDebug "Config file ${configFile} is loaded"
-      # shellcheck disable=SC2034
-      loadedFile="${configFile}"
-      return 0
-    fi
-  done
-
-  Log::displayWarning "Config file '${configFileName}' not found in any source directories provided"
-  return 1
-}
-
 # lazy initialization
-declare -g BASH_FRAMEWORK_INITIALIZED="0"
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
@@ -276,7 +132,7 @@ declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
 Env::load() {
-  if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
+  if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
   fi
   BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
@@ -360,11 +216,170 @@ Env::load() {
   set +o allexport
 }
 
+Env::pathPrepend() {
+  local arg
+  for arg in "$@"; do
+    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
+      PATH="$(realpath "${arg}"):${PATH}"
+    fi
+  done
+}
+
+# missingBashFileList this file will contain the files that are not available when checking them
+# File::detectBashFile is used in conjunction with git ls-files
+# typical case for missing file is when a file is marked as deleted but not staged
+declare missingBashFileList
+missingBashFileList=""
+export missingBashFileList
+
+File::detectBashFile() {
+  local file="$1"
+
+  if [[ ! -f "${file}" ]]; then
+    if [[ -z "${missingBashFileList}" ]]; then
+      missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+    fi
+    echo "${file}" >>"${missingBashFileList}"
+    return 0
+  fi
+  if Assert::bashFile "${file}"; then
+    echo "${file}"
+  fi
+}
+
+# print the resolved path relative to DIR
+# @param {string} srcFile $1 the file to resolve
+# @param {string} relativeTo $2 the directory
+# @output the resolved path relative to DIR
+# @note do not check for path existence
+File::relativeToDir() {
+  local srcFile="$1"
+  local relativeTo="$2"
+
+  realpath -m --relative-to="${relativeTo}" "${srcFile}"
+}
+
+# shellcheck disable=SC2120
+Filters::bashFrameworkFunctions() {
+  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
+}
+
+# shellcheck disable=SC2120
+Filters::commentLines() {
+  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
+}
+
+# @param {string[]} $@ the src directories in which .framework-config file will be searched
+# @output the config file path loaded if any
+# @return 0 if .framework-config file has been found in srcDirs provided
+Framework::loadConfig() {
+  # shellcheck disable=SC2034
+  local -n loadedConfigFile=$1
+  shift || true
+  Conf::loadNearestFile ".framework-config" loadedConfigFile "$@"
+}
+
+# Public: log level off
+export __LEVEL_OFF=0
+# Public: log level error
+export __LEVEL_ERROR=1
+# Public: log level warning
+export __LEVEL_WARNING=2
+# Public: log level info
+export __LEVEL_INFO=3
+# Public: log level success
+export __LEVEL_SUCCESS=3
+# Public: log level debug
+export __LEVEL_DEBUG=4
+
+export __LEVEL_OFF
+export __LEVEL_ERROR
+export __LEVEL_WARNING
+export __LEVEL_INFO
+export __LEVEL_SUCCESS
+export __LEVEL_DEBUG
+
 # Display message using debug color (grey)
 # @param {String} $1 message
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
+}
+
+# Display message using error color (red)
+# @param {String} $1 message
+Log::displayError() {
+  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  Log::logError "$1"
+}
+
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
+Log::displayInfo() {
+  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
+  Log::logInfo "$1"
+}
+
+# Display message using skip color (yellow)
+# @param {String} $1 message
+Log::displaySkipped() {
+  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  Log::logSkipped "$1"
+}
+
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
+Log::displaySuccess() {
+  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  Log::logSuccess "$1"
+}
+
+# Display message using warning color (yellow)
+# @param {String} $1 message
+Log::displayWarning() {
+  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  Log::logWarning "$1"
+}
+
+# Display message using error color (red) and exit immediately with error status 1
+# @param {String} $1 message
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
+}
+
+# Load the nearest config file
+# eg: Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
+# will search first .framework-config file in "srcDir1"
+# then if not found will go in up directories until /
+# then will search in "srcDir2"
+# then if not found will go in up directories until /
+# source the file if found
+# @param {String} $1 config file name to search
+# @param {String} $2 passed by reference, will return the loaded config file name
+# @param {String} $@ source directories in which the config file will be searched
+# @return 0 if file found, 1 if file not found
+# @output the filepath loaded if any
+Conf::loadNearestFile() {
+  local configFileName="$1"
+  local -n loadedFile="$2"
+  shift 2 || true
+  local -a srcDirs=("$@")
+  for srcDir in "${srcDirs[@]}"; do
+    configFile="$(File::upFind "${srcDir}" "${configFileName}" || true)"
+    if [[ -n "${configFile}" ]]; then
+      # shellcheck source=/.framework-config
+      source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
+      Log::displayDebug "Config file ${configFile} is loaded"
+      # shellcheck disable=SC2034
+      loadedFile="${configFile}"
+      return 0
+    fi
+  done
+
+  Log::displayWarning "Config file '${configFileName}' not found in any source directories provided"
+  return 1
 }
 
 # Display message using info color (bg light blue/fg white)
@@ -648,13 +663,13 @@ Env::pathPrepend "${BIN_DIR}"
 
 CONFIG_FILENAME="${ROOT_DIR}/.framework-config"
 FORMAT="plain"
-DEFAULT_ARGS=(-f checkstyle)
+DEFAULT_ARGS=(-f plain)
 HELP="$(
   cat <<EOF
 ${__HELP_TITLE}Synopsis:${__HELP_NORMAL} This framework linter
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>]
+${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>] [--verbose|-v]
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
@@ -664,8 +679,9 @@ Lint files of the current repository
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
+  -v|--verbose display more information about processed files
   --src-dir|-s <srcDir> provide the directory where to find the functions source code.
-      By default current src directory is used also.
+    Prefer using .framework-config file
 
 ${__HELP_TITLE}Author:${__HELP_NORMAL}
 [François Chastanet](https://github.com/fchastanet)
@@ -684,12 +700,7 @@ FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 NON_FRAMEWORK_FILES_REGEXP=^$
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
-
-# load .framework-config
-# shellcheck disable=SC2034
-configFile=""
-# shellcheck source=/.framework-config
-Framework::loadConfig configFile "${ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
+export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_WARNING}
 
 if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"
@@ -712,6 +723,9 @@ while true; do
       fi
       FORMAT="$1"
       ;;
+    --verbose | -v)
+      export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+      ;;
     --src-dir | -s)
       shift || true
       if [[ ! -d "$1" ]]; then
@@ -730,11 +744,24 @@ while true; do
   shift || true
 done
 
-# add src dir by default
-FRAMEWORK_SRC_DIRS+=("${ROOT_DIR}/src")
+BASH_FRAMEWORK_INITIALIZED=0 Env::load
+
+# load .framework-config
+# shellcheck disable=SC2034
+configFile=""
+# shellcheck source=/.framework-config
+Framework::loadConfig configFile "${ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
 
 checkEachFunctionHasSrcFile() {
   local file="$1"
+  if [[ "${file}" =~ .bats$ ]]; then
+    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - bats file"
+    return 0
+  fi
+  if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${file}"; then
+    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
   readarray -t functionsToImport < <(
     Filters::commentLines "${file}" |
       Filters::bashFrameworkFunctions |
@@ -744,7 +771,7 @@ checkEachFunctionHasSrcFile() {
   )
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      Log::displaySkipped "Function ${functionToImport} ignored, because of rule defined in ${CONFIG_FILENAME}"
+      Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
       continue
     fi
     local fileNameToImport
@@ -758,26 +785,46 @@ checkEachFunctionHasSrcFile() {
     done
     if [[ "${found}" = "0" ]]; then
       if [[ "${FORMAT}" = "plain" ]]; then
-        Log::displayError "The function ${functionToImport} called in ${file} does not have a matching source file ${fileNameToImport} in any source directories specified"
+        Log::displayError "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} - does not have a matching source file ${fileNameToImport} in any source directories specified"
       else
-        echo "<error severity='error' message='Function ${functionToImport} does not have a matching source file ${fileNameToImport}  in any source directories specified'/>"
+        echo "<error severity='error' source='checkEachFunctionHasSrcFile' message='Function ${functionToImport} does not have a matching source file ${fileNameToImport} in any source directories specified'/>"
       fi
       return 1
     fi
   done
 }
 
+getRelativeSrcDir() {
+  File::relativeToDir "${FRAMEWORK_SRC_DIRS[0]}" "${ROOT_DIR}"
+}
+
+deduceBashFunctionFromSrcFile() {
+  local srcFile="$1"
+  local result="${srcFile%.sh}"
+  result="${srcFile/$(getRelativeSrcDir)//}"
+  echo "${result//\//::}"
+}
+
 checkEachSrcFileHasBatsFile() {
   local file="$1"
   if [[ ! "${file}" =~ .sh$ ]]; then
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - no suffix .sh"
+    return 0
+  fi
+  if [[ ! "${file}" =~ ^$(getRelativeSrcDir) ]]; then
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - src directory not declared in ${CONFIG_FILENAME}"
+    return 0
+  fi
+  if deduceBashFunctionFromSrcFile "${file}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - matching function name matches FRAMEWORK_FUNCTIONS_IGNORE_REGEXP defined in ${CONFIG_FILENAME}"
     return 0
   fi
   local batsFile="${file%.*}.bats"
   if [[ ! -f "${ROOT_DIR}/${batsFile}" ]]; then
     if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "File '${file}', missing bats file '${batsFile}'"
+      Log::displayWarning "checkEachSrcFileHasBatsFile - File '${file}' - missing bats file '${batsFile}'"
     else
-      echo "<error severity='warning' message='missing bats file '${batsFile}'/>"
+      echo "<error severity='warning' source='checkEachSrcFileHasBatsFile' message='missing bats file '${batsFile}'/>"
     fi
     ((++warningCount))
   fi
@@ -786,15 +833,21 @@ checkEachSrcFileHasBatsFile() {
 # search for at least one function that is matching the filename
 checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local srcFile="$1"
-  if echo "${srcFile}" | grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}"; then
+  if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${CONFIG_FILENAME}"
     return 0
   fi
+  if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+
   local foundFunctionMatching=0
   local expectedFunctionName currentFunction
   local file="${srcFile#src/}"
-  expectedFunctionName="$(echo "${file%.sh}" | sed -E 's#/#::#g')"
+  expectedFunctionName="$(sed -E 's#/#::#g' <<<"${file%.sh}")"
   if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displaySkipped "Function ${expectedFunctionName} ignored, because of rule defined in ${CONFIG_FILENAME}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - Function ${expectedFunctionName} - rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
     return 0
   fi
 
@@ -806,9 +859,9 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
 
   if [[ "${foundFunctionMatching}" = "0" ]]; then
     if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "File ${srcFile} does not contain any function named '${expectedFunctionName}'"
+      Log::displayWarning "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - no function named '${expectedFunctionName}'"
     else
-      echo "<error severity='warning' message='Should contain a function named ${expectedFunctionName}'/>"
+      echo "<error severity='warning' source='srcFileHasOneFunctionCorrectlyNamed' message='Should contain a function named ${expectedFunctionName}'/>"
     fi
     ((++warningCount))
     return 0
@@ -829,7 +882,7 @@ while IFS='' read -r file; do
   if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "<file name='${file}'>"
   fi
-
+  Log::displayInfo "Checking file ${file}"
   checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
@@ -839,7 +892,6 @@ while IFS='' read -r file; do
   fi
 done < <(
   git ls-files --exclude-standard |
-    grep -E -v -e "${NON_FRAMEWORK_FILES_REGEXP}" |
     xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
     true
 )
@@ -847,10 +899,10 @@ done < <(
 # shellcheck disable=SC2154
 while IFS='' read -r file; do
   if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayWarning "File ${file} does not exist, git renamed file ?"
+    Log::displayWarning "fileExistence - File ${file} does not exist, git renamed file ?"
   else
     echo "<file name='${file}'>"
-    echo "<error severity='warning' message='file does not exist, git renamed file ?'/>"
+    echo "<error severity='warning' source='fileExistence' message='file does not exist, git renamed file ?'/>"
     echo "</file>"
   fi
   ((++warningCount))
