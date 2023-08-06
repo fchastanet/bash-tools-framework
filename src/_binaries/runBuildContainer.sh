@@ -11,6 +11,7 @@ TTY allocation is detected automatically
 
 ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <vendor> <bash_tar_version> <bash_base_image> <bash_image> ...
 additional docker build options can be passed via DOCKER_BUILD_OPTIONS env variable
+additional docker run options can be passed via DOCKER_RUN_OPTIONS env variable
 
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
@@ -53,8 +54,10 @@ fi
 
 (
   set -x
+  # shellcheck disable=SC2086
   docker run \
     --rm \
+    ${DOCKER_RUN_OPTIONS} \
     "${args[@]}" \
     -w /bash \
     -v "$(pwd):/bash" \

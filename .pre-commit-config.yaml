@@ -111,19 +111,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
-        stages: [push]
-
-  - repo: local
-    hooks:
-      - id: build-doc-files
-        name: build-doc-files
-        entry: bash -c 'SKIP_BUILD=1 ./bin/doc'
-        language: system
-        always_run: true
-        require_serial: true
-        fail_fast: true
-        verbose: true
-        stages: [push]
+        stages: [commit]
 
   - repo: local
     hooks:
@@ -136,6 +124,18 @@ repos:
         fail_fast: true
         verbose: true
         stages: [commit]
+
+  - repo: local
+    hooks:
+      - id: build-doc-files
+        name: build-doc-files
+        entry: bash -c 'SKIP_BUILD=1 ./bin/doc'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+        stages: [push]
 
   - repo: local
     hooks:
