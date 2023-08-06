@@ -2,6 +2,6 @@
 
 # log message to file
 # @param {String} $1 message
-Log::logError() {
-  Log::logMessage "${2:-ERROR}" "$@"
+Log::logStatus() {
+  Log::logMessage "${2:-STATUS}" "$@"
 }

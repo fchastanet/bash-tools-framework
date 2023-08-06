@@ -3,5 +3,5 @@
 # log message to file
 # @param {String} $1 message
 Log::logInfo() {
-  Log::logMessage "INFO" "$@"
+  Log::logMessage "${2:-INFO}" "$1"
 }

@@ -319,8 +319,9 @@ Log::displayDebug() {
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayInfo() {
-  echo -e "${__INFO_COLOR}INFO    - ${1}${__RESET_COLOR}" >&2
-  Log::logInfo "$1"
+  local type="${2:-INFO}"
+  echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+  Log::logInfo "$1" "${type}"
 }
 
 # shellcheck disable=SC2317
@@ -338,6 +339,7 @@ Log::load() {
   fi
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
     Log::displayWarning() { :; }
+    Log::displayStatus() { :; }
   fi
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
     Log::displayError() { :; }
@@ -354,6 +356,7 @@ Log::load() {
   fi
   if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
     Log::logWarning() { :; }
+    Log::logStatus() { :; }
   fi
   if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
     Log::logError() { :; }
@@ -418,8 +421,9 @@ Log::displayError() {
 # Display message using info color (bg light blue/fg white)
 # @param {String} $1 message
 Log::displayHelp() {
-  echo -e "${__HELP_COLOR}HELP    - ${1}${__RESET_COLOR}" >&2
-  Log::logHelp "$1"
+  local type="${2:-HELP}"
+  echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+  Log::logHelp "$1" "${type}"
 }
 
 # Display message using skip color (yellow)
@@ -427,6 +431,14 @@ Log::displayHelp() {
 Log::displaySkipped() {
   echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   Log::logSkipped "$1"
+}
+
+# Display message using info color (blue) but warning level
+# @param {String} $1 message
+Log::displayStatus() {
+  local type="${2:-STATUS}"
+  echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
+  Log::logStatus "$1" "${type}"
 }
 
 # Display message using success color (bg green/fg white)
@@ -446,43 +458,49 @@ Log::displayWarning() {
 # log message to file
 # @param {String} $1 message
 Log::logDebug() {
-  Log::logMessage "DEBUG" "$@"
+  Log::logMessage "${2:-DEBUG}" "$@"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logError() {
-  Log::logMessage "ERROR" "$@"
+  Log::logMessage "${2:-ERROR}" "$@"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logHelp() {
-  Log::logMessage "HELP" "$@"
+  Log::logMessage "${2:-HELP}" "$1"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logInfo() {
-  Log::logMessage "INFO" "$@"
+  Log::logMessage "${2:-INFO}" "$1"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logSkipped() {
-  Log::logMessage "SKIPPED" "$@"
+  Log::logMessage "${2:-SKIPPED}" "$@"
+}
+
+# log message to file
+# @param {String} $1 message
+Log::logStatus() {
+  Log::logMessage "${2:-STATUS}" "$@"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logSuccess() {
-  Log::logMessage "SUCCESS" "$@"
+  Log::logMessage "${2:-SUCCESS}" "$@"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logWarning() {
-  Log::logMessage "WARNING" "$@"
+  Log::logMessage "${2:-WARNING}" "$@"
 }
 
 # To be called before logging in the log file

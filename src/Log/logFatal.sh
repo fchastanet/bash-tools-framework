@@ -3,5 +3,5 @@
 # log message to file
 # @param {String} $1 message
 Log::logFatal() {
-  Log::logMessage "FATAL" "$@"
+  Log::logMessage "${2:-FATAL}" "$@"
 }

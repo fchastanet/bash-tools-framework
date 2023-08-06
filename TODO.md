@@ -76,6 +76,7 @@ TODOs linked to bin/compiler:
 
 - .framework-config should contain the compiler options
 - make compile options works with relative files
+  - display info should display relative path too instead of full path
   - update CompileCommand.md examples
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface

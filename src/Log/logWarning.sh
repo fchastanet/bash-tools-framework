@@ -3,5 +3,5 @@
 # log message to file
 # @param {String} $1 message
 Log::logWarning() {
-  Log::logMessage "WARNING" "$@"
+  Log::logMessage "${2:-WARNING}" "$@"
 }

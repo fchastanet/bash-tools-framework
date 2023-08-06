@@ -14,6 +14,7 @@ Log::load() {
   fi
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
     Log::displayWarning() { :; }
+    Log::displayStatus() { :; }
   fi
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
     Log::displayError() { :; }
@@ -30,6 +31,7 @@ Log::load() {
   fi
   if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
     Log::logWarning() { :; }
+    Log::logStatus() { :; }
   fi
   if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
     Log::logError() { :; }
