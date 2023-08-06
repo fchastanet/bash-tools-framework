@@ -136,6 +136,10 @@ deduceBashFunctionFromSrcFile() {
 
 checkEachSrcFileHasBatsFile() {
   local file="$1"
+  if [[ "${file}" =~ ${BATS_FILE_NOT_NEEDED_REGEXP} ]]; then
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - rule BATS_FILE_NOT_NEEDED_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
   if [[ ! "${file}" =~ .sh$ ]]; then
     Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - no suffix .sh"
     return 0
