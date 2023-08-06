@@ -6,8 +6,8 @@
     "megalinter-reports": true,
     "_site": true,
     "vendor": true,
-    "bin/*": true,
-    "bin/compile": false,
+    // all bin except bin/compile
+    "bin/[!c]*": true,
     "pages/assets/images/compilerEmbedInjection.svg": true
   },
   "explorer.autoReveal": false,

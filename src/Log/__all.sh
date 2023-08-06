@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# shellcheck source=src/_includes/_colors.sh
+source "${FRAMEWORK_DIR}/src/_includes/_colors.sh"
 # shellcheck source=src/Log/_.sh
 source "${FRAMEWORK_DIR}/src/Log/_.sh"
 # shellcheck source=src/Log/displayDebug.sh
@@ -38,5 +40,5 @@ source "${FRAMEWORK_DIR}/src/Log/logSuccess.sh"
 source "${FRAMEWORK_DIR}/src/Log/logWarning.sh"
 # shellcheck source=src/Log/rotate.sh
 source "${FRAMEWORK_DIR}/src/Log/rotate.sh"
-# shellcheck source=src/Log/ZZZ.sh
-source "${FRAMEWORK_DIR}/src/Log/ZZZ.sh"
+# shellcheck source=src/Log/load.sh
+source "${FRAMEWORK_DIR}/src/Log/load.sh"

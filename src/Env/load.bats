@@ -5,6 +5,9 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
   unset BASH_FRAMEWORK_INITIALIZED
+  unset HOME
+  unset BASH_FRAMEWORK_ENV_FILEPATH
+  unset BASH_FRAMEWORK_DISPLAY_LEVEL
 }
 
 teardown() {
@@ -28,7 +31,6 @@ function Env::load::forceLoadNonExistentFile { #@test
 function Env::load::forceLoadExistentFile { #@test
   cp "${BATS_TEST_DIRNAME}/testsData/.env" "${BATS_TEST_TMPDIR}/.env"
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_TMPDIR}/.env"
-  unset HOME
   Env::load || return 1
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
   [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "${__LEVEL_INFO}" ]]
@@ -41,7 +43,6 @@ function Env::load::loadRootDirConfEnvFile { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
   export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
-  unset HOME
   Env::load || return 1
   echo "${BASH_FRAMEWORK_LOG_FILE}"
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
@@ -104,9 +105,6 @@ function Env::load::overrideWithParameter { #@test
 }
 
 function Env::load::noEnvFilesDefaultValues { #@test
-  unset HOME
-  unset BASH_FRAMEWORK_ENV_FILEPATH
-
   Env::load || return 1
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
   [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "3" ]]
@@ -119,7 +117,6 @@ function Env::load::loadRootDirConfEnvFileAndOverride { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envOverride" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
   export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
-  unset HOME
   export OVERRIDE_BASH_FRAMEWORK_DISPLAY_LEVEL=overriddenDisplayLevel
   export OVERRIDE_BASH_FRAMEWORK_LOG_LEVEL=overriddenLogLevel
   export OVERRIDE_BASH_FRAMEWORK_LOG_FILE=overriddenLogFile

@@ -51,12 +51,14 @@ if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
   args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
 fi
 
-set -x
-docker run \
-  --rm \
-  "${args[@]}" \
-  -w /bash \
-  -v "$(pwd):/bash" \
-  --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
-  "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-  "$@"
+(
+  set -x
+  docker run \
+    --rm \
+    "${args[@]}" \
+    -w /bash \
+    -v "$(pwd):/bash" \
+    --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
+    "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
+    "$@"
+)

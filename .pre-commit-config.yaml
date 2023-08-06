@@ -21,7 +21,7 @@ repos:
         stages: [commit]
         exclude: |
           (?x)^(
-            pages\/images/.*\.svg
+            pages\/images/.*\.svg|
             images/.*\.svg
           )$
       - id: check-executables-have-shebangs
@@ -40,7 +40,7 @@ repos:
       - id: check-json
         exclude: |
           (?x)^(
-            conf\/.vscode\/settings.json
+            .vscode\/settings.json
           )$
         stages: [commit]
 

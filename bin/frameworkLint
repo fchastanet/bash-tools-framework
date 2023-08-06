@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# avoid to load the .env file too soon
-# shellcheck disable=SC2034
-export BASH_FRAMEWORK_INITIALIZED=1
-
 #####################################
 # GENERATED FILE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint.sh
 # DO NOT EDIT IT
@@ -28,6 +24,43 @@ SRC_DIR="${ROOT_DIR}/src"
 VENDOR_DIR="${ROOT_DIR}/vendor"
 # shellcheck disable=SC2034
 VENDOR_BIN_DIR="${ROOT_DIR}/vendor/bin"
+
+if [[ -t 1 || -t 2 ]]; then
+  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+  export __ERROR_COLOR='\e[31m'      # Red
+  export __INFO_COLOR='\e[44m'       # white on lightBlue
+  export __SUCCESS_COLOR='\e[32m'    # Green
+  export __WARNING_COLOR='\e[33m'    # Yellow
+  export __TEST_COLOR='\e[100m'      # Light magenta
+  export __TEST_ERROR_COLOR='\e[41m' # white on red
+  export __SKIPPED_COLOR='\e[33m'    # Yellow
+  export __HELP_COLOR='\e[7;49;33m'  # Black on Gold
+  export __DEBUG_COLOR='\e[37m'      # Grey
+  # Internal: reset color
+  export __RESET_COLOR='\e[0m' # Reset Color
+  # shellcheck disable=SC2155,SC2034
+  export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+  # shellcheck disable=SC2155,SC2034
+  export __HELP_TITLE="$(echo -e "\e[1;37m")"
+  # shellcheck disable=SC2155,SC2034
+  export __HELP_NORMAL="$(echo -e "\033[0m")"
+else
+  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+  export __ERROR_COLOR=''
+  export __INFO_COLOR=''
+  export __SUCCESS_COLOR=''
+  export __WARNING_COLOR=''
+  export __SKIPPED_COLOR=''
+  export __HELP_COLOR=''
+  export __TEST_COLOR=''
+  export __TEST_ERROR_COLOR=''
+  export __DEBUG_COLOR=''
+  # Internal: reset color
+  export __RESET_COLOR=''
+  export __HELP_EXAMPLE=''
+  export __HELP_TITLE=''
+  export __HELP_NORMAL=''
+fi
 
 ################################################
 # Temp dir management
@@ -90,6 +123,27 @@ export TERM=xterm-256color
 #avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# change display level to level argument
+# if --verbose|-v option is parsed in arguments
+Args::parseVerbose() {
+  local verboseDisplayLevel="$1"
+  declare -gx ARGS_VERBOSE=0
+  shift || true
+  local status=1
+  while true; do
+    if [[ "$1" = "--verbose" || "$1" = "-v" ]]; then
+      status=0
+      ARGS_VERBOSE=1
+      break
+    fi
+    shift || break
+  done
+  if [[ "${status}" = "0" ]]; then
+    export BASH_FRAMEWORK_DISPLAY_LEVEL=${verboseDisplayLevel}
+  fi
+  return "${status}"
+}
 
 # check if an element is contained in an array
 #
@@ -349,6 +403,63 @@ Log::fatal() {
   exit 1
 }
 
+# shellcheck disable=SC2317
+
+Log::load() {
+  # disable display methods following display level
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
+    Log::displayDebug() { :; }
+  fi
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_INFO)); then
+    Log::displayHelp() { :; }
+    Log::displayInfo() { :; }
+    Log::displaySkipped() { :; }
+    Log::displaySuccess() { :; }
+  fi
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
+    Log::displayWarning() { :; }
+  fi
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
+    Log::displayError() { :; }
+  fi
+  # disable log methods following log level
+  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_DEBUG)); then
+    Log::logDebug() { :; }
+  fi
+  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_INFO)); then
+    Log::logHelp() { :; }
+    Log::logInfo() { :; }
+    Log::logSkipped() { :; }
+    Log::logSuccess() { :; }
+  fi
+  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
+    Log::logWarning() { :; }
+  fi
+  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
+    Log::logError() { :; }
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+      export BASH_FRAMEWORK_LOG_LEVEL
+    elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
+        BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+        Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
+      fi
+      if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
+        BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
+        Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
+      fi
+    fi
+    Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
+    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+    fi
+  fi
+}
+
 # Load the nearest config file
 # eg: Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
 # will search first .framework-config file in "srcDir1"
@@ -553,110 +664,19 @@ Assert::validPath() {
 # FUNCTIONS
 
 Env::load
+export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
+Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
+# shellcheck disable=SC2034
+longArg="--verbose" shortArg="-v"
 
-# disable display methods following display level
-if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
-  Log::displayDebug() { :; }
-fi
-if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_INFO)); then
-  Log::displayHelp() { :; }
-  Log::displayInfo() { :; }
-  Log::displaySkipped() { :; }
-  Log::displaySuccess() { :; }
-fi
-if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
-  Log::displayWarning() { :; }
-fi
-if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
-  Log::displayError() { :; }
-fi
-# disable log methods following log level
-if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_DEBUG)); then
-  Log::logDebug() { :; }
-fi
-if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_INFO)); then
-  Log::logHelp() { :; }
-  Log::logInfo() { :; }
-  Log::logSkipped() { :; }
-  Log::logSuccess() { :; }
-fi
-if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
-  Log::logWarning() { :; }
-fi
-if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
-  Log::logError() { :; }
-fi
-
-if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-    export BASH_FRAMEWORK_LOG_LEVEL
-  elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-    if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
-      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
-      Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
-    fi
-    if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
-      BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
-      Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
-    fi
-  fi
-  Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
-  if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-    Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-  fi
-fi
-
-if [[ -t 1 || -t 2 ]]; then
-  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-  readonly __ERROR_COLOR='\e[31m'      # Red
-  readonly __INFO_COLOR='\e[44m'       # white on lightBlue
-  readonly __SUCCESS_COLOR='\e[32m'    # Green
-  readonly __WARNING_COLOR='\e[33m'    # Yellow
-  readonly __TEST_COLOR='\e[100m'      # Light magenta
-  readonly __TEST_ERROR_COLOR='\e[41m' # white on red
-  readonly __SKIPPED_COLOR='\e[33m'    # Yellow
-  readonly __HELP_COLOR='\e[7;49;33m'  # Black on Gold
-  readonly __DEBUG_COLOR='\e[37m'      # Grey
-  # Internal: reset color
-  readonly __RESET_COLOR='\e[0m' # Reset Color
-  # shellcheck disable=SC2155,SC2034
-  readonly __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
-  # shellcheck disable=SC2155,SC2034
-  readonly __HELP_TITLE="$(echo -e "\e[1;37m")"
-  # shellcheck disable=SC2155,SC2034
-  readonly __HELP_NORMAL="$(echo -e "\033[0m")"
-else
-  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-  readonly __ERROR_COLOR=''
-  readonly __INFO_COLOR=''
-  readonly __SUCCESS_COLOR=''
-  readonly __WARNING_COLOR=''
-  readonly __SKIPPED_COLOR=''
-  readonly __HELP_COLOR=''
-  readonly __TEST_COLOR=''
-  readonly __TEST_ERROR_COLOR=''
-  readonly __DEBUG_COLOR=''
-  # Internal: reset color
-  readonly __RESET_COLOR=''
-  readonly __HELP_EXAMPLE=''
-  readonly __HELP_TITLE=''
-  readonly __HELP_NORMAL=''
-fi
-export __ERROR_COLOR
-export __INFO_COLOR
-export __SUCCESS_COLOR
-export __WARNING_COLOR
-export __SKIPPED_COLOR
-export __TEST_COLOR
-export __TEST_ERROR_COLOR
-export __SKIPPED_COLOR
-export __HELP_COLOR
-export __DEBUG_COLOR
-export __RESET_COLOR
-export __HELP_EXAMPLE
-export __HELP_TITLE
-export __HELP_NORMAL
+# remove verbose param
+declare -a newParams=()
+for param; do
+  # shellcheck disable=SC2154
+  [[ "${param}" == "${longArg}" || "${param}" == "${shortArg}" ]] || newParams+=("${param}")
+done
+set -- "${newParams[@]}"
+Log::load
 
 Env::pathPrepend "${VENDOR_BIN_DIR}"
 Env::pathPrepend "${BIN_DIR}"
@@ -700,14 +720,13 @@ FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 NON_FRAMEWORK_FILES_REGEXP=^$
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
-export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_WARNING}
 
 if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"
 fi
 
 declare args
-args="$(getopt -l help,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do
@@ -722,9 +741,6 @@ while true; do
         Log::fatal "format option invalid"
       fi
       FORMAT="$1"
-      ;;
-    --verbose | -v)
-      export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
       ;;
     --src-dir | -s)
       shift || true

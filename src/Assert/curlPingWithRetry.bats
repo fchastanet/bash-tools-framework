@@ -5,10 +5,6 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Assert/curlPingWithRetry.sh
 source "${BATS_TEST_DIRNAME}/curlPingWithRetry.sh"
-# shellcheck source=/src/Env/load.sh
-source "${srcDir}/Env/load.sh"
-# shellcheck source=/src/Log/__all.sh
-source "${srcDir}/Log/__all.sh"
 # shellcheck source=/src/Retry/parameterized.sh
 source "${srcDir}/Retry/parameterized.sh"
 # shellcheck source=/src/Assert/dirExists.sh

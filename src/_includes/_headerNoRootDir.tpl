@@ -16,9 +16,18 @@ REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
 BIN_DIR="${CURRENT_DIR}"
 
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
 
 # FUNCTIONS
+
+Env::load
+export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
+Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
+# shellcheck disable=SC2034
+longArg="--verbose" shortArg="-v"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/Args/remove.sh"
+Log::load
 
 Env::pathPrepend "${BIN_DIR}"
 

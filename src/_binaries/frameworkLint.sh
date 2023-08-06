@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${ROOT_DIR}/bin/frameworkLint
 
-# avoid to load the .env file too soon
-# shellcheck disable=SC2034
-export BASH_FRAMEWORK_INITIALIZED=1
-
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 
 CONFIG_FILENAME="${ROOT_DIR}/.framework-config"
@@ -37,14 +33,13 @@ FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 NON_FRAMEWORK_FILES_REGEXP=^$
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
-export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_WARNING}
 
 if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"
 fi
 
 declare args
-args="$(getopt -l help,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do
@@ -59,9 +54,6 @@ while true; do
         Log::fatal "format option invalid"
       fi
       FORMAT="$1"
-      ;;
-    --verbose | -v)
-      export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
       ;;
     --src-dir | -s)
       shift || true

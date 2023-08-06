@@ -25,9 +25,7 @@ generateLogs() {
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${logEnvFile}"
 
   Env::load
-
-  # shellcheck source=src/Log/ZZZ.sh
-  source "${srcDir}/Log/ZZZ.sh"
+  Log::load
 
   fatalMsg=$(
     trap '' EXIT

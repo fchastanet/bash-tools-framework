@@ -29,9 +29,7 @@ generateLogs() {
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${logEnvFile}"
 
   Env::load
-
-  # shellcheck source=src/Log/ZZZ.sh
-  source "${srcDir}/Log/ZZZ.sh"
+  Log::load
 
   debugMsg=$(Log::displayDebug "debug" 2>&1)
   expectedDebugMsg="$(echo -e "${__DEBUG_COLOR}DEBUG   - debug${__RESET_COLOR}")"

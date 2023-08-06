@@ -29,9 +29,7 @@ generateLogs() {
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${logEnvFile}"
 
   Env::load
-
-  # shellcheck source=src/Log/ZZZ.sh
-  source "${srcDir}/Log/ZZZ.sh"
+  Log::load
 
   infoMsg=$(Log::displayInfo "info" 2>&1)
   expectedInfoMsg="$(echo -e "${__INFO_COLOR}INFO    - info${__RESET_COLOR}")"

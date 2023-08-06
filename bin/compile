@@ -29,8 +29,6 @@ source "${_COMPILE_SRC_DIR}/Env/load.sh"
 source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 # shellcheck source=src/File/relativeToDir.sh
 source "${_COMPILE_SRC_DIR}/File/relativeToDir.sh"
-# shellcheck source=src/Log/__all.sh
-source "${_COMPILE_SRC_DIR}/Log/__all.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
 # shellcheck source=/src/Filters/catFileCleaned.sh
@@ -83,6 +81,8 @@ source "${_COMPILE_SRC_DIR}/Embed/embedFrameworkFunction.sh"
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
+# shellcheck source=/src/Assert/fileWritable.sh
+source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Embed/getSrcDirsFromOptions.sh"
 

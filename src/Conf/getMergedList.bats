@@ -7,10 +7,6 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/Conf/getMergedList.sh"
 # shellcheck source=/src/Conf/list.sh
 source "${srcDir}/Conf/list.sh"
-# shellcheck source=/src/Env/load.sh
-source "${srcDir}/Env/load.sh"
-# shellcheck source=/src/Log/__all.sh
-source "${srcDir}/Log/__all.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"

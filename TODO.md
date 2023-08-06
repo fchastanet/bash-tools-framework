@@ -51,8 +51,9 @@
 
 ## 3. Framework functions changes
 
-- Log/ZZZ.sh to rename as Log/init.sh that will be called by Log::load function
-  - in order to allow levels to be overridden by command opts
+- check if we could use alias to override methods to be able to reload or pass
+  by temp functions?
+- replace \_colors.sh with Log/theme
 - merge Framework::run and Command::captureOutputAndExitCode
 - create function Array::remove
 - Conf::list findOptions as last arg so any number of args

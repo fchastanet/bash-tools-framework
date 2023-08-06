@@ -8,10 +8,6 @@ FRAMEWORK_DIR="${ROOT_DIR}"
 
 # shellcheck source=src/_includes/_header.sh
 source "${SRC_DIR}/_includes/_header.sh"
-# shellcheck source=src/Env/load.sh
-source "${SRC_DIR}/Env/load.sh"
-# shellcheck source=src/Log/__all.sh
-source "${SRC_DIR}/Log/__all.sh"
 
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched
@@ -23,6 +19,9 @@ declare -a params=(
   --bin-dir "${BIN_DIR}"
   --root-dir "${ROOT_DIR}"
 )
+if [[ "${ARGS_VERBOSE}" = "1" ]]; then
+  params+=("--verbose")
+fi
 
 (
   if (($# == 0)); then
