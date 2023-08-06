@@ -29,7 +29,7 @@ source "${srcDir}/Env/load.sh"
 source "${srcDir}/_includes/_commonHeader.sh"
 
 Env::load
-export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
+export BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-__LEVEL_WARNING}"
 Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
 # shellcheck source=/src/Args/parseVerbose.sh
 longArg="--verbose" shortArg="-v" source "${srcDir}/Args/remove.sh"

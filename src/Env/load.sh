@@ -90,7 +90,6 @@ Env::load() {
   # shellcheck source=src/Env/testsData/.env
   source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
 
-  export BASH_FRAMEWORK_INITIALIZED=1
-
   set +o allexport
+  BASH_FRAMEWORK_INITIALIZED=1
 }
