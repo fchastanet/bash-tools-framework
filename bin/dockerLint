@@ -873,6 +873,6 @@ if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"
 fi
 while IFS='' read -r file; do
-  hadolint "$@" "${file}"
+  "${VENDOR_BIN_DIR}/hadolint" "$@" "${file}"
   echo
 done < <(git ls-files --exclude-standard | grep -E '/Dockerfile.*' || true)
