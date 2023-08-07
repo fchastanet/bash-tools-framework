@@ -606,6 +606,7 @@ Log::logMessage() {
     return 0
   fi
   if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) || [[ "${levelMsg}" = "FATAL" ]]; then
+    mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" || true
     if Assert::fileWritable "${BASH_FRAMEWORK_LOG_FILE}"; then
       date="$(date '+%Y-%m-%d %H:%M:%S')"
       touch "${BASH_FRAMEWORK_LOG_FILE}"
