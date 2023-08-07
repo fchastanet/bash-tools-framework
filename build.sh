@@ -24,6 +24,7 @@ if [[ "${ARGS_VERBOSE}" = "1" ]]; then
 fi
 
 (
+  set -x
   if (($# == 0)); then
     find "${SRC_DIR}/_binaries" -name "*.sh" |
       (grep -v -E '/testsData/' || true)
@@ -32,5 +33,6 @@ fi
       realpath "${file}"
     done
   fi
-) | xargs -L1 -P8 -I{} \
+) | xargs -t -P8 --max-args=1 --replace="{}" \
   "${FRAMEWORK_DIR}/bin/compile" "{}" "${params[@]}"
+

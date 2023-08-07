@@ -2,7 +2,7 @@
 # BIN_FILE=${ROOT_DIR}/bin/buildBinFiles
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_headerNoRootDir.tpl"
-ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
+ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 SRC_DIR="${ROOT_DIR}/src"
 
 HELP="$(
@@ -25,13 +25,14 @@ Args::defaultHelp "${HELP}" "$@"
 declare beforeBuild
 computeMd5File() {
   local md5File="$1"
+  local currentFile
   while IFS= read -r file; do
-    md5sum "${file}" >>"${md5File}" 2>&1 || true
+    currentFile="$(ROOT_DIR=${ROOT_DIR} envsubst <<<"${file}")"
+    md5sum "${currentFile}" >>"${md5File}" 2>&1 || true
   done < <(
     grep -R "^# BIN_FILE" "${SRC_DIR}/_binaries" |
       (grep -v -E '/testsData/' || true) |
-      sed -E 's#^.*IN_FILE=(.*)$#\1#' |
-      envsubst
+      sed -E 's#^.*IN_FILE=(.*)$#\1#'
   )
 }
 
