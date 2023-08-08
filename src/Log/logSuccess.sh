@@ -3,5 +3,5 @@
 # log message to file
 # @param {String} $1 message
 Log::logSuccess() {
-  Log::logMessage "${2:-SUCCESS}" "$@"
+  Log::logMessage "${2:-SUCCESS}" "$1"
 }

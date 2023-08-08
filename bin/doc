@@ -153,6 +153,30 @@ Args::parseVerbose() {
   return "${status}"
 }
 
+# remove elements from array
+# Performance1 : version taken from https://stackoverflow.com/a/59030460
+# Performance2 : for multiple values to remove, prefer using Array::removeIf
+Array::remove() {
+  local -n arrayRemoveArray=$1
+  shift || true # $@ contains elements to remove
+  local -A valuesToRemoveKeys=()
+
+  # Tag items to remove
+  local del
+  for del in "$@"; do valuesToRemoveKeys[${del}]=1; done
+
+  # remove items
+  local k
+  for k in "${!arrayRemoveArray[@]}"; do
+    if [[ -n "${valuesToRemoveKeys[${arrayRemoveArray[k]}]+xxx}" ]]; then
+      unset 'arrayRemoveArray[k]'
+    fi
+  done
+
+  # compaction (element re-indexing, because unset makes "holes" in array )
+  arrayRemoveArray=("${arrayRemoveArray[@]}")
+}
+
 # lazy initialization
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
@@ -568,13 +592,13 @@ Log::displayWarning() {
 # log message to file
 # @param {String} $1 message
 Log::logDebug() {
-  Log::logMessage "${2:-DEBUG}" "$@"
+  Log::logMessage "${2:-DEBUG}" "$1"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logError() {
-  Log::logMessage "${2:-ERROR}" "$@"
+  Log::logMessage "${2:-ERROR}" "$1"
 }
 
 # log message to file
@@ -592,25 +616,25 @@ Log::logInfo() {
 # log message to file
 # @param {String} $1 message
 Log::logSkipped() {
-  Log::logMessage "${2:-SKIPPED}" "$@"
+  Log::logMessage "${2:-SKIPPED}" "$1"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logStatus() {
-  Log::logMessage "${2:-STATUS}" "$@"
+  Log::logMessage "${2:-STATUS}" "$1"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logSuccess() {
-  Log::logMessage "${2:-SUCCESS}" "$@"
+  Log::logMessage "${2:-SUCCESS}" "$1"
 }
 
 # log message to file
 # @param {String} $1 message
 Log::logWarning() {
-  Log::logMessage "${2:-WARNING}" "$@"
+  Log::logMessage "${2:-WARNING}" "$1"
 }
 
 # To be called before logging in the log file
@@ -881,7 +905,7 @@ File::elapsedTimeSinceLastModification() {
 # log message to file
 # @param {String} $1 message
 Log::logFatal() {
-  Log::logMessage "${2:-FATAL}" "$@"
+  Log::logMessage "${2:-FATAL}" "$1"
 }
 
 # FUNCTIONS
@@ -889,16 +913,9 @@ Log::logFatal() {
 Env::load
 export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
 Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
-# shellcheck disable=SC2034
-longArg="--verbose" shortArg="-v"
-
-# remove verbose param
-declare -a newParams=()
-for param; do
-  # shellcheck disable=SC2154
-  [[ "${param}" == "${longArg}" || "${param}" == "${shortArg}" ]] || newParams+=("${param}")
-done
-set -- "${newParams[@]}"
+declare -a args=("$@")
+Array::remove args -v --verbose
+set -- "${args[@]}"
 Log::load
 
 Env::pathPrepend "${VENDOR_BIN_DIR}"

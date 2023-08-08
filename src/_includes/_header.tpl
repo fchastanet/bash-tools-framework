@@ -33,9 +33,9 @@ VENDOR_BIN_DIR="<%% echo '${ROOT_DIR}/vendor/bin' %>"
 Env::load
 export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
 Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
-# shellcheck disable=SC2034
-longArg="--verbose" shortArg="-v"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/Args/remove.sh"
+declare -a args=("$@")
+Array::remove args -v --verbose
+set -- "${args[@]}"
 Log::load
 
 

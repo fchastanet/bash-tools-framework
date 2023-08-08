@@ -35,4 +35,3 @@ fi
   fi
 ) | xargs -t -P8 --max-args=1 --replace="{}" \
   "${FRAMEWORK_DIR}/bin/compile" "{}" "${params[@]}"
-
