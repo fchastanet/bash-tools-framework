@@ -5,10 +5,10 @@
 unalias -a || true
 
 export SCRIPT_NAME="test"
-ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)
-vendorDir="${ROOT_DIR}/vendor"
-srcDir="${ROOT_DIR}/src"
-export FRAMEWORK_DIR="${ROOT_DIR}"
+FRAMEWORK_ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)
+vendorDir="${FRAMEWORK_ROOT_DIR}/vendor"
+srcDir="${FRAMEWORK_ROOT_DIR}/src"
+export FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
 # shellcheck disable=SC2034
 export LC_ALL=POSIX
 

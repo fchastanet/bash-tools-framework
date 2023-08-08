@@ -19,7 +19,7 @@
 # @environment USER_NAME
 # @environment USER_GROUP
 # @environment BASE_MNT_C
-# @environment ROOT_DIR
+# @environment FRAMEWORK_ROOT_DIR
 Install::file() {
   local fromFile="$1"
   local targetFile="$2"
@@ -61,7 +61,7 @@ Install::file() {
 
   if cp "${fromFile}" "${targetFile}"; then
     ${successCallback} "${fromFile}" "${targetFile}" "$@"
-    Log::displaySuccess "Installed file '${fromDir#"${ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"
+    Log::displaySuccess "Installed file '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"
   else
     ${failureCallback} "${fromDir}" "${fromFilename}" "${targetFile}" "$@"
   fi

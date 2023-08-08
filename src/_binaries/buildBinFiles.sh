@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/buildBinFiles
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/buildBinFiles
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_headerNoRootDir.tpl"
-ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-SRC_DIR="${ROOT_DIR}/src"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+
+# FUNCTIONS
 
 HELP="$(
   cat <<EOF
@@ -27,10 +30,10 @@ computeMd5File() {
   local md5File="$1"
   local currentFile
   while IFS= read -r file; do
-    currentFile="$(ROOT_DIR=${ROOT_DIR} envsubst <<<"${file}")"
+    currentFile="$(FRAMEWORK_ROOT_DIR=${FRAMEWORK_ROOT_DIR} envsubst <<<"${file}")"
     md5sum "${currentFile}" >>"${md5File}" 2>&1 || true
   done < <(
-    grep -R "^# BIN_FILE" "${SRC_DIR}/_binaries" |
+    grep -R "^# BIN_FILE" "${FRAMEWORK_SRC_DIR}/_binaries" |
       (grep -v -E '/testsData/' || true) |
       sed -E 's#^.*IN_FILE=(.*)$#\1#'
   )
@@ -41,7 +44,7 @@ computeMd5File "${beforeBuild}"
 
 cat "${beforeBuild}"
 
-"${ROOT_DIR}/build.sh"
+"${FRAMEWORK_ROOT_DIR}/build.sh"
 
 # allows to add ignore missing option to md5sum when using pre-commit
 declare -a args=("${@}")

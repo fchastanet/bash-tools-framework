@@ -33,13 +33,13 @@ function File::upFindCurrentDirectory { #@test
 }
 
 function File::upFindUntilFound { #@test
-  run File::upFind "${srcDir}/File" ".framework-config" "${FRAMEWORK_DIR}"
+  run File::upFind "${srcDir}/File" ".framework-config" "${FRAMEWORK_ROOT_DIR}"
   assert_success
-  assert_output "${FRAMEWORK_DIR}/.framework-config"
+  assert_output "${FRAMEWORK_ROOT_DIR}/.framework-config"
 }
 
 function File::upFindUntilFoundMultiplePath { #@test
-  run File::upFind "${srcDir}/File" ".framework-config" "notExisting" "/etc" "${FRAMEWORK_DIR}"
+  run File::upFind "${srcDir}/File" ".framework-config" "notExisting" "/etc" "${FRAMEWORK_ROOT_DIR}"
   assert_success
-  assert_output "${FRAMEWORK_DIR}/.framework-config"
+  assert_output "${FRAMEWORK_ROOT_DIR}/.framework-config"
 }

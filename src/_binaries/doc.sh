@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/doc
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/doc
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-DOC_DIR="${ROOT_DIR}/pages"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+DOC_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 HELP="$(
   cat <<EOF
@@ -15,11 +17,11 @@ EOF
 Args::defaultHelp "${HELP}" "$@"
 
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-  "${BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
+  "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
   exit $?
 fi
 
-export FRAMEWORK_DIR="${ROOT_DIR}"
+export FRAMEWORK_ROOT_DIR
 
 #-----------------------------
 # doc generation
@@ -28,9 +30,9 @@ export FRAMEWORK_DIR="${ROOT_DIR}"
 Log::displayInfo 'generate Commands.md'
 ((TOKEN_NOT_FOUND_COUNT = 0)) || true
 ShellDoc::generateMdFileFromTemplate \
-  "${ROOT_DIR}/Commands.tmpl.md" \
+  "${FRAMEWORK_ROOT_DIR}/Commands.tmpl.md" \
   "${DOC_DIR}/Commands.md" \
-  "${BIN_DIR}" \
+  "${COMMAND_BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
   '(bash-tpl|var|simpleBinary)$'
 
@@ -39,12 +41,12 @@ rm -f "${DOC_DIR}/Index.md" || true
 rm -Rf "${DOC_DIR}/bashDoc" || true
 
 ShellDoc::generateShellDocsFromDir \
-  "${SRC_DIR}" \
+  "${FRAMEWORK_SRC_DIR}" \
   "${DOC_DIR}/bashDoc" \
   "${DOC_DIR}/FrameworkIndex.md" \
   '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|_binaries/.*\.sh|/__all\.sh)$'
 
-cp "${ROOT_DIR}/README.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/README.md" "${DOC_DIR}"
 sed -i -E \
   -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
   -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
@@ -52,14 +54,14 @@ sed -i -E \
   "${DOC_DIR}/README.md"
 
 mkdir -p "${DOC_DIR}/images" || true
-cp -R "${ROOT_DIR}/images/"* "${DOC_DIR}/images"
-cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
-cp "${ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
-cp "${ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
+cp -R "${FRAMEWORK_ROOT_DIR}/images/"* "${DOC_DIR}/images"
+cp "${FRAMEWORK_ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
 (
-  cd "${ROOT_DIR}/pages/bashDoc" || exit 1
+  cd "${FRAMEWORK_ROOT_DIR}/pages/bashDoc" || exit 1
   currentDir=""
   echo ""
   while IFS= read -r file; do

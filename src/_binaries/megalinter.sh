@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/megalinter
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/megalinter
 
-.INCLUDE "${TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 IMAGE_NAME=oxsecurity/megalinter-terraform:v7.2.0
 
@@ -115,7 +118,7 @@ declare cmd=(
   -e HOST_GROUP_ID="$(id -g)"
   "${megalinterOptions[@]}"
   -v /var/run/docker.sock:/var/run/docker.sock:rw
-  -v "${ROOT_DIR}":/tmp/lint:rw
+  -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw
   oxsecurity/megalinter-terraform:v6.16.0
 )
 Log::displayInfo "Running ${cmd[*]}"

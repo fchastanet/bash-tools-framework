@@ -11,7 +11,7 @@ Compiler::getBinFile() {
 
   BIN_FILE="$(Filters::directiveValue "BIN_FILE" "${srcFile}" |
     sed -E 's/^#[^=]+=[ \t]*(.*)[ \t]*$/\1/' |
-    ROOT_DIR="${ROOT_DIR}" envsubst ||
+    FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}" envsubst ||
     :)"
   if [[ -z "${BIN_FILE}" ]]; then
     Log::displaySkipped "${srcFile} does not contains BIN_FILE directive"

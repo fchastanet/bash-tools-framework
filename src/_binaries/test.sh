@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/test
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/test
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
 
-Bats::installRequirementsIfNeeded
+BASH_TOOLS_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+BASH_TOOLS_BIN_DIR="${BASH_TOOLS_ROOT_DIR}/bin"
+BASH_TOOLS_VENDOR_DIR="${BASH_TOOLS_ROOT_DIR}/vendor"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+
+Bats::installRequirementsIfNeeded "${BASH_TOOLS_ROOT_DIR}"
 
 HELP="$(
   cat <<EOF
@@ -29,18 +36,18 @@ ${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 EOF
 )"
 if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
-  "${VENDOR_DIR}/bats/bin/bats" --help
+  "${BASH_TOOLS_VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi
 
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (
     if (($# < 1)); then
-      "${VENDOR_DIR}/bats/bin/bats" -r src
+      "${BASH_TOOLS_VENDOR_DIR}/bats/bin/bats" -r src
     else
-      "${VENDOR_DIR}/bats/bin/bats" "$@"
+      "${BASH_TOOLS_VENDOR_DIR}/bats/bin/bats" "$@"
     fi
   )
 else
-  "${BIN_DIR}/runBuildContainer" "/bash/bin/test" "$@"
+  "${BASH_TOOLS_BIN_DIR}/runBuildContainer" "/bash/bin/test" "$@"
 fi

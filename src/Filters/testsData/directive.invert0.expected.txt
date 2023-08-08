@@ -1,1 +1,1 @@
-# BIN_FILE=<% ${ROOT_DIR} %>/bin/awkLint
+# BIN_FILE=<% ${FRAMEWORK_ROOT_DIR} %>/bin/awkLint

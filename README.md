@@ -76,9 +76,9 @@
 
 ## 1. Excerpt
 
-[Full documentation can be found here](/#/FrameworkFullDoc.md) but here an excerpt
-of the capabilities of this framework. This framework is a collection of several
-bash functions and commands that helps you to lint files, generate shell
+[Full documentation can be found here](/#/FrameworkFullDoc.md) but here an
+excerpt of the capabilities of this framework. This framework is a collection of
+several bash functions and commands that helps you to lint files, generate shell
 documentation, compile bash files, and many more, ...
 
 ### 1.1. Compile command
@@ -166,8 +166,8 @@ Here an excerpt of the namespaces available in Bash tools framework:
   Env::pathAppend allowing to add a bin path to `PATH` variable
 - File : files and file paths manipulations.
 - Filters : various functions to filter files using grep, awk or sed eg:
-  Filters::bashFrameworkFunctions allows to find all the bash framework functions
-  used in a file
+  Filters::bashFrameworkFunctions allows to find all the bash framework
+  functions used in a file
 - Framework : Framework::loadConfig loads `.framework-config` configuration
   file.
 - Git : provides git abstractions like Git::cloneOrPullIfNoChange,
@@ -220,7 +220,7 @@ simply add these lines to your script
 
 ```bash
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/myCommand
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myCommand
 
 # shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}
@@ -229,12 +229,12 @@ REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
 BIN_DIR="${CURRENT_DIR}"
 # shellcheck disable=SC2034
-SRC_DIR="<%% echo '${ROOT_DIR}/src' %>"
+FRAMEWORK_SRC_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/src' %>"
 # shellcheck disable=SC2034
-VENDOR_DIR="<%% echo '${ROOT_DIR}/vendor' %>"
+FRAMEWORK_VENDOR_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor' %>"
 # shellcheck disable=SC2034
-VENDOR_BIN_DIR="<%% echo '${ROOT_DIR}/vendor/bin' %>"
-export PATH="${BIN_DIR}":"${VENDOR_BIN_DIR}":${PATH}
+FRAMEWORK_VENDOR_BIN_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor/bin' %>"
+export PATH="${BIN_DIR}":"${FRAMEWORK_VENDOR_BIN_DIR}":${PATH}
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
 
@@ -248,8 +248,8 @@ Then add below special `# FUNCTIONS` marker, the rest of your script.
 
 Special comments:
 
-- `# BIN_FILE=${ROOT_DIR}/bin/myCommand` indicates where the resulting file will
-  be generated
+- `# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myCommand` indicates where the resulting
+  file will be generated
 - `# FUNCTIONS` is a placeholder that will be used to inject the functions of
   the framework that you are using in your script.
 

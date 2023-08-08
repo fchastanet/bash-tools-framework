@@ -12,7 +12,7 @@ source "${srcDir}/Env/pathPrepend.sh"
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
   export PATH="${TMPDIR}/bin":${PATH}
-  export _COMPILE_ROOT_DIR="${ROOT_DIR}"
+  export _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
@@ -25,7 +25,7 @@ function Embed::embedFile::binaryFile { #@test
   ) >"${BATS_TEST_TMPDIR}/fileIncluded"
   source "${BATS_TEST_TMPDIR}/fileIncluded"
 
-  _COMPILE_ROOT_DIR="${ROOT_DIR}" run binaryFile arg1 arg2
+  _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}" run binaryFile arg1 arg2
 
   assert_success
   assert_output "binaryFile arg1 arg2"

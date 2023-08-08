@@ -12,7 +12,7 @@ source "${srcDir}/Env/pathPrepend.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
-  export _COMPILE_ROOT_DIR="${ROOT_DIR}"
+  export _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 
@@ -23,7 +23,7 @@ function Embed::embedFrameworkFunction { #@test
     # binDir      : fallback bin directory in case BIN_FILE has not been provided
     --bin-dir "${BATS_TEST_TMPDIR}"
     # rootDir     : directory used to compute src file relative path
-    --root-dir "${ROOT_DIR}"
+    --root-dir "${FRAMEWORK_ROOT_DIR}"
     # srcDirs : (optional) you can provide multiple directories
     --src-dir "${srcDir}"
   )

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BASH_FRAMEWORK_TOMDOC_INSTALLED="${ROOT_DIR}/vendor/.tomdocInstalled"
+BASH_FRAMEWORK_TOMDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.tomdocInstalled"
 BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT=86400 # 1 day
 
 ShellDoc::installRequirementsIfNeeded() {
@@ -13,7 +13,7 @@ ShellDoc::installRequirementsIfNeeded() {
     (Log::displayInfo "Check if tomdoc.sh is up to date")
     if Git::shallowClone \
       "https://github.com/fchastanet/tomdoc.sh.git" \
-      "${VENDOR_DIR:-${ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
+      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
       "master" \
       "FORCE_DELETION"; then
       echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"

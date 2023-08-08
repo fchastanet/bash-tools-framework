@@ -316,10 +316,11 @@ It imports several common files like some additional bats features.
 
 And makes several variables available:
 
-- ROOT_DIR
+- BASH_TOOLS_ROOT_DIR
 - vendorDir
 - srcDir
-- FRAMEWORK_DIR (same as ROOT_DIR but used by some bash framework functions)
+- FRAMEWORK_ROOT_DIR (same as BASH_TOOLS_ROOT_DIR but used by some bash
+  framework functions)
 - LC_ALL=POSIX see
   [Bash and grep regular expressions best practices](BestPractices.md#regularExpressions)
 

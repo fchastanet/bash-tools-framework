@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/shellcheckLint
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/shellcheckLint
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 if [[ -z "${DEFAULT_ARGS+unset}" ]]; then
   DEFAULT_ARGS=(-f tty)
@@ -9,7 +12,7 @@ fi
 MIN_SHELLCHECK_VERSION="0.9.0"
 
 # check if command in PATH is already the minimal version needed
-if ! Version::checkMinimal "${VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
+if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
   install() {
     local file="$1"
     local targetFile="$2"
@@ -24,7 +27,7 @@ if ! Version::checkMinimal "${VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHE
     )
   }
   Github::upgradeRelease \
-    "${VENDOR_BIN_DIR}/shellcheck" \
+    "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" \
     "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz" \
     "--version" \
     Version::getCommandVersionFromPlainText \
@@ -72,7 +75,7 @@ while true; do
   case $1 in
     -h | --help)
       Args::showHelp "${HELP}"
-      "${VENDOR_BIN_DIR}/shellcheck" --help
+      "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" --help
       exit 0
       ;;
     --staged)
@@ -101,7 +104,7 @@ else
 fi
 
 (
-  exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
+  exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${FRAMEWORK_ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
   if [[ -z "${exclude}" ]]; then
     exclude='^$'
   fi

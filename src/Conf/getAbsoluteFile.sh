@@ -47,12 +47,12 @@ Conf::getAbsoluteFile() {
   # from home/.bash-tools/<confFolder>
   testAbs "$(File::concatenatePath "${HOME}/.bash-tools" "${confFolder}")/${conf}${extension}" && return 0
 
-  if [[ -n "${ROOT_DIR+xxx}" ]]; then
+  if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
     # from framework conf/<confFolder> (including extension)
-    testAbs "$(File::concatenatePath "${ROOT_DIR}/conf" "${confFolder}")/${conf}${extension}" && return 0
+    testAbs "$(File::concatenatePath "${FRAMEWORK_ROOT_DIR}/conf" "${confFolder}")/${conf}${extension}" && return 0
 
     # from framework conf/<confFolder>
-    testAbs "$(File::concatenatePath "${ROOT_DIR}/conf" "${confFolder}")/${conf}" && return 0
+    testAbs "$(File::concatenatePath "${FRAMEWORK_ROOT_DIR}/conf" "${confFolder}")/${conf}" && return 0
   fi
 
   # file not found

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BIN_FILE=${BIN_DIR}/var
+# BIN_FILE=${FRAMEWORK_BIN_DIR}/var
 # VAR_SCRIPT=myScript
 
 .INCLUDE "$(dynamicTemplateDir _var.tpl)"
