@@ -9,10 +9,6 @@ source "${srcDir}/Conf/loadNearestFile.sh"
 source "${srcDir}/File/upFind.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${srcDir}/Array/contains.sh"
-# shellcheck source=/src/Env/load.sh
-source "${srcDir}/Env/load.sh"
-# shellcheck source=/src/Log/__all.sh
-source "${srcDir}/Log/__all.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"

@@ -25,11 +25,19 @@ VENDOR_DIR="<%% echo '${ROOT_DIR}/vendor' %>"
 # shellcheck disable=SC2034
 VENDOR_BIN_DIR="<%% echo '${ROOT_DIR}/vendor/bin' %>"
 
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
 
 # FUNCTIONS
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
+Env::load
+export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
+Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
+declare -a args=("$@")
+Array::remove args -v --verbose
+set -- "${args[@]}"
+Log::load
+
 
 Env::pathPrepend "${VENDOR_BIN_DIR}"
 Env::pathPrepend "${BIN_DIR}"

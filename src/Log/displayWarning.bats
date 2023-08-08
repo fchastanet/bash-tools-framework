@@ -29,9 +29,7 @@ generateLogs() {
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${logEnvFile}"
 
   Env::load
-
-  # shellcheck source=src/Log/ZZZ.sh
-  source "${srcDir}/Log/ZZZ.sh"
+  Log::load
 
   warningMsg=$(Log::displayWarning "warning" 2>&1)
   expectedWarningMsg="$(echo -e "${__WARNING_COLOR}WARN    - warning${__RESET_COLOR}")"

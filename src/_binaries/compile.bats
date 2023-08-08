@@ -61,11 +61,10 @@ function compile::embed { #@test
   [[ -f "${BATS_TEST_TMPDIR}/embedBinary" ]]
   [[ -x "${BATS_TEST_TMPDIR}/embedBinary" ]]
   run "${BATS_TEST_TMPDIR}/embedBinary" 2>&1
-  assert_lines_count 5
+  assert_lines_count 4
   assert_line --index 0 '----------------------------------------------------------------------------------------------------'
-  assert_line --index 1 --partial "INFO    - KEEP_TEMP_FILES=0 removing temp files"
+  assert_line --index 1 'embedFile1'
   assert_line --index 2 'embedFile1'
-  assert_line --index 3 'embedFile1'
-  assert_line --index 4 'embedFile2'
+  assert_line --index 3 'embedFile2'
 
 }

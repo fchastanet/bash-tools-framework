@@ -3,5 +3,5 @@
 # log message to file
 # @param {String} $1 message
 Log::logSkipped() {
-  Log::logMessage "SKIPPED" "$@"
+  Log::logMessage "${2:-SKIPPED}" "$1"
 }

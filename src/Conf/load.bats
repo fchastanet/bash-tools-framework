@@ -5,10 +5,6 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Conf/load.sh
 source "${srcDir}/Conf/load.sh"
-# shellcheck source=/src/Env/load.sh
-source "${srcDir}/Env/load.sh"
-# shellcheck source=/src/Log/__all.sh
-source "${srcDir}/Log/__all.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"

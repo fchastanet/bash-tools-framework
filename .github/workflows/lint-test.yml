@@ -23,21 +23,29 @@ jobs:
           status: pending
 
       - name: Linting - Dockerfile
-        run: ./bin/dockerLint | tee logs/docker-checkstyle.xml
+        run: |
+          set -exo pipefail
+          ./bin/dockerLint | tee logs/docker-checkstyle.xml
 
       - name: Linting - Shellcheck
         run: |
+          set -exo pipefail
           ./bin/shellcheckLint -f checkstyle | \
             tee logs/shellcheck-checkstyle.xml
 
       - name: Linting - Framework
-        run: ./bin/frameworkLint | tee logs/framework-checkstyle.xml
+        run:
+          ./bin/frameworkLint -f checkstyle | tee logs/framework-checkstyle.xml
 
       - name: Linting - Awk
-        run: ./bin/awkLint | tee logs/awk-checkstyle.xml
+        run: |
+          set -exo pipefail
+          ./bin/awkLint | tee logs/awk-checkstyle.xml
 
       - name: build bin files + check md5
-        run: ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
+        run: |
+          set -exo pipefail
+          ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
 
       - name: Checkstyle aggregation
         uses: jwgmeligmeyling/checkstyle-github-action@master

@@ -87,6 +87,10 @@ bin/compile <fileToCompile>
 
 - `<fileToCompile>` the relative or absolute path to compile into one file
 
+**Options note:**
+Prefer using .framework-config file, to set the compiler options as it
+makes them more reusable.
+
 **Options:**
 
 - `--help,-h` prints this help and exits

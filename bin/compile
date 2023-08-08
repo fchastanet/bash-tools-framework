@@ -29,8 +29,6 @@ source "${_COMPILE_SRC_DIR}/Env/load.sh"
 source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 # shellcheck source=src/File/relativeToDir.sh
 source "${_COMPILE_SRC_DIR}/File/relativeToDir.sh"
-# shellcheck source=src/Log/__all.sh
-source "${_COMPILE_SRC_DIR}/Log/__all.sh"
 # shellcheck source=/src/Filters/removeDuplicatedShebangs.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeDuplicatedShebangs.sh"
 # shellcheck source=/src/Filters/catFileCleaned.sh
@@ -83,6 +81,8 @@ source "${_COMPILE_SRC_DIR}/Embed/embedFrameworkFunction.sh"
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
+# shellcheck source=/src/Assert/fileWritable.sh
+source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Embed/getSrcDirsFromOptions.sh"
 
@@ -253,6 +253,7 @@ if [[ -z "${BIN_DIR+xxx}" ]]; then
 fi
 export BIN_DIR
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
+loggedMessages=()
 
 # load .framework-config
 configFile=""
@@ -262,44 +263,50 @@ Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while load
 # shellcheck disable=SC2317
 dynamicTemplateDir() {
   local file="$1"
-  if [[ ! -f "${file}" ]]; then
-    if [[ -f "${TEMPLATE_DIR}/${file}" ]]; then
-      echo "${TEMPLATE_DIR}/${file}"
-      return 0
-    elif [[ -f "${ORIGINAL_TEMPLATE_DIR}/${file}" ]]; then
-      echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
-      return 0
-    fi
+  if [[ -f "${TEMPLATE_DIR}/${file}" ]]; then
+    echo "${TEMPLATE_DIR}/${file}"
+    return 0
+  elif [[ -f "${ORIGINAL_TEMPLATE_DIR}/${file}" ]]; then
+    echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
+    return 0
   fi
-  echo "${file}"
+  local msg="dynamicTemplateDir - ${file} does not exist in any template dirs declared"
+  echo -e "\e[31m${msg}\e[0m" >&2
+  return 1
 }
 export -f dynamicTemplateDir
 
 # shellcheck disable=SC2317
 dynamicSrcFile() {
   local file="$1"
-  local srcDir
+  local -a srcDirs=()
+  readarray -t srcDirs <"${TMPDIR:-/tmp}/srcDirs"
   for srcDir in "${srcDirs[@]}"; do
     if [[ -f "${srcDir}/${file}" ]]; then
       echo "${srcDir}/${file}"
       return 0
     fi
   done
-  echo "${file}"
+  local msg="dynamicSrcFile - ${file} does not exist in any src dirs declared"
+  echo -e "\e[31m${msg}\e[0m" >&2
+  return 1
 }
 export -f dynamicSrcFile
 
 # shellcheck disable=SC2317
 dynamicSrcDir() {
   local dir="$1"
-  local srcDir
+  local -a srcDirs=()
+  readarray -t srcDirs <"${TMPDIR:-/tmp}/srcDirs"
   for srcDir in "${srcDirs[@]}"; do
     if [[ -d "${srcDir}/${dir}" ]]; then
       echo "${srcDir}/${dir}"
       return 0
     fi
   done
-  echo "${dir}"
+  local msg="dynamicSrcDir - ${dir} does not exist in any src dirs declared"
+  echo -e "\e[31m${msg}\e[0m" >&2
+  return 1
 }
 export -f dynamicSrcDir
 
@@ -326,6 +333,10 @@ evalTemplate() {
     export SRC_ABSOLUTE_PATH
     export SRC_FILE_PATH
     export ROOT_DIR_RELATIVE_TO_BIN_DIR
+    export TMPDIR
+    # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
+    trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM
+    printf '%s\n' "${srcDirs[@]}" >"${TMPDIR:-/tmp}/srcDirs"
     # shellcheck source=/dev/null
     source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
   ) | Filters::removeDuplicatedShebangs
@@ -344,18 +355,24 @@ importFunctions() {
   readarray -t functionsToImport < <(Compiler::extractUniqueFrameworkFunctions "${file}")
 
   ((newFilesAdded = 0)) || true
-  if [[ "${DEBUG:-0}" = "1" ]]; then
-    echo >&2 "importing ${file} with ${#functionsToImport[@]} functions to import"
+  if [[ "${ARGS_VERBOSE:-0}" = "2" ]]; then
+    Log::displayDebug "importing ${file} with ${#functionsToImport[@]} functions to import"
   fi
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      (echo >&2 -e "${__DEBUG_COLOR}\tFunction ${functionToImport} ignored, because of rule defined in ${configFile}${__RESET_COLOR}")
+      if [[ "${ARGS_VERBOSE:-0}" = "1" ]]; then
+        msg="File ${INPUT_FILE} Function ${functionToImport} ignored, because of rule defined in ${configFile}"
+        if ! Array::contains "${msg}" "${loggedMessages[@]}"; then
+          loggedMessages+=("${msg}")
+          Log::displayHelp "${msg}" "HINT"
+        fi
+      fi
       continue
     fi
 
     local fileToImport
     fileToImport="$(Compiler::findFunctionInSrcDirs "${functionToImport}" "${srcDirs[@]}")" || {
-      (echo >&2 -e "${__ERROR_COLOR}\tFunction ${functionToImport} not found in any src directories${__RESET_COLOR}")
+      Log::displayError "File ${INPUT_FILE} Function ${functionToImport} not found in any src directories"
       ((importFailures++)) || true
       continue
     }
@@ -383,7 +400,7 @@ importFunctions() {
       # shellcheck disable=SC2034
       ((newFilesAdded = 1)) # as we added some files, we need to do another pass
     else
-      (echo >&2 -e "${__ERROR_COLOR}\tFile ${fileToImport} does not exist${__RESET_COLOR}")
+      Log::displayError "File ${INPUT_FILE} File ${fileToImport} does not exist${__RESET_COLOR}"
       # even if not existing, consider the file as imported to avoid other same errors
       filesImportedWithFunctions+=("${fileToImport}")
       ((importFailures++)) || true
@@ -409,8 +426,8 @@ injectImportedFunctions() {
   ((needAnotherPass = 1))
   ((iteration = 1))
   while ((needAnotherPass >= 1)); do
-    if [[ "${DEBUG:-0}" = "1" ]]; then
-      (echo >&2 -e "${__DEBUG_COLOR}\tIteration #${iteration}${__RESET_COLOR}")
+    if [[ "${ARGS_VERBOSE:-0}" = "2" ]]; then
+      Log::displayDebug "File ${INPUT_FILE} Iteration #${iteration}"
     fi
     echo >"${importedFunctionsTempFile}"
     echo >"${importedZZZTempFile}"
@@ -475,7 +492,7 @@ if [[ -z "${BIN_FILE}" ]]; then
     exit 0
   fi
 fi
-Log::displayInfo "Binfile ${BIN_FILE} from ${INPUT_FILE}"
+Log::displayInfo "Compiling ${INPUT_FILE} ..."
 
 # inject embed
 injectEmbed "${COMPILED_FILE}"
@@ -504,4 +521,5 @@ sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 cat -s "${COMPILED_FILE2}" | Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" >"${BIN_FILE}"
 chmod +x "${BIN_FILE}"
 
+Log::displayStatus "Compiled ${INPUT_FILE} to Binfile ${BIN_FILE}"
 exit "${failures}"

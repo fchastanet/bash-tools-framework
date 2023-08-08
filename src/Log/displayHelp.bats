@@ -29,9 +29,7 @@ generateLogs() {
   export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${logEnvFile}"
 
   Env::load
-
-  # shellcheck source=src/Log/ZZZ.sh
-  source "${srcDir}/Log/ZZZ.sh"
+  Log::load
 
   helpMsg=$(Log::displayHelp "help" 2>&1)
   expectedHelpMsg="$(echo -e "${__HELP_COLOR}HELP    - help${__RESET_COLOR}")"

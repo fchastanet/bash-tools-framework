@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# shellcheck source=src/_includes/_colors.sh
+source "${FRAMEWORK_DIR}/src/_includes/_colors.sh"
 # shellcheck source=src/Log/_.sh
 source "${FRAMEWORK_DIR}/src/Log/_.sh"
 # shellcheck source=src/Log/displayDebug.sh
@@ -16,6 +18,8 @@ source "${FRAMEWORK_DIR}/src/Log/displaySkipped.sh"
 source "${FRAMEWORK_DIR}/src/Log/displaySuccess.sh"
 # shellcheck source=src/Log/displayWarning.sh
 source "${FRAMEWORK_DIR}/src/Log/displayWarning.sh"
+# shellcheck source=src/Log/displayStatus.sh
+source "${FRAMEWORK_DIR}/src/Log/displayStatus.sh"
 # shellcheck source=src/Log/logMessage.sh
 source "${FRAMEWORK_DIR}/src/Log/logMessage.sh"
 # shellcheck source=src/Log/fatal.sh
@@ -36,7 +40,9 @@ source "${FRAMEWORK_DIR}/src/Log/logSkipped.sh"
 source "${FRAMEWORK_DIR}/src/Log/logSuccess.sh"
 # shellcheck source=src/Log/logWarning.sh
 source "${FRAMEWORK_DIR}/src/Log/logWarning.sh"
+# shellcheck source=src/Log/logStatus.sh
+source "${FRAMEWORK_DIR}/src/Log/logStatus.sh"
 # shellcheck source=src/Log/rotate.sh
 source "${FRAMEWORK_DIR}/src/Log/rotate.sh"
-# shellcheck source=src/Log/ZZZ.sh
-source "${FRAMEWORK_DIR}/src/Log/ZZZ.sh"
+# shellcheck source=src/Log/load.sh
+source "${FRAMEWORK_DIR}/src/Log/load.sh"

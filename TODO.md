@@ -51,6 +51,9 @@
 
 ## 3. Framework functions changes
 
+- check if we could use alias to override methods to be able to reload or pass
+  by temp functions?
+- replace \_colors.sh with Log/theme
 - merge Framework::run and Command::captureOutputAndExitCode
 - create function Array::remove
 - Conf::list findOptions as last arg so any number of args
@@ -71,7 +74,9 @@
 
 TODOs linked to bin/compiler:
 
+- .framework-config should contain the compiler options
 - make compile options works with relative files
+  - display info should display relative path too instead of full path
   - update CompileCommand.md examples
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface

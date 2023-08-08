@@ -9,10 +9,12 @@ source "${srcDir}/Dns/checkHostname.sh"
 source "${srcDir}/Command/captureOutputAndExitCode.sh"
 # shellcheck source=/src/Assert/windows.sh
 source "${srcDir}/Assert/windows.sh"
-# shellcheck source=/src/Env/load.sh
-source "${srcDir}/Env/load.sh"
-# shellcheck source=/src/Log/__all.sh
-source "${srcDir}/Log/__all.sh"
+
+setup() {
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+  Env::load
+  Log::load
+}
 
 teardown() {
   unstub_all
