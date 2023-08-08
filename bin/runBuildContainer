@@ -604,7 +604,7 @@ Env::pathPrepend "${COMMAND_BIN_DIR}"
 mkdir -p "${TMPDIR:-/tmp}/bin"
 Env::pathPrepend "${TMPDIR:-/tmp}/bin"
 
-HELP="$(
+showHelp() {
   cat <<EOF
 ${__HELP_TITLE}Description:${__HELP_NORMAL} run the container specified by args provided.
 Command to run is passed via the rest of arguments
@@ -625,8 +625,8 @@ MIT License
 
 Copyright (c) 2022 François Chastanet
 EOF
-)"
-Args::defaultHelp "${HELP}" "$@" || true
+}
+Args::defaultHelp showHelp "$@" || true
 
 VENDOR="${VENDOR:-ubuntu}"
 BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"
@@ -635,7 +635,7 @@ DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 Log::displayInfo "Using ${VENDOR}:${BASH_TAR_VERSION}"
 
-if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker/DockerfileUser" ]]; then
+if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
   "${FRAMEWORK_BIN_DIR}/buildPushDockerImages" "${VENDOR}" "${BASH_TAR_VERSION}" "${BASH_IMAGE}"
 
   # build docker image with user configuration
@@ -647,9 +647,9 @@ if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_ROOT_DIR:-${FRAMEWORK_ROOT_DIR
     --build-arg SKIP_USER="${SKIP_USER:-0}" \
     --build-arg USER_ID="${USER_ID:-$(id -u)}" \
     --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-    -f "${FRAMEWORK_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker/DockerfileUser" \
+    -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
     -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "${FRAMEWORK_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker"
+    "${FRAMEWORK_ROOT_DIR}/.docker"
 fi
 
 # run tests
