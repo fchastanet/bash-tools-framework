@@ -11,7 +11,7 @@ BATS_FILE_NOT_NEEDED_REGEXP="(^bin/|.framework-config|.bats$|/testsData/|^manual
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^build.sh$|\.tpl$|/testsData/|\.bats$"
 # Source directories
 FRAMEWORK_SRC_DIRS=(
-  "${ROOT_DIR}/src"
+  "${FRAMEWORK_ROOT_DIR}/src"
 )
 
 # export here all the variables that will be used in your templates

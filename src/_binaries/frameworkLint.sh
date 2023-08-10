@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/frameworkLint
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/frameworkLint
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
-CONFIG_FILENAME="${ROOT_DIR}/.framework-config"
+CONFIG_FILENAME="${FRAMEWORK_ROOT_DIR}/.framework-config"
 FORMAT="plain"
 DEFAULT_ARGS=(-f plain)
 HELP="$(
@@ -79,7 +82,7 @@ BASH_FRAMEWORK_INITIALIZED=0 Env::load
 # shellcheck disable=SC2034
 configFile=""
 # shellcheck source=/.framework-config
-Framework::loadConfig configFile "${ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
+Framework::loadConfig configFile "${FRAMEWORK_ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
 
 checkEachFunctionHasSrcFile() {
   local file="$1"
@@ -124,7 +127,7 @@ checkEachFunctionHasSrcFile() {
 }
 
 getRelativeSrcDir() {
-  File::relativeToDir "${FRAMEWORK_SRC_DIRS[0]}" "${ROOT_DIR}"
+  File::relativeToDir "${FRAMEWORK_SRC_DIRS[0]}" "${FRAMEWORK_ROOT_DIR}"
 }
 
 deduceBashFunctionFromSrcFile() {
@@ -153,7 +156,7 @@ checkEachSrcFileHasBatsFile() {
     return 0
   fi
   local batsFile="${file%.*}.bats"
-  if [[ ! -f "${ROOT_DIR}/${batsFile}" ]]; then
+  if [[ ! -f "${FRAMEWORK_ROOT_DIR}/${batsFile}" ]]; then
     if [[ "${FORMAT}" = "plain" ]]; then
       Log::displayWarning "checkEachSrcFileHasBatsFile - File '${file}' - missing bats file '${batsFile}'"
     else

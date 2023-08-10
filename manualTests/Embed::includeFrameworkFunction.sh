@@ -10,8 +10,8 @@ SCRIPT_NAME=${0##*/}
 BIN_DIR="${CURRENT_DIR}"
 srcDir="$(cd "${CURRENT_DIR}/../src" && pwd -P)"
 BATS_TEST_DIRNAME="${srcDir}/Embed"
-FRAMEWORK_DIR="$(cd "${srcDir}/.." && pwd -P)"
-export FRAMEWORK_DIR
+FRAMEWORK_ROOT_DIR="$(cd "${srcDir}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
 
 # PERSISTENT_TMPDIR is not deleted by traps
 PERSISTENT_TMPDIR="${TMPDIR:-/tmp}/bash-framework"
@@ -47,7 +47,7 @@ declare -agx _COMPILE_FILE_ARGUMENTS=(
   # binDir      : fallback bin directory in case BIN_FILE has not been provided
   --bin-dir "${BATS_TEST_TMPDIR}"
   # rootDir     : directory used to compute src file relative path
-  --root-dir "${ROOT_DIR}"
+  --root-dir "${FRAMEWORK_ROOT_DIR}"
   # srcDirs : (optional) you can provide multiple directories
   --src-dir "${srcDir}"
 )

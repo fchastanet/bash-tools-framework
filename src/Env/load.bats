@@ -35,14 +35,14 @@ function Env::load::forceLoadExistentFile { #@test
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
   [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "${__LEVEL_INFO}" ]]
   [[ "${BASH_FRAMEWORK_LOG_LEVEL}" = "${__LEVEL_OFF}" ]]
-  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${ROOT_DIR}/logs/${SCRIPT_NAME}.log" ]]
+  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log" ]]
   [[ "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}" = "5" ]]
 }
 
 function Env::load::loadRootDirConfEnvFile { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  export FRAMEWORK_ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   Env::load || return 1
   echo "${BASH_FRAMEWORK_LOG_FILE}"
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
@@ -55,7 +55,7 @@ function Env::load::loadRootDirConfEnvFile { #@test
 function Env::load::loadHomeEnvFileOverrideRootDirConfEnvFile { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  export FRAMEWORK_ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   mkdir -p "${BATS_TEST_TMPDIR}/home"
   cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_TEST_TMPDIR}/home/.env"
   export HOME="${BATS_TEST_TMPDIR}/home"
@@ -71,7 +71,7 @@ function Env::load::loadHomeEnvFileOverrideRootDirConfEnvFile { #@test
 function Env::load::forceLoadExistentFileWithHomeAndRootEnvFiles { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  export FRAMEWORK_ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   mkdir -p "${BATS_TEST_TMPDIR}/home"
   cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_TEST_TMPDIR}/home/.env"
   export HOME="${BATS_TEST_TMPDIR}/home"
@@ -89,7 +89,7 @@ function Env::load::forceLoadExistentFileWithHomeAndRootEnvFiles { #@test
 function Env::load::overrideWithParameter { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envRootDir" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  export FRAMEWORK_ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   mkdir -p "${BATS_TEST_TMPDIR}/home"
   cp "${BATS_TEST_DIRNAME}/testsData/.envHomeDir" "${BATS_TEST_TMPDIR}/home/.env"
   export HOME="${BATS_TEST_TMPDIR}/home"
@@ -109,14 +109,14 @@ function Env::load::noEnvFilesDefaultValues { #@test
   [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]
   [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "3" ]]
   [[ "${BASH_FRAMEWORK_LOG_LEVEL}" = "0" ]]
-  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${ROOT_DIR}/logs/${SCRIPT_NAME}.log" ]]
+  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log" ]]
   [[ "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}" = "5" ]]
 }
 
 function Env::load::loadRootDirConfEnvFileAndOverride { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/rootDir/conf"
   cp "${BATS_TEST_DIRNAME}/testsData/.envOverride" "${BATS_TEST_TMPDIR}/rootDir/conf/.env"
-  export ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
+  export FRAMEWORK_ROOT_DIR="${BATS_TEST_TMPDIR}/rootDir"
   export OVERRIDE_BASH_FRAMEWORK_DISPLAY_LEVEL=overriddenDisplayLevel
   export OVERRIDE_BASH_FRAMEWORK_LOG_LEVEL=overriddenLogLevel
   export OVERRIDE_BASH_FRAMEWORK_LOG_FILE=overriddenLogFile

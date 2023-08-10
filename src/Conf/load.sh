@@ -28,7 +28,7 @@ Conf::load() {
     # shellcheck source=/conf/dsn/default.local.env
     confFile="${HOME}/.bash-tools/${confFolder}/${conf}${extension}"
     if [[ ! -f "${confFile}" ]]; then
-      confFile="${ROOT_DIR}/conf/${confFolder}/${conf}${extension}"
+      confFile="${FRAMEWORK_ROOT_DIR}/conf/${confFolder}/${conf}${extension}"
     fi
   fi
   if [[ ! -f "${confFile}" ]]; then

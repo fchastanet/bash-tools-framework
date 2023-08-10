@@ -9,7 +9,7 @@ source "${BATS_TEST_DIRNAME}/extractDirFromBase64.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
-  export _COMPILE_ROOT_DIR="${ROOT_DIR}"
+  export _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   export PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
 }
 

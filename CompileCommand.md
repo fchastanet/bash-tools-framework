@@ -87,9 +87,8 @@ bin/compile <fileToCompile>
 
 - `<fileToCompile>` the relative or absolute path to compile into one file
 
-**Options note:**
-Prefer using .framework-config file, to set the compiler options as it
-makes them more reusable.
+**Options note:** Prefer using .framework-config file, to set the compiler
+options as it makes them more reusable.
 
 **Options:**
 
@@ -114,8 +113,9 @@ makes them more reusable.
   defined in this project, think about adding a `--src-dir` for this project
   too.
 
-- `--bin-dir|-b <binDir>` allows to override the value of `BIN_DIR`. By default
-  BIN_DIR is set to `bin` directory below the folder above `bin/compile`.
+- `--bin-dir|-b <binDir>` allows to override the value of `FRAMEWORK_BIN_DIR`.
+  By default FRAMEWORK_BIN_DIR is set to `bin` directory below the folder above
+  `bin/compile`.
 
 - `--bin-file|-f <binFile>` `BIN_FILE` directive will be overridden by `binFile`
   value. See more information below about directives.
@@ -123,7 +123,8 @@ makes them more reusable.
 - `--template-dir|-t <templateDir>` the template directory used to override some
   template includes. See more information below about environment variables.
 
-- `--root-dir|-r <rootDir>` if you whish to override `ROOT_DIR` variable.
+- `--root-dir|-r <rootDir>` if you whish to override `FRAMEWORK_ROOT_DIR`
+  variable.
 
   By default root directory is the folder above `bin/compile`.
 
@@ -131,7 +132,7 @@ makes them more reusable.
   displayed in the header to indicate the src filepath that has been compiled
   (`SRC_FILE_PATH`).
 
-  By default, it is initialized with path relative to `ROOT_DIR`
+  By default, it is initialized with path relative to `FRAMEWORK_ROOT_DIR`
 
 - `--keep-temp-files|-k` keep temporary files for debug purpose
 
@@ -179,11 +180,6 @@ Other variables are automatically generated to be used in your templates:
   script being interpreted
 - `TEMPLATE_DIR` the template directory in which you can override the templates
   defined in `ORIGINAL_TEMPLATE_DIR`
-- `ROOT_DIR_RELATIVE_TO_BIN_DIR` is automatically computed from `BIN_FILE`
-  directive. It allows to generate the framework root dir during runtime.
-
-  `ROOT_DIR_RELATIVE_TO_BIN_DIR` has been kept for compatibility reason but
-  prefer to use Embed feature instead.
 
 The following variables depends upon parameters passed to this script:
 
@@ -271,12 +267,13 @@ Eg:
 
 ```bash
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/binaryExample
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
 # VAR_SCRIPT=MinimumRequirements
 # EMBED "Backup::file" as backupFile
-# EMBED "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
+# EMBED "${FRAMEWORK_ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 sudo "${embed_file_backupFile}" # ...
 "${embed_file_otherNeededBinary}"
@@ -347,9 +344,9 @@ _`EMBED` directive usage example:_
 
 ```bash
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/myBinary
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myBinary
 # VAR_SCRIPT=MinimumRequirements
-# EMBED "${ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
+# EMBED "${FRAMEWORK_ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
 # EMBED Backup::file AS "backupFile"
 sudo "${embed_file_backupFile}" ...
 "${embed_file_otherNeededBinary}"

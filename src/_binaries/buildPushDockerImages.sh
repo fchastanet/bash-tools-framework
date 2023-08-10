@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/buildPushDockerImages
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/buildPushDockerImages
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 HELP="$(
   cat <<EOF
@@ -39,14 +41,14 @@ fi
 # shellcheck disable=SC2086
 DOCKER_BUILDKIT=1 docker build \
   ${DOCKER_BUILD_OPTIONS} \
-  -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/Dockerfile.${VENDOR}" \
+  -f "${BASH_TOOLS_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker/Dockerfile.${VENDOR}" \
   --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
   --build-arg BASH_TAR_VERSION="${BASH_TAR_VERSION}" \
   --build-arg BASH_IMAGE="${BASH_BASE_IMAGE}" \
   -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
   -t "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
-  "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker"
+  "${BASH_TOOLS_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker"
 docker run --rm "bash-tools-${VENDOR}-${BASH_TAR_VERSION}" bash --version
 
 if [[ "${PUSH_IMAGE}" == "push" ]]; then

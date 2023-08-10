@@ -5,8 +5,6 @@
 # DO NOT EDIT IT
 #####################################
 
-# DEPRECATED src/_includes/_header.tpl use src/_includes/_headerNoRootDir.tpl instead
-
 # ensure that no user aliases could interfere with
 # commands used in this script
 unalias -a || true
@@ -16,14 +14,8 @@ SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2034
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
-BIN_DIR="${CURRENT_DIR}"
-ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd -P)"
 # shellcheck disable=SC2034
-SRC_DIR="${ROOT_DIR}/src"
-# shellcheck disable=SC2034
-VENDOR_DIR="${ROOT_DIR}/vendor"
-# shellcheck disable=SC2034
-VENDOR_BIN_DIR="${ROOT_DIR}/vendor/bin"
+COMMAND_BIN_DIR="${CURRENT_DIR}"
 
 if [[ -t 1 || -t 2 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
@@ -109,6 +101,9 @@ shopt -s expand_aliases
 set -o pipefail
 set -o errexit
 
+# Command Substitution can inherit errexit option since bash v4.4
+(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
+
 # a log is generated when a command fails
 set -o errtrace
 
@@ -123,6 +118,20 @@ export TERM=xterm-256color
 #avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+DOC_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+
+COMMAND_BIN_DIR="${CURRENT_DIR}"
+if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
+  # shellcheck disable=SC2034
+  FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
+  # shellcheck disable=SC2034
+  FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+  # shellcheck disable=SC2034
+  FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
+  # shellcheck disable=SC2034
+  FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
+fi
 
 Args::defaultHelp() {
   local helpArg=$1
@@ -182,8 +191,8 @@ declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
 # load variables in order(from less specific to more specific) from :
-# - ${ROOT_DIR}/src/Env/testsData/.env file
-# - ${ROOT_DIR}/conf/.env file if exists
+# - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
+# - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
@@ -197,7 +206,7 @@ Env::load() {
   (
     echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
     echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
-    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
+    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
     echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
   ) >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
 
@@ -210,8 +219,8 @@ Env::load() {
     if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
       files+=("${BASH_FRAMEWORK_DEFAULT_ENV_FILE}")
     fi
-    if [[ -f "${ROOT_DIR}/conf/.env" && -r "${ROOT_DIR}/conf/.env" ]]; then
-      files+=("${ROOT_DIR}/conf/.env")
+    if [[ -f "${FRAMEWORK_ROOT_DIR}/conf/.env" && -r "${FRAMEWORK_ROOT_DIR}/conf/.env" ]]; then
+      files+=("${FRAMEWORK_ROOT_DIR}/conf/.env")
     fi
     if [[ -f "${HOME}/.env" && -r "${HOME}/.env" ]]; then
       files+=("${HOME}/.env")
@@ -440,7 +449,7 @@ ShellDoc::generateMdFileFromTemplate() {
       ( #
         (cd "${fromDir}" && "${relativeFile}" --help) |
           File::replaceTokenByInput "@@@${token}_help@@@" "${targetFile}"
-      ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${ROOT_DIR}") --help error caught"
+      ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${FRAMEWORK_ROOT_DIR}") --help error caught"
     else
       ((++tokenNotFoundCount))
       Log::displayWarning "token ${token} not found in ${targetFile}"
@@ -759,7 +768,7 @@ ShellDoc::generateShellDoc() {
   ShellDoc::installRequirementsIfNeeded
   (
     cd "${currentDir}" || exit 1
-    "${ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
+    "${FRAMEWORK_ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
   )
 }
 
@@ -774,7 +783,7 @@ Assert::fileWritable() {
   Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
-BASH_FRAMEWORK_TOMDOC_INSTALLED="${ROOT_DIR}/vendor/.tomdocInstalled"
+BASH_FRAMEWORK_TOMDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.tomdocInstalled"
 BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT=86400 # 1 day
 
 ShellDoc::installRequirementsIfNeeded() {
@@ -787,7 +796,7 @@ ShellDoc::installRequirementsIfNeeded() {
     (Log::displayInfo "Check if tomdoc.sh is up to date")
     if Git::shallowClone \
       "https://github.com/fchastanet/tomdoc.sh.git" \
-      "${VENDOR_DIR:-${ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
+      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
       "master" \
       "FORCE_DELETION"; then
       echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"
@@ -916,11 +925,14 @@ Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
 declare -a args=("$@")
 Array::remove args -v --verbose
 set -- "${args[@]}"
+
 Log::load
 
-Env::pathPrepend "${VENDOR_BIN_DIR}"
-Env::pathPrepend "${BIN_DIR}"
-DOC_DIR="${ROOT_DIR}/pages"
+Env::pathPrepend "${COMMAND_BIN_DIR}"
+
+# prepare bin directory for eventual bin files generated by Embed::embed
+mkdir -p "${TMPDIR:-/tmp}/bin"
+Env::pathPrepend "${TMPDIR:-/tmp}/bin"
 
 HELP="$(
   cat <<EOF
@@ -942,11 +954,11 @@ EOF
 Args::defaultHelp "${HELP}" "$@"
 
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-  "${BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
+  "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
   exit $?
 fi
 
-export FRAMEWORK_DIR="${ROOT_DIR}"
+export FRAMEWORK_ROOT_DIR
 
 #-----------------------------
 # doc generation
@@ -955,9 +967,9 @@ export FRAMEWORK_DIR="${ROOT_DIR}"
 Log::displayInfo 'generate Commands.md'
 ((TOKEN_NOT_FOUND_COUNT = 0)) || true
 ShellDoc::generateMdFileFromTemplate \
-  "${ROOT_DIR}/Commands.tmpl.md" \
+  "${FRAMEWORK_ROOT_DIR}/Commands.tmpl.md" \
   "${DOC_DIR}/Commands.md" \
-  "${BIN_DIR}" \
+  "${COMMAND_BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
   '(bash-tpl|var|simpleBinary)$'
 
@@ -966,12 +978,12 @@ rm -f "${DOC_DIR}/Index.md" || true
 rm -Rf "${DOC_DIR}/bashDoc" || true
 
 ShellDoc::generateShellDocsFromDir \
-  "${SRC_DIR}" \
+  "${FRAMEWORK_SRC_DIR}" \
   "${DOC_DIR}/bashDoc" \
   "${DOC_DIR}/FrameworkIndex.md" \
   '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|_binaries/.*\.sh|/__all\.sh)$'
 
-cp "${ROOT_DIR}/README.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/README.md" "${DOC_DIR}"
 sed -i -E \
   -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
   -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
@@ -979,14 +991,14 @@ sed -i -E \
   "${DOC_DIR}/README.md"
 
 mkdir -p "${DOC_DIR}/images" || true
-cp -R "${ROOT_DIR}/images/"* "${DOC_DIR}/images"
-cp "${ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
-cp "${ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
-cp "${ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
+cp -R "${FRAMEWORK_ROOT_DIR}/images/"* "${DOC_DIR}/images"
+cp "${FRAMEWORK_ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
 (
-  cd "${ROOT_DIR}/pages/bashDoc" || exit 1
+  cd "${FRAMEWORK_ROOT_DIR}/pages/bashDoc" || exit 1
   currentDir=""
   echo ""
   while IFS= read -r file; do

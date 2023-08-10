@@ -7,11 +7,11 @@ SCRIPT_NAME=${0##*/}
 # commands used in this script
 unalias -a || true
 
-if [[ -n "${BIN_DIR}" ]]; then
-  export PATH="${BIN_DIR}":${PATH}
+if [[ -n "${COMMAND_BIN_DIR}" ]]; then
+  export PATH="${COMMAND_BIN_DIR}":${PATH}
 fi
-if [[ -n "${VENDOR_BIN_DIR}" ]]; then
-  export PATH="${VENDOR_BIN_DIR}":${PATH}
+if [[ -n "${FRAMEWORK_VENDOR_BIN_DIR}" ]]; then
+  export PATH="${FRAMEWORK_VENDOR_BIN_DIR}":${PATH}
 fi
 
 srcDir="$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)"

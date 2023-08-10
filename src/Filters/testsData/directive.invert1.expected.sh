@@ -6,6 +6,6 @@ test # comment after command
 
 true
 
-# BIN_FILE=<% ${ROOT_DIR} %>/bin/awkLint2
+# BIN_FILE=<% ${FRAMEWORK_ROOT_DIR} %>/bin/awkLint2
 
 otherTest

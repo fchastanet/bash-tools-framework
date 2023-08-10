@@ -13,7 +13,7 @@ teardown() {
 }
 
 function compile() {
-  local binDir="${ROOT_DIR}/bin"
+  local binDir="${FRAMEWORK_ROOT_DIR}/bin"
   local -a params=(
     # srcFile     : file that needs to be compiled
     "${BATS_TEST_DIRNAME}/testsData/bin/$1"
@@ -22,7 +22,7 @@ function compile() {
     # binDir      : fallback bin directory in case BIN_FILE has not been provided
     --bin-dir "${BATS_TEST_TMPDIR}"
     # rootDir     : directory used to compute src file relative path
-    --root-dir "${ROOT_DIR}"
+    --root-dir "${FRAMEWORK_ROOT_DIR}"
     # srcDirs : (optional) you can provide multiple directories
     --src-dir "${BATS_TEST_DIRNAME}/testsData/src"
   )

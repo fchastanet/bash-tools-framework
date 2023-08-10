@@ -36,7 +36,7 @@
   - Env::load with 1 env file as parameter
   - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
   - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
-    BASH_FRAMEWORK_ENV_FILEPATH="${ROOT_DIR}/.env"
+    BASH_FRAMEWORK_ENV_FILEPATH="${FRAMEWORK_ROOT_DIR}/.env"
   - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
   - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
     global HOME variable
@@ -51,6 +51,7 @@
 
 ## 3. Framework functions changes
 
+- log use alias
 - check if we could use alias to override methods to be able to reload or pass
   by temp functions?
 - replace \_colors.sh with Log/theme
@@ -65,7 +66,7 @@
 
 ## 4. Update Bash-tools-framework dependencies
 
-- Remove ROOT_DIR/SRC_DIR requirements from binaries
+- Remove FRAMEWORK_ROOT_DIR/FRAMEWORK_SRC_DIR requirements from binaries
   - replace it by optional argument automatically added --root-dir
   - other default options to the binaries, log-level, display-log-level, ...
   - add options to `src/_includes/_headerNoRootDir.tpl`
@@ -74,6 +75,22 @@
 
 TODOs linked to bin/compiler:
 
+- arg configuration: display whole bash framework configuration
+- make compile use relative paths
+- deduce ROOT_DIR based on most near .framework-config file ?
+- dependencies checker
+  - ensure that needed variables are set
+    - eg: Conf::\* needs FRAMEWORK_ROOT_DIR to be defined
+  - REQUIRE directives that include templates files automatically and that
+    performs checks at the script start
+    - REQUIRE Log
+    - REQUIRE FRAMEWORK_ROOT_DIR
+    - REQUIRE Embed -> enable bin directory initialization
+    - REQUIRE alpine/ubuntu/wsl
+    - REQUIRE bash version > 4.0
+    - REQUIRE verboseArg
+    - REQUIRE TMPDIR
+  - Require Log::load if at least one Log::display\*
 - .framework-config should contain the compiler options
 - make compile options works with relative files
   - display info should display relative path too instead of full path
@@ -81,7 +98,6 @@ TODOs linked to bin/compiler:
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - define a sh format able to describe an interface
   - would it be possible to implement inheritance ?
-- deprecate usage of ROOT_DIR_RELATIVE_TO_BIN_DIR as all files can be embedded
 - compile should use FRAMEWORK_SRC_DIRS from .framework-config
 - use Filters::optimizeShFile
 - check if nested namespaces are supported

@@ -63,7 +63,7 @@ function Conf::getAbsoluteFile::CurrentDir { #@test
 
 function Conf::getAbsoluteFile::RootDir { #@test
   (
-    export ROOT_DIR="${BATS_TEST_TMPDIR}"
+    export FRAMEWORK_ROOT_DIR="${BATS_TEST_TMPDIR}"
     run Conf::getAbsoluteFile "dsn2" "myConf" ".sh"
 
     assert_success

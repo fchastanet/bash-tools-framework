@@ -12,6 +12,6 @@ ShellDoc::generateShellDoc() {
   ShellDoc::installRequirementsIfNeeded
   (
     cd "${currentDir}" || exit 1
-    "${ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
+    "${FRAMEWORK_ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
   )
 }

@@ -81,7 +81,7 @@ function Embed::inject::worksWithWarningResourceAlreadyIncluded { #@test
   local status="0"
   local -a embeddedNames=()
   local -a embeddedResources=("${BATS_TEST_DIRNAME}/testsData/binaryFile")
-  local _COMPILE_ROOT_DIR="${ROOT_DIR}"
+  local _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   local PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
   Embed::inject embeddedNames embeddedResources <<<"# EMBED '${BATS_TEST_DIRNAME}/testsData/binaryFile' as 'valid'" \
     >"${BATS_TEST_TMPDIR}/inject" 2>"${BATS_TEST_TMPDIR}/injectError" || status=$?
@@ -97,7 +97,7 @@ function Embed::inject::twiceSameResourceDifferentAsName { #@test
   local status="0"
   local -a embeddedNames=()
   local -a embeddedResources=()
-  local _COMPILE_ROOT_DIR="${ROOT_DIR}"
+  local _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   local PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
   dir="${BATS_TEST_DIRNAME}" envsubst <"${BATS_TEST_DIRNAME}/testsData/twiceSameResourceDifferentAsName.txt" |
     Embed::inject embeddedNames embeddedResources \

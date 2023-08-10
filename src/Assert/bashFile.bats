@@ -19,7 +19,7 @@ function Assert::bashFile::alternateShebang { #@test
 }
 
 function Assert::bashFile::markdown { #@test
-  run Assert::bashFile "${ROOT_DIR}/README.md"
+  run Assert::bashFile "${FRAMEWORK_ROOT_DIR}/README.md"
   assert_failure 1
   assert_output ""
 }

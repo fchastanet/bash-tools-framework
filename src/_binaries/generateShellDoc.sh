@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/generateShellDoc
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/generateShellDoc
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 # Usage info
 showHelp() {

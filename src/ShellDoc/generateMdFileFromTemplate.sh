@@ -39,7 +39,7 @@ ShellDoc::generateMdFileFromTemplate() {
       ( #
         (cd "${fromDir}" && "${relativeFile}" --help) |
           File::replaceTokenByInput "@@@${token}_help@@@" "${targetFile}"
-      ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${ROOT_DIR}") --help error caught"
+      ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${FRAMEWORK_ROOT_DIR}") --help error caught"
     else
       ((++tokenNotFoundCount))
       Log::displayWarning "token ${token} not found in ${targetFile}"

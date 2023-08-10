@@ -27,13 +27,13 @@ Install::dir() {
   backupDir "${TO_DIR}" "${DIRNAME}"
 
   local DEST_DIR="${TO_DIR}/${DIRNAME}"
-  Log::displayDebug "Install directory '${FROM_DIR#"${ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
+  Log::displayDebug "Install directory '${FROM_DIR#"${FRAMEWORK_ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
   (
     mkdir -p "${DEST_DIR}"
     cd "${FROM_DIR}/${DIRNAME}" || exit 1
     shopt -s dotglob # * will match hidden files too
     cp -R -- * "${DEST_DIR}" ||
-      Log::fatal "unable to copy directory '${FROM_DIR#"${ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
+      Log::fatal "unable to copy directory '${FROM_DIR#"${FRAMEWORK_ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}'"
     chown -R "${USER_NAME}":"${USER_GROUP}" "${DEST_DIR}"
     # chown all parent directory with same user
     local fullDir="${FROM_DIR}"
@@ -42,5 +42,5 @@ Install::dir() {
       chown "${USER_NAME}":"${USER_GROUP}" "${fullDir}"
     done
   )
-  Log::displaySuccess "Installed directory '${FROM_DIR#"${ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}')"
+  Log::displaySuccess "Installed directory '${FROM_DIR#"${FRAMEWORK_ROOT_DIR}/"}/${DIRNAME}' to '${DEST_DIR}')"
 }

@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# BIN_FILE=${ROOT_DIR}/bin/runBuildContainer
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/runBuildContainer
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+export FRAMEWORK_ROOT_DIR
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
-HELP="$(
+showHelp() {
   cat <<EOF
 ${__HELP_TITLE}Description:${__HELP_NORMAL} run the container specified by args provided.
 Command to run is passed via the rest of arguments
@@ -15,8 +18,8 @@ additional docker run options can be passed via DOCKER_RUN_OPTIONS env variable
 
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
-)"
-Args::defaultHelp "${HELP}" "$@" || true
+}
+Args::defaultHelp showHelp "$@" || true
 
 VENDOR="${VENDOR:-ubuntu}"
 BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"
@@ -25,8 +28,8 @@ DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 
 Log::displayInfo "Using ${VENDOR}:${BASH_TAR_VERSION}"
 
-if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/DockerfileUser" ]]; then
-  "${BIN_DIR}/buildPushDockerImages" "${VENDOR}" "${BASH_TAR_VERSION}" "${BASH_IMAGE}"
+if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
+  "${FRAMEWORK_BIN_DIR}/buildPushDockerImages" "${VENDOR}" "${BASH_TAR_VERSION}" "${BASH_IMAGE}"
 
   # build docker image with user configuration
   # shellcheck disable=SC2086
@@ -37,9 +40,9 @@ if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/Dock
     --build-arg SKIP_USER="${SKIP_USER:-0}" \
     --build-arg USER_ID="${USER_ID:-$(id -u)}" \
     --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-    -f "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker/DockerfileUser" \
+    -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
     -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "${FRAMEWORK_DIR:-${ROOT_DIR}}/.docker"
+    "${FRAMEWORK_ROOT_DIR}/.docker"
 fi
 
 # run tests

@@ -5,8 +5,8 @@ declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
 # load variables in order(from less specific to more specific) from :
-# - ${ROOT_DIR}/src/Env/testsData/.env file
-# - ${ROOT_DIR}/conf/.env file if exists
+# - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
+# - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
@@ -20,7 +20,7 @@ Env::load() {
   (
     echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
     echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
-    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
+    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
     echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
   ) >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
 
@@ -33,8 +33,8 @@ Env::load() {
     if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
       files+=("${BASH_FRAMEWORK_DEFAULT_ENV_FILE}")
     fi
-    if [[ -f "${ROOT_DIR}/conf/.env" && -r "${ROOT_DIR}/conf/.env" ]]; then
-      files+=("${ROOT_DIR}/conf/.env")
+    if [[ -f "${FRAMEWORK_ROOT_DIR}/conf/.env" && -r "${FRAMEWORK_ROOT_DIR}/conf/.env" ]]; then
+      files+=("${FRAMEWORK_ROOT_DIR}/conf/.env")
     fi
     if [[ -f "${HOME}/.env" && -r "${HOME}/.env" ]]; then
       files+=("${HOME}/.env")
