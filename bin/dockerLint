@@ -908,4 +908,5 @@ if (($# == 0)); then
   set -- "${DEFAULT_ARGS[@]}"
 fi
 
-"${FRAMEWORK_VENDOR_BIN_DIR}/hadolint" "$@" "$(git ls-files --exclude-standard | grep -E '/Dockerfile.*' || true)"
+# shellcheck disable=SC2046
+"${FRAMEWORK_VENDOR_BIN_DIR}/hadolint" "$@" $(git ls-files --exclude-standard | grep -E '/Dockerfile.*')
