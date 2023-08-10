@@ -14,6 +14,7 @@ export LC_ALL=POSIX
 
 set -o errexit
 set -o pipefail
+(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
 
 load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"

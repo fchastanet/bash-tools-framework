@@ -9,6 +9,7 @@ this project because I wrote some of them while writing this project.
     - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
     - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
     - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
+    - [shopt -s inherit\_errexit](#shopt--s-inherit_errexit)
     - [1.1.5. posix (set -o posix)](#115-posix-set--o-posix)
   - [1.2. Arguments](#12-arguments)
   - [1.3. some commands default options to use](#13-some-commands-default-options-to-use)
@@ -75,6 +76,39 @@ else
 fi
 ```
 
+Caveats with command substitution:
+
+```bash
+#!/bin/bash
+set -o errexit
+echo `exit 1`
+echo $?
+```
+
+Output:
+
+```bash
+
+0
+```
+
+it is because echo has succeeded. the same result occurs even with
+`shopt -s inherit_errexit` (see below).
+
+The **best practice** is to always assign command substitution to variable:
+
+```bash
+#!/bin/bash
+set -o errexit
+declare cmdOut
+cmdOut=`exit 1`
+echo "${cmdOut}"
+echo $?
+```
+
+Outputs nothing because the script stopped before variable affectation, return
+code is 1.
+
 #### 1.1.2. pipefail (set -o pipefail)
 
 > If set, the return value of a pipeline is the value of the last (rightmost)
@@ -87,6 +121,7 @@ in pipe could hide the error.
 **Eg**: without `pipefail` this command succeed
 
 ```bash
+#!/bin/bash
 set -o errexit
 set +o pipefail # deactivate pipefail mode
 foo | echo "a" # 'foo' is a non-existing command
@@ -111,6 +146,59 @@ This is not implemented in current framework (TODO in future version).
 > ‘_’, or array variables subscripted with ‘@’ or ‘_’, as an error when
 > performing parameter expansion. An error message will be written to the
 > standard error, and a non-interactive shell will exit.
+
+#### shopt -s inherit_errexit
+
+set -e does not affect subShells created by Command Substitution. This rule is
+stated in Command Execution Environment:
+
+> subShells spawned to execute command substitutions inherit the value of the -e
+> option from the parent shell. When not in POSIX mode, Bash clears the -e
+> option in such subShells.
+
+This rule means that the following script will run to completion, in spite of
+INVALID_COMMAND.
+
+```bash
+#!/bin/bash
+# command-substitution.sh
+set -e
+MY_VAR=$(echo -n Start; INVALID_COMMAND; echo -n End)
+echo "MY_VAR is $MY_VAR"
+```
+
+Output:
+
+```bash
+./command-substitution.sh: line 4: INVALID_COMMAND: command not found
+MY_VAR is StartEnd
+```
+
+shopt -s inherit_errexit, added in Bash 4.4 allows you to have command
+substitution parameters inherit your set -e from the parent script.
+
+From the Shopt Builtin documentation:
+
+> If set, command substitution inherits the value of the errexit option, instead
+> of unsetting it in the subShell environment. This option is enabled when POSIX
+> mode is enabled.
+
+So, modifying command-substitution.sh above, we get:
+
+```bash
+#!/bin/bash
+# command-substitution-inherit_errexit.sh
+set -e
+shopt -s inherit_errexit
+MY_VAR=$(echo -n Start; INVALID_COMMAND; echo -n End)
+echo "MY_VAR is $MY_VAR"
+```
+
+Output:
+
+```bash
+./command-substitution-inherit_errexit.sh: line 5: INVALID_COMMAND: command not found
+```
 
 #### 1.1.5. posix (set -o posix)
 
