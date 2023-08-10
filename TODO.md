@@ -5,7 +5,7 @@
 - [3. Framework functions changes](#3-framework-functions-changes)
 - [4. Update Bash-tools-framework dependencies](#4-update-bash-tools-framework-dependencies)
 - [5. Compiler and bash Object oriented](#5-compiler-and-bash-object-oriented)
-  - [5.1. Embed::embed](#51-embedembed)
+  - [REQUIRE directive](#require-directive)
   - [5.2. FrameworkLint](#52-frameworklint)
 - [6. Binaries](#6-binaries)
   - [New binaries](#new-binaries)
@@ -56,7 +56,6 @@
   by temp functions?
 - replace \_colors.sh with Log/theme
 - merge Framework::run and Command::captureOutputAndExitCode
-- create function Array::remove
 - Conf::list findOptions as last arg so any number of args
 - replace Command::captureOutputAndExitCode with Framework::run that mimics bats
   run
@@ -76,21 +75,7 @@
 TODOs linked to bin/compiler:
 
 - arg configuration: display whole bash framework configuration
-- make compile use relative paths
-- deduce ROOT_DIR based on most near .framework-config file ?
-- dependencies checker
-  - ensure that needed variables are set
-    - eg: Conf::\* needs FRAMEWORK_ROOT_DIR to be defined
-  - REQUIRE directives that include templates files automatically and that
-    performs checks at the script start
-    - REQUIRE Log
-    - REQUIRE FRAMEWORK_ROOT_DIR
-    - REQUIRE Embed -> enable bin directory initialization
-    - REQUIRE alpine/ubuntu/wsl
-    - REQUIRE bash version > 4.0
-    - REQUIRE verboseArg
-    - REQUIRE TMPDIR
-  - Require Log::load if at least one Log::display\*
+- deduce FRAMEWORK_ROOT_DIR based on most near .framework-config file ?
 - .framework-config should contain the compiler options
 - make compile options works with relative files
   - display info should display relative path too instead of full path
@@ -103,35 +88,32 @@ TODOs linked to bin/compiler:
 - check if nested namespaces are supported
 - get rid of `__all.sh` files, useless because of compiler auto include
 
-### 5.1. Embed::embed
+### REQUIRE directive
 
-- implement EMBED AS directive
-  - new bash-framework function to call bash-tpl (embedded)
-  - replace all envsubst by the usage of bash-tpl
-
-it doesn't matter if the command to execute is a sudo or not we just want to
-encapsulate a dependent binary(bash or not) inside the executable.
-
-- <https://blog.tratif.com/2023/02/17/bash-tips-6-embedding-files-in-a-single-bash-script/>
-  - from bin file, generate a directory will all the necessary bin files and
-    assets
-  - tar the entire directory
-  - create a bootstrap script able to untar and execute the entrypoint
-- add EMBED var
-- EMBED of a function of the framework will automatically generate a bin file
-  called with the name of the function and calling this function
-- using EMBED supposes to unsure the targeted binary has been constructed
-- using EMBED with a framework function (eg: Backup::file) will first construct
-  a bin file using that function directly
-- inject Embed::extract\_${asName} just before the use of the alias(lazy
-  loading)
-  - remove the call in `src/Embed/embedFileFunction.tpl`
-
-eg: Backup::file so it would allow to use `sudo Backup::file ...`
-
-```bash
-# EMBED Backup::file
-```
+- define REQUIRE_DISABLED array in .framework-config
+- Compiler::Requirement::assertRequireName
+  - error if requires name does not begin with requires
+  - error if requires name does not comply naming convention
+- Compiler::Requirement::parseDisable + add automatically to global variable
+  REQUIRE_DISABLED
+  - Warn if a requirement has no associated file using
+    Compiler::findFunctionInSrcDirs
+- Compiler::Requirement::parse
+  - Warn if a requirement has no associated file using
+    Compiler::findFunctionInSrcDirs
+- Compiler::Requirement::incrementRequireUsage
+- Compiler::Requirement::addRequireDependency
+- implement compiler pass
+  - will parse `# REQUIRE` directives
+    - error if _requires\*_ file not found
+  - will ignore the disabled requirements
+  - use of Compiler::Requirement::incrementRequireUsage
+  - use of Compiler::Requirement::addRequireDependency
+  - eventual framework functions needed will be imported
+- on second pass, execute again compiler pass as eventual other `REQUIRE`
+  directives could be found
+- At the end of compiler processing, inject the requirements in the order
+  specified by dependency tree.
 
 ### 5.2. FrameworkLint
 

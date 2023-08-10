@@ -2,7 +2,7 @@
 
 - [1. Why ?](#1-why-)
 - [2. Compile tool](#2-compile-tool)
-- [3. compile command help](#3--compile-command-help)
+- [3.  compile command help](#3--compile-command-help)
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
@@ -14,12 +14,25 @@
     - [3.5.1. `# FUNCTIONS` directive](#351--functions-directive)
     - [3.5.2. `VAR_*` directive (optional)](#352-var_-directive-optional)
     - [3.5.3. `BIN_FILE` directive (optional)](#353-bin_file-directive-optional)
-    - [3.5.5. `EMBED` directive (optional)](#355-embed-directive-optional)
-    - [3.5.4. Compiler - Embed::embed](#354-compiler---embedembed)
-  - [3.6. `.framework-config` framework configuration file](#36-framework-config-framework-configuration-file)
-- [4. FrameworkLint](#4-frameworklint)
-- [5. Best practices](#5-best-practices)
-- [6. Acknowledgements](#6-acknowledgements)
+  - [3.6. REQUIRE directive (optional)](#36-require-directive-optional)
+    - [3.6.1. What is a requirement ?](#361-what-is-a-requirement-)
+    - [3.6.2. REQUIRE directive syntax](#362-require-directive-syntax)
+      - [3.6.2.1. Requires naming convention](#3621-requires-naming-convention)
+      - [3.6.2.2. Best practice #1: feature name](#3622-best-practice-1-feature-name)
+      - [3.6.2.3. Best practice #2: support method](#3623-best-practice-2-support-method)
+    - [3.6.3. Requirement overloading](#363-requirement-overloading)
+    - [3.6.4. Requirement disable](#364-requirement-disable)
+  - [3.7. `EMBED` directive (optional)](#37-embed-directive-optional)
+  - [3.8. `.framework-config` framework configuration file](#38-framework-config-framework-configuration-file)
+- [4. Compiler algorithms](#4-compiler-algorithms)
+  - [4.1. Compiler - Compiler::Requirement::require](#41-compiler---compilerrequirementrequire)
+    - [4.1.1. Requires dependencies](#411-requires-dependencies)
+    - [4.1.2. disable compiler requirement management](#412-disable-compiler-requirement-management)
+    - [4.1.3. override requirements dependency order](#413-override-requirements-dependency-order)
+  - [4.2. Compiler - Embed::embed](#42-compiler---embedembed)
+- [5. FrameworkLint](#5-frameworklint)
+- [6. Best practices](#6-best-practices)
+- [7. Acknowledgements](#7-acknowledgements)
 
 ## 1. Why ?
 
@@ -322,10 +335,130 @@ SCRIPT="<% ${SCRIPT} %>"
 
 #### 3.5.3. `BIN_FILE` directive (optional)
 
-allows to indicate where the resulting bin file will be generated. If not
+Allows to indicate where the resulting bin file will be generated. If not
 provided, the binary file will be copied to `binDir` without sh extension
 
-#### 3.5.5. `EMBED` directive (optional)
+### 3.6. REQUIRE directive (optional)
+
+Allows to specify that a bash framework function requires some specific
+features.
+
+#### 3.6.1. What is a requirement ?
+
+`Compiler::Requirement::require` instructs the compiler to include some
+cross-used scripts to ensure that proper configuration is set. The directive
+`# REQUIRE` allow the usage of that feature during the compilation.
+
+Here a non exhaustive list of possible requirements:
+
+- REQUIRE Log::requiresLoad : ensure log configuration is loaded
+  - REQUIRE Log::requiresLoad added on each `Log::display*`functions
+- REQUIRE Framework::requiresRootDir
+  - ensure that needed variable is set _Eg:_ `Conf::*` needs FRAMEWORK_ROOT_DIR
+    to be defined
+- REQUIRE Embed::requiresLoad -> enable bin directory initialization
+- REQUIRE Args::requiresParseVerbose
+- REQUIRE Framework::requiresTMPDIR
+- REQUIRE Git::requiresShallowClone
+- REQUIRE Git::requiresGitCommand : checks that git command exists
+- REQUIRE Framework::requiresBashAssociativeArray
+  - if a function use this directive, the binary will check at the start that
+    the command bash exists with this minimal version 4.0 in which this feature
+    appears
+- REQUIRE Apt::requiresUbuntu
+
+#### 3.6.2. REQUIRE directive syntax
+
+Allows to define on namespace or function level, some scripts that need to be
+executed at loading time.
+
+The following syntax can be used:
+
+_Syntax:_ `# REQUIRE Framework::requiresRootDir`
+
+_Syntax:_ `# REQUIRE Git::requiresGitCommand`
+
+_Syntax:_ `# REQUIRE Git::requiresShallowClone`
+
+_`REQUIRE` directive usage example:_
+
+The following example will ensure that a script that is using the framework
+function Git::shallowClone has the git command available. In this particular
+case we could also ensure that a minimal version is available.
+
+```bash
+#!/usr/bin/env bash
+# REQUIRE Git::requiresGitCommand
+# REQUIRE Git::requiresShallowClone
+Git::shallowClone() {
+  # ...
+}
+```
+
+See [compiler - Compiler::Requirement::require]#requirement_require) below for
+more information.
+
+##### 3.6.2.1. Requires naming convention
+
+The following naming convention applies:
+
+- every required functions are prefixed with `requires`.
+- the name of file then respects camel case (eg: `requiresShallowClone.sh`.
+- the file usually defines a unique function that is named with the namespace
+  followed by the name of the file (eg: `Git::requiresShallowClone`).
+- the function does not take any parameter.
+
+##### 3.6.2.2. Best practice #1: feature name
+
+A best practice for the minimum command version is to name the requirement with
+the feature wanted, so instead of ~~Git::requiresGitMinVersion1_7_10~~ we prefer
+to write `Git::requiresShallowClone` and in the implementation of this
+requirement, we will check for git minimal version 1.7.10. This has the
+advantage, that maybe in some linux system, some requirements depends on
+different version. This has also the advantage to document at the same time why
+we need a specific requirement.
+
+##### 3.6.2.3. Best practice #2: support method
+
+When developing a _requires_ file, think about writing the associated function
+_support_. Eg: `src/Git/requiresShallowClone.sh` will use
+`Git::supportsShallowClone`
+
+#### 3.6.3. Requirement overloading
+
+In`.framework-config` file, the property `FRAMEWORK_SRC_DIRS` allows to specify
+multiple source directories, the framework functions will be searched in these
+directories in the order specified by this variable. It allows you to override
+either bash framework functions, either requirements that are just special bash
+framework functions.
+
+#### 3.6.4. Requirement disable
+
+Because sometimes we could expect that some command are not available and our
+script being able to run by providing an alternative. _Eg.:_ If gawk command is
+not available then use alternate function that uses sed command.
+
+\_\_Eg.: with the previous example of Git::shallowClone, we want in our script
+to be able to use this function without the git requirement. Then we can write
+this in our script headers:
+
+```bash
+#!/usr/bin/env bash
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
+# REQUIRE disable=Git::requiresShallowClone
+
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+
+if Git::shallowCloneSupported; then
+  Git::shallowClone ...
+else
+  Git::clone ...
+fi
+# ...
+```
+
+### 3.7. `EMBED` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax
 can be used:
@@ -354,10 +487,143 @@ sudo "${embed_file_backupFile}" ...
 
 See [compiler - Embed::embed]#embed_include) below for more information.
 
+### 3.8. `.framework-config` framework configuration file
+
+The special file `.framework-config` allows to change some behaviors of the
+compiler or the framework linter.
+
+```bash
+# describe the functions that will be skipped from being imported
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^namespace::functions$|^Functions::myFunction$|^IMPORT::dir::file$|^Acquire::ForceIPv4$'
+# describe the files that do not contain function to be imported
+NON_FRAMEWORK_FILES_REGEXP="(.bats$|/testsData/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_|^src/batsHeaders.sh$)"
+# describe the files that are allowed to not have a function matching the filename
+FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^build.sh$|^tests/|\.tpl$|testsData/binaryFile$"
+# Source directories
+FRAMEWORK_SRC_DIRS=()
+
+# export here all the variables that will be used in your templates
+# Use this when variables are common to most of your bin files.
+# You can alternatively use VAR_* directive to declare a constant
+# specific to your bin file
+export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
+```
+
+## 4. Compiler algorithms
+
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-#### 3.5.4. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
+### 4.1. <a name="requirement_require" id="requirement_require"></a>Compiler - Compiler::Requirement::require
+
+<!-- markdownlint-restore -->
+
+The compiler during successive passes:
+
+- will load `.framework-config`, eventual variable `REQUIRE_DISABLED` could be
+  loaded.
+- will parse `# REQUIRE disable=` directives, adding each disabled requirement
+  to the `REQUIRE_DISABLED` variable.
+  - warn if a disabled requirement has no associated file
+- compiler pass
+  - will parse `# REQUIRE` directives
+    - error if requires name does not begin with requires
+    - error if requires name does not comply naming convention
+    - error if _requires\*_ file not found
+  - will ignore the disabled requirements
+  - a tree of requires dependencies will be computed
+  - eventual framework functions needed will be imported
+- on second pass, execute again compiler pass as eventual other `REQUIRE`
+  directives could be found
+- At the end of compiler processing, inject the requirements in the order
+  specified by dependency tree.
+
+#### 4.1.1. Requires dependencies
+
+The following rules apply:
+
+- Some requirements can depends on each others, the compiler will compute which
+  dependency should be loaded before the other. _Eg:_ Log::requiresLoad
+  requirement depends on Framework::requiresRootDir, so
+  Framework::requiresRootDir is loaded before. But Log requirement depends also
+  on Env::requiresLoad requirement.
+- Requirement can be set at namespace level by adding the directive in \_.sh
+  file or at function level.
+- A requirement can be loaded only once.
+- A requirement that is used by several functions will be more prioritized and
+  will be loaded before a less prioritized requirement.
+- `# FUNCTIONS` placeholder should be defined before `# REQUIREMENTS`
+- `# REQUIREMENTS` placeholder should be defined before `# ENTRYPOINT`
+- You can use .INCLUDE directive in these files to avoid duplicating code for
+  each similar requirements.
+
+Let's take this example:
+
+- REQUIRE Log::requiresLoad
+  - will insert the script `src/Log/requiresLoad.sh`
+  - will call the function Log::load
+  - Log::load function could use a directive
+    `REQUIRE Framework::requiresRootDir` that would initialize
+    FRAMEWORK_ROOT_DIR variable by inserting `src/Framework/requiresRootDir.sh`
+    file.
+- REQUIRE Args::requiresVerboseArg
+  - will insert the script `src/Args/requiresVerboseArg.sh` that would contains
+
+```bash
+# File src/Args/parseVerboseRequirement.sh
+Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
+declare -a args=("$@")
+Array::remove args -v --verbose
+set -- "${args[@]}"
+```
+
+This could result in the following dependency files.
+
+Dependencies counts
+
+```csv
+# requirement;number of times the requirement is required
+Log::requiresLoad;1
+Framework::requiresRootDir;1
+Args::requiresVerboseArg;1
+```
+
+List of requirements dependencies
+
+```csv
+# requirement;requirement implied by this requirement
+Log::requiresLoad;Framework::requiresRootDir
+Framework::requiresRootDir;
+Args::requiresVerboseArg;
+```
+
+This would allow the compiler to deduce the order of the requirements:
+
+```bash
+Framework::requiresRootDir
+Args::requiresVerboseArg
+Log::requiresLoad
+```
+
+Framework::requiresRootDir and Args::requiresVerboseArg are inserted first as
+they depends on zero requirements. Order depends on order of appearance in the
+script.
+
+#### 4.1.2. disable compiler requirement management
+
+you can completely disable compiler requirement management using
+`DISABLE_COMPILER_REQUIREMENTS`. In this case you have to manually import the
+requirements using `.INCLUDE`directive.
+
+#### 4.1.3. override requirements dependency order
+
+the order of the requirements is computed automatically by the compiler but in
+some cases, you could need to override this order.
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+### 4.2. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
 
 <!-- markdownlint-restore -->
 
@@ -385,47 +651,29 @@ framework function. `Embed::embed` allows to:
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Embed/activityDiagram.puml).
 
-### 3.6. `.framework-config` framework configuration file
-
-The special file `.framework-config` allows to change some behaviors of the
-compiler or the framework linter.
-
-```bash
-# describe the functions that will be skipped from being imported
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^namespace::functions$|^Functions::myFunction$|^IMPORT::dir::file$|^Acquire::ForceIPv4$'
-# describe the files that do not contain function to be imported
-NON_FRAMEWORK_FILES_REGEXP="(.bats$|/testsData/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_|^src/batsHeaders.sh$)"
-# describe the files that are allowed to not have a function matching the filename
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^build.sh$|^tests/|\.tpl$|testsData/binaryFile$"
-# Source directories
-FRAMEWORK_SRC_DIRS=()
-
-# export here all the variables that will be used in your templates
-# Use this when variables are common to most of your bin files.
-# You can alternatively use VAR_* directive to declare a constant
-# specific to your bin file
-export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
-```
-
-## 4. FrameworkLint
+## 5. FrameworkLint
 
 Lint files of the current repository
 
 - check if all namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check that each framework function has a bats file associated (warning if not)
+- check that `REQUIRE` directive `AS` ids are not duplicated
+- check for `# FUNCTIONS`, `# REQUIREMENTS` and `# ENTRYPOINT` presence
+- check `# FUNCTIONS` placeholder is defined before `# REQUIREMENTS`
+- check `# REQUIREMENTS` placeholder is defined before `# ENTRYPOINT`
 
 This linter is used in precommit hooks, see
 [.pre-commit-config.yaml](https://github.com/fchastanet/bash-tools-framework/blob/master/.pre-commit-config.yaml).
 
-## 5. Best practices
+## 6. Best practices
 
 `EMBED` keyword is really useful to inline configuration files. However to run
 framework function using sudo, it is recommended to call the same binary but
 passing options to change the behavior. This way the content of the script file
 does not seem to be obfuscated.
 
-## 6. Acknowledgements
+## 7. Acknowledgements
 
 I want to thank a lot Michał Zieliński(Tratif company) for this wonderful
 article that helped me a lot in the conception of the file/dir/framework
