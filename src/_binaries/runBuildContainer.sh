@@ -46,7 +46,7 @@ if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUs
 fi
 
 # run tests
-args=()
+args=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
 if tty -s; then
   args+=("-it")
 fi
@@ -54,7 +54,9 @@ fi
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
   args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
 fi
-
+if [[ "${ARGS_VERBOSE}" = "1" ]]; then
+  set -- "$@" --verbose
+fi
 (
   set -x
   # shellcheck disable=SC2086
@@ -64,6 +66,7 @@ fi
     "${args[@]}" \
     -w /bash \
     -v "$(pwd):/bash" \
+    -v "/tmp:/tmp" \
     --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
     "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
     "$@"
