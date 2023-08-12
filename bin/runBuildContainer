@@ -133,13 +133,6 @@ if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
   FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 fi
 
-# @description display help and exits if one of args is -h|--help
-# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
-# @arg $@ args:String[] list of options
-# @option -h short help option
-# @option --help long help option
-# @exitcode 0 displays help and exit with code 0 if -h or --help option is in the args list
-# @output displays help if -h or --help option is in the args list
 Args::defaultHelp() {
   local helpArg=$1
   shift || true
@@ -148,14 +141,8 @@ Args::defaultHelp() {
   fi
 }
 
-# @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
-# @arg $1 verboseDisplayLevel:String the level of verbosity to set
-# @arg $@ args:String[] list of options
-# @option -v short verbose option
-# @option --verbose long verbose option
-# @set ARGS_VERBOSE 1 if --verbose|-v option is parsed in arguments
-# @set BASH_FRAMEWORK_DISPLAY_LEVEL to verboseDisplayLevel if --verbose|-v option is parsed in arguments
-# @exitcode 1 if --verbose|-v option is not present in args list
+# change display level to level argument
+# if --verbose|-v option is parsed in arguments
 Args::parseVerbose() {
   local verboseDisplayLevel="$1"
   declare -gx ARGS_VERBOSE=0
@@ -175,12 +162,9 @@ Args::parseVerbose() {
   return "${status}"
 }
 
-# @description remove elements from array
-# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
-# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
-# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
-# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
-# @see Array::removeIf
+# remove elements from array
+# Performance1 : version taken from https://stackoverflow.com/a/59030460
+# Performance2 : for multiple values to remove, prefer using Array::removeIf
 Array::remove() {
   local -n arrayRemoveArray=$1
   shift || true # $@ contains elements to remove
@@ -305,17 +289,17 @@ Env::pathPrepend() {
   done
 }
 
-# @description log level off
+# Public: log level off
 export __LEVEL_OFF=0
-# @description log level error
+# Public: log level error
 export __LEVEL_ERROR=1
-# @description log level warning
+# Public: log level warning
 export __LEVEL_WARNING=2
-# @description log level info
+# Public: log level info
 export __LEVEL_INFO=3
-# @description log level success
+# Public: log level success
 export __LEVEL_SUCCESS=3
-# @description log level debug
+# Public: log level debug
 export __LEVEL_DEBUG=4
 
 export __LEVEL_OFF
@@ -325,15 +309,15 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# @description Display message using debug color (grey)
-# @arg $1 message:String the message to display
+# Display message using debug color (grey)
+# @param {String} $1 message
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
 }
 
-# @description Display message using info color (bg light blue/fg white)
-# @arg $1 message:String the message to display
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
 Log::displayInfo() {
   local type="${2:-INFO}"
   echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
@@ -399,13 +383,6 @@ Log::load() {
   fi
 }
 
-# @description display help if one of args is -h|--help
-# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
-# @arg $@ args:String[] list of options
-# @option -h short help option
-# @option --help long help option
-# @exitcode 1 displays help and returns with code 1 if -h or --help option is in the args list
-# @output displays help if -h or --help option is in the args list
 Args::defaultHelpNoExit() {
   local helpArg=$1
   shift || true
@@ -434,101 +411,101 @@ Args::defaultHelpNoExit() {
   done
 }
 
-# @description Display message using error color (red)
-# @arg $1 message:String the message to display
+# Display message using error color (red)
+# @param {String} $1 message
 Log::displayError() {
   echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
   Log::logError "$1"
 }
 
-# @description Display message using info color (bg light blue/fg white)
-# @arg $1 message:String the message to display
+# Display message using info color (bg light blue/fg white)
+# @param {String} $1 message
 Log::displayHelp() {
   local type="${2:-HELP}"
   echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logHelp "$1" "${type}"
 }
 
-# @description Display message using skip color (yellow)
-# @arg $1 message:String the message to display
+# Display message using skip color (yellow)
+# @param {String} $1 message
 Log::displaySkipped() {
   echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   Log::logSkipped "$1"
 }
 
-# @description Display message using info color (blue) but warning level
-# @arg $1 message:String the message to display
+# Display message using info color (blue) but warning level
+# @param {String} $1 message
 Log::displayStatus() {
   local type="${2:-STATUS}"
   echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
   Log::logStatus "$1" "${type}"
 }
 
-# @description Display message using success color (bg green/fg white)
-# @arg $1 message:String the message to display
+# Display message using success color (bg green/fg white)
+# @param {String} $1 message
 Log::displaySuccess() {
   echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
   Log::logSuccess "$1"
 }
 
-# @description Display message using warning color (yellow)
-# @arg $1 message:String the message to display
+# Display message using warning color (yellow)
+# @param {String} $1 message
 Log::displayWarning() {
   echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
   Log::logWarning "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logDebug() {
   Log::logMessage "${2:-DEBUG}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logError() {
   Log::logMessage "${2:-ERROR}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logHelp() {
   Log::logMessage "${2:-HELP}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logInfo() {
   Log::logMessage "${2:-INFO}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logSkipped() {
   Log::logMessage "${2:-SKIPPED}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logStatus() {
   Log::logMessage "${2:-STATUS}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logSuccess() {
   Log::logMessage "${2:-SUCCESS}" "$1"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
+# log message to file
+# @param {String} $1 message
 Log::logWarning() {
   Log::logMessage "${2:-WARNING}" "$1"
 }
 
-# @description To be called before logging in the log file
-# @arg $1 file:string log file name
-# @arg $2 maxLogFilesCount:int maximum number of log files
+# To be called before logging in the log file
+# @param {string} file $1 log file name
+# @param {int} maxLogFilesCount $2 maximum number of log files
 Log::rotate() {
   local file="$1"
   local maxLogFilesCount="${2:-5}"
@@ -547,9 +524,6 @@ Log::rotate() {
   fi
 }
 
-# @description display help
-# @arg $1 helpArg:String the help string to show
-# @output display help arg
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
@@ -557,14 +531,17 @@ Args::showHelp() {
 
 # Internal: common log message
 #
-# @arg $1 levelMsg:String message's level description
-# @arg $2 msg:String the message to display
-# @output
-#   [date]|[levelMsg]|message
+# **Arguments**:
+# * $1 - message's level description
+# * $2 - message
+# **Output**:
+# [date]|[levelMsg]|message
 #
-# @example
-#   2020-01-19 19:20:21|ERROR  |log error
-#   2020-01-19 19:20:21|SKIPPED|log skipped
+# **Examples**:
+# <pre>
+# 2020-01-19 19:20:21|ERROR  |log error
+# 2020-01-19 19:20:21|SKIPPED|log skipped
+# </pre>
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -596,10 +573,10 @@ Assert::fileWritable() {
   Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
-# @description check if argument is a valid linux path
+# Public: check if argument is a valid linux path
 #
-# @arg $1 path:string path that needs to be checked
-# @exitcode 1 if path is invalid
+# @param {string} path $1 path that needs to be checked
+# @return 1 if path is invalid
 # invalid path are those with:
 # - invalid characters
 # - component beginning by a - (because option)

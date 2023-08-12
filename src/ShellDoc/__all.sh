@@ -4,8 +4,6 @@
 source "${FRAMEWORK_ROOT_DIR}/src/ShellDoc/appendDocToIndex.sh"
 # shellcheck source=src/ShellDoc/generateShellDoc.sh
 source "${FRAMEWORK_ROOT_DIR}/src/ShellDoc/generateShellDoc.sh"
-# shellcheck source=src/ShellDoc/generateShellDocFile.sh
-source "${FRAMEWORK_ROOT_DIR}/src/ShellDoc/generateShellDocFile.sh"
 # shellcheck source=src/ShellDoc/generateShellDocsFromDir.sh
 source "${FRAMEWORK_ROOT_DIR}/src/ShellDoc/generateShellDocsFromDir.sh"
 # shellcheck source=src/ShellDoc/installRequirementsIfNeeded.sh

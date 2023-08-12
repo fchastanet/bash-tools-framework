@@ -281,12 +281,12 @@ Dependencies are automatically installed when used.
 
 `bin/doc` script will install:
 
-- [fchastanet/tomdoc.sh](https://github.com/fchastanet/tomdoc.sh.git)
+- [reconquest/shdoc](https://github.com/reconquest/shdoc)
 
 To avoid checking for libraries update and have an impact on performance, a file
 is created in vendor dir.
 
-- `vendor/.tomdocInstalled`
+- `vendor/.shdocInstalled`
 - `vendor/.batsInstalled` You can remove these files to force the update of the
   libraries, or just wait 24 hours that the timeout expires.
 

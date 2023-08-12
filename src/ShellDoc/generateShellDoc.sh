@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
-# extract shDoc from file
+# @description extract shDoc from file
 #
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile
-# @output the shell documentation in markdown format
+# @arg $1 file:String
+# @stdout the shell documentation in markdown format
 ShellDoc::generateShellDoc() {
-  local currentDir="$1"
-  local relativeFile="$2"
+  local file="$1"
 
   ShellDoc::installRequirementsIfNeeded
   (
-    cd "${currentDir}" || exit 1
-    "${FRAMEWORK_ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
-  )
+    "${FRAMEWORK_VENDOR_DIR}//shdoc/shdoc" <"${file}" || {
+      Log::displayError "parse error of file ${file}"
+      return 0
+    }
+  ) || true
 }

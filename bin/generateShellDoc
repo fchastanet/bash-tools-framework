@@ -394,53 +394,54 @@ Log::load() {
   fi
 }
 
-# generate doc + index
-# @param {String} $1 fromDir
-# @param {String} $2 docDir
-# @param {String} $3 indexFile
-# @param {String} excludeFilesPattern $4 grep exclude pattern
-#   eg: '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
+# @description generate doc + index
+# @arg $1 fromDir:String
+# @arg $2 fromDirRelative:String
+# @arg $3 docDir:String
+# @arg $4 indexFile:String
+# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $6 excludeDirectoriesPattern:String grep exclude pattern. Eg: '/testsData|/_.*'
+# @arg $7 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
 ShellDoc::generateShellDocsFromDir() {
   local fromDir="$1"
-  local docDir="$2"
-  local indexFile="$3"
-  local excludeFilesPattern="${4:-}"
-  local -a grepExclude
-  local startTime endTime
+  local fromDirRelative="$2"
+  local docDir="$3"
+  local indexFile="$4"
+  local repositoryUrl="${5:-}"
+  local excludeDirectoriesPattern="${6:-}"
+  local excludeFilesPattern="${7:-}"
 
-  if [[ -z "${excludeFilesPattern}" ]]; then
+  # exlude dir pattern
+  local -a grepExclude
+  if [[ -z "${excludeDirectoriesPattern}" ]]; then
     grepExclude=(cat)
   else
-    grepExclude=(grep -E -v "${excludeFilesPattern}")
+    grepExclude=(grep -E -v "${excludeDirectoriesPattern}")
   fi
 
-  startTime=$(date +%s.%3N)
-  ((nbFilesGenerated = 0)) || true
-  while IFS= read -r relativeFile; do
-    relativeFile="${relativeFile#./}"
-    local basenameNoExtension="${relativeFile%.*}"
-    local targetDocFile="${docDir}/${basenameNoExtension}.md"
-    local targetDocDir
-    local targetDocFileRelative
+  # generate one .md per directory
+  local relativeDir
+  local targetDocFile
+  local targetDocFileRelative
+
+  while IFS= read -r relativeDir; do
+    relativeDir="${relativeDir#./}"
+    targetDocFile="${docDir}/${relativeDir}.md"
     targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "$(dirname "${indexFile}")" "${targetDocFile}")"
 
-    # create target doc dir
-    targetDocDir="$(dirname "${targetDocFile}")"
-    mkdir -p "${targetDocDir}" || {
-      Log::displayError "unable to create target doc directory ${targetDocDir}"
-      return 1
-    }
-
-    # generate markdown file from shell file
-    Log::displayInfo "generate markdown doc for ${relativeFile} in ${targetDocFile}"
-
-    if ShellDoc::generateShellDocFile "${fromDir}" "${relativeFile}" "${targetDocFile}"; then
-      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${basenameNoExtension}"
+    mkdir -p "$(dirname "${targetDocFile}")" || true
+    if ShellDoc::generateShellDocDir \
+      "${fromDir}/${relativeDir}" \
+      "${fromDirRelative}/${relativeDir}" \
+      "${targetDocFile}" \
+      "${repositoryUrl}" \
+      "${excludeFilesPattern}" && [[ -n "$(tail -n +6 "${targetDocFile}")" ]]; then
+      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${relativeDir}"
+    else
+      rm -f "${targetDocFile}" || true
+      Log::displaySkipped "${fromDir}/${relativeDir} does not contain any documentation"
     fi
-    ((nbFilesGenerated++)) || true
-  done < <(cd "${fromDir}" && find . -name "*.sh" | "${grepExclude[@]}" | sort)
-  endTime=$(date +%s.%3N)
-  Log::displayInfo "${nbFilesGenerated} files generated in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
+  done < <(cd "${fromDir}" && find . -type d -name '[^.]*' | "${grepExclude[@]}" | LC_ALL=C sort)
 }
 
 # Public: check if argument is a valid linux path
@@ -579,39 +580,86 @@ Log::rotate() {
   fi
 }
 
-# add reference to index file
-# @param {String} $1 indexFile
-# @param {String} $2 mdRelativeFile
-# @param {String} $3 title
+# @description add reference to index file (using docsify embed feature)
+# @arg $1 indexFile:String
+# @arg $2 mdRelativeFile:String
+# @arg $3 title:String
 ShellDoc::appendDocToIndex() {
   local indexFile="$1"
   local mdRelativeFile="$2"
   local title="$3"
 
-  echo "* [${title}](${mdRelativeFile})" >>"${indexFile}"
+  (
+    echo "[${title}](${mdRelativeFile} ':include')"
+    echo
+  ) >>"${indexFile}"
 }
 
-# generate shell doc file
+# @description generate shell doc file from given directory
 #
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile the file from which the markdown file will be generated
-# @param {String} $3 targetDocFile the markdown file generated using tomdoc
-# @return 0 if file has been generated, 1 if file is empty or error
-# if generated doc is empty, targetDocFile is deleted if it was existing
-ShellDoc::generateShellDocFile() {
-  local currentDir="$1"
-  local relativeFile="$2"
+# @arg $1 dir:String
+# @arg $2 relativeDir:String
+# @arg $3 targetDocFile:String the markdown file generated using shdoc
+# @arg $4 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $5 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
+# @exitcode 0 if file has been generated
+# @exitcode 1 if file is empty or error
+ShellDoc::generateShellDocDir() {
+  local dir="$1"
+  local relativeDir="$2"
   local targetDocFile="$3"
+  local repositoryUrl="${4:-}"
+  local excludeFilesPattern="${5:-}"
+  local namespaceFile
+  local relativeFile
+
+  local -a grepExclude
+  if [[ -z "${excludeFilesPattern}" ]]; then
+    grepExclude=(cat)
+  else
+    grepExclude=(grep -E -v "${excludeFilesPattern}")
+  fi
+
+  namespaceFile="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-shdoc-namespace-XXXXXX)"
+  Log::displayInfo "Generating ${targetDocFile} based on ${namespaceFile}"
 
   (
+    local firstFile=1
+    # generate one big sh file with all sh files of the directory
+    echo '#!/usr/bin/env bash' >"${namespaceFile}"
+    echo "# @name ${relativeDir}" >>"${namespaceFile}"
+    while IFS= read -r relativeFile; do
+      relativeFile="${relativeFile#./}"
+      (
+        if [[ "${firstFile}" = "1" && "${relativeFile}" != "_.sh" ]]; then
+          (
+            echo "# @description Directory ${relativeDir}"
+            echo
+          ) >>"${namespaceFile}"
+        fi
+
+        echo "# @section ${relativeDir}/${relativeFile}"
+        if [[ -n "${repositoryUrl}" ]]; then
+          echo "# @description [file source ${relativeDir}/${relativeFile}](${repositoryUrl}/tree/master/${relativeDir}/${relativeFile})"
+        else
+          echo "# @description file source ${relativeDir}/${relativeFile}"
+        fi
+        awk NR\>1 "${dir}/${relativeFile}"
+      ) >>"${namespaceFile}"
+      firstFile=0
+    done < <(cd "${dir}" && find . -maxdepth 1 -name "*.sh" | "${grepExclude[@]}" | LC_ALL=C sort)
+
     local doc
-    doc="$(ShellDoc::generateShellDoc "${currentDir}" "${relativeFile}")"
-    if [[ -n "${doc}" ]]; then
-      echo "${doc}" >"${targetDocFile}"
+    doc="$(ShellDoc::generateShellDoc "${namespaceFile}")"
+    if (("$(grep -c . <<<"${doc}")" > 1)); then
+      # remove index that is auto managed by docsify
+      # increment title level by one (#)
+      sed -E \
+        -e '/^## Index/,/## /d' \
+        -e 's/^(##*) (.*)$/#\1 \2/' \
+        <<<"${doc}" >"${targetDocFile}"
       return 0
     else
-      # empty doc
-      rm -f "${targetDocFile}" || true
       return 1
     fi
   )
@@ -650,41 +698,38 @@ Log::logMessage() {
   fi
 }
 
-# extract shDoc from file
+# @description extract shDoc from file
 #
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile
-# @output the shell documentation in markdown format
+# @arg $1 file:String
+# @stdout the shell documentation in markdown format
 ShellDoc::generateShellDoc() {
-  local currentDir="$1"
-  local relativeFile="$2"
+  local file="$1"
 
   ShellDoc::installRequirementsIfNeeded
   (
-    cd "${currentDir}" || exit 1
-    "${FRAMEWORK_ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
-  )
+    "${FRAMEWORK_VENDOR_DIR}//shdoc/shdoc" <"${file}" || {
+      Log::displayError "parse error of file ${file}"
+      return 0
+    }
+  ) || true
 }
 
-BASH_FRAMEWORK_TOMDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.tomdocInstalled"
-BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT=86400 # 1 day
+BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.shDocInstalled"
+BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 
 ShellDoc::installRequirementsIfNeeded() {
   if [[ "$(
     Cache::getFileContentIfNotExpired \
-      "${BASH_FRAMEWORK_TOMDOC_INSTALLED}" \
-      "${BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT}"
+      "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
+      "${BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT}"
   )" != "1" ]]; then
-
-    (Log::displayInfo "Check if tomdoc.sh is up to date")
-    if Git::shallowClone \
-      "https://github.com/fchastanet/tomdoc.sh.git" \
-      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
-      "master" \
-      "FORCE_DELETION"; then
-      echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"
+    Log::displayInfo "Check if shdoc is up to date"
+    if GIT_CLONE_OPTIONS="--recursive" Git::cloneOrPullIfNoChanges \
+      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/shdoc" \
+      "git@github.com:fchastanet/shdoc.git"; then
+      echo "1" >"${BASH_FRAMEWORK_SHDOC_INSTALLED}"
     else
-      Log::fatal "unable to install tomdoc.sh library"
+      Log::fatal "unable to install shdoc library"
     fi
   fi
 }
@@ -708,50 +753,40 @@ Cache::getFileContentIfNotExpired() {
   cat "${file}"
 }
 
-# Public: shallow clone a repository at specific commit sha, tag or branch
-# or update repo if already exists
-#
-# **Arguments**:
-# * $1 repository
-# * $2 Install dir
-# * $3 revision commit sha, tag or branch
-# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
-#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
-#
-# **Return**:
-# * code !=0 if git failure or directory not writable
-# * code=1 if destination dir already exists and force option is not 1
-Git::shallowClone() {
-  local REPO="$1"
-  local INSTALL_DIR="$2"
-  local REVISION="$3"
-  local FORCE_DELETION="${4:-0}"
+# clone the repository if not done yet, else pull it if no change in it
+# @param {String} $1 directory in which repository is installed or will be cloned
+# @param {String} $2 repository url
+# @param {function} $3 callback on successful clone
+# @param {function} $4 callback on successful pull
+# @param {$@} gitCloneOptions
+# @return 0 on successful pulling/cloning, 1 on failure
+Git::cloneOrPullIfNoChanges() {
+  local dir="$1"
+  shift || true
+  local repo="$1"
+  shift || true
+  local cloneCallback=${1:-}
+  shift || true
+  local pullCallback=${1:-}
+  shift || true
 
-  if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
-  else
-    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning "Removing ${INSTALL_DIR} ..."
-        rm -Rf "${INSTALL_DIR}" || exit 1
-      else
-        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
-        return 1
+  if [[ -d "${dir}/.git" ]]; then
+    Git::pullIfNoChanges "${dir}" && (
+      # shellcheck disable=SC2086
+      if [[ "$(type -t ${pullCallback})" = "function" ]]; then
+        ${pullCallback} "${dir}"
       fi
-    fi
-    (
-      Log::displayInfo "Installing ${INSTALL_DIR} ..."
-      mkdir -p "${INSTALL_DIR}"
-      cd "${INSTALL_DIR}" || exit 1
-      git init >&2
-      git remote add origin "${REPO}" >&2
+    )
+  else
+    Log::displayInfo "cloning ${repo} ..."
+    mkdir -p "$(dirname "${dir}")"
+    git clone "${GIT_CLONE_OPTIONS[@]}" --progress "$@" "${repo}" "${dir}" && (
+      # shellcheck disable=SC2086
+      if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
+        ${cloneCallback} "${dir}"
+      fi
     )
   fi
-  (
-    cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
-    git reset --hard FETCH_HEAD >&2
-  )
 }
 
 # Number of seconds since last modification of the file
@@ -767,6 +802,26 @@ File::elapsedTimeSinceLastModification() {
   lastModificationTimeSeconds="$(stat -c %Y "${file}")"
   ((diff = $(date +%s) - lastModificationTimeSeconds))
   echo -n "${diff}"
+}
+
+# pull the repository if no change in it
+# @return 0 on successful pulling, 1 on failure or no pull needed
+Git::pullIfNoChanges() {
+  local dir="$1"
+  if [[ -d "${dir}/.git" ]]; then
+    (
+      cd "${dir}"
+      git update-index --refresh &>/dev/null || true
+      if git diff-index --quiet HEAD --; then
+        Log::displayInfo "Pull git repository '${dir}' as no changes detected"
+        git pull --progress
+        return 0
+      else
+        Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
+      fi
+    ) && return 0
+  fi
+  return 1
 }
 
 # FUNCTIONS
