@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Public: ask the user if he wishes to continue a process
+# @description ask the user if he wishes to continue a process
 #
 # **Input**: user input y or Y characters
 # **Output**: displays message <pre>Are you sure, you want to continue (y or n)?</pre>

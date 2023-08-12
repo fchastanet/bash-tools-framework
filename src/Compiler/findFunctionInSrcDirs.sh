@@ -7,11 +7,11 @@ convertFunctionNameToPath() {
 }
 
 # return the path of the function found in srcDirs
-# @param {String} $1 function name (eg: Functions::myFunction)
-# @param {String[]} $@ rest of args list of src directories in
+# @arg $1 functionName:String function name (eg: Functions::myFunction)
+# @arg $@ srcDirs:String[] rest of args list of src directories in
 # which the function will be searched
-# @return 1 if function not found, 0 if found
-# @output the filepath of the function
+# @exitcode 1 if function not found, 0 if found
+# @stdout the filepath of the function
 Compiler::findFunctionInSrcDirs() {
   local functionName="$1"
   shift || true

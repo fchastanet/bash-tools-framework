@@ -2,15 +2,14 @@
 
 # Test if a container launched by docker-compose is reachable
 # docker-compose will be up and shutdown at the end of the process if success or not
-# @param {String} dir $1 the directory that contains the docker-compose.yml file
-# @param {String} containerName $2 name of the container that is tested
-# @param {String} title $3 a title that allows to discriminate the log lines
-# @param {Function} testCallback $4 a function callback that will be
-#   called to check the container
-# @return 1 if directory does not exists
-# @return 2 on container test failure
-# @return 3 on <docker-compose up> failure
-# @return 4 if testCallBack is not a function
+# @arg $1 dir:String the directory that contains the docker-compose.yml file
+# @arg $2 containerName:String name of the container that is tested
+# @arg $3 title:String a title that allows to discriminate the log lines
+# @arg $4 testCallback:Function a function callback that will be called to check the container
+# @exitcode 1 if directory does not exists
+# @exitcode 2 on container test failure
+# @exitcode 3 on <docker-compose up> failure
+# @exitcode 4 if testCallBack is not a function
 Docker::testContainer() {
   local directory="$1"
   local containerName="$2"

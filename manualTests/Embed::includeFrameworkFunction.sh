@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
 CURRENT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
 BATS_TEST_TMPDIR=/tmp/bats
 mkdir -p /tmp/bats

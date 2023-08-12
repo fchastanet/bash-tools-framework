@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Backup given file in the same directory
-# @param {string} $1 the file to backup
-# @output messages about backup file location
+# @arg $1 file:string the file to backup
+# @stdout messages about backup file location
 Backup::file() {
   local file="$1"
   local backupFile

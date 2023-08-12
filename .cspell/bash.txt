@@ -112,3 +112,5 @@ failfast
 untar
 untarred
 unsetting
+exitcode
+SHDOC

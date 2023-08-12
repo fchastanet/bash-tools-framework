@@ -85,11 +85,15 @@ TODOs linked to bin/compiler:
   - would it be possible to implement inheritance ?
 - compile should use FRAMEWORK_SRC_DIRS from .framework-config
 - use Filters::optimizeShFile
+  - using
+    [shfmt --minify option](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#generic-flags)
 - check if nested namespaces are supported
 - get rid of `__all.sh` files, useless because of compiler auto include
+- [Apply defensive suggestions](https://docs.fedoraproject.org/en-US/defensive-coding/programming-languages/Shell/)
 
 ### REQUIRE directive
 
+- move Embed to Compiler namespace
 - define REQUIRE_DISABLED array in .framework-config
 - Compiler::Requirement::assertRequireName
   - error if requires name does not begin with requires
@@ -148,9 +152,8 @@ TODOs linked to bin/compiler:
   - <https://github.com/gumpu/ROBODoc>
   - could I use groovy doc ?
   - bashDoc linter check params coherence
-    - 2 @param $1
-    - @param $1 after @param $2
-    - @paramDefault $1 just after @param $2
+    - 2 @arg $1
+    - @arg $1 after @arg $2
 
 #### 6.1.1. add compilation checks
 

@@ -2,8 +2,8 @@
 
 # add the line ip hostname at the end of /etc/hosts only if hostname does not exists yet in this file
 # if wsl do the same in ${BASE_MNT_C}/Windows/System32/drivers/etc/hosts
-# @param hostName
-# @param ip (optional, default value: 127.0.0.1)
+# @arg $1 hostName:String
+# @arg $2 ip:String optional, default value: 127.0.0.1
 Dns::addHost() {
   local hostName="$1"
   local ip="${2:-127.0.0.1}"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# download specified release software version from github
-# @param {String} releaseUrl $1 eg: https://github.com/kubernetes-sigs/kind/releases/download/v1.0.0/kind-linux-amd64
-# @return 1 on failure
-# @output the path to the downloaded release
+# @description download specified release software version from github
+# @arg $1 releaseUrl:String eg: https://github.com/kubernetes-sigs/kind/releases/download/v1.0.0/kind-linux-amd64
+# @exitcode 1 on failure
+# @stdout the path to the downloaded release
 Github::downloadReleaseVersion() {
   local releaseUrl="$1"
   local newSoftwarePath

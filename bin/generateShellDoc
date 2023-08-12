@@ -133,8 +133,14 @@ if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
   FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 fi
 
-# change display level to level argument
-# if --verbose|-v option is parsed in arguments
+# @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
+# @arg $1 verboseDisplayLevel:String the level of verbosity to set
+# @arg $@ args:String[] list of options
+# @option -v short verbose option
+# @option --verbose long verbose option
+# @set ARGS_VERBOSE 1 if --verbose|-v option is parsed in arguments
+# @set BASH_FRAMEWORK_DISPLAY_LEVEL to verboseDisplayLevel if --verbose|-v option is parsed in arguments
+# @exitcode 1 if --verbose|-v option is not present in args list
 Args::parseVerbose() {
   local verboseDisplayLevel="$1"
   declare -gx ARGS_VERBOSE=0
@@ -154,9 +160,12 @@ Args::parseVerbose() {
   return "${status}"
 }
 
-# remove elements from array
-# Performance1 : version taken from https://stackoverflow.com/a/59030460
-# Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @description remove elements from array
+# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
+# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
+# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
+# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @see Array::removeIf
 Array::remove() {
   local -n arrayRemoveArray=$1
   shift || true # $@ contains elements to remove
@@ -193,12 +202,22 @@ Assert::fileWritable() {
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
-# load variables in order(from less specific to more specific) from :
+# @description load variables in order(from less specific to more specific) from :
 # - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
 # - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+#
+# @env BASH_FRAMEWORK_INITIALIZED if 1 skip the load
+# @env FRAMEWORK_ROOT_DIR
+# @env HOME
+# @env BASH_FRAMEWORK_ENV_FILEPATH
+# @env OVERRIDE_* string allows to override any env file variable (with * name)
+#
+# @set BASH_FRAMEWORK_CACHED_ENV_FILE string
+# @set BASH_FRAMEWORK_DEFAULT_ENV_FILE string
+# @set BASH_FRAMEWORK_INITIALIZED int 1 if load successful
 Env::load() {
   if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
@@ -283,6 +302,9 @@ Env::load() {
   BASH_FRAMEWORK_INITIALIZED=1
 }
 
+# @description prepend directories to the PATH environment variable
+# @arg $@ args:String[] list of directories to prepend
+# @set PATH update PATH with the directories prepended
 Env::pathPrepend() {
   local arg
   for arg in "$@"; do
@@ -292,17 +314,25 @@ Env::pathPrepend() {
   done
 }
 
-# Public: log level off
+# @description Log namespace provides 2 kind of functions
+# - Log::display* allows to display given message with
+#   given display level
+# - Log::log* allows to log given message with
+#   given log level
+# Log::display* functions automatically log the message too
+# @see Log::load to load the display and log level from .env file
+
+# @description log level off
 export __LEVEL_OFF=0
-# Public: log level error
+# @description log level error
 export __LEVEL_ERROR=1
-# Public: log level warning
+# @description log level warning
 export __LEVEL_WARNING=2
-# Public: log level info
+# @description log level info
 export __LEVEL_INFO=3
-# Public: log level success
+# @description log level success
 export __LEVEL_SUCCESS=3
-# Public: log level debug
+# @description log level debug
 export __LEVEL_DEBUG=4
 
 export __LEVEL_OFF
@@ -312,23 +342,23 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# Display message using debug color (grey)
-# @param {String} $1 message
+# @description Display message using debug color (grey)
+# @arg $1 message:String the message to display
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayInfo() {
   local type="${2:-INFO}"
   echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logInfo "$1" "${type}"
 }
 
-# Display message using error color (red) and exit immediately with error status 1
-# @param {String} $1 message
+# @description Display message using error color (red) and exit immediately with error status 1
+# @arg $1 message:String the message to display
 Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
@@ -411,7 +441,7 @@ ShellDoc::generateShellDocsFromDir() {
   local excludeDirectoriesPattern="${6:-}"
   local excludeFilesPattern="${7:-}"
 
-  # exlude dir pattern
+  # exclude dir pattern
   local -a grepExclude
   if [[ -z "${excludeDirectoriesPattern}" ]]; then
     grepExclude=(cat)
@@ -444,10 +474,10 @@ ShellDoc::generateShellDocsFromDir() {
   done < <(cd "${fromDir}" && find . -type d -name '[^.]*' | "${grepExclude[@]}" | LC_ALL=C sort)
 }
 
-# Public: check if argument is a valid linux path
+# @description check if argument is a valid linux path
 #
-# @param {string} path $1 path that needs to be checked
-# @return 1 if path is invalid
+# @arg $1 path:string path that needs to be checked
+# @exitcode 1 if path is invalid
 # invalid path are those with:
 # - invalid characters
 # - component beginning by a - (because option)
@@ -461,107 +491,107 @@ Assert::validPath() {
     [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }
 
-# Display message using error color (red)
-# @param {String} $1 message
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
 Log::displayError() {
   echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
   Log::logError "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayHelp() {
   local type="${2:-HELP}"
   echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logHelp "$1" "${type}"
 }
 
-# Display message using skip color (yellow)
-# @param {String} $1 message
+# @description Display message using skip color (yellow)
+# @arg $1 message:String the message to display
 Log::displaySkipped() {
   echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   Log::logSkipped "$1"
 }
 
-# Display message using info color (blue) but warning level
-# @param {String} $1 message
+# @description Display message using info color (blue) but warning level
+# @arg $1 message:String the message to display
 Log::displayStatus() {
   local type="${2:-STATUS}"
   echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
   Log::logStatus "$1" "${type}"
 }
 
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
+# @description Display message using success color (bg green/fg white)
+# @arg $1 message:String the message to display
 Log::displaySuccess() {
   echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
   Log::logSuccess "$1"
 }
 
-# Display message using warning color (yellow)
-# @param {String} $1 message
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
 Log::displayWarning() {
   echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
   Log::logWarning "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logDebug() {
   Log::logMessage "${2:-DEBUG}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logError() {
   Log::logMessage "${2:-ERROR}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logFatal() {
   Log::logMessage "${2:-FATAL}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logHelp() {
   Log::logMessage "${2:-HELP}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logInfo() {
   Log::logMessage "${2:-INFO}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSkipped() {
   Log::logMessage "${2:-SKIPPED}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logStatus() {
   Log::logMessage "${2:-STATUS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSuccess() {
   Log::logMessage "${2:-SUCCESS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logWarning() {
   Log::logMessage "${2:-WARNING}" "$1"
 }
 
-# To be called before logging in the log file
-# @param {string} file $1 log file name
-# @param {int} maxLogFilesCount $2 maximum number of log files
+# @description To be called before logging in the log file
+# @arg $1 file:string log file name
+# @arg $2 maxLogFilesCount:int maximum number of log files
 Log::rotate() {
   local file="$1"
   local maxLogFilesCount="${2:-5}"
@@ -667,17 +697,14 @@ ShellDoc::generateShellDocDir() {
 
 # Internal: common log message
 #
-# **Arguments**:
-# * $1 - message's level description
-# * $2 - message
-# **Output**:
-# [date]|[levelMsg]|message
+# @arg $1 levelMsg:String message's level description
+# @arg $2 msg:String the message to display
+# @output text
+#   [date]|[levelMsg]|message
 #
-# **Examples**:
-# <pre>
-# 2020-01-19 19:20:21|ERROR  |log error
-# 2020-01-19 19:20:21|SKIPPED|log skipped
-# </pre>
+# @example
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -735,11 +762,11 @@ ShellDoc::installRequirementsIfNeeded() {
 }
 
 # get file content if file not expired
-# @param {String} file $1 the file to get content from
-# @param {String} maxDuration $2 number of seconds after which the file is considered expired
-# @output {String} the file content if not expired
-# @return 1 if file does not exists
-# @return 2 if file expired
+# @arg $1 file:String   the file to get content from
+# @arg $2 maxDuration:String  number of seconds after which the file is considered expired
+# @stdout {String} the file content if not expired
+# @exitcode 1 if file does not exists
+# @exitcode 2 if file expired
 Cache::getFileContentIfNotExpired() {
   local file="$1"
   local maxDuration="$2"
@@ -753,13 +780,13 @@ Cache::getFileContentIfNotExpired() {
   cat "${file}"
 }
 
-# clone the repository if not done yet, else pull it if no change in it
-# @param {String} $1 directory in which repository is installed or will be cloned
-# @param {String} $2 repository url
-# @param {function} $3 callback on successful clone
-# @param {function} $4 callback on successful pull
-# @param {$@} gitCloneOptions
-# @return 0 on successful pulling/cloning, 1 on failure
+# @description clone the repository if not done yet, else pull it if no change in it
+# @arg $1 dir:String directory in which repository is installed or will be cloned
+# @arg $2 repo:String repository url
+# @arg $3 cloneCallback:Function callback on successful clone
+# @arg $4 pullCallback:Function callback on successful pull
+# @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
+# @exitcode 0 on successful pulling/cloning, 1 on failure
 Git::cloneOrPullIfNoChanges() {
   local dir="$1"
   shift || true
@@ -780,7 +807,8 @@ Git::cloneOrPullIfNoChanges() {
   else
     Log::displayInfo "cloning ${repo} ..."
     mkdir -p "$(dirname "${dir}")"
-    git clone "${GIT_CLONE_OPTIONS[@]}" --progress "$@" "${repo}" "${dir}" && (
+    # shellcheck disable=SC2086
+    git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}" && (
       # shellcheck disable=SC2086
       if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
         ${cloneCallback} "${dir}"
@@ -789,10 +817,10 @@ Git::cloneOrPullIfNoChanges() {
   fi
 }
 
-# Number of seconds since last modification of the file
-# @param {String} file $1 file path
-# @return 1 if file does not exist
-# @output number of seconds since last modification of the file
+# @description Number of seconds since last modification of the file
+# @arg $1 file:String file path
+# @exitcode 1 if file does not exist
+# @stdout number of seconds since last modification of the file
 File::elapsedTimeSinceLastModification() {
   local file="$1"
   if [[ ! -f "${file}" ]]; then
@@ -805,7 +833,7 @@ File::elapsedTimeSinceLastModification() {
 }
 
 # pull the repository if no change in it
-# @return 0 on successful pulling, 1 on failure or no pull needed
+# @exitcode 0 on successful pulling, 1 on failure or no pull needed
 Git::pullIfNoChanges() {
   local dir="$1"
   if [[ -d "${dir}/.git" ]]; then

@@ -137,6 +137,13 @@ if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
   FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 fi
 
+# @description display help if one of args is -h|--help
+# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
+# @arg $@ args:String[] list of options
+# @option -h short help option
+# @option --help long help option
+# @exitcode 1 displays help and returns with code 1 if -h or --help option is in the args list
+# @output displays help if -h or --help option is in the args list
 Args::defaultHelpNoExit() {
   local helpArg=$1
   shift || true
@@ -165,8 +172,14 @@ Args::defaultHelpNoExit() {
   done
 }
 
-# change display level to level argument
-# if --verbose|-v option is parsed in arguments
+# @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
+# @arg $1 verboseDisplayLevel:String the level of verbosity to set
+# @arg $@ args:String[] list of options
+# @option -v short verbose option
+# @option --verbose long verbose option
+# @set ARGS_VERBOSE 1 if --verbose|-v option is parsed in arguments
+# @set BASH_FRAMEWORK_DISPLAY_LEVEL to verboseDisplayLevel if --verbose|-v option is parsed in arguments
+# @exitcode 1 if --verbose|-v option is not present in args list
 Args::parseVerbose() {
   local verboseDisplayLevel="$1"
   declare -gx ARGS_VERBOSE=0
@@ -186,9 +199,12 @@ Args::parseVerbose() {
   return "${status}"
 }
 
-# remove elements from array
-# Performance1 : version taken from https://stackoverflow.com/a/59030460
-# Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @description remove elements from array
+# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
+# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
+# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
+# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @see Array::removeIf
 Array::remove() {
   local -n arrayRemoveArray=$1
   shift || true # $@ contains elements to remove
@@ -255,12 +271,22 @@ Bats::installRequirementsIfNeeded() {
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
-# load variables in order(from less specific to more specific) from :
+# @description load variables in order(from less specific to more specific) from :
 # - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
 # - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+#
+# @env BASH_FRAMEWORK_INITIALIZED if 1 skip the load
+# @env FRAMEWORK_ROOT_DIR
+# @env HOME
+# @env BASH_FRAMEWORK_ENV_FILEPATH
+# @env OVERRIDE_* string allows to override any env file variable (with * name)
+#
+# @set BASH_FRAMEWORK_CACHED_ENV_FILE string
+# @set BASH_FRAMEWORK_DEFAULT_ENV_FILE string
+# @set BASH_FRAMEWORK_INITIALIZED int 1 if load successful
 Env::load() {
   if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
@@ -345,6 +371,9 @@ Env::load() {
   BASH_FRAMEWORK_INITIALIZED=1
 }
 
+# @description prepend directories to the PATH environment variable
+# @arg $@ args:String[] list of directories to prepend
+# @set PATH update PATH with the directories prepended
 Env::pathPrepend() {
   local arg
   for arg in "$@"; do
@@ -354,17 +383,25 @@ Env::pathPrepend() {
   done
 }
 
-# Public: log level off
+# @description Log namespace provides 2 kind of functions
+# - Log::display* allows to display given message with
+#   given display level
+# - Log::log* allows to log given message with
+#   given log level
+# Log::display* functions automatically log the message too
+# @see Log::load to load the display and log level from .env file
+
+# @description log level off
 export __LEVEL_OFF=0
-# Public: log level error
+# @description log level error
 export __LEVEL_ERROR=1
-# Public: log level warning
+# @description log level warning
 export __LEVEL_WARNING=2
-# Public: log level info
+# @description log level info
 export __LEVEL_INFO=3
-# Public: log level success
+# @description log level success
 export __LEVEL_SUCCESS=3
-# Public: log level debug
+# @description log level debug
 export __LEVEL_DEBUG=4
 
 export __LEVEL_OFF
@@ -374,15 +411,15 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# Display message using debug color (grey)
-# @param {String} $1 message
+# @description Display message using debug color (grey)
+# @arg $1 message:String the message to display
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayInfo() {
   local type="${2:-INFO}"
   echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
@@ -448,17 +485,20 @@ Log::load() {
   fi
 }
 
+# @description display help
+# @arg $1 helpArg:String the help string to show
+# @output display help arg
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
 }
 
 # get file content if file not expired
-# @param {String} file $1 the file to get content from
-# @param {String} maxDuration $2 number of seconds after which the file is considered expired
-# @output {String} the file content if not expired
-# @return 1 if file does not exists
-# @return 2 if file expired
+# @arg $1 file:String   the file to get content from
+# @arg $2 maxDuration:String  number of seconds after which the file is considered expired
+# @stdout {String} the file content if not expired
+# @exitcode 1 if file does not exists
+# @exitcode 2 if file expired
 Cache::getFileContentIfNotExpired() {
   local file="$1"
   local maxDuration="$2"
@@ -472,147 +512,147 @@ Cache::getFileContentIfNotExpired() {
   cat "${file}"
 }
 
-# Public: shallow clone a repository at specific commit sha, tag or branch
+# @description shallow clone a repository at specific commit sha, tag or branch
 # or update repo if already exists
 #
-# **Arguments**:
-# * $1 repository
-# * $2 Install dir
-# * $3 revision commit sha, tag or branch
-# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
-#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
+# @warning **USE THIS FORCE_DELETION ARGUMENT WITH CAUTION !!!** as the directory will be deleted without any prompt
 #
-# **Return**:
-# * code !=0 if git failure or directory not writable
-# * code=1 if destination dir already exists and force option is not 1
+# @arg $1 repository:String
+# @arg $2 installDir:String Install dir
+# @arg $3 revision:String commit sha, tag or branch
+# @arg $4 forceDeletion:Boolean (optional) put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
+#
+# @exitcode !=0 if git failure or directory not writable
+# @exitcode 1 if destination dir already exists and force option is not 1
+# @stderr display verbose status of the command execution
 Git::shallowClone() {
-  local REPO="$1"
-  local INSTALL_DIR="$2"
-  local REVISION="$3"
-  local FORCE_DELETION="${4:-0}"
+  local repository="$1"
+  local installDir="$2"
+  local revision="$3"
+  local forceDeletion="${4:-0}"
 
-  if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
+  if [[ -d "${installDir}/.git" ]]; then
+    Log::displayInfo "Repository ${installDir} already installed"
   else
-    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning "Removing ${INSTALL_DIR} ..."
-        rm -Rf "${INSTALL_DIR}" || exit 1
+    if [[ -f "${installDir}" || -d "${installDir}" ]]; then
+      if [[ "${forceDeletion}" = "FORCE_DELETION" ]]; then
+        Log::displayWarning "Removing ${installDir} ..."
+        rm -Rf "${installDir}" || exit 1
       else
-        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
+        Log::displayError "Destination ${installDir} already exists, use force option to automatically delete the destination"
         return 1
       fi
     fi
     (
-      Log::displayInfo "Installing ${INSTALL_DIR} ..."
-      mkdir -p "${INSTALL_DIR}"
-      cd "${INSTALL_DIR}" || exit 1
+      Log::displayInfo "Installing ${installDir} ..."
+      mkdir -p "${installDir}"
+      cd "${installDir}" || exit 1
       git init >&2
-      git remote add origin "${REPO}" >&2
+      git remote add origin "${repository}" >&2
     )
   fi
   (
-    cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
+    cd "${installDir}" || exit 1
+    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${revision}" >&2
     git reset --hard FETCH_HEAD >&2
   )
 }
 
-# Display message using error color (red)
-# @param {String} $1 message
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
 Log::displayError() {
   echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
   Log::logError "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayHelp() {
   local type="${2:-HELP}"
   echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logHelp "$1" "${type}"
 }
 
-# Display message using skip color (yellow)
-# @param {String} $1 message
+# @description Display message using skip color (yellow)
+# @arg $1 message:String the message to display
 Log::displaySkipped() {
   echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   Log::logSkipped "$1"
 }
 
-# Display message using info color (blue) but warning level
-# @param {String} $1 message
+# @description Display message using info color (blue) but warning level
+# @arg $1 message:String the message to display
 Log::displayStatus() {
   local type="${2:-STATUS}"
   echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
   Log::logStatus "$1" "${type}"
 }
 
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
+# @description Display message using success color (bg green/fg white)
+# @arg $1 message:String the message to display
 Log::displaySuccess() {
   echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
   Log::logSuccess "$1"
 }
 
-# Display message using warning color (yellow)
-# @param {String} $1 message
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
 Log::displayWarning() {
   echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
   Log::logWarning "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logDebug() {
   Log::logMessage "${2:-DEBUG}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logError() {
   Log::logMessage "${2:-ERROR}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logHelp() {
   Log::logMessage "${2:-HELP}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logInfo() {
   Log::logMessage "${2:-INFO}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSkipped() {
   Log::logMessage "${2:-SKIPPED}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logStatus() {
   Log::logMessage "${2:-STATUS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSuccess() {
   Log::logMessage "${2:-SUCCESS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logWarning() {
   Log::logMessage "${2:-WARNING}" "$1"
 }
 
-# To be called before logging in the log file
-# @param {string} file $1 log file name
-# @param {int} maxLogFilesCount $2 maximum number of log files
+# @description To be called before logging in the log file
+# @arg $1 file:string log file name
+# @arg $2 maxLogFilesCount:int maximum number of log files
 Log::rotate() {
   local file="$1"
   local maxLogFilesCount="${2:-5}"
@@ -631,10 +671,10 @@ Log::rotate() {
   fi
 }
 
-# Number of seconds since last modification of the file
-# @param {String} file $1 file path
-# @return 1 if file does not exist
-# @output number of seconds since last modification of the file
+# @description Number of seconds since last modification of the file
+# @arg $1 file:String file path
+# @exitcode 1 if file does not exist
+# @stdout number of seconds since last modification of the file
 File::elapsedTimeSinceLastModification() {
   local file="$1"
   if [[ ! -f "${file}" ]]; then
@@ -648,17 +688,14 @@ File::elapsedTimeSinceLastModification() {
 
 # Internal: common log message
 #
-# **Arguments**:
-# * $1 - message's level description
-# * $2 - message
-# **Output**:
-# [date]|[levelMsg]|message
+# @arg $1 levelMsg:String message's level description
+# @arg $2 msg:String the message to display
+# @output text
+#   [date]|[levelMsg]|message
 #
-# **Examples**:
-# <pre>
-# 2020-01-19 19:20:21|ERROR  |log error
-# 2020-01-19 19:20:21|SKIPPED|log skipped
-# </pre>
+# @example
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -690,10 +727,10 @@ Assert::fileWritable() {
   Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
-# Public: check if argument is a valid linux path
+# @description check if argument is a valid linux path
 #
-# @param {string} path $1 path that needs to be checked
-# @return 1 if path is invalid
+# @arg $1 path:string path that needs to be checked
+# @exitcode 1 if path is invalid
 # invalid path are those with:
 # - invalid characters
 # - component beginning by a - (because option)

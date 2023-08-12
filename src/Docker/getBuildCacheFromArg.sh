@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # generate list of --cache-from arg to pass to docker build
-# @param {String} ... $@ list of tags to use as cache
+# @arg $@ tags:String[] list of tags to use as cache
 # @stdout string representing arguments to pass to Docker::buildImage to build image using cache
 # @see Docker::buildImage
 Docker::getBuildCacheFromArg() {

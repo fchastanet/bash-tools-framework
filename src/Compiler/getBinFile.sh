@@ -2,9 +2,9 @@
 
 # extract BIN_FILE directive from srcFile
 # create the folder of the file
-# @param {String} file $1 the file to import
-# @return 1 if the path is not a valid path
-# @return 2 if the path is a directory
+# @arg $1 file:String the file to import
+# @exitcode 1 if the path is not a valid path
+# @exitcode 2 if the path is a directory
 Compiler::getBinFile() {
   local srcFile="$1"
   local BIN_FILE

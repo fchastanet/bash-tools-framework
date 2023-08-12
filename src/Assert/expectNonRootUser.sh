@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Public: exits with message if current user is root
+# @description exits with message if current user is root
 #
 # **Exit**: code 1 if current user is root
 Assert::expectNonRootUser() {

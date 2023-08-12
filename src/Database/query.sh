@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
-# Public: mysql query on a given db
+# @description mysql query on a given db
+# @example
+#   cat file.sql | Database::query ...
+# @arg $1 instanceQuery:&Map<String,String> (passed by reference) database instance to use
+# @arg $2 sqlQuery:String (optional) sql query or sql file to execute. if not provided or empty, the command can be piped
+# @arg $3 dbName:String (optional) the db name
 #
-# **Arguments**:
-# * $1 (passed by reference) database instance to use
-# * $2 sql query to execute.
-#    if not provided or empty, the command can be piped (eg: cat file.sql | Database::query ...)
-# * _$3 (optional)_ the db name
-#
-# **Returns**: mysql command status code
+# @exitcode mysql command status code
 Database::query() {
   local -n instanceQuery=$1
   local -a mysqlCommand=()
+  local -a queryOptions
 
   mysqlCommand+=(mysql)
   mysqlCommand+=("--defaults-extra-file=${instanceQuery['AUTH_FILE']}")

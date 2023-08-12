@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Display given text and complete the rest of the line with given character
-# @param {String} $1 text to display
-# @param {String} $2 (default:#) character to use to complete the line
+# @description Display given text and complete the rest of the line with given character
+# @arg $1 text:String text to display
+# @arg $2 character:String (default:#) character to use to complete the line
 UI::textLine() {
   local text="$1"
   local character="${2:-#}"

@@ -3,8 +3,8 @@
 # ability to call a command capturing output and exit code
 # but displaying it also to error output to follow command's progress
 # @global COMMAND_OUTPUT stdout of the command is returned in global variable COMMAND_OUTPUT
-# @errorOutput command output
-# @return exit code of the command
+# @stderrOutput command output
+# @exitcode exit code of the command
 Command::captureOutputAndExitCode() {
   local command logMessage returnCode
   command=$1

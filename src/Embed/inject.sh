@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-# finds all EMBED directives in the given script (stdin)
+# @description finds all EMBED directives in the given script (stdin)
 # and generates embedded script for each
-# @param {array} injectEmbeddedNames $1 (passed by reference) list of names that have been embedded
-# @param {array} injectEmbeddedResources $2 (passed by reference) list of resources that have been embedded
+# @arg $1 injectEmbeddedNames:&String[] (passed by reference) list of names that have been embedded
+# @arg $2 injectEmbeddedResources:&String[] (passed by reference) list of resources that have been embedded
 # @stdin pass the file in which the replacements will be done as stdin
 # @stderr display list of skipped embed when importing the same asName twice
 # @stderr if asName or resource is not correct
 # @stderr if fail to embed resource
 # @stdout embedded resources
-# @return 1 on first embed directive with invalid data
-# @return 2 on first embed directive embedding that fails
+# @exitcode 1 on first embed directive with invalid data
+# @exitcode 2 on first embed directive embedding that fails
 # @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments
 # @see Embed::embedBashFrameworkFunction
 Embed::inject() {

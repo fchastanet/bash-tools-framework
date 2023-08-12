@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
-#  Public: lis dbs of given mysql server
-# **Output**:
-# the list of db except mysql admin ones :
+# @description: databases's list of given mysql server
+#
+# @example
 # - information_schema
 # - mysql
 # - performance_schema
 # - sys
 #
-# **Arguments**:
-# * $1 (passed by reference) database instance to use
+# @arg $1 instanceUserDbList:&Map<String,String> (passed by reference) database instance to use
+# @stdout the list of db except mysql admin ones (see example)
+# @exitcode the query exit code
 Database::getUserDbList() {
   # shellcheck disable=SC2034
   local -n instanceUserDbList=$1

@@ -2,17 +2,14 @@
 
 # Internal: common log message
 #
-# **Arguments**:
-# * $1 - message's level description
-# * $2 - message
-# **Output**:
-# [date]|[levelMsg]|message
+# @arg $1 levelMsg:String message's level description
+# @arg $2 msg:String the message to display
+# @output text
+#   [date]|[levelMsg]|message
 #
-# **Examples**:
-# <pre>
-# 2020-01-19 19:20:21|ERROR  |log error
-# 2020-01-19 19:20:21|SKIPPED|log skipped
-# </pre>
+# @example
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"

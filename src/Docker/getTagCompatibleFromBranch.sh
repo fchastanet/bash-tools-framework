@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# @param {String} separator $1 replace / by separator
-# @paramDefault {String} separator $1 '_'
+# @arg $1 separator:String replace / by separator (Default value: '_')
 # @stdin the name of the branch
 # @stdout a string compatible with docker tag format
 Docker::getTagCompatibleFromBranch() {

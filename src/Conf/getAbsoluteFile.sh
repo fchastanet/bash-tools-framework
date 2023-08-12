@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
-# Public: get absolute conf file from specified conf folder deduced using these rules
+# @description get absolute conf file from specified conf folder deduced using these rules
 #   * from absolute file (ignores <confFolder> and <extension>)
 #   * relative to where script is executed (ignores <confFolder> and <extension>)
 #   * from home/.bash-tools/<confFolder>
 #   * from framework conf/<confFolder>
 #
-# **Arguments**:
-# * $1 confFolder the directory name (not the path) to list
-# * $2 conf file to use without extension
-# * $3 the extension (sh by default)
+# @arg $1 confFolder:String the directory name (not the path) to list
+# @arg $2 conf:String file to use without extension
+# @arg $3 extension:String the extension (.sh by default)
 #
-# Returns absolute conf filename
+# @stdout absolute conf filename
+# @exitcode 1 if file is not found in any location
 Conf::getAbsoluteFile() {
   local confFolder="$1"
   local conf="$2"

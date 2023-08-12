@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Public: determine if the script is executed under windows
+# @description determine if the script is executed under windows
 # cspell:disable
 # <pre>
 # uname GitBash windows (with wsl) => MINGW64_NT-10.0 ZOXFL-6619QN2 2.10.0(0.325/5/3) 2018-06-13 23:34 x86_64 Msys
@@ -9,7 +9,7 @@
 # </pre>
 # cspell:enable
 #
-# @return 1 on error
+# @exitcode 1 on error
 Assert::windows() {
   if [[ "$(uname -o)" = "Msys" ]]; then
     return 0

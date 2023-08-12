@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # allow to embed selected resource providing the given name
-# @param {string} resource $1
-# @param {string} asName $2
+# @arg $1 resource:string
+# @arg $2 asName:string
 # @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
 # @env _COMPILE_ROOT_DIR
 # @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments

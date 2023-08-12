@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# To be called before logging in the log file
-# @param {string} file $1 log file name
-# @param {int} maxLogFilesCount $2 maximum number of log files
+# @description To be called before logging in the log file
+# @arg $1 file:string log file name
+# @arg $2 maxLogFilesCount:int maximum number of log files
 Log::rotate() {
   local file="$1"
   local maxLogFilesCount="${2:-5}"

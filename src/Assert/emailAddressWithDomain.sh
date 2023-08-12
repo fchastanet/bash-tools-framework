@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # check if param is valid email address with one the specified domains
-# @param $1 the full email address
-# @param $@ the expected email address domains
-# @return 1 if email invalid
+# @arg $1 email:string the full email address
+# @arg $@ expectedDomains:String[] the expected email address domains
+# @exitcode 1 if email invalid
 Assert::emailAddressWithDomain() {
   local email="$1"
   local expectedDomain

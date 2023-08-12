@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-# convert base64 encoded back to target dir
-# @params {string} targetDir $1 the directory in which
-#   tar archive will be untarred
-# it is advised to include in the path of the target dir
-# the md5sum of the binFile
-# @params {string} base64 $2 the base64 encoded tar czf
-#   archive
+# @description convert base64 encoded back to target dir
+# it is advised to include the md5sum of the binFile in the path of the target dir
+#
+# @arg $1 targetDir:string the directory in which tar archive will be untarred
+# @arg $2 base64:string the base64 encoded tar czf archive
 Embed::extractDirFromBase64() {
   local targetDir="$1"
   local base64="$2"

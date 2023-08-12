@@ -23,7 +23,7 @@ function Assert::dnsHostname::invalid { #@test
 }
 
 function Assert::dnsHostname::invalidWithAccents { #@test
-  run Assert::dnsHostname "dnsé.com" # cspell:disable-line
+  run Assert::dnsHostname "dnsé.com"               # cspell:disable-line
   assert_failure 1
   assert_output ""
 }

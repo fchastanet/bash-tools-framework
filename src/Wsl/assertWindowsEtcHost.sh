@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Check if Host is defined in etc/hosts of windows
-# @param $1 hostname
-# @return 1 if hostname not found
+# @description Check if Host is defined in etc/hosts of windows
+# @arg $1 host:String
+# @exitcode 1 if hostname not found
 Wsl::assertWindowsEtcHost() {
   local host="$1"
 

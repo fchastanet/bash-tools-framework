@@ -17,7 +17,7 @@ ShellDoc::generateShellDocsFromDir() {
   local excludeDirectoriesPattern="${6:-}"
   local excludeFilesPattern="${7:-}"
 
-  # exlude dir pattern
+  # exclude dir pattern
   local -a grepExclude
   if [[ -z "${excludeDirectoriesPattern}" ]]; then
     grepExclude=(cat)

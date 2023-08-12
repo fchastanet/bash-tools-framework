@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
-# install binary with the exact version provided using retry
-# @param {String}   targetFile target binary file (eg: /usr/local/bin/kind)
-# @param {String}   releaseUrl github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
-#    the placeholder @latestVersion@ will be replaced by the provided version
-# @param {String}   argVersion the argument used to get the version of the command (default: --version)
-# @param {Function} versionCallback function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
-# @param {Function} installCallback function called to install the file retrieved on github (default copy as is and set execution bit)
-# @output log messages about retry, install, upgrade
+# @description install binary with the exact version provided using retry
+#
+# releaseUrl argument: the placeholder @latestVersion@ will be replaced by the provided version
+# @arg $1 targetFile:String    target binary file (eg: /usr/local/bin/kind)
+# @arg $2 releaseUrl:String    github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
+# @arg $3 exactVersion:String  which exact version to get
+# @arg $4 argVersion:String    the argument used to get the version of the command (default: --version)
+# @arg $5 versionCallback:Function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
+# @arg $6 installCallback:Function called to install the file retrieved on github (default copy as is and set execution bit)
+# @stdout log messages about retry, install, upgrade
 Github::installRelease() {
   local targetFile="$1"
   local releaseUrl="$2"

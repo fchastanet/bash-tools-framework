@@ -26,6 +26,7 @@
     "**/.idea/**",
     "**/report/**",
     "**/*.svg",
-    "src/_includes/_header.tpl"
+    "src/_includes/_header.tpl",
+    "vendor/**"
   ]
 }

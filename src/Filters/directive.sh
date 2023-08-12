@@ -4,13 +4,15 @@ readonly FILTER_DIRECTIVE_KEEP_ONLY_HEADERS="0"
 # shellcheck disable=SC2034
 readonly FILTER_DIRECTIVE_REMOVE_HEADERS="1"
 
-# filter the directive only at the beginning of the file
+# @description filter the directive only at the beginning of the file
 # we do not want to filter eventual documentation in the
 # rest of the script
-# @param {bool} invert $1 Invert the sense of matching,
-# to select non-matching lines:
-# - 0 to keep only directive
-# - 1 to remove directive and keep the rest of the file
+#
+# **invert arg**
+# - ${FILTER_DIRECTIVE_KEEP_ONLY_HEADERS} or 0 to keep only directive
+# - ${FILTER_DIRECTIVE_REMOVE_HEADERS} or 1 to remove directive and keep the rest of the file
+#
+# @arg $1 invert:bool Invert the sense of matching, to select non-matching lines:
 # shellcheck disable=SC2120
 Filters::directive() {
   local invert="${1:-${FILTER_DIRECTIVE_KEEP_ONLY_HEADERS}}"

@@ -1,25 +1,23 @@
 #!/usr/bin/env bash
 
-# installs file to given directory
-# @param $1 fromFile - original file to copy
-# @param $2 targetFile - target file
-# @param $3 SUCCESS_CALLBACK the callback to call when file is installed successfully
-#    by default setUserRights callback is called
-#    callback parameters ${fromFile} ${targetFile} $@
-# @param $4 FAILURE_CALLBACK the callback to call when file installation has failed
-#    by default setUserRights callback is called
-#    callback parameters ${fromFile} ${targetFile} $@
-# @param $@ all parameters after 4th will be passed to callback
-# @return 1 if fromFile is not readable
-# @return 2 if backup file failure
-# @return 0 on success or if OVERWRITE_CONFIG_FILES=0
-# @return 0 on success or if CHANGE_WINDOWS_FILES=0 and target file is a windows file
-# @environment OVERWRITE_CONFIG_FILES
-# @environment CHANGE_WINDOWS_FILES
-# @environment USER_NAME
-# @environment USER_GROUP
-# @environment BASE_MNT_C
-# @environment FRAMEWORK_ROOT_DIR
+# @description installs file to given directory
+#
+# callbacks parameters `${fromFile} ${targetFile} $@`
+# @arg $1 fromFile - original file to copy
+# @arg $2 targetFile - target file
+# @arg $3 successCallback:Function the callback to call when file is installed successfully, by default setUserRights callback is called
+# @arg $4 failureCallback:Function the callback to call when file installation has failed, by default setUserRights callback is called
+# @arg $@ callbacksParams:String[] all parameters after 4th will be passed to callback
+# @exitcode 1 if fromFile is not readable
+# @exitcode 2 if backup file failure
+# @exitcode 0 on success or if OVERWRITE_CONFIG_FILES=0
+# @exitcode 0 on success or if CHANGE_WINDOWS_FILES=0 and target file is a windows file
+# @env OVERWRITE_CONFIG_FILES
+# @env CHANGE_WINDOWS_FILES
+# @env USER_NAME
+# @env USER_GROUP
+# @env BASE_MNT_C
+# @env FRAMEWORK_ROOT_DIR
 Install::file() {
   local fromFile="$1"
   local targetFile="$2"

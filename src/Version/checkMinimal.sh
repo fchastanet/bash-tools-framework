@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 
-# Check that command version is greater than expected minimal version
+# @description Check that command version is greater than expected minimal version
 # display warning if command version greater than expected minimal version
 # display error if command version less than expected minimal version and exit 1
-# @param {String} $1 command path
-# @param {String} $2 command line parameters to launch to get command version
-# @param {String} $3 expected minimal command version
-# @param {String} $4 optional help message to display if command does not exist
-# @return 1 if command version less than expected minimal version, 0 otherwise
-# @return 2 if command does not exist
+# @arg $1 commandName:String command path
+# @arg $2 argVersion:String command line parameters to launch to get command version
+# @arg $3 minimalVersion:String expected minimal command version
+# @arg $4 parseVersionCallback:Function
+# @arg $5 help:String optional help message to display if command does not exist
+# @exitcode 0 if command version greater or equal to expected minimal version
+# @exitcode 1 if command version less than expected minimal version
+# @exitcode 2 if command does not exist
 Version::checkMinimal() {
   local commandName="$1"
   local argVersion="$2"
   local minimalVersion="$3"
   local parseVersionCallback=${4:-Version::parse}
-  local help="${4:-}"
+  local help="${5:-}"
 
   Assert::commandExists "${commandName}" "${help}" || return 2
 

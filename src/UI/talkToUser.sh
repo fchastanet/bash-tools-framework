@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# display info message
+# @description display info message
 # And wall Text to speech to tell the message if wsl and powershell available
 # Else try to use bip
-# @param {String} $1 message to tell
-# @global CAN_TALK_DURING_INSTALLATION if not 1 skip talking or beeping
+# @arg $1 msg:String message to tell
+# @env CAN_TALK_DURING_INSTALLATION if not 1 skip talking or beeping
 UI::talkToUser() {
   local msg="${1:-Please, your input is required}"
 

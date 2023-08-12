@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 
-# Public: dump db limited to optional table list
+# @description dump db limited to optional table list
 #
-# **Arguments**:
-# * $1 (passed by reference) database instance to use
-# * $2 the db to dump
-# * _$3(optional)_ string containing table list
-#       (can be empty string in order to specify additional options)
-# * _$4(optional)_ ... additional dump options
+# @arg $1 instanceDump:&Map<String,String> (passed by reference) database instance to use
+# @arg $2 db:String the db to dump
+# @arg $3 optionalTableList:String (optional) string containing tables list (can be empty string in order to specify additional options)
+# @arg $4 dumpAdditionalOptions:String[] (optional)_ ... additional dump options
 #
-# **Returns**: mysqldump command status code
+# @exitcode mysqldump command status code
 Database::dump() {
   # shellcheck disable=SC2178
   local -n instanceDump=$1
@@ -41,5 +39,4 @@ Database::dump() {
 
   Log::displayDebug "execute command: '${mysqlCommand[*]}'"
   "${mysqlCommand[@]}"
-  return $?
 }

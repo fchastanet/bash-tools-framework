@@ -1,22 +1,16 @@
 #!/usr/bin/env bash
 
-# Fail and display details if `$lines` does not match the expected
+# @description Fail and display details if `$lines` does not match the expected
 # number of lines.
 #
 # Globals:
 #   lines
-# Options:
-#   none
-# Arguments:
-#   $1 - expected number of lines
-# Returns:
-#   0 - expected matches the actual output
-#   1 - otherwise
-# Inputs:
-#   None
-# Outputs:
-#   STDERR - details, on failure
-#            error message, on error
+# @arg $1 expected:int expected number of lines
+#
+# @exitcode 0 - expected matches the actual output
+# @exitcode 1 - otherwise
+#
+# @stderr details, on failure
 assert_lines_count() {
   local -i expected=$1
   #shellcheck disable=SC2154

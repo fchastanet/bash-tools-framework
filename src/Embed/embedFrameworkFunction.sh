@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-# Allows to generate a bin file that will call the mentioned
-# bash framework function(md5 encoded) wrapped in an extractor
-# function
-# Note:
+# @description Allows to generate a bin file that will call the mentioned
+# bash framework function(md5 encoded) wrapped in an extractor function
+# **Note:**
 #   You cannot call this function directly
 #   it should be called using '# EMBED ... AS ...' directive
-# @param {string} functionToCall $1
-# @param {string} functionAlias $2
-# @output the generated bin file extractor
+#
+# @arg $1 functionToCall:string
+# @arg $2 functionAlias:string
+# @stdout the generated bin file extractor
 #   this bin file extractor actually calls a function that will
 #   extract the real binFile(md5 encoded) that
 # @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments

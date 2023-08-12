@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Check if Host is defined in etc/hosts of windows
-# @param $1 hostname
-# @return 1 if hostname not found
+# @arg $1 hostname:String
+# @exitcode 1 if hostname not found
 Assert::etcHost() {
   local host="$1"
 

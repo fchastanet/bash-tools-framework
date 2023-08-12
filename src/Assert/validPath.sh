@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Public: check if argument is a valid linux path
+# @description check if argument is a valid linux path
 #
-# @param {string} path $1 path that needs to be checked
-# @return 1 if path is invalid
+# @arg $1 path:string path that needs to be checked
+# @exitcode 1 if path is invalid
 # invalid path are those with:
 # - invalid characters
 # - component beginning by a - (because option)

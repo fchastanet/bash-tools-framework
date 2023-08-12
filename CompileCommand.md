@@ -2,7 +2,7 @@
 
 - [1. Why ?](#1-why-)
 - [2. Compile tool](#2-compile-tool)
-- [3.  compile command help](#3--compile-command-help)
+- [3. compile command help](#3--compile-command-help)
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
@@ -347,7 +347,7 @@ features.
 
 `Compiler::Requirement::require` instructs the compiler to include some
 cross-used scripts to ensure that proper configuration is set. The directive
-`# REQUIRE` allow the usage of that feature during the compilation.
+`# @require` allow the usage of that feature during the compilation.
 
 Here a non exhaustive list of possible requirements:
 
@@ -374,11 +374,11 @@ executed at loading time.
 
 The following syntax can be used:
 
-_Syntax:_ `# REQUIRE Framework::requiresRootDir`
+_Syntax:_ `# @require Framework::requiresRootDir`
 
-_Syntax:_ `# REQUIRE Git::requiresGitCommand`
+_Syntax:_ `# @require Git::requiresGitCommand`
 
-_Syntax:_ `# REQUIRE Git::requiresShallowClone`
+_Syntax:_ `# @require Git::requiresShallowClone`
 
 _`REQUIRE` directive usage example:_
 
@@ -388,8 +388,8 @@ case we could also ensure that a minimal version is available.
 
 ```bash
 #!/usr/bin/env bash
-# REQUIRE Git::requiresGitCommand
-# REQUIRE Git::requiresShallowClone
+# @require Git::requiresGitCommand
+# @require Git::requiresShallowClone
 Git::shallowClone() {
   # ...
 }
@@ -445,7 +445,7 @@ this in our script headers:
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
-# REQUIRE disable=Git::requiresShallowClone
+# @require disable=Git::requiresShallowClone
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
@@ -522,11 +522,11 @@ The compiler during successive passes:
 
 - will load `.framework-config`, eventual variable `REQUIRE_DISABLED` could be
   loaded.
-- will parse `# REQUIRE disable=` directives, adding each disabled requirement
+- will parse `# @require disable=` directives, adding each disabled requirement
   to the `REQUIRE_DISABLED` variable.
   - warn if a disabled requirement has no associated file
 - compiler pass
-  - will parse `# REQUIRE` directives
+  - will parse `# @require` directives
     - error if requires name does not begin with requires
     - error if requires name does not comply naming convention
     - error if _requires\*_ file not found
@@ -552,8 +552,8 @@ The following rules apply:
 - A requirement can be loaded only once.
 - A requirement that is used by several functions will be more prioritized and
   will be loaded before a less prioritized requirement.
-- `# FUNCTIONS` placeholder should be defined before `# REQUIREMENTS`
-- `# REQUIREMENTS` placeholder should be defined before `# ENTRYPOINT`
+- `# FUNCTIONS` placeholder should be defined before `# @requireMENTS`
+- `# @requireMENTS` placeholder should be defined before `# ENTRYPOINT`
 - You can use .INCLUDE directive in these files to avoid duplicating code for
   each similar requirements.
 
@@ -659,9 +659,9 @@ Lint files of the current repository
 - check that function defined in a .sh is correctly named
 - check that each framework function has a bats file associated (warning if not)
 - check that `REQUIRE` directive `AS` ids are not duplicated
-- check for `# FUNCTIONS`, `# REQUIREMENTS` and `# ENTRYPOINT` presence
-- check `# FUNCTIONS` placeholder is defined before `# REQUIREMENTS`
-- check `# REQUIREMENTS` placeholder is defined before `# ENTRYPOINT`
+- check for `# FUNCTIONS`, `# @requireMENTS` and `# ENTRYPOINT` presence
+- check `# FUNCTIONS` placeholder is defined before `# @requireMENTS`
+- check `# @requireMENTS` placeholder is defined before `# ENTRYPOINT`
 
 This linter is used in precommit hooks, see
 [.pre-commit-config.yaml](https://github.com/fchastanet/bash-tools-framework/blob/master/.pre-commit-config.yaml).

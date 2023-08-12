@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-# remove elements from array
-# Performance1 : version taken from https://stackoverflow.com/a/59030460
-# Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @description remove elements from array
+# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
+# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
+# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
+# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @see Array::removeIf
 Array::remove() {
   local -n arrayRemoveArray=$1
   shift || true # $@ contains elements to remove

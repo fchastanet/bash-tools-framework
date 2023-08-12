@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 
-# Public: get absolute file from name deduced using these rules
+# @description get absolute file from name deduced using these rules
 #   * using absolute/relative <conf> file (ignores <confFolder> and <extension>
 #   * from home/.bash-tools/<confFolder>/<conf><extension> file
 #   * from framework conf/<conf><extension> file
 #
-# **Arguments**:
-# * $1 confFolder to use below bash-tools conf folder
-# * $2 conf file to use without extension
-# * $3 file extension to use (default: sh)
+# @arg $1 confFolder:String directory to use (traditionally below bash-tools conf folder)
+# @arg $2 conf:String file to use without extension
+# @arg $3 extension:String file extension to use (default: .sh)
 #
-# Returns 1 if file not found or error during file loading
+# @exitcode 1 if file not found or error during file loading
 Conf::load() {
   local confFolder="$1"
   local conf="$2"

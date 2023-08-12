@@ -7,11 +7,11 @@
 # then will search in "srcDir2"
 # then if not found will go in up directories until /
 # source the file if found
-# @param {String} $1 config file name to search
-# @param {String} $2 passed by reference, will return the loaded config file name
-# @param {String} $@ source directories in which the config file will be searched
-# @return 0 if file found, 1 if file not found
-# @output the filepath loaded if any
+# @arg $1 String config file name to search
+# @arg $2 String passed by reference, will return the loaded config file name
+# @arg $@ String source directories in which the config file will be searched
+# @exitcode 0 if file found, 1 if file not found
+# @stdout the filepath loaded if any
 Conf::loadNearestFile() {
   local configFileName="$1"
   local -n loadedFile="$2"

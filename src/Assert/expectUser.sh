@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-# Public: exits with message if current user is not the expected one
+# @description exits with message if current user is not the expected one
 #
-# **Arguments**:
-# * $1 expected user login
+# @arg $1 expectedUserName:String expected user login
 #
-# **Exit**: code 1 if current user is not the expected one
+# @exitcode 1 if current user is not the expected one
 Assert::expectUser() {
   local expectedUserName="$1"
   if [[ "$(id -un)" != "${expectedUserName}" ]]; then

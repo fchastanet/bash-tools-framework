@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-# Public: delete files older than n days
+# @description delete files older than n days
 #
-# **Arguments**:
-# * $1 path
-# * $2 modification time
-#   eg: +1 match files that have been accessed at least two days ago (rounding effect)
+# @arg $1 path:String
+# @arg $2 mtime:String modification time. Eg: +1 match files that have been accessed at least two days ago (rounding effect)
 # @see man find atime
 #
-# **Exit**: code 1 if the command failed
+# @exitcode 1 if the command failed
 File::garbageCollect() {
   local path="$1"
   local mtime="$2"
