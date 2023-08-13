@@ -228,6 +228,19 @@ Array::remove() {
 
 BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT=86400 # 1 day
 
+# @description install requirements to execute bats
+# @warning the following repositories are shallow cloned
+# @warning cloning is skipped if vendor/.batsInstalled file exists
+# @warning a new check is done everyday
+# @warning repository is not updated of a change is detected
+# @env BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
+# @set BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED String the file created when all git shallow clones have succeeded
+# @see https://github.com/bats-core/bats-core.
+# @see https://github.com/bats-core/bats-support
+# @see https://github.com/bats-core/bats-assert
+# @see https://github.com/Flamefire/bats-mock
+# @stderr diagnostics information is displayed
+# @feature Git::shallowClone
 Bats::installRequirementsIfNeeded() {
   local rootDir="${1:-"${FRAMEWORK_ROOT_DIR}"}"
   BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED="${rootDir}/vendor/.batsInstalled"
@@ -244,7 +257,6 @@ Bats::installRequirementsIfNeeded() {
       "master" \
       "FORCE_DELETION"
 
-    # last revision 2019
     Git::shallowClone \
       "https://github.com/bats-core/bats-support.git" \
       "${rootDir}/vendor/bats-support" \
@@ -493,9 +505,9 @@ Args::showHelp() {
   echo -e "${helpArg}"
 }
 
-# get file content if file not expired
-# @arg $1 file:String   the file to get content from
-# @arg $2 maxDuration:String  number of seconds after which the file is considered expired
+# @description get file content if file not expired
+# @arg $1 file:String the file to get content from
+# @arg $2 maxDuration:int number of seconds after which the file is considered expired
 # @stdout {String} the file content if not expired
 # @exitcode 1 if file does not exists
 # @exitcode 2 if file expired
@@ -717,29 +729,43 @@ Log::logMessage() {
 }
 
 # Checks if file can be created in folder
+#
+
+# @description Checks if file can be created in folder
 # The file does not need to exist
+# @arg $1 file:String
+# @exitcode 1 if file is not a valid path
+# @exitcode 2 if file parent's dir is not writable
+# @exitcode 3 if existing file is not writable
+# @see Assert::validPath
 Assert::fileWritable() {
   local file="$1"
   local dir
 
-  dir="$(dirname "${file}")"
+  Assert::validPath "${file}" || return 1
+  if [[ -f "${file}" ]]; then
+    [[ -w "${file}" ]] || return 3
+  else
+    dir="$(dirname "${file}")"
+    [[ -w "${dir}" ]] || return 2
+  fi
 
-  Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
 # @description check if argument is a valid linux path
+# invalid path are those with:
+# - invalid characters
+# - component beginning by a - (because could be considered as a command's option)
+# - not beginning with a slash
+# - relative
 #
 # @arg $1 path:string path that needs to be checked
 # @exitcode 1 if path is invalid
-# invalid path are those with:
-# - invalid characters
-# - component beginning by a - (because option)
-# - not beginning with a slash
-# - relative
+# @see https://regex101.com/r/afLrmM/2
+# @see Assert::validPosixPath if you need more restrictive check
 Assert::validPath() {
   local path="$1"
 
-  # https://regex101.com/r/afLrmM/2
   [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
     [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }

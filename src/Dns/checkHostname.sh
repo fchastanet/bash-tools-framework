@@ -18,7 +18,8 @@ Dns::checkHostname() {
     pingCmd=(ping -n 1 "${host}")
   fi
 
-  if ! Command::captureOutputAndExitCode "${pingCmd[*]}" "try to reach host ${host}"; then
+  Log::displayInfo "try to reach host ${host}"
+  if ! Command::captureOutputAndExitCode "${pingCmd[@]}"; then
     return 2
   fi
 
@@ -32,12 +33,12 @@ Dns::checkHostname() {
   if [[ ${ip} != 127.0.* ]]; then
     # resolve to a non local address
     # check if ip resolve to our ips
-    local message="check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
     local -a ipconfigCmd=(ifconfig)
     if Assert::windows; then
       ipconfigCmd=(ipconfig)
     fi
 
+    Log::displayInfo "check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
     if ! Command::captureOutputAndExitCode "${ipconfigCmd[*]} | grep ${ip} | cat" "${message}"; then
       return 3
     fi

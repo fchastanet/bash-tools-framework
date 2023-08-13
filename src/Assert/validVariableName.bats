@@ -30,7 +30,25 @@ function Assert::validVariableName::noAt { #@test
   assert_output ""
 }
 
-function Assert::validVariableName::valid { #@test
+function Assert::validVariableName::noSpace { #@test
+  run Assert::validVariableName "var files_count invalid"
+  assert_failure 1
+  assert_output ""
+}
+
+function Assert::validVariableName::invalidUppercase { #@test
+  run Assert::validVariableName "FILEs_COUNT"
+  assert_failure 1
+  assert_output ""
+}
+
+function Assert::validVariableName::validUppercase { #@test
+  run Assert::validVariableName "FILES_COUNT"
+  assert_success
+  assert_output ""
+}
+
+function Assert::validVariableName::validSmallCase { #@test
   run Assert::validVariableName "files_count"
   assert_success
   assert_output ""

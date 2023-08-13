@@ -8,7 +8,7 @@
 #   }
 #   local -a myArray=("elem1" "elemX" "elem2" "elemX" "elem3" "elemX" "elem4" "elemX" "elem5" "elemX")
 #   Array::removeIf myArray predicateElem1to5
-#   echo "${myArray[*]}"
+#   echo "Result: ${myArray[*]}"
 #   # Result: elemX elemX elemX elemX elemX
 #
 # @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed

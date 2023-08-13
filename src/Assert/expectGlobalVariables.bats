@@ -13,14 +13,14 @@ teardown() {
 function Assert::expectGlobalVariables::varNotDefined { #@test
   run Assert::expectGlobalVariables NOT_EXISTING_VAR
   assert_failure 1
-  assert_output --partial "FATAL   - Variable NOT_EXISTING_VAR is unset"
+  assert_output --partial "ERROR   - Variable NOT_EXISTING_VAR is unset"
 }
 
 function Assert::expectGlobalVariables::1varNotDefined { #@test
   export EXISTING_VAR=1
   run Assert::expectGlobalVariables EXISTING_VAR NOT_EXISTING_VAR
   assert_failure 1
-  assert_output --partial "FATAL   - Variable NOT_EXISTING_VAR is unset"
+  assert_output --partial "ERROR   - Variable NOT_EXISTING_VAR is unset"
 }
 
 function Assert::expectGlobalVariables::1varDefined { #@test

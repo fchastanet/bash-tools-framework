@@ -188,14 +188,27 @@ Array::remove() {
 }
 
 # Checks if file can be created in folder
+#
+
+# @description Checks if file can be created in folder
 # The file does not need to exist
+# @arg $1 file:String
+# @exitcode 1 if file is not a valid path
+# @exitcode 2 if file parent's dir is not writable
+# @exitcode 3 if existing file is not writable
+# @see Assert::validPath
 Assert::fileWritable() {
   local file="$1"
   local dir
 
-  dir="$(dirname "${file}")"
+  Assert::validPath "${file}" || return 1
+  if [[ -f "${file}" ]]; then
+    [[ -w "${file}" ]] || return 3
+  else
+    dir="$(dirname "${file}")"
+    [[ -w "${dir}" ]] || return 2
+  fi
 
-  Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
 # lazy initialization
@@ -475,18 +488,19 @@ ShellDoc::generateShellDocsFromDir() {
 }
 
 # @description check if argument is a valid linux path
+# invalid path are those with:
+# - invalid characters
+# - component beginning by a - (because could be considered as a command's option)
+# - not beginning with a slash
+# - relative
 #
 # @arg $1 path:string path that needs to be checked
 # @exitcode 1 if path is invalid
-# invalid path are those with:
-# - invalid characters
-# - component beginning by a - (because option)
-# - not beginning with a slash
-# - relative
+# @see https://regex101.com/r/afLrmM/2
+# @see Assert::validPosixPath if you need more restrictive check
 Assert::validPath() {
   local path="$1"
 
-  # https://regex101.com/r/afLrmM/2
   [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
     [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }
@@ -674,7 +688,11 @@ ShellDoc::generateShellDocDir() {
         else
           echo "# @description file source ${relativeDir}/${relativeFile}"
         fi
-        awk NR\>1 "${dir}/${relativeFile}"
+        awk NR\>1 "${dir}/${relativeFile}" | # remove shebang
+          # remove unwanted strings
+          sed -E \
+            -e '/^# cspell:disable$/d' \
+            -e '/^# cspell:enable$/d'
       ) >>"${namespaceFile}"
       firstFile=0
     done < <(cd "${dir}" && find . -maxdepth 1 -name "*.sh" | "${grepExclude[@]}" | LC_ALL=C sort)
@@ -761,9 +779,9 @@ ShellDoc::installRequirementsIfNeeded() {
   fi
 }
 
-# get file content if file not expired
-# @arg $1 file:String   the file to get content from
-# @arg $2 maxDuration:String  number of seconds after which the file is considered expired
+# @description get file content if file not expired
+# @arg $1 file:String the file to get content from
+# @arg $2 maxDuration:int number of seconds after which the file is considered expired
 # @stdout {String} the file content if not expired
 # @exitcode 1 if file does not exists
 # @exitcode 2 if file expired

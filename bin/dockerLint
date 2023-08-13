@@ -542,6 +542,7 @@ Args::showHelp() {
 # @arg $2 helpIfNotExists:String a help command to display if the command does not exist
 #
 # @exitCode 1 if the command specified does not exist
+# @stderr diagnotics information + help if second argument is provided
 Assert::commandExists() {
   local commandName="$1"
   local helpIfNotExists="$2"
@@ -872,29 +873,43 @@ Version::githubApiExtractVersion() {
 }
 
 # Checks if file can be created in folder
+#
+
+# @description Checks if file can be created in folder
 # The file does not need to exist
+# @arg $1 file:String
+# @exitcode 1 if file is not a valid path
+# @exitcode 2 if file parent's dir is not writable
+# @exitcode 3 if existing file is not writable
+# @see Assert::validPath
 Assert::fileWritable() {
   local file="$1"
   local dir
 
-  dir="$(dirname "${file}")"
+  Assert::validPath "${file}" || return 1
+  if [[ -f "${file}" ]]; then
+    [[ -w "${file}" ]] || return 3
+  else
+    dir="$(dirname "${file}")"
+    [[ -w "${dir}" ]] || return 2
+  fi
 
-  Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
 # @description check if argument is a valid linux path
+# invalid path are those with:
+# - invalid characters
+# - component beginning by a - (because could be considered as a command's option)
+# - not beginning with a slash
+# - relative
 #
 # @arg $1 path:string path that needs to be checked
 # @exitcode 1 if path is invalid
-# invalid path are those with:
-# - invalid characters
-# - component beginning by a - (because option)
-# - not beginning with a slash
-# - relative
+# @see https://regex101.com/r/afLrmM/2
+# @see Assert::validPosixPath if you need more restrictive check
 Assert::validPath() {
   local path="$1"
 
-  # https://regex101.com/r/afLrmM/2
   [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
     [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }

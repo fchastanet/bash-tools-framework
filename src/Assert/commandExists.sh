@@ -7,6 +7,7 @@
 # @arg $2 helpIfNotExists:String a help command to display if the command does not exist
 #
 # @exitCode 1 if the command specified does not exist
+# @stderr diagnotics information + help if second argument is provided
 Assert::commandExists() {
   local commandName="$1"
   local helpIfNotExists="$2"

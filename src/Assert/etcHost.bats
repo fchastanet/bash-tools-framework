@@ -30,7 +30,7 @@ function Assert::etcHost::hostNotFoundInLinuxEtcHost { #@test
     return 0
   }
   run Assert::etcHost "host"
-  assert_failure 1
+  assert_failure 2
   assert_output --partial "Host host not configured in /etc/hosts"
 }
 
@@ -59,7 +59,7 @@ function Assert::etcHost::hostFoundWslNotFoundInWindows { #@test
     return 1
   }
   run Assert::etcHost "host"
-  assert_failure 1
+  assert_failure 3
   assert_output ""
 }
 

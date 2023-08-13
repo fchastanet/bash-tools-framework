@@ -121,6 +121,10 @@ TODOs linked to bin/compiler:
 
 ### 5.2. FrameworkLint
 
+- shdoc
+  - check that shdoc valid annotations are used
+  - check that @require function exists and matches naming convention
+  - check that at least @description is provided
 - check no use of ${TMPDIR} without default value
 - check if 2 files have the same BINARY_FILE target
 - refact `src/_binaries/frameworkLint.sh` formatter for plain or checkstyle

@@ -10,8 +10,16 @@ teardown() {
   unstub_all
 }
 
-function Assert::wsl { #@test
-  stub grep '-qEi "(Microsoft|WSL)" /proc/version : exit 0'
+function Assert::wsl::isGitBash { #@test
+  stub uname "-o : echo 'Msys'"
+
+  run Assert::wsl
+  assert_failure 1
+  assert_output ""
+}
+
+function Assert::wsl::isWsl { #@test
+  stub uname "-o : echo 'GNU/Linux'"
 
   run Assert::wsl
   assert_success

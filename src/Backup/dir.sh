@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
-# Backup given directory using tar gzipped
+# @description Backup given directory using tar gzipped
+#
 # @arg $1 string the base directory
 # @arg $2 string the directory to backup from base directory
-# @global BACKUP_DIR variable referencing backup directory
-# @global FRAMEWORK_ROOT_DIR used to remove this project directory from displayed backup path
+#
+# @env BACKUP_DIR String variable referencing backup directory
+# @env FRAMEWORK_ROOT_DIR String  used to remove this project directory from displayed backup path
+#
 # @exitcode 1 if directory to backup does not exist, 0 if everything is OK
 # @exitcode 2 on backup failure
-# @stdout message about where the directory is backed up
+#
+# @stderr message about where the directory is backed up
+# @require Linux::requireTar
 Backup::dir() {
   local escapedDirname backupFile
   local fromDir="$1"

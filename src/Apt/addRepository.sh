@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# @file src/Apt/addRepository.sh
 # @description add apt repository followed by an apt-get update
 # @feature Retry::default
 # @feature sudo

@@ -47,9 +47,3 @@ function Assert::bashFrameworkFunction::validMultiple { #@test
   assert_success
   assert_output ""
 }
-
-function Assert::bashFrameworkFunction::validWithPrefix { #@test
-  PREFIX="sudo::" run Assert::bashFrameworkFunction "sudo::Namespace1::Namespace2::function"
-  assert_success
-  assert_output ""
-}

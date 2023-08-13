@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Image exists with tags provided on AWS ecr
+# @description Checks if image exists with tags provided on AWS ecr
 # best practice: provide tags 'tagPrefix_shortSha' 'tagPrefix_branchName'
 # so image will be tagged with
 # - tagPrefix_shortSha
@@ -9,6 +9,8 @@
 # @arg $@ tags:String[] list of tags used to check if image exists on AWS ECR
 # @exitcode 1 if no tag provided
 # @exitcode 2 if at least one tag does not exist
+# @stderr diagnostics information is displayed
+# @require Aws::requireAwsCommand
 Aws::imageExists() {
   local repositoryName="$1"
   shift || true

@@ -1,25 +1,19 @@
 #!/usr/bin/env bash
 
-# ability to call a command capturing output and exit code
+# @description ability to call a command capturing output and exit code
 # but displaying it also to error output to follow command's progress
-# @global COMMAND_OUTPUT stdout of the command is returned in global variable COMMAND_OUTPUT
-# @stderrOutput command output
-# @exitcode exit code of the command
+# command output is sent to COMMAND_OUTPUT and stderr as well in realtime using tee
+# @arg * command:String[] the command to execute
+# @set COMMAND_OUTPUT String stdout of the command is returned in global variable COMMAND_OUTPUT
+# @stderr command output
+# @exitcode * exit code of the command
 Command::captureOutputAndExitCode() {
-  local command logMessage returnCode
-  command=$1
-  logMessage="$2"
-  returnCode=1
 
-  Log::displayInfo "Start - ${logMessage}"
-  Log::displayDebug "execute command ${command}"
+  # reset COMMAND_OUTPUT before launching the command
+  unset COMMAND_OUTPUT
 
   # trick, we capture stdout in variable COMMAND_OUTPUT
   # and we copy also (via tee) stdout to stderr to be able to follow progress of the command
   # shellcheck disable=SC2034
-  if COMMAND_OUTPUT=$(bash -c "${command}" | tee /dev/stderr); then
-    returnCode=0
-  fi
-
-  return "${returnCode}"
+  COMMAND_OUTPUT=$(bash -c "$*" | tee /dev/stderr) || return $?
 }

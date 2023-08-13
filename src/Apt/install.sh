@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# @src src/Apt/install.sh
 # @description apt-get install
 # @arg $@ softwares:String[] list of softwares to install
 # @feature Retry::default

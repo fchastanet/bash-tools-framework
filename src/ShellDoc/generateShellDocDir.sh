@@ -49,7 +49,11 @@ ShellDoc::generateShellDocDir() {
         else
           echo "# @description file source ${relativeDir}/${relativeFile}"
         fi
-        awk NR\>1 "${dir}/${relativeFile}"
+        awk NR\>1 "${dir}/${relativeFile}" | # remove shebang
+          # remove unwanted strings
+          sed -E \
+            -e '/^# cspell:disable$/d' \
+            -e '/^# cspell:enable$/d'
       ) >>"${namespaceFile}"
       firstFile=0
     done < <(cd "${dir}" && find . -maxdepth 1 -name "*.sh" | "${grepExclude[@]}" | LC_ALL=C sort)
