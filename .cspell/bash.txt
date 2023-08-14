@@ -114,3 +114,5 @@ untarred
 unsetting
 exitcode
 SHDOC
+noargs
+everytime

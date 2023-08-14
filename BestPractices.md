@@ -9,7 +9,7 @@ this project because I wrote some of them while writing this project.
     - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
     - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
     - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
-    - [shopt -s inherit\_errexit](#shopt--s-inherit_errexit)
+    - [shopt -s inherit_errexit](#shopt--s-inherit_errexit)
     - [1.1.5. posix (set -o posix)](#115-posix-set--o-posix)
   - [1.2. Arguments](#12-arguments)
   - [1.3. some commands default options to use](#13-some-commands-default-options-to-use)
@@ -415,7 +415,7 @@ And makes several variables available:
 ### 3.3. Override an environment variable when using bats run
 
 ```bash
-SUDO="" run Apt::update
+SUDO="" run Linux::Apt::update
 ```
 
 ### 3.4. Override a bash framework function

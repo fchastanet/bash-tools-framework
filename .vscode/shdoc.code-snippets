@@ -21,7 +21,7 @@
       "# @stdout description",
       "# @stderr diagnostics information is displayed",
       "# @see description",
-      "# @require Git::requiresGitCommand",
+      "# @require Git::requireGitCommand",
       "# @feature Retry::default, sudo"
     ],
     "description": "bash function generic shdoc"

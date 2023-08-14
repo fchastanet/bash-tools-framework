@@ -6,7 +6,7 @@
 # @exitcode 2 if host doesn't exist in linux /etc/hosts
 # @exitcode 3 if host doesn't exist in windows etc/hosts or windows etc/hosts doesn't exists
 # @stderr diagnostics information is displayed
-# @see Wsl::assertWindowsEtcHost
+# @see Linux::Wsl::assertWindowsEtcHost
 Assert::etcHost() {
   local host="$1"
 
@@ -16,7 +16,7 @@ Assert::etcHost() {
     return 2
   fi
   if Assert::wsl; then
-    Wsl::assertWindowsEtcHost "${host}" || return 3
+    Linux::Wsl::assertWindowsEtcHost "${host}" || return 3
   fi
   Log::displaySuccess "Host ${host} correctly configured"
 }

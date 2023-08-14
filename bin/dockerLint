@@ -139,7 +139,7 @@ fi
 # @option -h short help option
 # @option --help long help option
 # @exitcode 1 displays help and returns with code 1 if -h or --help option is in the args list
-# @output displays help if -h or --help option is in the args list
+# @stdout displays help if -h or --help option is in the args list
 Args::defaultHelpNoExit() {
   local helpArg=$1
   shift || true
@@ -432,6 +432,18 @@ Log::displayInfo() {
 
 # shellcheck disable=SC2317
 
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
 Log::load() {
   # disable display methods following display level
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
@@ -529,7 +541,7 @@ Version::checkMinimal() {
 
 # @description display help
 # @arg $1 helpArg:String the help string to show
-# @output display help arg
+# @stdout display help arg
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
@@ -541,8 +553,8 @@ Args::showHelp() {
 # @arg $1 commandName:String on which existence must be checked
 # @arg $2 helpIfNotExists:String a help command to display if the command does not exist
 #
-# @exitCode 1 if the command specified does not exist
-# @stderr diagnotics information + help if second argument is provided
+# @exitcode 1 if the command specified does not exist
+# @stderr diagnostic information + help if second argument is provided
 Assert::commandExists() {
   local commandName="$1"
   local helpIfNotExists="$2"
@@ -557,6 +569,23 @@ Assert::commandExists() {
   return 0
 }
 
+# @description intermediate callback that is used by Github::upgradeRelease
+# or Github::installRelease
+# if installCallback is not set, it allows to:
+#   - copy the downloaded file to the right target file
+#   - and set the execution bit
+# else
+#   installCallback is called with newSoftware, targetFile, version arguments
+# fi
+# @warning do not use this function as callback for Github::upgradeRelease or Github::installRelease, as it would result to an infinite loop
+# @arg $1 newSoftware:String the downloaded software file
+# @arg $2 targetFile:String where we want to copy the file
+# @arg $3 version:String the version that has been downloaded
+# @arg $4 installCallback:Function (optional) the callback to call with 3 first arguments
+# @exitcode * on failure
+# @see Github::upgradeRelease
+# @see Github::installRelease
+# @internal
 Github::defaultInstall() {
   local newSoftware="$1"
   local targetFile="$2"
@@ -568,10 +597,10 @@ Github::defaultInstall() {
     ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
   else
     mv "${newSoftware}" "${targetFile}"
+    chmod +x "${targetFile}"
+    hash -r
+    rm -f "${newSoftware}" || true
   fi
-  chmod +x "${targetFile}"
-  hash -r
-  rm -f "${newSoftware}" || true
 }
 
 # @description github repository eg: kubernetes-sigs/kind
@@ -787,10 +816,14 @@ Version::getCommandVersionFromPlainText() {
     Version::parse # keep only version numbers
 }
 
-# filter to keep only version number from a string
-# @stdin the string to parse
+# @description filter to keep only version number from a string
+# @arg $@ files:String[] the files to filter
+# @exitcode * if one of the filter command fails
+# @stdin you can use stdin as alternative to files argument
+# @stdout the filtered content
+# shellcheck disable=SC2120
 Version::parse() {
-  sed -En 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | head -n1
+  sed -En 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' "$@" | head -n1
 }
 
 # @description log message to file
@@ -799,16 +832,19 @@ Log::logFatal() {
   Log::logMessage "${2:-FATAL}" "$1"
 }
 
-# Internal: common log message
-#
-# @arg $1 levelMsg:String message's level description
-# @arg $2 msg:String the message to display
-# @output text
+# @description Internal: common log message
+# @example text
 #   [date]|[levelMsg]|message
 #
-# @example
+# @example text
 #   2020-01-19 19:20:21|ERROR  |log error
 #   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -866,8 +902,12 @@ Retry::parameterized() {
   return 0
 }
 
-# extract version number from github api
+# @description extract version number from github api
+# @noargs
 # @stdin json result of github API
+# @exitcode 1 if jq or Version::parse fails
+# @stdout the version parsed
+# @require Linux::requireJqCommand
 Version::githubApiExtractVersion() {
   jq -r ".tag_name" | Version::parse
 }

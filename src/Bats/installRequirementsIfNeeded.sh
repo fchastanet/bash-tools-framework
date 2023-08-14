@@ -6,10 +6,10 @@ BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT=86400 # 1 day
 # @warning the following repositories are shallow cloned
 # @warning cloning is skipped if vendor/.batsInstalled file exists
 # @warning a new check is done everyday
-# @warning repository is not updated of a change is detected
+# @warning repository is not updated if a change is detected
 # @env BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
 # @set BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED String the file created when all git shallow clones have succeeded
-# @see https://github.com/bats-core/bats-core.
+# @see https://github.com/bats-core/bats-core
 # @see https://github.com/bats-core/bats-support
 # @see https://github.com/bats-core/bats-assert
 # @see https://github.com/Flamefire/bats-mock

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# @description Number of seconds since last modification of the file
+# @description get number of seconds since last modification of the file
 # @arg $1 file:String file path
 # @exitcode 1 if file does not exist
 # @stdout number of seconds since last modification of the file

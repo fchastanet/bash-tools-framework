@@ -48,7 +48,7 @@ function Assert::validVariableName::validUppercase { #@test
   assert_output ""
 }
 
-function Assert::validVariableName::validSmallCase { #@test
+function Assert::validVariableName::validLowercase { #@test
   run Assert::validVariableName "files_count"
   assert_success
   assert_output ""

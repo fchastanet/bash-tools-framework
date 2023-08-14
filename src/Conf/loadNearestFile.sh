@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 
-# Load the nearest config file
-# eg: Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
-# will search first .framework-config file in "srcDir1"
+# @description Load the nearest config file
+# in next example will search first .framework-config file in "srcDir1"
 # then if not found will go in up directories until /
 # then will search in "srcDir2"
 # then if not found will go in up directories until /
 # source the file if found
-# @arg $1 String config file name to search
-# @arg $2 String passed by reference, will return the loaded config file name
-# @arg $@ String source directories in which the config file will be searched
-# @exitcode 0 if file found, 1 if file not found
-# @stdout the filepath loaded if any
+# @example
+#   Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
+#
+# @arg $1 configFileName:String config file name to search
+# @arg $2 loadedFile:String (passed by reference) will return the loaded config file name
+# @arg $@ srcDirs:String[] source directories in which the config file will be searched
+# @exitcode 0 if file found
+# @exitcode 1 if file not found
 Conf::loadNearestFile() {
   local configFileName="$1"
   local -n loadedFile="$2"

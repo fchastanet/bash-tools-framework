@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# try to docker pull image from pullTags arg
+# @description try to docker pull image from pullTags arg
 # best practice: provide tags 'tagPrefix_shortSha' 'tagPrefix_branchName'
 # so image will be tagged with
 # - tagPrefix_shortSha
@@ -10,6 +10,8 @@
 # @exitcode 1 if tags list is empty or on on invalid argument
 # @exitcode 2 if no image pulled
 # @stdout {String} the tag that has been successfully pulled, return 1 if none
+# @stderr diagnostics information is displayed
+# @require Docker::requireDockerCommand
 Docker::pullImage() {
   local registryImageUrl="$1"
   shift || true

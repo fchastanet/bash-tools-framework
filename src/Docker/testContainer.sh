@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Test if a container launched by docker-compose is reachable
+# @description Test if a container launched by docker-compose is reachable
 # docker-compose will be up and shutdown at the end of the process if success or not
 # @arg $1 dir:String the directory that contains the docker-compose.yml file
 # @arg $2 containerName:String name of the container that is tested
@@ -10,6 +10,7 @@
 # @exitcode 2 on container test failure
 # @exitcode 3 on <docker-compose up> failure
 # @exitcode 4 if testCallBack is not a function
+# @require Docker::requireDockerCommand
 Docker::testContainer() {
   local directory="$1"
   local containerName="$2"

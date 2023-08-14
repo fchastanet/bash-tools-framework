@@ -6,7 +6,7 @@
 # @arg $2 fileName:String
 # @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
 # @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
-# @output The filename if found
+# @stdout The filename if found
 # @exitcode 1 if the command failed or file not found
 File::upFind() {
   local fromPath="$1"

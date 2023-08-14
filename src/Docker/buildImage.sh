@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
-# try to docker build image from eventual tagged image cache
+# @description try to docker build image from eventual tagged image cache
 # - Using DOCKER_BUILDKIT=1
 # - Using BUILDKIT_INLINE_CACHE in order to use the resulting image as a cache source
-# @see https://docs.docker.com/engine/reference/commandline/build/#specifying-external-cache-sources
 #
 # You can specify cacheFrom options using the method Docker::getBuildCacheFromArg
-# Eg:
+# @example
 #   # notice that there is no double quotes around $(Docker::getBuildCacheFromArg bash-tools:tag1 bash-tools:tag2)
 #   Docker::buildImage "." "Dockerfile" "bash-tools" $(Docker::getBuildCacheFromArg bash-tools:tag1 bash-tools:tag2)
 #
@@ -17,7 +16,10 @@
 # @exitcode 1 if buildDirectory does not exists
 # @exitcode 2 if dockerFilePath does not exists
 # @exitcode 3 if empty or invalid localImageName
-# @stdout {String} the tag that has been successfully pulled, return 1 if none
+# @stdout {String} the tag that has been successfully pulled, return 1 if no
+# @stderr diagnostics information is displayed
+# @require Docker::requireDockerCommand
+# @see https://docs.docker.com/engine/reference/commandline/build/#specifying-external-cache-sources
 Docker::buildImage() {
   local buildDirectory="$1"
   shift || true

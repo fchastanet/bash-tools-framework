@@ -24,4 +24,3 @@ Log::logSkipped
 Log::logSuccess
 Log::logWarning
 Log::rotate
-namespace::functions

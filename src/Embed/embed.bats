@@ -47,7 +47,7 @@ function Embed::embed::function { #@test
 
 function Embed::embed::errorSrc { #@test
   run Embed::embed "myFunction" "asName" 2>&1
-  assert_failure 1
+  assert_failure 2
   assert_output --partial "ERROR   - invalid embedded resource myFunction"
 }
 

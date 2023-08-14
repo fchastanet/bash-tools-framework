@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-# allow to embed selected directory providing the given dirAlias
+# @description allow to embed selected directory providing the given dirAlias
 # @arg $1 dir:string
 # @arg $2 dirAlias:string
+# @stdout the generated bin file extractor
+#   this bin file extractor actually calls a function that will
+#   extract the real binFile(base64 encoded)
 # @env _COMPILE_ROOT_DIR
 # @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
+# @require Linux::requireTarCommand
+# @see Embed::embed
 Embed::embedDir() {
   local dir="$1"
   local dirAlias="$2"

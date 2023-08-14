@@ -5,12 +5,10 @@
 # @arg $1 dir:String the directory to list
 # @arg $2 prefix:String the profile file prefix (default: "")
 # @arg $3 ext:String the extension
-# @arg $4 findOptions:String find options, eg: -type d
-# Default value: '-type f'
-# @arg $5 indentStr:String the indentation can be any string compatible with sed not containing any /
-# Default value: '       - '
+# @arg $4 findOptions:String find options, eg: -type d (Default value: '-type f')
+# @arg $5 indentStr:String the indentation can be any string compatible with sed not containing any / (Default value: '       - ')
 # @stdout list of files without extension/directory
-# eg:
+# @example text
 #       - default.local
 #       - default.remote
 #       - localhost-root

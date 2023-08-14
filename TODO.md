@@ -52,6 +52,8 @@
 ## 3. Framework functions changes
 
 - log use alias
+- logMessage do nothing if Log::load has been called, no need to check logLevel
+  if Log::load do correctly its job
 - check if we could use alias to override methods to be able to reload or pass
   by temp functions?
 - replace \_colors.sh with Log/theme
@@ -81,7 +83,17 @@ TODOs linked to bin/compiler:
   - display info should display relative path too instead of full path
   - update CompileCommand.md examples
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
+  - Profiles::lintDefinitions can be changed to provide a dynamic list of method
+    names
   - define a sh format able to describe an interface
+    - installScripts_Install1_helpDescription should be named
+      installScripts_Install1.helpDescription
+      - installScripts_Install1 is the object, on which we call helpDescription
+        method
+    - or could we use file for implementing an object
+      - then call function of the class with this instance
+        - installScripts_helpDescription $instanceFile
+          - source the file and display help
   - would it be possible to implement inheritance ?
 - compile should use FRAMEWORK_SRC_DIRS from .framework-config
 - use Filters::optimizeShFile
@@ -121,10 +133,6 @@ TODOs linked to bin/compiler:
 
 ### 5.2. FrameworkLint
 
-- shdoc
-  - check that shdoc valid annotations are used
-  - check that @require function exists and matches naming convention
-  - check that at least @description is provided
 - check no use of ${TMPDIR} without default value
 - check if 2 files have the same BINARY_FILE target
 - refact `src/_binaries/frameworkLint.sh` formatter for plain or checkstyle
@@ -223,7 +231,7 @@ TODOs linked to `src/_binaries/*`:
 
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the use
-- Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
+- Linux::Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
   - but no way to know if variable exists except by using `wslvar -S` or
     `wslvar -L`
 

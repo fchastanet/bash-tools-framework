@@ -4,7 +4,7 @@
 #
 # @arg $1 instanceDropTable:&Map<String,String> (passed by reference) database instance to use
 # @arg $2 dbName:String database name on which the table will be dropped
-# @arg $2 tableName:String table name to drop
+# @arg $3 tableName:String table name to drop
 #
 # @exitcode 0 if success
 # @exitcode 1 if query fails

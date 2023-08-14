@@ -2,7 +2,7 @@
 
 - [1. Why ?](#1-why-)
 - [2. Compile tool](#2-compile-tool)
-- [3. compile command help](#3--compile-command-help)
+- [3. compile command help](#3-compile-command-help)
   - [3.1. .framework-config environment variables](#31-framework-config-environment-variables)
   - [3.2. Template variables](#32-template-variables)
   - [3.3. Bash-tpl templating](#33-bash-tpl-templating)
@@ -12,8 +12,9 @@
     - [3.4.3. dynamicSrcDir](#343-dynamicsrcdir)
   - [3.5. directives and template](#35-directives-and-template)
     - [3.5.1. `# FUNCTIONS` directive](#351--functions-directive)
-    - [3.5.2. `VAR_*` directive (optional)](#352-var_-directive-optional)
-    - [3.5.3. `BIN_FILE` directive (optional)](#353-bin_file-directive-optional)
+    - [3.5.2. bash framework functions](#352-bash-framework-functions)
+    - [3.5.3. `VAR_*` directive (optional)](#353-var_-directive-optional)
+    - [3.5.4. `BIN_FILE` directive (optional)](#354-bin_file-directive-optional)
   - [3.6. REQUIRE directive (optional)](#36-require-directive-optional)
     - [3.6.1. What is a requirement ?](#361-what-is-a-requirement-)
     - [3.6.2. REQUIRE directive syntax](#362-require-directive-syntax)
@@ -70,10 +71,12 @@ You can see several examples of compiled files by checking
 
 - `src/_binaries/frameworkLint.sh` generates the file `bin/frameworkLint`
 
-<!-- markdownlint-capture -->
-<!-- markdownlint-disable MD033 -->
+## 3. compile command help
 
-## 3. <a name="compileCommandHelp"></a> compile command help
+<!-- markdownlint-disable MD033 -->
+<!-- markdownlint-capture -->
+
+<a name="compileCommandHelp"></a>
 
 <!-- markdownlint-restore -->
 
@@ -308,7 +311,35 @@ script file (see example above).
 It is the most important directive as it will inform the compiler where
 dependent framework functions will be injected in your resulting bash file.
 
-#### 3.5.2. `VAR_*` directive (optional)
+#### 3.5.2. bash framework functions
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+<a name="bash_framework_functions_naming_convention"></a>
+
+<!-- markdownlint-restore -->
+
+The so called `bash framework functions` are the functions defined in this
+framework that respects the following naming convention:
+
+- namespace::namespace::functionName
+  - we can have any number of namespaces
+  - each namespace is followed by ::
+  - namespace must begin by an uppercase letter [A-Z] followed by any of these
+    characters [A-Za-z0-9_-].
+  - the function name is traditionally written using camelCase with first letter
+    in small case
+  - function name authorized characters are [a-zA-Z0-9_-]+
+- the function source code using namespace convention will be searched under
+  srcDirs provided to the compiler via --src-dir argument or via
+  .framework-config file
+  - each namespace corresponds to a folder
+  - the filename of the function is the function name with .sh extension
+  - eg: Filters::camel2snakeCase source code can be found in
+    src/Filters/camel2snakeCase.sh
+
+#### 3.5.3. `VAR_*` directive (optional)
 
 it is a directive variable used during compilation time (not during execution),
 it can be used to generate binary files based on generic template files.
@@ -333,7 +364,7 @@ The variable SCRIPT can then be used in the template using
 SCRIPT="<% ${SCRIPT} %>"
 ```
 
-#### 3.5.3. `BIN_FILE` directive (optional)
+#### 3.5.4. `BIN_FILE` directive (optional)
 
 Allows to indicate where the resulting bin file will be generated. If not
 provided, the binary file will be copied to `binDir` without sh extension
@@ -365,7 +396,7 @@ Here a non exhaustive list of possible requirements:
   - if a function use this directive, the binary will check at the start that
     the command bash exists with this minimal version 4.0 in which this feature
     appears
-- REQUIRE Apt::requiresUbuntu
+- REQUIRE Linux::Apt::requiresUbuntu
 
 #### 3.6.2. REQUIRE directive syntax
 
@@ -511,10 +542,12 @@ export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 
 ## 4. Compiler algorithms
 
+### 4.1. Compiler - Compiler::Requirement::require
+
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-### 4.1. <a name="requirement_require" id="requirement_require"></a>Compiler - Compiler::Requirement::require
+<a name="requirement_require" id="requirement_require"></a>
 
 <!-- markdownlint-restore -->
 
@@ -620,10 +653,12 @@ requirements using `.INCLUDE`directive.
 the order of the requirements is computed automatically by the compiler but in
 some cases, you could need to override this order.
 
+### 4.2. Compiler - Embed::embed
+
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-### 4.2. <a name="embed_include" id="embed_include"></a>Compiler - Embed::embed
+<a name="embed_include" id="embed_include"></a>
 
 <!-- markdownlint-restore -->
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 # @description Allows to generate a bin file that will call the mentioned
-# bash framework function(md5 encoded) wrapped in an extractor function
+# bash framework function(base64 encoded) wrapped in an extractor function
 # **Note:**
 #   You cannot call this function directly
-#   it should be called using '# EMBED ... AS ...' directive
+#   it should be called using the following directive '# EMBED ... AS ...' directive
 #
 # @arg $1 functionToCall:string
 # @arg $2 functionAlias:string
 # @stdout the generated bin file extractor
 #   this bin file extractor actually calls a function that will
-#   extract the real binFile(md5 encoded) that
+#   extract the real binFile(base64 encoded)
 # @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments
 # declare -a _EMBED_COMPILE_ARGUMENTS=(
 #      # templateDir : directory from which bash-tpl templates will be searched
@@ -24,6 +24,7 @@
 # )
 # @env _COMPILE_ROOT_DIR
 # @env PERSISTENT_TMPDIR to avoid directory to be deleted by traps
+# @see Embed::embed
 Embed::embedFrameworkFunction() {
   local functionToCall="$1"
   local functionAlias="$2"
@@ -53,10 +54,10 @@ Embed::embedFrameworkFunction() {
     # to run in parallel
     binFileMd5Sum="$(md5sum "${binSrcFile}" | awk '{print $1}')"
 
-    # encode bin file as md5
+    # encode bin file as base64
     # using PERSISTENT_TMPDIR to avoid directory to be deleted by traps
     (
-      binFileMd5="$(base64 -w 0 "${binSrcFile}")" \
+      binFileBase64="$(base64 -w 0 "${binSrcFile}")" \
       targetFile="\${PERSISTENT_TMPDIR:-/tmp}/bin/${binFileMd5Sum}/${functionAlias}" \
       asName="${functionAlias^}" \
         "${_COMPILE_ROOT_DIR}/bin/compile" \

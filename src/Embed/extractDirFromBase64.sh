@@ -5,6 +5,8 @@
 #
 # @arg $1 targetDir:string the directory in which tar archive will be untarred
 # @arg $2 base64:string the base64 encoded tar czf archive
+# @stderr diagnostics information is displayed
+# @require Linux::requireTarCommand
 Embed::extractDirFromBase64() {
   local targetDir="$1"
   local base64="$2"

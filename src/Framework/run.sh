@@ -10,11 +10,14 @@ declare -gx bash_framework_output
 # - bash_framework_duration
 # - bash_framework_output
 # redirecting error output to stdout is not supported, you can instead redirect stderr to a file if needed
+#
+# @arg $@ command:String[] command with arguments to execute
+#
 # @set bash_framework_status the exit status of the command
 # @set bash_framework_duration the duration of the command
 # @set bash_framework_output the output of the command
 #
-# @arg $@ command:String[] command with arguments to execute
+# @see Command::captureOutputAndExitCode as an alternative
 Framework::run() {
   # 'bash_framework_status', 'bash_framework_duration' are global variables
   local -i start end

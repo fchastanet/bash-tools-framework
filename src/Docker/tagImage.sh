@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Image built is tagged with tags provided
+# @description Image built is tagged with tags provided
 # best practice: provide tags 'tagPrefix_shortSha' 'tagPrefix_branchName'
 # so image will be tagged with
 # - tagPrefix_shortSha
@@ -9,6 +9,7 @@
 # @arg $2 localTag:String the docker image local tag that needs to be remotely tagged (eg: bash-tools:latest)
 # @arg $@ tags:String[] list of tags used to push image to docker registry
 # @exitcode 1 if tags list is empty
+# @require Docker::requireDockerCommand
 Docker::tagImage() {
   local registryImageUrl="$1"
   shift || true

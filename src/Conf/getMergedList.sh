@@ -8,7 +8,7 @@
 # @arg $3 indentStr:String the indentation ('       - ' by default) can be any string compatible with sed not containing any /
 #
 # @stdout list of files without extension/directory
-# @example
+# @example text
 #       - default.local
 #       - default.remote
 #       - localhost-root

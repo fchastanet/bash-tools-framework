@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # @description mysql query on a given db
+# @warning could use QUERY_OPTIONS variable from dsn if defined
 # @example
 #   cat file.sql | Database::query ...
 # @arg $1 instanceQuery:&Map<String,String> (passed by reference) database instance to use
@@ -25,11 +26,9 @@ Database::query() {
     mysqlCommand+=("$3")
   fi
   # add optional sql query
-  if [[ -n "${2+x}" && -n "$2" ]]; then
-    if [[ ! -f "$2" ]]; then
-      mysqlCommand+=("-e")
-      mysqlCommand+=("$2")
-    fi
+  if [[ -n "${2+x}" && -n "$2" && ! -f "$2" ]]; then
+    mysqlCommand+=("-e")
+    mysqlCommand+=("$2")
   fi
   Log::displayDebug "$(printf "execute command: '%s'" "${mysqlCommand[*]}")"
 

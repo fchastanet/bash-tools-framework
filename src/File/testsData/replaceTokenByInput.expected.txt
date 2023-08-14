@@ -1,0 +1,3 @@
+stuff before
+replaceTokenByInput injected
+stuff after

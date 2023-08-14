@@ -12,7 +12,7 @@
 # @exitcode 2 on backup failure
 #
 # @stderr message about where the directory is backed up
-# @require Linux::requireTar
+# @require Linux::requireTarCommand
 Backup::dir() {
   local escapedDirname backupFile
   local fromDir="$1"

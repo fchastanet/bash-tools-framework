@@ -5,7 +5,7 @@
 # @arg $1 email:String the full email address
 # @arg $@ expectedDomains:String[] the expected email address domains (no check if empty)
 # @exitcode 1 if email invalid
-# @exitcode 2 if email domain doesn't match the expected domains passed in arguements
+# @exitcode 2 if email domain doesn't match the expected domains passed in arguments
 # @see Assert::emailAddress
 Assert::emailAddressWithDomain() {
   local email="$1"

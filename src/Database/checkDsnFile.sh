@@ -4,7 +4,10 @@
 # Mandatory variables are: HOSTNAME, USER, PASSWORD, PORT
 #
 # @arg $1 dsnFileName:String dsn absolute filename
-#
+# @set HOSTNAME loaded from dsn file
+# @set PORT loaded from dsn file
+# @set USER loaded from dsn file
+# @set PASSWORD loaded from dsn file
 # @exitcode 0 on valid file
 # @exitcode 1 if one of the properties of the conf file is invalid or if file not found
 # @stderr log output if error found in conf file

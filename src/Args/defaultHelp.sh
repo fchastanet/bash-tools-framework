@@ -6,7 +6,7 @@
 # @option -h short help option
 # @option --help long help option
 # @exitcode 0 displays help and exit with code 0 if -h or --help option is in the args list
-# @output displays help if -h or --help option is in the args list
+# @stdout displays help if -h or --help option is in the args list
 Args::defaultHelp() {
   local helpArg=$1
   shift || true

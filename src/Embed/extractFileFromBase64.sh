@@ -6,9 +6,10 @@
 # it is advised to include in the path of the target file
 # the md5sum of the binFile
 #
-# @arg $1 targetFile:string the file to write
-# @arg $2 binFileBase64:string the base64 encoded file
-# @arg $3 fileMode:string the chmod to set on the file
+# @arg $1 targetFile:String the file to write
+# @arg $2 binFileBase64:String the base64 encoded file
+# @arg $3 fileMode:String the chmod to set on the file
+# @set PATH String prepend target embedded file binary directory to PATH variable if binary executable
 Embed::extractFileFromBase64() {
   local targetFile="$1"
   local binFileBase64="$2"

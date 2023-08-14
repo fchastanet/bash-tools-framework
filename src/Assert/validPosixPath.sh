@@ -5,8 +5,8 @@
 # @warning posix path is really restrictive, if you need less restrictive check you can use Assert::validPath
 # @arg $1 path:string path that needs to be checked
 # @exitcode 1 if path is invalid
-# @require Linux::requiresPathchk
-# @require Linux::requiresRealpath
+# @require Linux::requirePathchkCommand
+# @require Linux::requireRealpathCommand
 Assert::validPosixPath() {
   local path="$1"
 

@@ -217,6 +217,50 @@ Assert::bashFile() {
   [[ "${head}" =~ ^#\!.*bash ]]
 }
 
+# @description assert that first arg respects this bash framework naming convention
+# @arg $1 bashFrameworkFunction:String the function's name to assert
+# @exitcode 1 if bashFrameworkFunction arg doesn't respect this bash framework naming convention
+Assert::bashFrameworkFunction() {
+  local bashFrameworkFunction="$1"
+  local expectedRegexp="^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)\$"
+
+  [[ "${bashFrameworkFunction}" =~ ${expectedRegexp} ]]
+}
+
+# @description convert function name to path replacing :: by /
+# @internal
+convertFunctionNameToPath() {
+  local functionName="$1"
+  echo "$(sed -E 's#::#/#g' <<<"${functionName}").sh"
+}
+
+# @description return the path of the function found in srcDirs
+# @arg $1 functionName:String function name (eg: Functions::myFunction)
+# @arg $@ srcDirs:String[] rest of args list of src directories in # which the function will be searched
+# @exitcode 1 if function not found
+# @exitcode 0 if found
+# @stdout the filepath of the function if found
+Compiler::findFunctionInSrcDirs() {
+  local functionName="$1"
+  shift || true
+  local -a srcDirs=("$@")
+  local fileNameToImport
+
+  fileNameToImport="$(convertFunctionNameToPath "${functionName}")"
+
+  # search through srcDirs the file to import
+  for srcDir in "${srcDirs[@]}"; do
+    fileToImport="${srcDir}/${fileNameToImport}"
+    if [[ -f "${fileToImport}" ]]; then
+      # we found it
+      echo "${fileToImport}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 # lazy initialization
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
@@ -340,6 +384,12 @@ declare missingBashFileList
 missingBashFileList=""
 export missingBashFileList
 
+# @description check if file provided is a bash file
+# @arg $1 file:String
+# @arg $@ args:String[]
+# @set missingBashFileList String temp filepath that contains eventual missing files
+# @stdout filepath if Assert::bashFile succeed
+# @see Assert::bashFile
 File::detectBashFile() {
   local file="$1"
 
@@ -357,8 +407,8 @@ File::detectBashFile() {
 
 # @description print the resolved path relative to DIR
 # do not check for path existence
-# @arg $1 srcFile:string the file to resolve
-# @arg $2 relativeTo:string the directory
+# @arg $1 srcFile:String the file to resolve
+# @arg $2 relativeTo:String the directory
 # @stdout the resolved path relative to DIR
 File::relativeToDir() {
   local srcFile="$1"
@@ -367,24 +417,46 @@ File::relativeToDir() {
   realpath -m --relative-to="${relativeTo}" "${srcFile}"
 }
 
+# @description allows to match a bash framework function based on the naming convention
+# @warning this filter could extract bash framework functions that are actually commented in the source file
+# @warning use FRAMEWORK_FUNCTIONS_IGNORE_REGEXP from .framework-config to filter unwanted functions
+# @arg $@ files:String[] the files in which bash framework functions will be extracted
+# @env PREFIX String an eventual prefix you would like to match
+# @env FRAMEWORK_FUNCTIONS_IGNORE_REGEXP String this filter does not use this variable
+# @exitcode 0 if match or no match
+# @exitcode 2 if grep fails for other reasons
+# @stdin you can alternatively provide content to filter via stdin
+# @stdout the list of bash framework function detected
+# @see [bash framework functions naming convention](/CompileCommand.md#bash_framework_functions_naming_convention)
 # shellcheck disable=SC2120
 Filters::bashFrameworkFunctions() {
-  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
+  grep -Eo "${PREFIX:-}([A-Z]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
 }
 
+# @description remove comment lines from input or files provided as arguments
+# @arg $@ files:String[] (optional) the files to filter
+# @env commentLinePrefix String the comment line prefix (default value: #)
+# @exitcode 0 if lines filtered or not
+# @exitcode 2 if grep fails for any other reasons than not found
+# @stdin the file as stdin to filter (alternative to files argument)
+# @stdout the filtered lines
 # shellcheck disable=SC2120
 Filters::commentLines() {
   grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
 }
 
-# @arg $@ string[] the src directories in which .framework-config file will be searched
+# @description load .framework-config
+# @arg $1 loadedConfigFile:&String (passed by reference) the finally loaded configuration file path
+# @arg $@ srcDirs:String[] the src directories in which .framework-config file will be searched
 # @stdout the config file path loaded if any
 # @exitcode 0 if .framework-config file has been found in srcDirs provided
+# @exitcode 1 if .framework-config file not found
+# @see Conf::loadNearestFile
 Framework::loadConfig() {
   # shellcheck disable=SC2034
-  local -n loadedConfigFile=$1
+  local -n loadConfig_loadedConfigFile=$1
   shift || true
-  Conf::loadNearestFile ".framework-config" loadedConfigFile "$@"
+  Conf::loadNearestFile ".framework-config" loadConfig_loadedConfigFile "$@"
 }
 
 # @description Log namespace provides 2 kind of functions
@@ -468,6 +540,18 @@ Log::fatal() {
 
 # shellcheck disable=SC2317
 
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
 Log::load() {
   # disable display methods following display level
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
@@ -525,18 +609,20 @@ Log::load() {
   fi
 }
 
-# Load the nearest config file
-# eg: Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
-# will search first .framework-config file in "srcDir1"
+# @description Load the nearest config file
+# in next example will search first .framework-config file in "srcDir1"
 # then if not found will go in up directories until /
 # then will search in "srcDir2"
 # then if not found will go in up directories until /
 # source the file if found
-# @arg $1 String config file name to search
-# @arg $2 String passed by reference, will return the loaded config file name
-# @arg $@ String source directories in which the config file will be searched
-# @exitcode 0 if file found, 1 if file not found
-# @stdout the filepath loaded if any
+# @example
+#   Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
+#
+# @arg $1 configFileName:String config file name to search
+# @arg $2 loadedFile:String (passed by reference) will return the loaded config file name
+# @arg $@ srcDirs:String[] source directories in which the config file will be searched
+# @exitcode 0 if file found
+# @exitcode 1 if file not found
 Conf::loadNearestFile() {
   local configFileName="$1"
   local -n loadedFile="$2"
@@ -655,7 +741,7 @@ Log::rotate() {
 # @arg $2 fileName:String
 # @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
 # @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
-# @output The filename if found
+# @stdout The filename if found
 # @exitcode 1 if the command failed or file not found
 File::upFind() {
   local fromPath="$1"
@@ -681,16 +767,19 @@ File::upFind() {
   return 1
 }
 
-# Internal: common log message
-#
-# @arg $1 levelMsg:String message's level description
-# @arg $2 msg:String the message to display
-# @output text
+# @description Internal: common log message
+# @example text
 #   [date]|[levelMsg]|message
 #
-# @example
+# @example text
 #   2020-01-19 19:20:21|ERROR  |log error
 #   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -785,6 +874,10 @@ Lint files of the current repository
 - check if all namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check each function has a bats file associated
+- shdoc
+  - check that shdoc valid annotations are used
+  - check that @require function matches naming convention and exists
+  - check that at least @description is provided
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
@@ -930,12 +1023,8 @@ checkEachSrcFileHasBatsFile() {
   fi
   local batsFile="${file%.*}.bats"
   if [[ ! -f "${FRAMEWORK_ROOT_DIR}/${batsFile}" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "checkEachSrcFileHasBatsFile - File '${file}' - missing bats file '${batsFile}'"
-    else
-      echo "<error severity='warning' source='checkEachSrcFileHasBatsFile' message='missing bats file '${batsFile}'/>"
-    fi
-    ((++warningCount))
+    reportWarning "checkEachSrcFileHasBatsFile" "${file}" \
+      "missing bats file '${batsFile}'"
   fi
 }
 
@@ -967,14 +1056,103 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   done < <(sed -E -n 's#^([^([:blank:]]+)\(\)[[:blank:]]*\{#\1#p' "${srcFile}")
 
   if [[ "${foundFunctionMatching}" = "0" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - no function named '${expectedFunctionName}'"
-    else
-      echo "<error severity='warning' source='srcFileHasOneFunctionCorrectlyNamed' message='Should contain a function named ${expectedFunctionName}'/>"
-    fi
-    ((++warningCount))
+    reportWarning "srcFileHasOneFunctionCorrectlyNamed" "${srcFile}" \
+      "Should contain a function named '${expectedFunctionName}'"
     return 0
   fi
+}
+
+checkEachSrcFileHasCorrectShdoc() {
+  local srcFile="$1"
+  if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+  if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+
+  # @see https://regex101.com/r/H2Yrwp/1
+  function filterAnnotationNames() {
+    sed -n -E 's/^# @(([^ ]|$)+)[ ]*.*$/\1/p' "$@"
+  }
+
+  # @see https://regex101.com/r/5oMFQi/1
+  # shellcheck disable=SC2120
+  function filterInvalidAnnotationNames() {
+    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal)$' "$@"
+  }
+
+  function checkValidAnnotationsAreUsed() {
+    local srcFile="$1"
+    local invalidAnnotation
+
+    while IFS='' read -r invalidAnnotation; do
+      reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+        "shdoc annotation '@${invalidAnnotation}' is invalid"
+    done < <(filterAnnotationNames "${srcFile}" | filterInvalidAnnotationNames)
+  }
+
+  # check that @require function exists and matches naming convention
+  function checkRequiredFunctionExists() {
+    local srcFile="$1"
+    local requireAnnotation
+
+    while IFS='' read -r requireAnnotation; do
+      if ! Assert::bashFrameworkFunction "${requireAnnotation}"; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target a valid bash framework function"
+        continue
+      fi
+      if [[ ! "${requireAnnotation}" =~ ^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+require([A-Z][a-zA-Z0-9_-]+)$ ]]; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention namespace::requireSomething"
+        continue
+      fi
+      if ! Compiler::findFunctionInSrcDirs "${requireAnnotation}" "${FRAMEWORK_SRC_DIRS[@]}" >/dev/null; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target an existing bash framework function"
+      fi
+    done < <(sed -n -E 's/^# @require (.*)$/\1/p' "${srcFile}")
+  }
+
+  function checkDescriptionAnnotationIsProvided() {
+    local srcFile="$1"
+    if ! grep -q -E '^# @description .*' "${srcFile}"; then
+      reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+        "missing mandatory sh doc @description annotation"
+    fi
+  }
+
+  checkValidAnnotationsAreUsed "${srcFile}"
+  checkRequiredFunctionExists "${srcFile}"
+  checkDescriptionAnnotationIsProvided "${srcFile}"
+
+}
+
+reportError() {
+  local category="$1"
+  local file="$2"
+  local msg="$3"
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayError "${category} - File ${file} - ${msg}"
+  else
+    echo "<error severity='error' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
+  fi
+  ((++errorCount))
+}
+
+reportWarning() {
+  local category="$1"
+  local file="$2"
+  local msg="$3"
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayWarning "${category} - File ${file} - ${msg}"
+  else
+    echo "<error severity='warning' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
+  fi
+  ((++warningCount))
 }
 
 ((errorCount = 0)) || true
@@ -995,6 +1173,7 @@ while IFS='' read -r file; do
   checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasCorrectShdoc "${file}" "$@" || ((++errorCount))
 
   if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
@@ -1007,14 +1186,14 @@ done < <(
 
 # shellcheck disable=SC2154
 while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayWarning "fileExistence - File ${file} does not exist, git renamed file ?"
-  else
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "<file name='${file}'>"
-    echo "<error severity='warning' source='fileExistence' message='file does not exist, git renamed file ?'/>"
+  fi
+  reportWarning "fileExistence" "${file}" \
+    "File ${file} does not exist, git renamed file ?"
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
   fi
-  ((++warningCount))
 done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 
 if [[ "${FORMAT}" = "checkstyle" ]]; then

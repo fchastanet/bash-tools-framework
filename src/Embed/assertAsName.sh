@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-# check if param is valid asName
+# @description check if param is valid asName
 # @arg $1 asName:String the as name of the embedded data
 # @exitcode 1 on invalid name
+# @stderr diagnostics information is displayed
 Embed::assertAsName() {
   local asName="$1"
   if [[ ! "${asName}" =~ ^[A-Za-z0-9_]+$ ]]; then

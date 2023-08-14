@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# @description Backup given file in the same directory appending _ followined by the current date
+# @description Backup given file in the same directory appending _ followed by the current date
 # @arg $1 file:String the file to backup
 # @stderr messages about backup file location
 # @exitcode 1 on copy failure

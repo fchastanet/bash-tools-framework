@@ -39,7 +39,7 @@ Dns::checkHostname() {
     fi
 
     Log::displayInfo "check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
-    if ! Command::captureOutputAndExitCode "${ipconfigCmd[*]} | grep ${ip} | cat" "${message}"; then
+    if ! Command::captureOutputAndExitCode "${ipconfigCmd[*]} | grep ${ip} | cat"; then
       return 3
     fi
     if [[ -z "${COMMAND_OUTPUT}" ]]; then

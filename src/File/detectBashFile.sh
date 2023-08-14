@@ -7,6 +7,12 @@ declare missingBashFileList
 missingBashFileList=""
 export missingBashFileList
 
+# @description check if file provided is a bash file
+# @arg $1 file:String
+# @arg $@ args:String[]
+# @set missingBashFileList String temp filepath that contains eventual missing files
+# @stdout filepath if Assert::bashFile succeed
+# @see Assert::bashFile
 File::detectBashFile() {
   local file="$1"
 

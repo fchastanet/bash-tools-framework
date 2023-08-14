@@ -3,7 +3,7 @@
 # @description ability to call a command capturing output and exit code
 # but displaying it also to error output to follow command's progress
 # command output is sent to COMMAND_OUTPUT and stderr as well in realtime using tee
-# @arg * command:String[] the command to execute
+# @arg $@ command:String[] the command to execute
 # @set COMMAND_OUTPUT String stdout of the command is returned in global variable COMMAND_OUTPUT
 # @stderr command output
 # @exitcode * exit code of the command

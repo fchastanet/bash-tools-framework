@@ -380,6 +380,18 @@ Log::fatal() {
 
 # shellcheck disable=SC2317
 
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
 Log::load() {
   # disable display methods following display level
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
@@ -713,16 +725,19 @@ ShellDoc::generateShellDocDir() {
   )
 }
 
-# Internal: common log message
-#
-# @arg $1 levelMsg:String message's level description
-# @arg $2 msg:String the message to display
-# @output text
+# @description Internal: common log message
+# @example text
 #   [date]|[levelMsg]|message
 #
-# @example
+# @example text
 #   2020-01-19 19:20:21|ERROR  |log error
 #   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -762,6 +777,15 @@ ShellDoc::generateShellDoc() {
 BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.shDocInstalled"
 BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 
+# @description install requirements to execute shdoc
+# @warning cloning is skipped if vendor/.shDocInstalled file exists
+# @warning a new check is done everyday
+# @warning repository is not updated if a change is detected
+# @env BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
+# @set BASH_FRAMEWORK_SHDOC_INSTALLED String the file created when git clone succeeded
+# @see https://github.com/fchastanet/shdoc
+# @stderr diagnostics information is displayed
+# @feature Git::cloneOrPullIfNoChanges
 ShellDoc::installRequirementsIfNeeded() {
   if [[ "$(
     Cache::getFileContentIfNotExpired \
@@ -835,7 +859,7 @@ Git::cloneOrPullIfNoChanges() {
   fi
 }
 
-# @description Number of seconds since last modification of the file
+# @description get number of seconds since last modification of the file
 # @arg $1 file:String file path
 # @exitcode 1 if file does not exist
 # @stdout number of seconds since last modification of the file
@@ -850,24 +874,30 @@ File::elapsedTimeSinceLastModification() {
   echo -n "${diff}"
 }
 
-# pull the repository if no change in it
-# @exitcode 0 on successful pulling, 1 on failure or no pull needed
+# @description pull git directory only if no change has been detected
+# @arg $1 dir:String the git directory to pull
+# @exitcode 0 on successful pulling
+# @exitcode 1 on any other failure
+# @exitcode 2 changes detected, pull avoided
+# @exitcode 3 not a git directory
+# @exitcode 4 not able to update index
+# @stderr diagnostics information is displayed
+# @require Git::requireGitCommand
 Git::pullIfNoChanges() {
   local dir="$1"
-  if [[ -d "${dir}/.git" ]]; then
-    (
-      cd "${dir}"
-      git update-index --refresh &>/dev/null || true
-      if git diff-index --quiet HEAD --; then
-        Log::displayInfo "Pull git repository '${dir}' as no changes detected"
-        git pull --progress
-        return 0
-      else
-        Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
-      fi
-    ) && return 0
+  if [[ ! -d "${dir}/.git" ]]; then
+    return 3
   fi
-  return 1
+  (
+    cd "${dir}" || exit 3
+    git update-index --refresh &>/dev/null || exit 4
+    if ! git diff-index --quiet HEAD --; then
+      Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
+      exit 2
+    fi
+    Log::displayInfo "Pull git repository '${dir}' as no changes detected"
+    git pull --progress
+  )
 }
 
 # FUNCTIONS

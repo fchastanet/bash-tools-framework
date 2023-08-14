@@ -7,7 +7,7 @@
 # @arg $4 delayBetweenTries:int delay between attempt in seconds (default value: 5 seconds)
 # @stderr progression status using title argument
 # @feature Retry::parameterized
-# @require Assert::requiresCurl
+# @require Linux::requireCurlCommand
 Assert::curlPingWithRetry() {
   local url="$1"
   local title="${2:-"Try to contact ${url} ..."}"

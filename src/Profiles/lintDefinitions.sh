@@ -55,7 +55,13 @@ ProfilesLintDefinitionsFooter_checkstyle() {
   echo "</checkstyle>"
 }
 
-# linter
+# @description  linter that allows to check if a list of
+# methods is defined in each sh file of given scriptsDir
+# @arg $1 scriptsDir:String the directory to check
+# @arg $2 format:String can be plain or checkstyle
+# @arg $@ args:String[]
+# @exitcode 1 if errorCount > 0
+# @stderr diagnostics information is displayed
 Profiles::lintDefinitions() {
   local scriptsDir="$1"
   local format="$2"
@@ -84,7 +90,7 @@ Profiles::lintDefinitions() {
 
   "ProfilesLintDefinitionsFooter_${format}" "${errorCount}"
 
-  return "${errorCount}"
+  ((errorCount == 0))
 }
 
 ProfilesListDefinitionsFiles() {

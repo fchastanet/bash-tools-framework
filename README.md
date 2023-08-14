@@ -111,10 +111,10 @@ Here an excerpt of the namespaces available in Bash tools framework:
 
 - Apt : several functions to abstract the use of ubuntu apt-get function. these
   functions ar using some default arguments and manage retry automatically.
-  - Apt::addRepository
-  - Apt::install
-  - Apt::remove
-  - Apt::update
+  - Linux::Apt::addRepository
+  - Linux::Apt::install
+  - Linux::Apt::remove
+  - Linux::Apt::update
 - Args : functions to ease some recurrent arguments like -h|--help to display
   help
 - Array : functions to ease manipulation of bash arrays like Array::clone or
