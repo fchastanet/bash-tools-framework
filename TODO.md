@@ -78,8 +78,10 @@ TODOs linked to bin/compiler:
 
 - new IMPLEMENT directive
   - [detect that file is being sourced](https://stackoverflow.com/a/47613477)
-  - implement main security in tpl, the binary script has just to implement a main function
-  -
+  - implement main security in tpl, the binary script has just to implement a
+    main function
+- IMPLEMENT directive
+- add main function
 - arg configuration: display whole bash framework configuration
 - deduce FRAMEWORK_ROOT_DIR based on most near .framework-config file ?
 - .framework-config should contain the compiler options

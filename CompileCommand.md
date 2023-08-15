@@ -23,9 +23,11 @@
       - [3.6.2.3. Best practice #2: support method](#3623-best-practice-2-support-method)
     - [3.6.3. Requirement overloading](#363-requirement-overloading)
     - [3.6.4. Requirement disable](#364-requirement-disable)
-  - [3.7. `IMPLEMENT` directive (optional)](#37-implement-directive-optional)
-    - [3.7.1. Overview](#371-overview)
-    - [Generated script](#generated-script)
+  - [3.7. `IMPLEMENT` and `FACADE` directives (optional)](#37-implement-and-facade-directives-optional)
+    - [3.7.1. `IMPLEMENT` directive (optional)](#371-implement-directive-optional)
+    - [3.7.2. `FACADE` directive (optional)](#372-facade-directive-optional)
+      - [3.7.2.1. Overview](#3721-overview)
+      - [3.7.2.2. Generated script](#3722-generated-script)
   - [3.8. `EMBED` directive (optional)](#38-embed-directive-optional)
   - [3.9. `.framework-config` framework configuration file](#39-framework-config-framework-configuration-file)
 - [4. Compiler algorithms](#4-compiler-algorithms)
@@ -33,7 +35,9 @@
     - [4.1.1. Requires dependencies](#411-requires-dependencies)
     - [4.1.2. disable compiler requirement management](#412-disable-compiler-requirement-management)
     - [4.1.3. override requirements dependency order](#413-override-requirements-dependency-order)
-  - [4.2. Compiler - Compiler::Embed::embed](#42-compiler---compilerembedembed)
+  - [4.2. Compiler - Compiler::Implement::interface](#42-compiler---compilerimplementinterface)
+  - [4.2. Compiler - Compiler::Facade::generate](#42-compiler---compilerfacadegenerate)
+  - [4.3. Compiler - Compiler::Embed::embed](#43-compiler---compilerembedembed)
 - [5. FrameworkLint](#5-frameworklint)
 - [6. Best practices](#6-best-practices)
 - [7. Acknowledgements](#7-acknowledgements)
@@ -472,9 +476,9 @@ Because sometimes we could expect that some command are not available and our
 script being able to run by providing an alternative. _Eg.:_ If gawk command is
 not available then use alternate function that uses sed command.
 
-\_\_Eg.: with the previous example of Git::shallowClone, we want in our script
-to be able to use this function without the git requirement. Then we can write
-this in our script headers:
+_Eg.:_ with the previous example of Git::shallowClone, we want in our script to
+be able to use this function without the git requirement. Then we can write this
+in our script headers:
 
 ```bash
 #!/usr/bin/env bash
@@ -492,14 +496,30 @@ fi
 # ...
 ```
 
-### 3.7. `IMPLEMENT` directive (optional)
+### 3.7. `IMPLEMENT` and `FACADE` directives (optional)
 
-#### 3.7.1. Overview
+Now let's talk about 2 others directives : `IMPLEMENT` and `FACADE`.
 
-Allows to generate a kind of binary script that respects a kind of
+`IMPLEMENT` directive instructs the compiler to check if a set of functions have
+been implemented (at least declared) in the bin file being generated.
+
+`FACADE` directive is linked with `IMPLEMENT` directive. It should be seen as
+the [design pattern facade](https://refactoring.guru/design-patterns/facade).
+Because it allows to instruct the compiler to generate a special bin file that
+will encapsulate all the content of script into one main function. Then
+functions declared by `IMPLEMENT` directive will be exposed when calling this
+main function by passing as argument $1 the name of the function to execute. So
+doing this binary will do the job of a facade which is to provide a simplified
+interface to a a complex set of functions.
+
+Let's see now in details each directive.
+
+#### 3.7.1. `IMPLEMENT` directive (optional)
+
+This directive allows to indicate to the compiler that the script should respect
+a kind of
 [interface like in object-oriented programming](https://tinyurl.com/3t7nkcz7).
-It means that the binary must implement a set of functions defined by the file
-passed in parameter to this directive.
+It means a set of functions that the script file has to implement.
 
 _Syntax:_ `# IMPLEMENT "interfaceFile"`
 
@@ -508,10 +528,6 @@ if `IMPLEMENT` directive is provided, the compiler will ensure that:
 - the interfaceFile exists
 - all the functions defined in the interfaceFile are declared in the
   implementation file (the one being compiled)
-- encapsulates the functions inside a global function (interface functions will
-  nested in this function).
-- generate a script, that will allow to call these nested functions (more
-  details later)
 
 Using multiple `IMPLEMENT` directives is supported but the following rules
 apply:
@@ -521,13 +537,12 @@ apply:
     different interfaces.
 - as a corollary using IMPLEMENT with twice the same file, will have no effect.
 
-We will see later on, how to do a kind of "abstract class" that can be seen more
-as prototyping.
-
 **Example:** we want to create a script that will help people to install linux
 softwares easily with dependency management.
 
-We declare a Help interface in the file `src/InstallScripts/HelpInterface.sh`:
+We declare a Help interface in the file `src/InstallScripts/HelpInterface.sh`
+which defines 2 functions that have to be implemented if a script uses the
+`IMPLEMENT` directive:
 
 ```bash
 #!/usr/bin/env bash
@@ -583,9 +598,9 @@ InstallScript::InstallInterface() {
 }
 ```
 
-Notice that function name is "scoped" to namespace "InstallScript". It is a
-best practice as it enforces the "class" aspect. Also it is mandatory in order
-to respect the naming convention of this framework.
+Notice that function name is "scoped" to namespace "InstallScript". It is a best
+practice as it enforces the "class" aspect. Also it is mandatory in order to
+respect the naming convention of this framework.
 
 Now we implement a script that respects these interfaces in the file
 `src/_binaries/InstallScripts/firstInstallScript.sh`:
@@ -607,14 +622,37 @@ dependencies() {
   echo "InstallScript2"
 }
 
-# truncated ...
-
 ```
 
-#### Generated script
+Here the compiler will throw an error because some of the functions declared
+have not been implemented.
 
-A script that is using `IMPLEMENT` directive will be compiled using a special
-template:
+#### 3.7.2. `FACADE` directive (optional)
+
+_Syntax:_ `# FACADE`
+
+_Syntax:_ `# FACADE "alternateTemplate"`
+
+##### 3.7.2.1. Overview
+
+The `FACADE` directive allows to generate a kind of binary script that will hide
+the functions behind one unique function. The functions that will be made public
+will be the ones declared using `IMPLEMENT` directive.
+
+The `FACADE` directive will instruct the compiler to:
+
+- encapsulate the functions inside a global function (interface functions will
+  be nested in this function).
+- generate a script, that will allow to call these nested functions
+
+We will see later on, how to do a kind of "abstract class" that can be seen more
+as prototyping.
+
+##### 3.7.2.2. Generated script
+
+A script that is using `FACADE` directive will be compiled using a special
+template (a default one is provided but the directive allows to override it if
+you need:
 
 - all the functions defined in this script will be encapsulated in a global
   function with a unique name (random name auto generated to avoid function name
@@ -625,7 +663,8 @@ template:
     on first argument passed when sourcing the file. If no argument or more than
     1, an error is generated.
   - if file is executed, it will automatically call the main function using
-    first argument to call the right sub function.
+    first argument to call the right sub function and pass the rest of arguments
+    to that function.
 
 ### 3.8. `EMBED` directive (optional)
 
@@ -791,7 +830,52 @@ requirements using `.INCLUDE`directive.
 the order of the requirements is computed automatically by the compiler but in
 some cases, you could need to override this order.
 
-### 4.2. Compiler - Compiler::Embed::embed
+### 4.2. Compiler - Compiler::Implement::interface
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+<a name="implement_interface" id="implement_interface"></a>
+
+<!-- markdownlint-restore -->
+
+A new feature in the compiler is the ability to implement one or multiple
+interfaces. `Compiler::Implement::interface` allows to:
+
+- ensure all functions defined by the interface(s) are implemented inside the
+  script
+
+![activity diagram to explain how IMPLEMENT directives are injected](images/compilerImplementDirective.svg)
+
+[activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Implement/activityDiagram.puml).
+
+### 4.2. Compiler - Compiler::Facade::generate
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+<a name="implement_interface" id="implement_interface"></a>
+
+<!-- markdownlint-restore -->
+
+A new feature in the compiler is the ability to use the FACADE design pattern,
+by using the `FACADE` directive that allows to generate a kind of binary script
+that will hide the functions behind one unique function. The functions that will
+be made public will be the ones declared using `IMPLEMENT` directive.
+
+- using IMPLEMENT directive feature, the compiler will ensure that all functions
+  defined by the interface(s) are implemented inside the script
+- the functions implemented are automatically callable by the script as first
+  argument of the script
+- the functions are encapsulated inside a main function with unique name
+- finally using the template the main function will not be called if the file is
+  sourced
+
+![activity diagram to explain how IMPLEMENT directives are injected](images/compilerImplementDirective.svg)
+
+[activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Implement/activityDiagram.puml).
+
+### 4.3. Compiler - Compiler::Embed::embed
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
