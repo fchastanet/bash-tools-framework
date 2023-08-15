@@ -33,7 +33,7 @@
     - [4.1.1. Requires dependencies](#411-requires-dependencies)
     - [4.1.2. disable compiler requirement management](#412-disable-compiler-requirement-management)
     - [4.1.3. override requirements dependency order](#413-override-requirements-dependency-order)
-  - [4.2. Compiler - Embed::embed](#42-compiler---embedembed)
+  - [4.2. Compiler - Compiler::Embed::embed](#42-compiler---compilerembedembed)
 - [5. FrameworkLint](#5-frameworklint)
 - [6. Best practices](#6-best-practices)
 - [7. Acknowledgements](#7-acknowledgements)
@@ -390,7 +390,7 @@ Here a non exhaustive list of possible requirements:
 - REQUIRE Framework::requireRootDir
   - ensure that needed variable is set _Eg:_ `Conf::*` needs FRAMEWORK_ROOT_DIR
     to be defined
-- REQUIRE Embed::requireLoad -> enable bin directory initialization
+- REQUIRE Compiler::Embed::requireLoad -> enable bin directory initialization
 - REQUIRE Args::requireParseVerbose
 - REQUIRE Framework::requireTMPDIR
 - REQUIRE Git::requireShallowClone
@@ -496,10 +496,10 @@ fi
 
 #### 3.7.1. Overview
 
-Allows to generate a kind of binary script that respects a kind of [interface
-like in object-oriented programming](https://tinyurl.com/3t7nkcz7). It means
-that the binary must implement a set of functions defined by the file passed
-in parameter to this directive.
+Allows to generate a kind of binary script that respects a kind of
+[interface like in object-oriented programming](https://tinyurl.com/3t7nkcz7).
+It means that the binary must implement a set of functions defined by the file
+passed in parameter to this directive.
 
 _Syntax:_ `# IMPLEMENT "interfaceFile"`
 
@@ -508,23 +508,24 @@ if `IMPLEMENT` directive is provided, the compiler will ensure that:
 - the interfaceFile exists
 - all the functions defined in the interfaceFile are declared in the
   implementation file (the one being compiled)
-- encapsulates the functions inside a global function (interface functions
-  will nested in this function).
-- generate a script, that will allow to call these nested functions (more details later)
+- encapsulates the functions inside a global function (interface functions will
+  nested in this function).
+- generate a script, that will allow to call these nested functions (more
+  details later)
 
-Using multiple `IMPLEMENT` directives is supported but the following rules apply:
+Using multiple `IMPLEMENT` directives is supported but the following rules
+apply:
 
 - the functions declared are merged and deduplicated
-  - a warning is emitted to indicate when 2 functions are declared
-    in 2 different interfaces.
+  - a warning is emitted to indicate when 2 functions are declared in 2
+    different interfaces.
 - as a corollary using IMPLEMENT with twice the same file, will have no effect.
 
-We will see later on, how to do a kind of "abstract class" that can be seen
-more as prototyping.
+We will see later on, how to do a kind of "abstract class" that can be seen more
+as prototyping.
 
-**Example:**
-we want to create a script that will help people to install linux softwares
-easily with dependency managemnt.
+**Example:** we want to create a script that will help people to install linux
+softwares easily with dependency management.
 
 We declare a Help interface in the file `src/InstallScripts/HelpInterface.sh`:
 
@@ -537,7 +538,8 @@ InstallScript::HelpInterface() {
 }
 ```
 
-We declare a Dependency interface in the file `src/InstallScripts/DependencyInterface.sh`:
+We declare a Dependency interface in the file
+`src/InstallScripts/DependencyInterface.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -547,7 +549,8 @@ InstallScript::DependencyInterface() {
 }
 ```
 
-We declare a Config interface in the file `src/InstallScripts/ConfigInterface.sh`:
+We declare a Config interface in the file
+`src/InstallScripts/ConfigInterface.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -569,7 +572,8 @@ InstallScript::ConfigInterface() {
 }
 ```
 
-Finally we declare an Install interface in the file `src/InstallScripts/InstallInterface.sh`:
+Finally we declare an Install interface in the file
+`src/InstallScripts/InstallInterface.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -579,11 +583,12 @@ InstallScript::InstallInterface() {
 }
 ```
 
-Notice that function name is "scopped" to namespace "InstallScript". It is a best
-practice as it enforces the "class" aspect. Also it is mandatory in order to
-respect the naming convention of this framework.
+Notice that function name is "scoped" to namespace "InstallScript". It is a
+best practice as it enforces the "class" aspect. Also it is mandatory in order
+to respect the naming convention of this framework.
 
-Now we implement a script that respects these interfaces in the file `src/_binaries/InstallScripts/firstInstallScript.sh`:
+Now we implement a script that respects these interfaces in the file
+`src/_binaries/InstallScripts/firstInstallScript.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -608,16 +613,19 @@ dependencies() {
 
 #### Generated script
 
-A script that is using `IMPLEMENT` directive will be compiled using a special template:
+A script that is using `IMPLEMENT` directive will be compiled using a special
+template:
 
-- all the functions defined in this script will be encapsulated in a global function with
-  a unique name (random name auto generated to avoid function name conflicts if sourced)
-- The script will have 2 behaviors depending if the file is sourced or directly executed
-  - if file is sourced, it generates automatically a function with a name based on firt
-    argument passed when sourcing the file. If no argument or more than 1, an error is
-    generated.
-  - if file is executed, it will automatically call the main function using first argument
-    to call the right sub function.
+- all the functions defined in this script will be encapsulated in a global
+  function with a unique name (random name auto generated to avoid function name
+  conflicts if sourced)
+- The script will have 2 behaviors depending if the file is sourced or directly
+  executed
+  - if file is sourced, it generates automatically a function with a name based
+    on first argument passed when sourcing the file. If no argument or more than
+    1, an error is generated.
+  - if file is executed, it will automatically call the main function using
+    first argument to call the right sub function.
 
 ### 3.8. `EMBED` directive (optional)
 
@@ -646,7 +654,8 @@ sudo "${embed_file_backupFile}" ...
 "${embed_file_otherNeededBinary}"
 ```
 
-See [compiler - Embed::embed]#embed_include) below for more information.
+See [compiler - Compiler::Embed::embed]#embed_include) below for more
+information.
 
 ### 3.9. `.framework-config` framework configuration file
 
@@ -707,9 +716,9 @@ The following rules apply:
 
 - Some requirements can depends on each others, the compiler will compute which
   dependency should be loaded before the other. _Eg:_ Log::requireLoad
-  requirement depends on Framework::requireRootDir, so
-  Framework::requireRootDir is loaded before. But Log requirement depends also
-  on Env::requireLoad requirement.
+  requirement depends on Framework::requireRootDir, so Framework::requireRootDir
+  is loaded before. But Log requirement depends also on Env::requireLoad
+  requirement.
 - Requirement can be set at namespace level by adding the directive in \_.sh
   file or at function level.
 - A requirement can be loaded only once.
@@ -725,10 +734,9 @@ Let's take this example:
 - REQUIRE Log::requireLoad
   - will insert the script `src/Log/requireLoad.sh`
   - will call the function Log::load
-  - Log::load function could use a directive
-    `REQUIRE Framework::requireRootDir` that would initialize
-    FRAMEWORK_ROOT_DIR variable by inserting `src/Framework/requireRootDir.sh`
-    file.
+  - Log::load function could use a directive `REQUIRE Framework::requireRootDir`
+    that would initialize FRAMEWORK_ROOT_DIR variable by inserting
+    `src/Framework/requireRootDir.sh` file.
 - REQUIRE Args::requireVerboseArg
   - will insert the script `src/Args/requireVerboseArg.sh` that would contains
 
@@ -768,8 +776,8 @@ Args::requireVerboseArg
 Log::requireLoad
 ```
 
-Framework::requireRootDir and Args::requireVerboseArg are inserted first as
-they depends on zero requirements. Order depends on order of appearance in the
+Framework::requireRootDir and Args::requireVerboseArg are inserted first as they
+depends on zero requirements. Order depends on order of appearance in the
 script.
 
 #### 4.1.2. disable compiler requirement management
@@ -783,7 +791,7 @@ requirements using `.INCLUDE`directive.
 the order of the requirements is computed automatically by the compiler but in
 some cases, you could need to override this order.
 
-### 4.2. Compiler - Embed::embed
+### 4.2. Compiler - Compiler::Embed::embed
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -793,17 +801,17 @@ some cases, you could need to override this order.
 <!-- markdownlint-restore -->
 
 A new feature in the compiler is the ability to embed files, directories or a
-framework function. `Embed::embed` allows to:
+framework function. `Compiler::Embed::embed` allows to:
 
 - **include a file**(binary or not) as base64 encoded, the file can then be
-  extracted using the automatically generated method `Embed::extractFile_asName`
-  where asName is the name chosen using directive explained above. The original
-  file mode will be restored after extraction. The variable `embed_file_asName`
-  contains the targeted filepath.
+  extracted using the automatically generated method
+  `Compiler::Embed::extractFile_asName` where asName is the name chosen using
+  directive explained above. The original file mode will be restored after
+  extraction. The variable `embed_file_asName` contains the targeted filepath.
 - **include a directory**, the directory will be tar gz and added to the
   compiled file as base64 encoded string. The directory can then be extracted
-  using the automatically generated method `Embed::extractDir_asName` where
-  asName is the name chosen using directive explained above. The variable
+  using the automatically generated method `Compiler::Embed::extractDir_asName`
+  where asName is the name chosen using directive explained above. The variable
   embed_dir_asName contains the targeted directory path.
 - **include a bash framework function**, a special binary file that simply calls
   this function will be automatically generated. This binary file will be added
@@ -814,7 +822,7 @@ framework function. `Embed::embed` allows to:
 
 ![activity diagram to explain how EMBED directives are injected](images/compilerEmbedInjection.svg)
 
-[activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Embed/activityDiagram.puml).
+[activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Embed/activityDiagram.puml).
 
 ## 5. FrameworkLint
 

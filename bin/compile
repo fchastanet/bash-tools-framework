@@ -57,34 +57,34 @@ source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
 # shellcheck source=/src/File/insertFileAfterToken.sh
 source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
-# shellcheck source=src/Embed/inject.sh
-source "${_COMPILE_SRC_DIR}/Embed/inject.sh"
-# shellcheck source=src/Embed/filter.sh
-source "${_COMPILE_SRC_DIR}/Embed/filter.sh"
-# shellcheck source=src/Embed/parse.sh
-source "${_COMPILE_SRC_DIR}/Embed/parse.sh"
-# shellcheck source=src/Embed/assertAsName.sh
-source "${_COMPILE_SRC_DIR}/Embed/assertAsName.sh"
-# shellcheck source=src/Embed/assertResource.sh
-source "${_COMPILE_SRC_DIR}/Embed/assertResource.sh"
-# shellcheck source=src/Embed/embed.sh
-source "${_COMPILE_SRC_DIR}/Embed/embed.sh"
+# shellcheck source=src/Compiler/Embed/inject.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/inject.sh"
+# shellcheck source=src/Compiler/Embed/filter.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/filter.sh"
+# shellcheck source=src/Compiler/Embed/parse.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/parse.sh"
+# shellcheck source=src/Compiler/Embed/assertAsName.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/assertAsName.sh"
+# shellcheck source=src/Compiler/Embed/assertResource.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/assertResource.sh"
+# shellcheck source=src/Compiler/Embed/embed.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/embed.sh"
 # shellcheck source=src/Assert/validVariableName.sh
 source "${_COMPILE_SRC_DIR}/Assert/validVariableName.sh"
-# shellcheck source=src/Embed/embedFile.sh
-source "${_COMPILE_SRC_DIR}/Embed/embedFile.sh"
-# shellcheck source=src/Embed/embedDir.sh
-source "${_COMPILE_SRC_DIR}/Embed/embedDir.sh"
-# shellcheck source=src/Embed/embedFrameworkFunction.sh
-source "${_COMPILE_SRC_DIR}/Embed/embedFrameworkFunction.sh"
+# shellcheck source=src/Compiler/Embed/embedFile.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedFile.sh"
+# shellcheck source=src/Compiler/Embed/embedDir.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedDir.sh"
+# shellcheck source=src/Compiler/Embed/embedFrameworkFunction.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedFrameworkFunction.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
 # shellcheck source=/src/Assert/fileWritable.sh
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
-# shellcheck source=/src/Embed/getSrcDirsFromOptions.sh
-source "${_COMPILE_SRC_DIR}/Embed/getSrcDirsFromOptions.sh"
+# shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -453,7 +453,7 @@ injectEmbed() {
   local -a embeddedNames=()
   # shellcheck disable=SC2034
   local -a embeddedResources=()
-  Embed::inject embeddedNames embeddedResources <"${file}" >"${embedFile}"
+  Compiler::Embed::inject embeddedNames embeddedResources <"${file}" >"${embedFile}"
   File::insertFileAfterToken "${file}" "${embedFile}" "# FUNCTIONS"
 }
 

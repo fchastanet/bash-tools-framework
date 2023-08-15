@@ -8,7 +8,7 @@ mkdir -p /tmp/bats
 SCRIPT_NAME=${0##*/}
 BIN_DIR="${CURRENT_DIR}"
 srcDir="$(cd "${CURRENT_DIR}/../src" && pwd -P)"
-BATS_TEST_DIRNAME="${srcDir}/Embed"
+BATS_TEST_DIRNAME="${srcDir}/Compiler/Embed"
 FRAMEWORK_ROOT_DIR="$(cd "${srcDir}/.." && pwd -P)"
 export FRAMEWORK_ROOT_DIR
 
@@ -23,10 +23,10 @@ export TMPDIR
 
 # shellcheck source=src/Env/pathPrepend.sh
 source "${srcDir}/Env/pathPrepend.sh"
-# shellcheck source=src/Embed/embedFrameworkFunction.sh
-source "${srcDir}/Embed/embedFrameworkFunction.sh"
-# shellcheck source=src/Embed/extractFileFromBase64.sh
-source "${srcDir}/Embed/extractFileFromBase64.sh"
+# shellcheck source=src/Compiler/Embed/embedFrameworkFunction.sh
+source "${srcDir}/Compiler/Embed/embedFrameworkFunction.sh"
+# shellcheck source=src/Compiler/Embed/extractFileFromBase64.sh
+source "${srcDir}/Compiler/Embed/extractFileFromBase64.sh"
 # shellcheck source=src/_includes/_commonHeader.sh
 source "${srcDir}/_includes/_commonHeader.sh"
 # shellcheck source=src/_includes/_colors.sh
@@ -53,7 +53,7 @@ declare -agx _COMPILE_FILE_ARGUMENTS=(
 # shellcheck disable=SC2031
 export KEEP_TEMP_FILES=1
 
-Embed::embedFrameworkFunction \
+Compiler::Embed::embedFrameworkFunction \
   "Filters::bashFrameworkFunctions" \
   "bashFrameworkFunctions" \
   >"${BATS_TEST_TMPDIR}/functionEmbedded"
@@ -62,7 +62,7 @@ Embed::embedFrameworkFunction \
 source "${BATS_TEST_TMPDIR}/functionEmbedded"
 
 bashFrameworkFunctions \
-  "${srcDir}/Embed/testsData/embedFrameworkFunction.txt" \
+  "${srcDir}/Compiler/Embed/testsData/embedFrameworkFunction.txt" \
   >"${BATS_TEST_TMPDIR}/embedFrameworkFunction.result.txt"
 
 diff \
