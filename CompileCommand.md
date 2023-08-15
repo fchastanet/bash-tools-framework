@@ -23,8 +23,11 @@
       - [3.6.2.3. Best practice #2: support method](#3623-best-practice-2-support-method)
     - [3.6.3. Requirement overloading](#363-requirement-overloading)
     - [3.6.4. Requirement disable](#364-requirement-disable)
-  - [3.7. `EMBED` directive (optional)](#37-embed-directive-optional)
-  - [3.8. `.framework-config` framework configuration file](#38-framework-config-framework-configuration-file)
+  - [3.7. `IMPLEMENT` directive (optional)](#37-implement-directive-optional)
+    - [3.7.1. Overview](#371-overview)
+    - [Generated script](#generated-script)
+  - [3.8. `EMBED` directive (optional)](#38-embed-directive-optional)
+  - [3.9. `.framework-config` framework configuration file](#39-framework-config-framework-configuration-file)
 - [4. Compiler algorithms](#4-compiler-algorithms)
   - [4.1. Compiler - Compiler::Requirement::require](#41-compiler---compilerrequirementrequire)
     - [4.1.1. Requires dependencies](#411-requires-dependencies)
@@ -382,21 +385,21 @@ cross-used scripts to ensure that proper configuration is set. The directive
 
 Here a non exhaustive list of possible requirements:
 
-- REQUIRE Log::requiresLoad : ensure log configuration is loaded
-  - REQUIRE Log::requiresLoad added on each `Log::display*`functions
-- REQUIRE Framework::requiresRootDir
+- REQUIRE Log::requireLoad : ensure log configuration is loaded
+  - REQUIRE Log::requireLoad added on each `Log::display*`functions
+- REQUIRE Framework::requireRootDir
   - ensure that needed variable is set _Eg:_ `Conf::*` needs FRAMEWORK_ROOT_DIR
     to be defined
-- REQUIRE Embed::requiresLoad -> enable bin directory initialization
-- REQUIRE Args::requiresParseVerbose
-- REQUIRE Framework::requiresTMPDIR
-- REQUIRE Git::requiresShallowClone
-- REQUIRE Git::requiresGitCommand : checks that git command exists
-- REQUIRE Framework::requiresBashAssociativeArray
+- REQUIRE Embed::requireLoad -> enable bin directory initialization
+- REQUIRE Args::requireParseVerbose
+- REQUIRE Framework::requireTMPDIR
+- REQUIRE Git::requireShallowClone
+- REQUIRE Git::requireGitCommand : checks that git command exists
+- REQUIRE Framework::requireBashAssociativeArray
   - if a function use this directive, the binary will check at the start that
     the command bash exists with this minimal version 4.0 in which this feature
     appears
-- REQUIRE Linux::Apt::requiresUbuntu
+- REQUIRE Linux::Apt::requireUbuntu
 
 #### 3.6.2. REQUIRE directive syntax
 
@@ -405,11 +408,11 @@ executed at loading time.
 
 The following syntax can be used:
 
-_Syntax:_ `# @require Framework::requiresRootDir`
+_Syntax:_ `# @require Framework::requireRootDir`
 
-_Syntax:_ `# @require Git::requiresGitCommand`
+_Syntax:_ `# @require Git::requireGitCommand`
 
-_Syntax:_ `# @require Git::requiresShallowClone`
+_Syntax:_ `# @require Git::requireShallowClone`
 
 _`REQUIRE` directive usage example:_
 
@@ -419,8 +422,8 @@ case we could also ensure that a minimal version is available.
 
 ```bash
 #!/usr/bin/env bash
-# @require Git::requiresGitCommand
-# @require Git::requiresShallowClone
+# @require Git::requireGitCommand
+# @require Git::requireShallowClone
 Git::shallowClone() {
   # ...
 }
@@ -433,17 +436,17 @@ more information.
 
 The following naming convention applies:
 
-- every required functions are prefixed with `requires`.
-- the name of file then respects camel case (eg: `requiresShallowClone.sh`.
+- every required functions are prefixed with `require`.
+- the name of file then respects camel case (eg: `requireShallowClone.sh`.
 - the file usually defines a unique function that is named with the namespace
-  followed by the name of the file (eg: `Git::requiresShallowClone`).
+  followed by the name of the file (eg: `Git::requireShallowClone`).
 - the function does not take any parameter.
 
 ##### 3.6.2.2. Best practice #1: feature name
 
 A best practice for the minimum command version is to name the requirement with
-the feature wanted, so instead of ~~Git::requiresGitMinVersion1_7_10~~ we prefer
-to write `Git::requiresShallowClone` and in the implementation of this
+the feature wanted, so instead of ~~Git::requireGitMinVersion1_7_10~~ we prefer
+to write `Git::requireShallowClone` and in the implementation of this
 requirement, we will check for git minimal version 1.7.10. This has the
 advantage, that maybe in some linux system, some requirements depends on
 different version. This has also the advantage to document at the same time why
@@ -451,8 +454,8 @@ we need a specific requirement.
 
 ##### 3.6.2.3. Best practice #2: support method
 
-When developing a _requires_ file, think about writing the associated function
-_support_. Eg: `src/Git/requiresShallowClone.sh` will use
+When developing a _require_ file, think about writing the associated function
+_support_. Eg: `src/Git/requireShallowClone.sh` will use
 `Git::supportsShallowClone`
 
 #### 3.6.3. Requirement overloading
@@ -476,7 +479,7 @@ this in our script headers:
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
-# @require disable=Git::requiresShallowClone
+# @require disable=Git::requireShallowClone
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
@@ -489,7 +492,134 @@ fi
 # ...
 ```
 
-### 3.7. `EMBED` directive (optional)
+### 3.7. `IMPLEMENT` directive (optional)
+
+#### 3.7.1. Overview
+
+Allows to generate a kind of binary script that respects a kind of [interface
+like in object-oriented programming](https://tinyurl.com/3t7nkcz7). It means
+that the binary must implement a set of functions defined by the file passed
+in parameter to this directive.
+
+_Syntax:_ `# IMPLEMENT "interfaceFile"`
+
+if `IMPLEMENT` directive is provided, the compiler will ensure that:
+
+- the interfaceFile exists
+- all the functions defined in the interfaceFile are declared in the
+  implementation file (the one being compiled)
+- encapsulates the functions inside a global function (interface functions
+  will nested in this function).
+- generate a script, that will allow to call these nested functions (more details later)
+
+Using multiple `IMPLEMENT` directives is supported but the following rules apply:
+
+- the functions declared are merged and deduplicated
+  - a warning is emitted to indicate when 2 functions are declared
+    in 2 different interfaces.
+- as a corollary using IMPLEMENT with twice the same file, will have no effect.
+
+We will see later on, how to do a kind of "abstract class" that can be seen
+more as prototyping.
+
+**Example:**
+we want to create a script that will help people to install linux softwares
+easily with dependency managemnt.
+
+We declare a Help interface in the file `src/InstallScripts/HelpInterface.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+InstallScript::HelpInterface() {
+  echo "helpDescription"
+  echo "fortunes"
+}
+```
+
+We declare a Dependency interface in the file `src/InstallScripts/DependencyInterface.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+InstallScript::DependencyInterface() {
+  echo "dependencies"
+}
+```
+
+We declare a Config interface in the file `src/InstallScripts/ConfigInterface.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+InstallScript::ConfigInterface() {
+  echo "configure"
+  echo "breakOnConfigFailure"
+}
+```
+
+We declare a Test interface in the file `src/InstallScripts/TestInterface.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+InstallScript::ConfigInterface() {
+  echo "test"
+  echo "breakOnTestFailure"
+}
+```
+
+Finally we declare an Install interface in the file `src/InstallScripts/InstallInterface.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+InstallScript::InstallInterface() {
+  echo "install"
+}
+```
+
+Notice that function name is "scopped" to namespace "InstallScript". It is a best
+practice as it enforces the "class" aspect. Also it is mandatory in order to
+respect the naming convention of this framework.
+
+Now we implement a script that respects these interfaces in the file `src/_binaries/InstallScripts/firstInstallScript.sh`:
+
+```bash
+#!/usr/bin/env bash
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/InstallScripts/firstInstallScript
+# IMPLEMENT "<%% dynamicSrcFile InstallScripts/HelpInterface.sh %>"
+# IMPLEMENT "<%% dynamicSrcFile InstallScripts/DependencyInterface.sh %>"
+# IMPLEMENT "<%% dynamicSrcFile InstallScripts/ConfigInterface.sh %>"
+# IMPLEMENT "<%% dynamicSrcFile InstallScripts/TestInterface.sh %>"
+# IMPLEMENT "<%% dynamicSrcFile InstallScripts/InstallInterface.sh %>"
+
+helpDescription() {
+  echo "install help"
+}
+
+dependencies() {
+  echo "InstallScript2"
+}
+
+# truncated ...
+
+```
+
+#### Generated script
+
+A script that is using `IMPLEMENT` directive will be compiled using a special template:
+
+- all the functions defined in this script will be encapsulated in a global function with
+  a unique name (random name auto generated to avoid function name conflicts if sourced)
+- The script will have 2 behaviors depending if the file is sourced or directly executed
+  - if file is sourced, it generates automatically a function with a name based on firt
+    argument passed when sourcing the file. If no argument or more than 1, an error is
+    generated.
+  - if file is executed, it will automatically call the main function using first argument
+    to call the right sub function.
+
+### 3.8. `EMBED` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax
 can be used:
@@ -518,7 +648,7 @@ sudo "${embed_file_backupFile}" ...
 
 See [compiler - Embed::embed]#embed_include) below for more information.
 
-### 3.8. `.framework-config` framework configuration file
+### 3.9. `.framework-config` framework configuration file
 
 The special file `.framework-config` allows to change some behaviors of the
 compiler or the framework linter.
@@ -560,11 +690,11 @@ The compiler during successive passes:
   - warn if a disabled requirement has no associated file
 - compiler pass
   - will parse `# @require` directives
-    - error if requires name does not begin with requires
-    - error if requires name does not comply naming convention
-    - error if _requires\*_ file not found
+    - error if require name does not begin with require
+    - error if require name does not comply naming convention
+    - error if _require\*_ file not found
   - will ignore the disabled requirements
-  - a tree of requires dependencies will be computed
+  - a tree of require dependencies will be computed
   - eventual framework functions needed will be imported
 - on second pass, execute again compiler pass as eventual other `REQUIRE`
   directives could be found
@@ -576,10 +706,10 @@ The compiler during successive passes:
 The following rules apply:
 
 - Some requirements can depends on each others, the compiler will compute which
-  dependency should be loaded before the other. _Eg:_ Log::requiresLoad
-  requirement depends on Framework::requiresRootDir, so
-  Framework::requiresRootDir is loaded before. But Log requirement depends also
-  on Env::requiresLoad requirement.
+  dependency should be loaded before the other. _Eg:_ Log::requireLoad
+  requirement depends on Framework::requireRootDir, so
+  Framework::requireRootDir is loaded before. But Log requirement depends also
+  on Env::requireLoad requirement.
 - Requirement can be set at namespace level by adding the directive in \_.sh
   file or at function level.
 - A requirement can be loaded only once.
@@ -592,15 +722,15 @@ The following rules apply:
 
 Let's take this example:
 
-- REQUIRE Log::requiresLoad
-  - will insert the script `src/Log/requiresLoad.sh`
+- REQUIRE Log::requireLoad
+  - will insert the script `src/Log/requireLoad.sh`
   - will call the function Log::load
   - Log::load function could use a directive
-    `REQUIRE Framework::requiresRootDir` that would initialize
-    FRAMEWORK_ROOT_DIR variable by inserting `src/Framework/requiresRootDir.sh`
+    `REQUIRE Framework::requireRootDir` that would initialize
+    FRAMEWORK_ROOT_DIR variable by inserting `src/Framework/requireRootDir.sh`
     file.
-- REQUIRE Args::requiresVerboseArg
-  - will insert the script `src/Args/requiresVerboseArg.sh` that would contains
+- REQUIRE Args::requireVerboseArg
+  - will insert the script `src/Args/requireVerboseArg.sh` that would contains
 
 ```bash
 # File src/Args/parseVerboseRequirement.sh
@@ -616,29 +746,29 @@ Dependencies counts
 
 ```csv
 # requirement;number of times the requirement is required
-Log::requiresLoad;1
-Framework::requiresRootDir;1
-Args::requiresVerboseArg;1
+Log::requireLoad;1
+Framework::requireRootDir;1
+Args::requireVerboseArg;1
 ```
 
 List of requirements dependencies
 
 ```csv
 # requirement;requirement implied by this requirement
-Log::requiresLoad;Framework::requiresRootDir
-Framework::requiresRootDir;
-Args::requiresVerboseArg;
+Log::requireLoad;Framework::requireRootDir
+Framework::requireRootDir;
+Args::requireVerboseArg;
 ```
 
 This would allow the compiler to deduce the order of the requirements:
 
 ```bash
-Framework::requiresRootDir
-Args::requiresVerboseArg
-Log::requiresLoad
+Framework::requireRootDir
+Args::requireVerboseArg
+Log::requireLoad
 ```
 
-Framework::requiresRootDir and Args::requiresVerboseArg are inserted first as
+Framework::requireRootDir and Args::requireVerboseArg are inserted first as
 they depends on zero requirements. Order depends on order of appearance in the
 script.
 
