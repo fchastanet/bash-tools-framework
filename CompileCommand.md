@@ -23,6 +23,10 @@
       - [3.6.2.3. Best practice #2: support method](#3623-best-practice-2-support-method)
     - [3.6.3. Requirement overloading](#363-requirement-overloading)
     - [3.6.4. Requirement disable](#364-requirement-disable)
+  - [3.6. COMPATIBILITY directive (optional)](#36-compatibility-directive-optional)
+    - [3.6.1. requirement vs compatibility ?](#361-requirement-vs-compatibility-)
+    - [3.6.1. COMPATIBILITY directive syntax](#361-compatibility-directive-syntax)
+    - [@compatibility tag syntax](#compatibility-tag-syntax)
   - [3.7. `IMPLEMENT` and `FACADE` directives (optional)](#37-implement-and-facade-directives-optional)
     - [3.7.1. `IMPLEMENT` directive (optional)](#371-implement-directive-optional)
     - [3.7.2. `FACADE` directive (optional)](#372-facade-directive-optional)
@@ -441,7 +445,7 @@ more information.
 The following naming convention applies:
 
 - every required functions are prefixed with `require`.
-- the name of file then respects camel case (eg: `requireShallowClone.sh`.
+- the name of file then respects camel case (eg: `requireShallowClone.sh`).
 - the file usually defines a unique function that is named with the namespace
   followed by the name of the file (eg: `Git::requireShallowClone`).
 - the function does not take any parameter.
@@ -496,6 +500,110 @@ fi
 # ...
 ```
 
+### 3.6. COMPATIBILITY directive (optional)
+
+`COMPATIBILITY` directive allows to indicate to the compiler that we want our
+binary to use bash framework functions that conform to some constraints. Bash
+framework functions are "tagged" with the directive `@compatibility`. We can
+have several kinds of compatibility requirements:
+
+- posix: our script needs to be compatible with posix standard
+  - **Note: Here it's just an example of a compatibility usage but this**
+    **framework is not compatible at all with posix**
+- alpine: our script needs to be compatible with alpine distribution
+  - default sh is dash which is a posix shell, so this compatibility requirement
+    implies posix
+  - the compiler could generate errors if the script is using some functions
+    dedicated to ubuntu
+
+#### 3.6.1. requirement vs compatibility ?
+
+`REQUIREMENT` directive ensures during execution that the environment where the
+script is executed conforms to the requirement(Eg.: require gitShallowClone).
+
+At the opposite, `COMPATIBILITY` ensures that binary generated during
+compilation will conform to the compatibility constraints. (Eg.: compatibility
+posix but binary uses a function not marked as posix).
+
+Compatibility and requirement constraints can overlap sometimes, for example we
+want our script to be free of wsl requirement or free of jq requirement. It
+means if a function using jq or wsl is included in the binary, the compiler will
+throw an error.
+
+#### 3.6.1. COMPATIBILITY directive syntax
+
+The following syntax can be used:
+
+_Syntax:_ `# COMPATIBILITY Compatibility::posix`
+
+_Syntax:_ `# COMPATIBILITY Compatibility::dockerImageAlpineProjectX`
+
+A possible implementation of Compatibility::posix can be:
+
+```bash
+#!/usr/bin/env bash
+
+Compatibility::posix() {
+  local functionName="$1"
+  local -n compatibilityTags=$2
+  local -n requireTags=$3
+
+  if ! Array::contains "posix" "${compatibilityTags[@]}"
+    Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
+    return 1
+  fi
+}
+```
+
+dockerImageAlpineProjectX is a custom project where we need posix compatibility
+and as an old version of git is installed, we do not support shallowClone and
+also jq is not installed in this image. A possible implementation of
+Compatibility::dockerImageAlpineProjectX can be
+
+```bash
+#!/usr/bin/env bash
+
+Compatibility::posix() {
+  local functionName="$1"
+  local -n compatibilityTags=$2
+  local -n requireTags=$3
+
+  if ! Array::contains "posix" "${compatibilityTags[@]}"
+    Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
+    return 1
+  fi
+  if ! Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"
+    Log::displayError "The function ${functionName} used in the script require jq which is incompatible with this script"
+    return 1
+  fi
+}
+```
+
+So if your script suddenly uses `Version::githubApiExtractVersion`, the compiler
+will immediately warns you.
+
+#### @compatibility tag syntax
+
+in order to tag the function with some compatibilities, the tag `@compatibility`
+can be used.
+
+```bash
+# @description extract version number from github api
+# @noargs
+# @stdin json result of github API
+# @exitcode 1 if jq or Version::parse fails
+# @stdout the version parsed
+# @require Linux::requireJqCommand
+# @compatibility Linux::supportJqCommand
+Version::githubApiExtractVersion() {
+  jq -r ".tag_name" | Version::parse
+}
+```
+
+See [compiler -
+Compiler::Compatibility::checkCompatibility]#compatibility_directive) below for
+more information.
+
 ### 3.7. `IMPLEMENT` and `FACADE` directives (optional)
 
 Now let's talk about 2 others directives : `IMPLEMENT` and `FACADE`.
@@ -521,7 +629,7 @@ a kind of
 [interface like in object-oriented programming](https://tinyurl.com/3t7nkcz7).
 It means a set of functions that the script file has to implement.
 
-_Syntax:_ `# IMPLEMENT "interfaceFile"`
+_Syntax:_ `# IMPLEMENT InstallScripts::HelpInterface`
 
 if `IMPLEMENT` directive is provided, the compiler will ensure that:
 
@@ -608,11 +716,11 @@ Now we implement a script that respects these interfaces in the file
 ```bash
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/InstallScripts/firstInstallScript
-# IMPLEMENT "<%% dynamicSrcFile InstallScripts/HelpInterface.sh %>"
-# IMPLEMENT "<%% dynamicSrcFile InstallScripts/DependencyInterface.sh %>"
-# IMPLEMENT "<%% dynamicSrcFile InstallScripts/ConfigInterface.sh %>"
-# IMPLEMENT "<%% dynamicSrcFile InstallScripts/TestInterface.sh %>"
-# IMPLEMENT "<%% dynamicSrcFile InstallScripts/InstallInterface.sh %>"
+# IMPLEMENT InstallScripts::HelpInterface
+# IMPLEMENT InstallScripts::DependencyInterface
+# IMPLEMENT InstallScripts::ConfigInterface
+# IMPLEMENT InstallScripts::TestInterface
+# IMPLEMENT InstallScripts::InstallInterface
 
 helpDescription() {
   echo "install help"

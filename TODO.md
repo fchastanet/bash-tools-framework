@@ -51,6 +51,7 @@
 
 ## 3. Framework functions changes
 
+- remove all process substitution as it hides exit code > 0
 - log use alias
 - logMessage do nothing if Log::load has been called, no need to check logLevel
   if Log::load do correctly its job

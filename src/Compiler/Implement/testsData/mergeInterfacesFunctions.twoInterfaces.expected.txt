@@ -1,0 +1,6 @@
+help
+options
+install
+configure
+breakOnConfigFailure
+breakOnTestFailure

@@ -6,10 +6,12 @@ this project because I wrote some of them while writing this project.
 - [1. Bash Best practices](#1-bash-best-practices)
   - [1.1. Bash environment options](#11-bash-environment-options)
     - [1.1.1. errexit (set -e | set -o errexit)](#111-errexit-set--e--set--o-errexit)
+      - [Caveats with command substitution](#caveats-with-command-substitution)
+      - [Caveats with process substitution](#caveats-with-process-substitution)
     - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
     - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
     - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
-    - [1.1.5. shopt -s inherit_errexit](#115-shopt--s-inherit_errexit)
+    - [1.1.5. shopt -s inherit\_errexit](#115-shopt--s-inherit_errexit)
     - [1.1.6. posix (set -o posix)](#116-posix-set--o-posix)
   - [1.2. Main function](#12-main-function)
   - [1.3. Arguments](#13-arguments)
@@ -77,7 +79,7 @@ else
 fi
 ```
 
-Caveats with command substitution:
+##### Caveats with command substitution
 
 ```bash
 #!/bin/bash
@@ -109,6 +111,40 @@ echo $?
 
 Outputs nothing because the script stopped before variable affectation, return
 code is 1.
+
+##### Caveats with process substitution
+
+Consider this example that reads each line of the output of the command passed
+using process substitution in `<(...)`
+
+```bash
+parse() {
+  local scriptFile="$1"
+  local implementDirective
+  while IFS='' read -r implementDirective; do
+    echo "${implementDirective}"
+  done < <(grep -E -e "^# IMPLEMENT .*$" "${scriptFile}")
+}
+```
+
+If we execute this command with a non existent file, even if errexit, pipefail
+and inherit_errexit are set, the command will actually succeed.
+
+It is because process substitution launch the command as as separated process. I
+didn't find any clean way to manage this using process substitution (only
+workaround I found was to pass by file to pass the exit code to parent process).
+
+So here the solution removing process substitution
+
+```bash
+parse() {
+  local scriptFile="$1"
+  local implementDirective
+  grep -E -e "^# IMPLEMENT .*$" "${scriptFile}" | while IFS='' read -r implementDirective; do
+    echo "${implementDirective}"
+  done
+}
+```
 
 #### 1.1.2. pipefail (set -o pipefail)
 

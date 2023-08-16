@@ -14,12 +14,12 @@ partition Compiler::Implement::interface #LightGray {
 
   #SpringGreen: Compiler::Implement::interface scriptFile;
 
-  partition Compiler::Implement::interfaceFunctions #LightSkyBlue {
+  partition Compiler::Implement::interfaces #LightSkyBlue {
     #SpringGreen:Compiler::Implement::filter scriptFile;
     while (implementDirective?) is (<color:green>implement directive found)
       -[#green]->
         #SpringGreen:Compiler::Implement::parse $implementDirective
-          ~~uses Compiler::Implement::assertInterfaceFile~~
+          ~~uses Compiler::Implement::assertInterface~~
         ;
         if (implement directive can be parsed?) is (<color:green>valid directive) then
           -[#green]->
@@ -27,14 +27,14 @@ partition Compiler::Implement::interface #LightGray {
           -[#red]->
           end
         endif
-        #SpringGreen:add interfaceFile to interfaceFiles array;
+        #SpringGreen:add interfaceFunction to interfaces list;
         -[#green]->
     endwhile (no more implement directive to process)
 
-    #SpringGreen:Compiler::Implement::mergeInterfacesFunctions interfaceFiles;
   }
+  #SpringGreen:Compiler::Implement::mergeInterfacesFunctions interfacesList;
 
-  #SpringGreen:Compiler::Implement::validateInterfaceFunctions interfaceFunctions scriptFile;
+  #SpringGreen:Compiler::Implement::validateInterfaceFunctions scriptFile interfaceFunctions;
   if (one function cannot be found in scriptFile?) is (<color:red>missing function\n<color:red>#functionName) then
     -[#red]->
     end
