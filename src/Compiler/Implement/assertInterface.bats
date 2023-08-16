@@ -20,7 +20,7 @@ teardown() {
   rm -f "${BATS_TEST_TMPDIR}/symbolicLink" "${BATS_TEST_TMPDIR}/result" || true
 }
 
-declare -ax _EMBED_COMPILE_ARGUMENTS=(
+declare -ax _COMPILE_FILE_ARGUMENTS=(
   --src-dir "${srcDir}"
 )
 
@@ -39,7 +39,7 @@ function Compiler::Implement::assertInterface::InvalidBashFrameworkFunction { #@
 }
 
 function Compiler::Implement::assertInterface::BashFrameworkFunctionNotFound { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}"
   )
   local status=0
@@ -51,7 +51,7 @@ function Compiler::Implement::assertInterface::BashFrameworkFunctionNotFound { #
 }
 
 function Compiler::Implement::assertInterface::BashFrameworkFunctionErrorDuringCall { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${srcDir}"
   )
   local status=0
@@ -64,7 +64,7 @@ function Compiler::Implement::assertInterface::BashFrameworkFunctionErrorDuringC
 }
 
 function Compiler::Implement::assertInterface::InterfaceEmptyList { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -76,7 +76,7 @@ function Compiler::Implement::assertInterface::InterfaceEmptyList { #@test
 }
 
 function Compiler::Implement::assertInterface::InterfaceInvalidList { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -88,7 +88,7 @@ function Compiler::Implement::assertInterface::InterfaceInvalidList { #@test
 }
 
 function Compiler::Implement::assertInterface::validInterface { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0

@@ -20,5 +20,5 @@ Compiler::Implement::mergeInterfacesFunctions() {
         return 1
       }
     done
-  ) | uniq
+  ) | uniq | Filters::trimEmptyLines
 }

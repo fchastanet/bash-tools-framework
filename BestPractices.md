@@ -6,8 +6,8 @@ this project because I wrote some of them while writing this project.
 - [1. Bash Best practices](#1-bash-best-practices)
   - [1.1. Bash environment options](#11-bash-environment-options)
     - [1.1.1. errexit (set -e | set -o errexit)](#111-errexit-set--e--set--o-errexit)
-      - [Caveats with command substitution](#caveats-with-command-substitution)
-      - [Caveats with process substitution](#caveats-with-process-substitution)
+      - [1.1.1.1. Caveats with command substitution](#1111-caveats-with-command-substitution)
+      - [1.1.1.2. Caveats with process substitution](#1112-caveats-with-process-substitution)
     - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
     - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
     - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
@@ -79,7 +79,7 @@ else
 fi
 ```
 
-##### Caveats with command substitution
+##### 1.1.1.1. Caveats with command substitution
 
 ```bash
 #!/bin/bash
@@ -112,7 +112,7 @@ echo $?
 Outputs nothing because the script stopped before variable affectation, return
 code is 1.
 
-##### Caveats with process substitution
+##### 1.1.1.2. Caveats with process substitution
 
 Consider this example that reads each line of the output of the command passed
 using process substitution in `<(...)`
@@ -144,6 +144,47 @@ parse() {
     echo "${implementDirective}"
   done
 }
+```
+
+But how to use readarray without using process substitution. Old code was:
+
+```bash
+declare -a interfacesFunctions
+readarray -t interfacesFunctions < <(Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}")
+Compiler::Implement::validateInterfaceFunctions \
+    "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
+```
+
+I first think about doing this
+
+```bash
+declare -a interfacesFunctions
+Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}" | readarray -t interfacesFunctions
+```
+
+But interfacesFunctions was empty because readarray is run in another process, to
+avoid this issue, I could have used `shopt -s lastpipe`
+
+But I finally transformed it to (the array in the same subshell so no issue):
+
+```bash
+Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}" | {
+  declare -a interfacesFunctions
+  readarray -t interfacesFunctions
+  Compiler::Implement::validateInterfaceFunctions \
+    "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
+}
+```
+
+Another solution would be to simply read the array from stdin:
+
+```bash
+declare -a interfacesFunctions
+readarray -t interfacesFunctions <<<"$(
+  Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}"
+)"
+Compiler::Implement::validateInterfaceFunctions \
+    "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
 ```
 
 #### 1.1.2. pipefail (set -o pipefail)

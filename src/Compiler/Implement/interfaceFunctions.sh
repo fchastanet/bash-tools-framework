@@ -3,6 +3,7 @@
 # @description try to find interface function in srcDirs
 # and call it to output the interface's functions
 # @arg $1 interfaceFunction:String the interface function to call
+# @env _COMPILE_FILE_ARGUMENTS allows to override default compile arguments here used to deduce srcDirs
 # @exitcode 1 on invalid function name
 # @exitcode 2 on function not found
 # @exitcode 3 on error during call to interface
@@ -23,7 +24,7 @@ Compiler::Implement::interfaceFunctions() {
 
   # check if function exists
   local -a srcDirs
-  readarray -t srcDirs < <(Compiler::Embed::getSrcDirsFromOptions "${_EMBED_COMPILE_ARGUMENTS[@]}")
+  readarray -t srcDirs < <(Compiler::Embed::getSrcDirsFromOptions "${_COMPILE_FILE_ARGUMENTS[@]}")
   local interfaceFile
   interfaceFile="$(Compiler::findFunctionInSrcDirs "${interfaceFunction}" "${srcDirs[@]}")" || {
     Log::displayError "Interface '${interfaceFunction}' cannot be found in any src dirs: ${srcDirs[*]}"

@@ -116,3 +116,5 @@ exitcode
 SHDOC
 noargs
 everytime
+lastpipe
+subshell

@@ -2,7 +2,7 @@
 
 # @description check if param is valid interface
 # @arg $1 interface:String the interface function
-# @env _EMBED_COMPILE_ARGUMENTS allows to override default compile arguments
+# @env _COMPILE_FILE_ARGUMENTS allows to override default compile arguments
 # @exitcode 1 on invalid function name
 # @exitcode 2 on function not found
 # @exitcode 3 on error during call to interface

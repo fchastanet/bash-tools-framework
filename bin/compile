@@ -85,6 +85,8 @@ source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
+# shellcheck source=/src/Compiler/Implement/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Implement/__all.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -508,6 +510,13 @@ injectImportedFunctions "${COMPILED_FILE2}" filesAlreadyImported
 
 # remove spaces at the end of the lines
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
+
+# retrieve all interfaces functions that need to be implemented
+export _COMPILE_FILE_ARGUMENTS
+declare -a interfacesFunctions
+Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}" | readarray -t interfacesFunctions
+Compiler::Implement::validateInterfaceFunctions \
+  "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
 
 cat -s "${COMPILED_FILE2}" | Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" >"${BIN_FILE}"
 chmod +x "${BIN_FILE}"

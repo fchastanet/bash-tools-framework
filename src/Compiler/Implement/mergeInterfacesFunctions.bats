@@ -24,9 +24,27 @@ source "${srcDir}/Assert/posixFunctionName.sh"
 source "${srcDir}/Compiler/Embed/getSrcDirsFromOptions.sh"
 # shellcheck source=src/Compiler/findFunctionInSrcDirs.sh
 source "${srcDir}/Compiler/findFunctionInSrcDirs.sh"
+# shellcheck source=src/Filters/trimEmptyLines.sh
+source "${srcDir}/Filters/trimEmptyLines.sh"
+
+function Compiler::Implement::mergeInterfacesFunctions::noInterface { #@test
+  local -a _COMPILE_FILE_ARGUMENTS=(
+    --src-dir "${BATS_TEST_DIRNAME}/testsData"
+  )
+  local status=0
+  Compiler::Implement::mergeInterfacesFunctions \
+    "${BATS_TEST_DIRNAME}/testsData/interfacesNone.sh" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  [[ "${status}" = "0" ]] || {
+    cat "${BATS_TEST_TMPDIR}/result" >&3
+    return 1
+  }
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+}
 
 function Compiler::Implement::mergeInterfacesFunctions::twoInterfaces { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0

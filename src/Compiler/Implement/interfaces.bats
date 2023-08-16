@@ -37,7 +37,7 @@ function Compiler::Implement::interfaces::interfaceFileNotFound { #@test
 }
 
 function Compiler::Implement::interfaces::invalidBashFrameworkFunction { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -50,7 +50,7 @@ function Compiler::Implement::interfaces::invalidBashFrameworkFunction { #@test
 }
 
 function Compiler::Implement::interfaces::twiceSameInterface { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -62,7 +62,7 @@ function Compiler::Implement::interfaces::twiceSameInterface { #@test
 }
 
 function Compiler::Implement::interfaces::interfacesMismatchFunctionName { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -77,7 +77,7 @@ function Compiler::Implement::interfaces::interfacesMismatchFunctionName { #@tes
 }
 
 function Compiler::Implement::interfaces::twoInterfaces { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0

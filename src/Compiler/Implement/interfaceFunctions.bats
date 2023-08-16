@@ -18,7 +18,7 @@ teardown() {
   rm -f "${BATS_TEST_TMPDIR}/symbolicLink" "${BATS_TEST_TMPDIR}/result" || true
 }
 
-declare -ax _EMBED_COMPILE_ARGUMENTS=(
+declare -ax _COMPILE_FILE_ARGUMENTS=(
   --src-dir "${srcDir}"
 )
 
@@ -37,7 +37,7 @@ function Compiler::Implement::interfaceFunctions::InvalidBashFrameworkFunction {
 }
 
 function Compiler::Implement::interfaceFunctions::BashFrameworkFunctionNotFound { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}"
   )
   local status=0
@@ -49,7 +49,7 @@ function Compiler::Implement::interfaceFunctions::BashFrameworkFunctionNotFound 
 }
 
 function Compiler::Implement::interfaceFunctions::BashFrameworkFunctionErrorDuringCall { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${srcDir}"
   )
   local status=0
@@ -62,7 +62,7 @@ function Compiler::Implement::interfaceFunctions::BashFrameworkFunctionErrorDuri
 }
 
 function Compiler::Implement::interfaceFunctions::InterfaceEmptyList { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -74,7 +74,7 @@ function Compiler::Implement::interfaceFunctions::InterfaceEmptyList { #@test
 }
 
 function Compiler::Implement::interfaceFunctions::InterfaceInvalidList { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
@@ -86,7 +86,7 @@ function Compiler::Implement::interfaceFunctions::InterfaceInvalidList { #@test
 }
 
 function Compiler::Implement::interfaceFunctions::validInterface { #@test
-  local -a _EMBED_COMPILE_ARGUMENTS=(
+  local -a _COMPILE_FILE_ARGUMENTS=(
     --src-dir "${BATS_TEST_DIRNAME}/testsData"
   )
   local status=0
