@@ -24,7 +24,7 @@ Filters::directive() {
     }
     {
       line = $0
-      if (/^# (BIN_FILE=|IMPLEMENT |REQUIRE |COMPATIBILITY |EMBED |FACADE |VAR_[^=]*=|EMBED ).*$/) {
+      if (/^# (BIN_FILE=|IMPLEMENT |REQUIRE |COMPATIBILITY |EMBED |FACADE|VAR_[^=]*=|EMBED ).*$/) {
         write=(invert==0) || (headerProcessed==1)
       } else if (/^#!/) {
         write=invert

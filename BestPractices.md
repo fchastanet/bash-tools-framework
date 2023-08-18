@@ -8,10 +8,11 @@ this project because I wrote some of them while writing this project.
     - [1.1.1. errexit (set -e | set -o errexit)](#111-errexit-set--e--set--o-errexit)
       - [1.1.1.1. Caveats with command substitution](#1111-caveats-with-command-substitution)
       - [1.1.1.2. Caveats with process substitution](#1112-caveats-with-process-substitution)
+      - [1.1.1.3. Process substitution is asynchronous](#1113-process-substitution-is-asynchronous)
     - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
     - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
     - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
-    - [1.1.5. shopt -s inherit\_errexit](#115-shopt--s-inherit_errexit)
+    - [1.1.5. shopt -s inherit_errexit](#115-shopt--s-inherit_errexit)
     - [1.1.6. posix (set -o posix)](#116-posix-set--o-posix)
   - [1.2. Main function](#12-main-function)
   - [1.3. Arguments](#13-arguments)
@@ -162,8 +163,8 @@ declare -a interfacesFunctions
 Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}" | readarray -t interfacesFunctions
 ```
 
-But interfacesFunctions was empty because readarray is run in another process, to
-avoid this issue, I could have used `shopt -s lastpipe`
+But interfacesFunctions was empty because readarray is run in another process,
+to avoid this issue, I could have used `shopt -s lastpipe`
 
 But I finally transformed it to (the array in the same subshell so no issue):
 
@@ -176,6 +177,9 @@ Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}" | {
 }
 ```
 
+The issue with this previous solution is that commands runs in a subshell but
+using `shopt -s lastpipe` could solve this issue.
+
 Another solution would be to simply read the array from stdin:
 
 ```bash
@@ -185,6 +189,31 @@ readarray -t interfacesFunctions <<<"$(
 )"
 Compiler::Implement::validateInterfaceFunctions \
     "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
+```
+
+##### 1.1.1.3. Process substitution is asynchronous
+
+it is why you cannot retrieve the status code, a way to do that is to wait the
+process to finish
+
+```bash
+while read -r line; do
+  echo "$line" &
+done < <(echo 1; sleep 1; echo 2; sleep 1; exit 77)
+```
+
+could be rewritten in
+
+```bash
+mapfile -t lines < <(echo 1; sleep 1; echo 2; sleep 1; exit 77)
+wait $!
+
+for line in "${lines[@]}"; do
+  echo "$line" &
+done
+sleep 1
+wait $!
+echo done
 ```
 
 #### 1.1.2. pipefail (set -o pipefail)

@@ -118,3 +118,5 @@ noargs
 everytime
 lastpipe
 subshell
+uuidgen
+DELIMS

@@ -39,7 +39,7 @@ ShellDoc::generateMdFileFromTemplate \
   "${DOC_DIR}/Commands.md" \
   "${COMMAND_BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
-  '(bash-tpl|var|simpleBinary|shdoc)$'
+  '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
 
 # clean folder before generate
 rm -f "${DOC_DIR}/Index.md" || true

@@ -77,6 +77,8 @@ source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedFile.sh"
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedDir.sh"
 # shellcheck source=src/Compiler/Embed/embedFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedFrameworkFunction.sh"
+# shellcheck source=src/Compiler/Facade/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Facade/__all.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
@@ -313,20 +315,30 @@ dynamicSrcDir() {
 export -f dynamicSrcDir
 
 evalTemplate() {
-  local FILE="$1"
+  local file="$1"
+  local targetBinFile="$2"
+  local callback="$3"
   local varExports
-  varExports="$(Compiler::extractVarForExport "${FILE}")"
+  varExports="$(Compiler::extractVarForExport "${file}")"
+
+  local varCallbackExports=""
+  if [[ "$(type -t "${callback}")" = "function" ]]; then
+    local tmpFile
+    tmpFile="$(Framework::createTempFile "callbackExports")"
+    "${callback}" "${file}" >"${tmpFile}"
+    varCallbackExports="$(cat "${tmpFile}")"
+  fi
 
   # the src file you want to show at the top of generated file to indicate
   # from which source file the binary has been generated
   if [[ -z "${SRC_FILE_PATH+xxx}" ]]; then
     SRC_FILE_PATH="$(File::relativeToDir "${INPUT_FILE}" "${FRAMEWORK_ROOT_DIR}")"
   fi
-
   SRC_ABSOLUTE_PATH="$(realpath "${INPUT_FILE}")"
   (
     cd "${TEMPLATE_DIR}"
     eval "${varExports}"
+    eval "${varCallbackExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
     export FRAMEWORK_BIN_DIR
     export FRAMEWORK_ROOT_DIR
@@ -338,9 +350,18 @@ evalTemplate() {
     # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
     trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM
     printf '%s\n' "${srcDirs[@]}" >"${TMPDIR:-/tmp}/srcDirs"
+    local bashtplLogFile
+    bashtplLogFile="$(Framework::createTempFile "bashtplLogFile")"
     # shellcheck source=/dev/null
-    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
-  ) | Filters::removeDuplicatedShebangs
+    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${file}" 2>"${bashtplLogFile}")
+    wait $!
+    if [[ -s "${bashtplLogFile}" ]]; then
+      Log::displayError "bash-tpl found some errors"
+      cat >&2 "${bashtplLogFile}"
+      exit 1
+    fi
+  ) | Filters::removeDuplicatedShebangs | Compiler::Facade::restoreOldMainFunctionName "${targetBinFile}"
+
 }
 
 importFunctions() {
@@ -481,7 +502,7 @@ COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file2.XXXXXXX")"
 
 # shellcheck disable=SC2034
 declare -a filesAlreadyImported=("${INPUT_FILE}")
-evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
+evalTemplate "${INPUT_FILE}" "${BIN_FILE}" Compiler::Facade::facade >"${COMPILED_FILE}"
 
 # compute BIN_FILE
 if [[ -z "${BIN_FILE}" ]]; then
@@ -502,7 +523,7 @@ injectImportedFunctions "${COMPILED_FILE}" filesAlreadyImported
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Env::load
-evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
+evalTemplate "${COMPILED_FILE}" "${BIN_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # filesAlreadyImported is global variable so we will not reimport already included functions

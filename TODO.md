@@ -68,6 +68,7 @@
 
 ## 4. Update Bash-tools-framework dependencies
 
+- make \_commonHeader.sh be loaded sooner (should include unalias -a || true)
 - Remove FRAMEWORK_ROOT_DIR/FRAMEWORK_SRC_DIR requirements from binaries
   - replace it by optional argument automatically added --root-dir
   - other default options to the binaries, log-level, display-log-level, ...
@@ -77,6 +78,8 @@
 
 TODOs linked to bin/compiler:
 
+- FACADE help auto generated
+- what would be the impact to add shopt -s lastpipe
 - new IMPLEMENT directive
   - [detect that file is being sourced](https://stackoverflow.com/a/47613477)
   - implement main security in tpl, the binary script has just to implement a

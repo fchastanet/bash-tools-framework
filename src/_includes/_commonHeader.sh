@@ -48,7 +48,7 @@ set -o pipefail
 set -o errexit
 
 # Command Substitution can inherit errexit option since bash v4.4
-(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
+shopt -s inherit_errexit || true
 
 # a log is generated when a command fails
 set -o errtrace
