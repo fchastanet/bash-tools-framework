@@ -4,12 +4,22 @@
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
-# load variables in order(from less specific to more specific) from :
+# @description load variables in order(from less specific to more specific) from :
 # - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
 # - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+#
+# @env BASH_FRAMEWORK_INITIALIZED if 1 skip the load
+# @env FRAMEWORK_ROOT_DIR
+# @env HOME
+# @env BASH_FRAMEWORK_ENV_FILEPATH
+# @env OVERRIDE_* string allows to override any env file variable (with * name)
+#
+# @set BASH_FRAMEWORK_CACHED_ENV_FILE string
+# @set BASH_FRAMEWORK_DEFAULT_ENV_FILE string
+# @set BASH_FRAMEWORK_INITIALIZED int 1 if load successful
 Env::load() {
   if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0

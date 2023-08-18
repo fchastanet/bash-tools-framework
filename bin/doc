@@ -10,6 +10,34 @@
 unalias -a || true
 
 # shellcheck disable=SC2034
+((failures = 0)) || true
+
+shopt -s expand_aliases
+
+# Bash will remember & return the highest exit code in a chain of pipes.
+# This way you can catch the error inside pipes, e.g. mysqldump | gzip
+set -o pipefail
+set -o errexit
+
+# Command Substitution can inherit errexit option since bash v4.4
+shopt -s inherit_errexit || true
+
+# a log is generated when a command fails
+set -o errtrace
+
+# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+shopt -s nullglob
+
+# ensure regexp are interpreted without accentuated characters
+export LC_ALL=POSIX
+
+export TERM=xterm-256color
+
+#avoid interactive install
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2034
@@ -90,34 +118,6 @@ interruptManagement() {
   kill -s INT "$$"
 }
 trap interruptManagement INT
-
-# shellcheck disable=SC2034
-((failures = 0)) || true
-
-shopt -s expand_aliases
-
-# Bash will remember & return the highest exit code in a chain of pipes.
-# This way you can catch the error inside pipes, e.g. mysqldump | gzip
-set -o pipefail
-set -o errexit
-
-# Command Substitution can inherit errexit option since bash v4.4
-(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
-
-# a log is generated when a command fails
-set -o errtrace
-
-# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
-shopt -s nullglob
-
-# ensure regexp are interpreted without accentuated characters
-export LC_ALL=POSIX
-
-export TERM=xterm-256color
-
-#avoid interactive install
-export DEBIAN_FRONTEND=noninteractive
-export DEBCONF_NONINTERACTIVE_SEEN=true
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 DOC_DIR="${FRAMEWORK_ROOT_DIR}/pages"
 
@@ -133,6 +133,13 @@ if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
   FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 fi
 
+# @description display help and exits if one of args is -h|--help
+# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
+# @arg $@ args:String[] list of options
+# @option -h short help option
+# @option --help long help option
+# @exitcode 0 displays help and exit with code 0 if -h or --help option is in the args list
+# @stdout displays help if -h or --help option is in the args list
 Args::defaultHelp() {
   local helpArg=$1
   shift || true
@@ -141,8 +148,14 @@ Args::defaultHelp() {
   fi
 }
 
-# change display level to level argument
-# if --verbose|-v option is parsed in arguments
+# @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
+# @arg $1 verboseDisplayLevel:String the level of verbosity to set
+# @arg $@ args:String[] list of options
+# @option -v short verbose option
+# @option --verbose long verbose option
+# @set ARGS_VERBOSE 1 if --verbose|-v option is parsed in arguments
+# @set BASH_FRAMEWORK_DISPLAY_LEVEL to verboseDisplayLevel if --verbose|-v option is parsed in arguments
+# @exitcode 1 if --verbose|-v option is not present in args list
 Args::parseVerbose() {
   local verboseDisplayLevel="$1"
   declare -gx ARGS_VERBOSE=0
@@ -162,9 +175,12 @@ Args::parseVerbose() {
   return "${status}"
 }
 
-# remove elements from array
-# Performance1 : version taken from https://stackoverflow.com/a/59030460
-# Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @description remove elements from array
+# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
+# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
+# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
+# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @see Array::removeIf
 Array::remove() {
   local -n arrayRemoveArray=$1
   shift || true # $@ contains elements to remove
@@ -190,12 +206,22 @@ Array::remove() {
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
-# load variables in order(from less specific to more specific) from :
+# @description load variables in order(from less specific to more specific) from :
 # - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
 # - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+#
+# @env BASH_FRAMEWORK_INITIALIZED if 1 skip the load
+# @env FRAMEWORK_ROOT_DIR
+# @env HOME
+# @env BASH_FRAMEWORK_ENV_FILEPATH
+# @env OVERRIDE_* string allows to override any env file variable (with * name)
+#
+# @set BASH_FRAMEWORK_CACHED_ENV_FILE string
+# @set BASH_FRAMEWORK_DEFAULT_ENV_FILE string
+# @set BASH_FRAMEWORK_INITIALIZED int 1 if load successful
 Env::load() {
   if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
@@ -280,6 +306,9 @@ Env::load() {
   BASH_FRAMEWORK_INITIALIZED=1
 }
 
+# @description prepend directories to the PATH environment variable
+# @arg $@ args:String[] list of directories to prepend
+# @set PATH update PATH with the directories prepended
 Env::pathPrepend() {
   local arg
   for arg in "$@"; do
@@ -289,17 +318,25 @@ Env::pathPrepend() {
   done
 }
 
-# Public: log level off
+# @description Log namespace provides 2 kind of functions
+# - Log::display* allows to display given message with
+#   given display level
+# - Log::log* allows to log given message with
+#   given log level
+# Log::display* functions automatically log the message too
+# @see Log::load to load the display and log level from .env file
+
+# @description log level off
 export __LEVEL_OFF=0
-# Public: log level error
+# @description log level error
 export __LEVEL_ERROR=1
-# Public: log level warning
+# @description log level warning
 export __LEVEL_WARNING=2
-# Public: log level info
+# @description log level info
 export __LEVEL_INFO=3
-# Public: log level success
+# @description log level success
 export __LEVEL_SUCCESS=3
-# Public: log level debug
+# @description log level debug
 export __LEVEL_DEBUG=4
 
 export __LEVEL_OFF
@@ -309,15 +346,15 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# Display message using debug color (grey)
-# @param {String} $1 message
+# @description Display message using debug color (grey)
+# @arg $1 message:String the message to display
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayInfo() {
   local type="${2:-INFO}"
   echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
@@ -326,6 +363,18 @@ Log::displayInfo() {
 
 # shellcheck disable=SC2317
 
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
 Log::load() {
   # disable display methods following display level
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
@@ -383,8 +432,11 @@ Log::load() {
   fi
 }
 
-# fix markdown TOC generated by Markdown all in one vscode extension
-# https://regex101.com/r/DJJf2I/1
+# @description fix markdown TOC generated by Markdown all in one vscode extension
+# to make TOC compatible with docsify
+# @arg $1 file:String file to fix
+# @exitcode 1 if awk fails
+# @see https://regex101.com/r/DJJf2I/1
 ShellDoc::fixMarkdownToc() {
   local file="$1"
   local fixMarkdownToc
@@ -410,17 +462,18 @@ EOF
   awk -i inplace "${fixMarkdownToc}" "${file}"
 }
 
-# generate markdown file from template by replacing
-# @@@command_help@@@ by the help of the command
+# @description generates markdown file from template by
+# replacing @@@command_help@@@ by the help of the command
 # eg: @@@test_help@@@ will be replaced by the output
 # of the command `test --help` in the directory provided
-# @param {String} $1 templateFile the file to use as template
-# @param {String} $2 targetFile the target file
-# @param {String} $3 fromDir the directory from which commands will be searched
-# @param {int} $4 tokenNotFoundCount passed by reference, will return
-#    the number of tokens @@@command_help@@@ not found in the template file
-# @param {String} excludeFilesPattern $5 grep exclude pattern
-#   eg: '^(bash-tpl)$'
+#
+# @arg $1 templateFile:String the file to use as template
+# @arg $2 targetFile:String the target file
+# @arg $3 fromDir:String the directory from which commands will be searched
+# @arg $4 tokenNotFoundCount:&int (passed by reference) number of tokens @@@command_help@@@ not found in the template file
+# @arg $5 excludeFilesPattern:String grep exclude pattern (eg: '^(bash-tpl)$') (default value: "")
+# @stderr diagnostics logs
+# @stdout the generated markdown with help of the matching command
 ShellDoc::generateMdFileFromTemplate() {
   local templateFile="$1"
   local targetFile="$2"
@@ -460,55 +513,92 @@ ShellDoc::generateMdFileFromTemplate() {
   Log::displayInfo "${nbTokensGenerated} commands' help replaced in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
 }
 
-# generate doc + index
-# @param {String} $1 fromDir
-# @param {String} $2 docDir
-# @param {String} $3 indexFile
-# @param {String} excludeFilesPattern $4 grep exclude pattern
-#   eg: '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
+# @description generate doc + index
+# @arg $1 fromDir:String
+# @arg $2 fromDirRelative:String
+# @arg $3 docDir:String
+# @arg $4 indexFile:String
+# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $6 excludeDirectoriesPattern:String grep exclude pattern. Eg: '/testsData|/_.*'
+# @arg $7 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
 ShellDoc::generateShellDocsFromDir() {
   local fromDir="$1"
-  local docDir="$2"
-  local indexFile="$3"
-  local excludeFilesPattern="${4:-}"
-  local -a grepExclude
-  local startTime endTime
+  local fromDirRelative="$2"
+  local docDir="$3"
+  local indexFile="$4"
+  local repositoryUrl="${5:-}"
+  local excludeDirectoriesPattern="${6:-}"
+  local excludeFilesPattern="${7:-}"
 
-  if [[ -z "${excludeFilesPattern}" ]]; then
+  # exclude dir pattern
+  local -a grepExclude
+  if [[ -z "${excludeDirectoriesPattern}" ]]; then
     grepExclude=(cat)
   else
-    grepExclude=(grep -E -v "${excludeFilesPattern}")
+    grepExclude=(grep -E -v "${excludeDirectoriesPattern}")
   fi
 
-  startTime=$(date +%s.%3N)
-  ((nbFilesGenerated = 0)) || true
-  while IFS= read -r relativeFile; do
-    relativeFile="${relativeFile#./}"
-    local basenameNoExtension="${relativeFile%.*}"
-    local targetDocFile="${docDir}/${basenameNoExtension}.md"
-    local targetDocDir
-    local targetDocFileRelative
+  # generate one .md per directory
+  local relativeDir
+  local targetDocFile
+  local targetDocFileRelative
+
+  while IFS= read -r relativeDir; do
+    relativeDir="${relativeDir#./}"
+    targetDocFile="${docDir}/${relativeDir}.md"
     targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "$(dirname "${indexFile}")" "${targetDocFile}")"
 
-    # create target doc dir
-    targetDocDir="$(dirname "${targetDocFile}")"
-    mkdir -p "${targetDocDir}" || {
-      Log::displayError "unable to create target doc directory ${targetDocDir}"
-      return 1
-    }
-
-    # generate markdown file from shell file
-    Log::displayInfo "generate markdown doc for ${relativeFile} in ${targetDocFile}"
-
-    if ShellDoc::generateShellDocFile "${fromDir}" "${relativeFile}" "${targetDocFile}"; then
-      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${basenameNoExtension}"
+    mkdir -p "$(dirname "${targetDocFile}")" || true
+    if ShellDoc::generateShellDocDir \
+      "${fromDir}/${relativeDir}" \
+      "${fromDirRelative}/${relativeDir}" \
+      "${targetDocFile}" \
+      "${repositoryUrl}" \
+      "${excludeFilesPattern}" && [[ -n "$(tail -n +6 "${targetDocFile}")" ]]; then
+      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${relativeDir}"
+    else
+      rm -f "${targetDocFile}" || true
+      Log::displaySkipped "${fromDir}/${relativeDir} does not contain any documentation"
     fi
-    ((nbFilesGenerated++)) || true
-  done < <(cd "${fromDir}" && find . -name "*.sh" | "${grepExclude[@]}" | sort)
-  endTime=$(date +%s.%3N)
-  Log::displayInfo "${nbFilesGenerated} files generated in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
+  done < <(cd "${fromDir}" && find . -type d -name '[^.]*' | "${grepExclude[@]}" | LC_ALL=C sort)
 }
 
+BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.shDocInstalled"
+BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
+
+# @description install requirements to execute shdoc
+# @warning cloning is skipped if vendor/.shDocInstalled file exists
+# @warning a new check is done everyday
+# @warning repository is not updated if a change is detected
+# @env BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
+# @set BASH_FRAMEWORK_SHDOC_INSTALLED String the file created when git clone succeeded
+# @see https://github.com/fchastanet/shdoc
+# @stderr diagnostics information is displayed
+# @feature Git::cloneOrPullIfNoChanges
+ShellDoc::installRequirementsIfNeeded() {
+  if [[ "$(
+    Cache::getFileContentIfNotExpired \
+      "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
+      "${BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT}"
+  )" != "1" ]]; then
+    Log::displayInfo "Check if shdoc is up to date"
+    if GIT_CLONE_OPTIONS="--recursive" Git::cloneOrPullIfNoChanges \
+      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/shdoc" \
+      "git@github.com:fchastanet/shdoc.git"; then
+      echo "1" >"${BASH_FRAMEWORK_SHDOC_INSTALLED}"
+    else
+      Log::fatal "unable to install shdoc library"
+    fi
+  fi
+}
+
+# @description display help if one of args is -h|--help
+# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
+# @arg $@ args:String[] list of options
+# @option -h short help option
+# @option --help long help option
+# @exitcode 1 displays help and returns with code 1 if -h or --help option is in the args list
+# @stdout displays help if -h or --help option is in the args list
 Args::defaultHelpNoExit() {
   local helpArg=$1
   shift || true
@@ -537,6 +627,31 @@ Args::defaultHelpNoExit() {
   done
 }
 
+# @description get file content if file not expired
+# @arg $1 file:String the file to get content from
+# @arg $2 maxDuration:int number of seconds after which the file is considered expired
+# @stdout {String} the file content if not expired
+# @exitcode 1 if file does not exists
+# @exitcode 2 if file expired
+Cache::getFileContentIfNotExpired() {
+  local file="$1"
+  local maxDuration="$2"
+
+  if [[ ! -f "${file}" ]]; then
+    return 1
+  fi
+  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
+    return 2
+  fi
+  cat "${file}"
+}
+
+# @description replace token by input(stdin) in given targetFile
+# @warning special ansi codes will be removed from stdin
+# @arg $1 token:String the token to replace by stdin
+# @arg $2 targetFile:String the file in which token will be replaced by stdin
+# @exitcode 1 if error
+# @stdin the file content that will be injected in targetFile
 File::replaceTokenByInput() {
   local token="$1"
   local targetFile="$2"
@@ -545,7 +660,7 @@ File::replaceTokenByInput() {
     local tokenFile
     tokenFile="$(Framework::createTempFile "replaceTokenByInput")"
 
-    cat - | Filters::escapeColorCodes >"${tokenFile}"
+    cat - | Filters::removeAnsiCodes >"${tokenFile}"
 
     sed -E -i \
       -e "/${token}/r ${tokenFile}" \
@@ -554,101 +669,146 @@ File::replaceTokenByInput() {
   )
 }
 
-# Display message using error color (red)
-# @param {String} $1 message
+# @description clone the repository if not done yet, else pull it if no change in it
+# @arg $1 dir:String directory in which repository is installed or will be cloned
+# @arg $2 repo:String repository url
+# @arg $3 cloneCallback:Function callback on successful clone
+# @arg $4 pullCallback:Function callback on successful pull
+# @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
+# @exitcode 0 on successful pulling/cloning, 1 on failure
+Git::cloneOrPullIfNoChanges() {
+  local dir="$1"
+  shift || true
+  local repo="$1"
+  shift || true
+  local cloneCallback=${1:-}
+  shift || true
+  local pullCallback=${1:-}
+  shift || true
+
+  if [[ -d "${dir}/.git" ]]; then
+    Git::pullIfNoChanges "${dir}" && (
+      # shellcheck disable=SC2086
+      if [[ "$(type -t ${pullCallback})" = "function" ]]; then
+        ${pullCallback} "${dir}"
+      fi
+    )
+  else
+    Log::displayInfo "cloning ${repo} ..."
+    mkdir -p "$(dirname "${dir}")"
+    # shellcheck disable=SC2086
+    git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}" && (
+      # shellcheck disable=SC2086
+      if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
+        ${cloneCallback} "${dir}"
+      fi
+    )
+  fi
+}
+
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
 Log::displayError() {
   echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
   Log::logError "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayHelp() {
   local type="${2:-HELP}"
   echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logHelp "$1" "${type}"
 }
 
-# Display message using skip color (yellow)
-# @param {String} $1 message
+# @description Display message using skip color (yellow)
+# @arg $1 message:String the message to display
 Log::displaySkipped() {
   echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   Log::logSkipped "$1"
 }
 
-# Display message using info color (blue) but warning level
-# @param {String} $1 message
+# @description Display message using info color (blue) but warning level
+# @arg $1 message:String the message to display
 Log::displayStatus() {
   local type="${2:-STATUS}"
   echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
   Log::logStatus "$1" "${type}"
 }
 
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
+# @description Display message using success color (bg green/fg white)
+# @arg $1 message:String the message to display
 Log::displaySuccess() {
   echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
   Log::logSuccess "$1"
 }
 
-# Display message using warning color (yellow)
-# @param {String} $1 message
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
 Log::displayWarning() {
   echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
   Log::logWarning "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description Display message using error color (red) and exit immediately with error status 1
+# @arg $1 message:String the message to display
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logDebug() {
   Log::logMessage "${2:-DEBUG}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logError() {
   Log::logMessage "${2:-ERROR}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logHelp() {
   Log::logMessage "${2:-HELP}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logInfo() {
   Log::logMessage "${2:-INFO}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSkipped() {
   Log::logMessage "${2:-SKIPPED}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logStatus() {
   Log::logMessage "${2:-STATUS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSuccess() {
   Log::logMessage "${2:-SUCCESS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logWarning() {
   Log::logMessage "${2:-WARNING}" "$1"
 }
 
-# To be called before logging in the log file
-# @param {string} file $1 log file name
-# @param {int} maxLogFilesCount $2 maximum number of log files
+# @description To be called before logging in the log file
+# @arg $1 file:string log file name
+# @arg $2 maxLogFilesCount:int maximum number of log files
 Log::rotate() {
   local file="$1"
   local maxLogFilesCount="${2:-5}"
@@ -667,75 +827,184 @@ Log::rotate() {
   fi
 }
 
-# add reference to index file
-# @param {String} $1 indexFile
-# @param {String} $2 mdRelativeFile
-# @param {String} $3 title
+# @description add reference to index file (using docsify embed feature)
+# @arg $1 indexFile:String
+# @arg $2 mdRelativeFile:String
+# @arg $3 title:String
 ShellDoc::appendDocToIndex() {
   local indexFile="$1"
   local mdRelativeFile="$2"
   local title="$3"
 
-  echo "* [${title}](${mdRelativeFile})" >>"${indexFile}"
+  (
+    echo "[${title}](${mdRelativeFile} ':include')"
+    echo
+  ) >>"${indexFile}"
 }
 
-# generate shell doc file
+# @description generate shell doc file from given directory
 #
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile the file from which the markdown file will be generated
-# @param {String} $3 targetDocFile the markdown file generated using tomdoc
-# @return 0 if file has been generated, 1 if file is empty or error
-# if generated doc is empty, targetDocFile is deleted if it was existing
-ShellDoc::generateShellDocFile() {
-  local currentDir="$1"
-  local relativeFile="$2"
+# @arg $1 dir:String
+# @arg $2 relativeDir:String
+# @arg $3 targetDocFile:String the markdown file generated using shdoc
+# @arg $4 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $5 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
+# @exitcode 0 if file has been generated
+# @exitcode 1 if file is empty or error
+ShellDoc::generateShellDocDir() {
+  local dir="$1"
+  local relativeDir="$2"
   local targetDocFile="$3"
+  local repositoryUrl="${4:-}"
+  local excludeFilesPattern="${5:-}"
+  local namespaceFile
+  local relativeFile
+
+  local -a grepExclude
+  if [[ -z "${excludeFilesPattern}" ]]; then
+    grepExclude=(cat)
+  else
+    grepExclude=(grep -E -v "${excludeFilesPattern}")
+  fi
+
+  namespaceFile="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-shdoc-namespace-XXXXXX)"
+  Log::displayInfo "Generating ${targetDocFile} based on ${namespaceFile}"
 
   (
+    local firstFile=1
+    # generate one big sh file with all sh files of the directory
+    echo '#!/usr/bin/env bash' >"${namespaceFile}"
+    echo "# @name ${relativeDir}" >>"${namespaceFile}"
+    while IFS= read -r relativeFile; do
+      relativeFile="${relativeFile#./}"
+      (
+        if [[ "${firstFile}" = "1" && "${relativeFile}" != "_.sh" ]]; then
+          (
+            echo "# @description Directory ${relativeDir}"
+            echo
+          ) >>"${namespaceFile}"
+        fi
+
+        echo "# @section ${relativeDir}/${relativeFile}"
+        if [[ -n "${repositoryUrl}" ]]; then
+          echo "# @description [file source ${relativeDir}/${relativeFile}](${repositoryUrl}/tree/master/${relativeDir}/${relativeFile})"
+        else
+          echo "# @description file source ${relativeDir}/${relativeFile}"
+        fi
+        awk NR\>1 "${dir}/${relativeFile}" | # remove shebang
+          # remove unwanted strings
+          sed -E \
+            -e '/^# cspell:disable$/d' \
+            -e '/^# cspell:enable$/d'
+      ) >>"${namespaceFile}"
+      firstFile=0
+    done < <(cd "${dir}" && find . -maxdepth 1 -name "*.sh" | "${grepExclude[@]}" | LC_ALL=C sort)
+
     local doc
-    doc="$(ShellDoc::generateShellDoc "${currentDir}" "${relativeFile}")"
-    if [[ -n "${doc}" ]]; then
-      echo "${doc}" >"${targetDocFile}"
+    doc="$(ShellDoc::generateShellDoc "${namespaceFile}")"
+    if (("$(grep -c . <<<"${doc}")" > 1)); then
+      # remove index that is auto managed by docsify
+      # increment title level by one (#)
+      sed -E \
+        -e '/^## Index/,/## /d' \
+        -e 's/^(##*) (.*)$/#\1 \2/' \
+        <<<"${doc}" >"${targetDocFile}"
       return 0
     else
-      # empty doc
-      rm -f "${targetDocFile}" || true
       return 1
     fi
   )
 }
 
+# @description display help
+# @arg $1 helpArg:String the help string to show
+# @stdout display help arg
 Args::showHelp() {
   local helpArg="$1"
   echo -e "${helpArg}"
 }
 
-Filters::escapeColorCodes() {
-  cat - | sed -E $'s/\e\\[[0-9;:]*[a-zA-Z]//g'
+# @description get number of seconds since last modification of the file
+# @arg $1 file:String file path
+# @exitcode 1 if file does not exist
+# @stdout number of seconds since last modification of the file
+File::elapsedTimeSinceLastModification() {
+  local file="$1"
+  if [[ ! -f "${file}" ]]; then
+    return 1
+  fi
+  local lastModificationTimeSeconds diff
+  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
+  ((diff = $(date +%s) - lastModificationTimeSeconds))
+  echo -n "${diff}"
 }
 
-# Public: create a temp file using default TMPDIR variable
+# @description remove ansi codes from input or files given as argument
+# @arg $@ files:String[] the files to filter
+# @exitcode * if one of the filter command fails
+# @stdin you can use stdin as alternative to files argument
+# @stdout the filtered content
+# @see https://en.wikipedia.org/wiki/ANSI_escape_code
+# shellcheck disable=SC2120
+Filters::removeAnsiCodes() {
+  # cspell:disable
+  sed -E 's/\x1b\[[0-9;]*[mGKHF]//g' "$@"
+  # cspell:enable
+}
+
+# @description create a temp file using default TMPDIR variable
 # initialized in src/_includes/_header.tpl
-#
-# **Arguments**:
-# @param $1 {String} template (optional)
+# @env TMPDIR String (default value /tmp)
+# @arg $1 templateName:String template name to use(optional)
 Framework::createTempFile() {
-  mktemp -p "${TMPDIR:-/tmp}" -t "$1.XXXXXXXXXXXX"
+  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
 
-# Internal: common log message
+# @description pull git directory only if no change has been detected
+# @arg $1 dir:String the git directory to pull
+# @exitcode 0 on successful pulling
+# @exitcode 1 on any other failure
+# @exitcode 2 changes detected, pull avoided
+# @exitcode 3 not a git directory
+# @exitcode 4 not able to update index
+# @stderr diagnostics information is displayed
+# @require Git::requireGitCommand
+Git::pullIfNoChanges() {
+  local dir="$1"
+  if [[ ! -d "${dir}/.git" ]]; then
+    return 3
+  fi
+  (
+    cd "${dir}" || exit 3
+    git update-index --refresh &>/dev/null || exit 4
+    if ! git diff-index --quiet HEAD --; then
+      Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
+      exit 2
+    fi
+    Log::displayInfo "Pull git repository '${dir}' as no changes detected"
+    git pull --progress
+  )
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logFatal() {
+  Log::logMessage "${2:-FATAL}" "$1"
+}
+
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
 #
-# **Arguments**:
-# * $1 - message's level description
-# * $2 - message
-# **Output**:
-# [date]|[levelMsg]|message
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
 #
-# **Examples**:
-# <pre>
-# 2020-01-19 19:20:21|ERROR  |log error
-# 2020-01-19 19:20:21|SKIPPED|log skipped
-# </pre>
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -756,165 +1025,62 @@ Log::logMessage() {
   fi
 }
 
-# extract shDoc from file
+# @description extract shDoc from file
 #
-# @param {String} $1 currentDir
-# @param {String} $2 relativeFile
-# @output the shell documentation in markdown format
+# @arg $1 file:String
+# @stdout the shell documentation in markdown format
 ShellDoc::generateShellDoc() {
-  local currentDir="$1"
-  local relativeFile="$2"
+  local file="$1"
 
   ShellDoc::installRequirementsIfNeeded
   (
-    cd "${currentDir}" || exit 1
-    "${FRAMEWORK_ROOT_DIR}/vendor/fchastanet.tomdoc.sh/tomdoc.sh" "${relativeFile}"
-  )
+    "${FRAMEWORK_VENDOR_DIR}//shdoc/shdoc" <"${file}" || {
+      Log::displayError "parse error of file ${file}"
+      return 0
+    }
+  ) || true
 }
 
 # Checks if file can be created in folder
+#
+
+# @description Checks if file can be created in folder
 # The file does not need to exist
+# @arg $1 file:String
+# @exitcode 1 if file is not a valid path
+# @exitcode 2 if file parent's dir is not writable
+# @exitcode 3 if existing file is not writable
+# @see Assert::validPath
 Assert::fileWritable() {
   local file="$1"
   local dir
 
-  dir="$(dirname "${file}")"
-
-  Assert::validPath "${file}" && [[ -w "${dir}" ]]
-}
-
-BASH_FRAMEWORK_TOMDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.tomdocInstalled"
-BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT=86400 # 1 day
-
-ShellDoc::installRequirementsIfNeeded() {
-  if [[ "$(
-    Cache::getFileContentIfNotExpired \
-      "${BASH_FRAMEWORK_TOMDOC_INSTALLED}" \
-      "${BASH_FRAMEWORK_TOMDOC_CHECK_TIMEOUT}"
-  )" != "1" ]]; then
-
-    (Log::displayInfo "Check if tomdoc.sh is up to date")
-    if Git::shallowClone \
-      "https://github.com/fchastanet/tomdoc.sh.git" \
-      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/fchastanet.tomdoc.sh" \
-      "master" \
-      "FORCE_DELETION"; then
-      echo "1" >"${BASH_FRAMEWORK_TOMDOC_INSTALLED}"
-    else
-      Log::fatal "unable to install tomdoc.sh library"
-    fi
+  Assert::validPath "${file}" || return 1
+  if [[ -f "${file}" ]]; then
+    [[ -w "${file}" ]] || return 3
+  else
+    dir="$(dirname "${file}")"
+    [[ -w "${dir}" ]] || return 2
   fi
+
 }
 
-# Public: check if argument is a valid linux path
-#
-# @param {string} path $1 path that needs to be checked
-# @return 1 if path is invalid
+# @description check if argument is a valid linux path
 # invalid path are those with:
 # - invalid characters
-# - component beginning by a - (because option)
+# - component beginning by a - (because could be considered as a command's option)
 # - not beginning with a slash
 # - relative
+#
+# @arg $1 path:string path that needs to be checked
+# @exitcode 1 if path is invalid
+# @see https://regex101.com/r/afLrmM/2
+# @see Assert::validPosixPath if you need more restrictive check
 Assert::validPath() {
   local path="$1"
 
-  # https://regex101.com/r/afLrmM/2
   [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
     [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
-}
-
-# get file content if file not expired
-# @param {String} file $1 the file to get content from
-# @param {String} maxDuration $2 number of seconds after which the file is considered expired
-# @output {String} the file content if not expired
-# @return 1 if file does not exists
-# @return 2 if file expired
-Cache::getFileContentIfNotExpired() {
-  local file="$1"
-  local maxDuration="$2"
-
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
-    return 2
-  fi
-  cat "${file}"
-}
-
-# Public: shallow clone a repository at specific commit sha, tag or branch
-# or update repo if already exists
-#
-# **Arguments**:
-# * $1 repository
-# * $2 Install dir
-# * $3 revision commit sha, tag or branch
-# * $4 put "FORCE_DELETION" to force directory deletion if directory exists and it's not a git repository (default: 0)
-#     USE THIS OPTION WITH CAUTION !!! as the directory will be deleted without any prompt
-#
-# **Return**:
-# * code !=0 if git failure or directory not writable
-# * code=1 if destination dir already exists and force option is not 1
-Git::shallowClone() {
-  local REPO="$1"
-  local INSTALL_DIR="$2"
-  local REVISION="$3"
-  local FORCE_DELETION="${4:-0}"
-
-  if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    Log::displayInfo "Repository ${INSTALL_DIR} already installed"
-  else
-    if [[ -f "${INSTALL_DIR}" || -d "${INSTALL_DIR}" ]]; then
-      if [[ "${FORCE_DELETION}" = "FORCE_DELETION" ]]; then
-        Log::displayWarning "Removing ${INSTALL_DIR} ..."
-        rm -Rf "${INSTALL_DIR}" || exit 1
-      else
-        Log::displayError "Destination ${INSTALL_DIR} already exists, use force option to automatically delete the destination"
-        return 1
-      fi
-    fi
-    (
-      Log::displayInfo "Installing ${INSTALL_DIR} ..."
-      mkdir -p "${INSTALL_DIR}"
-      cd "${INSTALL_DIR}" || exit 1
-      git init >&2
-      git remote add origin "${REPO}" >&2
-    )
-  fi
-  (
-    cd "${INSTALL_DIR}" || exit 1
-    git -c advice.detachedHead=false fetch --progress --depth 1 origin "${REVISION}" >&2
-    git reset --hard FETCH_HEAD >&2
-  )
-}
-
-# Display message using error color (red) and exit immediately with error status 1
-# @param {String} $1 message
-Log::fatal() {
-  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
-  Log::logFatal "$1"
-  exit 1
-}
-
-# Number of seconds since last modification of the file
-# @param {String} file $1 file path
-# @return 1 if file does not exist
-# @output number of seconds since last modification of the file
-File::elapsedTimeSinceLastModification() {
-  local file="$1"
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  local lastModificationTimeSeconds diff
-  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
-  ((diff = $(date +%s) - lastModificationTimeSeconds))
-  echo -n "${diff}"
-}
-
-# log message to file
-# @param {String} $1 message
-Log::logFatal() {
-  Log::logMessage "${2:-FATAL}" "$1"
 }
 
 # FUNCTIONS
@@ -930,7 +1096,7 @@ Log::load
 
 Env::pathPrepend "${COMMAND_BIN_DIR}"
 
-# prepare bin directory for eventual bin files generated by Embed::embed
+# prepare bin directory for eventual bin files generated by Compiler::Embed::embed
 mkdir -p "${TMPDIR:-/tmp}/bin"
 Env::pathPrepend "${TMPDIR:-/tmp}/bin"
 
@@ -953,7 +1119,12 @@ EOF
 )"
 Args::defaultHelp "${HELP}" "$@"
 
+ShellDoc::installRequirementsIfNeeded
+
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+  if [[ "${ARGS_VERBOSE}" = "1" ]]; then
+    set -- "$@" --verbose
+  fi
   "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
   exit $?
 fi
@@ -971,17 +1142,21 @@ ShellDoc::generateMdFileFromTemplate \
   "${DOC_DIR}/Commands.md" \
   "${COMMAND_BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
-  '(bash-tpl|var|simpleBinary)$'
+  '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
 
 # clean folder before generate
 rm -f "${DOC_DIR}/Index.md" || true
 rm -Rf "${DOC_DIR}/bashDoc" || true
+rm -Rf "${DOC_DIR}/FrameworkIndex.md" || true
 
 ShellDoc::generateShellDocsFromDir \
   "${FRAMEWORK_SRC_DIR}" \
+  "src" \
   "${DOC_DIR}/bashDoc" \
   "${DOC_DIR}/FrameworkIndex.md" \
-  '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|_binaries/.*\.sh|/__all\.sh)$'
+  "https://github.com/fchastanet/bash-tools-framework" \
+  '/testsData|/_.*' \
+  '(/__all\.sh)$'
 
 cp "${FRAMEWORK_ROOT_DIR}/README.md" "${DOC_DIR}"
 sed -i -E \
@@ -994,32 +1169,13 @@ mkdir -p "${DOC_DIR}/images" || true
 cp -R "${FRAMEWORK_ROOT_DIR}/images/"* "${DOC_DIR}/images"
 cp "${FRAMEWORK_ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
 cp "${FRAMEWORK_ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
-cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
+cp "${FRAMEWORK_ROOT_DIR}/src/Docker/DockerUsage.md" "${DOC_DIR}/DockerUsage.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
+cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
 (
-  cd "${FRAMEWORK_ROOT_DIR}/pages/bashDoc" || exit 1
-  currentDir=""
-  echo ""
-  while IFS= read -r file; do
-    dir="$(dirname "${file}")"
-    if [[ "${currentDir}" != "${dir}" ]]; then
-      echo
-      echo "## ${dir#./}"
-      currentDir="${dir}"
-    fi
-    # shellcheck disable=SC2016
-    # print removing 2 first titles
-    sed -E \
-      -e 's/^(##?) [^#]+$//g' \
-      -e 's/^### Function (.+)$/### \1/g' \
-      "${file}"
-  done < <(
-    # find ensuring that files are ordered
-    find . -type f -printf '%h\0%d\0%p\n' |
-      sort -t '\0' -n |
-      awk -F '\0' '{print $3}'
-  )
+  echo
+  find "${DOC_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
 ) >>"${DOC_DIR}/FrameworkFullDoc.md"
 
 ShellDoc::fixMarkdownToc "${DOC_DIR}/FrameworkFullDoc.md"

@@ -8,19 +8,19 @@ source "${srcDir}/Cache/getFileContentIfNotExpired.sh"
 # shellcheck source=src/File/elapsedTimeSinceLastModification.sh
 source "${srcDir}/File/elapsedTimeSinceLastModification.sh"
 
-function Cache::getFileContentIfNotExpiredNoFileProvided { #@test
+function Cache::getFileContentIfNotExpired::NoFileProvided { #@test
   run Cache::getFileContentIfNotExpired
   assert_failure 1
   assert_output ""
 }
 
-function Cache::getFileContentIfNotExpiredFileNotExists { #@test
+function Cache::getFileContentIfNotExpired::FileNotExists { #@test
   run Cache::getFileContentIfNotExpired "${BATS_TEST_TMPDIR}/fileNotExists"
   assert_failure 1
   assert_output ""
 }
 
-function Cache::getFileContentIfNotExpiredNotExpired { #@test
+function Cache::getFileContentIfNotExpired::NotExpired { #@test
   echo "content" >"${BATS_TEST_TMPDIR}/fileExists"
   touch -d "1 hour ago" "${BATS_TEST_TMPDIR}/fileExists"
   run Cache::getFileContentIfNotExpired "${BATS_TEST_TMPDIR}/fileExists" "7200"
@@ -28,7 +28,7 @@ function Cache::getFileContentIfNotExpiredNotExpired { #@test
   assert_output "content"
 }
 
-function Cache::getFileContentIfNotExpiredExpired { #@test
+function Cache::getFileContentIfNotExpired::Expired { #@test
   echo "content" >"${BATS_TEST_TMPDIR}/fileExists"
   touch -d "1 hour ago" "${BATS_TEST_TMPDIR}/fileExists"
   run Cache::getFileContentIfNotExpired "${BATS_TEST_TMPDIR}/fileExists" "600"

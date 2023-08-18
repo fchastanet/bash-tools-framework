@@ -22,5 +22,5 @@ function Compiler::extractUniqueFrameworkFunctions { #@test
 function Compiler::extractUniqueFrameworkFunctions::self { #@test
   Compiler::extractUniqueFrameworkFunctions "${BATS_TEST_DIRNAME}/testsData/frameworkLint" \
     >"${BATS_TEST_TMPDIR}/frameworkLint"
-  diff "${BATS_TEST_DIRNAME}/testsData/frameworkLint.expectedList" "${BATS_TEST_TMPDIR}/frameworkLint"
+  diff "${BATS_TEST_DIRNAME}/testsData/frameworkLint.expectedList" "${BATS_TEST_TMPDIR}/frameworkLint" >&3
 }

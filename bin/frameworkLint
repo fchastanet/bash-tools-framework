@@ -10,6 +10,34 @@
 unalias -a || true
 
 # shellcheck disable=SC2034
+((failures = 0)) || true
+
+shopt -s expand_aliases
+
+# Bash will remember & return the highest exit code in a chain of pipes.
+# This way you can catch the error inside pipes, e.g. mysqldump | gzip
+set -o pipefail
+set -o errexit
+
+# Command Substitution can inherit errexit option since bash v4.4
+shopt -s inherit_errexit || true
+
+# a log is generated when a command fails
+set -o errtrace
+
+# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+shopt -s nullglob
+
+# ensure regexp are interpreted without accentuated characters
+export LC_ALL=POSIX
+
+export TERM=xterm-256color
+
+#avoid interactive install
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2034
@@ -90,34 +118,6 @@ interruptManagement() {
   kill -s INT "$$"
 }
 trap interruptManagement INT
-
-# shellcheck disable=SC2034
-((failures = 0)) || true
-
-shopt -s expand_aliases
-
-# Bash will remember & return the highest exit code in a chain of pipes.
-# This way you can catch the error inside pipes, e.g. mysqldump | gzip
-set -o pipefail
-set -o errexit
-
-# Command Substitution can inherit errexit option since bash v4.4
-(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
-
-# a log is generated when a command fails
-set -o errtrace
-
-# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
-shopt -s nullglob
-
-# ensure regexp are interpreted without accentuated characters
-export LC_ALL=POSIX
-
-export TERM=xterm-256color
-
-#avoid interactive install
-export DEBIAN_FRONTEND=noninteractive
-export DEBCONF_NONINTERACTIVE_SEEN=true
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 export FRAMEWORK_ROOT_DIR
 
@@ -133,8 +133,14 @@ if [[ -n "${FRAMEWORK_ROOT_DIR+xxx}" ]]; then
   FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 fi
 
-# change display level to level argument
-# if --verbose|-v option is parsed in arguments
+# @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
+# @arg $1 verboseDisplayLevel:String the level of verbosity to set
+# @arg $@ args:String[] list of options
+# @option -v short verbose option
+# @option --verbose long verbose option
+# @set ARGS_VERBOSE 1 if --verbose|-v option is parsed in arguments
+# @set BASH_FRAMEWORK_DISPLAY_LEVEL to verboseDisplayLevel if --verbose|-v option is parsed in arguments
+# @exitcode 1 if --verbose|-v option is not present in args list
 Args::parseVerbose() {
   local verboseDisplayLevel="$1"
   declare -gx ARGS_VERBOSE=0
@@ -154,18 +160,14 @@ Args::parseVerbose() {
   return "${status}"
 }
 
-# check if an element is contained in an array
+# @description check if an element is contained in an array
 #
-# **Arguments**:
-# $@ - first parameter is the needle, rest is the array
-#
-# **Examples**:
-#
-# ```shell
-#  Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
-# ```
-#
-# Returns 0 if found, 1 otherwise
+# @arg $1 needle:String
+# @arg $@ array:String[]
+# @exitcode 0 if found
+# @exitcode 1 otherwise
+# @example
+#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
 Array::contains() {
   local element
   for element in "${@:2}"; do
@@ -174,9 +176,12 @@ Array::contains() {
   return 1
 }
 
-# remove elements from array
-# Performance1 : version taken from https://stackoverflow.com/a/59030460
-# Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @description remove elements from array
+# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
+# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
+# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
+# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @see Array::removeIf
 Array::remove() {
   local -n arrayRemoveArray=$1
   shift || true # $@ contains elements to remove
@@ -198,6 +203,10 @@ Array::remove() {
   arrayRemoveArray=("${arrayRemoveArray[@]}")
 }
 
+# @description ensure that file begin with a bash shebang
+# @arg $1 file:String
+# @exitcode 1 if file doesn't have a bash shebang
+# @exitcode 2 if file doesn't exist
 Assert::bashFile() {
   local file="$1"
   local head=""
@@ -208,16 +217,70 @@ Assert::bashFile() {
   [[ "${head}" =~ ^#\!.*bash ]]
 }
 
+# @description assert that first arg respects this bash framework naming convention
+# @arg $1 bashFrameworkFunction:String the function's name to assert
+# @exitcode 1 if bashFrameworkFunction arg doesn't respect this bash framework naming convention
+Assert::bashFrameworkFunction() {
+  local bashFrameworkFunction="$1"
+  local expectedRegexp="^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)\$"
+
+  [[ "${bashFrameworkFunction}" =~ ${expectedRegexp} ]]
+}
+
+# @description convert function name to path replacing :: by /
+# @internal
+convertFunctionNameToPath() {
+  local functionName="$1"
+  echo "$(sed -E 's#::#/#g' <<<"${functionName}").sh"
+}
+
+# @description return the path of the function found in srcDirs
+# @arg $1 functionName:String function name (eg: Functions::myFunction)
+# @arg $@ srcDirs:String[] rest of args list of src directories in # which the function will be searched
+# @exitcode 1 if function not found
+# @exitcode 0 if found
+# @stdout the filepath of the function if found
+Compiler::findFunctionInSrcDirs() {
+  local functionName="$1"
+  shift || true
+  local -a srcDirs=("$@")
+  local fileNameToImport
+
+  fileNameToImport="$(convertFunctionNameToPath "${functionName}")"
+
+  # search through srcDirs the file to import
+  for srcDir in "${srcDirs[@]}"; do
+    fileToImport="${srcDir}/${fileNameToImport}"
+    if [[ -f "${fileToImport}" ]]; then
+      # we found it
+      echo "${fileToImport}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 # lazy initialization
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
-# load variables in order(from less specific to more specific) from :
+# @description load variables in order(from less specific to more specific) from :
 # - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
 # - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
+#
+# @env BASH_FRAMEWORK_INITIALIZED if 1 skip the load
+# @env FRAMEWORK_ROOT_DIR
+# @env HOME
+# @env BASH_FRAMEWORK_ENV_FILEPATH
+# @env OVERRIDE_* string allows to override any env file variable (with * name)
+#
+# @set BASH_FRAMEWORK_CACHED_ENV_FILE string
+# @set BASH_FRAMEWORK_DEFAULT_ENV_FILE string
+# @set BASH_FRAMEWORK_INITIALIZED int 1 if load successful
 Env::load() {
   if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
     return 0
@@ -302,6 +365,9 @@ Env::load() {
   BASH_FRAMEWORK_INITIALIZED=1
 }
 
+# @description prepend directories to the PATH environment variable
+# @arg $@ args:String[] list of directories to prepend
+# @set PATH update PATH with the directories prepended
 Env::pathPrepend() {
   local arg
   for arg in "$@"; do
@@ -318,6 +384,12 @@ declare missingBashFileList
 missingBashFileList=""
 export missingBashFileList
 
+# @description check if file provided is a bash file
+# @arg $1 file:String
+# @arg $@ args:String[]
+# @set missingBashFileList String temp filepath that contains eventual missing files
+# @stdout filepath if Assert::bashFile succeed
+# @see Assert::bashFile
 File::detectBashFile() {
   local file="$1"
 
@@ -333,11 +405,11 @@ File::detectBashFile() {
   fi
 }
 
-# print the resolved path relative to DIR
-# @param {string} srcFile $1 the file to resolve
-# @param {string} relativeTo $2 the directory
-# @output the resolved path relative to DIR
-# @note do not check for path existence
+# @description print the resolved path relative to DIR
+# do not check for path existence
+# @arg $1 srcFile:String the file to resolve
+# @arg $2 relativeTo:String the directory
+# @stdout the resolved path relative to DIR
 File::relativeToDir() {
   local srcFile="$1"
   local relativeTo="$2"
@@ -345,37 +417,67 @@ File::relativeToDir() {
   realpath -m --relative-to="${relativeTo}" "${srcFile}"
 }
 
+# @description allows to match a bash framework function based on the naming convention
+# @warning this filter could extract bash framework functions that are actually commented in the source file
+# @warning use FRAMEWORK_FUNCTIONS_IGNORE_REGEXP from .framework-config to filter unwanted functions
+# @arg $@ files:String[] the files in which bash framework functions will be extracted
+# @env PREFIX String an eventual prefix you would like to match
+# @env FRAMEWORK_FUNCTIONS_IGNORE_REGEXP String this filter does not use this variable
+# @exitcode 0 if match or no match
+# @exitcode 2 if grep fails for other reasons
+# @stdin you can alternatively provide content to filter via stdin
+# @stdout the list of bash framework function detected
+# @see [bash framework functions naming convention](/CompileCommand.md#bash_framework_functions_naming_convention)
 # shellcheck disable=SC2120
 Filters::bashFrameworkFunctions() {
-  grep -Eo "${PREFIX:-}([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
+  grep -Eo "${PREFIX:-}([A-Z]+[A-Za-z0-9_-]*::)+([a-zA-Z0-9_-]+)" "$@" || test $? = 1
 }
 
+# @description remove comment lines from input or files provided as arguments
+# @arg $@ files:String[] (optional) the files to filter
+# @env commentLinePrefix String the comment line prefix (default value: #)
+# @exitcode 0 if lines filtered or not
+# @exitcode 2 if grep fails for any other reasons than not found
+# @stdin the file as stdin to filter (alternative to files argument)
+# @stdout the filtered lines
 # shellcheck disable=SC2120
 Filters::commentLines() {
   grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
 }
 
-# @param {string[]} $@ the src directories in which .framework-config file will be searched
-# @output the config file path loaded if any
-# @return 0 if .framework-config file has been found in srcDirs provided
+# @description load .framework-config
+# @arg $1 loadedConfigFile:&String (passed by reference) the finally loaded configuration file path
+# @arg $@ srcDirs:String[] the src directories in which .framework-config file will be searched
+# @stdout the config file path loaded if any
+# @exitcode 0 if .framework-config file has been found in srcDirs provided
+# @exitcode 1 if .framework-config file not found
+# @see Conf::loadNearestFile
 Framework::loadConfig() {
   # shellcheck disable=SC2034
-  local -n loadedConfigFile=$1
+  local -n loadConfig_loadedConfigFile=$1
   shift || true
-  Conf::loadNearestFile ".framework-config" loadedConfigFile "$@"
+  Conf::loadNearestFile ".framework-config" loadConfig_loadedConfigFile "$@"
 }
 
-# Public: log level off
+# @description Log namespace provides 2 kind of functions
+# - Log::display* allows to display given message with
+#   given display level
+# - Log::log* allows to log given message with
+#   given log level
+# Log::display* functions automatically log the message too
+# @see Log::load to load the display and log level from .env file
+
+# @description log level off
 export __LEVEL_OFF=0
-# Public: log level error
+# @description log level error
 export __LEVEL_ERROR=1
-# Public: log level warning
+# @description log level warning
 export __LEVEL_WARNING=2
-# Public: log level info
+# @description log level info
 export __LEVEL_INFO=3
-# Public: log level success
+# @description log level success
 export __LEVEL_SUCCESS=3
-# Public: log level debug
+# @description log level debug
 export __LEVEL_DEBUG=4
 
 export __LEVEL_OFF
@@ -385,51 +487,51 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# Display message using debug color (grey)
-# @param {String} $1 message
+# @description Display message using debug color (grey)
+# @arg $1 message:String the message to display
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
   Log::logDebug "$1"
 }
 
-# Display message using error color (red)
-# @param {String} $1 message
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
 Log::displayError() {
   echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
   Log::logError "$1"
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayInfo() {
   local type="${2:-INFO}"
   echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logInfo "$1" "${type}"
 }
 
-# Display message using skip color (yellow)
-# @param {String} $1 message
+# @description Display message using skip color (yellow)
+# @arg $1 message:String the message to display
 Log::displaySkipped() {
   echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   Log::logSkipped "$1"
 }
 
-# Display message using success color (bg green/fg white)
-# @param {String} $1 message
+# @description Display message using success color (bg green/fg white)
+# @arg $1 message:String the message to display
 Log::displaySuccess() {
   echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
   Log::logSuccess "$1"
 }
 
-# Display message using warning color (yellow)
-# @param {String} $1 message
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
 Log::displayWarning() {
   echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
   Log::logWarning "$1"
 }
 
-# Display message using error color (red) and exit immediately with error status 1
-# @param {String} $1 message
+# @description Display message using error color (red) and exit immediately with error status 1
+# @arg $1 message:String the message to display
 Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
@@ -438,6 +540,18 @@ Log::fatal() {
 
 # shellcheck disable=SC2317
 
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
 Log::load() {
   # disable display methods following display level
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
@@ -495,18 +609,20 @@ Log::load() {
   fi
 }
 
-# Load the nearest config file
-# eg: Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
-# will search first .framework-config file in "srcDir1"
+# @description Load the nearest config file
+# in next example will search first .framework-config file in "srcDir1"
 # then if not found will go in up directories until /
 # then will search in "srcDir2"
 # then if not found will go in up directories until /
 # source the file if found
-# @param {String} $1 config file name to search
-# @param {String} $2 passed by reference, will return the loaded config file name
-# @param {String} $@ source directories in which the config file will be searched
-# @return 0 if file found, 1 if file not found
-# @output the filepath loaded if any
+# @example
+#   Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
+#
+# @arg $1 configFileName:String config file name to search
+# @arg $2 loadedFile:String (passed by reference) will return the loaded config file name
+# @arg $@ srcDirs:String[] source directories in which the config file will be searched
+# @exitcode 0 if file found
+# @exitcode 1 if file not found
 Conf::loadNearestFile() {
   local configFileName="$1"
   local -n loadedFile="$2"
@@ -528,79 +644,79 @@ Conf::loadNearestFile() {
   return 1
 }
 
-# Display message using info color (bg light blue/fg white)
-# @param {String} $1 message
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
 Log::displayHelp() {
   local type="${2:-HELP}"
   echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   Log::logHelp "$1" "${type}"
 }
 
-# Display message using info color (blue) but warning level
-# @param {String} $1 message
+# @description Display message using info color (blue) but warning level
+# @arg $1 message:String the message to display
 Log::displayStatus() {
   local type="${2:-STATUS}"
   echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
   Log::logStatus "$1" "${type}"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logDebug() {
   Log::logMessage "${2:-DEBUG}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logError() {
   Log::logMessage "${2:-ERROR}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logFatal() {
   Log::logMessage "${2:-FATAL}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logHelp() {
   Log::logMessage "${2:-HELP}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logInfo() {
   Log::logMessage "${2:-INFO}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSkipped() {
   Log::logMessage "${2:-SKIPPED}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logStatus() {
   Log::logMessage "${2:-STATUS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logSuccess() {
   Log::logMessage "${2:-SUCCESS}" "$1"
 }
 
-# log message to file
-# @param {String} $1 message
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logWarning() {
   Log::logMessage "${2:-WARNING}" "$1"
 }
 
-# To be called before logging in the log file
-# @param {string} file $1 log file name
-# @param {int} maxLogFilesCount $2 maximum number of log files
+# @description To be called before logging in the log file
+# @arg $1 file:string log file name
+# @arg $2 maxLogFilesCount:int maximum number of log files
 Log::rotate() {
   local file="$1"
   local maxLogFilesCount="${2:-5}"
@@ -619,14 +735,14 @@ Log::rotate() {
   fi
 }
 
-# Public: search a file in parent directories
+# @description search a file in parent directories
 #
-# **Arguments**:
-# * $1 path
-# * $2 fileName
-# * $@ list of untilInclusivePath
-# **Output**: The filename if found
-# **Exit**: code 1 if the command failed
+# @arg $1 fromPath:String path
+# @arg $2 fileName:String
+# @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
+# @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
+# @stdout The filename if found
+# @exitcode 1 if the command failed or file not found
 File::upFind() {
   local fromPath="$1"
   shift || true
@@ -651,19 +767,19 @@ File::upFind() {
   return 1
 }
 
-# Internal: common log message
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
 #
-# **Arguments**:
-# * $1 - message's level description
-# * $2 - message
-# **Output**:
-# [date]|[levelMsg]|message
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
 #
-# **Examples**:
-# <pre>
-# 2020-01-19 19:20:21|ERROR  |log error
-# 2020-01-19 19:20:21|SKIPPED|log skipped
-# </pre>
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
 Log::logMessage() {
   local levelMsg="$1"
   local msg="$2"
@@ -685,29 +801,43 @@ Log::logMessage() {
 }
 
 # Checks if file can be created in folder
+#
+
+# @description Checks if file can be created in folder
 # The file does not need to exist
+# @arg $1 file:String
+# @exitcode 1 if file is not a valid path
+# @exitcode 2 if file parent's dir is not writable
+# @exitcode 3 if existing file is not writable
+# @see Assert::validPath
 Assert::fileWritable() {
   local file="$1"
   local dir
 
-  dir="$(dirname "${file}")"
+  Assert::validPath "${file}" || return 1
+  if [[ -f "${file}" ]]; then
+    [[ -w "${file}" ]] || return 3
+  else
+    dir="$(dirname "${file}")"
+    [[ -w "${dir}" ]] || return 2
+  fi
 
-  Assert::validPath "${file}" && [[ -w "${dir}" ]]
 }
 
-# Public: check if argument is a valid linux path
-#
-# @param {string} path $1 path that needs to be checked
-# @return 1 if path is invalid
+# @description check if argument is a valid linux path
 # invalid path are those with:
 # - invalid characters
-# - component beginning by a - (because option)
+# - component beginning by a - (because could be considered as a command's option)
 # - not beginning with a slash
 # - relative
+#
+# @arg $1 path:string path that needs to be checked
+# @exitcode 1 if path is invalid
+# @see https://regex101.com/r/afLrmM/2
+# @see Assert::validPosixPath if you need more restrictive check
 Assert::validPath() {
   local path="$1"
 
-  # https://regex101.com/r/afLrmM/2
   [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
     [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }
@@ -725,7 +855,7 @@ Log::load
 
 Env::pathPrepend "${COMMAND_BIN_DIR}"
 
-# prepare bin directory for eventual bin files generated by Embed::embed
+# prepare bin directory for eventual bin files generated by Compiler::Embed::embed
 mkdir -p "${TMPDIR:-/tmp}/bin"
 Env::pathPrepend "${TMPDIR:-/tmp}/bin"
 
@@ -741,9 +871,13 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,pl
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
-- check if all namespace::functions are existing in the framework
+- check if all Namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check each function has a bats file associated
+- shdoc
+  - check that shdoc valid annotations are used
+  - check that @require function matches naming convention and exists
+  - check that at least @description is provided
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
@@ -889,12 +1023,8 @@ checkEachSrcFileHasBatsFile() {
   fi
   local batsFile="${file%.*}.bats"
   if [[ ! -f "${FRAMEWORK_ROOT_DIR}/${batsFile}" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "checkEachSrcFileHasBatsFile - File '${file}' - missing bats file '${batsFile}'"
-    else
-      echo "<error severity='warning' source='checkEachSrcFileHasBatsFile' message='missing bats file '${batsFile}'/>"
-    fi
-    ((++warningCount))
+    reportWarning "checkEachSrcFileHasBatsFile" "${file}" \
+      "missing bats file '${batsFile}'"
   fi
 }
 
@@ -926,14 +1056,103 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   done < <(sed -E -n 's#^([^([:blank:]]+)\(\)[[:blank:]]*\{#\1#p' "${srcFile}")
 
   if [[ "${foundFunctionMatching}" = "0" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - no function named '${expectedFunctionName}'"
-    else
-      echo "<error severity='warning' source='srcFileHasOneFunctionCorrectlyNamed' message='Should contain a function named ${expectedFunctionName}'/>"
-    fi
-    ((++warningCount))
+    reportWarning "srcFileHasOneFunctionCorrectlyNamed" "${srcFile}" \
+      "Should contain a function named '${expectedFunctionName}'"
     return 0
   fi
+}
+
+checkEachSrcFileHasCorrectShdoc() {
+  local srcFile="$1"
+  if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+  if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+
+  # @see https://regex101.com/r/H2Yrwp/1
+  function filterAnnotationNames() {
+    sed -n -E 's/^# @(([^ ]|$)+)[ ]*.*$/\1/p' "$@"
+  }
+
+  # @see https://regex101.com/r/5oMFQi/1
+  # shellcheck disable=SC2120
+  function filterInvalidAnnotationNames() {
+    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal)$' "$@"
+  }
+
+  function checkValidAnnotationsAreUsed() {
+    local srcFile="$1"
+    local invalidAnnotation
+
+    while IFS='' read -r invalidAnnotation; do
+      reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+        "shdoc annotation '@${invalidAnnotation}' is invalid"
+    done < <(filterAnnotationNames "${srcFile}" | filterInvalidAnnotationNames)
+  }
+
+  # check that @require function exists and matches naming convention
+  function checkRequiredFunctionExists() {
+    local srcFile="$1"
+    local requireAnnotation
+
+    while IFS='' read -r requireAnnotation; do
+      if ! Assert::bashFrameworkFunction "${requireAnnotation}"; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target a valid bash framework function"
+        continue
+      fi
+      if [[ ! "${requireAnnotation}" =~ ^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+require([A-Z][a-zA-Z0-9_-]+)$ ]]; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention Namespace::requireSomething"
+        continue
+      fi
+      if ! Compiler::findFunctionInSrcDirs "${requireAnnotation}" "${FRAMEWORK_SRC_DIRS[@]}" >/dev/null; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target an existing bash framework function"
+      fi
+    done < <(sed -n -E 's/^# @require (.*)$/\1/p' "${srcFile}")
+  }
+
+  function checkDescriptionAnnotationIsProvided() {
+    local srcFile="$1"
+    if ! grep -q -E '^# @description .*' "${srcFile}"; then
+      reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+        "missing mandatory sh doc @description annotation"
+    fi
+  }
+
+  checkValidAnnotationsAreUsed "${srcFile}"
+  checkRequiredFunctionExists "${srcFile}"
+  checkDescriptionAnnotationIsProvided "${srcFile}"
+
+}
+
+reportError() {
+  local category="$1"
+  local file="$2"
+  local msg="$3"
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayError "${category} - File ${file} - ${msg}"
+  else
+    echo "<error severity='error' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
+  fi
+  ((++errorCount))
+}
+
+reportWarning() {
+  local category="$1"
+  local file="$2"
+  local msg="$3"
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayWarning "${category} - File ${file} - ${msg}"
+  else
+    echo "<error severity='warning' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
+  fi
+  ((++warningCount))
 }
 
 ((errorCount = 0)) || true
@@ -954,6 +1173,7 @@ while IFS='' read -r file; do
   checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasCorrectShdoc "${file}" "$@" || ((++errorCount))
 
   if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
@@ -966,14 +1186,14 @@ done < <(
 
 # shellcheck disable=SC2154
 while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayWarning "fileExistence - File ${file} does not exist, git renamed file ?"
-  else
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "<file name='${file}'>"
-    echo "<error severity='warning' source='fileExistence' message='file does not exist, git renamed file ?'/>"
+  fi
+  reportWarning "fileExistence" "${file}" \
+    "File ${file} does not exist, git renamed file ?"
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
   fi
-  ((++warningCount))
 done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 
 if [[ "${FORMAT}" = "checkstyle" ]]; then

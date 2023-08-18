@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-# check if param is valid email address with one the specified domains
-# @param $1 the full email address
-# @param $@ the expected email address domains
-# @return 1 if email invalid
+# @description check if param is valid email address with one the specified domains
+# @warning it is a very simple check, no RFC validation
+# @arg $1 email:String the full email address
+# @arg $@ expectedDomains:String[] the expected email address domains (no check if empty)
+# @exitcode 1 if email invalid
+# @exitcode 2 if email domain doesn't match the expected domains passed in arguments
+# @see Assert::emailAddress
 Assert::emailAddressWithDomain() {
   local email="$1"
   local expectedDomain

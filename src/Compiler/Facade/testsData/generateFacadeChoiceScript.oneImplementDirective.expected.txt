@@ -1,0 +1,12 @@
+local action=$1
+shift || true
+case ${action} in
+  install)
+    install "$@"
+    ;;
+  *)
+    Log::displayError "invalid action requested: ${action}"
+    exit 1
+    ;;
+esac
+exit 0

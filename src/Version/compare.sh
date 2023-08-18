@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# @param $1 version 1
-# @param $2 version 2
-# @return
-#   0 if equal
-#   1 if version1 > version2
-#   2 else
+# @description compare 2 version numbers
+# @arg $1 version1:String version 1
+# @arg $2 version2:String version 2
+# @exitcode 0 if equal
+# @exitcode 1 if version1 > version2
+# @exitcode 2 else
 Version::compare() {
   if [[ "$1" = "$2" ]]; then
     return 0

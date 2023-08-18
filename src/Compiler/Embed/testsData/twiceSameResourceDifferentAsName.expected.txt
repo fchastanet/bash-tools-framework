@@ -1,0 +1,6 @@
+Compiler::Embed::extractFileFromBase64 "${PERSISTENT_TMPDIR:-/tmp}/7be7bfaf6ff1d2836119b22ae8881346/valid1" "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK" "755"
+
+declare -gx embed_file_valid1="${PERSISTENT_TMPDIR:-/tmp}/7be7bfaf6ff1d2836119b22ae8881346/valid1"
+Compiler::Embed::extractFileFromBase64 "${PERSISTENT_TMPDIR:-/tmp}/7be7bfaf6ff1d2836119b22ae8881346/valid2" "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZWNobyAiYmluYXJ5RmlsZSAkKiIK" "755"
+
+declare -gx embed_file_valid2="${PERSISTENT_TMPDIR:-/tmp}/7be7bfaf6ff1d2836119b22ae8881346/valid2"

@@ -15,6 +15,8 @@ if [[ -n "${FRAMEWORK_VENDOR_BIN_DIR}" ]]; then
 fi
 
 srcDir="$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)"
+# shellcheck source=src/_includes/_mandatoryHeader.sh
+source "${srcDir}/_includes/_mandatoryHeader.sh"
 # shellcheck source=/src/Assert/fileWritable.sh
 source "${srcDir}/Assert/fileWritable.sh"
 # shellcheck source=/src/Assert/validPath.sh

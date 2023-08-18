@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-# generate markdown file from template by replacing
-# @@@command_help@@@ by the help of the command
+# @description generates markdown file from template by
+# replacing @@@command_help@@@ by the help of the command
 # eg: @@@test_help@@@ will be replaced by the output
 # of the command `test --help` in the directory provided
-# @param {String} $1 templateFile the file to use as template
-# @param {String} $2 targetFile the target file
-# @param {String} $3 fromDir the directory from which commands will be searched
-# @param {int} $4 tokenNotFoundCount passed by reference, will return
-#    the number of tokens @@@command_help@@@ not found in the template file
-# @param {String} excludeFilesPattern $5 grep exclude pattern
-#   eg: '^(bash-tpl)$'
+#
+# @arg $1 templateFile:String the file to use as template
+# @arg $2 targetFile:String the target file
+# @arg $3 fromDir:String the directory from which commands will be searched
+# @arg $4 tokenNotFoundCount:&int (passed by reference) number of tokens @@@command_help@@@ not found in the template file
+# @arg $5 excludeFilesPattern:String grep exclude pattern (eg: '^(bash-tpl)$') (default value: "")
+# @stderr diagnostics logs
+# @stdout the generated markdown with help of the matching command
 ShellDoc::generateMdFileFromTemplate() {
   local templateFile="$1"
   local targetFile="$2"

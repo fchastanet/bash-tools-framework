@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-# Backup given file in the same directory
-# @param {string} $1 the file to backup
-# @output messages about backup file location
+# @description Backup given file in the same directory appending _ followed by the current date
+# @arg $1 file:String the file to backup
+# @stderr messages about backup file location
+# @exitcode 1 on copy failure
 Backup::file() {
   local file="$1"
   local backupFile

@@ -16,7 +16,12 @@ EOF
 )"
 Args::defaultHelp "${HELP}" "$@"
 
+ShellDoc::installRequirementsIfNeeded
+
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+  if [[ "${ARGS_VERBOSE}" = "1" ]]; then
+    set -- "$@" --verbose
+  fi
   "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
   exit $?
 fi
@@ -34,17 +39,21 @@ ShellDoc::generateMdFileFromTemplate \
   "${DOC_DIR}/Commands.md" \
   "${COMMAND_BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
-  '(bash-tpl|var|simpleBinary)$'
+  '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
 
 # clean folder before generate
 rm -f "${DOC_DIR}/Index.md" || true
 rm -Rf "${DOC_DIR}/bashDoc" || true
+rm -Rf "${DOC_DIR}/FrameworkIndex.md" || true
 
 ShellDoc::generateShellDocsFromDir \
   "${FRAMEWORK_SRC_DIR}" \
+  "src" \
   "${DOC_DIR}/bashDoc" \
   "${DOC_DIR}/FrameworkIndex.md" \
-  '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|_binaries/.*\.sh|/__all\.sh)$'
+  "<% ${REPOSITORY_URL} %>" \
+  '/testsData|/_.*' \
+  '(/__all\.sh)$'
 
 cp "${FRAMEWORK_ROOT_DIR}/README.md" "${DOC_DIR}"
 sed -i -E \
@@ -57,32 +66,13 @@ mkdir -p "${DOC_DIR}/images" || true
 cp -R "${FRAMEWORK_ROOT_DIR}/images/"* "${DOC_DIR}/images"
 cp "${FRAMEWORK_ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
 cp "${FRAMEWORK_ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
-cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
+cp "${FRAMEWORK_ROOT_DIR}/src/Docker/DockerUsage.md" "${DOC_DIR}/DockerUsage.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
+cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
 (
-  cd "${FRAMEWORK_ROOT_DIR}/pages/bashDoc" || exit 1
-  currentDir=""
-  echo ""
-  while IFS= read -r file; do
-    dir="$(dirname "${file}")"
-    if [[ "${currentDir}" != "${dir}" ]]; then
-      echo
-      echo "## ${dir#./}"
-      currentDir="${dir}"
-    fi
-    # shellcheck disable=SC2016
-    # print removing 2 first titles
-    sed -E \
-      -e 's/^(##?) [^#]+$//g' \
-      -e 's/^### Function (.+)$/### \1/g' \
-      "${file}"
-  done < <(
-    # find ensuring that files are ordered
-    find . -type f -printf '%h\0%d\0%p\n' |
-      sort -t '\0' -n |
-      awk -F '\0' '{print $3}'
-  )
+  echo
+  find "${DOC_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
 ) >>"${DOC_DIR}/FrameworkFullDoc.md"
 
 ShellDoc::fixMarkdownToc "${DOC_DIR}/FrameworkFullDoc.md"

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# print the resolved path relative to DIR
-# @param {string} srcFile $1 the file to resolve
-# @param {string} relativeTo $2 the directory
-# @output the resolved path relative to DIR
-# @note do not check for path existence
+# @description print the resolved path relative to DIR
+# do not check for path existence
+# @arg $1 srcFile:String the file to resolve
+# @arg $2 relativeTo:String the directory
+# @stdout the resolved path relative to DIR
 File::relativeToDir() {
   local srcFile="$1"
   local relativeTo="$2"

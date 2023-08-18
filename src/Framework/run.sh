@@ -5,13 +5,19 @@ declare -gx bash_framework_status
 declare -gix bash_framework_duration
 declare -gx bash_framework_output
 
-# *Public*: run command and store data in following global variables :
-# * bash_framework_status the exit status of the command
-# * bash_framework_duration the duration of the command
-# * bash_framework_output the output of the command
+# @description run command and store data in global variables
+# - bash_framework_status
+# - bash_framework_duration
+# - bash_framework_output
 # redirecting error output to stdout is not supported, you can instead redirect stderr to a file if needed
-# **Arguments**:
-# * $@ command with arguments to execute
+#
+# @arg $@ command:String[] command with arguments to execute
+#
+# @set bash_framework_status the exit status of the command
+# @set bash_framework_duration the duration of the command
+# @set bash_framework_output the output of the command
+#
+# @see Command::captureOutputAndExitCode as an alternative
 Framework::run() {
   # 'bash_framework_status', 'bash_framework_duration' are global variables
   local -i start end

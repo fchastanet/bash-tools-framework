@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-# Public: set the options to use on mysqldump command
+# @description set the options to use on mysqldump command
 #
-# **Arguments**:
-# * $1 - (passed by reference) database instance to use
-# * $2 - options list
+# @arg $1 instanceSetDumpOptions:&Map<String,String> (passed by reference) database instance to use
+# @arg $2 optionsList:String dump options list
 Database::setDumpOptions() {
   local -n instanceSetDumpOptions=$1
   # shellcheck disable=SC2034

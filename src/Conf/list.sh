@@ -1,20 +1,18 @@
 #!/usr/bin/env bash
 
-# Public: list files of dir with given extension and display it as a list one by line
+# @description list files of dir with given extension and display it as a list one by line
 #
-# @param {String} dir $1 the directory to list
-# @param {String} prefix $2 the profile file prefix (default: "")
-# @param {String} ext $3 the extension
-# @param {String} findOptions $4 find options, eg: -type d
-# @paramDefault {String} findOptions $4 '-type f'
-# @param {String} indentStr $5 the indentation can be any string compatible with sed not containing any /
-# @paramDefault {String} indentStr $5 '       - '
-# @output list of files without extension/directory
-# eg:
+# @arg $1 dir:String the directory to list
+# @arg $2 prefix:String the profile file prefix (default: "")
+# @arg $3 ext:String the extension
+# @arg $4 findOptions:String find options, eg: -type d (Default value: '-type f')
+# @arg $5 indentStr:String the indentation can be any string compatible with sed not containing any / (Default value: '       - ')
+# @stdout list of files without extension/directory
+# @example text
 #       - default.local
 #       - default.remote
 #       - localhost-root
-# @return 1 if directory does not exists
+# @exitcode 1 if directory does not exists
 Conf::list() {
   local dir="$1"
   local prefix="${2:-}"

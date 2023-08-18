@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Public: insert file content inside another file before a
+# @description insert file content inside another file before a
 # pattern
 #
-# @param {String} file $1 file in which fileToImport will be
+# @arg $1 file:String file in which fileToImport will be
 #   injected
-# @param {String} fileToImport $2 file to inject before the
+# @arg $2 fileToImport:String file to inject before the
 #   token
-# @param {String} token $3 token needs to be properly escaped
+# @arg $3 token:String token needs to be properly escaped
 #   for usage inside sed // regexp
 File::insertFileBeforeToken() {
   local file="$1"

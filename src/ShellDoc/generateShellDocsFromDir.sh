@@ -1,50 +1,51 @@
 #!/usr/bin/env bash
 
-# generate doc + index
-# @param {String} $1 fromDir
-# @param {String} $2 docDir
-# @param {String} $3 indexFile
-# @param {String} excludeFilesPattern $4 grep exclude pattern
-#   eg: '(/_\.sh|/ZZZ\.sh|_includes/.*\.sh|/__all\.sh)$'
+# @description generate doc + index
+# @arg $1 fromDir:String
+# @arg $2 fromDirRelative:String
+# @arg $3 docDir:String
+# @arg $4 indexFile:String
+# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $6 excludeDirectoriesPattern:String grep exclude pattern. Eg: '/testsData|/_.*'
+# @arg $7 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
 ShellDoc::generateShellDocsFromDir() {
   local fromDir="$1"
-  local docDir="$2"
-  local indexFile="$3"
-  local excludeFilesPattern="${4:-}"
-  local -a grepExclude
-  local startTime endTime
+  local fromDirRelative="$2"
+  local docDir="$3"
+  local indexFile="$4"
+  local repositoryUrl="${5:-}"
+  local excludeDirectoriesPattern="${6:-}"
+  local excludeFilesPattern="${7:-}"
 
-  if [[ -z "${excludeFilesPattern}" ]]; then
+  # exclude dir pattern
+  local -a grepExclude
+  if [[ -z "${excludeDirectoriesPattern}" ]]; then
     grepExclude=(cat)
   else
-    grepExclude=(grep -E -v "${excludeFilesPattern}")
+    grepExclude=(grep -E -v "${excludeDirectoriesPattern}")
   fi
 
-  startTime=$(date +%s.%3N)
-  ((nbFilesGenerated = 0)) || true
-  while IFS= read -r relativeFile; do
-    relativeFile="${relativeFile#./}"
-    local basenameNoExtension="${relativeFile%.*}"
-    local targetDocFile="${docDir}/${basenameNoExtension}.md"
-    local targetDocDir
-    local targetDocFileRelative
+  # generate one .md per directory
+  local relativeDir
+  local targetDocFile
+  local targetDocFileRelative
+
+  while IFS= read -r relativeDir; do
+    relativeDir="${relativeDir#./}"
+    targetDocFile="${docDir}/${relativeDir}.md"
     targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "$(dirname "${indexFile}")" "${targetDocFile}")"
 
-    # create target doc dir
-    targetDocDir="$(dirname "${targetDocFile}")"
-    mkdir -p "${targetDocDir}" || {
-      Log::displayError "unable to create target doc directory ${targetDocDir}"
-      return 1
-    }
-
-    # generate markdown file from shell file
-    Log::displayInfo "generate markdown doc for ${relativeFile} in ${targetDocFile}"
-
-    if ShellDoc::generateShellDocFile "${fromDir}" "${relativeFile}" "${targetDocFile}"; then
-      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${basenameNoExtension}"
+    mkdir -p "$(dirname "${targetDocFile}")" || true
+    if ShellDoc::generateShellDocDir \
+      "${fromDir}/${relativeDir}" \
+      "${fromDirRelative}/${relativeDir}" \
+      "${targetDocFile}" \
+      "${repositoryUrl}" \
+      "${excludeFilesPattern}" && [[ -n "$(tail -n +6 "${targetDocFile}")" ]]; then
+      ShellDoc::appendDocToIndex "${indexFile}" "${targetDocFileRelative}" "${relativeDir}"
+    else
+      rm -f "${targetDocFile}" || true
+      Log::displaySkipped "${fromDir}/${relativeDir} does not contain any documentation"
     fi
-    ((nbFilesGenerated++)) || true
-  done < <(cd "${fromDir}" && find . -name "*.sh" | "${grepExclude[@]}" | sort)
-  endTime=$(date +%s.%3N)
-  Log::displayInfo "${nbFilesGenerated} files generated in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
+  done < <(cd "${fromDir}" && find . -type d -name '[^.]*' | "${grepExclude[@]}" | LC_ALL=C sort)
 }

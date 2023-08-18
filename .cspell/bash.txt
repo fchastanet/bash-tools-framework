@@ -112,3 +112,11 @@ failfast
 untar
 untarred
 unsetting
+exitcode
+SHDOC
+noargs
+everytime
+lastpipe
+subshell
+uuidgen
+DELIMS

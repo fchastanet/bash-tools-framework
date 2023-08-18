@@ -2,6 +2,19 @@
 
 BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT=86400 # 1 day
 
+# @description install requirements to execute bats
+# @warning the following repositories are shallow cloned
+# @warning cloning is skipped if vendor/.batsInstalled file exists
+# @warning a new check is done everyday
+# @warning repository is not updated if a change is detected
+# @env BASH_FRAMEWORK_BATS_DEPENDENCIES_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
+# @set BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED String the file created when all git shallow clones have succeeded
+# @see https://github.com/bats-core/bats-core
+# @see https://github.com/bats-core/bats-support
+# @see https://github.com/bats-core/bats-assert
+# @see https://github.com/Flamefire/bats-mock
+# @stderr diagnostics information is displayed
+# @feature Git::shallowClone
 Bats::installRequirementsIfNeeded() {
   local rootDir="${1:-"${FRAMEWORK_ROOT_DIR}"}"
   BASH_FRAMEWORK_BATS_DEPENDENCIES_INSTALLED="${rootDir}/vendor/.batsInstalled"
@@ -18,7 +31,6 @@ Bats::installRequirementsIfNeeded() {
       "master" \
       "FORCE_DELETION"
 
-    # last revision 2019
     Git::shallowClone \
       "https://github.com/bats-core/bats-support.git" \
       "${rootDir}/vendor/bats-support" \

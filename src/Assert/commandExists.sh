@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Public: check if command specified exists or return 1
+# @description check if command specified exists or return 1
 # with error and message if not
 #
-# **Arguments**:
-# * $1 commandName on which existence must be checked
-# * $2 helpIfNotExists a help command to display if the command does not exist
+# @arg $1 commandName:String on which existence must be checked
+# @arg $2 helpIfNotExists:String a help command to display if the command does not exist
 #
-# **Exit**: code 1 if the command specified does not exist
+# @exitcode 1 if the command specified does not exist
+# @stderr diagnostic information + help if second argument is provided
 Assert::commandExists() {
   local commandName="$1"
   local helpIfNotExists="$2"

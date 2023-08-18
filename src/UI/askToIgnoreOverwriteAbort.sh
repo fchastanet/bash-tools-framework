@@ -2,7 +2,7 @@
 readonly __bash_framework__choice_ignore=0
 readonly __bash_framework__choice_overwrite=1
 
-# Public: ask the user to ignore(i), overwrite(o) or abort(a)
+# @description ask the user to ignore(i), overwrite(o) or abort(a)
 #
 # **Input**: user input any characters
 #

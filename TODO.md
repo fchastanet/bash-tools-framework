@@ -5,14 +5,14 @@
 - [3. Framework functions changes](#3-framework-functions-changes)
 - [4. Update Bash-tools-framework dependencies](#4-update-bash-tools-framework-dependencies)
 - [5. Compiler and bash Object oriented](#5-compiler-and-bash-object-oriented)
-  - [5.1. Embed::embed](#51-embedembed)
+  - [5.1. REQUIRE directive](#51-require-directive)
   - [5.2. FrameworkLint](#52-frameworklint)
 - [6. Binaries](#6-binaries)
-  - [New binaries](#new-binaries)
-  - [6.1. BashDoc](#61-bashdoc)
-    - [6.1.1. add compilation checks](#611-add-compilation-checks)
-  - [6.2. all binaries - template](#62-all-binaries---template)
-  - [6.3. Binaries improvement](#63-binaries-improvement)
+  - [6.1. New binaries](#61-new-binaries)
+  - [6.2. shDoc](#62-shdoc)
+    - [6.2.1. add compilation checks](#621-add-compilation-checks)
+  - [6.3. all binaries - template](#63-all-binaries---template)
+  - [6.4. Binaries improvement](#64-binaries-improvement)
 - [7. Other improvements/Studies](#7-other-improvementsstudies)
   - [7.1. run precommit on github action](#71-run-precommit-on-github-action)
   - [7.2. Other libraries integration](#72-other-libraries-integration)
@@ -51,12 +51,14 @@
 
 ## 3. Framework functions changes
 
+- remove all process substitution as it hides exit code > 0
 - log use alias
+- logMessage do nothing if Log::load has been called, no need to check logLevel
+  if Log::load do correctly its job
 - check if we could use alias to override methods to be able to reload or pass
   by temp functions?
 - replace \_colors.sh with Log/theme
 - merge Framework::run and Command::captureOutputAndExitCode
-- create function Array::remove
 - Conf::list findOptions as last arg so any number of args
 - replace Command::captureOutputAndExitCode with Framework::run that mimics bats
   run
@@ -75,63 +77,54 @@
 
 TODOs linked to bin/compiler:
 
+- MAIN_FUNCTION_VAR_NAME not working + add doc
+- use FACADE for all binaries
+- FACADE help auto generated
+- what would be the impact to add shopt -s lastpipe
 - arg configuration: display whole bash framework configuration
-- make compile use relative paths
-- deduce ROOT_DIR based on most near .framework-config file ?
-- dependencies checker
-  - ensure that needed variables are set
-    - eg: Conf::\* needs FRAMEWORK_ROOT_DIR to be defined
-  - REQUIRE directives that include templates files automatically and that
-    performs checks at the script start
-    - REQUIRE Log
-    - REQUIRE FRAMEWORK_ROOT_DIR
-    - REQUIRE Embed -> enable bin directory initialization
-    - REQUIRE alpine/ubuntu/wsl
-    - REQUIRE bash version > 4.0
-    - REQUIRE verboseArg
-    - REQUIRE TMPDIR
-  - Require Log::load if at least one Log::display\*
+- deduce FRAMEWORK_ROOT_DIR based on most near .framework-config file ?
 - .framework-config should contain the compiler options
 - make compile options works with relative files
   - display info should display relative path too instead of full path
   - update CompileCommand.md examples
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
-  - define a sh format able to describe an interface
-  - would it be possible to implement inheritance ?
+  - Profiles::lintDefinitions can be changed to provide a dynamic list of method
+    names
 - compile should use FRAMEWORK_SRC_DIRS from .framework-config
 - use Filters::optimizeShFile
-- check if nested namespaces are supported
+  - using
+    [shfmt --minify option](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#generic-flags)
 - get rid of `__all.sh` files, useless because of compiler auto include
+- [Apply defensive suggestions](https://docs.fedoraproject.org/en-US/defensive-coding/programming-languages/Shell/)
 
-### 5.1. Embed::embed
+### 5.1. REQUIRE directive
 
-- implement EMBED AS directive
-  - new bash-framework function to call bash-tpl (embedded)
-  - replace all envsubst by the usage of bash-tpl
-
-it doesn't matter if the command to execute is a sudo or not we just want to
-encapsulate a dependent binary(bash or not) inside the executable.
-
-- <https://blog.tratif.com/2023/02/17/bash-tips-6-embedding-files-in-a-single-bash-script/>
-  - from bin file, generate a directory will all the necessary bin files and
-    assets
-  - tar the entire directory
-  - create a bootstrap script able to untar and execute the entrypoint
-- add EMBED var
-- EMBED of a function of the framework will automatically generate a bin file
-  called with the name of the function and calling this function
-- using EMBED supposes to unsure the targeted binary has been constructed
-- using EMBED with a framework function (eg: Backup::file) will first construct
-  a bin file using that function directly
-- inject Embed::extract\_${asName} just before the use of the alias(lazy
-  loading)
-  - remove the call in `src/Embed/embedFileFunction.tpl`
-
-eg: Backup::file so it would allow to use `sudo Backup::file ...`
-
-```bash
-# EMBED Backup::file
-```
+- clarify when to use `# @feature sudo, ...`, shouldn't be a require ?
+- move Embed to Compiler namespace
+- define REQUIRE_DISABLED array in .framework-config
+- Compiler::Requirement::assertRequireName
+  - error if requires name does not begin with requires
+  - error if requires name does not comply naming convention
+- Compiler::Requirement::parseDisable + add automatically to global variable
+  REQUIRE_DISABLED
+  - Warn if a requirement has no associated file using
+    Compiler::findFunctionInSrcDirs
+- Compiler::Requirement::parse
+  - Warn if a requirement has no associated file using
+    Compiler::findFunctionInSrcDirs
+- Compiler::Requirement::incrementRequireUsage
+- Compiler::Requirement::addRequireDependency
+- implement compiler pass
+  - will parse `# REQUIRE` directives
+    - error if _requires\*_ file not found
+  - will ignore the disabled requirements
+  - use of Compiler::Requirement::incrementRequireUsage
+  - use of Compiler::Requirement::addRequireDependency
+  - eventual framework functions needed will be imported
+- on second pass, execute again compiler pass as eventual other `REQUIRE`
+  directives could be found
+- At the end of compiler processing, inject the requirements in the order
+  specified by dependency tree.
 
 ### 5.2. FrameworkLint
 
@@ -145,38 +138,33 @@ eg: Backup::file so it would allow to use `sudo Backup::file ...`
   - function allow to unzip the file
 - EMBED "as" names should be unique + some forbidden names (existing bash
   functions)
+- shDoc linter check params coherence
+  - 2 @arg $1
+  - @arg $1 after @arg $2
 
 ## 6. Binaries
 
-### New binaries
+### 6.1. New binaries
 
 - add githubUpgradeRelease based on Github::upgradeRelease
 
-### 6.1. BashDoc
+### 6.2. shDoc
 
-- update bashDoc and include it inside bash-tools-framework
-- generates automatically bash framework functions dependencies recursively
 - register to <https://repology.org/projects/> in order to show matrix image
   <https://github.com/jirutka/esh/blob/master/README.adoc>
 - bash documentation
-  - <https://www.sphinx-doc.org/en/master/>
   - <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/> add man page
     heredoc + tool that extract heredoc from each sh files
   - asciidoctor to build manpages
   - <https://github.com/gumpu/ROBODoc>
-  - could I use groovy doc ?
-  - bashDoc linter check params coherence
-    - 2 @param $1
-    - @param $1 after @param $2
-    - @paramDefault $1 just after @param $2
 
-#### 6.1.1. add compilation checks
+#### 6.2.1. add compilation checks
 
 - compile exit 1 if at least 1 warning
 - error if bash-tpl template not found
   - File not found: '/dbQueryAllDatabases.awk'
 
-### 6.2. all binaries - template
+### 6.3. all binaries - template
 
 default binary template improvement that adds:
 
@@ -191,7 +179,7 @@ default binary template improvement that adds:
   - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
 
-### 6.3. Binaries improvement
+### 6.4. Binaries improvement
 
 TODOs linked to `src/_binaries/*`:
 
@@ -233,14 +221,14 @@ TODOs linked to `src/_binaries/*`:
 ## 8. best practices
 
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
-  using customized aliased commands by the use
-- Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
+  using customized aliased commands by the use => but unalias --all is used in
+  header
+- Linux::Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
   - but no way to know if variable exists except by using `wslvar -S` or
     `wslvar -L`
 
 ### 8.1. Robustness
 
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html>
-  - add `shopt -s inherit_errexit`
   - add `set -u`
   - add this page comments to `BestPractices.md`

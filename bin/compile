@@ -57,34 +57,20 @@ source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
 # shellcheck source=/src/File/insertFileAfterToken.sh
 source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
-# shellcheck source=src/Embed/inject.sh
-source "${_COMPILE_SRC_DIR}/Embed/inject.sh"
-# shellcheck source=src/Embed/filter.sh
-source "${_COMPILE_SRC_DIR}/Embed/filter.sh"
-# shellcheck source=src/Embed/parse.sh
-source "${_COMPILE_SRC_DIR}/Embed/parse.sh"
-# shellcheck source=src/Embed/assertAsName.sh
-source "${_COMPILE_SRC_DIR}/Embed/assertAsName.sh"
-# shellcheck source=src/Embed/assertResource.sh
-source "${_COMPILE_SRC_DIR}/Embed/assertResource.sh"
-# shellcheck source=src/Embed/embed.sh
-source "${_COMPILE_SRC_DIR}/Embed/embed.sh"
-# shellcheck source=src/Assert/validVariableName.sh
-source "${_COMPILE_SRC_DIR}/Assert/validVariableName.sh"
-# shellcheck source=src/Embed/embedFile.sh
-source "${_COMPILE_SRC_DIR}/Embed/embedFile.sh"
-# shellcheck source=src/Embed/embedDir.sh
-source "${_COMPILE_SRC_DIR}/Embed/embedDir.sh"
-# shellcheck source=src/Embed/embedFrameworkFunction.sh
-source "${_COMPILE_SRC_DIR}/Embed/embedFrameworkFunction.sh"
+# shellcheck source=src/Compiler/Embed/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/__all.sh"
+# shellcheck source=src/Compiler/Facade/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Facade/__all.sh"
+# shellcheck source=/src/Compiler/Implement/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Implement/__all.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
 # shellcheck source=/src/Assert/fileWritable.sh
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
-# shellcheck source=/src/Embed/getSrcDirsFromOptions.sh
-source "${_COMPILE_SRC_DIR}/Embed/getSrcDirsFromOptions.sh"
+# shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -311,20 +297,30 @@ dynamicSrcDir() {
 export -f dynamicSrcDir
 
 evalTemplate() {
-  local FILE="$1"
+  local file="$1"
+  local targetBinFile="$2"
+  local callback="$3"
   local varExports
-  varExports="$(Compiler::extractVarForExport "${FILE}")"
+  varExports="$(Compiler::extractVarForExport "${file}")"
+
+  local varCallbackExports=""
+  if [[ "$(type -t "${callback}")" = "function" ]]; then
+    local tmpFile
+    tmpFile="$(Framework::createTempFile "callbackExports")"
+    "${callback}" "${file}" >"${tmpFile}"
+    varCallbackExports="$(cat "${tmpFile}")"
+  fi
 
   # the src file you want to show at the top of generated file to indicate
   # from which source file the binary has been generated
   if [[ -z "${SRC_FILE_PATH+xxx}" ]]; then
     SRC_FILE_PATH="$(File::relativeToDir "${INPUT_FILE}" "${FRAMEWORK_ROOT_DIR}")"
   fi
-
   SRC_ABSOLUTE_PATH="$(realpath "${INPUT_FILE}")"
   (
     cd "${TEMPLATE_DIR}"
     eval "${varExports}"
+    eval "${varCallbackExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
     export FRAMEWORK_BIN_DIR
     export FRAMEWORK_ROOT_DIR
@@ -336,9 +332,18 @@ evalTemplate() {
     # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
     trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM
     printf '%s\n' "${srcDirs[@]}" >"${TMPDIR:-/tmp}/srcDirs"
+    local bashtplLogFile
+    bashtplLogFile="$(Framework::createTempFile "bashtplLogFile")"
     # shellcheck source=/dev/null
-    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${FILE}")
-  ) | Filters::removeDuplicatedShebangs
+    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${file}" 2>"${bashtplLogFile}")
+    wait $!
+    if [[ -s "${bashtplLogFile}" ]]; then
+      Log::displayError "bash-tpl found some errors"
+      cat >&2 "${bashtplLogFile}"
+      exit 1
+    fi
+  ) | Filters::removeDuplicatedShebangs | Compiler::Facade::restoreOldMainFunctionName "${targetBinFile}"
+
 }
 
 importFunctions() {
@@ -453,7 +458,7 @@ injectEmbed() {
   local -a embeddedNames=()
   # shellcheck disable=SC2034
   local -a embeddedResources=()
-  Embed::inject embeddedNames embeddedResources <"${file}" >"${embedFile}"
+  Compiler::Embed::inject embeddedNames embeddedResources <"${file}" >"${embedFile}"
   File::insertFileAfterToken "${file}" "${embedFile}" "# FUNCTIONS"
 }
 
@@ -479,7 +484,7 @@ COMPILED_FILE2="$(mktemp -p "${TMPDIR:-/tmp}" -t "compiled_file2.XXXXXXX")"
 
 # shellcheck disable=SC2034
 declare -a filesAlreadyImported=("${INPUT_FILE}")
-evalTemplate "${INPUT_FILE}" >"${COMPILED_FILE}"
+evalTemplate "${INPUT_FILE}" "${BIN_FILE}" Compiler::Facade::facade >"${COMPILED_FILE}"
 
 # compute BIN_FILE
 if [[ -z "${BIN_FILE}" ]]; then
@@ -500,7 +505,7 @@ injectImportedFunctions "${COMPILED_FILE}" filesAlreadyImported
 
 # evaluate again the current compiledFile as a template in the case
 # where injected function are using template function (include files like Env::load
-evalTemplate "${COMPILED_FILE}" >"${COMPILED_FILE2}"
+evalTemplate "${COMPILED_FILE}" "${BIN_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
 # filesAlreadyImported is global variable so we will not reimport already included functions
@@ -508,6 +513,13 @@ injectImportedFunctions "${COMPILED_FILE2}" filesAlreadyImported
 
 # remove spaces at the end of the lines
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
+
+# retrieve all interfaces functions that need to be implemented
+export _COMPILE_FILE_ARGUMENTS
+declare -a interfacesFunctions
+Compiler::Implement::mergeInterfacesFunctions "${COMPILED_FILE2}" | readarray -t interfacesFunctions
+Compiler::Implement::validateInterfaceFunctions \
+  "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
 
 cat -s "${COMPILED_FILE2}" | Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" >"${BIN_FILE}"
 chmod +x "${BIN_FILE}"

@@ -31,7 +31,22 @@ function Assert::fileWritable::validPathDirNotWritable { #@test
     return 0
   }
   run Assert::fileWritable "${file}"
-  assert_failure 1
+  assert_failure 2
+  assert_output ""
+}
+
+function Assert::fileWritable::fileExistsButNotWritable { #@test
+  local dir="${BATS_TEST_TMPDIR}/myDir"
+  mkdir -p "${dir}"
+  local file="${dir}/myFile"
+  touch "${file}"
+  chmod 444 "${file}"
+
+  Assert::validPath() {
+    return 0
+  }
+  run Assert::fileWritable "${file}"
+  assert_failure 3
   assert_output ""
 }
 

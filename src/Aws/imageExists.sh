@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-# Image exists with tags provided on AWS ecr
+# @description Checks if image exists with tags provided on AWS ecr
 # best practice: provide tags 'tagPrefix_shortSha' 'tagPrefix_branchName'
 # so image will be tagged with
 # - tagPrefix_shortSha
 # - tagPrefix_branchName
-# @param {String} repositoryName $1 eg:889859566884.dkr.ecr.eu-west-1.amazonaws.com/bast-tools-dev-env
-# @param {String} tags $@ list of tags used to check if image exists on AWS ECR
-# @return 1 if no tag provided
-# @return 2 if at least one tag does not exist
+# @arg $1 repositoryName:String eg:889859566884.dkr.ecr.eu-west-1.amazonaws.com/bast-tools-dev-env
+# @arg $@ tags:String[] list of tags used to check if image exists on AWS ECR
+# @exitcode 1 if no tag provided
+# @exitcode 2 if at least one tag does not exist
+# @stderr diagnostics information is displayed
+# @require Aws::requireAwsCommand
 Aws::imageExists() {
   local repositoryName="$1"
   shift || true

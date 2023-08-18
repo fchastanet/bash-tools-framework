@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-# @param {String} url $1 the url to contact using curl
-# @param {String} title $2 the title to pass to Retry::parameterized method
-# @paramDefault {String} title $2 "Try to contact ${title} ..."
-# @param {int} maxRetries $3 max retries
-# @paramDefault {int} maxRetries $3 default Value: 40
-# @param {int} delayBetweenTries $4 delay between attempt in seconds
-# @paramDefault {String} delayBetweenTries $4 default Value: 5 seconds
+# @description check if ulr provided can be reached (trying if failure)
+# @arg $1 url:String the url to contact using curl
+# @arg $2 title:String the title to pass to Retry::parameterized method (default: "Try to contact ${title} ...")
+# @arg $3 maxRetries:int max retries (default: 40)
+# @arg $4 delayBetweenTries:int delay between attempt in seconds (default value: 5 seconds)
+# @stderr progression status using title argument
+# @feature Retry::parameterized
+# @require Linux::requireCurlCommand
 Assert::curlPingWithRetry() {
   local url="$1"
   local title="${2:-"Try to contact ${url} ..."}"

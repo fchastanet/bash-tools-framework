@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-# Public: check if argument is a valid posix linux path
+# @description check if argument is a valid posix linux path
 # and does not contains relative directory
-#
-# @param {string} path $1 path that needs to be checked
-# @return 1 if path is invalid
+# @warning posix path is really restrictive, if you need less restrictive check you can use Assert::validPath
+# @arg $1 path:string path that needs to be checked
+# @exitcode 1 if path is invalid
+# @require Linux::requirePathchkCommand
+# @require Linux::requireRealpathCommand
 Assert::validPosixPath() {
   local path="$1"
 

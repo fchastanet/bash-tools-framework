@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# get file content if file not expired
-# @param {String} file $1 the file to get content from
-# @param {String} maxDuration $2 number of seconds after which the file is considered expired
-# @output {String} the file content if not expired
-# @return 1 if file does not exists
-# @return 2 if file expired
+# @description get file content if file not expired
+# @arg $1 file:String the file to get content from
+# @arg $2 maxDuration:int number of seconds after which the file is considered expired
+# @stdout {String} the file content if not expired
+# @exitcode 1 if file does not exists
+# @exitcode 2 if file expired
 Cache::getFileContentIfNotExpired() {
   local file="$1"
   local maxDuration="$2"

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# Ask user to enter y or n, retry until answer is correct
-# @param {String} $1 message to display before asking
-# @output displays message <pre>[msg arg $1] (y or n)?</pre>
-# @output if characters entered different than [yYnN] displays "Invalid answer" and continue to ask
-# @return 0 if yes, 1 else
+# @description Ask user to enter y or n, retry until answer is correct
+# @arg $1 message:String message to display before asking
+# @stdout displays message <pre>[msg arg $1] (y or n)?</pre>
+# @stdout if characters entered different than [yYnN] displays "Invalid answer" and continue to ask
+# @exitcode 0 if yes
+# @exitcode 1 else
 UI::askYesNo() {
   while true; do
     read -p "$1 (y or n)? " -n 1 -r

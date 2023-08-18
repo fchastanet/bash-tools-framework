@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-# Public: exits with message if expected global variable is not set
+# @description exits with message if expected global variable is not set
+# @example
+#   Assert::expectGlobalVariables EXISTING_VAR EXISTING_VAR2
 #
-# **Arguments**:
-# * $1 expected global variable
-#
-# **Exit**: code 1 if expected global variable is not set
+# @arg $@ expectedGlobals:String[] expected global variables
+# @exitcode 1 if one of the expected global variables is not set
+# @stderr diagnostics information displayed
 Assert::expectGlobalVariables() {
   for var in "${@}"; do
-    [[ -v "${var}" ]] || Log::fatal "Variable ${var} is unset"
+    [[ -v "${var}" ]] || {
+      Log::displayError "Variable ${var} is unset"
+      return 1
+    }
   done
 }

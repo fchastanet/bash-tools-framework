@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 
+# @description install callback
+#   default callback used called when file copy has failed
+# @arg $1 fromFile:String
+# @arg $2 targetFile:String
+# @env FRAMEWORK_ROOT_DIR used to make paths relative to this directory to reduce length of messages
+# @exitcode 1 always fail
+# @stderr diagnostics information is displayed
+# @see Install::file
 Install::unableToCopyCallback() {
-  local FROM_DIR="$1"
-  local FILENAME="$2"
-  local DEST_FILE="$3"
-  Log::fatal "unable to copy file '${FROM_DIR#"${FRAMEWORK_ROOT_DIR}/"}/${FILENAME}' to '${DEST_FILE}'"
+  local fromDir="$1"
+  local fileName="$2"
+  local targetFile="$3"
+  Log::fatal "unable to copy file '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fileName}' to '${targetFile}'"
 }

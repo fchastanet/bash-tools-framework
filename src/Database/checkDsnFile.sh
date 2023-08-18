@@ -1,47 +1,51 @@
 #!/usr/bin/env bash
 
-# Internal: check if dsn file has all the mandatory variables set
+# @description check if dsn file has all the mandatory variables set
 # Mandatory variables are: HOSTNAME, USER, PASSWORD, PORT
 #
-# **Arguments**:
-# * $1 - dsn absolute filename
-#
-# Returns 0 on valid file, 1 otherwise with log output
+# @arg $1 dsnFileName:String dsn absolute filename
+# @set HOSTNAME loaded from dsn file
+# @set PORT loaded from dsn file
+# @set USER loaded from dsn file
+# @set PASSWORD loaded from dsn file
+# @exitcode 0 on valid file
+# @exitcode 1 if one of the properties of the conf file is invalid or if file not found
+# @stderr log output if error found in conf file
 Database::checkDsnFile() {
-  local DSN_FILENAME="$1"
-  if [[ ! -f "${DSN_FILENAME}" ]]; then
-    Log::displayError "dsn file ${DSN_FILENAME} not found"
+  local dsnFileName="$1"
+  if [[ ! -f "${dsnFileName}" ]]; then
+    Log::displayError "dsn file ${dsnFileName} not found"
     return 1
   fi
 
   (
     unset HOSTNAME PORT PASSWORD USER
     # shellcheck source=/src/Database/testsData/dsn_valid.env
-    source "${DSN_FILENAME}"
+    source "${dsnFileName}"
     if [[ -z ${HOSTNAME+x} ]]; then
-      Log::displayError "dsn file ${DSN_FILENAME} : HOSTNAME not provided"
+      Log::displayError "dsn file ${dsnFileName} : HOSTNAME not provided"
       return 1
     fi
     if [[ -z "${HOSTNAME}" ]]; then
-      Log::displayWarning "dsn file ${DSN_FILENAME} : HOSTNAME value not provided"
+      Log::displayWarning "dsn file ${dsnFileName} : HOSTNAME value not provided"
     fi
     if [[ "${HOSTNAME}" = "localhost" ]]; then
-      Log::displayWarning "dsn file ${DSN_FILENAME} : check that HOSTNAME should not be 127.0.0.1 instead of localhost"
+      Log::displayWarning "dsn file ${dsnFileName} : check that HOSTNAME should not be 127.0.0.1 instead of localhost"
     fi
     if [[ -z "${PORT+x}" ]]; then
-      Log::displayError "dsn file ${DSN_FILENAME} : PORT not provided"
+      Log::displayError "dsn file ${dsnFileName} : PORT not provided"
       return 1
     fi
     if ! [[ ${PORT} =~ ^[0-9]+$ ]]; then
-      Log::displayError "dsn file ${DSN_FILENAME} : PORT invalid"
+      Log::displayError "dsn file ${dsnFileName} : PORT invalid"
       return 1
     fi
     if [[ -z "${USER+x}" ]]; then
-      Log::displayError "dsn file ${DSN_FILENAME} : USER not provided"
+      Log::displayError "dsn file ${dsnFileName} : USER not provided"
       return 1
     fi
     if [[ -z "${PASSWORD+x}" ]]; then
-      Log::displayError "dsn file ${DSN_FILENAME} : PASSWORD not provided"
+      Log::displayError "dsn file ${dsnFileName} : PASSWORD not provided"
       return 1
     fi
   )

@@ -1,0 +1,2 @@
+replaceTokenByInput injected
+multi lines

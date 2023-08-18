@@ -2,10 +2,20 @@
 
 # echo the sh file only if not present in the list provided as second parameter
 # the shebang is automatically removed
-# @param {String} file $1 the file to import
-# @param {&String[]} compilerInjectFileOnceAlreadyImported $2 array of files
+# @arg $1 file:String the file to import
+# @arg $2 compilerInjectFileOnceAlreadyImported:&String[] array of files
 #   already imported (passed by reference)
-# @return 1 if file that does not exist
+# @exitcode 1 if file that does not exist
+
+# @description echo the sh file's content only if not present in the list provided as second parameter
+# the shebang is automatically removed
+# the file will be added to the compilerInjectFileOnceAlreadyImported array passed by reference
+#
+# @arg $1 file:String
+# @arg $2 compilerInjectFileOnceAlreadyImported:&String[] (passed by reference) file will not wbe included if present in this list
+# @exitcode 1 if file doesn't exist
+# @stdout file content if not in the compilerInjectFileOnceAlreadyImported list cleaned of shebang
+# @stderr diagnostics information is displayed if file not found
 Compiler::injectFileOnce() {
   local file="$1"
   local -n compilerInjectFileOnceAlreadyImported=$2

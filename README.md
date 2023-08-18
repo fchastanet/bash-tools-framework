@@ -111,10 +111,10 @@ Here an excerpt of the namespaces available in Bash tools framework:
 
 - Apt : several functions to abstract the use of ubuntu apt-get function. these
   functions ar using some default arguments and manage retry automatically.
-  - Apt::addRepository
-  - Apt::install
-  - Apt::remove
-  - Apt::update
+  - Linux::Apt::addRepository
+  - Linux::Apt::install
+  - Linux::Apt::remove
+  - Linux::Apt::update
 - Args : functions to ease some recurrent arguments like -h|--help to display
   help
 - Array : functions to ease manipulation of bash arrays like Array::clone or
@@ -281,12 +281,12 @@ Dependencies are automatically installed when used.
 
 `bin/doc` script will install:
 
-- [fchastanet/tomdoc.sh](https://github.com/fchastanet/tomdoc.sh.git)
+- [reconquest/shdoc](https://github.com/reconquest/shdoc)
 
 To avoid checking for libraries update and have an impact on performance, a file
 is created in vendor dir.
 
-- `vendor/.tomdocInstalled`
+- `vendor/.shdocInstalled`
 - `vendor/.batsInstalled` You can remove these files to force the update of the
   libraries, or just wait 24 hours that the timeout expires.
 

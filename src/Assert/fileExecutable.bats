@@ -17,7 +17,7 @@ function Assert::fileExecutable::notExists { #@test
     return 1
   }
   run Assert::fileExecutable "fileNotFound" "root" "root"
-  assert_failure
+  assert_failure 1
   assert_output ""
 }
 
@@ -29,7 +29,7 @@ function Assert::fileExecutable::notExecutable { #@test
     return 0
   }
   run Assert::fileExecutable "${file}" "$(id -un)" "$(id -gn)"
-  assert_failure 1
+  assert_failure 2
   assert_output --partial "file ${file} is expected to be executable"
 }
 

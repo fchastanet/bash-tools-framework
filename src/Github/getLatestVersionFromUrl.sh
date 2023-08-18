@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Retrieve the latest version number for given github url
-# @param {String} $1 github url from which repository will be extracted
-# @error log messages about retry
-# @output the version number retrieved
+# @description Retrieve the latest version number for given github url
+# @arg $1 releaseUrl:String github url from which repository will be extracted
+# @stderr log messages about retry
+# @stdout the version number retrieved
 Github::getLatestVersionFromUrl() {
   local releaseUrl="$1"
   local repo

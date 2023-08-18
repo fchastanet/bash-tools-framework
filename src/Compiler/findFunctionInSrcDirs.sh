@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 
-# convert function name to path replacing :: by /
+# @description convert function name to path replacing :: by /
+# @internal
 convertFunctionNameToPath() {
   local functionName="$1"
   echo "$(sed -E 's#::#/#g' <<<"${functionName}").sh"
 }
 
-# return the path of the function found in srcDirs
-# @param {String} $1 function name (eg: Functions::myFunction)
-# @param {String[]} $@ rest of args list of src directories in
-# which the function will be searched
-# @return 1 if function not found, 0 if found
-# @output the filepath of the function
+# @description return the path of the function found in srcDirs
+# @arg $1 functionName:String function name (eg: Functions::myFunction)
+# @arg $@ srcDirs:String[] rest of args list of src directories in # which the function will be searched
+# @exitcode 1 if function not found
+# @exitcode 0 if found
+# @stdout the filepath of the function if found
 Compiler::findFunctionInSrcDirs() {
   local functionName="$1"
   shift || true

@@ -1,29 +1,24 @@
 #!/usr/bin/env bash
 
-# Public: create database if not already existent
+# @description create database if not already existent
 #
-# **Arguments**:
-# * $1 (passed by reference) database instance to use
-# * $2 database name to create
+# @arg $1 instanceCreateDb:&Map<String,String> (passed by reference) database instance to use
+# @arg $2 dbName:String database name to create
 #
-# **Returns**:
-# * 0 if success
-# * 1 else
+# @exitcode 0 if success
+# @exitcode 1 if query fails
+# @stderr display db creation status
 Database::createDb() {
   # shellcheck disable=SC2034
   local -n instanceCreateDb=$1
-  local dbName sql result
-  dbName="$2"
+  local dbName="$2"
 
-  sql="CREATE DATABASE IF NOT EXISTS ${dbName} CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'"
+  local sql="CREATE DATABASE IF NOT EXISTS ${dbName} CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'"
 
-  Database::query instanceCreateDb "${sql}"
-  result=$?
-
-  if [[ "${result}" == "0" ]]; then
+  if Database::query instanceCreateDb "${sql}"; then
     Log::displayInfo "Db ${dbName} has been created"
   else
     Log::displayError "Creating Db ${dbName} has failed"
+    return 1
   fi
-  return "${result}"
 }

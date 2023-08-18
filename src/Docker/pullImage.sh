@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
-# try to docker pull image from pullTags arg
+# @description try to docker pull image from pullTags arg
 # best practice: provide tags 'tagPrefix_shortSha' 'tagPrefix_branchName'
 # so image will be tagged with
 # - tagPrefix_shortSha
 # - tagPrefix_branchName
-# @param {String} registryImageUrl $1 eg:889859566884.dkr.ecr.eu-west-1.amazonaws.com/bast-tools-dev-env
-# @param {String} tags $@ list of tags used to pull image from docker registry
-# @return 1 if tags list is empty or on on invalid argument
-# @return 2 if no image pulled
-# @output {String} the tag that has been successfully pulled, return 1 if none
+# @arg $1 registryImageUrl:String eg:889859566884.dkr.ecr.eu-west-1.amazonaws.com/bast-tools-dev-env
+# @arg $@ tags:String[] list of tags used to pull image from docker registry
+# @exitcode 1 if tags list is empty or on on invalid argument
+# @exitcode 2 if no image pulled
+# @stdout {String} the tag that has been successfully pulled, return 1 if none
+# @stderr diagnostics information is displayed
+# @require Docker::requireDockerCommand
 Docker::pullImage() {
   local registryImageUrl="$1"
   shift || true

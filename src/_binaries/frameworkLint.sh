@@ -18,9 +18,13 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,pl
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
-- check if all namespace::functions are existing in the framework
+- check if all Namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check each function has a bats file associated
+- shdoc
+  - check that shdoc valid annotations are used
+  - check that @require function matches naming convention and exists
+  - check that at least @description is provided
 
 ${__HELP_TITLE}Options:${__HELP_NORMAL}
   -f|--format <checkstyle,plain>  define output format of this command
@@ -157,12 +161,8 @@ checkEachSrcFileHasBatsFile() {
   fi
   local batsFile="${file%.*}.bats"
   if [[ ! -f "${FRAMEWORK_ROOT_DIR}/${batsFile}" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "checkEachSrcFileHasBatsFile - File '${file}' - missing bats file '${batsFile}'"
-    else
-      echo "<error severity='warning' source='checkEachSrcFileHasBatsFile' message='missing bats file '${batsFile}'/>"
-    fi
-    ((++warningCount))
+    reportWarning "checkEachSrcFileHasBatsFile" "${file}" \
+      "missing bats file '${batsFile}'"
   fi
 }
 
@@ -194,14 +194,103 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   done < <(sed -E -n 's#^([^([:blank:]]+)\(\)[[:blank:]]*\{#\1#p' "${srcFile}")
 
   if [[ "${foundFunctionMatching}" = "0" ]]; then
-    if [[ "${FORMAT}" = "plain" ]]; then
-      Log::displayWarning "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - no function named '${expectedFunctionName}'"
-    else
-      echo "<error severity='warning' source='srcFileHasOneFunctionCorrectlyNamed' message='Should contain a function named ${expectedFunctionName}'/>"
-    fi
-    ((++warningCount))
+    reportWarning "srcFileHasOneFunctionCorrectlyNamed" "${srcFile}" \
+      "Should contain a function named '${expectedFunctionName}'"
     return 0
   fi
+}
+
+checkEachSrcFileHasCorrectShdoc() {
+  local srcFile="$1"
+  if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+  if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    return 0
+  fi
+
+  # @see https://regex101.com/r/H2Yrwp/1
+  function filterAnnotationNames() {
+    sed -n -E 's/^# @(([^ ]|$)+)[ ]*.*$/\1/p' "$@"
+  }
+
+  # @see https://regex101.com/r/5oMFQi/1
+  # shellcheck disable=SC2120
+  function filterInvalidAnnotationNames() {
+    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal)$' "$@"
+  }
+
+  function checkValidAnnotationsAreUsed() {
+    local srcFile="$1"
+    local invalidAnnotation
+
+    while IFS='' read -r invalidAnnotation; do
+      reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+        "shdoc annotation '@${invalidAnnotation}' is invalid"
+    done < <(filterAnnotationNames "${srcFile}" | filterInvalidAnnotationNames)
+  }
+
+  # check that @require function exists and matches naming convention
+  function checkRequiredFunctionExists() {
+    local srcFile="$1"
+    local requireAnnotation
+
+    while IFS='' read -r requireAnnotation; do
+      if ! Assert::bashFrameworkFunction "${requireAnnotation}"; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target a valid bash framework function"
+        continue
+      fi
+      if [[ ! "${requireAnnotation}" =~ ^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+require([A-Z][a-zA-Z0-9_-]+)$ ]]; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention Namespace::requireSomething"
+        continue
+      fi
+      if ! Compiler::findFunctionInSrcDirs "${requireAnnotation}" "${FRAMEWORK_SRC_DIRS[@]}" >/dev/null; then
+        reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+          "# @require ${requireAnnotation}' does not target an existing bash framework function"
+      fi
+    done < <(sed -n -E 's/^# @require (.*)$/\1/p' "${srcFile}")
+  }
+
+  function checkDescriptionAnnotationIsProvided() {
+    local srcFile="$1"
+    if ! grep -q -E '^# @description .*' "${srcFile}"; then
+      reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
+        "missing mandatory sh doc @description annotation"
+    fi
+  }
+
+  checkValidAnnotationsAreUsed "${srcFile}"
+  checkRequiredFunctionExists "${srcFile}"
+  checkDescriptionAnnotationIsProvided "${srcFile}"
+
+}
+
+reportError() {
+  local category="$1"
+  local file="$2"
+  local msg="$3"
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayError "${category} - File ${file} - ${msg}"
+  else
+    echo "<error severity='error' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
+  fi
+  ((++errorCount))
+}
+
+reportWarning() {
+  local category="$1"
+  local file="$2"
+  local msg="$3"
+  if [[ "${FORMAT}" = "plain" ]]; then
+    Log::displayWarning "${category} - File ${file} - ${msg}"
+  else
+    echo "<error severity='warning' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
+  fi
+  ((++warningCount))
 }
 
 ((errorCount = 0)) || true
@@ -222,6 +311,7 @@ while IFS='' read -r file; do
   checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
   checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
+  checkEachSrcFileHasCorrectShdoc "${file}" "$@" || ((++errorCount))
 
   if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
@@ -234,14 +324,14 @@ done < <(
 
 # shellcheck disable=SC2154
 while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayWarning "fileExistence - File ${file} does not exist, git renamed file ?"
-  else
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "<file name='${file}'>"
-    echo "<error severity='warning' source='fileExistence' message='file does not exist, git renamed file ?'/>"
+  fi
+  reportWarning "fileExistence" "${file}" \
+    "File ${file} does not exist, git renamed file ?"
+  if [[ "${FORMAT}" = "checkstyle" ]]; then
     echo "</file>"
   fi
-  ((++warningCount))
 done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 
 if [[ "${FORMAT}" = "checkstyle" ]]; then

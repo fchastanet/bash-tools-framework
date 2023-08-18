@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
 
-# ensure that no user aliases could interfere with
-# commands used in this script
-unalias -a || true
-
 export SCRIPT_NAME="test"
 FRAMEWORK_ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")/.." && pwd -P)
 vendorDir="${FRAMEWORK_ROOT_DIR}/vendor"
 srcDir="${FRAMEWORK_ROOT_DIR}/src"
 export FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
-# shellcheck disable=SC2034
-export LC_ALL=POSIX
 
-set -o errexit
-set -o pipefail
-(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
+# shellcheck source=/src/_includes/_mandatoryHeader.sh
+source "${srcDir}/_includes/_mandatoryHeader.sh"
 
 load "${vendorDir}/bats-support/load.bash"
 load "${vendorDir}/bats-assert/load.bash"

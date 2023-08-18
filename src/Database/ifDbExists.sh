@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
-# Public: check if given database exists
+# @description check if given database exists
 #
-# **Arguments**:
-# * $1 (passed by reference) database instance to use
-# * $2 database name
+# @arg $1 instanceIfDbExists:&Map<String,String> (passed by reference) database instance to use
+# @arg $2 dbName:String database name
+# @exitcode 1 if db doesn't exist
+# @stderr debug command
 Database::ifDbExists() {
   local -n instanceIfDbExists=$1
-  local dbName result
-  dbName="$2"
+  local dbName="$2"
+  local result
   local -a mysqlCommand=()
 
   mysqlCommand+=(mysqlshow)

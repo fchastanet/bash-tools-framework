@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
-# add reference to index file
-# @param {String} $1 indexFile
-# @param {String} $2 mdRelativeFile
-# @param {String} $3 title
+# @description add reference to index file (using docsify embed feature)
+# @arg $1 indexFile:String
+# @arg $2 mdRelativeFile:String
+# @arg $3 title:String
 ShellDoc::appendDocToIndex() {
   local indexFile="$1"
   local mdRelativeFile="$2"
   local title="$3"
 
-  echo "* [${title}](${mdRelativeFile})" >>"${indexFile}"
+  (
+    echo "[${title}](${mdRelativeFile} ':include')"
+    echo
+  ) >>"${indexFile}"
 }

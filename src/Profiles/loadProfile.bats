@@ -24,7 +24,7 @@ teardown() {
   rm -f "${logFile}" || true
 }
 
-function Profiles::loadProfileOK { #@test
+function Profiles::loadProfile::OK { #@test
   run Profiles::loadProfile \
     "${BATS_TEST_DIRNAME}/testsData" "test1"
 
@@ -37,7 +37,7 @@ function Profiles::loadProfileOK { #@test
   assert_line --index 3 "Install4"
 }
 
-function Profiles::loadProfileDuplicates { #@test
+function Profiles::loadProfile::Duplicates { #@test
   run Profiles::loadProfile \
     "${BATS_TEST_DIRNAME}/testsData" "test2Duplicates"
 
@@ -49,17 +49,17 @@ function Profiles::loadProfileDuplicates { #@test
   assert_line --index 3 "Install2"
 }
 
-function Profiles::loadProfileUnknown { #@test
+function Profiles::loadProfile::Unknown { #@test
   run Profiles::loadProfile \
     "${BATS_TEST_DIRNAME}/testsData" "unknown"
 
-  assert_failure 1
+  assert_failure 2
   assert_lines_count 2
   assert_line --index 0 --partial "INFO    - Loading profile '${BATS_TEST_DIRNAME}/testsData/profile.unknown.sh'"
   assert_line --index 1 --partial "profile profile.unknown.sh not found in '${BATS_TEST_DIRNAME}/testsData'"
 }
 
-function Profiles::loadProfileMissingProfileArg { #@test
+function Profiles::loadProfile::MissingProfileArg { #@test
   run Profiles::loadProfile \
     "${BATS_TEST_DIRNAME}/testsData"
 
@@ -68,7 +68,7 @@ function Profiles::loadProfileMissingProfileArg { #@test
   assert_line --index 0 --partial "ERROR   - This method needs exactly 2 parameters"
 }
 
-function Profiles::loadProfileMissingArgs { #@test
+function Profiles::loadProfile::MissingArgs { #@test
   run Profiles::loadProfile
 
   assert_failure 1

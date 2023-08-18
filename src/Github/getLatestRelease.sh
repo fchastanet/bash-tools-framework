@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Retrieve the latest version number of a github release using Github API using retry
-# @param {String} $1 repository in the format fchastanet/bash-tools
-#   that would match https://github.com/fchastanet/bash-tools
-# @param {String} $2 reference to a variable that will contain the result of the command
-# @output log messages about retry
+# @description Retrieve the latest version number of a github release using Github API using retry
+# repo arg with fchastanet/bash-tools value would match https://github.com/fchastanet/bash-tools
+# @arg $1 repo:String repository in the format fchastanet/bash-tools
+# @arg $2 resultRef:&String reference to a variable that will contain the result of the command
+# @stdout log messages about retry
 Github::getLatestRelease() {
   local repo="$1"
   # we need to pass the result through a reference instead of output directly

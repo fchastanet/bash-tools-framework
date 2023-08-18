@@ -1,0 +1,67 @@
+@startuml "compilerEmbedInjection"
+title compiler embed injection
+skinparam {
+  ' https://github.com/plantuml/plantuml/blob/49115dfc7d4156961e5b49a81c09b474daa79823/src/net/sourceforge/plantuml/style/FromSkinparamToStyle.java#L145
+  activityDiamondBackgroundColor #AAAAAA
+  activityEndColor #red
+}
+start
+
+:compiler;
+
+#SpringGreen:Compiler::Embed::inject fromFile;
+
+#SpringGreen:Compiler::Embed::filter fromFile;
+while (embedDirective?) is (<color:green>embed found)
+  -[#green]->
+  partition Compiler::Embed::embed #SpringGreen {
+    #SpringGreen:Compiler::Embed::parse $embedDirective
+      ~~uses Compiler::Embed::assertAsName~~
+      ~~uses Compiler::Embed::assertResource~~
+    ;
+    if (embed directive can be parsed?) is (<color:green>valid directive) then
+      -[#green]->
+    else (<color:red>invalid embed\n<color:red>directive)
+      -[#red]->
+      end
+    endif
+    -[#green]->
+  }
+
+  if (embed name already injected?) then (yes)
+    :display skip;
+  else (<color:green>embed resource can be injected)
+    if (embed resources already injected?) then (yes)
+      :display warning;
+    endif
+    partition Compiler::Embed::embed #LightGray {
+      #SpringGreen:__Compiler::Embed::embed__ **$resource** **$asName**;
+      switch (resource type?)
+      case ( resource is a file )
+        #SpringGreen:Compiler::Embed::embedFile;
+      case ( resource is a directory )
+        #SpringGreen:Compiler::Embed::embedDir;
+      case ( resource is a bash\nframework function )
+        #SpringGreen:Compiler::Embed::embedFrameworkFunction;
+        #SpringGreen:bin/compile;
+      case ( <color:red>error )
+        -[#red]->
+        end
+      endswitch
+    }
+    if (embed resource injection failure ?) then
+      -[#red]-> <color:red>display error\n<color:red>and return 2;
+      end
+    else
+      -[#green]->
+    endif
+
+  endif
+  -[#green]-> <color:green>process next embed directive;
+
+endwhile (no more embed directive to process)
+
+:Output result;
+
+stop
+@enduml

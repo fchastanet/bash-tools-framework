@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Public: search a file in parent directories
+# @description search a file in parent directories
 #
-# **Arguments**:
-# * $1 path
-# * $2 fileName
-# * $@ list of untilInclusivePath
-# **Output**: The filename if found
-# **Exit**: code 1 if the command failed
+# @arg $1 fromPath:String path
+# @arg $2 fileName:String
+# @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
+# @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
+# @stdout The filename if found
+# @exitcode 1 if the command failed or file not found
 File::upFind() {
   local fromPath="$1"
   shift || true

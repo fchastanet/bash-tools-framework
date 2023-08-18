@@ -18,7 +18,7 @@ EXCLUDED_DIRECTORIES:
   - '.history'
   - '.git'
   - '.idea'
-FILTER_REGEX_EXCLUDE: (\.git/|\.history/|\.idea/)
+FILTER_REGEX_EXCLUDE: (\.git/|\.history/|\.idea/|vendor)
 FILEIO_REPORTER: false
 PRE_COMMANDS:
   - command: env
@@ -32,7 +32,7 @@ PRINT_ALPACA: false
 SHOW_ELAPSED_TIME: true
 
 # Linters configurations
-BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (vendor/.*)
+BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (vendor/.*|/testsData/)
 BASH_SHELLCHECK_ARGUMENTS: --source-path=/tmp/lint
 
 BASH_SHFMT_ARGUMENTS: -i 2 -ci

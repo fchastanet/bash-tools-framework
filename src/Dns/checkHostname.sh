@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-# try to ping the dns
-# @param $1 is the dns hostname
-# @return 1 on error
+# @description try to ping the dns
+# @arg $1 host:String is the dns hostname
+# @exitcode 1 if host arg empty
+# @exitcode 2 if ping host failed
+# @exitcode 3 if ip is not bound to local ip address
+# @exitcode 4 if ifconfig result is empty
 Dns::checkHostname() {
   local host="$1"
   if [[ -z "${host}" ]]; then
@@ -10,39 +13,39 @@ Dns::checkHostname() {
   fi
 
   # check if host is reachable
-  local returnCode=0
+  local -a pingCmd=(ping -c 1 "${host}")
   if Assert::windows; then
-    Command::captureOutputAndExitCode "ping -n 1 ${host}" "try to reach host ${host}"
-  else
-    Command::captureOutputAndExitCode "ping -c 1 ${host}" "try to reach host ${host}"
+    pingCmd=(ping -n 1 "${host}")
   fi
-  returnCode=$?
 
-  if [[ "${returnCode}" = "0" ]]; then
-    # get ip from ping
-    # under windows: Pinging willywonka.host.lan [127.0.0.1] with 32 bytes of data
-    # under linux: PING willywonka.host.lan (127.0.1.1) 56(84) bytes of data.
-    local ip
-    ip=$(echo "${COMMAND_OUTPUT}" | grep -i ping | grep -Eo '[0-9.]{4,}' | head -1)
+  Log::displayInfo "try to reach host ${host}"
+  if ! Command::captureOutputAndExitCode "${pingCmd[@]}"; then
+    return 2
+  fi
 
-    # now we have to check if ip is bound to local ip address
-    if [[ ${ip} != 127.0.* ]]; then
-      # resolve to a non local address
-      # check if ip resolve to our ips
-      local message="check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
-      if Assert::windows; then
-        Command::captureOutputAndExitCode "ipconfig | grep ${ip} | cat" "${message}"
-        returnCode=$?
-      else
-        Command::captureOutputAndExitCode "ifconfig | grep ${ip} | cat" "${message}"
-        returnCode=$?
-      fi
-      if [[ "${returnCode}" != "0" ]]; then
-        returnCode=2
-      elif [[ -z "${COMMAND_OUTPUT}" ]]; then
-        returnCode=3
-      fi
+  # get ip from ping
+  # under windows: Pinging willywonka.host.lan [127.0.0.1] with 32 bytes of data
+  # under linux: PING willywonka.host.lan (127.0.1.1) 56(84) bytes of data.
+  local ip
+  ip=$(echo "${COMMAND_OUTPUT}" | grep -i ping | grep -Eo '[0-9.]{4,}' | head -1)
+
+  # now we have to check if ip is bound to local ip address
+  if [[ ${ip} != 127.0.* ]]; then
+    # resolve to a non local address
+    # check if ip resolve to our ips
+    local -a ipconfigCmd=(ifconfig)
+    if Assert::windows; then
+      ipconfigCmd=(ipconfig)
+    fi
+
+    Log::displayInfo "check if ip(${ip}) associated to host(${host}) is listed in your network configuration"
+    if ! Command::captureOutputAndExitCode "${ipconfigCmd[*]} | grep ${ip} | cat"; then
+      return 3
+    fi
+    if [[ -z "${COMMAND_OUTPUT}" ]]; then
+      return 4
     fi
   fi
-  return "${returnCode}"
+
+  return 0
 }

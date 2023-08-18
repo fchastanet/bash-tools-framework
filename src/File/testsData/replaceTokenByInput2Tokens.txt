@@ -1,0 +1,5 @@
+stuff before
+@token@
+stuff after 1
+@token@
+stuff after 2

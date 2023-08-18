@@ -14,6 +14,14 @@ function Filters::commentLines::singleLine { #@test
   }
 }
 
+function Filters::commentLines::commandFollowedByComment { #@test
+  echo "command # comment" | {
+    run Filters::commentLines
+    assert_success
+    assert_output "command # comment"
+  }
+}
+
 function Filters::commentLines::fromFile { #@test
   run Filters::commentLines "${BATS_TEST_DIRNAME}/testsData/commentLines.txt"
   assert_success

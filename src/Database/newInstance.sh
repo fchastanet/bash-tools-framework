@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 
-# Public: create a new db instance
-#
-# **Arguments**:
-# * $1 - (passed by reference) database instance to create
-# * $2 - dsn profile - load the dsn.env profile
-#     absolute file is deduced using rules defined in Conf::getAbsoluteFile
-#
-# **Example:**
-# ```shell
-# declare -Agx dbInstance
-# Database::newInstance dbInstance "default.local"
-# ```
-#
+# @description create a new db instance
 # Returns immediately if the instance is already initialized
+#
+# @arg $1 instanceNewInstance:&Map<String,String> (passed by reference) database instance to use
+# @arg $2 dsn:String dsn profile - load the dsn.env profile deduced using rules defined in Conf::getAbsoluteFile
+#
+# @example
+#   declare -Agx dbInstance
+#   Database::newInstance dbInstance "default.local"
+#
+# @exitcode 1 if dns file not able to loaded
 Database::newInstance() {
   local -n instanceNewInstance=$1
   local dsn="$2"
