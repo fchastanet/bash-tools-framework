@@ -3,9 +3,8 @@
 # EMBED "<%% dynamicSrcFile embedDir/embedFile1 %>" as embedFile1
 # EMBED "<%% dynamicSrcDir embedDir %>" as embedDir
 # EMBED UI::displayLine as embedUIDisplayLine
-
-.INCLUDE "$(dynamicTemplateDir _header.tpl)"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+# VAR_DEPRECATED_LOAD=1
+# FACADE
 
 embedUIDisplayLine "-" 100
 #shellcheck disable=SC2154

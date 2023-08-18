@@ -1,6 +1,6 @@
-declare -gx embed_function_<%% echo ${asName} %>="<%% echo ${targetFile} %>"
-declare -gx encoded_binary_file_<%% echo ${asName} %>="<%% echo ${binFileBase64} %>"
+declare -gx embed_function_<% ${asName} %>="<% ${targetFile} %>"
+declare -gx encoded_binary_file_<% ${asName} %>="<% ${binFileBase64} %>"
 
 Compiler::Embed::extractFileFromBase64 \
-  "${embed_function_<%% echo ${asName} %>}" \
-  "${encoded_binary_file_<%% echo ${asName} %>}"
+  "${embed_function_<% ${asName} %>}" \
+  "${encoded_binary_file_<% ${asName} %>}"

@@ -5,11 +5,6 @@
 # IMPLEMENT Install::InstallInterface
 # FACADE
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
-
 HELP="$(
   cat <<EOF
 ${__HELP_TITLE}Description:${__HELP_NORMAL} build files using build.sh

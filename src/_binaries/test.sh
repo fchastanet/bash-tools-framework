@@ -1,16 +1,10 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/test
+# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
+# VAR_DEPRECATED_LOAD=1
+# FACADE
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-export FRAMEWORK_ROOT_DIR
-
-BASH_TOOLS_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-COMMAND_BIN_DIR="${BASH_TOOLS_ROOT_DIR}/bin"
-BASH_TOOLS_VENDOR_DIR="${BASH_TOOLS_ROOT_DIR}/vendor"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
-
-Bats::installRequirementsIfNeeded "${BASH_TOOLS_ROOT_DIR}"
+Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
 
 HELP="$(
   cat <<EOF
@@ -36,16 +30,16 @@ ${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 EOF
 )"
 if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
-  "${BASH_TOOLS_VENDOR_DIR}/bats/bin/bats" --help
+  "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi
 
 if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
   (
     if (($# < 1)); then
-      "${BASH_TOOLS_VENDOR_DIR}/bats/bin/bats" -r src
+      "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" -r src
     else
-      "${BASH_TOOLS_VENDOR_DIR}/bats/bin/bats" "$@"
+      "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" "$@"
     fi
   )
 else
