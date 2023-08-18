@@ -8,7 +8,7 @@ source "$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)/Compiler/Embed/parse.sh"
 source "$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)/Filters/removeExternalQuotes.sh"
 
 # EMBED "srcDir" AS "targetDir"
-# EMBED namespace::functions AS "myFunction"
+# EMBED Namespace::functions AS "myFunction"
 
 assertAsNameReturnStatus=0
 assertResourceReturnStatus=0

@@ -25,7 +25,7 @@ function Compiler::Embed::filter::fileArg { #@test
   assert_success
   assert_lines_count 4
   assert_line --index 0 '# EMBED "srcDir" As "targetDir"'
-  assert_line --index 1 '# EMBED namespace::functions AS "myFunction"'
+  assert_line --index 1 '# EMBED Namespace::functions AS "myFunction"'
   assert_line --index 2 '# EMBED "Backup::file" as backupFile'
   assert_line --index 3 '# EMBED "${BATS_TEST_DIRNAME}/test" AS targetFile0-7ù'
 }

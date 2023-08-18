@@ -12,6 +12,9 @@ BATS_TEST_DIRNAME="${srcDir}/Compiler/Embed"
 FRAMEWORK_ROOT_DIR="$(cd "${srcDir}/.." && pwd -P)"
 export FRAMEWORK_ROOT_DIR
 
+# shellcheck source=src/_includes/_mandatoryHeader.sh
+source "${srcDir}/_includes/_mandatoryHeader.sh"
+
 # PERSISTENT_TMPDIR is not deleted by traps
 PERSISTENT_TMPDIR="${TMPDIR:-/tmp}/bash-framework"
 export PERSISTENT_TMPDIR

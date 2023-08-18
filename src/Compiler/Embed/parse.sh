@@ -4,7 +4,7 @@
 # @example
 #   # EMBED "srcFile" AS "targetFile"
 #   # EMBED "srcDir" AS "targetDir"
-#   # EMBED namespace::functions AS "myFunction"
+#   # EMBED Namespace::functions AS "myFunction"
 # @arg $1 str:String the directive to parse
 # @arg $2 ref_resource:&String (passed by reference) the resource to embed
 # @arg $3 ref_asName:&String (passed by reference) the resource alias to embed

@@ -5,9 +5,7 @@
 # DO NOT EDIT IT
 #####################################
 
-# ensure that no user aliases could interfere with
-# commands used in this script
-unalias -a || true
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_mandatoryHeader.sh"
 
 # shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}

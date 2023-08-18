@@ -2,7 +2,7 @@
 
 # @description parse IMPLEMENT directive
 # @example
-#   # IMPLEMENT namespace::functions
+#   # IMPLEMENT Namespace::functions
 # @arg $1 str:String the directive to parse
 # @arg $2 ref_interface:&String (passed by reference) the interface that needs to be implemented
 # @exitcode 1 on invalid function name

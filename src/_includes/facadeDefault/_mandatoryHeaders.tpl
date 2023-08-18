@@ -2,9 +2,7 @@
 # shellcheck disable=SC2288
 # shellcheck disable=SC2034
 
-# ensure that no user aliases could interfere with
-# commands used in this script
-unalias -a || true
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_mandatoryHeader.sh"
 
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"

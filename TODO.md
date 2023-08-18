@@ -5,14 +5,14 @@
 - [3. Framework functions changes](#3-framework-functions-changes)
 - [4. Update Bash-tools-framework dependencies](#4-update-bash-tools-framework-dependencies)
 - [5. Compiler and bash Object oriented](#5-compiler-and-bash-object-oriented)
-  - [REQUIRE directive](#require-directive)
+  - [5.1. REQUIRE directive](#51-require-directive)
   - [5.2. FrameworkLint](#52-frameworklint)
 - [6. Binaries](#6-binaries)
-  - [New binaries](#new-binaries)
-  - [6.1. BashDoc](#61-bashdoc)
-    - [6.1.1. add compilation checks](#611-add-compilation-checks)
-  - [6.2. all binaries - template](#62-all-binaries---template)
-  - [6.3. Binaries improvement](#63-binaries-improvement)
+  - [6.1. New binaries](#61-new-binaries)
+  - [6.2. shDoc](#62-shdoc)
+    - [6.2.1. add compilation checks](#621-add-compilation-checks)
+  - [6.3. all binaries - template](#63-all-binaries---template)
+  - [6.4. Binaries improvement](#64-binaries-improvement)
 - [7. Other improvements/Studies](#7-other-improvementsstudies)
   - [7.1. run precommit on github action](#71-run-precommit-on-github-action)
   - [7.2. Other libraries integration](#72-other-libraries-integration)
@@ -68,7 +68,6 @@
 
 ## 4. Update Bash-tools-framework dependencies
 
-- make \_commonHeader.sh be loaded sooner (should include unalias -a || true)
 - Remove FRAMEWORK_ROOT_DIR/FRAMEWORK_SRC_DIR requirements from binaries
   - replace it by optional argument automatically added --root-dir
   - other default options to the binaries, log-level, display-log-level, ...
@@ -78,14 +77,10 @@
 
 TODOs linked to bin/compiler:
 
+- MAIN_FUNCTION_VAR_NAME not working + add doc
+- use FACADE for all binaries
 - FACADE help auto generated
 - what would be the impact to add shopt -s lastpipe
-- new IMPLEMENT directive
-  - [detect that file is being sourced](https://stackoverflow.com/a/47613477)
-  - implement main security in tpl, the binary script has just to implement a
-    main function
-- IMPLEMENT directive
-- add main function
 - arg configuration: display whole bash framework configuration
 - deduce FRAMEWORK_ROOT_DIR based on most near .framework-config file ?
 - .framework-config should contain the compiler options
@@ -95,26 +90,16 @@ TODOs linked to bin/compiler:
 - extract from Profiles::lintDefinitions to Class::isInterfaceImplemented
   - Profiles::lintDefinitions can be changed to provide a dynamic list of method
     names
-  - define a sh format able to describe an interface
-    - installScripts_Install1_helpDescription should be named
-      installScripts_Install1.helpDescription
-      - installScripts_Install1 is the object, on which we call helpDescription
-        method
-    - or could we use file for implementing an object
-      - then call function of the class with this instance
-        - installScripts_helpDescription $instanceFile
-          - source the file and display help
-  - would it be possible to implement inheritance ?
 - compile should use FRAMEWORK_SRC_DIRS from .framework-config
 - use Filters::optimizeShFile
   - using
     [shfmt --minify option](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#generic-flags)
-- check if nested namespaces are supported
 - get rid of `__all.sh` files, useless because of compiler auto include
 - [Apply defensive suggestions](https://docs.fedoraproject.org/en-US/defensive-coding/programming-languages/Shell/)
 
-### REQUIRE directive
+### 5.1. REQUIRE directive
 
+- clarify when to use `# @feature sudo, ...`, shouldn't be a require ?
 - move Embed to Compiler namespace
 - define REQUIRE_DISABLED array in .framework-config
 - Compiler::Requirement::assertRequireName
@@ -153,37 +138,33 @@ TODOs linked to bin/compiler:
   - function allow to unzip the file
 - EMBED "as" names should be unique + some forbidden names (existing bash
   functions)
+- shDoc linter check params coherence
+  - 2 @arg $1
+  - @arg $1 after @arg $2
 
 ## 6. Binaries
 
-### New binaries
+### 6.1. New binaries
 
 - add githubUpgradeRelease based on Github::upgradeRelease
 
-### 6.1. BashDoc
+### 6.2. shDoc
 
-- update bashDoc and include it inside bash-tools-framework
-- generates automatically bash framework functions dependencies recursively
 - register to <https://repology.org/projects/> in order to show matrix image
   <https://github.com/jirutka/esh/blob/master/README.adoc>
 - bash documentation
-  - <https://www.sphinx-doc.org/en/master/>
   - <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/> add man page
     heredoc + tool that extract heredoc from each sh files
   - asciidoctor to build manpages
   - <https://github.com/gumpu/ROBODoc>
-  - could I use groovy doc ?
-  - bashDoc linter check params coherence
-    - 2 @arg $1
-    - @arg $1 after @arg $2
 
-#### 6.1.1. add compilation checks
+#### 6.2.1. add compilation checks
 
 - compile exit 1 if at least 1 warning
 - error if bash-tpl template not found
   - File not found: '/dbQueryAllDatabases.awk'
 
-### 6.2. all binaries - template
+### 6.3. all binaries - template
 
 default binary template improvement that adds:
 
@@ -198,7 +179,7 @@ default binary template improvement that adds:
   - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
 
-### 6.3. Binaries improvement
+### 6.4. Binaries improvement
 
 TODOs linked to `src/_binaries/*`:
 
@@ -240,7 +221,8 @@ TODOs linked to `src/_binaries/*`:
 ## 8. best practices
 
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
-  using customized aliased commands by the use
+  using customized aliased commands by the use => but unalias --all is used in
+  header
 - Linux::Wsl::cachedWslpathFromWslVar arg2 default value if variable not found
   - but no way to know if variable exists except by using `wslvar -S` or
     `wslvar -L`
@@ -248,6 +230,5 @@ TODOs linked to `src/_binaries/*`:
 ### 8.1. Robustness
 
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html>
-  - add `shopt -s inherit_errexit`
   - add `set -u`
   - add this page comments to `BestPractices.md`

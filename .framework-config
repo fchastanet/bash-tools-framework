@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034
 
 # describe the functions that will be skipped from being imported
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^(namespace::functions|Functions::myFunction|namespace::requireSomething|IMPORT::dir::file|Acquire::ForceIPv4)$'
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|IMPORT::dir::file|Acquire::ForceIPv4)$'
 # describe the files that do not contain function to be imported
 NON_FRAMEWORK_FILES_REGEXP="(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)"
 # describe the files that are allowed to not have an associated bats file

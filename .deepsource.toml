@@ -4,7 +4,8 @@ test_patterns = ["tests/**"]
 
 exclude_patterns = [
   "doc/**",
-  "bin/deepsource"
+  "bin/deepsource",
+  "**/testsData/**"
 ]
 
 [[analyzers]]

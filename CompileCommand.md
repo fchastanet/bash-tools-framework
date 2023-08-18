@@ -15,33 +15,35 @@
     - [3.5.2. bash framework functions](#352-bash-framework-functions)
     - [3.5.3. `VAR_*` directive (optional)](#353-var_-directive-optional)
     - [3.5.4. `BIN_FILE` directive (optional)](#354-bin_file-directive-optional)
-  - [3.6. REQUIRE directive (optional)](#36-require-directive-optional)
+  - [3.6. REQUIRE directive (optional) - @future feature](#36-require-directive-optional---future-feature)
     - [3.6.1. What is a requirement ?](#361-what-is-a-requirement-)
     - [3.6.2. REQUIRE directive syntax](#362-require-directive-syntax)
-      - [3.6.2.1. Requires naming convention](#3621-requires-naming-convention)
+      - [3.6.2.1. Requires source file naming convention](#3621-requires-source-file-naming-convention)
       - [3.6.2.2. Best practice #1: feature name](#3622-best-practice-1-feature-name)
       - [3.6.2.3. Best practice #2: support method](#3623-best-practice-2-support-method)
     - [3.6.3. Requirement overloading](#363-requirement-overloading)
     - [3.6.4. Requirement disable](#364-requirement-disable)
-  - [3.6. COMPATIBILITY directive (optional)](#36-compatibility-directive-optional)
-    - [3.6.1. requirement vs compatibility ?](#361-requirement-vs-compatibility-)
-    - [3.6.1. COMPATIBILITY directive syntax](#361-compatibility-directive-syntax)
-    - [@compatibility tag syntax](#compatibility-tag-syntax)
-  - [3.7. `IMPLEMENT` and `FACADE` directives (optional)](#37-implement-and-facade-directives-optional)
-    - [3.7.1. `IMPLEMENT` directive (optional)](#371-implement-directive-optional)
-    - [3.7.2. `FACADE` directive (optional)](#372-facade-directive-optional)
-      - [3.7.2.1. Overview](#3721-overview)
-      - [3.7.2.2. Generated script](#3722-generated-script)
-  - [3.8. `EMBED` directive (optional)](#38-embed-directive-optional)
-  - [3.9. `.framework-config` framework configuration file](#39-framework-config-framework-configuration-file)
+  - [3.7. COMPATIBILITY directive (optional) - @future feature](#37-compatibility-directive-optional---future-feature)
+    - [3.7.1. requirement vs compatibility ?](#371-requirement-vs-compatibility-)
+    - [3.7.2. COMPATIBILITY directive syntax](#372-compatibility-directive-syntax)
+    - [3.7.3. @compatibility tag syntax](#373-compatibility-tag-syntax)
+  - [3.8. `IMPLEMENT` and `FACADE` directives (optional)](#38-implement-and-facade-directives-optional)
+    - [3.8.1. `IMPLEMENT` directive (optional)](#381-implement-directive-optional)
+      - [3.8.1.1. Composition vs inheritance](#3811-composition-vs-inheritance)
+    - [3.8.2. `FACADE` directive (optional)](#382-facade-directive-optional)
+      - [3.8.2.1. Overview](#3821-overview)
+      - [3.8.2.2. Generated script](#3822-generated-script)
+  - [3.9. `EMBED` directive (optional)](#39-embed-directive-optional)
+  - [3.10. `.framework-config` framework configuration file](#310-framework-config-framework-configuration-file)
 - [4. Compiler algorithms](#4-compiler-algorithms)
   - [4.1. Compiler - Compiler::Requirement::require](#41-compiler---compilerrequirementrequire)
     - [4.1.1. Requires dependencies](#411-requires-dependencies)
     - [4.1.2. disable compiler requirement management](#412-disable-compiler-requirement-management)
     - [4.1.3. override requirements dependency order](#413-override-requirements-dependency-order)
   - [4.2. Compiler - Compiler::Implement::interface](#42-compiler---compilerimplementinterface)
-  - [4.2. Compiler - Compiler::Facade::generate](#42-compiler---compilerfacadegenerate)
-  - [4.3. Compiler - Compiler::Embed::embed](#43-compiler---compilerembedembed)
+  - [4.3. Compiler - Compiler::Facade::generate](#43-compiler---compilerfacadegenerate)
+  - [4.4. Compiler - Compiler::Embed::embed](#44-compiler---compilerembedembed)
+  - [4.5. compiler - Compiler::Compatibility::checkCompatibility](#45-compiler---compilercompatibilitycheckcompatibility)
 - [5. FrameworkLint](#5-frameworklint)
 - [6. Best practices](#6-best-practices)
 - [7. Acknowledgements](#7-acknowledgements)
@@ -71,7 +73,7 @@ messaging programs.
 ## 2. Compile tool
 
 This tool allows to detect all the framework functions used inside a given sh
-file. The framework functions matches the pattern `namespace::functionName` (we
+file. The framework functions matches the pattern `Namespace::functionName` (we
 can have several namespaces separated by the characters `::`). These framework
 functions will be injected inside a compiled file. The process is recursive so
 that every framework functions used by imported framework functions will be
@@ -334,7 +336,7 @@ dependent framework functions will be injected in your resulting bash file.
 The so called `bash framework functions` are the functions defined in this
 framework that respects the following naming convention:
 
-- namespace::namespace::functionName
+- Namespace::Namespace::functionName
   - we can have any number of namespaces
   - each namespace is followed by ::
   - namespace must begin by an uppercase letter [A-Z] followed by any of these
@@ -380,7 +382,7 @@ SCRIPT="<% ${SCRIPT} %>"
 Allows to indicate where the resulting bin file will be generated. If not
 provided, the binary file will be copied to `binDir` without sh extension
 
-### 3.6. REQUIRE directive (optional)
+### 3.6. REQUIRE directive (optional) - @future feature
 
 Allows to specify that a bash framework function requires some specific
 features.
@@ -440,9 +442,10 @@ Git::shallowClone() {
 See [compiler - Compiler::Requirement::require]#requirement_require) below for
 more information.
 
-##### 3.6.2.1. Requires naming convention
+##### 3.6.2.1. Requires source file naming convention
 
-The following naming convention applies:
+The following naming convention applies to the source file of a require
+function:
 
 - every required functions are prefixed with `require`.
 - the name of file then respects camel case (eg: `requireShallowClone.sh`).
@@ -464,11 +467,11 @@ we need a specific requirement.
 
 When developing a _require_ file, think about writing the associated function
 _support_. Eg: `src/Git/requireShallowClone.sh` will use
-`Git::supportsShallowClone`
+`Git::supportShallowClone`
 
 #### 3.6.3. Requirement overloading
 
-In`.framework-config` file, the property `FRAMEWORK_SRC_DIRS` allows to specify
+In `.framework-config` file, the property `FRAMEWORK_SRC_DIRS` allows to specify
 multiple source directories, the framework functions will be searched in these
 directories in the order specified by this variable. It allows you to override
 either bash framework functions, either requirements that are just special bash
@@ -492,7 +495,7 @@ in our script headers:
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
-if Git::shallowCloneSupported; then
+if Git::supportShallowClone; then
   Git::shallowClone ...
 else
   Git::clone ...
@@ -500,7 +503,7 @@ fi
 # ...
 ```
 
-### 3.6. COMPATIBILITY directive (optional)
+### 3.7. COMPATIBILITY directive (optional) - @future feature
 
 `COMPATIBILITY` directive allows to indicate to the compiler that we want our
 binary to use bash framework functions that conform to some constraints. Bash
@@ -516,7 +519,7 @@ have several kinds of compatibility requirements:
   - the compiler could generate errors if the script is using some functions
     dedicated to ubuntu
 
-#### 3.6.1. requirement vs compatibility ?
+#### 3.7.1. requirement vs compatibility ?
 
 `REQUIREMENT` directive ensures during execution that the environment where the
 script is executed conforms to the requirement(Eg.: require gitShallowClone).
@@ -530,7 +533,7 @@ want our script to be free of wsl requirement or free of jq requirement. It
 means if a function using jq or wsl is included in the binary, the compiler will
 throw an error.
 
-#### 3.6.1. COMPATIBILITY directive syntax
+#### 3.7.2. COMPATIBILITY directive syntax
 
 The following syntax can be used:
 
@@ -572,7 +575,7 @@ Compatibility::posix() {
     Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
     return 1
   fi
-  if ! Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"
+  if Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"
     Log::displayError "The function ${functionName} used in the script require jq which is incompatible with this script"
     return 1
   fi
@@ -580,9 +583,9 @@ Compatibility::posix() {
 ```
 
 So if your script suddenly uses `Version::githubApiExtractVersion`, the compiler
-will immediately warns you.
+will immediately warns you as this function requires jq.
 
-#### @compatibility tag syntax
+#### 3.7.3. @compatibility tag syntax
 
 in order to tag the function with some compatibilities, the tag `@compatibility`
 can be used.
@@ -594,17 +597,34 @@ can be used.
 # @exitcode 1 if jq or Version::parse fails
 # @stdout the version parsed
 # @require Linux::requireJqCommand
-# @compatibility Linux::supportJqCommand
+# @compatibility Linux::supportAlpine
+# @compatibility Linux::supportUbuntu
 Version::githubApiExtractVersion() {
   jq -r ".tag_name" | Version::parse
 }
 ```
 
+for example we could have this kind of compatibility tag on Linux::Apt::update
+
+```bash
+# @description update apt packages list
+# @feature Retry::default
+# @feature sudo
+# @require Linux::requireUbuntu
+# @compatibility Linux::supportUbuntuOnly
+Linux::Apt::update() {
+  Retry::default sudo apt-get update -y --fix-missing -o Acquire::ForceIPv4=true
+}
+```
+
+It means that if a binary is compiled with alpine COMPATIBILITY requirement the
+compiler will fail with an error.
+
 See [compiler -
 Compiler::Compatibility::checkCompatibility]#compatibility_directive) below for
 more information.
 
-### 3.7. `IMPLEMENT` and `FACADE` directives (optional)
+### 3.8. `IMPLEMENT` and `FACADE` directives (optional)
 
 Now let's talk about 2 others directives : `IMPLEMENT` and `FACADE`.
 
@@ -618,11 +638,20 @@ will encapsulate all the content of script into one main function. Then
 functions declared by `IMPLEMENT` directive will be exposed when calling this
 main function by passing as argument $1 the name of the function to execute. So
 doing this binary will do the job of a facade which is to provide a simplified
-interface to a a complex set of functions.
+interface to a complex set of functions.
 
-Let's see now in details each directive.
+Note that IMPLEMENT is not mandatory, you can use FACADE without IMPLEMENT
+directive, in this case a main function will be generated allowing you to call
+the content of your script.
 
-#### 3.7.1. `IMPLEMENT` directive (optional)
+Creating this main function, that is embedding your script, is a best practice
+in bash scripting. Because if the script being executed is rewritten during the
+execution, without main function, it could implies the execution of an other
+part of the code which can lead to serious issues.
+
+Let's see now in details those 2 directives.
+
+#### 3.8.1. `IMPLEMENT` directive (optional)
 
 This directive allows to indicate to the compiler that the script should respect
 a kind of
@@ -633,9 +662,9 @@ _Syntax:_ `# IMPLEMENT InstallScripts::HelpInterface`
 
 if `IMPLEMENT` directive is provided, the compiler will ensure that:
 
-- the interfaceFile exists
-- all the functions defined in the interfaceFile are declared in the
-  implementation file (the one being compiled)
+- The interface script function exists.
+- And all the functions defined in the interface function are declared in the
+  implementation file (so the one being compiled).
 
 Using multiple `IMPLEMENT` directives is supported but the following rules
 apply:
@@ -735,46 +764,64 @@ dependencies() {
 Here the compiler will throw an error because some of the functions declared
 have not been implemented.
 
-#### 3.7.2. `FACADE` directive (optional)
+##### 3.8.1.1. Composition vs inheritance
+
+Bash is not an Object oriented language. I propose here a kind of interface. We
+could ask ourself, why not implementing a kind of inheritance too? The reason is
+that it would be too complicated in bash language as it is not been designed for
+it. And also because of this principle,
+[we should prefer composition over inheritance](https://tinyurl.com/n955vtya).
+And composition is easily reachable using `bash-tpl` with `.INCLUDE` directive,
+heavily used in this framework.
+
+#### 3.8.2. `FACADE` directive (optional)
 
 _Syntax:_ `# FACADE`
 
 _Syntax:_ `# FACADE "alternateTemplate"`
 
-##### 3.7.2.1. Overview
+##### 3.8.2.1. Overview
 
 The `FACADE` directive allows to generate a kind of binary script that will hide
-the functions behind one unique function. The functions that will be made public
-will be the ones declared using `IMPLEMENT` directive.
+the functions behind one unique function. Optionally, the functions that will be
+made public will be the ones declared using `IMPLEMENT` directive.
 
 The `FACADE` directive will instruct the compiler to:
 
-- encapsulate the functions inside a global function (interface functions will
+- Encapsulate the functions inside a global function (interface functions will
   be nested in this function).
-- generate a script, that will allow to call these nested functions
+- Generate a script, that will allow to call these nested functions.
 
 We will see later on, how to do a kind of "abstract class" that can be seen more
 as prototyping.
 
-##### 3.7.2.2. Generated script
+##### 3.8.2.2. Generated script
 
 A script that is using `FACADE` directive will be compiled using a special
 template (a default one is provided but the directive allows to override it if
-you need:
+you need):
 
-- all the functions defined in this script will be encapsulated in a global
+- All the functions defined in this script will be encapsulated in a global
   function with a unique name (random name auto generated to avoid function name
-  conflicts if sourced)
-- The script will have 2 behaviors depending if the file is sourced or directly
-  executed
-  - if file is sourced, it generates automatically a function with a name based
-    on first argument passed when sourcing the file. If no argument or more than
-    1, an error is generated.
-  - if file is executed, it will automatically call the main function using
-    first argument to call the right sub function and pass the rest of arguments
-    to that function.
+  conflicts if sourced).
+- if the directive `# VAR_MAIN_FUNCTION_VAR_NAME=anyMainFunctionName` is
+  provided
+  - The script will have 2 behaviors depending if the file is sourced or
+    directly executed:
+  - If file is sourced
+    - The main function (automatically generated) is not called.
+    - The name of the main function is available in the `MAIN_FUNCTION_VAR_NAME`
+      corresponding name (in our case anyMainFunctionName variable).
+    - It means a script that sourced this file can rely on that variable to call
+      the main function.
+  - If file is directly executed then it will automatically call the main
+    function using first argument to call the right sub function and pass the
+    rest of arguments to that function.
+- if the directive `# VAR_MAIN_FUNCTION_VAR_NAME` is not provided, the file
+  could still be sourced, but the main function with auto generated name will be
+  automatically called.
 
-### 3.8. `EMBED` directive (optional)
+### 3.9. `EMBED` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax
 can be used:
@@ -783,7 +830,7 @@ _Syntax:_ `# EMBED "srcFile" AS "targetFile"`
 
 _Syntax:_ `# EMBED "srcDir" AS "targetDir"`
 
-_Syntax:_ `# EMBED namespace::functions AS "myFunction"`
+_Syntax:_ `# EMBED Namespace::functions AS "myFunction"`
 
 if `EMBED` directive is provided, the file/dir provided will be added inside the
 resulting bin file as a tar gz file(base64 encoded) and automatically extracted
@@ -804,14 +851,14 @@ sudo "${embed_file_backupFile}" ...
 See [compiler - Compiler::Embed::embed]#embed_include) below for more
 information.
 
-### 3.9. `.framework-config` framework configuration file
+### 3.10. `.framework-config` framework configuration file
 
 The special file `.framework-config` allows to change some behaviors of the
 compiler or the framework linter.
 
 ```bash
 # describe the functions that will be skipped from being imported
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^namespace::functions$|^Functions::myFunction$|^IMPORT::dir::file$|^Acquire::ForceIPv4$'
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^Namespace::functions$|^Functions::myFunction$|^IMPORT::dir::file$|^Acquire::ForceIPv4$'
 # describe the files that do not contain function to be imported
 NON_FRAMEWORK_FILES_REGEXP="(.bats$|/testsData/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_|^src/batsHeaders.sh$)"
 # describe the files that are allowed to not have a function matching the filename
@@ -957,7 +1004,7 @@ interfaces. `Compiler::Implement::interface` allows to:
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Implement/activityDiagram.puml).
 
-### 4.2. Compiler - Compiler::Facade::generate
+### 4.3. Compiler - Compiler::Facade::generate
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -983,7 +1030,7 @@ be made public will be the ones declared using `IMPLEMENT` directive.
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Implement/activityDiagram.puml).
 
-### 4.3. Compiler - Compiler::Embed::embed
+### 4.4. Compiler - Compiler::Embed::embed
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -1016,11 +1063,22 @@ framework function. `Compiler::Embed::embed` allows to:
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Embed/activityDiagram.puml).
 
+### 4.5. compiler - Compiler::Compatibility::checkCompatibility
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+<a name="compatibility_directive" id="compatibility_directive"></a>
+
+<!-- markdownlint-restore -->
+
+TODO
+
 ## 5. FrameworkLint
 
 Lint files of the current repository
 
-- check if all namespace::functions are existing in the framework
+- check if all Namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check that each framework function has a bats file associated (warning if not)
 - check that `REQUIRE` directive `AS` ids are not duplicated

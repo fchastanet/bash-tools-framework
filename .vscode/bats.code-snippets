@@ -11,7 +11,7 @@
     "prefix": "bats_test_without_run",
     "body": [
       "local status=0",
-      "functionTotest >\"\\${BATS_TEST_TMPDIR}/result\" 2>&1 || status=\\$?",
+      "functionToTest >\"\\${BATS_TEST_TMPDIR}/result\" 2>&1 || status=\\$?",
       "[[ \"\\${status}\" = \"0\" ]]",
       "run cat \"\\${BATS_TEST_TMPDIR}/result\""
     ],

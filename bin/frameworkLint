@@ -10,6 +10,34 @@
 unalias -a || true
 
 # shellcheck disable=SC2034
+((failures = 0)) || true
+
+shopt -s expand_aliases
+
+# Bash will remember & return the highest exit code in a chain of pipes.
+# This way you can catch the error inside pipes, e.g. mysqldump | gzip
+set -o pipefail
+set -o errexit
+
+# Command Substitution can inherit errexit option since bash v4.4
+shopt -s inherit_errexit || true
+
+# a log is generated when a command fails
+set -o errtrace
+
+# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+shopt -s nullglob
+
+# ensure regexp are interpreted without accentuated characters
+export LC_ALL=POSIX
+
+export TERM=xterm-256color
+
+#avoid interactive install
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# shellcheck disable=SC2034
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2034
@@ -90,34 +118,6 @@ interruptManagement() {
   kill -s INT "$$"
 }
 trap interruptManagement INT
-
-# shellcheck disable=SC2034
-((failures = 0)) || true
-
-shopt -s expand_aliases
-
-# Bash will remember & return the highest exit code in a chain of pipes.
-# This way you can catch the error inside pipes, e.g. mysqldump | gzip
-set -o pipefail
-set -o errexit
-
-# Command Substitution can inherit errexit option since bash v4.4
-shopt -s inherit_errexit || true
-
-# a log is generated when a command fails
-set -o errtrace
-
-# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
-shopt -s nullglob
-
-# ensure regexp are interpreted without accentuated characters
-export LC_ALL=POSIX
-
-export TERM=xterm-256color
-
-#avoid interactive install
-export DEBIAN_FRONTEND=noninteractive
-export DEBCONF_NONINTERACTIVE_SEEN=true
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 export FRAMEWORK_ROOT_DIR
 
@@ -871,7 +871,7 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,pl
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
-- check if all namespace::functions are existing in the framework
+- check if all Namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check each function has a bats file associated
 - shdoc
@@ -1107,7 +1107,7 @@ checkEachSrcFileHasCorrectShdoc() {
       fi
       if [[ ! "${requireAnnotation}" =~ ^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+require([A-Z][a-zA-Z0-9_-]+)$ ]]; then
         reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
-          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention namespace::requireSomething"
+          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention Namespace::requireSomething"
         continue
       fi
       if ! Compiler::findFunctionInSrcDirs "${requireAnnotation}" "${FRAMEWORK_SRC_DIRS[@]}" >/dev/null; then

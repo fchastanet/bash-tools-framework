@@ -57,28 +57,12 @@ source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
 # shellcheck source=/src/File/insertFileAfterToken.sh
 source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
-# shellcheck source=src/Compiler/Embed/inject.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/inject.sh"
-# shellcheck source=src/Compiler/Embed/filter.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/filter.sh"
-# shellcheck source=src/Compiler/Embed/parse.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/parse.sh"
-# shellcheck source=src/Compiler/Embed/assertAsName.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/assertAsName.sh"
-# shellcheck source=src/Compiler/Embed/assertResource.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/assertResource.sh"
-# shellcheck source=src/Compiler/Embed/embed.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/embed.sh"
-# shellcheck source=src/Assert/validVariableName.sh
-source "${_COMPILE_SRC_DIR}/Assert/validVariableName.sh"
-# shellcheck source=src/Compiler/Embed/embedFile.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedFile.sh"
-# shellcheck source=src/Compiler/Embed/embedDir.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedDir.sh"
-# shellcheck source=src/Compiler/Embed/embedFrameworkFunction.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Embed/embedFrameworkFunction.sh"
+# shellcheck source=src/Compiler/Embed/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Embed/__all.sh"
 # shellcheck source=src/Compiler/Facade/__all.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Facade/__all.sh"
+# shellcheck source=/src/Compiler/Implement/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Implement/__all.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
@@ -87,8 +71,6 @@ source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
-# shellcheck source=/src/Compiler/Implement/__all.sh
-source "${_COMPILE_SRC_DIR}/Compiler/Implement/__all.sh"
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true

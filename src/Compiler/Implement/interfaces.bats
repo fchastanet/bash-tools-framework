@@ -67,13 +67,14 @@ function Compiler::Implement::interfaces::interfacesMismatchFunctionName { #@tes
   )
   local status=0
   Compiler::Implement::interfaces \
-    "${BATS_TEST_DIRNAME}/testsData/interfacesMismatchFunctionName.sh" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+    "${BATS_TEST_DIRNAME}/testsData/interfacesMismatchFunctionName.sh" >"${BATS_TEST_TMPDIR}/stdout" 2>"${BATS_TEST_TMPDIR}/stderr" || status=$?
   [[ "${status}" = "1" ]]
-  run cat "${BATS_TEST_TMPDIR}/result"
-  assert_lines_count 3
+  run cat "${BATS_TEST_TMPDIR}/stdout"
+  assert_output "Namespace::interfaceValidList"
+  run cat "${BATS_TEST_TMPDIR}/stderr"
+  assert_lines_count 2
   assert_line --index 0 --partial "Namespace::interfaceMismatchFunctionName: command not found"
   assert_line --index 1 --partial "ERROR   - Calling interface 'Namespace::interfaceMismatchFunctionName' has generated an error"
-  assert_line --index 2 "Namespace::interfaceValidList"
 }
 
 function Compiler::Implement::interfaces::twoInterfaces { #@test

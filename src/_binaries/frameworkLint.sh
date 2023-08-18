@@ -18,7 +18,7 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,pl
 
 ${__HELP_TITLE}Description:${__HELP_NORMAL}
 Lint files of the current repository
-- check if all namespace::functions are existing in the framework
+- check if all Namespace::functions are existing in the framework
 - check that function defined in a .sh is correctly named
 - check each function has a bats file associated
 - shdoc
@@ -245,7 +245,7 @@ checkEachSrcFileHasCorrectShdoc() {
       fi
       if [[ ! "${requireAnnotation}" =~ ^([A-Za-z0-9_]+[A-Za-z0-9_-]*::)+require([A-Z][a-zA-Z0-9_-]+)$ ]]; then
         reportError "checkEachSrcFileHasCorrectShdoc" "${srcFile}" \
-          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention namespace::requireSomething"
+          "# @require ${requireAnnotation}' does not target a bash framework function with naming convention Namespace::requireSomething"
         continue
       fi
       if ! Compiler::findFunctionInSrcDirs "${requireAnnotation}" "${FRAMEWORK_SRC_DIRS[@]}" >/dev/null; then
