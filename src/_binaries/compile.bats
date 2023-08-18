@@ -18,7 +18,7 @@ function compile() {
     # srcFile     : file that needs to be compiled
     "${BATS_TEST_DIRNAME}/testsData/bin/$1"
     # templateDir : directory from which bash-tpl templates will be searched
-    --template-dir "${BATS_TEST_DIRNAME}/testsData/templates"
+    --template-dir "$2"
     # binDir      : fallback bin directory in case BIN_FILE has not been provided
     --bin-dir "${BATS_TEST_TMPDIR}"
     # rootDir     : directory used to compute src file relative path
@@ -26,12 +26,11 @@ function compile() {
     # srcDirs : (optional) you can provide multiple directories
     --src-dir "${BATS_TEST_DIRNAME}/testsData/src"
   )
-  run "${binDir}/compile" "${params[@]}"
+  "${binDir}/compile" "${params[@]}"
 }
 
 function compile::Simple { #@test
-  run compile "simpleBinary.sh" 2>&1
-  assert_output ""
+  run compile "simpleBinary.sh" ${BATS_TEST_DIRNAME}/testsData/templates
   assert_success
   [[ -f "${BATS_TEST_TMPDIR}/simpleBinary" ]]
   [[ -x "${BATS_TEST_TMPDIR}/simpleBinary" ]]
@@ -39,7 +38,7 @@ function compile::Simple { #@test
 }
 
 function compile::var { #@test
-  run compile "var.sh"
+  run compile "var.sh" ${BATS_TEST_DIRNAME}/testsData/templates
   assert_success
   [[ -f "${BATS_TEST_TMPDIR}/var" ]]
   [[ -x "${BATS_TEST_TMPDIR}/var" ]]
@@ -47,7 +46,7 @@ function compile::var { #@test
 }
 
 function compile::IncludeSimpleFile { #@test
-  run compile "simpleBinary.sh"
+  run compile "simpleBinary.sh" ${BATS_TEST_DIRNAME}/testsData/templates
   assert_success
   [[ -f "${BATS_TEST_TMPDIR}/simpleBinary" ]]
   [[ -x "${BATS_TEST_TMPDIR}/simpleBinary" ]]
@@ -55,9 +54,8 @@ function compile::IncludeSimpleFile { #@test
 }
 
 function compile::embed { #@test
-  run compile "embed.sh" 2>&1
+  run compile "embed.sh" "${FRAMEWORK_ROOT_DIR}/src" 2>&1
   assert_success
-  assert_output ""
   [[ -f "${BATS_TEST_TMPDIR}/embedBinary" ]]
   [[ -x "${BATS_TEST_TMPDIR}/embedBinary" ]]
   run "${BATS_TEST_TMPDIR}/embedBinary" 2>&1

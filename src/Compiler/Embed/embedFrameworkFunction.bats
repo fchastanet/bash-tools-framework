@@ -19,7 +19,7 @@ setup() {
 function Compiler::Embed::embedFrameworkFunction { #@test
   local -a _EMBED_COMPILE_ARGUMENTS=(
     # templateDir : directory from which bash-tpl templates will be searched
-    --template-dir "${srcDir}/_includes"
+    --template-dir "${srcDir}"
     # binDir      : fallback bin directory in case BIN_FILE has not been provided
     --bin-dir "${BATS_TEST_TMPDIR}"
     # rootDir     : directory used to compute src file relative path

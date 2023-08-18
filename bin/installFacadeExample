@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
-
-#####################################
+###############################################################################
 # GENERATED FACADE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/installFacadeExample.sh
 # DO NOT EDIT IT
-#####################################
-
+###############################################################################
+# shellcheck disable=SC2288,SC2034
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/installFacadeExample
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-
-# shellcheck disable=SC2288
-# shellcheck disable=SC2034
+# VAR_MAIN_FUNCTION_VAR_NAME=installFacadeExampleMainFunctionName
+# IMPLEMENT Install::InstallInterface
+# FACADE
 
 # ensure that no user aliases could interfere with
 # commands used in this script
@@ -42,11 +41,16 @@ export TERM=xterm-256color
 #avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
-
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
 COMMAND_BIN_DIR="${CURRENT_DIR}"
+
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
+FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
+FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 
 if [[ -t 1 || -t 2 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
@@ -121,12 +125,6 @@ interruptManagement() {
   kill -s INT "$$"
 }
 trap interruptManagement INT
-
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/${META_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR}" && pwd -P)"
-FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
-FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
-FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
-FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
@@ -274,28 +272,30 @@ Assert::validPath() {
 # FUNCTIONS
 
 facade_main_eabc2d3140cb41cfb14980eea28ad05c() {
-  # REQUIRES
+# REQUIRES
 
-  # _VAR_MAIN_FUNCTION_VAR_NAME=installFacadeExampleMainFunctionName
-  # IMPLEMENT Install::InstallInterface
-  # FACADE
-
-  install() {
-    echo "installation in progress"
-  }
-
-  local action=$1
-  shift || true
-  case ${action} in
-    install)
-      install "$@"
-      ;;
-    *)
-      Log::displayError "invalid action requested: ${action}"
-      exit 1
-      ;;
-  esac
-  exit 0
+install() {
+  echo "installation in progress"
 }
 
-facade_main_eabc2d3140cb41cfb14980eea28ad05c "$@"
+local action=$1
+shift || true
+case ${action} in
+  install)
+    install "$@"
+    ;;
+  *)
+    Log::displayError "invalid action requested: ${action}"
+    exit 1
+    ;;
+esac
+exit 0
+}
+
+# if file is sourced avoid calling main function
+# shellcheck disable=SC2178
+BASH_SOURCE=".$0" # cannot be changed in bash
+# shellcheck disable=SC2128
+test ".$0" != ".${BASH_SOURCE}" || facade_main_eabc2d3140cb41cfb14980eea28ad05c "$@"
+
+export installFacadeExampleMainFunctionName="facade_main_eabc2d3140cb41cfb14980eea28ad05c"

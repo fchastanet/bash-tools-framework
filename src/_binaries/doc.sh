@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/doc
+# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
+# VAR_DEPRECATED_LOAD=1
+# FACADE
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 DOC_DIR="${FRAMEWORK_ROOT_DIR}/pages"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
 
 HELP="$(
   cat <<EOF

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/buildPushDockerImages
-
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
+# VAR_DEPRECATED_LOAD=1
+# FACADE
 
 HELP="$(
   cat <<EOF

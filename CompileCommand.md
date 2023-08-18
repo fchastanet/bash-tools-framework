@@ -300,9 +300,7 @@ Eg:
 # VAR_SCRIPT=MinimumRequirements
 # EMBED "Backup::file" as backupFile
 # EMBED "${FRAMEWORK_ROOT_DIR}/bin/otherNeededBinary" AS "otherNeededBinary"
-
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+# FACADE
 
 sudo "${embed_file_backupFile}" # ...
 "${embed_file_otherNeededBinary}"
@@ -314,7 +312,7 @@ uses `EMBED` directive to allow the usage of `Backup::file` function as a
 binary, named backupFile that can even be called using `sudo`.
 
 In previous example, the directive `# FUNCTIONS` is injected via the file
-`_includes/_header.tpl`.
+`_includes/facadeDefault/facadeDefault.tpl`.
 
 The srcFile should contains at least the directive `BIN_FILE` at top of the bash
 script file (see example above).
@@ -491,9 +489,7 @@ in our script headers:
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
 # @require disable=Git::requireShallowClone
-
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_load.tpl"
+# FACADE
 
 if Git::supportShallowClone; then
   Git::shallowClone ...
