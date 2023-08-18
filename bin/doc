@@ -584,7 +584,7 @@ ShellDoc::installRequirementsIfNeeded() {
     Log::displayInfo "Check if shdoc is up to date"
     if GIT_CLONE_OPTIONS="--recursive" Git::cloneOrPullIfNoChanges \
       "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/shdoc" \
-      "git@github.com:fchastanet/shdoc.git"; then
+      "https://github.com/fchastanet/shdoc.git"; then
       echo "1" >"${BASH_FRAMEWORK_SHDOC_INSTALLED}"
     else
       Log::fatal "unable to install shdoc library"
