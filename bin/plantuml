@@ -40,16 +40,20 @@ export TERM=xterm-256color
 #avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# @see https://unix.stackexchange.com/a/386856
+interruptManagement() {
+  # restore SIGINT handler
+  trap - INT
+  # ensure that Ctrl-C is trapped by this script and not by sub process
+  # report to the parent that we have indeed been interrupted
+  kill -s INT "$$"
+}
+trap interruptManagement INT
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
 COMMAND_BIN_DIR="${CURRENT_DIR}"
-
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
-FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
-FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
-FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 
 if [[ -t 1 || -t 2 ]]; then
   # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
@@ -114,16 +118,6 @@ cleanOnExit() {
   fi
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
-
-# @see https://unix.stackexchange.com/a/386856
-interruptManagement() {
-  # restore SIGINT handler
-  trap - INT
-  # ensure that Ctrl-C is trapped by this script and not by sub process
-  # report to the parent that we have indeed been interrupted
-  kill -s INT "$$"
-}
-trap interruptManagement INT
 
 # @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
 # @arg $1 verboseDisplayLevel:String the level of verbosity to set
@@ -614,6 +608,11 @@ Assert::validPath() {
 # FUNCTIONS
 
 facade_main_1eed7d47fd2544e59f936b36f8b93f99() {
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
+FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
+FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 Env::load
 export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
 Args::parseVerbose "${__LEVEL_INFO}" "$@" || true

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/vendor/.shDocInstalled"
+BASH_FRAMEWORK_SHDOC_INSTALLED_PATH="vendor/.shDocInstalled"
 BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 
 # @description install requirements to execute shdoc
@@ -13,6 +13,7 @@ BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 # @stderr diagnostics information is displayed
 # @feature Git::cloneOrPullIfNoChanges
 ShellDoc::installRequirementsIfNeeded() {
+  local BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/${BASH_FRAMEWORK_SHDOC_INSTALLED_PATH}"
   if [[ "$(
     Cache::getFileContentIfNotExpired \
       "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \

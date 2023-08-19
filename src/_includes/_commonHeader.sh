@@ -26,13 +26,3 @@ cleanOnExit() {
   fi
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
-
-# @see https://unix.stackexchange.com/a/386856
-interruptManagement() {
-  # restore SIGINT handler
-  trap - INT
-  # ensure that Ctrl-C is trapped by this script and not by sub process
-  # report to the parent that we have indeed been interrupted
-  kill -s INT "$$"
-}
-trap interruptManagement INT
