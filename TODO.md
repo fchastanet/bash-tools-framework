@@ -113,6 +113,8 @@
 
 TODOs linked to bin/compiler or templates .tpl:
 
+- ADAPTER directive to allow to choose between multiple implementation
+  dependening on require conditions
 - make compile options works with relative files
   - display info should display relative path too instead of full path
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
