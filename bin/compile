@@ -63,6 +63,8 @@ source "${_COMPILE_SRC_DIR}/Compiler/Embed/__all.sh"
 source "${_COMPILE_SRC_DIR}/Compiler/Facade/__all.sh"
 # shellcheck source=/src/Compiler/Implement/__all.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Implement/__all.sh"
+# shellcheck source=/src/Compiler/Require/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Require/__all.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
@@ -354,9 +356,12 @@ importFunctions() {
   local -n newFilesAdded=$5
   local -n importFailures=$6
   local -a functionsToImport
+  local -a requireFunctionsToImport
   local functionToImport
 
   readarray -t functionsToImport < <(Compiler::extractUniqueFrameworkFunctions "${file}")
+  readarray -t requireFunctionsToImport < <(Compiler::Require::requires "${file}")
+  functionsToImport+=("${requireFunctionsToImport[@]}")
 
   ((newFilesAdded = 0)) || true
   if [[ "${ARGS_VERBOSE:-0}" = "2" ]]; then
@@ -513,6 +518,13 @@ injectImportedFunctions "${COMPILED_FILE2}" filesAlreadyImported
 
 # remove spaces at the end of the lines
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
+
+# inject eventual requires
+declare importedRequiresTempFile
+importedRequiresTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_requires.XXXXXXX")"
+Compiler::Require::requires "${COMPILED_FILE2}" | tac >"${importedRequiresTempFile}"
+# insert functions before # REQUIRES
+File::insertFileAfterToken "${COMPILED_FILE2}" "${importedRequiresTempFile}" "# REQUIRES"
 
 # retrieve all interfaces functions that need to be implemented
 export _COMPILE_FILE_ARGUMENTS

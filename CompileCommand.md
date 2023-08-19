@@ -17,33 +17,34 @@
     - [3.5.4. `BIN_FILE` directive (optional)](#354-bin_file-directive-optional)
   - [3.6. REQUIRE directive (optional) - @future feature](#36-require-directive-optional---future-feature)
     - [3.6.1. What is a requirement ?](#361-what-is-a-requirement-)
-    - [3.6.2. REQUIRE directive syntax](#362-require-directive-syntax)
+    - [3.6.2. @require directive syntax](#362-require-directive-syntax)
       - [3.6.2.1. Requires source file naming convention](#3621-requires-source-file-naming-convention)
       - [3.6.2.2. Best practice #1: feature name](#3622-best-practice-1-feature-name)
       - [3.6.2.3. Best practice #2: support method](#3623-best-practice-2-support-method)
     - [3.6.3. Requirement overloading](#363-requirement-overloading)
-    - [3.6.4. Requirement disable](#364-requirement-disable)
   - [3.7. COMPATIBILITY directive (optional) - @future feature](#37-compatibility-directive-optional---future-feature)
     - [3.7.1. requirement vs compatibility ?](#371-requirement-vs-compatibility-)
     - [3.7.2. COMPATIBILITY directive syntax](#372-compatibility-directive-syntax)
     - [3.7.3. @compatibility tag syntax](#373-compatibility-tag-syntax)
-  - [3.8. `IMPLEMENT` and `FACADE` directives (optional)](#38-implement-and-facade-directives-optional)
-    - [3.8.1. `IMPLEMENT` directive (optional)](#381-implement-directive-optional)
-      - [3.8.1.1. Composition vs inheritance](#3811-composition-vs-inheritance)
-    - [3.8.2. `FACADE` directive (optional)](#382-facade-directive-optional)
-      - [3.8.2.1. Overview](#3821-overview)
-      - [3.8.2.2. Generated script](#3822-generated-script)
-  - [3.9. `EMBED` directive (optional)](#39-embed-directive-optional)
-  - [3.10. `.framework-config` framework configuration file](#310-framework-config-framework-configuration-file)
+  - [3.8. `DISABLE` directive (optional)](#38-disable-directive-optional)
+  - [3.9. `IMPLEMENT` and `FACADE` directives (optional)](#39-implement-and-facade-directives-optional)
+    - [3.9.1. `IMPLEMENT` directive (optional)](#391-implement-directive-optional)
+      - [3.9.1.1. Composition vs inheritance](#3911-composition-vs-inheritance)
+    - [3.9.2. `FACADE` directive (optional)](#392-facade-directive-optional)
+      - [3.9.2.1. Overview](#3921-overview)
+      - [3.9.2.2. Generated script](#3922-generated-script)
+  - [3.10. `EMBED` directive (optional)](#310-embed-directive-optional)
+  - [3.11. `.framework-config` framework configuration file](#311-framework-config-framework-configuration-file)
 - [4. Compiler algorithms](#4-compiler-algorithms)
   - [4.1. Compiler - Compiler::Requirement::require](#41-compiler---compilerrequirementrequire)
-    - [4.1.1. Requires dependencies](#411-requires-dependencies)
-    - [4.1.2. disable compiler requirement management](#412-disable-compiler-requirement-management)
-    - [4.1.3. override requirements dependency order](#413-override-requirements-dependency-order)
-  - [4.2. Compiler - Compiler::Implement::interface](#42-compiler---compilerimplementinterface)
-  - [4.3. Compiler - Compiler::Facade::generate](#43-compiler---compilerfacadegenerate)
-  - [4.4. Compiler - Compiler::Embed::embed](#44-compiler---compilerembedembed)
-  - [4.5. compiler - Compiler::Compatibility::checkCompatibility](#45-compiler---compilercompatibilitycheckcompatibility)
+    - [4.1.1. Requires dependencies tree](#411-requires-dependencies-tree)
+    - [4.1.2. Requires dependencies use cases](#412-requires-dependencies-use-cases)
+    - [4.1.3. disable compiler requirement management](#413-disable-compiler-requirement-management)
+    - [4.1.4. override requirements dependency order](#414-override-requirements-dependency-order)
+  - [4.2. compiler - Compiler::Compatibility::checkCompatibility](#42-compiler---compilercompatibilitycheckcompatibility)
+  - [4.3. Compiler - Compiler::Implement::interface](#43-compiler---compilerimplementinterface)
+  - [4.4. Compiler - Compiler::Facade::generate](#44-compiler---compilerfacadegenerate)
+  - [4.5. Compiler - Compiler::Embed::embed](#45-compiler---compilerembedembed)
 - [5. FrameworkLint](#5-frameworklint)
 - [6. Best practices](#6-best-practices)
 - [7. Acknowledgements](#7-acknowledgements)
@@ -389,27 +390,28 @@ features.
 
 `Compiler::Requirement::require` instructs the compiler to include some
 cross-used scripts to ensure that proper configuration is set. The directive
-`# @require` allow the usage of that feature during the compilation.
+`# @require` allows the usage of that feature during the compilation.
 
 Here a non exhaustive list of possible requirements:
 
-- REQUIRE Log::requireLoad : ensure log configuration is loaded
-  - REQUIRE Log::requireLoad added on each `Log::display*`functions
-- REQUIRE Framework::requireRootDir
+- @require Log::requireLoad : ensure log configuration is loaded
+  - @require Log::requireLoad added on each `Log::display*`functions
+- @require Framework::requireRootDir
   - ensure that needed variable is set _Eg:_ `Conf::*` needs FRAMEWORK_ROOT_DIR
     to be defined
-- REQUIRE Compiler::Embed::requireLoad -> enable bin directory initialization
-- REQUIRE Args::requireParseVerbose
-- REQUIRE Framework::requireTMPDIR
-- REQUIRE Git::requireShallowClone
-- REQUIRE Git::requireGitCommand : checks that git command exists
-- REQUIRE Framework::requireBashAssociativeArray
+- @require Compiler::Embed::requireLoad -> enable bin directory initialization
+- @require Args::requireParseVerbose -> a require directive you could add in
+  your script
+- @require Framework::requireTMPDIR -> added on Framework::createTmpFile
+- @require Git::requireShallowClone
+- @require Git::requireGitCommand : checks that git command exists
+- @require Framework::requireBashAssociativeArray
   - if a function use this directive, the binary will check at the start that
     the command bash exists with this minimal version 4.0 in which this feature
     appears
-- REQUIRE Linux::Apt::requireUbuntu
+- @require Linux::Apt::requireUbuntu
 
-#### 3.6.2. REQUIRE directive syntax
+#### 3.6.2. @require directive syntax
 
 Allows to define on namespace or function level, some scripts that need to be
 executed at loading time.
@@ -418,11 +420,9 @@ The following syntax can be used:
 
 _Syntax:_ `# @require Framework::requireRootDir`
 
-_Syntax:_ `# @require Git::requireGitCommand`
+_Syntax:_ `# @require Namespace::functionName`
 
-_Syntax:_ `# @require Git::requireShallowClone`
-
-_`REQUIRE` directive usage example:_
+_`@require` directive usage example:_
 
 The following example will ensure that a script that is using the framework
 function Git::shallowClone has the git command available. In this particular
@@ -475,30 +475,6 @@ directories in the order specified by this variable. It allows you to override
 either bash framework functions, either requirements that are just special bash
 framework functions.
 
-#### 3.6.4. Requirement disable
-
-Because sometimes we could expect that some command are not available and our
-script being able to run by providing an alternative. _Eg.:_ If gawk command is
-not available then use alternate function that uses sed command.
-
-_Eg.:_ with the previous example of Git::shallowClone, we want in our script to
-be able to use this function without the git requirement. Then we can write this
-in our script headers:
-
-```bash
-#!/usr/bin/env bash
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
-# @require disable=Git::requireShallowClone
-# FACADE
-
-if Git::supportShallowClone; then
-  Git::shallowClone ...
-else
-  Git::clone ...
-fi
-# ...
-```
-
 ### 3.7. COMPATIBILITY directive (optional) - @future feature
 
 `COMPATIBILITY` directive allows to indicate to the compiler that we want our
@@ -508,16 +484,18 @@ have several kinds of compatibility requirements:
 
 - posix: our script needs to be compatible with posix standard
   - **Note: Here it's just an example of a compatibility usage but this**
-    **framework is not compatible at all with posix**
+    **framework is not compatible at all with posix for several reasons**
 - alpine: our script needs to be compatible with alpine distribution
   - default sh is dash which is a posix shell, so this compatibility requirement
     implies posix
   - the compiler could generate errors if the script is using some functions
     dedicated to ubuntu
 
+`COMPATIBILITY` directive can only be used in the header of the script file.
+
 #### 3.7.1. requirement vs compatibility ?
 
-`REQUIREMENT` directive ensures during execution that the environment where the
+`@require` directive ensures during execution that the environment where the
 script is executed conforms to the requirement(Eg.: require gitShallowClone).
 
 At the opposite, `COMPATIBILITY` ensures that binary generated during
@@ -605,7 +583,7 @@ for example we could have this kind of compatibility tag on Linux::Apt::update
 ```bash
 # @description update apt packages list
 # @feature Retry::default
-# @feature sudo
+# Linux::requireSudoCommand
 # @require Linux::requireUbuntu
 # @compatibility Linux::supportUbuntuOnly
 Linux::Apt::update() {
@@ -620,7 +598,37 @@ See [compiler -
 Compiler::Compatibility::checkCompatibility]#compatibility_directive) below for
 more information.
 
-### 3.8. `IMPLEMENT` and `FACADE` directives (optional)
+### 3.8. `DISABLE` directive (optional)
+
+Because sometimes we could expect that some command are not available and our
+script being able to run by providing an alternative. _Eg.:_ If gawk command is
+not available then use alternate function that uses sed command.
+
+`# DISABLE Namespace::functionName` directive can only be used in file script
+header.
+
+_Eg.:_ with the previous example of Git::shallowClone, we want in our script to
+be able to use this function without the git requirement. Then we can write this
+in our script headers:
+
+```bash
+#!/usr/bin/env bash
+# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/binaryExample
+# DISABLE Git::requireShallowClone
+# FACADE
+
+if Git::supportShallowClone; then
+  Git::shallowClone ...
+else
+  Git::clone ...
+fi
+# ...
+```
+
+Using this directive we can disable either require directive, either
+compatibility directive.
+
+### 3.9. `IMPLEMENT` and `FACADE` directives (optional)
 
 Now let's talk about 2 others directives : `IMPLEMENT` and `FACADE`.
 
@@ -647,7 +655,7 @@ part of the code which can lead to serious issues.
 
 Let's see now in details those 2 directives.
 
-#### 3.8.1. `IMPLEMENT` directive (optional)
+#### 3.9.1. `IMPLEMENT` directive (optional)
 
 This directive allows to indicate to the compiler that the script should respect
 a kind of
@@ -760,7 +768,7 @@ dependencies() {
 Here the compiler will throw an error because some of the functions declared
 have not been implemented.
 
-##### 3.8.1.1. Composition vs inheritance
+##### 3.9.1.1. Composition vs inheritance
 
 Bash is not an Object oriented language. I propose here a kind of interface. We
 could ask ourself, why not implementing a kind of inheritance too? The reason is
@@ -770,13 +778,13 @@ it. And also because of this principle,
 And composition is easily reachable using `bash-tpl` with `.INCLUDE` directive,
 heavily used in this framework.
 
-#### 3.8.2. `FACADE` directive (optional)
+#### 3.9.2. `FACADE` directive (optional)
 
 _Syntax:_ `# FACADE`
 
 _Syntax:_ `# FACADE "alternateTemplate"`
 
-##### 3.8.2.1. Overview
+##### 3.9.2.1. Overview
 
 The `FACADE` directive allows to generate a kind of binary script that will hide
 the functions behind one unique function. Optionally, the functions that will be
@@ -791,7 +799,7 @@ The `FACADE` directive will instruct the compiler to:
 We will see later on, how to do a kind of "abstract class" that can be seen more
 as prototyping.
 
-##### 3.8.2.2. Generated script
+##### 3.9.2.2. Generated script
 
 A script that is using `FACADE` directive will be compiled using a special
 template (a default one is provided but the directive allows to override it if
@@ -817,7 +825,7 @@ you need):
   could still be sourced, but the main function with auto generated name will be
   automatically called.
 
-### 3.9. `EMBED` directive (optional)
+### 3.10. `EMBED` directive (optional)
 
 Allows to embed files, directories or a framework function. The following syntax
 can be used:
@@ -847,7 +855,7 @@ sudo "${embed_file_backupFile}" ...
 See [compiler - Compiler::Embed::embed]#embed_include) below for more
 information.
 
-### 3.10. `.framework-config` framework configuration file
+### 3.11. `.framework-config` framework configuration file
 
 The special file `.framework-config` allows to change some behaviors of the
 compiler or the framework linter.
@@ -884,23 +892,27 @@ The compiler during successive passes:
 
 - will load `.framework-config`, eventual variable `REQUIRE_DISABLED` could be
   loaded.
-- will parse `# @require disable=` directives, adding each disabled requirement
-  to the `REQUIRE_DISABLED` variable.
-  - warn if a disabled requirement has no associated file
-- compiler pass
-  - will parse `# @require` directives
+- will parse `# DISABLE Namespace::functionName` directives, adding each
+  disabled requirement to the `REQUIRE_DISABLED` or `COMPATIBILITY_DISABLED`
+  variables depending on the name of the function to disable.
+  - error if a disabled function does not exist
+- use existing compiler passes (injectImportedFunctions)
+  - will parse `# @require` directives of each newly injected functions
     - error if require name does not begin with require
     - error if require name does not comply naming convention
-    - error if _require\*_ file not found
+    - error if `require*` file not found
   - will ignore the disabled requirements
   - a tree of require dependencies will be computed
-  - eventual framework functions needed will be imported
-- on second pass, execute again compiler pass as eventual other `REQUIRE`
-  directives could be found
-- At the end of compiler processing, inject the requirements in the order
-  specified by dependency tree.
+  - we inject gradually the framework functions linked to the requires functions
+- At the end of compiler processing
+  - inject the requirements calls in the order specified by dependency tree (see
+    below).
 
-#### 4.1.1. Requires dependencies
+![activity diagram to explain how @require directives are injected](images/compilerRequireDirective.svg)
+
+[activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Require/activityDiagram.puml).
+
+#### 4.1.1. Requires dependencies tree
 
 The following rules apply:
 
@@ -909,79 +921,157 @@ The following rules apply:
   requirement depends on Framework::requireRootDir, so Framework::requireRootDir
   is loaded before. But Log requirement depends also on Env::requireLoad
   requirement.
-- Requirement can be set at namespace level by adding the directive in \_.sh
+- Requirement can be set at namespace level by adding the directive in `_.sh`
   file or at function level.
 - A requirement can be loaded only once.
 - A requirement that is used by several functions will be more prioritized and
   will be loaded before a less prioritized requirement.
-- `# FUNCTIONS` placeholder should be defined before `# @requireMENTS`
-- `# @requireMENTS` placeholder should be defined before `# ENTRYPOINT`
-- You can use .INCLUDE directive in these files to avoid duplicating code for
-  each similar requirements.
+- `# FUNCTIONS` placeholder should be defined before `# REQUIREMENTS`
+  placeholder
+- `# REQUIREMENTS` placeholder should be defined before `# ENTRYPOINT`
+  placeholder
 
-Let's take this example:
+#### 4.1.2. Requires dependencies use cases
 
-- REQUIRE Log::requireLoad
-  - will insert the script `src/Log/requireLoad.sh`
-  - will call the function Log::load
-  - Log::load function could use a directive `REQUIRE Framework::requireRootDir`
-    that would initialize FRAMEWORK_ROOT_DIR variable by inserting
-    `src/Framework/requireRootDir.sh` file.
-- REQUIRE Args::requireVerboseArg
-  - will insert the script `src/Args/requireVerboseArg.sh` that would contains
+_Script file example:_
 
 ```bash
-# File src/Args/parseVerboseRequirement.sh
-Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
-declare -a args=("$@")
-Array::remove args -v --verbose
-set -- "${args[@]}"
+# FUNCTIONS placeholder
+# REQUIRES placeholder
+Linux::Apt::update || Log::displayError "impossible to update"
 ```
 
-This could result in the following dependency files.
+- first compiler injectImportedFunctions pass
+  - `Linux::Apt::update` requires
+    - `Linux::requireSudoCommand`
+    - `Linux::requireUbuntu`
+  - `Log::display*` requires `Colors::requireTheme`
+- second compiler injectImportedFunctions pass
+  - `Log::log*` requires `Log::load`
+- third compiler injectImportedFunctions pass
+  - `Log::load` requires `Env::load`
+- fourth compiler injectImportedFunctions pass
+  - `Env::load` requires
+    - `Framework::requireRootDir`
+    - `Framework::tmpFileManagement` (see `src/_includes/_commonHeader.sh`)
+- fifth compiler injectImportedFunctions pass
+  - `Framework::tmpFileManagement` requires
+    - `Framework::requireRootDir` which is already in the required list
 
-Dependencies counts
+If we order the requirements following reversed pass order, we end up with:
 
-```csv
-# requirement;number of times the requirement is required
-Log::requireLoad;1
-Framework::requireRootDir;1
-Args::requireVerboseArg;1
-```
+- `Framework::tmpFileManagement`
+- `Framework::requireRootDir`
+  - here we have an issue as it should come before
+    `Framework::tmpFileManagement`
+  - a solution could be to add the element to require list even if it is already
+    in the list. This way it could even give a weight at certain requires.
+- `Env::load`
+- `Log::load`
+- `Colors::requireTheme`
+- `Linux::requireUbuntu`
+- `Linux::requireSudoCommand`
 
-List of requirements dependencies
+To take into consideration:
 
-```csv
-# requirement;requirement implied by this requirement
-Log::requireLoad;Framework::requireRootDir
-Framework::requireRootDir;
-Args::requireVerboseArg;
-```
+- at each pass, we will parse the full list of functions and requires
+  - it means the array of requires has to be reset at each pass.
 
-This would allow the compiler to deduce the order of the requirements:
+Let's take again our above example, pass by pass (we avoided to include some
+functions intentionally like `Retry:default` needed by `Linux::Apt::update` to
+make example easier to understand).
+
+_Pass #1:_ import functions Linux::Apt::update and Log::displayError
 
 ```bash
-Framework::requireRootDir
-Args::requireVerboseArg
+# @require Linux::requireSudoCommand
+# @require Linux::requireUbuntu
+Linux::Apt::update() { :; }
+# @require Log::requireLoad
+Log::displayError() {
+  #...
+  Log:logMessage #...
+}
+# FUNCTIONS placeholder
+# we don't have any yet as we are still parsing the 3 lines code above.
+# REQUIRES placeholder
+Linux::Apt::update || Log::displayError "impossible to update"
+```
+
+Functions imported list so far:
+
+- Linux::Apt::update
+- Log::displayError
+
+_Pass #2:_ import functions Log:logMessage and import required functions in
+reverse order Linux::requireSudoCommand, Linux::requireUbuntu, Log::load _Note:_
+remember that require functions are only filtered using `# @require`
+
+```bash
+# @require Linux::requireSudoCommand
+# @require Linux::requireUbuntu
+Linux::Apt::update() { :; }
+# @require Log::requireLoad
+Log::displayError() {
+  #...
+  Log:logMessage #...
+}
+Log:logMessage() { :; }
+Linux::requireSudoCommand() { :; }
+Linux::requireUbuntu() { :; }
+# @require Env::requireLoad
+Log::requireLoad() { :; }
+# FUNCTIONS placeholder
+
 Log::requireLoad
+Linux::requireUbuntu
+Linux::requireSudoCommand
+# REQUIRES placeholder
+Linux::Apt::update || Log::displayError "impossible to update"
 ```
 
-Framework::requireRootDir and Args::requireVerboseArg are inserted first as they
-depends on zero requirements. Order depends on order of appearance in the
-script.
+Functions imported list so far:
 
-#### 4.1.2. disable compiler requirement management
+- Linux::Apt::update
+- Log::displayError
+- Log:logMessage
+- Log::requireLoad
+- Linux::requireSudoCommand
+- Linux::requireUbuntu
+
+_Pass #3:_ import functions, import required functions will import
+Env::requireLoad so order of requires will be:
+
+```bash
+Env:requireLoad
+Log::requireLoad
+Linux::requireUbuntu
+Linux::requireSudoCommand
+```
+
+#### 4.1.3. disable compiler requirement management
 
 you can completely disable compiler requirement management using
 `DISABLE_COMPILER_REQUIREMENTS`. In this case you have to manually import the
 requirements using `.INCLUDE`directive.
 
-#### 4.1.3. override requirements dependency order
+#### 4.1.4. override requirements dependency order
 
 the order of the requirements is computed automatically by the compiler but in
 some cases, you could need to override this order.
 
-### 4.2. Compiler - Compiler::Implement::interface
+### 4.2. compiler - Compiler::Compatibility::checkCompatibility
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD033 -->
+
+<a name="compatibility_directive" id="compatibility_directive"></a>
+
+<!-- markdownlint-restore -->
+
+TODO
+
+### 4.3. Compiler - Compiler::Implement::interface
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -1000,7 +1090,7 @@ interfaces. `Compiler::Implement::interface` allows to:
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Implement/activityDiagram.puml).
 
-### 4.3. Compiler - Compiler::Facade::generate
+### 4.4. Compiler - Compiler::Facade::generate
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -1026,7 +1116,7 @@ be made public will be the ones declared using `IMPLEMENT` directive.
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Implement/activityDiagram.puml).
 
-### 4.4. Compiler - Compiler::Embed::embed
+### 4.5. Compiler - Compiler::Embed::embed
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -1059,17 +1149,6 @@ framework function. `Compiler::Embed::embed` allows to:
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Compiler/Embed/activityDiagram.puml).
 
-### 4.5. compiler - Compiler::Compatibility::checkCompatibility
-
-<!-- markdownlint-capture -->
-<!-- markdownlint-disable MD033 -->
-
-<a name="compatibility_directive" id="compatibility_directive"></a>
-
-<!-- markdownlint-restore -->
-
-TODO
-
 ## 5. FrameworkLint
 
 Lint files of the current repository
@@ -1078,9 +1157,9 @@ Lint files of the current repository
 - check that function defined in a .sh is correctly named
 - check that each framework function has a bats file associated (warning if not)
 - check that `REQUIRE` directive `AS` ids are not duplicated
-- check for `# FUNCTIONS`, `# @requireMENTS` and `# ENTRYPOINT` presence
-- check `# FUNCTIONS` placeholder is defined before `# @requireMENTS`
-- check `# @requireMENTS` placeholder is defined before `# ENTRYPOINT`
+- check for `# FUNCTIONS`, `# REQUIREMENTS` and `# ENTRYPOINT` presence
+- check `# FUNCTIONS` placeholder is defined before `# REQUIREMENTS`
+- check `# REQUIREMENTS` placeholder is defined before `# ENTRYPOINT`
 
 This linter is used in precommit hooks, see
 [.pre-commit-config.yaml](https://github.com/fchastanet/bash-tools-framework/blob/master/.pre-commit-config.yaml).

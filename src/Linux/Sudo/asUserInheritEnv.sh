@@ -6,7 +6,7 @@
 # @env USERNAME String sudo as this user (root by default)
 # @exitcode 1 exit code of sudo command
 # @require Linux::requireSudoCommand
-# @feature sudo
+# Linux::requireSudoCommand
 Linux::Sudo::asUserInheritEnv() {
   if [[ "$(id -un)" = "${USERNAME:-root}" ]]; then
     "$@"

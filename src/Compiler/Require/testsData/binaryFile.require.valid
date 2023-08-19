@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# @require Namespace::requireSomething
+Log::displayError() { :; }
+echo "binaryFile $*"

@@ -1,9 +1,9 @@
 # Todo
 
 - [1. REQUIRE directive](#1-require-directive)
-  - [Require use cases](#require-use-cases)
-  - [1.1. refact env load using require ?](#11-refact-env-load-using-require-)
-  - [1.2. Options/Args management](#12-optionsargs-management)
+  - [1.1. DISABLE directive](#11-disable-directive)
+  - [1.2. refact env load using require ?](#12-refact-env-load-using-require-)
+  - [1.3. Options/Args management](#13-optionsargs-management)
 - [2. Framework functions changes](#2-framework-functions-changes)
 - [3. Compiler and bash Object oriented](#3-compiler-and-bash-object-oriented)
   - [3.1. .framework-config should contain the compiler options](#31-framework-config-should-contain-the-compiler-options)
@@ -22,40 +22,17 @@
 
 ## 1. REQUIRE directive
 
-- clarify when to use `# @feature sudo, ...`, shouldn't be a require ?
+### 1.1. DISABLE directive
+
 - define REQUIRE_DISABLED array in .framework-config
-- Compiler::Requirement::assertRequireName
-  - error if requires name does not begin with requires
-  - error if requires name does not comply naming convention
 - Compiler::Requirement::parseDisable + add automatically to global variable
   REQUIRE_DISABLED
   - Warn if a requirement has no associated file using
     Compiler::findFunctionInSrcDirs
-- Compiler::Requirement::parse
-  - Warn if a requirement has no associated file using
-    Compiler::findFunctionInSrcDirs
-- Compiler::Requirement::incrementRequireUsage
-- Compiler::Requirement::addRequireDependency
-- implement compiler pass
-  - will parse `# REQUIRE` directives
-    - error if _requires\*_ file not found
+- compiler pass
   - will ignore the disabled requirements
-  - use of Compiler::Requirement::incrementRequireUsage
-  - use of Compiler::Requirement::addRequireDependency
-  - eventual framework functions needed will be imported
-- on second pass, execute again compiler pass as eventual other `REQUIRE`
-  directives could be found
-- At the end of compiler processing, inject the requirements in the order
-  specified by dependency tree.
 
-### Require use cases
-
-- `Log::display*` requires Log::load
-  - Log::load requires Env::load
-    - Env::load requires Framework::tmpFileManagement (see
-      `src/_includes/_commonHeader.sh`)
-
-### 1.1. refact env load using require ?
+### 1.2. refact env load using require ?
 
 - test Env::load
   - Env::load with invalid .env file => should display a warning message
@@ -80,7 +57,7 @@
   - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
 
-### 1.2. Options/Args management
+### 1.3. Options/Args management
 
 - default arguments
 
@@ -114,7 +91,7 @@
 TODOs linked to bin/compiler or templates .tpl:
 
 - ADAPTER directive to allow to choose between multiple implementation
-  dependening on require conditions
+  depending on require conditions
 - make compile options works with relative files
   - display info should display relative path too instead of full path
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten
