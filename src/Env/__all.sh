@@ -10,6 +10,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Env/mergeConfFiles.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Env/parseEnvFileArg.sh"
 # shellcheck source=src/Env/parseVerboseArg.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Env/parseVerboseArg.sh"
+# shellcheck source=src/Env/requireRemoveVerboseArg.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Env/requireRemoveVerboseArg.sh"
 # shellcheck source=src/Env/pathAppend.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Env/pathAppend.sh"
 # shellcheck source=src/Env/pathPrepend.sh
@@ -20,3 +22,5 @@ source "${FRAMEWORK_ROOT_DIR}/src/Env/requireLoad.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Framework/createTempFile.sh"
 # shellcheck source=src/Filters/commentLines.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Filters/commentLines.sh"
+# shellcheck source=src/Array/remove.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Array/remove.sh"

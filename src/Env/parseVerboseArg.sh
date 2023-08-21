@@ -18,36 +18,53 @@ export __VERBOSE_LEVEL_TRACE=3
 # @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
 # @set BASH_FRAMEWORK_ARGS_VERBOSE int 1 if -v, 2 if -vv, 3 if -vvv
 # @set BASH_FRAMEWORK_DISPLAY_LEVEL int 3 if --verbose|-v, 4 if -vv or -vvv
+# @require Env::requireRemoveVerboseArg
 Env::parseVerboseArg() {
   local envFile
   envFile="$(Framework::createTempFile "parseVerboseArgEnvFile")" || return 2
 
   (
-    BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_OFF}
-    BASH_FRAMEWORK_DISPLAY_LEVEL=0
+    local verbose=${__VERBOSE_LEVEL_OFF}
+    local displayLevel=0
     local arg
     for arg in "${BASH_FRAMEWORK_ARGV[@]}"; do
       case "${arg}" in
         --verbose | -v)
-          BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
-          BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+          verbose=${__VERBOSE_LEVEL_INFO}
+          displayLevel=${__LEVEL_INFO}
           ;;
         -vv)
-          BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
-          BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+          verbose=${__VERBOSE_LEVEL_DEBUG}
+          displayLevel=${__LEVEL_DEBUG}
           ;;
         -vvv)
-          BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
-          BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+          verbose=${__VERBOSE_LEVEL_TRACE}
+          displayLevel=${__LEVEL_DEBUG}
           ;;
         *)
           # ignore
           ;;
       esac
     done
-    echo "BASH_FRAMEWORK_ARGS_VERBOSE=${BASH_FRAMEWORK_ARGS_VERBOSE}"
-    if [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" != "0" ]]; then
-      echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL}"
+    # compute resulting option
+    local verboseOption=""
+    case ${verbose} in
+      "${__VERBOSE_LEVEL_INFO}")
+        verboseOption="--verbose"
+        ;;
+      "${__VERBOSE_LEVEL_DEBUG}")
+        verboseOption="-vv"
+        ;;
+      "${__VERBOSE_LEVEL_TRACE}")
+        verboseOption="-vvv"
+        ;;
+      *) ;;
+    esac
+
+    echo "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='${verboseOption}'"
+    echo "BASH_FRAMEWORK_ARGS_VERBOSE=${verbose}"
+    if [[ "${displayLevel}" != "0" ]]; then
+      echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${displayLevel}"
     fi
   ) >"${envFile}"
   echo "${envFile}"

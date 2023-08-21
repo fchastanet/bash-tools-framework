@@ -40,7 +40,7 @@ EOF
 )"
 
 declare args
-args="$(getopt -l help,format: -o hf: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,format: -o hf: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do

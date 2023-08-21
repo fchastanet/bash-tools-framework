@@ -13,14 +13,11 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
 
 ShellDoc::installRequirementsIfNeeded
 
 if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-  if [[ "${ARGS_VERBOSE}" = "1" ]]; then
-    set -- "$@" --verbose
-  fi
   "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
   exit $?
 fi

@@ -6,6 +6,12 @@ FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 # shellcheck source=src/_includes/_header.sh
 source "${FRAMEWORK_SRC_DIR}/_includes/_header.sh"
+# shellcheck source=src/Env/__all.sh
+source "${FRAMEWORK_SRC_DIR}/Env/__all.sh"
+
+# parse parameters
+Env::requireLoad
+Env::requireRemoveVerboseArg
 
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched
@@ -17,17 +23,18 @@ declare -a params=(
   --bin-dir "${FRAMEWORK_BIN_DIR}"
   --root-dir "${FRAMEWORK_ROOT_DIR}"
 )
-if [[ "${ARGS_VERBOSE}" = "1" ]]; then
-  params+=("--verbose")
+
+if ((BASH_FRAMEWORK_ARGS_VERBOSE > 0)); then
+  params+=("${BASH_FRAMEWORK_ARGS_VERBOSE_OPTION}")
 fi
 
 (
   set -x
-  if (($# == 0)); then
+  if ((${#BASH_FRAMEWORK_ARGV} == 0)); then
     find "${FRAMEWORK_SRC_DIR}/_binaries" -name "*.sh" |
       (grep -v -E '/testsData/' || true)
   else
-    for file in "$@"; do
+    for file in "${BASH_FRAMEWORK_ARGV[@]}"; do
       realpath "${file}"
     done
   fi

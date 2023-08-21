@@ -15,7 +15,7 @@ Result in checkstyle format.
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
 
 awkLintScript="$(
   cat <<'EOF'

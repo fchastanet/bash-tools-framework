@@ -22,7 +22,7 @@ ${SCRIPT_NAME} chmod +x
 EOF
 )"
 
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
 
 export -f File::detectBashFile
 export -f Assert::bashFile

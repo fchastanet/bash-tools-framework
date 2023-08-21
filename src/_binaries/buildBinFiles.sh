@@ -19,7 +19,7 @@ INTERNAL TOOL
 EOF
 )"
 
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
 
 declare beforeBuild
 computeMd5File() {

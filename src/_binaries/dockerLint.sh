@@ -17,7 +17,7 @@ ${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <hadolint options>
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
-Args::defaultHelpNoExit "${HELP}" "$@" || true
+Args::defaultHelpNoExit "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}" || true
 
 # check if command in PATH is already the minimal version needed
 if ! Version::checkMinimal "hadolint" "--version" "${MIN_HADOLINT_VERSION}" >/dev/null 2>&1; then

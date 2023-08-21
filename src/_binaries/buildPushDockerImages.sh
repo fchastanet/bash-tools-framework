@@ -17,7 +17,7 @@ additional docker build options can be passed via DOCKER_BUILD_OPTIONS env varia
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
-Args::defaultHelp "${HELP}" "$@" || true
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}" || true
 
 VENDOR="$1"
 BASH_TAR_VERSION="$2"

@@ -28,7 +28,7 @@ ${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 
 EOF
 )"
-if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
+if ! Args::defaultHelpNoExit "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"; then
   "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi

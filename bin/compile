@@ -74,6 +74,7 @@ source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
 
 Env::requireLoad
 Log::requireLoad
+Env::requireRemoveVerboseArg
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -151,7 +152,7 @@ declare -agx _COMPILE_FILE_ARGUMENTS=()
 # the comma separates different long options
 longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path:,bin-file:,keep-temp-files"
 shortOpts="hks:t:b:r:f:"
-options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "$@" 2>/dev/null) || {
+options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
 }

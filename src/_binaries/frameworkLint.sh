@@ -43,7 +43,7 @@ if (($# == 0)); then
 fi
 
 declare args
-args="$(getopt -l help,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,format:,src-dir: -o hs:f: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do

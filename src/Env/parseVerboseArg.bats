@@ -24,8 +24,9 @@ function Env::parseVerboseArg::noArg { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 1
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=0"
+  assert_lines_count 2
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION=''"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=0"
 }
 
 function Env::parseVerboseArg::emptyArg { #@test
@@ -35,8 +36,9 @@ function Env::parseVerboseArg::emptyArg { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 1
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=0"
+  assert_lines_count 2
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION=''"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=0"
 }
 
 function Env::parseVerboseArg::verboseLongArg { #@test
@@ -46,9 +48,10 @@ function Env::parseVerboseArg::verboseLongArg { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 2
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=1"
-  assert_line --index 1 "BASH_FRAMEWORK_DISPLAY_LEVEL=3"
+  assert_lines_count 3
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=1"
+  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=3"
 }
 
 function Env::parseVerboseArg::verboseShortArg { #@test
@@ -58,9 +61,10 @@ function Env::parseVerboseArg::verboseShortArg { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 2
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=1"
-  assert_line --index 1 "BASH_FRAMEWORK_DISPLAY_LEVEL=3"
+  assert_lines_count 3
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=1"
+  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=3"
 }
 
 function Env::parseVerboseArg::vvArg { #@test
@@ -70,9 +74,10 @@ function Env::parseVerboseArg::vvArg { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 2
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=2"
-  assert_line --index 1 "BASH_FRAMEWORK_DISPLAY_LEVEL=4"
+  assert_lines_count 3
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=2"
+  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=4"
 }
 
 function Env::parseVerboseArg::vvvArg { #@test
@@ -82,9 +87,10 @@ function Env::parseVerboseArg::vvvArg { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 2
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=3"
-  assert_line --index 1 "BASH_FRAMEWORK_DISPLAY_LEVEL=4"
+  assert_lines_count 3
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=3"
+  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=4"
 }
 
 function Env::parseVerboseArg::mixed { #@test
@@ -94,7 +100,8 @@ function Env::parseVerboseArg::mixed { #@test
   assert_lines_count 1
   assert_output --partial "${TMPDIR}/parseVerboseArgEnvFile"
   run cat "${output}"
-  assert_lines_count 2
-  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE=3"
-  assert_line --index 1 "BASH_FRAMEWORK_DISPLAY_LEVEL=4"
+  assert_lines_count 3
+  assert_line --index 0 "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'"
+  assert_line --index 1 "BASH_FRAMEWORK_ARGS_VERBOSE=3"
+  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=4"
 }

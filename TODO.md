@@ -1,6 +1,7 @@
 # Todo
 
 - [Env::load](#envload)
+- [Framework Controller](#framework-controller)
 - [1. REQUIRE directive](#1-require-directive)
   - [1.1. DISABLE directive](#11-disable-directive)
   - [1.2. refact env load using require ?](#12-refact-env-load-using-require-)
@@ -23,14 +24,7 @@
 
 ## Env::load
 
-- remove --verbose options from args
-- replace ARGS_VERBOSE to BASH_FRAMEWORK_ARGS_VERBOSE
-  - instead of removing and then potentially have to add the option again just
-    remove it if we need
-- generate help for --env-file, --verbose, ...
-  - inspired by docker --help globals options
-    - @require Log::requireVerboseArgHelp append help to an array
-  - add --log-level and --display-log-level args
+- add --log-level and --display-log-level args
   - add --version
   - add --config
 - should \_.sh files be loaded at header level ?
@@ -38,6 +32,29 @@
 - add in FrameworkDoc.doc
   - default facade template
   - How to create your first binary file
+
+## Framework Controller
+
+- Framework controller/listener
+  - Facade becomes a controller with some actions
+  - require becomes event listener
+  - Event manager, I launch an event from a function
+    - it actually add a line in a temp file
+  - new directive controller
+- With a router to redirect to the right controller function
+- [Inspiration](https://symfony.com/doc/current/console.html)
+
+- Framework lifecycle
+  - send an event actionInit
+  - manage init events
+  - call controller manager with arg1
+    - controller could send events
+  - manage events
+- manage command options
+  - generate help for --env-file, --verbose, ...
+  - inspired by docker --help globals options
+    - @require Log::requireVerboseArgHelp append help to an array
+  - if IMPLEMENT help => @require Args::requireHelpArg
 
 ## 1. REQUIRE directive
 
