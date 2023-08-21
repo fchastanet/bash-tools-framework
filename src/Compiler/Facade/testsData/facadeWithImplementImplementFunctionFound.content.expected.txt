@@ -1,3 +1,4 @@
+# @require Compiler::Facade::requireCommandBinDir
 
 HELP="$(
   cat <<EOF

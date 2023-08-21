@@ -58,7 +58,7 @@ function Compiler::Facade::generateFacadeScript::EmptyFile { #@test
   local script="$(tail +2 <<<"${output}")"
   eval "${script}"
   [[ -z "$(cat "${FACADE_HEADERS_FILE}")" ]]
-  [[ -z "$(cat "${FACADE_CONTENT_FILE}")" ]]
+  diff "${FACADE_CONTENT_FILE}" "${BATS_TEST_DIRNAME}/testsData/generateFacadeScript.emptyFile.content.expected.txt" >&3
   [[ -z "$(cat "${FACADE_CHOICE_SCRIPT_FILE}")" ]]
 }
 
@@ -76,7 +76,7 @@ function Compiler::Facade::generateFacadeScript::FacadeWithoutImplement { #@test
   local script="$(tail +2 <<<"${output}")"
   eval "${script}"
   [[ "$(cat "${FACADE_HEADERS_FILE}")" = '# FACADE "_includes/facadeDefault/facadeDefault.tpl"' ]]
-  [[ -z "$(cat "${FACADE_CONTENT_FILE}")" ]]
+  diff "${FACADE_CONTENT_FILE}" "${BATS_TEST_DIRNAME}/testsData/generateFacadeScript.emptyFile.content.expected.txt" >&3
   [[ -z "$(cat "${FACADE_CHOICE_SCRIPT_FILE}")" ]]
 }
 

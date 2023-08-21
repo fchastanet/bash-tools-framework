@@ -23,7 +23,6 @@
 
 ## Env::load
 
-- remove DEPRECATED_LOAD
 - remove --verbose options from args
 - replace ARGS_VERBOSE to BASH_FRAMEWORK_ARGS_VERBOSE
   - instead of removing and then potentially have to add the option again just

@@ -7,5 +7,8 @@
 Compiler::Facade::generateFacadeContent() {
   local scriptFile="$1"
 
-  Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" "${scriptFile}" | sed -E '{/^#!/d;}'
+  (
+    echo "# @require Compiler::Facade::requireCommandBinDir"
+    Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" "${scriptFile}" | sed -E '{/^#!/d;}'
+  )
 }

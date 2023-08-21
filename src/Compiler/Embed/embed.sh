@@ -9,8 +9,7 @@
 # @stderr diagnostics information is displayed
 # @exitcode 1 if invalid asName
 # @exitcode 2 if resource is neither a file, dir nor a bash framework function
-# @see Compiler::Embed::embedBashFrameworkFunction to see why the use of
-#      _EMBED_COMPILE_ARGUMENTS and _COMPILE_ROOT_DIR
+# @see Compiler::Embed::embedBashFrameworkFunction to see why the use of _EMBED_COMPILE_ARGUMENTS and _COMPILE_ROOT_DIR
 Compiler::Embed::embed() {
   local resource="$1"
   local asName="$2"
