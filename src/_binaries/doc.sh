@@ -66,6 +66,7 @@ mkdir -p "${DOC_DIR}/images" || true
 cp -R "${FRAMEWORK_ROOT_DIR}/images/"* "${DOC_DIR}/images"
 cp "${FRAMEWORK_ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
 cp "${FRAMEWORK_ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/FrameworkDoc.md" "${DOC_DIR}"
 cp "${FRAMEWORK_ROOT_DIR}/src/Docker/DockerUsage.md" "${DOC_DIR}/DockerUsage.md"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
@@ -78,6 +79,7 @@ cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc
 ShellDoc::fixMarkdownToc "${DOC_DIR}/FrameworkFullDoc.md"
 ShellDoc::fixMarkdownToc "${DOC_DIR}/BestPractices.md"
 ShellDoc::fixMarkdownToc "${DOC_DIR}/CompileCommand.md"
+ShellDoc::fixMarkdownToc "${DOC_DIR}/FrameworkDoc.md"
 ShellDoc::fixMarkdownToc "${DOC_DIR}/README.md"
 ShellDoc::fixMarkdownToc "${DOC_DIR}/Commands.md"
 

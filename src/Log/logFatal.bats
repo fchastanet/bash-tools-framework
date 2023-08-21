@@ -16,7 +16,6 @@ setup() {
 
   unset HOME
   unset FRAMEWORK_ROOT_DIR
-  export BASH_FRAMEWORK_INITIALIZED=0
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
   export BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=0
 }
@@ -28,9 +27,9 @@ teardown() {
 
 generateLogs() {
   local envFile="$1"
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${envFile}"
-  Env::load
-  Log::load
+  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${envFile}")
+  Env::requireLoad
+  Log::requireLoad
 
   (
     trap '' EXIT
@@ -46,7 +45,7 @@ function Log::logFatal::debugLevel { #@test
   run cat "${logFile}"
 
   assert_lines_count 2
-  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile}"
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 4"
   assert_line --index 1 "dateMocked|  FATAL|fatal"
 }
 
@@ -58,7 +57,7 @@ function Log::logFatal::infoLevel { #@test
   run cat "${logFile}"
 
   assert_lines_count 2
-  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile}"
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 3"
   assert_line --index 1 "dateMocked|  FATAL|fatal"
 }
 
@@ -70,28 +69,32 @@ function Log::logFatal::successLevel { #@test
   run cat "${logFile}"
 
   assert_lines_count 2
-  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile}"
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 3"
   assert_line --index 1 "dateMocked|  FATAL|fatal"
 }
 
 function Log::logFatal::warningLevel { #@test
   stub date \
+    '* : echo "dateMocked"' \
     '* : echo "dateMocked"'
   generateLogs "Log.warning.env"
   run cat "${logFile}"
 
-  assert_lines_count 1
-  assert_line --index 0 "dateMocked|  FATAL|fatal"
+  assert_lines_count 2
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 2"
+  assert_line --index 1 "dateMocked|  FATAL|fatal"
 }
 
 function Log::logFatal::errorLevel { #@test
   stub date \
+    '* : echo "dateMocked"' \
     '* : echo "dateMocked"'
   generateLogs "Log.error.env"
   run cat "${logFile}"
 
-  assert_lines_count 1
-  assert_line --index 0 "dateMocked|  FATAL|fatal"
+  assert_lines_count 2
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 1"
+  assert_line --index 1 "dateMocked|  FATAL|fatal"
 }
 
 function Log::logFatal::offLevel { #@test
@@ -99,7 +102,5 @@ function Log::logFatal::offLevel { #@test
     '* : echo "dateMocked"'
   generateLogs "Log.off.env"
   run cat "${logFile}"
-
-  assert_lines_count 1
-  assert_line --index 0 "dateMocked|  FATAL|fatal"
+  assert_output ""
 }

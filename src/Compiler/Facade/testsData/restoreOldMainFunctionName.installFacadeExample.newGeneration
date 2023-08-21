@@ -97,8 +97,6 @@ trap interruptManagement INT
 # shellcheck disable=SC2034
 ((failures = 0)) || true
 
-shopt -s expand_aliases
-
 # Bash will remember & return the highest exit code in a chain of pipes.
 # This way you can catch the error inside pipes, e.g. mysqldump | gzip
 set -o pipefail
@@ -134,7 +132,7 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 # - Log::log* allows to log given message with
 #   given log level
 # Log::display* functions automatically log the message too
-# @see Log::load to load the display and log level from .env file
+# @see Env::requireLoad to load the display and log level from .env file
 
 # @description log level off
 export __LEVEL_OFF=0

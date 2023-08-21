@@ -16,7 +16,6 @@ setup() {
 
   unset HOME
   unset FRAMEWORK_ROOT_DIR
-  export BASH_FRAMEWORK_INITIALIZED=0
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
   export BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=0
 }
@@ -28,9 +27,9 @@ teardown() {
 
 generateLogs() {
   local envFile="$1"
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${envFile}"
-  Env::load
-  Log::load
+  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${envFile}")
+  Env::requireLoad
+  Log::requireLoad
 
   Log::logHelp "help"
 }
@@ -43,7 +42,7 @@ function Log::logHelp::debugLevel { #@test
   run cat "${logFile}"
 
   assert_lines_count 2
-  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile}"
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 4"
   assert_line --index 1 "dateMocked|   HELP|help"
 }
 
@@ -55,7 +54,7 @@ function Log::logHelp::infoLevel { #@test
   run cat "${logFile}"
 
   assert_lines_count 2
-  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile}"
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 3"
   assert_line --index 1 "dateMocked|   HELP|help"
 }
 
@@ -67,26 +66,24 @@ function Log::logHelp::successLevel { #@test
   run cat "${logFile}"
 
   assert_lines_count 2
-  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile}"
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 3"
   assert_line --index 1 "dateMocked|   HELP|help"
 }
 
 function Log::logHelp::warningLevel { #@test
-  stub date \
-    '* : echo "dateMocked"'
+  stub date '* : echo "dateMocked"'
   generateLogs "Log.warning.env"
   run cat "${logFile}"
-
-  assert_output ""
+  assert_lines_count 1
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 2"
 }
 
 function Log::logHelp::errorLevel { #@test
-  stub date \
-    '* : echo "dateMocked"'
+  stub date '* : echo "dateMocked"'
   generateLogs "Log.error.env"
   run cat "${logFile}"
-
-  assert_output ""
+  assert_lines_count 1
+  assert_line --index 0 "dateMocked|   INFO|Logging to file ${logFile} - Log level 1"
 }
 
 function Log::logHelp::offLevel { #@test

@@ -947,11 +947,11 @@ Linux::Apt::update || Log::displayError "impossible to update"
     - `Linux::requireUbuntu`
   - `Log::display*` requires `Colors::requireTheme`
 - second compiler injectImportedFunctions pass
-  - `Log::log*` requires `Log::load`
+  - `Log::log*` requires `Log::requireLoad`
 - third compiler injectImportedFunctions pass
-  - `Log::load` requires `Env::load`
+  - `Log::requireLoad` requires `Env::requireLoad`
 - fourth compiler injectImportedFunctions pass
-  - `Env::load` requires
+  - `Env::requireLoad` requires
     - `Framework::requireRootDir`
     - `Framework::tmpFileManagement` (see `src/_includes/_commonHeader.sh`)
 - fifth compiler injectImportedFunctions pass
@@ -966,8 +966,8 @@ If we order the requirements following reversed pass order, we end up with:
     `Framework::tmpFileManagement`
   - a solution could be to add the element to require list even if it is already
     in the list. This way it could even give a weight at certain requires.
-- `Env::load`
-- `Log::load`
+- `Env::requireLoad`
+- `Log::requireLoad`
 - `Colors::requireTheme`
 - `Linux::requireUbuntu`
 - `Linux::requireSudoCommand`
@@ -993,7 +993,8 @@ Log::displayError() {
   Log:logMessage #...
 }
 # FUNCTIONS placeholder
-# we don't have any yet as we are still parsing the 3 lines code above.
+# we don't have any yet as we are still parsing the 3 lines
+# code above.
 # REQUIRES placeholder
 Linux::Apt::update || Log::displayError "impossible to update"
 ```
@@ -1004,8 +1005,8 @@ Functions imported list so far:
 - Log::displayError
 
 _Pass #2:_ import functions Log:logMessage and import required functions in
-reverse order Linux::requireSudoCommand, Linux::requireUbuntu, Log::load _Note:_
-remember that require functions are only filtered using `# @require`
+reverse order Linux::requireSudoCommand, Linux::requireUbuntu, Log::requireLoad
+_Note:_ remember that require functions are only filtered using `# @require`
 
 ```bash
 # @require Linux::requireSudoCommand

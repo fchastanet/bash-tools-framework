@@ -23,8 +23,6 @@ source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 source "${_COMPILE_SRC_DIR}/Conf/loadNearestFile.sh"
 # shellcheck source=/src/Framework/loadConfig.sh
 source "${_COMPILE_SRC_DIR}/Framework/loadConfig.sh"
-# shellcheck source=src/Env/load.sh
-source "${_COMPILE_SRC_DIR}/Env/load.sh"
 # shellcheck source=src/File/upFind.sh
 source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 # shellcheck source=src/File/relativeToDir.sh
@@ -73,6 +71,9 @@ source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
+
+Env::requireLoad
+Log::requireLoad
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -509,7 +510,7 @@ injectEmbed "${COMPILED_FILE}"
 injectImportedFunctions "${COMPILED_FILE}" filesAlreadyImported
 
 # evaluate again the current compiledFile as a template in the case
-# where injected function are using template function (include files like Env::load
+# where injected function are using template function
 evalTemplate "${COMPILED_FILE}" "${BIN_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
@@ -522,7 +523,7 @@ sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
 # inject eventual requires
 declare importedRequiresTempFile
 importedRequiresTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_requires.XXXXXXX")"
-Compiler::Require::requires "${COMPILED_FILE2}" | tac >"${importedRequiresTempFile}"
+Compiler::Require::requires "${COMPILED_FILE2}" >"${importedRequiresTempFile}"
 # insert functions before # REQUIRES
 File::insertFileAfterToken "${COMPILED_FILE2}" "${importedRequiresTempFile}" "# REQUIRES"
 

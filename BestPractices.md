@@ -385,7 +385,12 @@ BASH_SOURCE=".$0"
 - `cat << 'EOF'` avoid to interpolate variables
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the user In this framework, I added the
-  command `unalias -a || true` to remove all eventual aliases.
+  command `unalias -a || true` to remove all eventual aliases and also ensure to
+  disable aliases expansion by using `shopt -u expand_aliases`. Because aliases
+  have a very special way to load. In a script file changing an alias doesn't
+  occur immediately, it depends if script evaluated has been parsed yet or not.
+  And alias changed in a function, will be applied outside of the function. But
+  I experienced some trouble with this last rule, so I give up using aliases.
 - use the right shebang, avoid `#!/bin/bash` as bash binary could be in another
   folder (especially on alpine), use this instead `#!/usr/bin/env bash`
 

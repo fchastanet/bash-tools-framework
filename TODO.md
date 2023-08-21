@@ -1,5 +1,6 @@
 # Todo
 
+- [Env::load](#envload)
 - [1. REQUIRE directive](#1-require-directive)
   - [1.1. DISABLE directive](#11-disable-directive)
   - [1.2. refact env load using require ?](#12-refact-env-load-using-require-)
@@ -20,6 +21,25 @@
   - [5.7. best practices](#57-best-practices)
   - [5.8. Other libraries integration](#58-other-libraries-integration)
 
+## Env::load
+
+- remove DEPRECATED_LOAD
+- remove --verbose options from args
+- replace ARGS_VERBOSE to BASH_FRAMEWORK_ARGS_VERBOSE
+  - instead of removing and then potentially have to add the option again just
+    remove it if we need
+- generate help for --env-file, --verbose, ...
+  - inspired by docker --help globals options
+    - @require Log::requireVerboseArgHelp append help to an array
+  - add --log-level and --display-log-level args
+  - add --version
+  - add --config
+- should \_.sh files be loaded at header level ?
+  - it would allow to load constants, even maybe rename it to \_header.sh
+- add in FrameworkDoc.doc
+  - default facade template
+  - How to create your first binary file
+
 ## 1. REQUIRE directive
 
 ### 1.1. DISABLE directive
@@ -35,14 +55,6 @@
 ### 1.2. refact env load using require ?
 
 - test Env::load
-  - Env::load with invalid .env file => should display a warning message
-  - Env::load with missing .env file => fatal
-  - Env::load twice do not source again the files
-  - Env::load with 1 env file as parameter
-  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
-  - Env::load with overriding BASH_FRAMEWORK_INITIALIZED="0"
-    BASH_FRAMEWORK_ENV_FILEPATH="${FRAMEWORK_ROOT_DIR}/.env"
-  - Env::load with BASH_FRAMEWORK_ENV_FILEPATH
   - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
     global HOME variable
   - replace all ${HOME} by $(Env::get "HOME")
@@ -90,8 +102,8 @@
 
 TODOs linked to bin/compiler or templates .tpl:
 
-- ADAPTER directive to allow to choose between multiple implementation
-  depending on require conditions
+- ADAPTER directive to allow to choose between multiple implementation depending
+  on require conditions
 - make compile options works with relative files
   - display info should display relative path too instead of full path
 - rename TMPDIR to BASH_FRAMEWORK_TMP_DIR because as this variable overwritten

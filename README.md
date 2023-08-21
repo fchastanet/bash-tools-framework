@@ -132,7 +132,8 @@ Here an excerpt of the namespaces available in Bash tools framework:
     convention of this framework's functions
   - ...
 - Backup::file, Backup::dir allows to create a backup of a file or a directory
-  in a folder configured in a .env file managed by the framework (see Env::load)
+  in a folder configured in a .env file managed by the framework (see
+  Env::requireLoad)
 - Aws : Aim is to abstract the use of some aws cli commands, for the moment only
   Aws::imageExists has been implemented allowing to check that a docker image
   exists with tags provided on AWS ecr(AWS docker repository)

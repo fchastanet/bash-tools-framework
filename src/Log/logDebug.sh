@@ -3,5 +3,7 @@
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logDebug() {
-  Log::logMessage "${2:-DEBUG}" "$1"
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_DEBUG)); then
+    Log::logMessage "${2:-DEBUG}" "$1"
+  fi
 }

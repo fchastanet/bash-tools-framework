@@ -14,7 +14,8 @@ Compiler::Require::requires() {
 
   local filteredRequiresTmpFile
   filteredRequiresTmpFile="$(Framework::createTempFile "requires")"
-  Compiler::Require::filter "${scriptFile}" >"${filteredRequiresTmpFile}" || return 2
+  Compiler::Require::filter "${scriptFile}" |
+    Filters::uniqUnsorted >"${filteredRequiresTmpFile}" || return 2
 
   (
     while IFS='' read -r requireDirective; do
@@ -24,5 +25,5 @@ Compiler::Require::requires() {
       }
       echo "${requireFunction}"
     done <"${filteredRequiresTmpFile}"
-  ) | uniq
+  )
 }

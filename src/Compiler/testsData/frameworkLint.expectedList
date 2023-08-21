@@ -1,6 +1,6 @@
 Array::contains
 Conf::loadNearestFile
-Env::load
+Env::requireLoad
 File::detectBashFile
 File::upFind
 Filters::bashFrameworkFunctions

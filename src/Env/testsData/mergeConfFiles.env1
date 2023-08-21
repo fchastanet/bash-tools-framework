@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# comment line
+KEY_1=${KEY_2}
+
+KEY_2='some value'
+    # comment line indented
+KEY_1=this value will be ignored

@@ -18,3 +18,5 @@ source "${FRAMEWORK_ROOT_DIR}/src/Assert/bashFrameworkFunction.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Compiler/findFunctionInSrcDirs.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Compiler/Embed/getSrcDirsFromOptions.sh"
+# shellcheck source=/src/Filters/uniqUnsorted.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Filters/uniqUnsorted.sh"

@@ -17,7 +17,7 @@
     "pages/CompileCommand.md",
     "pages/Commands.md",
     "pages/DockerUsage.md",
-    "pages/Framework.md",
+    "pages/FrameworkDoc.md",
     "pages/bashDoc/**",
     "**/testsData/**",
     "tests/ManualTest*.sh",

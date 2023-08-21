@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+SHARED_KEY_1='some shared value'
+SHARED_KEY_2=${SHARED_KEY_1}
+SHARED_KEY_1='this value will never see the light of day'
+KEY_1='this will not be overridden'

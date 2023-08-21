@@ -78,8 +78,6 @@ while true; do
   shift || true
 done
 
-BASH_FRAMEWORK_INITIALIZED=0 Env::load
-
 # load .framework-config
 # shellcheck disable=SC2034
 configFile=""
@@ -335,13 +333,16 @@ done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 if [[ "${FORMAT}" = "checkstyle" ]]; then
   echo "</checkstyle>"
 fi
-if ((errorCount > 0 || warningCount > 0)); then
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
-  fi
+if [[ "${FORMAT}" = "plain" ]]; then
   if ((errorCount > 0)); then
-    exit 1
+    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
+  elif ((warningCount > 0)); then
+    Log::displayWarning "0 error/${warningCount} warnings found !"
+  else
+    Log::displaySuccess "No error/warning found !"
   fi
-else
-  Log::displaySuccess "No error found !"
+fi
+
+if ((errorCount > 0)); then
+  exit 1
 fi

@@ -3,11 +3,10 @@
 # ensure that no user aliases could interfere with
 # commands used in this script
 unalias -a || true
+shopt -u expand_aliases
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
-
-shopt -s expand_aliases
 
 # Bash will remember & return the highest exit code in a chain of pipes.
 # This way you can catch the error inside pipes, e.g. mysqldump | gzip
@@ -28,9 +27,12 @@ export LC_ALL=POSIX
 
 export TERM=xterm-256color
 
-#avoid interactive install
+# avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# store command arguments for later usage
+export BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
 interruptManagement() {

@@ -12,11 +12,10 @@
 # ensure that no user aliases could interfere with
 # commands used in this script
 unalias -a || true
+shopt -u expand_aliases
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
-
-shopt -s expand_aliases
 
 # Bash will remember & return the highest exit code in a chain of pipes.
 # This way you can catch the error inside pipes, e.g. mysqldump | gzip
@@ -37,9 +36,12 @@ export LC_ALL=POSIX
 
 export TERM=xterm-256color
 
-#avoid interactive install
+# avoid interactive install
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
+
+# store command arguments for later usage
+export BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
 interruptManagement() {
@@ -119,164 +121,6 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
-# @description change display level to verboseDisplayLevel argument if --verbose|-v option is parsed in arguments
-# @arg $1 verboseDisplayLevel:String the level of verbosity to set
-# @arg $@ args:String[] list of options
-# @option -v short verbose option
-# @option --verbose long verbose option
-# @set ARGS_VERBOSE 1 if --verbose|-v option is parsed in arguments
-# @set BASH_FRAMEWORK_DISPLAY_LEVEL to verboseDisplayLevel if --verbose|-v option is parsed in arguments
-# @exitcode 1 if --verbose|-v option is not present in args list
-Args::parseVerbose() {
-  local verboseDisplayLevel="$1"
-  declare -gx ARGS_VERBOSE=0
-  shift || true
-  local status=1
-  while true; do
-    if [[ "$1" = "--verbose" || "$1" = "-v" ]]; then
-      status=0
-      ARGS_VERBOSE=1
-      break
-    fi
-    shift || break
-  done
-  if [[ "${status}" = "0" ]]; then
-    export BASH_FRAMEWORK_DISPLAY_LEVEL=${verboseDisplayLevel}
-  fi
-  return "${status}"
-}
-
-# @description remove elements from array
-# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
-# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
-# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
-# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
-# @see Array::removeIf
-Array::remove() {
-  local -n arrayRemoveArray=$1
-  shift || true # $@ contains elements to remove
-  local -A valuesToRemoveKeys=()
-
-  # Tag items to remove
-  local del
-  for del in "$@"; do valuesToRemoveKeys[${del}]=1; done
-
-  # remove items
-  local k
-  for k in "${!arrayRemoveArray[@]}"; do
-    if [[ -n "${valuesToRemoveKeys[${arrayRemoveArray[k]}]+xxx}" ]]; then
-      unset 'arrayRemoveArray[k]'
-    fi
-  done
-
-  # compaction (element re-indexing, because unset makes "holes" in array )
-  arrayRemoveArray=("${arrayRemoveArray[@]}")
-}
-
-# lazy initialization
-declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
-declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
-
-# @description load variables in order(from less specific to more specific) from :
-# - ${FRAMEWORK_ROOT_DIR}/src/Env/testsData/.env file
-# - ${FRAMEWORK_ROOT_DIR}/conf/.env file if exists
-# - ~/.env file if exists
-# - ~/.bash-tools/.env file if exists
-# - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
-#
-# @env BASH_FRAMEWORK_INITIALIZED if 1 skip the load
-# @env FRAMEWORK_ROOT_DIR
-# @env HOME
-# @env BASH_FRAMEWORK_ENV_FILEPATH
-# @env OVERRIDE_* string allows to override any env file variable (with * name)
-#
-# @set BASH_FRAMEWORK_CACHED_ENV_FILE string
-# @set BASH_FRAMEWORK_DEFAULT_ENV_FILE string
-# @set BASH_FRAMEWORK_INITIALIZED int 1 if load successful
-Env::load() {
-  if [[ "${BASH_FRAMEWORK_INITIALIZED:-0}" = "1" ]]; then
-    return 0
-  fi
-  BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
-  BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_file.XXXXXXX")"
-  # shellcheck source=src/Env/testsData/.env
-  (
-    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
-    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
-    echo "BASH_FRAMEWORK_LOG_FILE=${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log}"
-    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-  ) >"${BASH_FRAMEWORK_DEFAULT_ENV_FILE}"
-
-  (
-    # reset temp file
-    echo >"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
-
-    # list .env files that need to be loaded
-    local -a files=()
-    if [[ -f "${BASH_FRAMEWORK_DEFAULT_ENV_FILE}" ]]; then
-      files+=("${BASH_FRAMEWORK_DEFAULT_ENV_FILE}")
-    fi
-    if [[ -f "${FRAMEWORK_ROOT_DIR}/conf/.env" && -r "${FRAMEWORK_ROOT_DIR}/conf/.env" ]]; then
-      files+=("${FRAMEWORK_ROOT_DIR}/conf/.env")
-    fi
-    if [[ -f "${HOME}/.env" && -r "${HOME}/.env" ]]; then
-      files+=("${HOME}/.env")
-    fi
-    local file
-    for file in "$@"; do
-      if [[ -f "${file}" && -r "${file}" ]]; then
-        files+=("${file}")
-      fi
-    done
-    # import custom .env file
-    if [[ -n "${BASH_FRAMEWORK_ENV_FILEPATH+xxx}" ]]; then
-      # load BASH_FRAMEWORK_ENV_FILEPATH
-      if [[ -f "${BASH_FRAMEWORK_ENV_FILEPATH}" && -r "${BASH_FRAMEWORK_ENV_FILEPATH}" ]]; then
-        files+=("${BASH_FRAMEWORK_ENV_FILEPATH}")
-      else
-        Log::displayWarning "env file not not found - ${BASH_FRAMEWORK_ENV_FILEPATH}"
-      fi
-    fi
-
-    # add all files added as parameters
-    files+=("$@")
-
-    # source each file in order
-    local file
-    for file in "${files[@]}"; do
-      # shellcheck source=src/Env/testsData/.env
-      source "${file}" || {
-        Log::displayWarning "Cannot load '${file}'"
-      }
-    done
-
-    # copy only the variables to the tmp file
-    local varName overrideVarName
-    while IFS=$'\n' read -r varName; do
-      overrideVarName="OVERRIDE_${varName}"
-      if [[ -z ${!overrideVarName+xxx} ]]; then
-        echo "${varName}='${!varName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
-      else
-        # variable is overridden
-        echo "${varName}='${!overrideVarName}'" >>"${BASH_FRAMEWORK_CACHED_ENV_FILE}"
-      fi
-
-      # using awk deduce all variables that need to be copied in tmp file
-      #   from less specific file to the most
-    done < <(awk -F= '!a[$1]++' "${files[@]}" | grep -v '^$\|^\s*\#' | cut -d= -f1)
-  ) || exit 1
-
-  # ensure all sourced variables will be exported
-  set -o allexport
-
-  # Finally load the temp file to make the variables available in current script
-  # shellcheck source=src/Env/testsData/.env
-  source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
-
-  set +o allexport
-  BASH_FRAMEWORK_INITIALIZED=1
-}
-
 # @description prepend directories to the PATH environment variable
 # @arg $@ args:String[] list of directories to prepend
 # @set PATH update PATH with the directories prepended
@@ -295,7 +139,7 @@ Env::pathPrepend() {
 # - Log::log* allows to log given message with
 #   given log level
 # Log::display* functions automatically log the message too
-# @see Log::load to load the display and log level from .env file
+# @see Env::requireLoad to load the display and log level from .env file
 
 # @description log level off
 export __LEVEL_OFF=0
@@ -310,17 +154,12 @@ export __LEVEL_SUCCESS=3
 # @description log level debug
 export __LEVEL_DEBUG=4
 
-export __LEVEL_OFF
-export __LEVEL_ERROR
-export __LEVEL_WARNING
-export __LEVEL_INFO
-export __LEVEL_SUCCESS
-export __LEVEL_DEBUG
-
 # @description Display message using debug color (grey)
 # @arg $1 message:String the message to display
 Log::displayDebug() {
-  echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_DEBUG)); then
+    echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  fi
   Log::logDebug "$1"
 }
 
@@ -328,7 +167,9 @@ Log::displayDebug() {
 # @arg $1 message:String the message to display
 Log::displayInfo() {
   local type="${2:-INFO}"
-  echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+  fi
   Log::logInfo "$1" "${type}"
 }
 
@@ -340,131 +181,12 @@ Log::fatal() {
   exit 1
 }
 
-# shellcheck disable=SC2317
-
-# @description activate or not Log::display* and Log::log* functions
-# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
-# environment variables
-# try to create log file and rotate it if necessary
-# @noargs
-# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
-# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
-# @env BASH_FRAMEWORK_LOG_LEVEL int
-# @env BASH_FRAMEWORK_LOG_FILE String
-# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
-# @exitcode 0 always successful
-# @stderr diagnostics information about log file is displayed
-Log::load() {
-  # disable display methods following display level
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then
-    Log::displayDebug() { :; }
-  fi
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_INFO)); then
-    Log::displayHelp() { :; }
-    Log::displayInfo() { :; }
-    Log::displaySkipped() { :; }
-    Log::displaySuccess() { :; }
-  fi
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_WARNING)); then
-    Log::displayWarning() { :; }
-    Log::displayStatus() { :; }
-  fi
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_ERROR)); then
-    Log::displayError() { :; }
-  fi
-  # disable log methods following log level
-  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_DEBUG)); then
-    Log::logDebug() { :; }
-  fi
-  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_INFO)); then
-    Log::logHelp() { :; }
-    Log::logInfo() { :; }
-    Log::logSkipped() { :; }
-    Log::logSuccess() { :; }
-  fi
-  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_WARNING)); then
-    Log::logWarning() { :; }
-    Log::logStatus() { :; }
-  fi
-  if ((BASH_FRAMEWORK_LOG_LEVEL < __LEVEL_ERROR)); then
-    Log::logError() { :; }
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-      export BASH_FRAMEWORK_LOG_LEVEL
-    elif [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      if ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null; then
-        BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
-        Log::displayWarning "Log dir cannot be created $(dirname "${BASH_FRAMEWORK_LOG_FILE}")"
-      fi
-      if ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
-        BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_OFF
-        Log::displayWarning "Log file '${BASH_FRAMEWORK_LOG_FILE}' cannot be created"
-      fi
-    fi
-    Log::displayInfo "Logging to file ${BASH_FRAMEWORK_LOG_FILE}"
-    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-    fi
-  fi
-}
-
-# @description Display message using error color (red)
-# @arg $1 message:String the message to display
-Log::displayError() {
-  echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  Log::logError "$1"
-}
-
-# @description Display message using info color (bg light blue/fg white)
-# @arg $1 message:String the message to display
-Log::displayHelp() {
-  local type="${2:-HELP}"
-  echo -e "${__HELP_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
-  Log::logHelp "$1" "${type}"
-}
-
-# @description Display message using skip color (yellow)
-# @arg $1 message:String the message to display
-Log::displaySkipped() {
-  echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  Log::logSkipped "$1"
-}
-
-# @description Display message using info color (blue) but warning level
-# @arg $1 message:String the message to display
-Log::displayStatus() {
-  local type="${2:-STATUS}"
-  echo -e "${__INFO_COLOR}${type}  - ${1}${__RESET_COLOR}" >&2
-  Log::logStatus "$1" "${type}"
-}
-
-# @description Display message using success color (bg green/fg white)
-# @arg $1 message:String the message to display
-Log::displaySuccess() {
-  echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
-  Log::logSuccess "$1"
-}
-
-# @description Display message using warning color (yellow)
-# @arg $1 message:String the message to display
-Log::displayWarning() {
-  echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
-  Log::logWarning "$1"
-}
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logDebug() {
-  Log::logMessage "${2:-DEBUG}" "$1"
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logError() {
-  Log::logMessage "${2:-ERROR}" "$1"
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_DEBUG)); then
+    Log::logMessage "${2:-DEBUG}" "$1"
+  fi
 }
 
 # @description log message to file
@@ -475,38 +197,219 @@ Log::logFatal() {
 
 # @description log message to file
 # @arg $1 message:String the message to display
-Log::logHelp() {
-  Log::logMessage "${2:-HELP}" "$1"
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
 Log::logInfo() {
-  Log::logMessage "${2:-INFO}" "$1"
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-INFO}" "$1"
+  fi
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logSkipped() {
-  Log::logMessage "${2:-SKIPPED}" "$1"
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
+#
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
+# @require Env::requireLoad
+# @require Log::requireLoad
+Log::logMessage() {
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+
+  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    touch "${BASH_FRAMEWORK_LOG_FILE}"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logStatus() {
-  Log::logMessage "${2:-STATUS}" "$1"
+# @description ensure env files are loaded
+# @noargs
+# @exitcode 1 if getOrderedConfFiles fails
+# @exitcode 2 if one of env files fails to load
+# @stderr diagnostics information is displayed
+Env::requireLoad() {
+  local configFilesStr
+  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
+
+  local -a configFiles
+  readarray -t configFiles <<<"${configFilesStr}"
+
+  # if empty string, there will be one element
+  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
+    # should not happen, as there is always default file
+    Log::displaySkipped "no env file to load"
+    return 0
+  fi
+
+  Env::mergeConfFiles "${configFiles[@]}" || {
+    Log::displayError "while loading config files: ${configFiles[*]}"
+    return 2
+  }
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logSuccess() {
-  Log::logMessage "${2:-SUCCESS}" "$1"
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables loaded by Env::requireLoad
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
+# @require Env::requireLoad
+Log::requireLoad() {
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      if
+        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
+          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
+      then
+        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+      fi
+    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+    fi
+
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    # will always be created even if not in info level
+    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
+    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+    fi
+  fi
 }
 
-# @description log message to file
+# @description get list of env files to load
+# in order to make them available for Env::requireLoad
+# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @exitcode 1 if one of the env file cannot be generated
+# @exitcode 2 if one of the env file is not a file or readable
+# @stdout the env files asked to be loaded
+# @stderr diagnostic information on failure
+# @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
+Env::getOrderedConfFiles() {
+  local -a configFiles=()
+  local verboseFile
+  verboseFile="$(Env::parseVerboseArg)" || return 1
+  if [[ -n "${verboseFile}" ]]; then
+    configFiles+=("${verboseFile}")
+  fi
+
+  local -a envFiles
+  envFilesStr="$(Env::parseEnvFileArg)" || return 1
+  if [[ -n "${envFilesStr}" ]]; then
+    readarray -t envFiles <<<"${envFilesStr}"
+    if ((${#envFiles[@]} > 0)); then
+      configFiles+=("${envFiles[@]}")
+    fi
+  fi
+
+  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    # BASH_FRAMEWORK_ENV_FILES is an array
+    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
+  fi
+
+  local defaultEnvFile
+  defaultEnvFile="$(Env::createDefaultEnvFile)" || return 1
+  configFiles+=("${defaultEnvFile}")
+
+  local file
+  for file in "${configFiles[@]}"; do
+    if [[ ! -f "${file}" || ! -r "${file}" ]]; then
+      Log::displayError "One of the config file is not available '${file}'"
+      return 2
+    fi
+    echo "${file}"
+  done
+}
+
+# @description merge and load conf files specified as argument
+# - files are cleaned from ay comment
+# - missing quotes after property = sign are added automatically
+# - automatic remove of all whitespace before and after declarations
+# - bash arrays are not supported
+# - if a variable is declared in first file and overridden later on
+#   in the same file or in subsequent files, those overloads will be
+#   ignored
+# @warning if an error occurs while loading one of the config file, exit code 3 but environment could be partially loaded
+# @arg $@ args:String[] list of configuration files to load in order
+# @set envVars String will set in environment all the variables that have been declared in the config files
+# @env envVars String the env variables of the current script could be used to interpret variables during config files parsing
+# @exitcode 0 if no config files provided or load completed successfully
+# @exitcode 1 if error occurred during parsing the config files (file not found, grep, awk or sed error)
+# @exitcode 2 if temporary file cannot be created
+# @exitcode 3 if an error occurred during config file sourcing
+# @stderr diagnostics information is displayed
+# @see largely inspired but modified from https://opensource.com/article/21/5/processing-configuration-files-shell
+Env::mergeConfFiles() {
+  local -a configFileList=("$@")
+
+  if ((${#configFileList[@]} == 0)); then
+    return 0
+  fi
+
+  local combinedConfigFile
+  combinedConfigFile="$(Framework::createTempFile "mergeConfFiles")" || return 2
+
+  (
+    # removes any trailing whitespace from each file, if any
+    # this is absolutely required when importing into ConfigMaps
+    # put quotes around values
+    sed -E -e $'s/\s*$// ; /^$/d ; /^#.*$/d ; s/=([^"\'].*)$/="\\1"/' "${configFileList[@]}" |
+      # remove all comment lines
+      Filters::commentLines |
+      # iterates over each file and prints (default awk behavior)
+      # each unique line; only takes first value and ignores duplicates
+      awk -F= '!line[$1]++'
+  ) >"${combinedConfigFile}" || return 1
+
+  # have to export everything, and source it twice:
+  # 1) first source is to realize variables
+  # 2) second time is to realize references
+  set -o allexport
+  # shellcheck source=.framework-config
+  source "${combinedConfigFile}" || return 3
+  # shellcheck source=.framework-config
+  source "${combinedConfigFile}" || return 3
+  set +o allexport
+}
+
+# @description Display message using error color (red)
 # @arg $1 message:String the message to display
-Log::logWarning() {
-  Log::logMessage "${2:-WARNING}" "$1"
+Log::displayError() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
+    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logError "$1"
+}
+
+# @description Display message using skip color (yellow)
+# @arg $1 message:String the message to display
+Log::displaySkipped() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logSkipped "$1"
 }
 
 # @description To be called before logging in the log file
@@ -530,79 +433,146 @@ Log::rotate() {
   fi
 }
 
-# @description Internal: common log message
-# @example text
-#   [date]|[levelMsg]|message
-#
-# @example text
-#   2020-01-19 19:20:21|ERROR  |log error
-#   2020-01-19 19:20:21|SKIPPED|log skipped
-#
-# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
-# @arg $2 msg:String the message to display
-# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
-# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
-# @stderr diagnostics information is displayed
-Log::logMessage() {
-  local levelMsg="$1"
-  local msg="$2"
-  local date
+# @description default env file with all default values
+# @stdout the default env filepath
+Env::createDefaultEnvFile() {
+  local envFile
+  envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
 
-  if [[ -z "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-    return 0
-  fi
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)) || [[ "${levelMsg}" = "FATAL" ]]; then
-    mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" || true
-    if Assert::fileWritable "${BASH_FRAMEWORK_LOG_FILE}"; then
-      date="$(date '+%Y-%m-%d %H:%M:%S')"
-      touch "${BASH_FRAMEWORK_LOG_FILE}"
-      printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
-    else
-      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+  (
+    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
+    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
+    # shellcheck disable=SC2016
+    echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
+    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+  ) >"${envFile}"
+  echo "${envFile}"
+}
+
+# @description if --env-file option is parsed in arguments
+# outputs the file provided after this argument to make it
+# available for Env::requireLoad
+# @option --env-file <file> the environment file to load
+# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @exitcode 1 if Env file provided is invalid
+# @stdout the env filepath asked to be loaded
+# @stderr diagnostic information on failure
+Env::parseEnvFileArg() {
+  (
+    set -- "${BASH_FRAMEWORK_ARGV[@]}" --
+    while true; do
+      case $1 in
+        --env-file)
+          shift || true
+          if [[ "$1" = "--" ]]; then
+            Log::displayError "Env file not provided"
+            return 1
+          fi
+          if [[ ! -r "$1" ]]; then
+            Log::displayError "Env file provided '$1' is invalid"
+            return 1
+          fi
+          echo "$1"
+          ;;
+        --)
+          break
+          ;;
+        *)
+          # ignore
+          ;;
+      esac
+      shift || true
+    done
+  )
+}
+
+# @description verbose level off
+export __VERBOSE_LEVEL_OFF=0
+# @description verbose level info
+export __VERBOSE_LEVEL_INFO=1
+# @description verbose level info
+export __VERBOSE_LEVEL_DEBUG=2
+# @description verbose level info
+export __VERBOSE_LEVEL_TRACE=3
+
+# @description if --verbose|-v option is parsed in arguments
+# generates a conf file that will be loaded via Env::requireLoad
+# @option -v verbose level short option (verbose level = info,  display level = info)
+# @option --verbose verbose level long option (verbose level = info,  display level = info)
+# @option -vv more verbose logs option (verbose level = debug, display level = debug)
+# @option -vvv trace level logs option (verbose level = trace, display level = debug)
+# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @set BASH_FRAMEWORK_ARGS_VERBOSE int 1 if -v, 2 if -vv, 3 if -vvv
+# @set BASH_FRAMEWORK_DISPLAY_LEVEL int 3 if --verbose|-v, 4 if -vv or -vvv
+Env::parseVerboseArg() {
+  local envFile
+  envFile="$(Framework::createTempFile "parseVerboseArgEnvFile")" || return 2
+
+  (
+    BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_OFF}
+    BASH_FRAMEWORK_DISPLAY_LEVEL=0
+    local arg
+    for arg in "${BASH_FRAMEWORK_ARGV[@]}"; do
+      case "${arg}" in
+        --verbose | -v)
+          BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+          BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+          ;;
+        -vv)
+          BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+          BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+          ;;
+        -vvv)
+          BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+          BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+          ;;
+        *)
+          # ignore
+          ;;
+      esac
+    done
+    echo "BASH_FRAMEWORK_ARGS_VERBOSE=${BASH_FRAMEWORK_ARGS_VERBOSE}"
+    if [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" != "0" ]]; then
+      echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL}"
     fi
+  ) >"${envFile}"
+  echo "${envFile}"
+}
+
+# @description remove comment lines from input or files provided as arguments
+# @arg $@ files:String[] (optional) the files to filter
+# @env commentLinePrefix String the comment line prefix (default value: #)
+# @exitcode 0 if lines filtered or not
+# @exitcode 2 if grep fails for any other reasons than not found
+# @stdin the file as stdin to filter (alternative to files argument)
+# @stdout the filtered lines
+# shellcheck disable=SC2120
+Filters::commentLines() {
+  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
+}
+
+# @description create a temp file using default TMPDIR variable
+# initialized in _includes/_commonHeader.sh
+# @env TMPDIR String (default value /tmp)
+# @arg $1 templateName:String template name to use(optional)
+Framework::createTempFile() {
+  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logError() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
+    Log::logMessage "${2:-ERROR}" "$1"
   fi
 }
 
-# Checks if file can be created in folder
-#
-
-# @description Checks if file can be created in folder
-# The file does not need to exist
-# @arg $1 file:String
-# @exitcode 1 if file is not a valid path
-# @exitcode 2 if file parent's dir is not writable
-# @exitcode 3 if existing file is not writable
-# @see Assert::validPath
-Assert::fileWritable() {
-  local file="$1"
-  local dir
-
-  Assert::validPath "${file}" || return 1
-  if [[ -f "${file}" ]]; then
-    [[ -w "${file}" ]] || return 3
-  else
-    dir="$(dirname "${file}")"
-    [[ -w "${dir}" ]] || return 2
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSkipped() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SKIPPED}" "$1"
   fi
-
-}
-
-# @description check if argument is a valid linux path
-# invalid path are those with:
-# - invalid characters
-# - component beginning by a - (because could be considered as a command's option)
-# - not beginning with a slash
-# - relative
-#
-# @arg $1 path:string path that needs to be checked
-# @exitcode 1 if path is invalid
-# @see https://regex101.com/r/afLrmM/2
-# @see Assert::validPosixPath if you need more restrictive check
-Assert::validPath() {
-  local path="$1"
-
-  [[ "${path}" =~ ^\/$|^(\/[.a-zA-Z_0-9][.a-zA-Z_0-9-]*)+$ ]] &&
-    [[ ! "${path}" =~ (\/\.\.)|(\.\.\/)|^\.$|^\.\.$ ]] # avoid relative
 }
 
 # FUNCTIONS
@@ -613,18 +583,13 @@ FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
 FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
-Env::load
-export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_WARNING}"
-Args::parseVerbose "${__LEVEL_INFO}" "$@" || true
-declare -a args=("$@")
-Array::remove args -v --verbose
-set -- "${args[@]}"
-Log::load
 Env::pathPrepend "${COMMAND_BIN_DIR}"
 # prepare bin directory for eventual bin files generated by Compiler::Embed::embed
 mkdir -p "${TMPDIR:-/tmp}/bin"
 Env::pathPrepend "${TMPDIR:-/tmp}/bin"
 # REQUIRES
+Env::requireLoad
+Log::requireLoad
 
 HELP="$(
   cat <<EOF
