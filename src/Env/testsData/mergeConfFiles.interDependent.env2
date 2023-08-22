@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# comment line
+ENV_2_SHARED_KEY="shared key env 2"
+ENV_2_KEY="${ENV_1_SHARED_KEY}"

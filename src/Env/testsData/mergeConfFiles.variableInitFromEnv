@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# comment line
+KEY_1="completed with env var ${KEY_1_FROM_ENV}"

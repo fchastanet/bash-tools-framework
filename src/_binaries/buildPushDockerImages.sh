@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/buildPushDockerImages
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 HELP="$(
@@ -18,7 +17,7 @@ additional docker build options can be passed via DOCKER_BUILD_OPTIONS env varia
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 )"
-Args::defaultHelp "${HELP}" "$@" || true
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}" || true
 
 VENDOR="$1"
 BASH_TAR_VERSION="$2"

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+KEY_1=key1
+KEY_2=("item1" "item2")

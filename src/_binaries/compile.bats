@@ -64,5 +64,12 @@ function compile::embed { #@test
   assert_line --index 1 'embedFile1'
   assert_line --index 2 'embedFile1'
   assert_line --index 3 'embedFile2'
+}
 
+function compile::require { #@test
+  run compile "require.sh" ${BATS_TEST_DIRNAME}/testsData/templates
+  assert_success
+  [[ -f "${BATS_TEST_TMPDIR}/require" ]]
+  [[ -x "${BATS_TEST_TMPDIR}/require" ]]
+  diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/require" "${BATS_TEST_TMPDIR}/require"
 }

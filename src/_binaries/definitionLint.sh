@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/definitionLint
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 FORMAT="plain"
@@ -41,7 +40,7 @@ EOF
 )"
 
 declare args
-args="$(getopt -l help,format: -o hf: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,format: -o hf: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do

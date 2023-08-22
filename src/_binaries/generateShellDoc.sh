@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/generateShellDoc
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 # Usage info
@@ -27,7 +26,7 @@ EOF
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-options=$(getopt -l help -o h -- "$@" 2>/dev/null) || {
+options=$(getopt -l help -o h -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
 }

@@ -264,7 +264,6 @@ Conf::loadNearestFile() {
 }
 
 # lazy initialization
-declare -g BASH_FRAMEWORK_INITIALIZED="0"
 declare -g BASH_FRAMEWORK_CACHED_ENV_FILE
 declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 
@@ -274,10 +273,7 @@ declare -g BASH_FRAMEWORK_DEFAULT_ENV_FILE
 # - ~/.env file if exists
 # - ~/.bash-tools/.env file if exists
 # - BASH_FRAMEWORK_ENV_FILEPATH=<fullPathToEnvFile or empty if no file to be loaded>
-Env::load() {
-  if [[ "${BASH_FRAMEWORK_INITIALIZED}" = "1" ]]; then
-    return 0
-  fi
+Env::requireLoad() {
   BASH_FRAMEWORK_CACHED_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "env_vars.XXXXXXX")"
   BASH_FRAMEWORK_DEFAULT_ENV_FILE="$(mktemp -p "${TMPDIR:-/tmp}" -t "default_env_file.XXXXXXX")"
   # shellcheck source=src/Env/testsData/.env
@@ -353,8 +349,6 @@ Env::load() {
   # Finally load the temp file to make the variables available in current script
   # shellcheck source=src/Env/testsData/.env
   source "${BASH_FRAMEWORK_CACHED_ENV_FILE}"
-
-  export BASH_FRAMEWORK_INITIALIZED=1
 
   set +o allexport
 }
@@ -501,7 +495,7 @@ Log::logMessage() {
 
 # FUNCTIONS
 
-Env::load
+Env::requireLoad
 
 # disable display methods following display level
 if ((BASH_FRAMEWORK_DISPLAY_LEVEL < __LEVEL_DEBUG)); then

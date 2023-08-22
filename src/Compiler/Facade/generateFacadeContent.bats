@@ -11,7 +11,7 @@ source "${srcDir}/Filters/directive.sh"
 function Compiler::Facade::generateFacadeContent::script2Facades { #@test
   run Compiler::Facade::generateFacadeContent "${BATS_TEST_DIRNAME}/testsData/script2Facades.sh"
   assert_success
-  assert_output ""
+  assert_output "# @require Compiler::Facade::requireCommandBinDir"
 }
 
 function Compiler::Facade::generateFacadeContent::longerScript { #@test

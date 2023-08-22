@@ -12,8 +12,8 @@ source "${srcDir}/Assert/windows.sh"
 
 setup() {
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
-  Env::load
-  Log::load
+  Env::requireLoad
+  Log::requireLoad
 }
 
 teardown() {

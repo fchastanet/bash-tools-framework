@@ -44,5 +44,5 @@ source "${FRAMEWORK_ROOT_DIR}/src/Log/logWarning.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Log/logStatus.sh"
 # shellcheck source=src/Log/rotate.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Log/rotate.sh"
-# shellcheck source=src/Log/load.sh
-source "${FRAMEWORK_ROOT_DIR}/src/Log/load.sh"
+# shellcheck source=src/Log/requireLoad.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Log/requireLoad.sh"

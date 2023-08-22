@@ -23,8 +23,6 @@ source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 source "${_COMPILE_SRC_DIR}/Conf/loadNearestFile.sh"
 # shellcheck source=/src/Framework/loadConfig.sh
 source "${_COMPILE_SRC_DIR}/Framework/loadConfig.sh"
-# shellcheck source=src/Env/load.sh
-source "${_COMPILE_SRC_DIR}/Env/load.sh"
 # shellcheck source=src/File/upFind.sh
 source "${_COMPILE_SRC_DIR}/File/upFind.sh"
 # shellcheck source=src/File/relativeToDir.sh
@@ -63,6 +61,8 @@ source "${_COMPILE_SRC_DIR}/Compiler/Embed/__all.sh"
 source "${_COMPILE_SRC_DIR}/Compiler/Facade/__all.sh"
 # shellcheck source=/src/Compiler/Implement/__all.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Implement/__all.sh"
+# shellcheck source=/src/Compiler/Require/__all.sh
+source "${_COMPILE_SRC_DIR}/Compiler/Require/__all.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
@@ -71,6 +71,10 @@ source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
+
+Env::requireLoad
+Log::requireLoad
+Env::requireRemoveVerboseArg
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -148,7 +152,7 @@ declare -agx _COMPILE_FILE_ARGUMENTS=()
 # the comma separates different long options
 longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path:,bin-file:,keep-temp-files"
 shortOpts="hks:t:b:r:f:"
-options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "$@" 2>/dev/null) || {
+options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
 }
@@ -354,9 +358,12 @@ importFunctions() {
   local -n newFilesAdded=$5
   local -n importFailures=$6
   local -a functionsToImport
+  local -a requireFunctionsToImport
   local functionToImport
 
   readarray -t functionsToImport < <(Compiler::extractUniqueFrameworkFunctions "${file}")
+  readarray -t requireFunctionsToImport < <(Compiler::Require::requires "${file}")
+  functionsToImport+=("${requireFunctionsToImport[@]}")
 
   ((newFilesAdded = 0)) || true
   if [[ "${ARGS_VERBOSE:-0}" = "2" ]]; then
@@ -504,7 +511,7 @@ injectEmbed "${COMPILED_FILE}"
 injectImportedFunctions "${COMPILED_FILE}" filesAlreadyImported
 
 # evaluate again the current compiledFile as a template in the case
-# where injected function are using template function (include files like Env::load
+# where injected function are using template function
 evalTemplate "${COMPILED_FILE}" "${BIN_FILE}" >"${COMPILED_FILE2}"
 
 # inject again functions in case included file at previous step needs some new functions
@@ -513,6 +520,13 @@ injectImportedFunctions "${COMPILED_FILE2}" filesAlreadyImported
 
 # remove spaces at the end of the lines
 sed -E -i 's/[[:blank:]]+$//' "${COMPILED_FILE2}"
+
+# inject eventual requires
+declare importedRequiresTempFile
+importedRequiresTempFile="$(mktemp -p "${TMPDIR:-/tmp}" -t "imported_requires.XXXXXXX")"
+Compiler::Require::requires "${COMPILED_FILE2}" >"${importedRequiresTempFile}"
+# insert functions before # REQUIRES
+File::insertFileAfterToken "${COMPILED_FILE2}" "${importedRequiresTempFile}" "# REQUIRES"
 
 # retrieve all interfaces functions that need to be implemented
 export _COMPILE_FILE_ARGUMENTS

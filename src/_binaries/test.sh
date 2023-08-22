@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/test
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
@@ -29,7 +28,7 @@ ${__HELP_TITLE}Bats help:${__HELP_NORMAL}
 
 EOF
 )"
-if ! Args::defaultHelpNoExit "${HELP}" "$@"; then
+if ! Args::defaultHelpNoExit "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"; then
   "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" --help
   exit 0
 fi

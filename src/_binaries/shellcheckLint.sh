@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/shellcheckLint
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 if [[ -z "${DEFAULT_ARGS+unset}" ]]; then
@@ -66,7 +65,7 @@ declare -a savedOptions=("$@")
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-options=$(getopt -n "$0" -l help,staged -o h -- "$@" 2>/dev/null || true)
+options=$(getopt -n "$0" -l help,staged -o h -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null || true)
 ONLY_STAGED=0
 eval set -- "${options}"
 while true; do

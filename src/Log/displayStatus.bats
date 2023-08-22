@@ -15,7 +15,6 @@ setup() {
 
   unset HOME
   unset FRAMEWORK_ROOT_DIR
-  export BASH_FRAMEWORK_INITIALIZED=0
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
   export BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=0
 }
@@ -26,10 +25,10 @@ teardown() {
 
 generateLogs() {
   local logEnvFile="$1"
-  export BASH_FRAMEWORK_ENV_FILEPATH="${BATS_TEST_DIRNAME}/testsData/${logEnvFile}"
+  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${logEnvFile}")
 
-  Env::load
-  Log::load
+  Env::requireLoad
+  Log::requireLoad
 
   statusMsg=$(Log::displayStatus "status" 2>&1)
   expectedStatusMsg="$(echo -e "${__INFO_COLOR}STATUS  - status${__RESET_COLOR}")"

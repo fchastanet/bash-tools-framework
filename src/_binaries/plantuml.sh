@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/plantuml
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 HELP="$(
@@ -19,7 +18,7 @@ EOF
 )"
 
 declare args
-args="$(getopt -l help,format: -o hf: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,format: -o hf: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
 eval set -- "${args}"
 declare FORMATS=()
 
@@ -52,7 +51,7 @@ changedFilesBefore=$(detectChangedAddedFiles)
 for format in "${FORMATS[@]}"; do
   docker run --rm -v "$(pwd -P)":/app/project plantuml/plantuml \
     -u "$(id -u):$(id -g)" -t"${format}" -failfast \
-    -o/app/project/images "/app/project/src/**/*.puml"
+    -o/app/project/doc/images "/app/project/src/**/*.puml"
 done
 changedFilesAfter=$(detectChangedAddedFiles)
 

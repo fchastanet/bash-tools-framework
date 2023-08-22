@@ -14,7 +14,6 @@ setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
   logFile=""$(mktemp -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)""
 
-  export BASH_FRAMEWORK_INITIALIZED=0
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
   export BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=0
 }

@@ -34,8 +34,8 @@ source "${srcDir}/Compiler/Embed/extractFileFromBase64.sh"
 source "${srcDir}/_includes/_commonHeader.sh"
 # shellcheck source=src/_includes/_colors.sh
 source "${srcDir}/_includes/_colors.sh"
-# shellcheck source=src/Env/load.sh
-source "${srcDir}/Env/load.sh"
+# shellcheck source=src/Env/requireLoad.sh
+source "${srcDir}/Env/requireLoad.sh"
 # shellcheck source=src/Log/__all.sh
 source "${srcDir}/Log/__all.sh"
 

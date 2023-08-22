@@ -5,67 +5,95 @@ skinparam {
   activityDiamondBackgroundColor #AAAAAA
   activityEndColor #red
 }
+
 start
 
 :compile scriptFile (facade directive phase);
-note right: this phase occurs before compiler begin to compile the script
+note right: this phase occurs before compiler begin to compile the script during template evaluation
 
-partition Compiler::Facade::generate #LightGray {
+partition Compiler::Facade::facade #LightGray {
 
   #SpringGreen: Compiler::Facade::generate scriptFile;
 
   #SpringGreen:Compiler::Facade::filter scriptFile;
   switch (facade directives count?)
-  case (0)
-    -[#green]->
-    :continue with normal compilation;
-  case (1)
+  case (<color:green>One facade found)
     -[#green]->
     #SpringGreen:Compiler::Facade::parse $facadeDirective
-      ~~uses Compiler::Facade::assertTemplateFile~~
+      ~~uses Compiler::Facade::assertFacadeTemplate~~
     ;
-    if (facade directive can be parsed?) is (<color:green>valid directive) then
-      -[#green]->
-    else (<color:red>invalid facade\n<color:red>directive)
-      -[#red]->
-      end
-    endif
-    if (facade directive template file exists?) is (<color:green>valid facade template file) then
-      -[#green]->
-    else (<color:red>invalid facade\n<color:red>template file)
-      -[#red]->
-      end
-    endif
+    switch (facade parse result?)
+    case (<color:green>valid directive and template)
+      partition Compiler::Facade::generateFacadeScriptFile #LightSkyBlue {
+        partition Compiler::Facade::generateFacadeChoiceScript #Magenta {
+          #Magenta:Compiler::Implement::mergeInterfacesFunctions;
+          note right
+            list all IMPLEMENT directives
+            and merge all the function names
+          endnote
+          switch (implement?)
+          case (<color:red>invalid interface)
+            -[#red]->
+            end
+          case (<color:green>valid interface)
+            -[#green]->
+            #Magenta:generate switch case script\nfrom interface functions;
+            note left
+              generate the switch case
+              to call the public functions
+              of the script file using
+              interfaceFunctions computed above
+            endnote
+          case (<color:green>no interface\n<color:green>implemented)
+            -[#green]->
+          endswitch
+        }
 
-    :call Compiler::Implement::interfaceFunctions;
-    if (no error?) is (<color:green>valid interface) then
-      -[#green]->
-    else (<color:red>invalid interface)
+        #DeepSkyBlue: Compiler::Facade::generateFacadeHeaders;
+        note right
+          copy back IMPLEMENT directives inside template file
+          This way, the compiler will automatically check for function presence.
+          Note that compiler only checks using regexp, does not check if the function
+          is really accessible.
+        endnote
+
+        #DeepSkyBlue: Compiler::Facade::generateFacadeContent;
+        note right
+          move the script inside main function of the template file
+          The script needs to be compiled before being able to know if all interface
+          functions have been implemented
+        endnote
+
+        #DeepSkyBlue: Compiler::Facade::generateMainFunctionName;
+
+        #DeepSkyBlue: export all variables;
+        note right
+          <color:green>The following variables will be used when the template
+          <color:green>will evaluated by the compiler
+          export FACADE_HEADERS_FILE
+          export FACADE_CONTENT_FILE
+          export FACADE_CHOICE_SCRIPT_FILE
+          export MAIN_FUNCTION_NAME
+          <color:red>The following variable actually overrides
+          <color:red>the file variable of the compiler
+          <color:red>it represents the facade template to use
+          <color:red>(not really nice, part to be refactored)
+          export file
+        endnote
+      }
+      #pink:compilerContinue;
+      detach
+    case (<color:red>parse failed)
       -[#red]->
       end
-    endif
-
-    partition Compiler::Facade::generateFacadeScriptFile #LightSkyBlue {
-      #DeepSkyBlue:use facade template file;
-      #DeepSkyBlue:copy IMPLEMENT directives inside template file;
-      note right
-        This way, the compiler will automatically check for function presence.
-        Note that compiler only checks using regexp, does not check if the function
-        is really accessible.
-      endnote
-      #DeepSkyBlue:move the script inside main function of the template file;
-      note right
-        The script needs to be compiled before being able to know if all interface
-        functions have been implemented
-      endnote
-      #DeepSkyBlue:Compiler::Facade::generateSwitchCaseFromInterfaceFunctions;
-      note right
-        generate the switch case to call the public functions
-        of the script file using interfaceFunctions computed above;
-      endnote
-      #DeepSkyBlue:inject switch case inside main function of the template file;
-    }
-  case(<color:red>>1)
+    case (<color:red>facade directive template not found)
+      -[#red]->
+      end
+    endswitch
+  case (<color:green>no facade directive found)
+    #pink:compilerContinue;
+    detach
+  case(<color:red>more than one\n<color:red>facade directive)
     -[#red]->
     :You can provide only one FACADE directive;
     end
@@ -73,9 +101,10 @@ partition Compiler::Facade::generate #LightGray {
 
 }
 
-:Continue normal compilation process;
-
-:Output result;
+partition "compilerContinue" #pink {
+  :Continue normal compilation process;
+  :Output result;
+}
 
 stop
 @enduml

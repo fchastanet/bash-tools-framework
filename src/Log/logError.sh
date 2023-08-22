@@ -3,5 +3,7 @@
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logError() {
-  Log::logMessage "${2:-ERROR}" "$1"
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
+    Log::logMessage "${2:-ERROR}" "$1"
+  fi
 }

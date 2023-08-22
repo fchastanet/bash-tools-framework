@@ -1,3 +1,5 @@
+# @require Compiler::Embed::requireEmbedBinDir
+
 declare -gx embed_function_<% ${asName} %>="<% ${targetFile} %>"
 declare -gx encoded_binary_file_<% ${asName} %>="<% ${binFileBase64} %>"
 

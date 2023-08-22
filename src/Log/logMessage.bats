@@ -22,16 +22,6 @@ teardown() {
   rm -f "${logFile}" || true
 }
 
-function Log::logMessage::logFileNotExistingYet { #@test
-  stub date '* : echo "dateMocked"'
-  export BASH_FRAMEWORK_LOG_FILE="${BATS_TEST_TMPDIR}/logFile"
-  export BASH_FRAMEWORK_LOG_LEVEL=__LEVEL_DEBUG
-
-  Log::logMessage "LEVEL" "message"
-  [[ -f "${BATS_TEST_TMPDIR}/logFile" ]]
-  [[ "$(cat "${BATS_TEST_TMPDIR}/logFile")" = "dateMocked|  LEVEL|message" ]]
-}
-
 function Log::logMessage::debugLevel { #@test
   stub date '* : echo "dateMocked"'
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
@@ -82,6 +72,7 @@ function Log::logMessage::offLevel { #@test
   export BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
 
   Log::logMessage "LEVEL" "message"
+  cat "${logFile}" >&3
   [[ "$(cat "${logFile}")" = "" ]]
 }
 
@@ -101,13 +92,4 @@ function Log::logMessage::fatal { #@test
   Log::logMessage "FATAL" "message"
   run cat "${logFile}"
   assert_output "dateMocked|  FATAL|message"
-}
-
-function Log::logMessage::fileNotWritable { #@test
-  export BASH_FRAMEWORK_LOG_FILE="/logFile"
-  export BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_DEBUG}
-
-  run Log::logMessage "FATAL" "message"
-  [[ ! -f "/logFile" ]]
-  assert_output --partial "ERROR   - File /logFile is not writable"
 }

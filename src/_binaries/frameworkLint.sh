@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/frameworkLint
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 CONFIG_FILENAME="${FRAMEWORK_ROOT_DIR}/.framework-config"
@@ -44,7 +43,7 @@ if (($# == 0)); then
 fi
 
 declare args
-args="$(getopt -l help,format:,src-dir: -o hs:f: -- "$@" 2>/dev/null)" || true
+args="$(getopt -l help,format:,src-dir: -o hs:f: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
 eval set -- "${args}"
 
 while true; do
@@ -77,8 +76,6 @@ while true; do
   esac
   shift || true
 done
-
-BASH_FRAMEWORK_INITIALIZED=0 Env::load
 
 # load .framework-config
 # shellcheck disable=SC2034
@@ -335,13 +332,16 @@ done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 if [[ "${FORMAT}" = "checkstyle" ]]; then
   echo "</checkstyle>"
 fi
-if ((errorCount > 0 || warningCount > 0)); then
-  if [[ "${FORMAT}" = "plain" ]]; then
-    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
-  fi
+if [[ "${FORMAT}" = "plain" ]]; then
   if ((errorCount > 0)); then
-    exit 1
+    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
+  elif ((warningCount > 0)); then
+    Log::displayWarning "0 error/${warningCount} warnings found !"
+  else
+    Log::displaySuccess "No error/warning found !"
   fi
-else
-  Log::displaySuccess "No error found !"
+fi
+
+if ((errorCount > 0)); then
+  exit 1
 fi

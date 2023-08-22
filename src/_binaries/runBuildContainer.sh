@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/runBuildContainer
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 showHelp() {
@@ -17,7 +16,7 @@ additional docker run options can be passed via DOCKER_RUN_OPTIONS env variable
 .INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
 EOF
 }
-Args::defaultHelp showHelp "$@" || true
+Args::defaultHelp showHelp "${BASH_FRAMEWORK_ARGV[@]}" || true
 
 VENDOR="${VENDOR:-ubuntu}"
 BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"
@@ -51,9 +50,6 @@ fi
 
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
   args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
-fi
-if [[ "${ARGS_VERBOSE}" = "1" ]]; then
-  set -- "$@" --verbose
 fi
 (
   set -x

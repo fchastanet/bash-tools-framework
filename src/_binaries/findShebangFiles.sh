@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 HELP="$(
@@ -23,7 +22,7 @@ ${SCRIPT_NAME} chmod +x
 EOF
 )"
 
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
 
 export -f File::detectBashFile
 export -f Assert::bashFile

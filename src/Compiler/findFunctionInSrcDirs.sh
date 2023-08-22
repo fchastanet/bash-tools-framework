@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-# @description convert function name to path replacing :: by /
-# @internal
-convertFunctionNameToPath() {
-  local functionName="$1"
-  echo "$(sed -E 's#::#/#g' <<<"${functionName}").sh"
-}
-
 # @description return the path of the function found in srcDirs
 # @arg $1 functionName:String function name (eg: Functions::myFunction)
 # @arg $@ srcDirs:String[] rest of args list of src directories in # which the function will be searched
@@ -19,6 +12,12 @@ Compiler::findFunctionInSrcDirs() {
   local -a srcDirs=("$@")
   local fileNameToImport
 
+  # @description convert function name to path replacing :: by /
+  # @internal
+  convertFunctionNameToPath() {
+    local functionName="$1"
+    echo "$(sed -E 's#::#/#g' <<<"${functionName}").sh"
+  }
   fileNameToImport="$(convertFunctionNameToPath "${functionName}")"
 
   # search through srcDirs the file to import

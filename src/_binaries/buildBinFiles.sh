@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/buildBinFiles
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 HELP="$(
@@ -20,7 +19,7 @@ INTERNAL TOOL
 EOF
 )"
 
-Args::defaultHelp "${HELP}" "$@"
+Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
 
 declare beforeBuild
 computeMd5File() {

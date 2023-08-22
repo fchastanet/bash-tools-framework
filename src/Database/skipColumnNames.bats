@@ -12,6 +12,7 @@ source "${srcDir}/Database/query.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=4
 }
 
 teardown() {

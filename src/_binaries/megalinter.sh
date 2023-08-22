@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/megalinter
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# VAR_DEPRECATED_LOAD=1
 # FACADE
 
 IMAGE_NAME=oxsecurity/megalinter-terraform:v7.2.0
@@ -31,7 +30,7 @@ EOF
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-options=$(getopt -l help,log-level:,incremental,fix,json,filesOnly,image: -o hi: -- "$@" 2>/dev/null) || {
+options=$(getopt -l help,log-level:,incremental,fix,json,filesOnly,image: -o hi: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
   Args::showHelp "${HELP}"
   Log::fatal "invalid options specified"
 }
