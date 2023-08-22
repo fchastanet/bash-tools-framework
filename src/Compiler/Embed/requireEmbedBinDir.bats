@@ -18,39 +18,40 @@ function Compiler::Embed::requireEmbedBinDir::failure { #@test
   Env::pathPrepend() {
     return 1
   }
-  export PATH="/usr/bin"
+  local PATH_BEFORE="${PATH}"
   export CURRENT_DIR="${BATS_TEST_DIRNAME}"
   local status=0
   Compiler::Embed::requireEmbedBinDir >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
+  [[ "${PATH}" = "${PATH_BEFORE}" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
-  [[ "${PATH}" = "/usr/bin" ]]
 }
 
 function Compiler::Embed::requireEmbedBinDir::notExistingDir { #@test
-  export PATH="/usr/bin"
+  local PATH_BEFORE="${PATH}"
   export CURRENT_DIR="${BATS_TEST_DIRNAME}"
   export TMPDIR="/myTmpDir"
   local status=0
   Compiler::Embed::requireEmbedBinDir >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
+  [[ "${PATH}" = "${PATH_BEFORE}" ]]
   assert_lines_count 2
   assert_line --index 0 "mkdir: cannot create directory '/myTmpDir': Permission denied"
   assert_line --index 1 --partial "ERROR   - unable to create directory /myTmpDir/bin"
-  [[ "${PATH}" = "/usr/bin" ]]
 }
 
 function Compiler::Embed::requireEmbedBinDir::success { #@test
-  export PATH="/usr/bin"
+  local PATH_BEFORE="${PATH}"
   export CURRENT_DIR="${BATS_TEST_DIRNAME}"
   export TMPDIR="${BATS_TEST_TMPDIR}"
   local status=0
   Compiler::Embed::requireEmbedBinDir >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
+  [[ -d "${BATS_TEST_TMPDIR:-/tmp}/bin" ]]
+  [[ "${PATH}" = "${BATS_TEST_TMPDIR}/bin:${PATH_BEFORE}" ]]
+  export PATH="${PATH_BEFORE}"
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
-  [[ -d "${BATS_TEST_TMPDIR:-/tmp}/bin" ]]
-  [[ "${PATH}" = "${BATS_TEST_TMPDIR}/bin:/usr/bin" ]]
 }

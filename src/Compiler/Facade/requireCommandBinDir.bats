@@ -28,7 +28,7 @@ function Compiler::Facade::requireCommandBinDir::failure { #@test
 }
 
 function Compiler::Facade::requireCommandBinDir::success { #@test
-  export PATH="/usr/bin"
+  local PATH_BEFORE="${PATH}"
   export CURRENT_DIR="${BATS_TEST_DIRNAME}"
   local status=0
   Compiler::Facade::requireCommandBinDir >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
@@ -36,5 +36,5 @@ function Compiler::Facade::requireCommandBinDir::success { #@test
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
   [[ "${CURRENT_DIR}" = "${BATS_TEST_DIRNAME}" ]]
-  [[ "${PATH}" = "${BATS_TEST_DIRNAME}:/usr/bin" ]]
+  [[ "${PATH}" = "${BATS_TEST_DIRNAME}:${PATH_BEFORE}" ]]
 }
