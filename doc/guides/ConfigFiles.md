@@ -1,30 +1,12 @@
-# Bash tools Framework - General framework documentation
+# Configuration files documentation
 
-- [1. Introduction](#1-introduction)
-- [2. Bash framework specificities](#2-bash-framework-specificities)
-  - [2.1. Use Compiler features](#21-use-compiler-features)
-  - [2.2. Config files](#22-config-files)
-    - [2.2.1. Config file format and loading rules](#221-config-file-format-and-loading-rules)
-  - [2.3. Config file overloading values](#23-config-file-overloading-values)
-    - [2.3.1. Config files loading order](#231-config-files-loading-order)
-
-## 1. Introduction
-
-general framework documentation explaining some main framework features like:
-
-- Config files loading management
-- default facade template (TODO)
-- How to create your first binary file (TODO)
-
-## 2. Bash framework specificities
-
-### 2.1. Use Compiler features
-
-### 2.2. Config files
+- [1. Config file format and loading rules](#1-config-file-format-and-loading-rules)
+- [2. Config file overloading values](#2-config-file-overloading-values)
+- [3. Config files loading order](#3-config-files-loading-order)
 
 [Inspired by Evan "Hippy" Slatis work](https://opensource.com/article/21/5/processing-configuration-files-shell)
 
-#### 2.2.1. Config file format and loading rules
+## 1. Config file format and loading rules
 
 Configuration files loading is following these rules or best practices:
 
@@ -42,7 +24,7 @@ VAR1=value1
 VAR1=value2
 ```
 
-### 2.3. Config file overloading values
+## 2. Config file overloading values
 
 - Best practice is to override variables only by
   - command argument --env-file to allow loading alternate env before other
@@ -55,7 +37,11 @@ VAR1=value2
   generalize this practice** as it could lead to unwanted results if variables
   are not well scoped.
 
-#### 2.3.1. Config files loading order
+- [1. Config file format and loading rules](#1-config-file-format-and-loading-rules)
+- [2. Config file overloading values](#2-config-file-overloading-values)
+- [3. Config files loading order](#3-config-files-loading-order)
+
+## 3. Config files loading order
 
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
@@ -97,6 +83,6 @@ BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/
 BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
 ```
 
-![activity diagram to explain how Env::requireLoad is working](images/envRequireLoad.svg)
+![activity diagram to explain how Env::requireLoad is working](../images/envRequireLoad.svg)
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Env/activityDiagram.puml).

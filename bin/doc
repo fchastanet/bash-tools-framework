@@ -1156,7 +1156,7 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
-DOC_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
 
 HELP="$(
   cat <<EOF
@@ -1193,53 +1193,47 @@ export FRAMEWORK_ROOT_DIR
 Log::displayInfo 'generate Commands.md'
 ((TOKEN_NOT_FOUND_COUNT = 0)) || true
 ShellDoc::generateMdFileFromTemplate \
-  "${FRAMEWORK_ROOT_DIR}/Commands.tmpl.md" \
-  "${DOC_DIR}/Commands.md" \
+  "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
+  "${PAGES_DIR}/Commands.md" \
   "${COMMAND_BIN_DIR}" \
   TOKEN_NOT_FOUND_COUNT \
   '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
 
 # clean folder before generate
-rm -f "${DOC_DIR}/Index.md" || true
-rm -Rf "${DOC_DIR}/bashDoc" || true
-rm -Rf "${DOC_DIR}/FrameworkIndex.md" || true
+rm -f "${PAGES_DIR}/Index.md" || true
+rm -Rf "${PAGES_DIR}/bashDoc" || true
+rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
 
 ShellDoc::generateShellDocsFromDir \
   "${FRAMEWORK_SRC_DIR}" \
   "src" \
-  "${DOC_DIR}/bashDoc" \
-  "${DOC_DIR}/FrameworkIndex.md" \
+  "${PAGES_DIR}/bashDoc" \
+  "${PAGES_DIR}/FrameworkIndex.md" \
   "https://github.com/fchastanet/bash-tools-framework" \
   '/testsData|/_.*' \
   '(/__all\.sh)$'
+cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
 
-cp "${FRAMEWORK_ROOT_DIR}/README.md" "${DOC_DIR}"
+cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
 sed -i -E \
   -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
   -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
   -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
-  "${DOC_DIR}/README.md"
+  "${PAGES_DIR}/README.md"
 
-mkdir -p "${DOC_DIR}/images" || true
-cp -R "${FRAMEWORK_ROOT_DIR}/images/"* "${DOC_DIR}/images"
-cp "${FRAMEWORK_ROOT_DIR}/BestPractices.md" "${DOC_DIR}"
-cp "${FRAMEWORK_ROOT_DIR}/CompileCommand.md" "${DOC_DIR}"
-cp "${FRAMEWORK_ROOT_DIR}/FrameworkDoc.md" "${DOC_DIR}"
-cp "${FRAMEWORK_ROOT_DIR}/src/Docker/DockerUsage.md" "${DOC_DIR}/DockerUsage.md"
+cp -R "${FRAMEWORK_ROOT_DIR}/doc" "${PAGES_DIR}"
+rm -Rf "${PAGES_DIR}/doc/guides/templates"
 
 Log::displayInfo 'generate FrameworkFullDoc.md'
-cp "${FRAMEWORK_ROOT_DIR}/FrameworkFullDoc.tmpl.md" "${DOC_DIR}/FrameworkFullDoc.md"
+cp "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkFullDoc.tmpl.md" "${PAGES_DIR}/FrameworkFullDoc.md"
 (
   echo
-  find "${DOC_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
-) >>"${DOC_DIR}/FrameworkFullDoc.md"
+  find "${PAGES_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
+) >>"${PAGES_DIR}/FrameworkFullDoc.md"
 
-ShellDoc::fixMarkdownToc "${DOC_DIR}/FrameworkFullDoc.md"
-ShellDoc::fixMarkdownToc "${DOC_DIR}/BestPractices.md"
-ShellDoc::fixMarkdownToc "${DOC_DIR}/CompileCommand.md"
-ShellDoc::fixMarkdownToc "${DOC_DIR}/FrameworkDoc.md"
-ShellDoc::fixMarkdownToc "${DOC_DIR}/README.md"
-ShellDoc::fixMarkdownToc "${DOC_DIR}/Commands.md"
+while read -r path; do
+  ShellDoc::fixMarkdownToc "${path}"
+done < <(find "${PAGES_DIR}" -type f -name '*.md')
 
 if ((TOKEN_NOT_FOUND_COUNT > 0)); then
   exit 1

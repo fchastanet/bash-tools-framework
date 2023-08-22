@@ -34,6 +34,7 @@
       - [3.9.2.1. Overview](#3921-overview)
       - [3.9.2.2. Generated script](#3922-generated-script)
   - [3.10. `EMBED` directive (optional)](#310-embed-directive-optional)
+  - [Options management](#options-management)
   - [3.11. `.framework-config` framework configuration file](#311-framework-config-framework-configuration-file)
 - [4. Compiler algorithms](#4-compiler-algorithms)
   - [4.1. Compiler - Compiler::Requirement::require](#41-compiler---compilerrequirementrequire)
@@ -81,7 +82,7 @@ that every framework functions used by imported framework functions will be
 imported as well (of course only once).
 
 You can see several examples of compiled files by checking
-[src/\_binaries folder](src/_binaries). For example:
+[src/\_binaries folder](../src/_binaries). For example:
 
 - `src/_binaries/frameworkLint.sh` generates the file `bin/frameworkLint`
 
@@ -854,6 +855,19 @@ sudo "${embed_file_backupFile}" ...
 
 See [compiler - Compiler::Embed::embed]#embed_include) below for more
 information.
+
+### Options management
+
+```bash
+declare optionVerbose=<% Options::parse ... %>
+```
+
+- Options::parse will generate a function allowing to manipulate an option
+- the function name will be automatically generated (like main facade function)
+- Option::parse function call will be replaced by this function name
+- the function will be automatically generated in a temp file
+- the temp directory will be added in src directories, allowing the compiler to
+  inject the generated function
 
 ### 3.11. `.framework-config` framework configuration file
 

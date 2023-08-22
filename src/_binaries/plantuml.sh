@@ -51,7 +51,7 @@ changedFilesBefore=$(detectChangedAddedFiles)
 for format in "${FORMATS[@]}"; do
   docker run --rm -v "$(pwd -P)":/app/project plantuml/plantuml \
     -u "$(id -u):$(id -g)" -t"${format}" -failfast \
-    -o/app/project/images "/app/project/src/**/*.puml"
+    -o/app/project/doc/images "/app/project/src/**/*.puml"
 done
 changedFilesAfter=$(detectChangedAddedFiles)
 

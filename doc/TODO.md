@@ -50,11 +50,7 @@
   - call controller manager with arg1
     - controller could send events
   - manage events
-- manage command options
-  - generate help for --env-file, --verbose, ...
-  - inspired by docker --help globals options
-    - @require Log::requireVerboseArgHelp append help to an array
-  - if IMPLEMENT help => @require Args::requireHelpArg
+- if IMPLEMENT help => @require Args::requireHelpArg
 
 ## 1. REQUIRE directive
 

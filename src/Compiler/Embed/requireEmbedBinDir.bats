@@ -31,14 +31,14 @@ function Compiler::Embed::requireEmbedBinDir::failure { #@test
 function Compiler::Embed::requireEmbedBinDir::notExistingDir { #@test
   export PATH="/usr/bin"
   export CURRENT_DIR="${BATS_TEST_DIRNAME}"
-  export TMPDIR="/mytmpdir"
+  export TMPDIR="/myTmpDir"
   local status=0
   Compiler::Embed::requireEmbedBinDir >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 2
-  assert_line --index 0 "mkdir: cannot create directory '/mytmpdir': Permission denied"
-  assert_line --index 1 --partial "ERROR   - unable to create directory /mytmpdir/bin"
+  assert_line --index 0 "mkdir: cannot create directory '/myTmpDir': Permission denied"
+  assert_line --index 1 --partial "ERROR   - unable to create directory /myTmpDir/bin"
   [[ "${PATH}" = "/usr/bin" ]]
 }
 
