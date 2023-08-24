@@ -18,6 +18,9 @@
     "*.md": ["# %%"]
   },
   "markdown.extension.toc.levels": "2..6",
+  "plantuml.server": "http://localhost:8080/",
   "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"],
-  "plantuml.server": "http://localhost:8080/"
+  "shellcheck.ignorePatterns": {
+    "**/*.tpl": true
+  }
 }

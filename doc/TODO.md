@@ -1,5 +1,6 @@
 # Todo
 
+- [Options](#options)
 - [Env::load](#envload)
 - [Framework Controller](#framework-controller)
 - [1. REQUIRE directive](#1-require-directive)
@@ -21,6 +22,12 @@
   - [5.6. Improve UT](#56-improve-ut)
   - [5.7. best practices](#57-best-practices)
   - [5.8. Other libraries integration](#58-other-libraries-integration)
+
+## Options
+
+- remove action to remove args already managed
+- command
+- remove duplicates in `src/Options/templates/*.tpl`
 
 ## Env::load
 

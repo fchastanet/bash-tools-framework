@@ -49,9 +49,9 @@ Options::generateOption
 
 **Options:**
 
-`--form <String|Function>` _(optional)_
+`--command <String|Function>` _(optional)_
 
-> provides the form variable name.
+> provides the command variable name.
 
 `--mandatory` _(optional)_
 
@@ -66,18 +66,10 @@ Options::generateOption
 > - **Boolean** : indicates an option that will evaluate to 1 if the option is
 >   present
 > - **String** : indicates an option that should be followed by a string
-> - **String[]** : indicates the option can be repeated several times
 
 **Specific `Boolean` options**
 
 These options are specific to `Boolean` options
-
-`--default-value <Number>` _(optional)_
-
-> Applicable to `Boolean` option type only. Indicates the default value of the
-> variable.
->
-> Default: `--off-value` value.
 
 `--off-value <Number>` _(optional)_
 
@@ -97,35 +89,43 @@ These options are specific to `Boolean` options
 
 These options are specific to `String` options
 
+`--default-value <String|Function>` _(optional)_
+
+> Applicable to `String` option type only. Indicates the default value of the
+> variable
+>
+> Default: "" (empty string)
+
+**Specific `String` or `StringArray` options**
+
+These options are specific to `String` or `StringArray` options
+
 `--authorized-values <StringList>` _(optional)_
 
-> Applicable to `String` option type only. Indicates the possible value list
-> separated by | character
+> Applicable to `String` or `StringArray` option type only. Indicates the
+> possible value list separated by | character
 >
 > Default: no check.
 >
 > Eg.: --authorized-values "debug|info|warn|error"
 
-**Specific `String[]` options**
+**Specific `StringArray` options**
 
-These options are specific to `String[]` options
+These options are specific to `StringArray` options
 
 `--min <Number>` _(optional)_
 
-> Applicable to `String[]` option type only. Indicates the minimum number of
+> Applicable to `StringArray` option type only. Indicates the minimum number of
 > options to provide.
 >
-> - Defaults to 0.
-> - Defaults to 1 if mandatory.
-> - Else specified number of times.
+> - Defaults to 0 or 1 if mandatory.
 
 `--max <Number>` _(optional)_
 
-> Applicable to `String[]` option type only. Indicates the maximum number of
+> Applicable to `StringArray` option type only. Indicates the maximum number of
 > options to provide.
 >
-> - no limitation by default.
-> - Else specified number of times.
+> - Default "" means no limit
 
 **Exit status:**
 
