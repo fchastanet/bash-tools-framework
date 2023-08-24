@@ -68,7 +68,7 @@ function Options::generateOption::caseString1::OptionTest::parseWithNoArg { #@te
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
   assert_output --partial "ERROR   - Option --var - a value needs to be specified"
-  [[ "${varName}" = "" ]]
+  [[ "${varName}" = "somethingElse" ]]
 }
 
 function Options::generateOption::caseString1::OptionTest::parseWithArg { #@test
@@ -128,7 +128,7 @@ function Options::generateOption::caseString2::OptionsTest::parseWithNoArg { #@t
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
-  [[ "${varName}" = "" ]]
+  [[ "${varName}" = "somethingElse" ]]
 }
 
 function Options::generateOption::caseString2::OptionsTest::parseWithArgAlt1 { #@test
@@ -201,7 +201,7 @@ function Options::generateOption::caseString3::OptionsTest::parseWithNoArg { #@t
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
   assert_output --partial "ERROR   - Option '--var' should be provided"
-  [[ "${varName}" = "" ]]
+  [[ "${varName}" = "somethingElse" ]]
 }
 
 function Options::generateOption::caseString3::OptionsTest::parseWithArg { #@test
@@ -263,7 +263,7 @@ function Options::generateOption::caseString4::OptionsTest::parseWithNoArg { #@t
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
   assert_output --partial "ERROR   - Option '--var' should be provided"
-  [[ "${varName}" = "" ]]
+  [[ "${varName}" = "somethingElse" ]]
 }
 
 function Options::generateOption::caseString4::OptionsTest::parseWithArg { #@test
@@ -282,10 +282,10 @@ function Options::generateOption::caseString4::OptionsTest::parseMultipleArg { #
   local status=0
   local varName="somethingElse"
   Options::optionVarName parse --var "NewValue" -v "NewValue2" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  [[ "${status}" = "0" ]]
+  [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
-  assert_output ""
-  [[ "${varName}" = "NewValue2" ]]
+  assert_output --partial "ERROR   - Option -v - Maximum number of option occurrences reached(1)"
+  [[ "${varName}" = "NewValue" ]]
 }
 
 function Options::generateOption::caseString4::OptionsTest::help { #@test

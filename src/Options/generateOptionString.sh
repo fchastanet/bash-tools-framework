@@ -10,6 +10,10 @@
 # @see Options::generateOption
 Options::generateOptionString() {
   # args default values
+  local min="0"
+  if Array::contains "--mandatory" "$@"; then
+    min="1"
+  fi
   local defaultValue=""
   local authorizedValues=""
 
@@ -33,6 +37,8 @@ Options::generateOptionString() {
     shift || true
   done
 
+  echo "export min='${min}'"
+  echo "export max='1'"
   echo "export defaultValue='${defaultValue}'"
   echo "export authorizedValues='${authorizedValues}'"
 }

@@ -123,7 +123,7 @@ Options::generateOption() {
         Options::generateOptionBoolean "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       String)
-        functionTpl="parseOptionString.tpl"
+        functionTpl="parseOptionStringArray.tpl"
         Options::generateOptionString "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       StringArray)

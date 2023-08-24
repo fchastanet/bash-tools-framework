@@ -229,6 +229,10 @@ done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 _COMPILE_FILE_ARGUMENTS+=(-s "${_COMPILE_SRC_DIR}")
+# add temporary generated functions src dir(Options)
+mkdir -p "${TMPDIR}/src" || true
+srcDirs+=("${TMPDIR}/src")
+_COMPILE_FILE_ARGUMENTS+=(-s "${TMPDIR}/src")
 
 if (($# != 1)); then
   Log::fatal "You must provide exactly 1 fixed parameter"

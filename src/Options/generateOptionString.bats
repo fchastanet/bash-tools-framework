@@ -5,6 +5,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=src/Options/generateOptionString.sh
 source "${srcDir}/Options/generateOptionString.sh"
+# shellcheck source=src/Array/contains.sh
+source "${srcDir}/Array/contains.sh"
 
 function setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
@@ -14,25 +16,31 @@ function setup() {
 function Options::generateOptionString::noOption { #@test
   run Options::generateOptionString
   assert_success
-  assert_lines_count 2
-  assert_line --index 0 "export defaultValue=''"
-  assert_line --index 1 "export authorizedValues=''"
+  assert_lines_count 4
+  assert_line --index 0 "export min='0'"
+  assert_line --index 1 "export max='1'"
+  assert_line --index 2 "export defaultValue=''"
+  assert_line --index 3 "export authorizedValues=''"
 }
 
 function Options::generateOptionString::defaultValueMissingValue { #@test
   run Options::generateOptionString --default-value
   assert_success
-  assert_lines_count 2
-  assert_line --index 0 "export defaultValue=''"
-  assert_line --index 1 "export authorizedValues=''"
+  assert_lines_count 4
+  assert_line --index 0 "export min='0'"
+  assert_line --index 1 "export max='1'"
+  assert_line --index 2 "export defaultValue=''"
+  assert_line --index 3 "export authorizedValues=''"
 }
 
 function Options::generateOptionString::authorizedValuesValueMissingValue { #@test
   run Options::generateOptionString --authorized-values
   assert_success
-  assert_lines_count 2
-  assert_line --index 0 "export defaultValue=''"
-  assert_line --index 1 "export authorizedValues=''"
+  assert_lines_count 4
+  assert_line --index 0 "export min='0'"
+  assert_line --index 1 "export max='1'"
+  assert_line --index 2 "export defaultValue=''"
+  assert_line --index 3 "export authorizedValues=''"
 }
 
 function Options::generateOptionString::authorizedValuesValueInvalidValue { #@test
@@ -45,9 +53,21 @@ function Options::generateOptionString::authorizedValuesValueInvalidValue { #@te
 function Options::generateOptionString::setBoth { #@test
   run Options::generateOptionString --authorized-values "valid|invalid" --default-value "valid"
   assert_success
-  assert_lines_count 2
-  assert_line --index 0 "export defaultValue='valid'"
-  assert_line --index 1 "export authorizedValues='valid|invalid'"
+  assert_lines_count 4
+  assert_line --index 0 "export min='0'"
+  assert_line --index 1 "export max='1'"
+  assert_line --index 2 "export defaultValue='valid'"
+  assert_line --index 3 "export authorizedValues='valid|invalid'"
+}
+
+function Options::generateOptionString::setMandatory { #@test
+  run Options::generateOptionString --authorized-values "valid|invalid" --default-value "valid" --mandatory
+  assert_success
+  assert_lines_count 4
+  assert_line --index 0 "export min='1'"
+  assert_line --index 1 "export max='1'"
+  assert_line --index 2 "export defaultValue='valid'"
+  assert_line --index 3 "export authorizedValues='valid|invalid'"
 }
 
 # TODO case with arguments function

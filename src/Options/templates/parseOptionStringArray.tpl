@@ -32,7 +32,11 @@
           fi
           % fi
           ((++optionParsedCount))
+          % if [[ "${type}" = "String" ]]; then
+          <% ${variableName} %>="$1"
+          % else
           <% ${variableName} %>+=("$1")
+          % fi
           ;;
         *)
           # ignore
@@ -50,13 +54,17 @@
   elif [[ "${cmd}" = "help" ]]; then
     echo -n -e "${__HELP_EXAMPLE}  <%% Array::join ', ' "${alts[@]}" %>"
     %
-      if [[ -n "${min}" ]] && ((min > 0)); then
-        echo "    echo -n -e ' (at least ${min} times)'"
+      if ((min == 1 && max == 1)); then
+        echo "    echo -n -e ' (mandatory)'"
       else
-        echo '    echo -n -e " (optional)"'
-      fi
-      if [[ -n "${max}" ]]; then
-        echo "    echo -n -e ' (at most ${max} times)'"
+        if [[ -n "${min}" ]] && ((min > 0)); then
+          echo "    echo -n -e ' (at least ${min} times)'"
+        else
+          echo '    echo -n -e " (optional)"'
+        fi
+        if [[ -n "${max}" ]]; then
+          echo "    echo -n -e ' (at most ${max} times)'"
+        fi
       fi
       echo '    echo -e "${__HELP_NORMAL}"'
       if [[ -z "${help}" ]]; then

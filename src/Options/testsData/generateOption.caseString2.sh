@@ -5,8 +5,8 @@ Options::optionVarName() {
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    varName=""
-    local optionParsed="0"
+    local -i optionParsedCount
+    ((optionParsedCount = 0)) || true
     while (($# > 0)); do
       local arg=$1
       case "${arg}" in
@@ -16,7 +16,11 @@ Options::optionVarName() {
             Log::displayError "Option ${arg} - a value needs to be specified"
             return 1
           fi
-          optionParsed="1"
+          if ((optionParsedCount >= 1)); then
+            Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++optionParsedCount))
           varName="$1"
           ;;
         *)
@@ -28,7 +32,9 @@ Options::optionVarName() {
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     echo -n -e "${__HELP_EXAMPLE}  --var, -v"
-    echo -e " (optional)${__HELP_NORMAL}"
+    echo -n -e " (optional)"
+    echo -n -e ' (at most 1 times)'
+    echo -e "${__HELP_NORMAL}"
     echo '    No help available'
   else
     Log::displayError "Option command invalid: '${cmd}'"
