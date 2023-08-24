@@ -15,6 +15,9 @@ Options::generateOptionBoolean() {
 
   while (($# > 0)); do
     case "$1" in
+      --mandatory)
+        Log::displaySkipped "Options::generateOptionBoolean - --mandatory is incompatible with Boolean type, ignored"
+        ;;
       --on-value)
         shift || true
         if [[ -z "$1" ]]; then
@@ -40,6 +43,8 @@ Options::generateOptionBoolean() {
     return 1
   fi
 
+  echo "export min='0'"
+  echo "export max='1'"
   echo "export onValue='${onValue}'"
   echo "export offValue='${offValue}'"
 }

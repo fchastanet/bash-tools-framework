@@ -114,20 +114,16 @@ Options::generateOption() {
 
   (
     # generate specific type options values
-    local functionTpl
     local adapterOptionsTmpFile
     adapterOptionsTmpFile="$(Framework::createTempFile "optionTypeExports")"
     case "${type}" in
       Boolean)
-        functionTpl="parseOptionBoolean.tpl"
         Options::generateOptionBoolean "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       String)
-        functionTpl="parseOptionStringArray.tpl"
         Options::generateOptionString "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       StringArray)
-        functionTpl="parseOptionStringArray.tpl"
         Options::generateOptionStringArray "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       *)
@@ -158,7 +154,7 @@ Options::generateOption() {
     local optionFunctionTmpFile
     optionFunctionTmpFile="${TMPDIR}/src/Options/${baseOptionFunctionName}"
     mkdir -p "$(dirname "${optionFunctionTmpFile}")" || return 3
-    Options::bashTpl "${_COMPILE_ROOT_DIR}/src/Options/templates/${functionTpl}" >"${optionFunctionTmpFile}" || return 3
+    Options::bashTpl "${_COMPILE_ROOT_DIR}/src/Options/templates/parseOption.tpl" >"${optionFunctionTmpFile}" || return 3
     Log::displayDebug "Generated function for option ${variableName} in ${optionFunctionTmpFile}"
 
     # display the functionOption

@@ -45,7 +45,10 @@ function Options::generateOption::caseBoolean1::success { #@test
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}")"
   [[ -f "${tmpFile}" ]]
   sed -i -E "s#^Options::optionVarName[A-F0-9][a-f0-9]{31}#Options::optionVarName#" "${tmpFile}"
-  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean1.sh" >&3
+  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean1.sh" >&3 || {
+    cat "${tmpFile}" >&3
+    return 1
+  }
 }
 
 function Options::generateOption::caseBoolean1::OptionTest::noArg { #@test
@@ -102,7 +105,10 @@ function Options::generateOption::caseBoolean2::success { #@test
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}")"
   [[ -f "${tmpFile}" ]]
   sed -i -E "s#^Options::optionVarName[A-F0-9][a-f0-9]{31}#Options::optionVarName#" "${tmpFile}"
-  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean2.sh" >&3
+  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean2.sh" >&3 || {
+    cat "${tmpFile}" >&3
+    return 1
+  }
 }
 
 function Options::generateOption::caseBoolean2::OptionsTest::noArg { #@test
@@ -150,17 +156,21 @@ function Options::generateOption::caseBoolean3::success { #@test
   run Options::generateOption --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory
   assert_success
-  assert_lines_count 1
+  assert_lines_count 2
+  assert_line --index 0 --partial 'SKIPPED - Options::generateOptionBoolean - --mandatory is incompatible with Boolean type, ignored'
   # output is the function name generated
-  assert_output --regexp $'^Options::optionVarName[A-F0-9][a-f0-9]{31}$'
-  local functionName="${output}"
+  assert_line --index 1 --regexp $'^Options::optionVarName[A-F0-9][a-f0-9]{31}$'
+  local functionName="${lines[1]}"
 
   # check function content
   local tmpFile
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}")"
   [[ -f "${tmpFile}" ]]
   sed -i -E "s#^Options::optionVarName[A-F0-9][a-f0-9]{31}#Options::optionVarName#" "${tmpFile}"
-  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean3.sh" >&3
+  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean3.sh" >&3 || {
+    cat "${tmpFile}" >&3
+    return 1
+  }
 }
 
 function Options::generateOption::caseBoolean3::OptionsTest::noArg { #@test
@@ -197,7 +207,7 @@ function Options::generateOption::caseBoolean3::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean3.sh"
   run Options::optionVarName help
   assert_lines_count 2
-  assert_line --index 0 --partial "  --var, -v (mandatory)"
+  assert_line --index 0 --partial "  --var, -v (optional) (at most 1 times)"
   assert_line --index 1 "    No help available"
 }
 
@@ -208,17 +218,21 @@ function Options::generateOption::caseBoolean4::success { #@test
   run Options::generateOption --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory --help "super help"
   assert_success
-  assert_lines_count 1
+  assert_lines_count 2
+  assert_line --index 0 --partial 'SKIPPED - Options::generateOptionBoolean - --mandatory is incompatible with Boolean type, ignored'
   # output is the function name generated
-  assert_output --regexp $'^Options::optionVarName[A-F0-9][a-f0-9]{31}$'
-  local functionName="${output}"
+  assert_line --index 1 --regexp $'^Options::optionVarName[A-F0-9][a-f0-9]{31}$'
+  local functionName="${lines[1]}"
 
   # check function content
   local tmpFile
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}")"
   [[ -f "${tmpFile}" ]]
   sed -i -E "s#^Options::optionVarName[A-F0-9][a-f0-9]{31}#Options::optionVarName#" "${tmpFile}"
-  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean4.sh" >&3
+  diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean4.sh" >&3 || {
+    cat "${tmpFile}" >&3
+    return 1
+  }
 }
 
 function Options::generateOption::caseBoolean4::OptionsTest::noArg { #@test
@@ -255,6 +269,6 @@ function Options::generateOption::caseBoolean4::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean4.sh"
   run Options::optionVarName help
   assert_lines_count 2
-  assert_line --index 0 --partial "  --var, -v (mandatory)"
+  assert_line --index 0 --partial "  --var, -v (optional) (at most 1 times)"
   assert_line --index 1 "    super help"
 }

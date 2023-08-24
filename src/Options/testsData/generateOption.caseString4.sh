@@ -8,7 +8,7 @@ Options::optionVarName() {
     local -i optionParsedCount
     ((optionParsedCount = 0)) || true
     while (($# > 0)); do
-      local arg=$1
+      local arg="$1"
       case "${arg}" in
         --var | -v)
           shift
