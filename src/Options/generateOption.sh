@@ -138,6 +138,7 @@ Options::generateOption() {
     export adapterOptions
     eval "${optionTypeExports}"
     export optionFunctionName
+    export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
     # interpret the template
     local optionFunctionTmpFile

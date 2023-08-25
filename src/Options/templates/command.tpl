@@ -5,7 +5,7 @@
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    echo "parse"
+    .INCLUDE "${tplDir}/commandParse.tpl"
   elif [[ "${cmd}" = "help" ]]; then
     .INCLUDE "${tplDir}/commandHelp.tpl"
   else

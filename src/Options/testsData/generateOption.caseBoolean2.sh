@@ -6,8 +6,8 @@ Options::optionVarName() {
 
   if [[ "${cmd}" = "parse" ]]; then
     varName="0"
-    local -i optionParsedCount
-    ((optionParsedCount = 0)) || true
+    local -i optionParsedCountVarName
+    ((optionParsedCountVarName = 0)) || true
     while (($# > 0)); do
       local arg="$1"
       case "${arg}" in
@@ -20,6 +20,7 @@ Options::optionVarName() {
       esac
       shift || true
     done
+
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::optionVarName helpTpl)"
@@ -33,8 +34,13 @@ Options::optionVarName() {
     echo "echo -n -e ' (at most 1 times)'"
     echo 'echo'
     echo "echo '    No help available'"
+  elif [[ "${cmd}" = "variableName" ]]; then
+    echo "varName"
   elif [[ "${cmd}" = "type" ]]; then
     echo "Boolean"
+  elif [[ "${cmd}" = "alts" ]]; then
+    echo '--var'
+    echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var|-v]'
   else

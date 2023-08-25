@@ -5,8 +5,8 @@ Options::optionVarName() {
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    local -i optionParsedCount
-    ((optionParsedCount = 0)) || true
+    local -i optionParsedCountVarName
+    ((optionParsedCountVarName = 0)) || true
     while (($# > 0)); do
       local arg="$1"
       case "${arg}" in
@@ -16,11 +16,11 @@ Options::optionVarName() {
             Log::displayError "Option ${arg} - a value needs to be specified"
             return 1
           fi
-          if ((optionParsedCount >= 1)); then
+          if ((optionParsedCountVarName >= 1)); then
             Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          ((++optionParsedCount))
+          ((++optionParsedCountVarName))
           varName="$1"
           ;;
         *)
@@ -29,6 +29,7 @@ Options::optionVarName() {
       esac
       shift || true
     done
+
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::optionVarName helpTpl)"
@@ -43,8 +44,13 @@ Options::optionVarName() {
     echo "echo -n -e ' (at most 1 times)'"
     echo 'echo'
     echo "echo '    No help available'"
+  elif [[ "${cmd}" = "variableName" ]]; then
+    echo "varName"
   elif [[ "${cmd}" = "type" ]]; then
     echo "String"
+  elif [[ "${cmd}" = "alts" ]]; then
+    echo '--var'
+    echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var|-v <String>]'
   else

@@ -5,8 +5,8 @@ Options::optionVarName() {
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    local -i optionParsedCount
-    ((optionParsedCount = 0)) || true
+    local -i optionParsedCountVarName
+    ((optionParsedCountVarName = 0)) || true
     while (($# > 0)); do
       local arg="$1"
       case "${arg}" in
@@ -20,11 +20,11 @@ Options::optionVarName() {
             Log::displayError "Option ${arg} - value '$1' is not part of authorized values(value1|value2|value3)"
             return 1
           fi
-          if ((optionParsedCount >= 3)); then
+          if ((optionParsedCountVarName >= 3)); then
             Log::displayError "Option ${arg} - Maximum number of option occurrences reached(3)"
             return 1
           fi
-          ((++optionParsedCount))
+          ((++optionParsedCountVarName))
           varName+=("$1")
           ;;
         *)
@@ -33,10 +33,11 @@ Options::optionVarName() {
       esac
       shift || true
     done
-    if ((optionParsedCount < 2)); then
+    if ((optionParsedCountVarName < 2)); then
       Log::displayError "Option '--var' should be provided at least 2 time(s)"
       return 1
     fi
+
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::optionVarName helpTpl)"
@@ -51,8 +52,13 @@ Options::optionVarName() {
     echo "echo -n -e ' (at most 3 times)'"
     echo 'echo'
     echo "echo '    super help'"
+  elif [[ "${cmd}" = "variableName" ]]; then
+    echo "varName"
   elif [[ "${cmd}" = "type" ]]; then
     echo "StringArray"
+  elif [[ "${cmd}" = "alts" ]]; then
+    echo '--var'
+    echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '--var|-v'
   else
