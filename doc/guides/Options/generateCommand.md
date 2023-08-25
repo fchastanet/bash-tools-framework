@@ -8,8 +8,9 @@ declare commandForm=<% Options::generateCommand \
   --command-name "myCommand" \
   --License "MIT License" \
   --copyright "Copyright" \
-  --template "path/to/template.tpl" \
-  --error-if-repeated-options
+  --help-template "path/to/template.tpl" \
+  option1
+  option2
 %>
 ```
 
@@ -20,17 +21,16 @@ Generates a function that allows to manipulate a command and its options.
 **Syntax**
 
 ```text
-Usage:  Options::generateCommand [OPTIONS]
+Usage:  Options::generateCommand [OPTIONS] [optionsVariablesReferences]
 
 Options::generateCommand
   --help <String|Function>
   [--command-name <String|Function>]
-  [--help-version <String|Function>]
-  [--help-author <String|Function>]
-  [--help-License <String|Function>]
-  [--help-copyright <String|Function>]
+  [--version <String|Function>]
+  [--author <String|Function>]
+  [--License <String|Function>]
+  [--copyright <String|Function>]
   [--help-template <String>]
-  [--error-if-repeated-options]
 ```
 
 **Mandatory Options:**
@@ -46,30 +46,25 @@ Options::generateCommand
 > provides the command name. By default the name of current command file without
 > path
 
-`--help-version <String|Function>` _(optional)_
+`--version <String|Function>` _(optional)_
 
 > provides version section help. Section not generated if not provided.
 
-`--help-author <String|Function>` _(optional)_
+`--author <String|Function>` _(optional)_
 
 > provides author section help. Section not generated if not provided.
 
-`--help-License <String|Function>` _(optional)_
+`--License <String|Function>` _(optional)_
 
 > provides License section help Section not generated if not provided.
 
-`--help-copyright <String|Function>` _(optional)_
+`--copyright <String|Function>` _(optional)_
 
 > provides copyright section help Section not generated if not provided.
 
 `--help-template <String>` _(optional)_
 
 > if you want to override the default template used to generate the help
-
-`--error-if-repeated-options` _(optional)_
-
-> exists with error code 1 if a unique mode option (Boolean, String) are
-> repeated several times.
 
 **Exit status:**
 

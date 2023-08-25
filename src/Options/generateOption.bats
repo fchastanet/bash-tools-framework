@@ -3,26 +3,8 @@
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
-# shellcheck source=src/Options/generateOption.sh
-source "${srcDir}/Options/generateOption.sh"
-# shellcheck source=src/Options/generateFunctionName.sh
-source "${srcDir}/Options/generateFunctionName.sh"
-# shellcheck source=src/Options/generateOptionBoolean.sh
-source "${srcDir}/Options/generateOptionBoolean.sh"
-# shellcheck source=src/Options/assertAlt.sh
-source "${srcDir}/Options/assertAlt.sh"
-# shellcheck source=src/Options/bashTpl.sh
-source "${srcDir}/Options/bashTpl.sh"
-# shellcheck source=/src/Assert/validVariableName.sh
-source "${srcDir}/Assert/validVariableName.sh"
-# shellcheck source=/src/Array/contains.sh
-source "${srcDir}/Array/contains.sh"
-# shellcheck source=/src/Array/join.sh
-source "${srcDir}/Array/join.sh"
-# shellcheck source=/src/Framework/createTempFile.sh
-source "${srcDir}/Framework/createTempFile.sh"
-# shellcheck source=/src/Crypto/uuidV4.sh
-source "${srcDir}/Crypto/uuidV4.sh"
+# shellcheck source=src/Options/__all.sh
+source "${srcDir}/Options/__all.sh"
 
 function setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
@@ -90,27 +72,6 @@ function Options::generateOption::typeOptionTwice { #@test
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Options::generateOption - only one '--type' option can be provided"
-}
-
-function Options::generateOption::invalidCommandMissingValue { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --command
-  assert_failure 1
-  assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - command parameter value '' should target a valid variable name"
-}
-
-function Options::generateOption::invalidCommandValue { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --command "François"
-  assert_failure 1
-  assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - command parameter value 'François' should target a valid variable name"
-}
-
-function Options::generateOption::commandOptionTwice { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --command "command" --command "command2"
-  assert_failure 1
-  assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - only one '--command' option can be provided"
 }
 
 # TODO case with arguments function

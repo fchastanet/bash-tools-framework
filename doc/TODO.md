@@ -27,8 +27,8 @@
 
 - remove action to remove args already managed
 - command
+- manage String|Function
 - option parse if error variable should not be overridden
-- remove duplicates in `src/Options/templates/*.tpl`
 
 ## Env::load
 

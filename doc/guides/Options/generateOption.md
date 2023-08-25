@@ -6,7 +6,6 @@ declare optionVerbose=<% Options::generateOption \
   --variable-name "verbose" \
   --alt "--verbose" \
   --alt "-v" \
-  --form commandForm \
   --mandatory \
   --type "Boolean" \
 %>
@@ -25,7 +24,6 @@ Options::generateOption
   --help <String|Function>
   --variable-name <optionVariableName>
   --alt <option>
-  [--form <commandFormVariable>]
   [--mandatory]
   [--type <String|Function>]
   [TYPE_OPTIONS]
@@ -48,10 +46,6 @@ Options::generateOption
 > You must provide at least one `--alt` option.
 
 **Options:**
-
-`--command <String|Function>` _(optional)_
-
-> provides the command variable name.
 
 `--mandatory` _(optional)_
 

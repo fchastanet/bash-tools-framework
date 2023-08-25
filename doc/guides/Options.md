@@ -68,29 +68,30 @@ These functions allow to manipulate respectively:
 ## 3. Full example
 
 ```bash
-declare commandForm=<% Options::generateForm \
-  --help "Command help" \
-  --author "author is me" \
-  --command-name "myCommand" \
-  --License "MIT License"
-%>
-declare optionVerbose=<% Options::generateArg \
-  --form commandForm \
+declare optionVerbose=<% Options::generateOption \
   --variable-name "verbose" \
   --alt "--verbose" \
   --alt "-v" \
   --type "Boolean" \
   --help "displays more information about processed files"
 %>
-declare optionSrcDirs=<% Options::generateArg \
-  --form commandForm \
+declare optionSrcDirs=<% Options::generateOption \
   --variable-name "srcDirs" \
   --alt "-s" \
   --alt "--src-dir" \
   --help-item-name "srcDir" \
-  --type "String[]" \
+  --type "StringArray" \
   --help "provides the directory where to find the functions source code."
 %>
+declare commandForm=<% Options::generateCommand \
+  --help "Command help" \
+  --author "author is me" \
+  --command-name "myCommand" \
+  --license "MIT License" \
+  optionVerbose \
+  optionSrcDirs
+%>
+
 ```
 
 _Using `commandForm help` would generate the following help:_

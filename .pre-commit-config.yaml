@@ -55,7 +55,7 @@ repos:
       # markers and whitespace errors according to core.whitespace
       # and conflict-marker-size configuration in a git repo.
       - id: git-check
-        exclude: ^src/Filters/testsData/
+        exclude: /testsData/
         stages: [commit]
 
   - repo: https://github.com/pre-commit/mirrors-prettier

@@ -16,7 +16,6 @@
 # @option --type <Boolean|String|StringArray> option type (default: Boolean)
 # @option --mandatory (optional) indicates if option is mandatory (optional if not provided)
 # @option --help <help> (optional)
-# @option --command <commandVariableName> (optional) reference to the command
 # Others options are passed to specific option handler:
 # @option --authorized-values  <String> if String type, list of authorized values separated by |
 # @option --regexp <String> if String type, regexp to use to validate the option value
@@ -26,6 +25,7 @@
 # @stdout script file generated to parse the arguments following the rules provided
 # @stderr diagnostics information is displayed
 # @see Options::generateCommand
+# @see doc/guides/Options/generateOption.md
 Options::generateOption() {
   # args default values
   local variableName=""
@@ -85,18 +85,7 @@ Options::generateOption() {
         mandatory=1
         adapterOptions+=("$1")
         ;;
-      --command)
-        shift || true
-        if [[ -n "${commandVariableName}" ]]; then
-          Log::displayError "Options::generateOption - only one '--command' option can be provided"
-          return 1
-        fi
-        Assert::validVariableName "$1" || {
-          Log::displayError "Options::generateOption - command parameter value '$1' should target a valid variable name"
-          return 1
-        }
-        commandVariableName="$1"
-        ;;
+
       *)
         adapterOptions+=("$1")
         ;;
@@ -152,9 +141,9 @@ Options::generateOption() {
 
     # interpret the template
     local optionFunctionTmpFile
-    optionFunctionTmpFile="${TMPDIR}/src/Options/${baseOptionFunctionName}"
+    optionFunctionTmpFile="${TMPDIR}/src/Options/${baseOptionFunctionName}.sh"
     mkdir -p "$(dirname "${optionFunctionTmpFile}")" || return 3
-    Options::bashTpl "${_COMPILE_ROOT_DIR}/src/Options/templates/parseOption.tpl" >"${optionFunctionTmpFile}" || return 3
+    Options::bashTpl "${_COMPILE_ROOT_DIR}/src/Options/templates/option.tpl" >"${optionFunctionTmpFile}" || return 3
     Log::displayDebug "Generated function for option ${variableName} in ${optionFunctionTmpFile}"
 
     # display the functionOption
@@ -162,14 +151,27 @@ Options::generateOption() {
   ) || return $?
 }
 
+# export FRAMEWORK_ROOT_DIR="$(pwd)"
+# # shellcheck source=src/Options/assertAlt.sh
+# source "src/Options/assertAlt.sh"
+# # shellcheck source=src/Options/bashTpl.sh
+# source "src/Options/bashTpl.sh"
 # # shellcheck source=src/Options/generateFunctionName.sh
 # source "src/Options/generateFunctionName.sh"
+# # shellcheck source=src/Options/generateOptionString.sh
+# source "src/Options/generateOptionString.sh"
 # # shellcheck source=/src/Assert/validVariableName.sh
 # source "src/Assert/validVariableName.sh"
 # # shellcheck source=/src/Array/contains.sh
 # source "src/Array/contains.sh"
+# # shellcheck source=/src/Array/join.sh
+# source "src/Array/join.sh"
 # # shellcheck source=/src/Framework/createTempFile.sh
 # source "src/Framework/createTempFile.sh"
+# # shellcheck source=/src/Crypto/uuidV4.sh
+# source "src/Crypto/uuidV4.sh"
+# # shellcheck source=/src/Log/__all.sh
+# source "src/Log/__all.sh"
 
 # set -x
 # set -o errexit
@@ -177,4 +179,5 @@ Options::generateOption() {
 # export TMPDIR="/tmp"
 # export _COMPILE_ROOT_DIR="$(pwd)"
 # echo "$@"
-# Options::generateOption "$@"
+# # Options::generateOption "$@"
+# Options::generateOption --type String --variable-name "varName" --alt "--var" --alt -v

@@ -22,11 +22,21 @@ Options::optionVarName() {
     done
     export varName
   elif [[ "${cmd}" = "help" ]]; then
-    echo -n -e "${__HELP_EXAMPLE}  --var"
-    echo -n -e " (optional)"
-    echo -n -e ' (at most 1 times)'
-    echo -e "${__HELP_NORMAL}"
-    echo '    No help available'
+    eval "$(Options::optionVarName helpTpl)"
+  elif [[ "${cmd}" = "helpTpl" ]]; then
+    # shellcheck disable=SC2016
+    echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'
+    echo 'echo -n "--var"'
+    # shellcheck disable=SC2016
+    echo 'echo -n -e "${__HELP_NORMAL}"'
+    echo "echo -n -e ' (optional)'"
+    echo "echo -n -e ' (at most 1 times)'"
+    echo 'echo'
+    echo "echo '    No help available'"
+  elif [[ "${cmd}" = "type" ]]; then
+    echo "Boolean"
+  elif [[ "${cmd}" = "helpAlt" ]]; then
+    echo '[--var]'
   else
     Log::displayError "Option command invalid: '${cmd}'"
     return 1
