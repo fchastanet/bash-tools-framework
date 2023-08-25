@@ -93,16 +93,13 @@ function Options::generateCommand::atLeastOnePositionalArg { #@test
 }
 
 function Options::generateCommand::case1 { #@test
-  Options::myCustomOption() {
-    if [[ "$1" = "help" ]]; then
-      echo "help"
-    fi
-    if [[ "$1" = "helpAlt" ]]; then
-      echo "helpAlt"
-    fi
-  }
+  local optionFile
+  optionFile="$(Options::generateOption --type String --help "file" \
+    --variable-name "file" --alt "--file" --alt "-f")" || return 1
+  sourceOption "${optionFile}"
+
   local status=0
-  Options::generateCommand Options::myCustomOption >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::generateCommand --help "super command" ${optionFile} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
 
   testCommand "generateCommand.case1.sh" "Options::command"
 }
@@ -111,6 +108,40 @@ function Options::generateCommand::case1::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case1.sh"
   run Options::command help
   checkCommandResult "generateCommand.case1.expected.help"
+}
+
+function Options::generateCommand::case1::parseNoArg { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case1.sh"
+  local status=0
+  local file="fileBefore"
+  Options::command parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${file}" = "fileBefore" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+}
+
+function Options::generateCommand::case1::missingFile { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case1.sh"
+  local status=0
+  local file="fileBefore"
+  Options::command parse --file >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "1" ]]
+  [[ "${file}" = "fileBefore" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Option --file - a value needs to be specified"
+}
+
+function Options::generateCommand::case1::parseFile { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case1.sh"
+  local status=0
+  local file="fileBefore"
+  Options::command parse --file fileTest >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${file}" = "fileTest" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
 }
 
 function Options::generateCommand::case2 { #@test
@@ -129,6 +160,28 @@ function Options::generateCommand::case2::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
   run Options::command help
   checkCommandResult "generateCommand.case2.expected.help"
+}
+
+function Options::generateCommand::case2::parseNoArg { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
+  local status=0
+  local verbose
+  Options::command parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${verbose}" = "0" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+}
+
+function Options::generateCommand::case2::parseVerbose { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
+  local status=0
+  local verbose
+  Options::command parse --verbose >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${verbose}" = "1" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
 }
 
 function Options::generateCommand::case3 { #@test
@@ -156,6 +209,32 @@ function Options::generateCommand::case3::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case3.sh"
   run Options::command help
   checkCommandResult "generateCommand.case3.expected.help"
+}
+
+function Options::generateCommand::case3::parseNoArg { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case3.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  Options::command parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${verbose}" = "0" ]]
+  [[ "${srcDirs[*]}" = "initialDir" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+}
+
+function Options::generateCommand::case3::parseAll { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case3.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  Options::command parse --verbose --src-dirs srcDir1 -s srcDir2 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${verbose}" = "1" ]]
+  [[ "${srcDirs[*]}" = "initialDir srcDir1 srcDir2" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
 }
 
 # TODO case with arguments function

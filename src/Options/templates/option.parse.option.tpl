@@ -1,6 +1,12 @@
 <%% Array::join ' | ' "${alts[@]}" %>)
   % if [[ "${type}" = "Boolean" ]]; then
     <% ${variableName} %>="<% ${onValue} %>"
+    % if (( max > 0 )); then
+    if ((optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
+      Log::displayError "Option ${arg} - Maximum number of option occurrences reached(<% ${max} %>)"
+      return 1
+    fi
+    % fi
   % else
     shift
     if (($# == 0)); then
@@ -13,13 +19,15 @@
       return 1
     fi
     % fi
-    % if [[ -n "${max}" ]]; then
+    % if (( max > 0 )); then
     if ((optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
       Log::displayError "Option ${arg} - Maximum number of option occurrences reached(<% ${max} %>)"
       return 1
     fi
     % fi
+    % if ((min > 0 || max > 0)); then
     ((++optionParsedCount<% ${variableName^} %>))
+    % fi
     % if [[ "${type}" = "String" ]]; then
     <% ${variableName} %>="$1"
     % else

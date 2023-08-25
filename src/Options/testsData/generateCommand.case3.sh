@@ -5,7 +5,35 @@ Options::command() {
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    echo "parse"
+    verbose="0"
+    local -i optionParsedCountVerbose
+    ((optionParsedCountVerbose = 0)) || true
+    while (($# > 0)); do
+      local arg="$1"
+      case "${arg}" in
+        --verbose | -v)
+          verbose="1"
+          if ((optionParsedCountVerbose >= 1)); then
+            Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        --src-dirs | -s)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${arg} - a value needs to be specified"
+            return 1
+          fi
+          srcDirs+=("$1")
+          ;;
+        *)
+          # ignore
+          ;;
+      esac
+      shift || true
+    done
+    export verbose
+    export srcDirs
   elif [[ "${cmd}" = "help" ]]; then
     Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command"
     echo

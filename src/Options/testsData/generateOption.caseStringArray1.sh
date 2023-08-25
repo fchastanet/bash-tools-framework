@@ -5,8 +5,6 @@ Options::optionVarName() {
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    local -i optionParsedCountVarName
-    ((optionParsedCountVarName = 0)) || true
     while (($# > 0)); do
       local arg="$1"
       case "${arg}" in
@@ -16,7 +14,6 @@ Options::optionVarName() {
             Log::displayError "Option ${arg} - a value needs to be specified"
             return 1
           fi
-          ((++optionParsedCountVarName))
           varName+=("$1")
           ;;
         *)

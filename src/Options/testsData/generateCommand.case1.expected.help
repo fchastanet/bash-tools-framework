@@ -1,6 +1,8 @@
-[1;37mDescription:[0m 
+[1;37mDescription:[0m super command
 
 [1;37mUSAGE:[0m test [OPTIONS]
-[1;37mUSAGE:[0m test helpAlt
+[1;37mUSAGE:[0m test [--file|-f <String>]
 
 [1;37mOPTIONS:[0m
+  [1;34m--file, -f <String>[0m (optional) (at most 1 times)
+    file

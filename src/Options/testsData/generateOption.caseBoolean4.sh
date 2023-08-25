@@ -13,6 +13,10 @@ Options::optionVarName() {
       case "${arg}" in
         --var | -v)
           varName="1"
+          if ((optionParsedCountVarName >= 1)); then
+            Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
           ;;
         *)
           # ignore
