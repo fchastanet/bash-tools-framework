@@ -17,8 +17,6 @@
       shift || true
     done
     .INCLUDE "${tplDir}/option.parse.after.tpl"
-
-    export <% ${variableName} %>
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(<% ${optionFunctionName} %> helpTpl)"
   elif [[ "${cmd}" = "helpTpl" ]]; then
@@ -71,6 +69,17 @@
       fi
     %
     echo '<% ${helpAlt%, } %>'
+  elif [[ "${cmd}" = "export" ]]; then
+    export type="<% ${type} %>"
+    export variableName="<% ${variableName} %>"
+    export offValue="<% ${offValue} %>"
+    export onValue="<% ${onValue} %>"
+    export defaultValue="<% ${defaultValue} %>"
+    export min="<% ${min} %>"
+    export max="<% ${max} %>"
+    export authorizedValues="<% ${authorizedValues} %>"
+    % exportAlts="$(printf ' "%s"' "${alts[@]}")"
+    export alts=(<% ${exportAlts:1} %>)
   else
     Log::displayError "Option command invalid: '${cmd}'"
     return 1

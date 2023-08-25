@@ -33,7 +33,6 @@ Options::optionVarName() {
       Log::displayError "Option '--var' should be provided at least 1 time(s)"
       return 1
     fi
-
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::optionVarName helpTpl)"
@@ -56,6 +55,16 @@ Options::optionVarName() {
     echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '--var|-v'
+  elif [[ "${cmd}" = "export" ]]; then
+    export type="String"
+    export variableName="varName"
+    export offValue=""
+    export onValue=""
+    export defaultValue=""
+    export min="1"
+    export max="1"
+    export authorizedValues=""
+    export alts=("--var" "-v")
   else
     Log::displayError "Option command invalid: '${cmd}'"
     return 1

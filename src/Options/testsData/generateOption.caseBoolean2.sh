@@ -20,7 +20,6 @@ Options::optionVarName() {
       esac
       shift || true
     done
-
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::optionVarName helpTpl)"
@@ -43,6 +42,16 @@ Options::optionVarName() {
     echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var|-v]'
+  elif [[ "${cmd}" = "export" ]]; then
+    export type="Boolean"
+    export variableName="varName"
+    export offValue="0"
+    export onValue="1"
+    export defaultValue=""
+    export min="0"
+    export max="1"
+    export authorizedValues=""
+    export alts=("--var" "-v")
   else
     Log::displayError "Option command invalid: '${cmd}'"
     return 1

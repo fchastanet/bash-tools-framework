@@ -4,3 +4,4 @@ if ((optionParsedCount<% ${variableName^} %> < <% ${min} %>)); then
   return 1
 fi
 % fi
+export <% ${variableName} %>
