@@ -31,6 +31,7 @@ Options::generateCommand
   [--License <String|Function>]
   [--copyright <String|Function>]
   [--help-template <String>]
+  [--error-if-unknown-option]
 ```
 
 **Mandatory Options:**
@@ -65,6 +66,13 @@ Options::generateCommand
 `--help-template <String>` _(optional)_
 
 > if you want to override the default template used to generate the help
+
+`--no-error-if-unknown-option` _(optional)_
+
+> By default, options parser displays an error message and exit with code 1 if
+> an option provided does not match any specified options.
+>
+> This flag allows to disable this behavior.
 
 **Exit status:**
 

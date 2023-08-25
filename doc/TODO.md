@@ -26,11 +26,9 @@
 ## Options
 
 - remove action to remove args already managed
-- command
 - manage String|Function
 - option type File, would check if String after is a valid file
   - actually more that a validator
-- command error if unknown option
 - option parse if error variable should not be overridden
 
 ## Env::load

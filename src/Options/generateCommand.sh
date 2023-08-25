@@ -19,6 +19,7 @@
 # @option --license <String|Function> (optional) provides License section help Section not generated if not provided.
 # @option --copyright <String|Function> (optional) provides copyright section help Section not generated if not provided.
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
+# @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options.
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering
@@ -35,6 +36,7 @@ Options::generateCommand() {
   local license=""
   local copyright=""
   local helpTemplate=""
+  local errorIfUnknownOption="1"
   local -a optionFunctionList=()
 
   setArg() {
@@ -86,6 +88,9 @@ Options::generateCommand() {
         setArg "${option}" helpTemplate "$#" "$1" || return 1
         # TODO check if valid template file
         ;;
+      --no-error-if-unknown-option)
+        errorIfUnknownOption="0"
+        ;;
       *)
         if [[ "${option}" =~ ^-- ]]; then
           Log::displayError "Options::generateCommand - invalid option provided '$1'"
@@ -128,6 +133,7 @@ Options::generateCommand() {
     export helpTemplate
     export optionFunctionList
     export commandFunctionName
+    export errorIfUnknownOption
     export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
     # interpret the template

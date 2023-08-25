@@ -10,7 +10,12 @@ while (($# > 0)); do
       .INCLUDE "${tplDir}/option.parse.option.tpl"
     % done
     *)
+      % if [[ "${errorIfUnknownOption}" = "1" ]]; then
+        Log::displayError "Invalid option ${arg}"
+        return 1
+      % else
       # ignore
+      % fi
       ;;
   esac
   shift || true

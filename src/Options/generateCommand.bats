@@ -151,7 +151,8 @@ function Options::generateCommand::case2 { #@test
   sourceOption "${optionVerbose}"
 
   local status=0
-  Options::generateCommand --help "super command" ${optionVerbose} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::generateCommand --no-error-if-unknown-option \
+    --help "super command" ${optionVerbose} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
 
   testCommand "generateCommand.case2.sh" "Options::command"
 }
@@ -180,6 +181,17 @@ function Options::generateCommand::case2::parseVerbose { #@test
   Options::command parse --verbose >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   [[ "${verbose}" = "1" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+}
+
+function Options::generateCommand::case2::parseInvalidOption { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
+  local status=0
+  local verbose
+  Options::command parse --invalid-option >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${verbose}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
 }
@@ -222,6 +234,20 @@ function Options::generateCommand::case3::parseNoArg { #@test
   [[ "${srcDirs[*]}" = "initialDir" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
+}
+
+function Options::generateCommand::case3::parseInvalidOption { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case3.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  Options::command parse --invalid-option >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "1" ]]
+  [[ "${verbose}" = "0" ]]
+  [[ "${srcDirs[*]}" = "initialDir" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Invalid option --invalid-option"
 }
 
 function Options::generateCommand::case3::parseAll { #@test

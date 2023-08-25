@@ -27,7 +27,8 @@ Options::command() {
           srcDirs+=("$1")
           ;;
         *)
-          # ignore
+          Log::displayError "Invalid option ${arg}"
+          return 1
           ;;
       esac
       shift || true
