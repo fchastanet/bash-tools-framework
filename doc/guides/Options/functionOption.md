@@ -1,5 +1,17 @@
 # function Option
 
+Several commands are available on option function:
+
+- parse
+- help (will actually eval helpTpl command)
+- helpTpl (internal)
+- variableName
+- variableType (Boolean, String, StringArray)
+- type (Option)
+- alts
+- helpAlt
+- export
+
 ## 4.2.1. function Option - parse
 
 The option function generated will help you to parse options provided to the

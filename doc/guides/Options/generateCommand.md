@@ -11,17 +11,21 @@ declare commandForm=<% Options::generateCommand \
   --help-template "path/to/template.tpl" \
   option1
   option2
+  arg1
+  arg2
 %>
 ```
 
 **Description**
 
-Generates a function that allows to manipulate a command and its options.
+Generates a function that allows to manipulate a command and its options and/or
+arguments.
 
 **Syntax**
 
 ```text
-Usage:  Options::generateCommand [OPTIONS] [optionsVariablesReferences]
+Usage:  Options::generateCommand [OPTIONS]
+[optionsVariablesReferences] [argVariablesReferences]
 
 Options::generateCommand
   --help <String|Function>

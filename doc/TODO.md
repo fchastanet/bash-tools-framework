@@ -25,11 +25,19 @@
 
 ## Options
 
+- rename function option type to option variable-type
+- option type returns argument or option
+- generateCommand
+  - check that all optionFunctionList/argFunctionList have a different
+    variableName
+  - check arguments min/max index coherence
 - remove action to remove args already managed
 - manage String|Function
 - option type File, would check if String after is a valid file
   - actually more that a validator
-- option parse if error variable should not be overridden
+- global options
+  <https://symfony.com/doc/current/console/input.html#command-global-options>
+- option type env --env OPTION=\*
 
 ## Env::load
 

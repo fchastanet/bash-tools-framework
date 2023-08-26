@@ -18,7 +18,7 @@ function setup() {
 # Case 1: 1 --alt
 function Options::generateOption::caseStringArray1::success { #@test
   local status=0
-  Options::generateOption --type StringArray --variable-name "varName" --alt "--var" \
+  Options::generateOption --variable-type StringArray --variable-name "varName" --alt "--var" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseStringArray1.sh" "Options::optionVarName"
 }
@@ -68,7 +68,7 @@ function Options::generateOption::caseStringArray1::OptionTest::help { #@test
 # Case 2: 2 --alt
 function Options::generateOption::caseStringArray2::success { #@test
   local status=0
-  Options::generateOption --type StringArray --variable-name "varName" --alt "--var" --alt "-v" \
+  Options::generateOption --variable-type StringArray --variable-name "varName" --alt "--var" --alt "-v" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseStringArray2.sh" "Options::optionVarName"
 }
@@ -130,7 +130,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::help { #@test
 # Case 3: 2 --alt + mandatory
 function Options::generateOption::caseStringArray3::success { #@test
   local status=0
-  Options::generateOption --type StringArray --variable-name "varName" \
+  Options::generateOption --variable-type StringArray --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseStringArray3.sh" "Options::optionVarName"
@@ -182,7 +182,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::help { #@test
 # Case 3: 2 --alt + mandatory + custom help
 function Options::generateOption::caseStringArray4::success { #@test
   local status=0
-  Options::generateOption --type StringArray --variable-name "varName" \
+  Options::generateOption --variable-type StringArray --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory --help "super help" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseStringArray4.sh" "Options::optionVarName"
@@ -246,10 +246,45 @@ function Options::generateOption::caseStringArray4::OptionsTest::help { #@test
 # Case 5: 2 --alt + min 2 + max 3 + custom help + --authorized-values
 function Options::generateOption::caseStringArray5::success { #@test
   local status=0
-  Options::generateOption --type StringArray --variable-name "varName" \
+  Options::generateOption --variable-type StringArray --variable-name "varName" \
     --alt "--var" --alt "-v" --min 2 --max 3 --authorized-values "value1|value2|value3" \
     --help "super help" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseStringArray5.sh" "Options::optionVarName"
+}
+
+function Options::generateOption::caseStringArray5::otherCommands { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
+  run Options::optionVarName variableName
+  assert_success
+  assert_output "varName"
+
+  run Options::optionVarName type
+  assert_success
+  assert_output "Option"
+
+  run Options::optionVarName variableType
+  assert_success
+  assert_output "StringArray"
+
+  run Options::optionVarName helpAlt
+  assert_success
+  assert_output "--var|-v"
+
+  local status=0
+  Options::optionVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+  [[ "${type}" = "Option" ]]
+  [[ "${variableType}" = "StringArray" ]]
+  [[ "${variableName}" = "varName" ]]
+  [[ "${onValue}" = "" ]]
+  [[ "${offValue}" = "" ]]
+  [[ "${defaultValue}" = "" ]]
+  [[ "${min}" = "2" ]]
+  [[ "${max}" = "3" ]]
+  [[ "${authorizedValues}" = "value1|value2|value3" ]]
+  [[ "${alts[*]}" = "--var -v" ]]
 }
 
 function Options::generateOption::caseStringArray5::OptionsTest::parseWithNotEnoughArgs { #@test

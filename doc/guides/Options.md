@@ -26,7 +26,7 @@ declare optionVerbose=<% Options::generateOption \
   --variable-name "verbose" \
   --alt "-v" \
   --alt "--verbose" \
-  --type "Boolean" \
+  --variable-type "Boolean" \
   --default-value "0" \
   --off-value "0" \ # default
   --on-value "1" \ # default
@@ -72,7 +72,7 @@ declare optionVerbose=<% Options::generateOption \
   --variable-name "verbose" \
   --alt "--verbose" \
   --alt "-v" \
-  --type "Boolean" \
+  --variable-type "Boolean" \
   --help "displays more information about processed files"
 %>
 declare optionSrcDirs=<% Options::generateOption \
@@ -80,7 +80,7 @@ declare optionSrcDirs=<% Options::generateOption \
   --alt "-s" \
   --alt "--src-dir" \
   --help-item-name "srcDir" \
-  --type "StringArray" \
+  --variable-type "StringArray" \
   --help "provides the directory where to find the functions source code."
 %>
 declare commandForm=<% Options::generateCommand \
@@ -130,7 +130,7 @@ Options::parse \
   --variable-name "verbose" \
   --alt "-v" \
   --alt "--verbose" \
-  --type "Boolean" \
+  --variable-type "Boolean" \
   --default-value "0" \
   --off-value "0" \ # default
   --on-value "1" \ # default
@@ -147,7 +147,7 @@ Options::parse \
   --variable-name "logLevel" \
   --alt "--log-level" \
   --alt "-l" \
-  --type "String" \
+  --variable-type "String" \
   --default-value "info" \
   --authorized-values "debug|info|warn|error" \
   --help "help" \
@@ -164,7 +164,7 @@ Options::parse \
   --variable-name "srcDirs" \
   --alt "-s" \
   --alt "--src-dir" \
-  --type "String[]" \
+  --variable-type "String[]" \
   --mandatory \ # default is required
   --help "help" \
   --validator "validatorHandler" \

@@ -94,7 +94,7 @@ function Options::generateCommand::atLeastOnePositionalArg { #@test
 
 function Options::generateCommand::case1 { #@test
   local optionFile
-  optionFile="$(Options::generateOption --type String --help "file" \
+  optionFile="$(Options::generateOption --variable-type String --help "file" \
     --variable-name "file" --alt "--file" --alt "-f")" || return 1
   sourceOption "${optionFile}"
 
@@ -203,7 +203,7 @@ function Options::generateCommand::case3 { #@test
   sourceOption "${optionVerbose}"
 
   local optionSrcDirs
-  optionSrcDirs="$(Options::generateOption --type StringArray \
+  optionSrcDirs="$(Options::generateOption --variable-type StringArray \
     --help "provide the directory where to find the functions source code." \
     --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
   sourceOption "${optionSrcDirs}"

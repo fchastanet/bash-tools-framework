@@ -1,5 +1,5 @@
 <%% Array::join ' | ' "${alts[@]}" %>)
-  % if [[ "${type}" = "Boolean" ]]; then
+  % if [[ "${variableType}" = "Boolean" ]]; then
     <% ${variableName} %>="<% ${onValue} %>"
     % if (( max > 0 )); then
     if ((optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
@@ -28,7 +28,7 @@
     % if ((min > 0 || max > 0)); then
     ((++optionParsedCount<% ${variableName^} %>))
     % fi
-    % if [[ "${type}" = "String" ]]; then
+    % if [[ "${variableType}" = "String" ]]; then
     <% ${variableName} %>="$1"
     % else
     <% ${variableName} %>+=("$1")

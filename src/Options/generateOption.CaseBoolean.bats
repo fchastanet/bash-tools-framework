@@ -22,6 +22,41 @@ function Options::generateOption::caseBoolean1::success { #@test
   testCommand "generateOption.caseBoolean1.sh" "Options::optionVarName"
 }
 
+function Options::generateOption::caseBoolean1::otherCommands { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean1.sh"
+  run Options::optionVarName variableName
+  assert_success
+  assert_output "varName"
+
+  run Options::optionVarName type
+  assert_success
+  assert_output "Option"
+
+  run Options::optionVarName variableType
+  assert_success
+  assert_output "Boolean"
+
+  run Options::optionVarName helpAlt
+  assert_success
+  assert_output "[--var]"
+
+  local status=0
+  Options::optionVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+  [[ "${type}" = "Option" ]]
+  [[ "${variableType}" = "Boolean" ]]
+  [[ "${variableName}" = "varName" ]]
+  [[ "${onValue}" = "1" ]]
+  [[ "${offValue}" = "0" ]]
+  [[ "${defaultValue}" = "" ]]
+  [[ "${min}" = "0" ]]
+  [[ "${max}" = "1" ]]
+  [[ "${authorizedValues}" = "" ]]
+  [[ "${alts}" = "--var" ]]
+}
+
 function Options::generateOption::caseBoolean1::OptionTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean1.sh"
   run Options::optionVarName

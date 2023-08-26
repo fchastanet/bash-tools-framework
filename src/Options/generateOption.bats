@@ -22,7 +22,7 @@ function Options::generateOption::missingValue { #@test
   run Options::generateOption --variable-name
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - invalid variable name"
+  assert_output --partial "ERROR   - Options::generateOption - Option --variable-name - a value needs to be specified"
 }
 
 function Options::generateOption::invalidValue { #@test
@@ -43,7 +43,7 @@ function Options::generateOption::missingAltValue { #@test
   run Options::generateOption --variable-name "varName" --alt
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - invalid alt option value ''"
+  assert_output --partial "ERROR   - Options::generateOption - Option --alt - a value needs to be specified"
 }
 
 function Options::generateOption::invalidAltValue { #@test
@@ -54,24 +54,24 @@ function Options::generateOption::invalidAltValue { #@test
 }
 
 function Options::generateOption::invalidTypeMissingValue { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --type
+  run Options::generateOption --variable-name "varName" --alt "--var" --variable-type
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - type '' invalid, should be one of Boolean String StringArray"
+  assert_output --partial "ERROR   - Options::generateOption - Option --variable-type - a value needs to be specified"
 }
 
 function Options::generateOption::invalidTypeValue { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --type "invalid"
+  run Options::generateOption --variable-name "varName" --alt "--var" --variable-type "invalid"
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - type 'invalid' invalid, should be one of Boolean String StringArray"
+  assert_output --partial "ERROR   - Options::generateOption - variable type 'invalid' invalid, should be one of Boolean String StringArray"
 }
 
 function Options::generateOption::typeOptionTwice { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --type "String" --type "StringArray"
+  run Options::generateOption --variable-name "varName" --alt "--var" --variable-type "String" --variable-type "StringArray"
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - only one '--type' option can be provided"
+  assert_output --partial "ERROR   - Options::generateOption - only one '--variable-type' option can be provided"
 }
 
 # TODO case with arguments function

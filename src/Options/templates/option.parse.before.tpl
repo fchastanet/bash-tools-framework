@@ -1,4 +1,4 @@
-% if [[ "${type}" = "Boolean" ]]; then
+% if [[ "${variableType}" = "Boolean" ]]; then
 <% ${variableName} %>="<% ${offValue} %>"
 % elif [[ -n "${defaultValue}" ]]; then
 <% ${variableName} %>=<% ${defaultValue} %>

@@ -12,6 +12,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionBoolean.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionString.sh"
 # shellcheck source=src/Options/generateOptionStringArray.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionStringArray.sh"
+# shellcheck source=src/Options/generateArg.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Options/generateArg.sh"
 # shellcheck source=src/Options/generateFunctionName.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateFunctionName.sh"
 # shellcheck source=src/Options/assertAlt.sh

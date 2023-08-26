@@ -7,7 +7,7 @@ declare optionVerbose=<% Options::generateOption \
   --alt "--verbose" \
   --alt "-v" \
   --mandatory \
-  --type "Boolean" \
+  --variable-type "Boolean" \
 %>
 ```
 
@@ -25,7 +25,7 @@ Options::generateOption
   --variable-name <optionVariableName>
   --alt <option>
   [--mandatory]
-  [--type <String|Function>]
+  [--variable-type <String|Function>]
   [TYPE_OPTIONS]
 ```
 
@@ -53,7 +53,7 @@ Options::generateOption
 > `--mandatory` you can make the option mandatory. An error will be generated if
 > the option is not found during parsing arguments.
 
-`--type <String>` _(optional)_
+`--variable-type <String>` _(optional)_
 
 > the type of option to generate. Supported types are:
 >

@@ -23,7 +23,7 @@
     # shellcheck disable=SC2016
     echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'
     echo 'echo -n "<%% Array::join ", " "${alts[@]}" %>"'
-    % if [[ "${type}" != "Boolean" ]]; then
+    % if [[ "${variableType}" != "Boolean" ]]; then
       echo "echo -n ' <String>'"
     % fi
     # shellcheck disable=SC2016
@@ -53,13 +53,15 @@
     echo "<% ${variableName} %>"
   elif [[ "${cmd}" = "type" ]]; then
     echo "<% ${type} %>"
+  elif [[ "${cmd}" = "variableType" ]]; then
+    echo "<% ${variableType} %>"
   elif [[ "${cmd}" = "alts" ]]; then
     % for alt in "${alts[@]}"; do
     echo '<% ${alt} %>'
     % done
   elif [[ "${cmd}" = "helpAlt" ]]; then
     %
-      if [[ "${type}" = "Boolean" ]]; then
+      if [[ "${variableType}" = "Boolean" ]]; then
         helpAlt="[$(Array::join '|' "${alts[@]}")]"
       else
         helpAlt=""
@@ -71,6 +73,7 @@
     echo '<% ${helpAlt%, } %>'
   elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
+    export variableType="<% ${variableType} %>"
     export variableName="<% ${variableName} %>"
     export offValue="<% ${offValue} %>"
     export onValue="<% ${onValue} %>"

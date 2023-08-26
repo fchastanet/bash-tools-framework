@@ -46,6 +46,8 @@ Options::optionVarName() {
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
   elif [[ "${cmd}" = "type" ]]; then
+    echo "Option"
+  elif [[ "${cmd}" = "variableType" ]]; then
     echo "String"
   elif [[ "${cmd}" = "alts" ]]; then
     echo '--var'
@@ -53,7 +55,8 @@ Options::optionVarName() {
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var|-v <String>]'
   elif [[ "${cmd}" = "export" ]]; then
-    export type="String"
+    export type="Option"
+    export variableType="String"
     export variableName="varName"
     export offValue=""
     export onValue=""

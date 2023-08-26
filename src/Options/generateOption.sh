@@ -6,14 +6,14 @@
 #     --variable-name "srcDirs" \
 #     --alt "-s" \
 #     --alt "--src-dir" \
-#     --type "StringArray" \
+#     --variable-type "StringArray" \
 #     --required \
 #     --help "provides the directory where to find the functions source code."
 #
 # @arg $@ args:StringArray
 # @option --variable-name|--var <varName> (mandatory) provides the variable name that will be used to store the parsed options.
 # @option --alt <option> (mandatory 1 time) option possibility
-# @option --type <Boolean|String|StringArray> option type (default: Boolean)
+# @option --variable-type <Boolean|String|StringArray> option type (default: Boolean)
 # @option --mandatory (optional) indicates if option is mandatory (optional if not provided)
 # @option --help <help> (optional)
 # Others options are passed to specific option handler:
@@ -22,7 +22,7 @@
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering
-# @stdout script file generated to parse the arguments following the rules provided
+# @stdout script file generated to parse the options following the rules provided
 # @stderr diagnostics information is displayed
 # @see Options::generateCommand
 # @see doc/guides/Options/generateOption.md
@@ -30,17 +30,21 @@ Options::generateOption() {
   # args default values
   local variableName=""
   local -a alts=()
-  local type="Boolean"
-  local typeOptionProvided=0
+  local variableType="Boolean"
+  local variableTypeOptionProvided=0
   local help=""
   local mandatory=0
-  local commandVariableName=""
   local -a adapterOptions=()
 
   while (($# > 0)); do
-    case "$1" in
+    local arg="$1"
+    case "${arg}" in
       --var | --variable-name)
-        shift || true
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
+          return 1
+        fi
         if [[ -n "${variableName}" ]]; then
           Log::displayError "Options::generateOption - only one --var option can be provided"
           return 1
@@ -52,29 +56,41 @@ Options::generateOption() {
         variableName="$1"
         ;;
       --alt)
-        shift || true
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
+          return 1
+        fi
         if ! Options::assertAlt "$1"; then
           Log::displayError "Options::generateOption - invalid alt option value '$1'"
           return 1
         fi
         alts+=("$1")
         ;;
-      --type)
-        shift || true
-        if [[ "${typeOptionProvided}" != "0" ]]; then
-          Log::displayError "Options::generateOption - only one '--type' option can be provided"
+      --variable-type)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
           return 1
         fi
-        typeOptionProvided=1
-        local -a validTypes=("Boolean" "String" "StringArray")
-        if ! Array::contains "$1" "${validTypes[@]}"; then
-          Log::displayError "Options::generateOption - type '$1' invalid, should be one of ${validTypes[*]}"
+        if [[ "${variableTypeOptionProvided}" != "0" ]]; then
+          Log::displayError "Options::generateOption - only one '--variable-type' option can be provided"
           return 1
         fi
-        type="$1"
+        variableTypeOptionProvided=1
+        local -a validVariableTypes=("Boolean" "String" "StringArray")
+        if ! Array::contains "$1" "${validVariableTypes[@]}"; then
+          Log::displayError "Options::generateOption - variable type '$1' invalid, should be one of ${validVariableTypes[*]}"
+          return 1
+        fi
+        variableType="$1"
         ;;
       --help)
-        shift || true
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
+          return 1
+        fi
         if [[ -n "${help}" ]]; then
           Log::displayError "Options::generateOption - only one --help option can be provided"
           return 1
@@ -105,7 +121,7 @@ Options::generateOption() {
     # generate specific type options values
     local adapterOptionsTmpFile
     adapterOptionsTmpFile="$(Framework::createTempFile "optionTypeExports")"
-    case "${type}" in
+    case "${variableType}" in
       Boolean)
         Options::generateOptionBoolean "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
@@ -116,7 +132,7 @@ Options::generateOption() {
         Options::generateOptionStringArray "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       *)
-        Log::displayError "invalid option type: ${type}"
+        Log::displayError "invalid option --variable-type: ${variableType}"
         return 1
         ;;
     esac
@@ -129,12 +145,12 @@ Options::generateOption() {
     local optionFunctionName="Options::${baseOptionFunctionName}"
 
     # export current values
+    export type="Option"
     export variableName
+    export variableType
     export alts
-    export type
     export help
     export mandatory
-    export commandVariableName=
     export adapterOptions
     eval "${optionTypeExports}"
     export optionFunctionName
@@ -151,34 +167,3 @@ Options::generateOption() {
     echo "${optionFunctionName}"
   ) || return $?
 }
-
-# export FRAMEWORK_ROOT_DIR="$(pwd)"
-# # shellcheck source=src/Options/assertAlt.sh
-# source "src/Options/assertAlt.sh"
-# # shellcheck source=src/Options/bashTpl.sh
-# source "src/Options/bashTpl.sh"
-# # shellcheck source=src/Options/generateFunctionName.sh
-# source "src/Options/generateFunctionName.sh"
-# # shellcheck source=src/Options/generateOptionString.sh
-# source "src/Options/generateOptionString.sh"
-# # shellcheck source=/src/Assert/validVariableName.sh
-# source "src/Assert/validVariableName.sh"
-# # shellcheck source=/src/Array/contains.sh
-# source "src/Array/contains.sh"
-# # shellcheck source=/src/Array/join.sh
-# source "src/Array/join.sh"
-# # shellcheck source=/src/Framework/createTempFile.sh
-# source "src/Framework/createTempFile.sh"
-# # shellcheck source=/src/Crypto/uuidV4.sh
-# source "src/Crypto/uuidV4.sh"
-# # shellcheck source=/src/Log/__all.sh
-# source "src/Log/__all.sh"
-
-# set -x
-# set -o errexit
-# set -o pipefail
-# export TMPDIR="/tmp"
-# export _COMPILE_ROOT_DIR="$(pwd)"
-# echo "$@"
-# # Options::generateOption "$@"
-# Options::generateOption --type String --variable-name "varName" --alt "--var" --alt -v

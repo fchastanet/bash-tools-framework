@@ -60,31 +60,31 @@ Options::generateCommand() {
     local option="$1"
     case "${option}" in
       --help)
-        shift || true
+        shift
         setArg "${option}" help "$#" "$1" || return 1
         ;;
       --version)
-        shift || true
+        shift
         setArg "${option}" version "$#" "$1" || return 1
         ;;
       --author)
-        shift || true
+        shift
         setArg "${option}" author "$#" "$1" || return 1
         ;;
       --command-name)
-        shift || true
+        shift
         setArg "${option}" commandName "$#" "$1" || return 1
         ;;
       --license)
-        shift || true
+        shift
         setArg "${option}" license "$#" "$1" || return 1
         ;;
       --copyright)
-        shift || true
+        shift
         setArg "${option}" copyright "$#" "$1" || return 1
         ;;
       --help-template)
-        shift || true
+        shift
         setArg "${option}" helpTemplate "$#" "$1" || return 1
         # TODO check if valid template file
         ;;
@@ -147,40 +147,3 @@ Options::generateCommand() {
     echo "${commandFunctionName}"
   ) || return $?
 }
-
-# export FRAMEWORK_ROOT_DIR="$(pwd)"
-# # shellcheck source=src/Options/generateFunctionName.sh
-# source "src/Options/generateFunctionName.sh"
-# # shellcheck source=src/Options/bashTpl.sh
-# source "src/Options/bashTpl.sh"
-# # shellcheck source=/src/Assert/validVariableName.sh
-# source "src/Assert/validVariableName.sh"
-# # shellcheck source=/src/Array/contains.sh
-# source "src/Array/contains.sh"
-# # shellcheck source=/src/Array/wrap.sh
-# source "src/Array/wrap.sh"
-# # shellcheck source=/src/Crypto/uuidV4.sh
-# source "src/Crypto/uuidV4.sh"
-# # shellcheck source=/src/Framework/createTempFile.sh
-# source "src/Framework/createTempFile.sh"
-# # shellcheck source=/src/_includes/_colors.sh
-# source "src/_includes/_colors.sh"
-# # shellcheck source=/src/Log/__all.sh
-# source "src/Log/__all.sh"
-
-# set -x
-# set -o errexit
-# set -o pipefail
-# export TMPDIR="/tmp"
-# export _COMPILE_ROOT_DIR="$(pwd)"
-
-# Options::myCustomOption() {
-#   if [[ "$1" = "help" ]]; then
-#     echo "help"
-#   fi
-#   if [[ "$1" = "helpAlt" ]]; then
-#     echo "helpAlt"
-#   fi
-# }
-# set -x
-# Options::generateCommand Options::myCustomOption
