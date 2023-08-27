@@ -18,7 +18,7 @@ if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" 
     tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
     (
       cd "${tempDir}" || exit 1
-      tar -xJvf "${file}"
+      tar -xJvf "${file}" >&2
       mv "shellcheck-v${version}/shellcheck" "${targetFile}"
       chmod +x "${targetFile}"
     )
@@ -100,7 +100,7 @@ else
   set -- "${savedOptions[@]}"
 fi
 
-(
+getFiles() {
   exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${FRAMEWORK_ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
   if [[ -z "${exclude}" ]]; then
     exclude='^$'
@@ -117,4 +117,9 @@ fi
   ) |
     (grep -E -v "${exclude}" || true) |
     LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "File::detectBashFile '@'"
-)
+}
+
+declare -a files
+readarray -t files < <(getFiles)
+
+"${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" --format=checkstyle "${files[@]}"
