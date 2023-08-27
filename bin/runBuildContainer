@@ -137,6 +137,49 @@ Args::defaultHelp() {
   fi
 }
 
+# @description check if an element is contained in an array
+#
+# @arg $1 needle:String
+# @arg $@ array:String[]
+# @exitcode 0 if found
+# @exitcode 1 otherwise
+# @example
+#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
+Array::contains() {
+  local element
+  for element in "${@:2}"; do
+    [[ "${element}" = "$1" ]] && return 0
+  done
+  return 1
+}
+
+# @description remove elements from array
+# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
+# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
+# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
+# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
+# @see Array::removeIf
+Array::remove() {
+  local -n arrayRemoveArray=$1
+  shift || true # $@ contains elements to remove
+  local -A valuesToRemoveKeys=()
+
+  # Tag items to remove
+  local del
+  for del in "$@"; do valuesToRemoveKeys[${del}]=1; done
+
+  # remove items
+  local k
+  for k in "${!arrayRemoveArray[@]}"; do
+    if [[ -n "${valuesToRemoveKeys[${arrayRemoveArray[k]}]+xxx}" ]]; then
+      unset 'arrayRemoveArray[k]'
+    fi
+  done
+
+  # compaction (element re-indexing, because unset makes "holes" in array )
+  arrayRemoveArray=("${arrayRemoveArray[@]}")
+}
+
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
 #   given display level
@@ -655,33 +698,6 @@ Env::requireRemoveVerboseArg() {
   Array::remove BASH_FRAMEWORK_ARGV -v --verbose -vv -vvv
 }
 
-# @description remove elements from array
-# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
-# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
-# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
-# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
-# @see Array::removeIf
-Array::remove() {
-  local -n arrayRemoveArray=$1
-  shift || true # $@ contains elements to remove
-  local -A valuesToRemoveKeys=()
-
-  # Tag items to remove
-  local del
-  for del in "$@"; do valuesToRemoveKeys[${del}]=1; done
-
-  # remove items
-  local k
-  for k in "${!arrayRemoveArray[@]}"; do
-    if [[ -n "${valuesToRemoveKeys[${arrayRemoveArray[k]}]+xxx}" ]]; then
-      unset 'arrayRemoveArray[k]'
-    fi
-  done
-
-  # compaction (element re-indexing, because unset makes "holes" in array )
-  arrayRemoveArray=("${arrayRemoveArray[@]}")
-}
-
 # FUNCTIONS
 
 facade_main_a1a6baaae16042c9aa333898ae52db34() {
@@ -752,6 +768,13 @@ if tty -s; then
   args+=("-it")
 fi
 
+if ! Array::contains '--ci' "${BASH_FRAMEWORK_ARGV[@]}"; then
+  args+=("-v")
+  args+=("/tmp:/tmp")
+fi
+
+Array::remove BASH_FRAMEWORK_ARGV --ci
+
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
   args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
 fi
@@ -760,14 +783,13 @@ fi
   # shellcheck disable=SC2086
   docker run \
     --rm \
-    ${DOCKER_RUN_OPTIONS} \
+    "${DOCKER_RUN_OPTIONS[@]}" \
     "${args[@]}" \
     -w /bash \
     -v "$(pwd):/bash" \
-    -v "/tmp:/tmp" \
     --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
     "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "$@"
+    "${BASH_FRAMEWORK_ARGV[@]}"
 )
 
 }

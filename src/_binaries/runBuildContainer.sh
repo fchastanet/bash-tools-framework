@@ -48,6 +48,13 @@ if tty -s; then
   args+=("-it")
 fi
 
+if ! Array::contains '--ci' "${BASH_FRAMEWORK_ARGV[@]}"; then
+  args+=("-v")
+  args+=("/tmp:/tmp")
+fi
+
+Array::remove BASH_FRAMEWORK_ARGV --ci
+
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
   args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
 fi
@@ -56,12 +63,11 @@ fi
   # shellcheck disable=SC2086
   docker run \
     --rm \
-    ${DOCKER_RUN_OPTIONS} \
+    "${DOCKER_RUN_OPTIONS[@]}" \
     "${args[@]}" \
     -w /bash \
     -v "$(pwd):/bash" \
-    -v "/tmp:/tmp" \
     --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
     "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "$@"
+    "${BASH_FRAMEWORK_ARGV[@]}"
 )

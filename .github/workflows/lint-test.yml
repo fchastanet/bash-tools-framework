@@ -141,7 +141,7 @@ jobs:
           USER_ID=1000 \
           GROUP_ID=1000 \
           SKIP_BUILD=0 \
-          ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src
+          ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src --ci
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
