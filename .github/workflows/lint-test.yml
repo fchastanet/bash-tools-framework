@@ -48,7 +48,7 @@ jobs:
           ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
 
       - name: Checkstyle aggregation
-        uses: jwgmeligmeyling/checkstyle-github-action@master
+        uses: adore-me/checkstyle-github-action@master
         with:
           path: 'logs/*-checkstyle.xml'
 
@@ -134,6 +134,7 @@ jobs:
 
       - name: run unit tests
         run: |
+          chmod -R 777 logs
           # shellcheck disable=SC2266
           VENDOR="${{ matrix.vendor }}" \
           BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
