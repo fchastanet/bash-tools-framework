@@ -7,8 +7,8 @@
   if [[ "${cmd}" = "parse" ]]; then
     .INCLUDE "${tplDir}/option.parse.before.tpl"
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         .INCLUDE "${tplDir}/option.parse.option.tpl"
         *)
           # ignore

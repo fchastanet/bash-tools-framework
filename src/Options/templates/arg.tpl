@@ -33,14 +33,14 @@
   }
 %
 <% ${argFunctionName} %>() {
-  local cmd="$1"
+  local options_parse_cmd="$1"
   shift || true
 
-  if [[ "${cmd}" = "parse" ]]; then
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
     .INCLUDE "${tplDir}/arg.parse.before.tpl"
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         -*)
           # ignore options
           ;;
@@ -52,9 +52,9 @@
       shift || true
     done
     .INCLUDE "${tplDir}/arg.parse.after.tpl"
-  elif [[ "${cmd}" = "help" ]]; then
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
     eval "$(<% ${argFunctionName} %> helpTpl)"
-  elif [[ "${cmd}" = "helpTpl" ]]; then
+  elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  <%% helpArg "1" %>"'
     % if [[ -z "${help}" ]]; then
@@ -62,21 +62,21 @@
     % else
         echo "echo '    <% ${help} %>'"
     % fi
-  elif [[ "${cmd}" = "variableName" ]]; then
+  elif [[ "${options_parse_cmd}" = "variableName" ]]; then
     echo "<% ${variableName} %>"
-  elif [[ "${cmd}" = "type" ]]; then
+  elif [[ "${options_parse_cmd}" = "type" ]]; then
     echo "<% ${type} %>"
-  elif [[ "${cmd}" = "variableType" ]]; then
+  elif [[ "${options_parse_cmd}" = "variableType" ]]; then
     echo "<% ${variableType} %>"
-  elif [[ "${cmd}" = "helpArg" ]]; then
+  elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
     echo "<%% helpArg "0" %>"
-  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+  elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
     echo "Argument <% ${variableName} %> min <% ${min} %> min <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
-  elif [[ "${cmd}" = "min" ]]; then
+  elif [[ "${options_parse_cmd}" = "min" ]]; then
     echo "<% ${min} %>"
-  elif [[ "${cmd}" = "max" ]]; then
+  elif [[ "${options_parse_cmd}" = "max" ]]; then
     echo "<% ${max} %>"
-  elif [[ "${cmd}" = "export" ]]; then
+  elif [[ "${options_parse_cmd}" = "export" ]]; then
     export type="<% ${type} %>"
     export variableName="<% ${variableName} %>"
     export variableType="<% ${variableType} %>"
@@ -86,7 +86,7 @@
     export authorizedValues="<% ${authorizedValues} %>"
     export regexp="<% ${regexp} %>"
   else
-    Log::displayError "Argument command invalid: '${cmd}'"
+    Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1
   fi
 }

@@ -1,2 +1,2 @@
-local -i argParsedCount<% ${variableName^} %>
-((argParsedCount<% ${variableName^} %> = 0)) || true
+local -i options_parse_argParsedCount<% ${variableName^} %>
+((options_parse_argParsedCount<% ${variableName^} %> = 0)) || true

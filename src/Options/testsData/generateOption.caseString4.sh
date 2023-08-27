@@ -5,22 +5,22 @@ Options::optionVarName() {
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    local -i optionParsedCountVarName
-    ((optionParsedCountVarName = 0)) || true
+    local -i options_parse_optionParsedCountVarName
+    ((options_parse_optionParsedCountVarName = 0)) || true
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         --var | -v)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${arg} - a value needs to be specified"
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
-          if ((optionParsedCountVarName >= 1)); then
-            Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
+          if ((options_parse_optionParsedCountVarName >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          ((++optionParsedCountVarName))
+          ((++options_parse_optionParsedCountVarName))
           varName="$1"
           ;;
         *)
@@ -29,7 +29,7 @@ Options::optionVarName() {
       esac
       shift || true
     done
-    if ((optionParsedCountVarName < 1)); then
+    if ((options_parse_optionParsedCountVarName < 1)); then
       Log::displayError "Option '--var' should be provided at least 1 time(s)"
       return 1
     fi

@@ -4,6 +4,6 @@
 <% ${variableName} %>=<% ${defaultValue} %>
 % fi
 % if ((min > 0 || max > 0)); then
-local -i optionParsedCount<% ${variableName^} %>
-((optionParsedCount<% ${variableName^} %> = 0)) || true
+local -i options_parse_optionParsedCount<% ${variableName^} %>
+((options_parse_optionParsedCount<% ${variableName^} %> = 0)) || true
 % fi

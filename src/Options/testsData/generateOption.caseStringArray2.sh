@@ -6,12 +6,12 @@ Options::optionVarName() {
 
   if [[ "${cmd}" = "parse" ]]; then
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         --var | -v)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${arg} - a value needs to be specified"
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           varName+=("$1")

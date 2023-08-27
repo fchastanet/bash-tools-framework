@@ -6,15 +6,15 @@ Options::optionVarName() {
 
   if [[ "${cmd}" = "parse" ]]; then
     varName="0"
-    local -i optionParsedCountVarName
-    ((optionParsedCountVarName = 0)) || true
+    local -i options_parse_optionParsedCountVarName
+    ((options_parse_optionParsedCountVarName = 0)) || true
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         --var)
           varName="1"
-          if ((optionParsedCountVarName >= 1)); then
-            Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
+          if ((options_parse_optionParsedCountVarName >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ;;

@@ -1,24 +1,24 @@
 % if [[ -n "${authorizedValues}" ]]; then
-if [[ ! "$1" =~ <% ${authorizedValues} %> ]]; then
-  Log::displayError "Argument <% ${name} %> - value '$1' is not part of authorized values(<% ${authorizedValues} %>)"
+if [[ ! "${options_parse_arg}" =~ <% ${authorizedValues} %> ]]; then
+  Log::displayError "Argument <% ${name} %> - value '${options_parse_arg}' is not part of authorized values(<% ${authorizedValues} %>)"
   return 1
 fi
 % fi
 % if [[ -n "${regexp}" ]]; then
-if [[ ! "$1" =~ <% ${regexp} %> ]]; then
-  Log::displayError "Argument <% ${name} %> - value '$1' doesn't match the regular expression(<% ${regexp} %>)"
+if [[ ! "${options_parse_arg}" =~ <% ${regexp} %> ]]; then
+  Log::displayError "Argument <% ${name} %> - value '${options_parse_arg}' doesn't match the regular expression(<% ${regexp} %>)"
   return 1
 fi
 % fi
 % if (( max > 0 )); then
-if ((argParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
+if ((options_parse_argParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
   Log::displayError "Argument <% ${name} %> - Maximum number of argument occurrences reached(<% ${max} %>)"
   return 1
 fi
 % fi
-((++argParsedCount<% ${variableName^} %>))
+((++options_parse_argParsedCount<% ${variableName^} %>))
 % if [[ "${variableType}" = "String" ]]; then
-<% ${variableName} %>="$1"
+<% ${variableName} %>="${options_parse_arg}"
 % else
-<% ${variableName} %>+=("$1")
+<% ${variableName} %>+=("${options_parse_arg}")
 % fi

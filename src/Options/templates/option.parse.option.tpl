@@ -2,31 +2,31 @@
   % if [[ "${variableType}" = "Boolean" ]]; then
     <% ${variableName} %>="<% ${onValue} %>"
     % if (( max > 0 )); then
-    if ((optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
-      Log::displayError "Option ${arg} - Maximum number of option occurrences reached(<% ${max} %>)"
+    if ((options_parse_optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
+      Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(<% ${max} %>)"
       return 1
     fi
     % fi
   % else
     shift
     if (($# == 0)); then
-      Log::displayError "Option ${arg} - a value needs to be specified"
+      Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
       return 1
     fi
     % if [[ -n "${authorizedValues}" ]]; then
     if [[ ! "$1" =~ <% ${authorizedValues} %> ]]; then
-      Log::displayError "Option ${arg} - value '$1' is not part of authorized values(<% ${authorizedValues} %>)"
+      Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(<% ${authorizedValues} %>)"
       return 1
     fi
     % fi
     % if (( max > 0 )); then
-    if ((optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
-      Log::displayError "Option ${arg} - Maximum number of option occurrences reached(<% ${max} %>)"
+    if ((options_parse_optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
+      Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(<% ${max} %>)"
       return 1
     fi
     % fi
     % if ((min > 0 || max > 0)); then
-    ((++optionParsedCount<% ${variableName^} %>))
+    ((++options_parse_optionParsedCount<% ${variableName^} %>))
     % fi
     % if [[ "${variableType}" = "String" ]]; then
     <% ${variableName} %>="$1"

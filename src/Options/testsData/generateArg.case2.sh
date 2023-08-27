@@ -1,56 +1,56 @@
 #!/usr/bin/env bash
 
 Options::argVarName() {
-  local cmd="$1"
+  local options_parse_cmd="$1"
   shift || true
 
-  if [[ "${cmd}" = "parse" ]]; then
-    local -i argParsedCountVarName
-    ((argParsedCountVarName = 0)) || true
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
+    local -i options_parse_argParsedCountVarName
+    ((options_parse_argParsedCountVarName = 0)) || true
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         -*)
           # ignore options
           ;;
         *)
           # positional arg
-          if [[ ! "$1" =~ debug|info|warn ]]; then
-            Log::displayError "Argument varName - value '$1' is not part of authorized values(debug|info|warn)"
+          if [[ ! "${options_parse_arg}" =~ debug|info|warn ]]; then
+            Log::displayError "Argument varName - value '${options_parse_arg}' is not part of authorized values(debug|info|warn)"
             return 1
           fi
-          if ((argParsedCountVarName >= 3)); then
+          if ((options_parse_argParsedCountVarName >= 3)); then
             Log::displayError "Argument varName - Maximum number of argument occurrences reached(3)"
             return 1
           fi
-          ((++argParsedCountVarName))
-          varName+=("$1")
+          ((++options_parse_argParsedCountVarName))
+          varName+=("${options_parse_arg}")
           ;;
       esac
       shift || true
     done
     export varName
-  elif [[ "${cmd}" = "help" ]]; then
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
     eval "$(Options::argVarName helpTpl)"
-  elif [[ "${cmd}" = "helpTpl" ]]; then
+  elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  [${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {list} (at most 3 times)]"'
     echo "echo '    No help available'"
-  elif [[ "${cmd}" = "variableName" ]]; then
+  elif [[ "${options_parse_cmd}" = "variableName" ]]; then
     echo "varName"
-  elif [[ "${cmd}" = "type" ]]; then
+  elif [[ "${options_parse_cmd}" = "type" ]]; then
     echo "Argument"
-  elif [[ "${cmd}" = "variableType" ]]; then
+  elif [[ "${options_parse_cmd}" = "variableType" ]]; then
     echo "StringArray"
-  elif [[ "${cmd}" = "helpArg" ]]; then
+  elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
     echo "[varName {list} (at most 3 times)]"
-  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+  elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
     echo "Argument varName min 0 min 3 authorizedValues 'debug|info|warn' regexp ''"
-  elif [[ "${cmd}" = "min" ]]; then
+  elif [[ "${options_parse_cmd}" = "min" ]]; then
     echo "0"
-  elif [[ "${cmd}" = "max" ]]; then
+  elif [[ "${options_parse_cmd}" = "max" ]]; then
     echo "3"
-  elif [[ "${cmd}" = "export" ]]; then
+  elif [[ "${options_parse_cmd}" = "export" ]]; then
     export type="Argument"
     export variableName="varName"
     export variableType="StringArray"
@@ -60,7 +60,7 @@ Options::argVarName() {
     export authorizedValues="debug|info|warn"
     export regexp=""
   else
-    Log::displayError "Argument command invalid: '${cmd}'"
+    Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1
   fi
 }

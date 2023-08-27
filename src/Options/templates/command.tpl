@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 <% ${commandFunctionName} %>() {
-  local cmd="$1"
+  local options_parse_cmd="$1"
   shift || true
 
-  if [[ "${cmd}" = "parse" ]]; then
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
     .INCLUDE "${tplDir}/command.parse.tpl"
-  elif [[ "${cmd}" = "help" ]]; then
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
     .INCLUDE "${tplDir}/command.help.tpl"
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1
   fi
 }

@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
 Options::command() {
-  local cmd="$1"
+  local options_parse_cmd="$1"
   shift || true
 
-  if [[ "${cmd}" = "parse" ]]; then
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
     verbose="0"
-    local -i optionParsedCountVerbose
-    ((optionParsedCountVerbose = 0)) || true
-    local -i parsedArgIndex=0
+    local -i options_parse_optionParsedCountVerbose
+    ((options_parse_optionParsedCountVerbose = 0)) || true
+    local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
-      local arg="$1"
-      case "${arg}" in
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
         # Option 1/1
         # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           verbose="1"
-          if ((optionParsedCountVerbose >= 1)); then
-            Log::displayError "Option ${arg} - Maximum number of option occurrences reached(1)"
+          if ((options_parse_optionParsedCountVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ;;
@@ -25,13 +25,13 @@ Options::command() {
           # ignore
           ;;
         *)
-          ((++parsedArgIndex))
+          ((++options_parse_parsedArgIndex))
           ;;
       esac
       shift || true
     done
     export verbose
-  elif [[ "${cmd}" = "help" ]]; then
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
     Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command"
     echo
 
@@ -49,7 +49,7 @@ Options::command() {
     echo
     echo '    verbose mode'
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1
   fi
 }

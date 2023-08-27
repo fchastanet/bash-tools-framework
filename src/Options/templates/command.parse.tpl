@@ -6,10 +6,10 @@
   % "${argument}" export
   .INCLUDE "${tplDir}/arg.parse.before.tpl"
 % done
-local -i parsedArgIndex=0
+local -i options_parse_parsedArgIndex=0
 while (($# > 0)); do
-  local arg="$1"
-  case "${arg}" in
+  local options_parse_arg="$1"
+  case "${options_parse_arg}" in
     % for ((optionIdx=0; optionIdx<${#optionList[@]}; ++optionIdx)); do
       % local option="${optionList[optionIdx]}"
       % echo "        # Option $((optionIdx + 1))/${#optionList[@]}"
@@ -19,7 +19,7 @@ while (($# > 0)); do
     % done
     -*)
       % if [[ "${errorIfUnknownOption}" = "1" ]]; then
-        Log::displayError "Invalid option ${arg}"
+        Log::displayError "Invalid option ${options_parse_arg}"
         return 1
       % else
       # ignore
@@ -44,9 +44,9 @@ while (($# > 0)); do
           echo "          # $("${argument}" oneLineHelp)"
           ((minParsedArgIndex+=argMax))
           if ((argMax == -1 || argIdx == argCount - 1)); then
-          echo "          elif ((parsedArgIndex >= ${maxParsedArgIndex})); then"
+          echo "          elif ((options_parse_parsedArgIndex >= ${maxParsedArgIndex})); then"
           else
-          echo "          elif ((parsedArgIndex >= ${maxParsedArgIndex} && parsedArgIndex < ${minParsedArgIndex})); then"
+          echo "          elif ((parsedArgIndex >= ${maxParsedArgIndex} && options_parse_parsedArgIndex < ${minParsedArgIndex})); then"
           fi
           "${argument}" export
       %
@@ -58,7 +58,7 @@ while (($# > 0)); do
         echo '          fi'
       fi
       %
-      ((++parsedArgIndex))
+      ((++options_parse_parsedArgIndex))
       ;;
   esac
   shift || true

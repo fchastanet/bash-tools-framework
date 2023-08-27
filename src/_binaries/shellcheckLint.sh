@@ -122,4 +122,6 @@ getFiles() {
 declare -a files
 readarray -t files < <(getFiles)
 
-"${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" --format=checkstyle "${files[@]}"
+if ((${#files[@]} != 0)); then
+  "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" --format=checkstyle "${files[@]}"
+fi
