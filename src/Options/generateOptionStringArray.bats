@@ -18,7 +18,7 @@ function Options::generateOptionStringArray::noOption { #@test
   assert_success
   assert_lines_count 3
   assert_line --index 0 "export min='0'"
-  assert_line --index 1 "export max=''"
+  assert_line --index 1 "export max='-1'"
   assert_line --index 2 "export authorizedValues=''"
 }
 
@@ -27,7 +27,7 @@ function Options::generateOptionStringArray::mandatory { #@test
   assert_success
   assert_lines_count 3
   assert_line --index 0 "export min='1'"
-  assert_line --index 1 "export max=''"
+  assert_line --index 1 "export max='-1'"
   assert_line --index 2 "export authorizedValues=''"
 }
 
@@ -36,7 +36,7 @@ function Options::generateOptionStringArray::authorizedValuesValueMissingValue {
   assert_success
   assert_lines_count 3
   assert_line --index 0 "export min='0'"
-  assert_line --index 1 "export max=''"
+  assert_line --index 1 "export max='-1'"
   assert_line --index 2 "export authorizedValues=''"
 }
 
@@ -90,5 +90,3 @@ function Options::generateOptionStringArray::setAll { #@test
   assert_line --index 1 "export max='2'"
   assert_line --index 2 "export authorizedValues='valid|invalid'"
 }
-
-# TODO case with arguments function

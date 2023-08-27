@@ -234,9 +234,21 @@ function Options::generateArg::case1::ArgTest::otherCommands { #@test
   assert_success
   assert_output "String"
 
+  run Options::argVarName min
+  assert_success
+  assert_output "1"
+
+  run Options::argVarName max
+  assert_success
+  assert_output "1"
+
   run Options::argVarName helpArg
   assert_success
   assert_output "varName {single} (mandatory)"
+
+  run Options::argVarName oneLineHelp
+  assert_success
+  assert_output "Argument varName min 1 min 1 authorizedValues '' regexp ''"
 
   local status=0
   Options::argVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
@@ -348,5 +360,3 @@ function Options::generateArg::case2::ArgTest::help { #@test
   assert_line --index 0 "  $(echo -e "[${__HELP_OPTION_COLOR}")varName${__HELP_NORMAL} {list} (at most 3 times)]"
   assert_line --index 1 "    No help available"
 }
-
-# TODO case with arguments function

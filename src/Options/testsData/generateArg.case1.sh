@@ -44,6 +44,12 @@ Options::argVarName() {
     echo "String"
   elif [[ "${cmd}" = "helpArg" ]]; then
     echo "varName {single} (mandatory)"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Argument varName min 1 min 1 authorizedValues '' regexp ''"
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "1"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "1"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Argument"
     export variableName="varName"

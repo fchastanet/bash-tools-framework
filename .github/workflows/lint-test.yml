@@ -138,8 +138,8 @@ jobs:
           VENDOR="${{ matrix.vendor }}" \
           BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
           BASH_IMAGE="${{ matrix.bashImage }}" \
-          USER_ID=$(id -u) \
-          GROUP_ID=$(id -g) \
+          USER_ID=1000 \
+          GROUP_ID=1000 \
           SKIP_BUILD=0 \
           ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src
 

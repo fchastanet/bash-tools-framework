@@ -19,6 +19,8 @@
     .INCLUDE "${tplDir}/option.parse.after.tpl"
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(<% ${optionFunctionName} %> helpTpl)"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Option <% ${variableName} %> <%% Array::join '|' "${alts[@]}" %> variableType <% ${variableType} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'
@@ -31,12 +33,12 @@
     % if ((min == 1 && max == 1)); then
       echo "echo -n -e ' (mandatory)'"
     % else
-      % if [[ -n "${min}" ]] && ((min > 0)); then
+      % if ((min > 0)); then
         echo "echo -n -e ' (at least <% ${min} %> times)'"
       % else
         echo "echo -n -e ' (optional)'"
       % fi
-      % if [[ -n "${max}" ]]; then
+      % if ((max > 0)); then
         echo "echo -n -e ' (at most <% ${max} %> times)'"
       % fi
     % fi

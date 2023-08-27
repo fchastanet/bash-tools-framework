@@ -27,6 +27,8 @@ Options::optionVarName() {
     export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::optionVarName helpTpl)"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Option varName --var variableType Boolean min 0 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'

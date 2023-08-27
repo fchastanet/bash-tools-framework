@@ -19,7 +19,7 @@ function Options::generateCommand::noOption { #@test
   run Options::generateCommand
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateCommand - at least one option must be provided as positional argument"
+  assert_output --partial "ERROR   - Options::generateCommand - at least one option or argument must be provided as positional argument"
 }
 
 function Options::generateCommand::invalidArgument { #@test
@@ -89,14 +89,14 @@ function Options::generateCommand::atLeastOnePositionalArg { #@test
   run Options::generateCommand --help-template "help.tpl" --version "version 1.0"
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateCommand - at least one option must be provided as positional argument"
+  assert_output --partial "ERROR   - Options::generateCommand - at least one option or argument must be provided as positional argument"
 }
 
 function Options::generateCommand::case1 { #@test
   local optionFile
   optionFile="$(Options::generateOption --variable-type String --help "file" \
     --variable-name "file" --alt "--file" --alt "-f")" || return 1
-  sourceOption "${optionFile}"
+  sourceFunctionFile "${optionFile}"
 
   local status=0
   Options::generateCommand --help "super command" ${optionFile} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
@@ -148,7 +148,7 @@ function Options::generateCommand::case2 { #@test
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
     --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
-  sourceOption "${optionVerbose}"
+  sourceFunctionFile "${optionVerbose}"
 
   local status=0
   Options::generateCommand --no-error-if-unknown-option \
@@ -200,13 +200,19 @@ function Options::generateCommand::case3 { #@test
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
     --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
-  sourceOption "${optionVerbose}"
+  sourceFunctionFile "${optionVerbose}"
 
   local optionSrcDirs
   optionSrcDirs="$(Options::generateOption --variable-type StringArray \
     --help "provide the directory where to find the functions source code." \
     --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
-  sourceOption "${optionSrcDirs}"
+  sourceFunctionFile "${optionSrcDirs}"
+
+  local optionSrcDirs
+  optionSrcDirs="$(Options::generateOption --variable-type StringArray \
+    --help "provide the directory where to find the functions source code." \
+    --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
+  sourceFunctionFile "${optionSrcDirs}"
 
   local status=0
   Options::generateCommand --help "super command" \
@@ -263,4 +269,124 @@ function Options::generateCommand::case3::parseAll { #@test
   assert_output ""
 }
 
-# TODO case with arguments function
+function Options::generateCommand::case4 { #@test
+  local optionVerbose
+  optionVerbose="$(Options::generateOption --help "verbose mode" \
+    --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
+  sourceFunctionFile "${optionVerbose}"
+
+  local optionSrcDirs
+  optionSrcDirs="$(Options::generateOption --variable-type StringArray \
+    --help "provide the directory where to find the functions source code." \
+    --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
+  sourceFunctionFile "${optionSrcDirs}"
+
+  local srcFile
+  srcFile="$(Options::generateArg --variable-name "srcFile")" || return 1
+  sourceFunctionFile "${srcFile}"
+
+  local destFiles
+  destFiles="$(Options::generateArg --variable-name "destFiles" --max 3)" || return 1
+  sourceFunctionFile "${destFiles}"
+
+  local status=0
+  Options::generateCommand --help "super command" \
+    ${optionVerbose} \
+    ${optionSrcDirs} \
+    ${srcFile} \
+    ${destFiles} \
+    >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  testCommand "generateCommand.case4.sh" "Options::command"
+}
+
+function Options::generateCommand::case4::help { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case4.sh"
+  run Options::command help
+  checkCommandResult "generateCommand.case4.expected.help"
+}
+
+function Options::generateCommand::case4::parseNoArg { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case4.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  local srcFile="initialFile"
+  local -a destFiles=("initialDestDir")
+  Options::command parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "1" ]]
+  [[ "${verbose}" = "0" ]]
+  [[ "${srcDirs[*]}" = "initialDir" ]]
+  [[ "${srcFile}" = "initialFile" ]]
+  [[ "${destFiles[*]}" = "initialDestDir" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Argument 'srcFile' should be provided at least 1 time(s)"
+}
+
+function Options::generateCommand::case4::parseInvalidOption { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case4.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  local srcFile="initialFile"
+  local -a destFiles=("initialDestDir")
+  Options::command parse --invalid-option >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "1" ]]
+  [[ "${verbose}" = "0" ]]
+  [[ "${srcDirs[*]}" = "initialDir" ]]
+  [[ "${srcFile}" = "initialFile" ]]
+  [[ "${destFiles[*]}" = "initialDestDir" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Invalid option --invalid-option"
+}
+
+function Options::generateCommand::case4::parseAll { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case4.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  local srcFile="initialFile"
+  local -a destFiles=("initialDestDir")
+  Options::command parse initialFile2 --verbose destFile1 --src-dirs srcDir1 destFile2 -s srcDir2 destFile3 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  [[ "${verbose}" = "1" ]]
+  [[ "${srcDirs[*]}" = "initialDir srcDir1 srcDir2" ]]
+  [[ "${srcFile}" = "initialFile2" ]]
+  [[ "${destFiles[*]}" = "initialDestDir destFile1 destFile2 destFile3" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
+}
+
+function Options::generateCommand::case4::destFile4 { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case4.sh"
+  local status=0
+  local verbose
+  local -a srcDirs=("initialDir")
+  local srcFile="initialFile"
+  local -a destFiles=("initialDestDir")
+  Options::command parse initialFile2 --verbose destFile1 --src-dirs srcDir1 destFile2 -s srcDir2 destFile3 destFile4 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "1" ]]
+  [[ "${verbose}" = "1" ]]
+  [[ "${srcDirs[*]}" = "initialDir srcDir1 srcDir2" ]]
+  [[ "${srcFile}" = "initialFile2" ]]
+  [[ "${destFiles[*]}" = "initialDestDir destFile1 destFile2 destFile3" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Argument destFiles - Maximum number of argument occurrences reached(3)"
+}
+
+function Options::generateCommand::case5::invalidArgOrder { #@test
+  local srcFile
+  srcFile="$(Options::generateArg --variable-name "srcFile")" || return 1
+  sourceFunctionFile "${srcFile}"
+
+  local destFiles
+  destFiles="$(Options::generateArg --variable-name "destFiles" --max 3)" || return 1
+  sourceFunctionFile "${destFiles}"
+
+  run Options::generateCommand --help "super command" "${destFiles}" "${srcFile}"
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options::generateCommand - variable list argument srcFile after an other variable list argument destFiles, it would not be possible to discriminate them"
+}

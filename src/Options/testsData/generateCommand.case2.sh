@@ -8,9 +8,12 @@ Options::command() {
     verbose="0"
     local -i optionParsedCountVerbose
     ((optionParsedCountVerbose = 0)) || true
+    local -i parsedArgIndex=0
     while (($# > 0)); do
       local arg="$1"
       case "${arg}" in
+        # Option 1/1
+        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           verbose="1"
           if ((optionParsedCountVerbose >= 1)); then
@@ -18,8 +21,11 @@ Options::command() {
             return 1
           fi
           ;;
-        *)
+        -*)
           # ignore
+          ;;
+        *)
+          ((++parsedArgIndex))
           ;;
       esac
       shift || true

@@ -73,5 +73,3 @@ function Options::generateOption::typeOptionTwice { #@test
   assert_lines_count 1
   assert_output --partial "ERROR   - Options::generateOption - only one '--variable-type' option can be provided"
 }
-
-# TODO case with arguments function

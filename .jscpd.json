@@ -22,6 +22,7 @@
     "pages/bashDoc/**",
     "**/testsData/**",
     "tests/ManualTest*.sh",
+    "src/Options/templates/command.help.tpl",
     "**/.venv/**",
     "**/*cache*/**",
     "**/.github/**",

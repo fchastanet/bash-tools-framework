@@ -44,6 +44,12 @@ Options::argVarName() {
     echo "StringArray"
   elif [[ "${cmd}" = "helpArg" ]]; then
     echo "[varName {list} (at most 3 times)]"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Argument varName min 0 min 3 authorizedValues 'debug|info|warn' regexp ''"
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "0"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "3"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Argument"
     export variableName="varName"

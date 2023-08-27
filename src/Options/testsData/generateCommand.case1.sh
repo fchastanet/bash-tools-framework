@@ -7,9 +7,12 @@ Options::command() {
   if [[ "${cmd}" = "parse" ]]; then
     local -i optionParsedCountFile
     ((optionParsedCountFile = 0)) || true
+    local -i parsedArgIndex=0
     while (($# > 0)); do
       local arg="$1"
       case "${arg}" in
+        # Option 1/1
+        # Option file --file|-f variableType String min 0 max 1 authorizedValues '' regexp ''
         --file | -f)
           shift
           if (($# == 0)); then
@@ -23,9 +26,12 @@ Options::command() {
           ((++optionParsedCountFile))
           file="$1"
           ;;
-        *)
+        -*)
           Log::displayError "Invalid option ${arg}"
           return 1
+          ;;
+        *)
+          ((++parsedArgIndex))
           ;;
       esac
       shift || true

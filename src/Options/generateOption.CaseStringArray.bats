@@ -270,6 +270,10 @@ function Options::generateOption::caseStringArray5::otherCommands { #@test
   assert_success
   assert_output "--var|-v"
 
+  run Options::optionVarName oneLineHelp
+  assert_success
+  assert_output "Option varName --var|-v variableType StringArray min 2 max 3 authorizedValues 'value1|value2|value3' regexp ''"
+
   local status=0
   Options::optionVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]

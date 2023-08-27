@@ -25,12 +25,10 @@
 
 ## Options
 
-- rename function option type to option variable-type
-- option type returns argument or option
 - generateCommand
-  - check that all optionFunctionList/argFunctionList have a different
-    variableName
-  - check arguments min/max index coherence
+  - variableNames should not match the variables names used in templates
+    - so templates variables names should be scoped
+      - arg, varName, cmd
 - remove action to remove args already managed
 - manage String|Function
 - option type File, would check if String after is a valid file

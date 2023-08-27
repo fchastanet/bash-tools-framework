@@ -36,7 +36,7 @@ testCommand() {
 
 # @description source option file deduced by option function name
 # @arg $1 functionName:String
-sourceOption() {
+sourceFunctionFile() {
   local functionName="$1"
   local tmpFile
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}").sh"

@@ -16,7 +16,7 @@ Options::generateOptionStringArray() {
   if Array::contains "--mandatory" "$@"; then
     min="1"
   fi
-  local max=""
+  local max="-1"
   local authorizedValues=""
 
   while (($# > 0)); do
@@ -55,7 +55,7 @@ Options::generateOptionStringArray() {
     shift || true
   done
 
-  if [[ -n "${max}" ]] && ((min > max)); then
+  if ((max != -1 && min > max)); then
     Log::displayError "Options::generateOptionStringArray - --max value should be greater than --min value"
     return 1
   fi

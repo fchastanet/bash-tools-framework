@@ -52,5 +52,3 @@ function Options::generateOptionBoolean::mandatoryIgnored { #@test
   assert_line --index 3 "export onValue='12'"
   assert_line --index 4 "export offValue='14'"
 }
-
-# TODO case with arguments function

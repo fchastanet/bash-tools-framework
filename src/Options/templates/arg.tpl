@@ -70,6 +70,12 @@
     echo "<% ${variableType} %>"
   elif [[ "${cmd}" = "helpArg" ]]; then
     echo "<%% helpArg "0" %>"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Argument <% ${variableName} %> min <% ${min} %> min <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "<% ${min} %>"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "<% ${max} %>"
   elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
     export variableName="<% ${variableName} %>"

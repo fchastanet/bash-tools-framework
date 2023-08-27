@@ -69,5 +69,3 @@ function Options::generateOptionString::setMandatory { #@test
   assert_line --index 2 "export defaultValue='valid'"
   assert_line --index 3 "export authorizedValues='valid|invalid'"
 }
-
-# TODO case with arguments function

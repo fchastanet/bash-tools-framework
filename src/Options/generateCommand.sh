@@ -11,7 +11,7 @@
 #     --copyright "Copyright" \
 #     --help-template "path/to/template.tpl"
 #
-# @arg $@ args:StringArray list of options variables references, allowing to link the options with this command
+# @arg $@ args:StringArray list of options/arguments variables references, allowing to link the options/arguments with this command
 # @option --help <String|Function> provides command description help
 # @option --version <String|Function> (optional) provides version section help. Section not generated if not provided.
 # @option --author <String|Function> (optional) provides author section help. Section not generated if not provided.
@@ -20,6 +20,7 @@
 # @option --copyright <String|Function> (optional) provides copyright section help Section not generated if not provided.
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
 # @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options.
+# @warning arguments list have to be provided in correct order
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering
@@ -37,7 +38,10 @@ Options::generateCommand() {
   local copyright=""
   local helpTemplate=""
   local errorIfUnknownOption="1"
-  local -a optionFunctionList=()
+  local -a optionList=()
+  local -a argumentList=()
+  local -a variableNameList=()
+  local -a altList=()
 
   setArg() {
     local option="$1"
@@ -100,7 +104,51 @@ Options::generateCommand() {
           Log::displayError "Options::generateCommand - only function type are accepted as positional argument - invalid '$1'"
           return 1
         fi
-        optionFunctionList+=("$1")
+
+        # check option/argument type
+        local optionType
+        optionType="$("${option}" type)" || {
+          Log::displayError "Options::generateCommand - option/argument ${option} - command type failed"
+          return 1
+        }
+        if ! Array::contains "${optionType}" "Option" "Argument"; then
+          Log::displayError "Options::generateCommand - option/argument ${option} - type '${optionType}' invalid"
+          return 1
+        fi
+        if [[ "${optionType}" = "Option" ]]; then
+          optionList+=("${option}")
+        else
+          argumentList+=("${option}")
+        fi
+
+        # check variable name is not used by another option/argument
+        local variableName
+        variableName="$("${option}" variableName)" || {
+          Log::displayError "Options::generateCommand - ${optionType} ${option} - command variableName failed"
+          return 1
+        }
+        if Array::contains "${variableName}" variableNameList; then
+          Log::displayError "Options::generateCommand - ${optionType} ${option} - variable name ${variableName} is already used by a previous option/argument"
+          return 1
+        fi
+        variableNameList+=("${variableName}")
+
+        # check alts not duplicated
+        if [[ "${optionType}" = "Option" ]]; then
+          local -a optionAlts
+          optionAlts=("$("${option}" alts)") || {
+            Log::displayError "Options::generateCommand - Option ${option} - command alts failed"
+            return 1
+          }
+          local optionAlt
+          for optionAlt in "${optionAlts[@]}"; do
+            if Array::contains "${optionAlt}" "${altList[@]}"; then
+              Log::displayError "Options::generateCommand - Option ${option} - alt ${optionAlt} is already used by a previous Option"
+              return 1
+            fi
+            altList+=("${optionAlt}")
+          done
+        fi
         ;;
     esac
     shift || true
@@ -108,14 +156,34 @@ Options::generateCommand() {
   if [[ -z "${helpTemplate}" ]]; then
     helpTemplate="${_COMPILE_ROOT_DIR}/src/Options/templates/commandHelp.tpl"
   fi
-  if ((${#optionFunctionList} == 0)); then
-    Log::displayError "Options::generateCommand - at least one option must be provided as positional argument"
+  if ((${#optionList} == 0 && ${#argumentList} == 0)); then
+    Log::displayError "Options::generateCommand - at least one option or argument must be provided as positional argument"
     return 1
   fi
   if [[ -z "${commandName}" ]]; then
     # shellcheck disable=SC2016
     commandName='${SCRIPT_NAME}'
   fi
+
+  # check arguments coherence
+  local currentArg currentArgMin currentArgMax
+  local optionalArg=""
+  for currentArg in "${argumentList[@]}"; do
+    currentArgMin="$("${currentArg}" min)" || {
+      Log::displayError "Options::generateCommand - Argument ${currentArg} - command min failed"
+      return 1
+    }
+    currentArgMax="$("${currentArg}" max)" || {
+      Log::displayError "Options::generateCommand - Argument ${currentArg} - command max failed"
+      return 1
+    }
+    if ((currentArgMin != currentArgMax)); then
+      optionalArg="$("${currentArg}" variableName)"
+    elif [[ -n "${optionalArg}" ]]; then
+      Log::displayError "Options::generateCommand - variable list argument $("${currentArg}" variableName) after an other variable list argument ${optionalArg}, it would not be possible to discriminate them"
+      return 1
+    fi
+  done
 
   (
     # generate a function name that will be the output of this script
@@ -131,7 +199,8 @@ Options::generateCommand() {
     export license
     export copyright
     export helpTemplate
-    export optionFunctionList
+    export optionList
+    export argumentList
     export commandFunctionName
     export errorIfUnknownOption
     export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"

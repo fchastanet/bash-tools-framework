@@ -5,9 +5,9 @@
   shift || true
 
   if [[ "${cmd}" = "parse" ]]; then
-    .INCLUDE "${tplDir}/commandParse.tpl"
+    .INCLUDE "${tplDir}/command.parse.tpl"
   elif [[ "${cmd}" = "help" ]]; then
-    .INCLUDE "${tplDir}/commandHelp.tpl"
+    .INCLUDE "${tplDir}/command.help.tpl"
   else
     Log::displayError "Option command invalid: '${cmd}'"
     return 1

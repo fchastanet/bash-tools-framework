@@ -6,17 +6,17 @@ Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}Description:${__RESET_COLOR
 %# ------------------------------------------
 %
 args=($(printf '%s' "${commandName}"))
-((${#optionFunctionList[@]} > 0)) && args+=("[OPTIONS]")
-((${#argsList[@]} > 0)) && args+=("[ARGUMENTS]")
+((${#optionList[@]} > 0)) && args+=("[OPTIONS]")
+((${#argumentList[@]} > 0)) && args+=("[ARGUMENTS]")
 
 %
 Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %><%% printf ' "%s"' "${args[@]}" %>
 %
 optionsAltList=()
-for option in "${optionFunctionList[@]}"; do
+for option in "${optionList[@]}"; do
   optionsAltList+=("$("${option}" "helpAlt")")
 done
-if ((${#optionFunctionList[@]} > 0)); then
+if ((${#optionList[@]} > 0)); then
 %
 Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %> \
   <%% printf '"%s"' "${commandName}" %> \
@@ -26,11 +26,11 @@ Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %>
 %# options section
 %# ------------------------------------------
 %
-if ((${#optionFunctionList[@]} > 0)); then
+if ((${#optionList[@]} > 0)); then
   echo '    echo'
   local option
   echo $'    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"'
-  for option in ${optionFunctionList[@]}; do
+  for option in ${optionList[@]}; do
     "${option}" helpTpl | sed 's/^/    /'
   done
 fi
@@ -39,12 +39,12 @@ fi
 %# arguments section
 %# ------------------------------------------
 %
-if ((${#argsList[@]} > 0)); then
+if ((${#argumentList[@]} > 0)); then
   echo '    echo'
   echo $'    echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"'
   local arg
-  for arg in "${argsList[@]}"; do
-    "${arg}" helpTpl
+  for arg in "${argumentList[@]}"; do
+    "${arg}" helpTpl | sed 's/^/    /'
   done
 fi
 %

@@ -40,6 +40,10 @@ function Options::generateOption::caseBoolean1::otherCommands { #@test
   assert_success
   assert_output "[--var]"
 
+  run Options::optionVarName oneLineHelp
+  assert_success
+  assert_output "Option varName --var variableType Boolean min 0 max 1 authorizedValues '' regexp ''"
+
   local status=0
   Options::optionVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
