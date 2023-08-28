@@ -21,7 +21,7 @@
     "pages/FrameworkDoc.md",
     "pages/bashDoc/**",
     "**/testsData/**",
-    "tests/ManualTest*.sh",
+    "manualTests/**",
     "src/Options/templates/command.help.tpl",
     "**/.venv/**",
     "**/*cache*/**",

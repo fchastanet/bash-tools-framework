@@ -19,6 +19,7 @@
 # Others options are passed to specific option handler:
 # @option --authorized-values  <String> if String type, list of authorized values separated by |
 # @option --regexp <String> if String type, regexp to use to validate the option value
+# @option --group <Function> the group to which the option will be attached
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering
@@ -34,6 +35,7 @@ Options::generateOption() {
   local variableTypeOptionProvided=0
   local help=""
   local mandatory=0
+  local group=""
   local -a adapterOptions=()
 
   while (($# > 0)); do
@@ -101,7 +103,17 @@ Options::generateOption() {
         mandatory=1
         adapterOptions+=("$1")
         ;;
-
+      --group)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
+          return 1
+        fi
+        if [[ "$(type -t "$1")" != "function" ]]; then
+          Log::displayError "Options::generateOption - only function type are accepted as group - invalid '$1'"
+          return 1
+        fi
+        ;;
       *)
         adapterOptions+=("$1")
         ;;
@@ -150,6 +162,7 @@ Options::generateOption() {
     export variableType
     export alts
     export help
+    export group
     export mandatory
     export adapterOptions
     eval "${optionTypeExports}"

@@ -25,6 +25,7 @@ Options::generateOption
   --variable-name <optionVariableName>
   --alt <option>
   [--mandatory]
+  [--group <Function>]
   [--variable-type <String|Function>]
   [TYPE_OPTIONS]
 ```
@@ -52,6 +53,11 @@ Options::generateOption
 > as its name indicates, by default an option is optional. But using
 > `--mandatory` you can make the option mandatory. An error will be generated if
 > the option is not found during parsing arguments.
+
+`--group <Function>` _(optional)_
+
+> associate the option to a group. grouped option will be displayed under that
+> group. Default: no group
 
 `--variable-type <String>` _(optional)_
 

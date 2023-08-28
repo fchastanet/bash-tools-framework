@@ -2,6 +2,8 @@
 
 # shellcheck source=src/batsHeaders.sh
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
+# shellcheck source=src/Options/_bats.sh
+source "${srcDir}/Options/_bats.sh"
 
 # shellcheck source=src/Options/__all.sh
 source "${srcDir}/Options/__all.sh"
@@ -72,4 +74,27 @@ function Options::generateOption::typeOptionTwice { #@test
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Options::generateOption - only one '--variable-type' option can be provided"
+}
+
+function Options::generateOption::groupOptionEmpty { #@test
+  run Options::generateOption --variable-name "varName" --alt "--var" --group
+  assert_failure 1
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options::generateOption - Option --group - a value needs to be specified"
+}
+
+function Options::generateOption::groupOptionInvalid { #@test
+  run Options::generateOption --variable-name "varName" --alt "--var" --group "invalid"
+  assert_failure 1
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options::generateOption - only function type are accepted as group - invalid 'invalid'"
+}
+
+function Options::generateOption::groupOptionValid { #@test
+  group() {
+    :
+  }
+  local status=0
+  Options::generateOption --variable-name "varName" --alt "--var" --group group >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  testCommand "generateOption.caseGroupOption.sh" "Options::optionVarName"
 }

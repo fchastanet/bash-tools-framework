@@ -4,6 +4,8 @@
 source "${FRAMEWORK_ROOT_DIR}/src/_includes/_colors.sh"
 # shellcheck source=src/Options/generateCommand.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateCommand.sh"
+# shellcheck source=src/Options/generateGroup.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Options/generateGroup.sh"
 # shellcheck source=src/Options/generateOption.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOption.sh"
 # shellcheck source=src/Options/generateOptionBoolean.sh
