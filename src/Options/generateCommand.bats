@@ -390,3 +390,46 @@ function Options::generateCommand::case5::invalidArgOrder { #@test
   assert_lines_count 1
   assert_output --partial "ERROR   - Options::generateCommand - variable list argument srcFile after an other variable list argument destFiles, it would not be possible to discriminate them"
 }
+
+# group management
+function Options::generateCommand::case6 { #@test
+  local optionGroup="$(Options::generateGroup \
+    --title "Command global options" \
+    --help "The Console component adds some predefined options to all commands:")"
+  sourceFunctionFile "${optionGroup}"
+
+  local optionVerbose
+  optionVerbose="$(Options::generateOption --help "verbose mode" \
+    --group "${optionGroup}" \
+    --variable-name "verbose" \
+    --alt "--verbose" --alt "-v")" || return 1
+  sourceFunctionFile "${optionVerbose}"
+
+  local optionSrcDirs
+  optionSrcDirs="$(Options::generateOption --variable-type StringArray \
+    --help "provide the directory where to find the functions source code." \
+    --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
+  sourceFunctionFile "${optionSrcDirs}"
+
+  local optionQuiet
+  optionQuiet="$(Options::generateOption --help "quiet mode" \
+    --group "${optionGroup}" \
+    --variable-name "quiet" \
+    --alt "--quiet" --alt "-q")" || return 1
+  sourceFunctionFile "${optionQuiet}"
+
+  local status=0
+  Options::generateCommand --help "super command" \
+    ${optionVerbose} \
+    ${optionQuiet} \
+    ${optionSrcDirs} \
+    >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  testCommand "generateCommand.case6.sh" "Options::command"
+}
+
+function Options::generateCommand::case6::help { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
+  run Options::command help
+  checkCommandResult "generateCommand.case6.expected.help"
+}

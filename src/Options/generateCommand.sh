@@ -38,7 +38,7 @@ Options::generateCommand() {
   local copyright=""
   local helpTemplate=""
   local errorIfUnknownOption="1"
-  local -a optionList=()
+  local -a optionListUnordered=()
   local -a argumentList=()
   local -a variableNameList=()
   local -a altList=()
@@ -116,7 +116,7 @@ Options::generateCommand() {
           return 1
         fi
         if [[ "${optionType}" = "Option" ]]; then
-          optionList+=("${option}")
+          optionListUnordered+=("${option}")
         else
           argumentList+=("${option}")
         fi
@@ -156,7 +156,7 @@ Options::generateCommand() {
   if [[ -z "${helpTemplate}" ]]; then
     helpTemplate="${_COMPILE_ROOT_DIR}/src/Options/templates/commandHelp.tpl"
   fi
-  if ((${#optionList} == 0 && ${#argumentList} == 0)); then
+  if ((${#optionListUnordered} == 0 && ${#argumentList} == 0)); then
     Log::displayError "Options::generateCommand - at least one option or argument must be provided as positional argument"
     return 1
   fi
@@ -184,6 +184,18 @@ Options::generateCommand() {
       return 1
     fi
   done
+
+  # sort options
+  local -a optionList
+  local optionListToSort
+  optionListToSort="$(
+    (
+      for currentOpt in "${optionListUnordered[@]}"; do
+        echo "${currentOpt} $("${currentOpt}" groupId)"
+      done
+    ) | sort -k2,2 | awk '{ print $1 }'
+  )"
+  readarray -t optionList <<<"${optionListToSort}"
 
   (
     # generate a function name that will be the output of this script

@@ -1,4 +1,4 @@
-Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}"' %> "<% ${help} %>"
+echo -e "$(Array::wrap " " 80 2 <%% echo -e '"${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}"' %> "<% ${help} %>")"
 % echo '    echo'
 
 %# ------------------------------------------
@@ -10,7 +10,7 @@ args=($(printf '%s' "${commandName}"))
 ((${#argumentList[@]} > 0)) && args+=("[ARGUMENTS]")
 
 %
-Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %><%% printf ' "%s"' "${args[@]}" %>
+echo -e "$(Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %><%% printf ' "%s"' "${args[@]}" %>)"
 %
 optionsAltList=()
 for option in "${optionList[@]}"; do
@@ -18,23 +18,10 @@ for option in "${optionList[@]}"; do
 done
 if ((${#optionList[@]} > 0)); then
 %
-Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %> \
+echo -e "$(Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %> \
   <%% printf '"%s"' "${commandName}" %> \
-  <%%  printf '"%s" ' "${optionsAltList[@]}" %>
+  <%%  printf '"%s" ' "${optionsAltList[@]}" | sed -E 's/[ ]*$//' %>)"
 % fi
-%# ------------------------------------------
-%# options section
-%# ------------------------------------------
-%
-if ((${#optionList[@]} > 0)); then
-  echo '    echo'
-  local option
-  echo $'    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"'
-  for option in ${optionList[@]}; do
-    "${option}" helpTpl | sed 's/^/    /'
-  done
-fi
-%
 %# ------------------------------------------
 %# arguments section
 %# ------------------------------------------
@@ -45,6 +32,29 @@ if ((${#argumentList[@]} > 0)); then
   local arg
   for arg in "${argumentList[@]}"; do
     "${arg}" helpTpl | sed 's/^/    /'
+  done
+fi
+%
+%# ------------------------------------------
+%# options section
+%# ------------------------------------------
+%
+if ((${#optionList[@]} > 0)); then
+  echo '    echo'
+  local option
+  local previousGroupId=""
+  local groupId
+  for option in ${optionList[@]}; do
+    groupId="$("${option}" groupId)"
+    if [[ "${groupId}" != "${previousGroupId}" ]]; then
+      if [[ "${groupId}" = "__default" ]]; then
+        echo $'    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"'
+      else
+        "${groupId}" helpTpl
+      fi
+    fi
+    "${option}" helpTpl | sed 's/^/    /'
+    previousGroupId="${groupId}"
   done
 fi
 %

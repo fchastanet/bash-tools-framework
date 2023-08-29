@@ -55,6 +55,8 @@ Options::optionVarName() {
     echo '--var'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var <String>]'
+  elif [[ "${cmd}" = "groupId" ]]; then
+    echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
     export variableType="String"

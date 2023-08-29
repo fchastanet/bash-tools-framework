@@ -113,6 +113,7 @@ Options::generateOption() {
           Log::displayError "Options::generateOption - only function type are accepted as group - invalid '$1'"
           return 1
         fi
+        group="$1"
         ;;
       *)
         adapterOptions+=("$1")

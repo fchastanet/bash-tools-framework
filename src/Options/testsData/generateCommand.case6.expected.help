@@ -1,0 +1,14 @@
+Description: super command
+
+USAGE: test [OPTIONS]
+USAGE: test [--quiet|-q] [--verbose|-v] [--src-dirs|-s <String>]
+
+Command global options
+The Console component adds some predefined options to all commands:
+  --quiet, -q (optional) (at most 1 times)
+    quiet mode
+  --verbose, -v (optional) (at most 1 times)
+    verbose mode
+OPTIONS:
+  --src-dirs, -s <String> (optional)
+    provide the directory where to find the functions source code.

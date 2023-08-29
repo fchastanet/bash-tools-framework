@@ -49,6 +49,8 @@ Options::optionVarName() {
     echo '--var'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var]'
+  elif [[ "${cmd}" = "groupId" ]]; then
+    group id
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
     export variableType="Boolean"

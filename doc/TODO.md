@@ -25,6 +25,9 @@
 
 ## Options
 
+- make --help display help
+  - callback on option
+- special arg to manage command list (see docker --help)
 - remove action to remove args already managed
 - manage String|Function
 - option type File, would check if String after is a valid file

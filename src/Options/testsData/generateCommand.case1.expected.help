@@ -1,8 +1,8 @@
-[1;37mDescription:[0m super command
+Description: super command
 
-[1;37mUSAGE:[0m test [OPTIONS]
-[1;37mUSAGE:[0m test [--file|-f <String>]
+USAGE: test [OPTIONS]
+USAGE: test [--file|-f <String>]
 
-[1;37mOPTIONS:[0m
-  [1;34m--file, -f <String>[0m (optional) (at most 1 times)
+OPTIONS:
+  --file, -f <String> (optional) (at most 1 times)
     file

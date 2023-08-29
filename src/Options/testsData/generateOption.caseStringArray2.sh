@@ -48,6 +48,8 @@ Options::optionVarName() {
     echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
     echo '[--var|-v <String>]'
+  elif [[ "${cmd}" = "groupId" ]]; then
+    echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
     export variableType="StringArray"

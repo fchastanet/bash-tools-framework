@@ -73,6 +73,12 @@
       fi
     %
     echo '<% ${helpAlt%, } %>'
+  elif [[ "${cmd}" = "groupId" ]]; then
+    % if [[ -z "${group}" ]]; then
+    echo "__default"
+    % else
+    <% ${group} %> id
+    % fi
   elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
     export variableType="<% ${variableType} %>"

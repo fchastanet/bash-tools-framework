@@ -1,16 +1,16 @@
-[1;37mDescription:[0m super command
+Description: super command
 
-[1;37mUSAGE:[0m test [OPTIONS] [ARGUMENTS]
-[1;37mUSAGE:[0m test [--verbose|-v] [--src-dirs|-s <String>]
+USAGE: test [OPTIONS] [ARGUMENTS]
+USAGE: test [--src-dirs|-s <String>] [--verbose|-v]
 
-[1;37mOPTIONS:[0m
-  [1;34m--verbose, -v[0m (optional) (at most 1 times)
-    verbose mode
-  [1;34m--src-dirs, -s <String>[0m (optional)
+ARGUMENTS:
+  srcFile {single} (mandatory)
+    No help available
+  destFiles {list} (at least 1 times) (at most 3 times)
+    No help available
+
+OPTIONS:
+  --src-dirs, -s <String> (optional)
     provide the directory where to find the functions source code.
-
-[1;37mARGUMENTS:[0m
-  [1;34msrcFile[0m {single} (mandatory)
-    No help available
-  [1;34mdestFiles[0m {list} (at least 1 times) (at most 3 times)
-    No help available
+  --verbose, -v (optional) (at most 1 times)
+    verbose mode

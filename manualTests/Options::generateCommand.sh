@@ -24,6 +24,33 @@ set -o errexit
 set -o pipefail
 export TMPDIR="/tmp"
 
+set -x
+declare optionGroup
+optionGroup="$(Options::generateGroup \
+  --title "GLOBAL OPTIONS:" \
+  --help "The Console component adds some predefined options to all commands:")"
+sourceFunctionFile "${optionGroup}"
+
+declare optionVerbose
+optionVerbose="$(Options::generateOption --help "verbose mode" \
+  --group "${optionGroup}" \
+  --variable-name "verbose" \
+  --alt "--verbose" --alt "-v")"
+sourceFunctionFile "${optionVerbose}"
+
+declare optionSrcDirs
+optionSrcDirs="$(Options::generateOption --variable-type StringArray \
+  --help "provide the directory where to find the functions source code." \
+  --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")"
+sourceFunctionFile "${optionSrcDirs}"
+
+declare optionQuiet
+optionQuiet="$(Options::generateOption --help "quiet mode" \
+  --group "${optionGroup}" \
+  --variable-name "quiet" \
+  --alt "--quiet" --alt "-q")"
+sourceFunctionFile "${optionQuiet}"
+
 declare srcFile
 srcFile="$(Options::generateArg --variable-name "srcFile")" || return 1
 sourceFunctionFile "${srcFile}"
@@ -32,6 +59,13 @@ declare destFiles
 destFiles="$(Options::generateArg --variable-name "destFiles" --max 3)" || return 1
 sourceFunctionFile "${destFiles}"
 
-Options::generateCommand --help "super command" \
-  "${destFiles}" \
-  "${srcFile}"
+command=$(Options::generateCommand --help "super command" \
+  "${optionVerbose}" \
+  "${optionSrcDirs}" \
+  "${optionQuiet}" \
+  "${srcFile}" \
+  "${destFiles}")
+sourceFunctionFile "${command}"
+
+set +x
+"${command}" help

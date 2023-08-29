@@ -1,10 +1,10 @@
-[1;37mDescription:[0m super command
+Description: super command
 
-[1;37mUSAGE:[0m test [OPTIONS]
-[1;37mUSAGE:[0m test [--verbose|-v] [--src-dirs|-s <String>]
+USAGE: test [OPTIONS]
+USAGE: test [--src-dirs|-s <String>] [--verbose|-v]
 
-[1;37mOPTIONS:[0m
-  [1;34m--verbose, -v[0m (optional) (at most 1 times)
-    verbose mode
-  [1;34m--src-dirs, -s <String>[0m (optional)
+OPTIONS:
+  --src-dirs, -s <String> (optional)
     provide the directory where to find the functions source code.
+  --verbose, -v (optional) (at most 1 times)
+    verbose mode
