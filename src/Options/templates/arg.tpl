@@ -85,6 +85,7 @@
     export max="<% ${max} %>"
     export authorizedValues="<% ${authorizedValues} %>"
     export regexp="<% ${regexp} %>"
+    export callback="<% ${callback} %>"
   else
     Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1

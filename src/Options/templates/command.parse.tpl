@@ -46,7 +46,7 @@ while (($# > 0)); do
           if ((argMax == -1 || argIdx == argCount - 1)); then
           echo "          elif ((options_parse_parsedArgIndex >= ${maxParsedArgIndex})); then"
           else
-          echo "          elif ((parsedArgIndex >= ${maxParsedArgIndex} && options_parse_parsedArgIndex < ${minParsedArgIndex})); then"
+          echo "          elif ((options_parse_parsedArgIndex >= ${maxParsedArgIndex} && options_parse_parsedArgIndex < ${minParsedArgIndex})); then"
           fi
           "${argument}" export
       %

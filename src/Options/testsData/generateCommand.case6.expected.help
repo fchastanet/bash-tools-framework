@@ -1,7 +1,13 @@
 Description: super command
 
-USAGE: test [OPTIONS]
+USAGE: test [OPTIONS] [ARGUMENTS]
 USAGE: test [--quiet|-q] [--verbose|-v] [--help|-h] [--src-dirs|-s <String>]
+
+ARGUMENTS:
+  srcFile {single} (mandatory)
+    No help available
+  destFiles {list} (at least 1 times) (at most 3 times)
+    No help available
 
 Command global options
 The Console component adds some predefined options to all commands:

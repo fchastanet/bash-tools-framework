@@ -425,12 +425,24 @@ function Options::generateCommand::case6 { #@test
     --alt "--quiet" --alt "-q")" || return 1
   sourceFunctionFile "${optionQuiet}"
 
+  function srcFileCallback() { :; }
+  local srcFile
+  srcFile="$(Options::generateArg --variable-name "srcFile" --callback srcFileCallback)" || return 1
+  sourceFunctionFile "${srcFile}"
+
+  function destFilesCallback() { :; }
+  local destFiles
+  destFiles="$(Options::generateArg --variable-name "destFiles" --max 3 --callback destFilesCallback)" || return 1
+  sourceFunctionFile "${destFiles}"
+
   local status=0
   Options::generateCommand --help "super command" \
     ${optionVerbose} \
     ${optionQuiet} \
     ${optionHelp} \
     ${optionSrcDirs} \
+    ${srcFile} \
+    ${destFiles} \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
 
   testCommand "generateCommand.case6.sh" "Options::command"
@@ -445,8 +457,24 @@ function Options::generateCommand::case6::help { #@test
 function Options::generateCommand::case6::parseHelp { #@test
   function helpCallback() {
     echo "helpCallback"
+    exit 0
   }
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
   run Options::command parse --help
   assert_output "helpCallback"
+}
+
+function Options::generateCommand::case6::parseArgsCallback { #@test
+  function srcFileCallback() {
+    echo "srcFileCallback $*"
+  }
+  function destFilesCallback() {
+    echo "destFilesCallback $*"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
+  run Options::command parse srcFile destFile1 destFile2
+  assert_lines_count 3
+  assert_line --index 0 "srcFileCallback srcFile"
+  assert_line --index 1 "destFilesCallback destFile1"
+  assert_line --index 2 "destFilesCallback destFile1 destFile2"
 }

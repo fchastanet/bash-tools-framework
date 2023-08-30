@@ -9,9 +9,9 @@ declare commandForm=<% Options::generateCommand \
   --License "MIT License" \
   --copyright "Copyright" \
   --help-template "path/to/template.tpl" \
-  option1
-  option2
-  arg1
+  option1 \
+  option2 \
+  arg1 \
   arg2
 %>
 ```
@@ -59,7 +59,7 @@ Options::generateCommand
 
 > provides author section help. Section not generated if not provided.
 
-`--License <String|Function>` _(optional)_
+`--license <String|Function>` _(optional)_
 
 > provides License section help Section not generated if not provided.
 

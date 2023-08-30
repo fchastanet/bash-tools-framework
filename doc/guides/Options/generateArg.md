@@ -26,6 +26,7 @@ Options::generateArg
   [--min <count>] [--max <count>]
   [--authorized-values <StringList>]
   [--regexp <String>]
+  [--callback <Function>]
 ```
 
 **Mandatory Options:**
@@ -72,3 +73,8 @@ Options::generateArg
 `--regexp <String>` _(optional)_
 
 > regexp to use to validate the argument value.
+
+`--callback <Function>` _(optional)_
+
+> the callback is called if the option is parsed successfully. The arg value
+> will be passed as parameter (several parameters if type StringArray).

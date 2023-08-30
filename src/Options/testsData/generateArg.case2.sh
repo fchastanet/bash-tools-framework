@@ -59,6 +59,7 @@ Options::argVarName() {
     export max="3"
     export authorizedValues="debug|info|warn"
     export regexp=""
+    export callback=""
   else
     Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1

@@ -15,6 +15,7 @@
 # @option --max <int> Indicates the maximum number of args that will be parsed. (Default: 1)
 # @option --authorized-values  <String> list of authorized values separated by |
 # @option --regexp <String> regexp to use to validate the option value
+# @option --callback <Function> the callback called if the arg is parsed successfully
 # @exitcode 1 if error during argument parsing
 # @exitcode 2 if error during template rendering
 # @stdout script file generated to parse the arguments following the rules provided
@@ -53,6 +54,10 @@ Options::generateArg() {
 
   local type="Argument"
   local variableType="StringArray"
+
+  local callback=""
+  # shellcheck disable=SC2034
+  local -i callbackCount=0
 
   checkOption() {
     local option="$1"
@@ -130,6 +135,19 @@ Options::generateArg() {
         fi
         regexp="$1"
         ;;
+      --callback)
+        shift
+        checkOption "${option}" callbackCount "$#" || return 1
+        if (($# == 0)); then
+          Log::displayError "Options::generateArg - Option ${option} - a value needs to be specified"
+          return 1
+        fi
+        if [[ "$(type -t "$1")" != "function" ]]; then
+          Log::displayError "Options::generateArg - only function type are accepted as callback - invalid '$1'"
+          return 1
+        fi
+        callback="$1"
+        ;;
       *)
         Log::displayError "Options::generateArg - Option ${option} - invalid option provided"
         return 1
@@ -169,6 +187,7 @@ Options::generateArg() {
     export authorizedValues
     export regexp
     export argFunctionName
+    export callback
     export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
     # interpret the template

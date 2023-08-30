@@ -45,7 +45,7 @@ Options::command() {
             :
           # Argument 1/2
           # Argument srcFile min 1 min 1 authorizedValues '' regexp ''
-          elif ((parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
+          elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
             if ((options_parse_argParsedCountSrcFile >= 1)); then
               Log::displayError "Argument srcFile - Maximum number of argument occurrences reached(1)"
               return 1

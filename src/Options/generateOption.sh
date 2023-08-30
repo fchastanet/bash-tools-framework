@@ -20,7 +20,7 @@
 # @option --authorized-values  <String> if String type, list of authorized values separated by |
 # @option --regexp <String> if String type, regexp to use to validate the option value
 # @option --group <Function> the group to which the option will be attached
-# @option --calback <Function> the callback called if the option is parsed successfully
+# @option --callback <Function> the callback called if the option is parsed successfully
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering

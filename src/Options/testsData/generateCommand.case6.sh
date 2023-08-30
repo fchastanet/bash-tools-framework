@@ -14,6 +14,10 @@ Options::command() {
     help="0"
     local -i options_parse_optionParsedCountHelp
     ((options_parse_optionParsedCountHelp = 0)) || true
+    local -i options_parse_argParsedCountSrcFile
+    ((options_parse_argParsedCountSrcFile = 0)) || true
+    local -i options_parse_argParsedCountDestFiles
+    ((options_parse_argParsedCountDestFiles = 0)) || true
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -61,6 +65,30 @@ Options::command() {
           return 1
           ;;
         *)
+          if ((0)); then
+            # Technical if never reached
+            :
+          # Argument 1/2
+          # Argument srcFile min 1 min 1 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
+            if ((options_parse_argParsedCountSrcFile >= 1)); then
+              Log::displayError "Argument srcFile - Maximum number of argument occurrences reached(1)"
+              return 1
+            fi
+            ((++options_parse_argParsedCountSrcFile))
+            srcFile="${options_parse_arg}"
+            srcFileCallback "${srcFile}"
+          # Argument 2/2
+          # Argument destFiles min 1 min 3 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 1)); then
+            if ((options_parse_argParsedCountDestFiles >= 3)); then
+              Log::displayError "Argument destFiles - Maximum number of argument occurrences reached(3)"
+              return 1
+            fi
+            ((++options_parse_argParsedCountDestFiles))
+            destFiles+=("${options_parse_arg}")
+            destFilesCallback "${destFiles[@]}"
+          fi
           ((++options_parse_parsedArgIndex))
           ;;
       esac
@@ -70,14 +98,30 @@ Options::command() {
     export verbose
     export help
     export srcDirs
+    if ((options_parse_argParsedCountSrcFile < 1)); then
+      Log::displayError "Argument 'srcFile' should be provided at least 1 time(s)"
+      return 1
+    fi
+    export srcFile
+    if ((options_parse_argParsedCountDestFiles < 1)); then
+      Log::displayError "Argument 'destFiles' should be provided at least 1 time(s)"
+      return 1
+    fi
+    export destFiles
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
     echo
 
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
       "[--quiet|-q]" "[--verbose|-v]" "[--help|-h]" "[--src-dirs|-s <String>]")"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
+    echo -e "  ${__HELP_OPTION_COLOR}srcFile${__HELP_NORMAL} {single} (mandatory)"
+    echo '    No help available'
+    echo -e "  ${__HELP_OPTION_COLOR}destFiles${__HELP_NORMAL} {list} (at least 1 times) (at most 3 times)"
+    echo '    No help available'
     echo
     echo -e "${__HELP_TITLE_COLOR}Command global options${__RESET_COLOR}"
     echo "The Console component adds some predefined options to all commands:"
