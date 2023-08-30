@@ -60,7 +60,7 @@
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
     % else
-        echo "echo '    <% ${help} %>'"
+        echo 'echo -e "    <% ${help} %>"'
     % fi
   elif [[ "${options_parse_cmd}" = "variableName" ]]; then
     echo "<% ${variableName} %>"

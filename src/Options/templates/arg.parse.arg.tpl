@@ -24,8 +24,8 @@ fi
 % fi
 % if [[ -n "${callback}" ]]; then
   % if [[ "${variableType}" = "StringArray" ]]; then
-  <% ${callback} %> "${<% ${variableName} %>[@]}"
+  <% ${callback} %> "${<% ${variableName} %>[@]}" -- "${@:2}"
   % else
-  <% ${callback} %> "${<% ${variableName} %>}"
+  <% ${callback} %> "${<% ${variableName} %>}" -- "${@:2}"
   % fi
 % fi

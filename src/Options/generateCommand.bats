@@ -474,7 +474,100 @@ function Options::generateCommand::case6::parseArgsCallback { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
   run Options::command parse srcFile destFile1 destFile2
   assert_lines_count 3
-  assert_line --index 0 "srcFileCallback srcFile"
-  assert_line --index 1 "destFilesCallback destFile1"
-  assert_line --index 2 "destFilesCallback destFile1 destFile2"
+  assert_line --index 0 "srcFileCallback srcFile -- destFile1 destFile2"
+  assert_line --index 1 "destFilesCallback destFile1 -- destFile2"
+  assert_line --index 2 "destFilesCallback destFile1 destFile2 --"
+}
+
+# sub command management
+function Options::generateCommand::case7 { #@test
+  function helpCallback() {
+    echo "helpCallback"
+  }
+  local optionHelp="$(Options::generateOption --variable-type Boolean --help "help" \
+    --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)" || return 1
+  sourceFunctionFile "${optionHelp}"
+
+  function subCommandCallback() { :; }
+  local subCommand
+  subCommand="$(
+    Options::generateArg \
+      --variable-name "subCommand" \
+      --authorized-values 'run|exec|ps|build|pull|push|images|login|logout|search|version|info' \
+      --help $'''
+  ${__HELP_TITLE_COLOR}Common Commands:${__RESET_COLOR}
+  run         Create and run a new container from an image
+  exec        Execute a command in a running container
+  ps          List containers
+  build       Build an image from a Dockerfile
+  pull        Download an image from a registry
+  push        Upload an image to a registry
+  images      List images
+  login       Log in to a registry
+  logout      Log out from a registry
+  search      Search Docker Hub for images
+  version     Show the Docker version information
+  info        Display system-wide information
+  ''' \
+      --callback subCommandCallback
+  )" || return 1
+  sourceFunctionFile "${subCommand}"
+
+  local status=0
+  Options::generateCommand --help "super command" \
+    ${optionHelp} \
+    ${subCommand} \
+    >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  testCommand "generateCommand.case7.sh" "Options::command"
+}
+
+function Options::generateCommand::case7::help { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case7.sh"
+  run Options::command help
+  checkCommandResult "generateCommand.case7.expected.help"
+}
+
+function Options::generateCommand::case7::parseHelp { #@test
+  function helpCallback() {
+    echo "helpCallback"
+    exit 0
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case7.sh"
+  run Options::command parse --help
+  assert_output "helpCallback"
+}
+
+function Options::generateCommand::case7::parseArgsCallback { #@test
+  function helpCallback() {
+    # this is the help callback of generateCommand.case7.sh
+    # not the one from subCommand
+    echo "helpCallback $*"
+  }
+  function subCommandCallback() {
+    echo "subCommandCallback $*"
+    # here we could have managed subCommand calls like run --help
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case7.sh"
+  run Options::command parse run --help
+  assert_lines_count 2
+  assert_line --index 0 "subCommandCallback run -- --help"
+  assert_line --index 1 "helpCallback 1"
+}
+
+function Options::generateCommand::case7::parseArgsInvalidSubCommand { #@test
+  function helpCallback() {
+    # this is the help callback of generateCommand.case7.sh
+    # not the one from subCommand
+    echo "helpCallback $*"
+  }
+  function subCommandCallback() {
+    echo "subCommandCallback $*"
+    echo "subCommandCallback args ${COMMAND_ARGS[*]}"
+    # here we could have managed subCommand calls like run --help
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case7.sh"
+  run Options::command parse François --help
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Argument subCommand - value 'François' is not part of authorized values(run|exec|ps|build|pull|push|images|login|logout|search|version|info)"
 }

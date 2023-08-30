@@ -25,13 +25,10 @@
 
 ## Options
 
-- special arg to manage command list (see docker --help)
 - remove action to remove args already managed
 - manage String|Function
 - validatorCallback
   - option type File, would check if String after is a valid file
-- global options
-  <https://symfony.com/doc/current/console/input.html#command-global-options>
 - option type env --env OPTION=\*
 
 ## Env::load

@@ -77,7 +77,7 @@ Options::command() {
             fi
             ((++options_parse_argParsedCountSrcFile))
             srcFile="${options_parse_arg}"
-            srcFileCallback "${srcFile}"
+            srcFileCallback "${srcFile}" -- "${@:2}"
           # Argument 2/2
           # Argument destFiles min 1 min 3 authorizedValues '' regexp ''
           elif ((options_parse_parsedArgIndex >= 1)); then
@@ -87,7 +87,7 @@ Options::command() {
             fi
             ((++options_parse_argParsedCountDestFiles))
             destFiles+=("${options_parse_arg}")
-            destFilesCallback "${destFiles[@]}"
+            destFilesCallback "${destFiles[@]}" -- "${@:2}"
           fi
           ((++options_parse_parsedArgIndex))
           ;;
