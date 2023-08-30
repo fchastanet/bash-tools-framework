@@ -20,6 +20,7 @@
 # @option --authorized-values  <String> if String type, list of authorized values separated by |
 # @option --regexp <String> if String type, regexp to use to validate the option value
 # @option --group <Function> the group to which the option will be attached
+# @option --calback <Function> the callback called if the option is parsed successfully
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering
@@ -36,6 +37,7 @@ Options::generateOption() {
   local help=""
   local mandatory=0
   local group=""
+  local callback=""
   local -a adapterOptions=()
 
   while (($# > 0)); do
@@ -115,6 +117,18 @@ Options::generateOption() {
         fi
         group="$1"
         ;;
+      --callback)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
+          return 1
+        fi
+        if [[ "$(type -t "$1")" != "function" ]]; then
+          Log::displayError "Options::generateOption - only function type are accepted as callback - invalid '$1'"
+          return 1
+        fi
+        callback="$1"
+        ;;
       *)
         adapterOptions+=("$1")
         ;;
@@ -164,6 +178,7 @@ Options::generateOption() {
     export alts
     export help
     export group
+    export callback
     export mandatory
     export adapterOptions
     eval "${optionTypeExports}"

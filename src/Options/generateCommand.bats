@@ -393,6 +393,13 @@ function Options::generateCommand::case5::invalidArgOrder { #@test
 
 # group management
 function Options::generateCommand::case6 { #@test
+  function helpCallback() {
+    echo "helpCallback"
+  }
+  local optionHelp="$(Options::generateOption --variable-type Boolean --help "help" \
+    --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)" || return 1
+  sourceFunctionFile "${optionHelp}"
+
   local optionGroup="$(Options::generateGroup \
     --title "Command global options" \
     --help "The Console component adds some predefined options to all commands:")"
@@ -422,6 +429,7 @@ function Options::generateCommand::case6 { #@test
   Options::generateCommand --help "super command" \
     ${optionVerbose} \
     ${optionQuiet} \
+    ${optionHelp} \
     ${optionSrcDirs} \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
 
@@ -432,4 +440,13 @@ function Options::generateCommand::case6::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
   run Options::command help
   checkCommandResult "generateCommand.case6.expected.help"
+}
+
+function Options::generateCommand::case6::parseHelp { #@test
+  function helpCallback() {
+    echo "helpCallback"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
+  run Options::command parse --help
+  assert_output "helpCallback"
 }

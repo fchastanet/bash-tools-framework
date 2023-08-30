@@ -57,6 +57,7 @@ Options::optionVarName() {
     export offValue=""
     export onValue=""
     export defaultValue=""
+    export callback=""
     export min="0"
     export max="-1"
     export authorizedValues=""

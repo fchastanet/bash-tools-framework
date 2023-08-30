@@ -349,3 +349,34 @@ function Options::generateOption::caseStringArray5::OptionsTest::help { #@test
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 2 times) (at most 3 times)"
   assert_line --index 1 "    super help"
 }
+
+# Options::generateOption::caseStringArray6 ensures
+# that testsData/generateOption.caseStringArray6.sh is up to date
+# Case 6: callback
+function Options::generateOption::caseStringArray6::success { #@test
+  local status=0
+  function srcDirsCallback() {
+    :
+  }
+  Options::generateOption --variable-type StringArray --variable-name "srcDirs" \
+    --alt "--src-dir" --alt "-s" --max -1 --callback srcDirsCallback \
+    >"${BATS_TEST_TMPDIR}/result" 2>"${BATS_TEST_TMPDIR}/error" || status=$?
+  testCommand "generateOption.caseStringArray6.sh" "Options::optionSrcDirs"
+  run cat "${BATS_TEST_TMPDIR}/error"
+  assert_output ""
+}
+
+function Options::generateOption::caseStringArray6::OptionsTest::parseSrcDirs { #@test
+  function srcDirsCallback() {
+    echo "srcDirsCallback called $*"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray6.sh"
+  local status=0
+  local -a srcDirs=()
+  Options::optionSrcDirs parse --src-dir test1 -s test2 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_lines_count 2
+  assert_line --index 0 "srcDirsCallback called test1"
+  assert_line --index 1 "srcDirsCallback called test1 test2"
+}

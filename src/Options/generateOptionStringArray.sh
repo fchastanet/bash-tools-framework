@@ -40,8 +40,8 @@ Options::generateOptionStringArray() {
         ;;
       --max)
         shift || true
-        if [[ -n "$1" && ! "$1" =~ ^[1-9][0-9]*$ ]]; then
-          Log::displayError "Options::generateOptionStringArray - --max value should be an integer greater than 0"
+        if [[ -n "$1" && ! "$1" =~ ^([1-9][0-9]*|-1)$ ]]; then
+          Log::displayError "Options::generateOptionStringArray - --max value should be an integer greater than 0 or -1"
           return 1
         fi
         max="$1"

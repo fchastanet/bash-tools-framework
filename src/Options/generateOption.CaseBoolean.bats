@@ -201,7 +201,7 @@ function Options::generateOption::caseBoolean3::OptionsTest::help { #@test
 
 # Options::generateOption::caseBoolean4 ensures
 # that testsData/generateOption.caseBoolean4.sh is up to date
-# Case 3: 2 --alt + mandatory + custom help
+# Case 4: 2 --alt + mandatory + custom help
 function Options::generateOption::caseBoolean4::success { #@test
   local status=0
   Options::generateOption --variable-name "varName" \
@@ -249,4 +249,32 @@ function Options::generateOption::caseBoolean4::OptionsTest::help { #@test
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v${__HELP_NORMAL} (optional) (at most 1 times)"
   assert_line --index 1 "    super help"
+}
+
+# Options::generateOption::caseBoolean5 ensures
+# that testsData/generateOption.caseBoolean5.sh is up to date
+# Case 5: callback
+function Options::generateOption::caseBoolean5::success { #@test
+  local status=0
+  function helpCallback() {
+    :
+  }
+  Options::generateOption --variable-name "help" \
+    --alt "--help" --alt "-h" --callback helpCallback \
+    >"${BATS_TEST_TMPDIR}/result" 2>"${BATS_TEST_TMPDIR}/error" || status=$?
+  testCommand "generateOption.caseBoolean5.sh" "Options::optionHelp"
+  run cat "${BATS_TEST_TMPDIR}/error"
+  assert_output ""
+}
+
+function Options::generateOption::caseBoolean5::OptionsTest::parseHelp { #@test
+  function helpCallback() {
+    echo "helpCallback called $1"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean5.sh"
+  local status=0
+  Options::optionHelp parse --help >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  [[ "${status}" = "0" ]]
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output "helpCallback called 1"
 }

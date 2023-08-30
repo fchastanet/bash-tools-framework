@@ -1,7 +1,7 @@
 Description: super command
 
 USAGE: test [OPTIONS]
-USAGE: test [--quiet|-q] [--verbose|-v] [--src-dirs|-s <String>]
+USAGE: test [--quiet|-q] [--verbose|-v] [--help|-h] [--src-dirs|-s <String>]
 
 Command global options
 The Console component adds some predefined options to all commands:
@@ -10,5 +10,7 @@ The Console component adds some predefined options to all commands:
   --verbose, -v (optional) (at most 1 times)
     verbose mode
 OPTIONS:
+  --help, -h (optional) (at most 1 times)
+    help
   --src-dirs, -s <String> (optional)
     provide the directory where to find the functions source code.

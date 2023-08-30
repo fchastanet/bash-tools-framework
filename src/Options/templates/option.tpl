@@ -86,6 +86,7 @@
     export offValue="<% ${offValue} %>"
     export onValue="<% ${onValue} %>"
     export defaultValue="<% ${defaultValue} %>"
+    export callback="<% ${callback} %>"
     export min="<% ${min} %>"
     export max="<% ${max} %>"
     export authorizedValues="<% ${authorizedValues} %>"

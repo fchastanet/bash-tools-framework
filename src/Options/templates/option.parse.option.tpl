@@ -34,4 +34,11 @@
     <% ${variableName} %>+=("$1")
     % fi
   % fi
+  % if [[ -n "${callback}" ]]; then
+    % if [[ "${variableType}" = "StringArray" ]]; then
+    <% ${callback} %> "${<% ${variableName} %>[@]}"
+    % else
+    <% ${callback} %> "${<% ${variableName} %>}"
+    % fi
+  % fi
   ;;

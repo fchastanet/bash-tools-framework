@@ -26,6 +26,7 @@ Options::generateOption
   --alt <option>
   [--mandatory]
   [--group <Function>]
+  [--callback <Function>]
   [--variable-type <String|Function>]
   [TYPE_OPTIONS]
 ```
@@ -59,13 +60,19 @@ Options::generateOption
 > associate the option to a group. grouped option will be displayed under that
 > group. Default: no group
 
+`--callback <Function>` _(optional)_
+
+> the callback is called if the option is parsed successfully. The option value
+> will be passed as parameter (several parameters if type StringArray).
+
 `--variable-type <String>` _(optional)_
 
 > the type of option to generate. Supported types are:
 >
 > - **Boolean** : indicates an option that will evaluate to 1 if the option is
 >   present
-> - **String** : indicates an option that should be followed by a string
+> - **String** : indicates an option that should be followed by a string _Note:_
+>   if `--max` parameter > 1, the type will automatically switch to StringArray
 
 **Specific `Boolean` options**
 

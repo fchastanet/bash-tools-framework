@@ -98,3 +98,26 @@ function Options::generateOption::groupOptionValid { #@test
   Options::generateOption --variable-name "varName" --alt "--var" --group group >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseGroupOption.sh" "Options::optionVarName"
 }
+
+function Options::generateOption::callbackOptionEmpty { #@test
+  run Options::generateOption --variable-name "varName" --alt "--var" --callback
+  assert_failure 1
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options::generateOption - Option --callback - a value needs to be specified"
+}
+
+function Options::generateOption::callbackOptionInvalid { #@test
+  run Options::generateOption --variable-name "varName" --alt "--var" --callback "invalid"
+  assert_failure 1
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options::generateOption - only function type are accepted as callback - invalid 'invalid'"
+}
+
+function Options::generateOption::callbackOptionValid { #@test
+  callback() {
+    :
+  }
+  local status=0
+  Options::generateOption --variable-name "varName" --alt "--var" --callback callback >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  testCommand "generateOption.caseCallbackOption.sh" "Options::optionVarName"
+}

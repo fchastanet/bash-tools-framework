@@ -16,4 +16,11 @@ set -o errexit
 set -o pipefail
 export TMPDIR="/tmp"
 
-Options::generateOption --variable-type String --variable-name "varName" --alt "--var" --alt -v
+#Options::generateOption --variable-type String --variable-name "varName" --alt "--var" --alt -v
+
+function srcDirsCallback() {
+  echo "params $*"
+}
+
+Options::generateOption --variable-type StringArray --variable-name "srcDirs" \
+  --alt "--srcDirs" --alt "-s" --callback srcDirsCallback
