@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-Options::argVarName() {
+Options::arg() {
   local options_parse_cmd="$1"
   shift || true
 
@@ -31,7 +31,7 @@ Options::argVarName() {
     done
     export varName
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    eval "$(Options::argVarName helpTpl)"
+    eval "$(Options::arg helpTpl)"
   elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  [${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {list} (at most 3 times)]"'

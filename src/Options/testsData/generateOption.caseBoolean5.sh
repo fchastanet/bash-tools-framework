@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-Options::optionHelp() {
+Options::option() {
   local cmd="$1"
   shift || true
 
@@ -27,7 +27,7 @@ Options::optionHelp() {
     done
     export help
   elif [[ "${cmd}" = "help" ]]; then
-    eval "$(Options::optionHelp helpTpl)"
+    eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then

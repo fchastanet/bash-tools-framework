@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-<% ${commandFunctionName} %>() {
+<% ${functionName} %>() {
   local options_parse_cmd="$1"
   shift || true
 

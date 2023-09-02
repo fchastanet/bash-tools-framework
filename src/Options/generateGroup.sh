@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # @description generate command parse function
+# By default the name of the random generated function name
+# is displayed as output of this function.
+# By providing the option --function-name, the output of this
+# function will be the generated function itself with the chosen name.
 # @example
 #   declare optionGroup=<% Options::generateGroup \
 #     --title "Command global options" \
@@ -9,6 +13,7 @@
 # @arg $@ args:StringArray list of options/arguments variables references, allowing to link the options/arguments with this command
 # @option --title <String|Function> (optional) provides group title
 # @option --help <String|Function> provides command description help
+# @option --function-name <String> the name of the function that will be generated
 # @exitcode 1 if error during option parsing
 # @stdout script file generated to group options and to be associated to options using --group option
 # @stderr diagnostics information is displayed
@@ -18,7 +23,7 @@ Options::generateGroup() {
   # args default values
   local title=""
   local help=""
-  local id=""
+  local functionName=""
 
   setArg() {
     local option="$1"
@@ -48,6 +53,14 @@ Options::generateGroup() {
         shift
         setArg "${option}" help "$#" "$1" || return 1
         ;;
+      --function-name)
+        shift
+        setArg "${option}" functionName "$#" "$1" || return 1
+        if ! Assert::posixFunctionName "${functionName}"; then
+          Log::displayError "Options::generateOption - Option ${option} - only posix function name are accepted - invalid '$1'"
+          return 1
+        fi
+        ;;
       *)
         Log::displayError "Options::generateGroup - invalid option ${option}"
         return 1
@@ -61,28 +74,12 @@ Options::generateGroup() {
   fi
 
   (
-    # generate a function name that will be the output of this script
-    local baseGroupFunctionName
-    baseGroupFunctionName=$(Options::generateFunctionName "group" "") || return 3
-    local groupFunctionName="Options::${baseGroupFunctionName}"
-
-    # generate unique id
-    id="${groupFunctionName}"
-
     # export current values
     export title
     export help
-    export id
+    export functionName
     export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
-    # interpret the template
-    local groupFunctionTmpFile
-    groupFunctionTmpFile="${TMPDIR}/src/Options/${baseGroupFunctionName}.sh"
-    mkdir -p "$(dirname "${groupFunctionTmpFile}")" || return 3
-    Options::bashTpl "${tplDir}/group.tpl" | sed -E -e 's/[\t ]+$//' >"${groupFunctionTmpFile}" || return 3
-    Log::displayDebug "Generated group function in ${groupFunctionTmpFile}"
-
-    # display the functionOption
-    echo "${groupFunctionName}"
+    Options::generateFunction "${functionName}" "group" || return 3
   ) || return $?
 }

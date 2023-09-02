@@ -14,6 +14,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionBoolean.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionString.sh"
 # shellcheck source=src/Options/generateOptionStringArray.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionStringArray.sh"
+# shellcheck source=src/Options/generateFunction.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Options/generateFunction.sh"
 # shellcheck source=src/Options/generateArg.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateArg.sh"
 # shellcheck source=src/Options/generateFunctionName.sh
@@ -26,6 +28,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Options/assertAlt.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Options/bashTpl.sh"
 # shellcheck source=/src/Assert/validVariableName.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Assert/validVariableName.sh"
+# shellcheck source=/src/Assert/posixFunctionName.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Assert/posixFunctionName.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Array/contains.sh"
 # shellcheck source=/src/Array/join.sh

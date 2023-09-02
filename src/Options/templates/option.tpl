@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-<% ${optionFunctionName} %>() {
+<% ${functionName} %>() {
   local cmd="$1"
   shift || true
 
@@ -18,7 +18,7 @@
     done
     .INCLUDE "${tplDir}/option.parse.after.tpl"
   elif [[ "${cmd}" = "help" ]]; then
-    eval "$(<% ${optionFunctionName} %> helpTpl)"
+    eval "$(<% ${functionName} %> helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option <% ${variableName} %> <%% Array::join '|' "${alts[@]}" %> variableType <% ${variableType} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${cmd}" = "helpTpl" ]]; then

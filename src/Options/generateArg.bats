@@ -166,12 +166,12 @@ function Options::generateArg::checkOption::min-max::mismatch1 { #@test
 function Options::generateArg::checkOption::success:case1 { #@test
   local status=0
   Options::generateArg --variable-name "varName" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateArg.case1.sh" "Options::argVarName"
+  testCommand "generateArg.case1.sh" "Options::arg"
 }
 
 function Options::generateArg::case1::ArgTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case1.sh"
-  run Options::argVarName
+  run Options::arg
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Argument command invalid: ''"
@@ -181,7 +181,7 @@ function Options::generateArg::case1::ArgTest::parseWithNoArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case1.sh"
   local status=0
   local varName="somethingElse"
-  Options::argVarName parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -193,7 +193,7 @@ function Options::generateArg::case1::ArgTest::parseWithOption { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case1.sh"
   local status=0
   local varName="somethingElse"
-  Options::argVarName parse --var >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse --var >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -205,7 +205,7 @@ function Options::generateArg::case1::ArgTest::parseWithArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case1.sh"
   local status=0
   local varName="somethingElse"
-  Options::argVarName parse "Argument" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse "Argument" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -214,7 +214,7 @@ function Options::generateArg::case1::ArgTest::parseWithArg { #@test
 
 function Options::generateArg::case1::ArgTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case1.sh"
-  run Options::argVarName help
+  run Options::arg help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")varName${__HELP_NORMAL} {single} (mandatory)"
   assert_line --index 1 "    No help available"
@@ -222,36 +222,36 @@ function Options::generateArg::case1::ArgTest::help { #@test
 
 function Options::generateArg::case1::ArgTest::otherCommands { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case1.sh"
-  run Options::argVarName variableName
+  run Options::arg variableName
   assert_success
   assert_output "varName"
 
-  run Options::argVarName type
+  run Options::arg type
   assert_success
   assert_output "Argument"
 
-  run Options::argVarName variableType
+  run Options::arg variableType
   assert_success
   assert_output "String"
 
-  run Options::argVarName min
+  run Options::arg min
   assert_success
   assert_output "1"
 
-  run Options::argVarName max
+  run Options::arg max
   assert_success
   assert_output "1"
 
-  run Options::argVarName helpArg
+  run Options::arg helpArg
   assert_success
   assert_output "varName {single} (mandatory)"
 
-  run Options::argVarName oneLineHelp
+  run Options::arg oneLineHelp
   assert_success
   assert_output "Argument varName min 1 min 1 authorizedValues '' regexp ''"
 
   local status=0
-  Options::argVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -274,12 +274,12 @@ function Options::generateArg::checkOption::success:case2 { #@test
     --max 3 \
     --authorized-values "debug|info|warn" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateArg.case2.sh" "Options::argVarName"
+  testCommand "generateArg.case2.sh" "Options::arg"
 }
 
 function Options::generateArg::case2::ArgTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
-  run Options::argVarName
+  run Options::arg
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Argument command invalid: ''"
@@ -289,7 +289,7 @@ function Options::generateArg::case2::ArgTest::parseWithNoArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::argVarName parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -300,7 +300,7 @@ function Options::generateArg::case2::ArgTest::parseWithOption { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::argVarName parse --var >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse --var >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -311,7 +311,7 @@ function Options::generateArg::case2::ArgTest::parseWithArgInvalid { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::argVarName parse "Argument" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse "Argument" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -323,7 +323,7 @@ function Options::generateArg::case2::ArgTest::parseWithArgValid { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::argVarName parse "debug" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse "debug" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -334,7 +334,7 @@ function Options::generateArg::case2::ArgTest::parseWith3ArgsValid { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::argVarName parse "debug" "info" "warn" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse "debug" "info" "warn" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -345,7 +345,7 @@ function Options::generateArg::case2::ArgTest::parseWith4ArgsValid { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::argVarName parse "debug" "info" "warn" "info" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::arg parse "debug" "info" "warn" "info" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -355,7 +355,7 @@ function Options::generateArg::case2::ArgTest::parseWith4ArgsValid { #@test
 
 function Options::generateArg::case2::ArgTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
-  run Options::argVarName help
+  run Options::arg help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "[${__HELP_OPTION_COLOR}")varName${__HELP_NORMAL} {list} (at most 3 times)]"
   assert_line --index 1 "    No help available"

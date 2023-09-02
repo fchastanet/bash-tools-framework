@@ -20,12 +20,12 @@ function Options::generateOption::caseStringArray1::success { #@test
   local status=0
   Options::generateOption --variable-type StringArray --variable-name "varName" --alt "--var" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseStringArray1.sh" "Options::optionVarName"
+  testCommand "generateOption.caseStringArray1.sh" "Options::option"
 }
 
 function Options::generateOption::caseStringArray1::OptionTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray1.sh"
-  run Options::optionVarName
+  run Options::option
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Option command invalid: ''"
@@ -35,7 +35,7 @@ function Options::generateOption::caseStringArray1::OptionTest::parseWithNoArg {
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray1.sh"
   local status=0
   local -a varName=()
-  Options::optionVarName parse --var >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -47,7 +47,7 @@ function Options::generateOption::caseStringArray1::OptionTest::parseWithArg { #
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray1.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var newValue >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var newValue >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -57,7 +57,7 @@ function Options::generateOption::caseStringArray1::OptionTest::parseWithArg { #
 
 function Options::generateOption::caseStringArray1::OptionTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray1.sh"
-  run Options::optionVarName help
+  run Options::option help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var <String>${__HELP_NORMAL} (optional)"
   assert_line --index 1 "    No help available"
@@ -70,12 +70,12 @@ function Options::generateOption::caseStringArray2::success { #@test
   local status=0
   Options::generateOption --variable-type StringArray --variable-name "varName" --alt "--var" --alt "-v" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseStringArray2.sh" "Options::optionVarName"
+  testCommand "generateOption.caseStringArray2.sh" "Options::option"
 }
 
 function Options::generateOption::caseStringArray2::OptionsTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray2.sh"
-  run Options::optionVarName
+  run Options::option
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Option command invalid: ''"
@@ -85,7 +85,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::parseWithNoArg 
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -97,7 +97,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::parseWithArgAlt
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "newValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "newValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -109,7 +109,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::parseWithArgAlt
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray2.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse -v "newValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse -v "newValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -119,7 +119,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::parseWithArgAlt
 
 function Options::generateOption::caseStringArray2::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray2.sh"
-  run Options::optionVarName help
+  run Options::option help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (optional)"
   assert_line --index 1 "    No help available"
@@ -133,12 +133,12 @@ function Options::generateOption::caseStringArray3::success { #@test
   Options::generateOption --variable-type StringArray --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseStringArray3.sh" "Options::optionVarName"
+  testCommand "generateOption.caseStringArray3.sh" "Options::option"
 }
 
 function Options::generateOption::caseStringArray3::OptionsTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray3.sh"
-  run Options::optionVarName
+  run Options::option
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Option command invalid: ''"
@@ -148,7 +148,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::parseWithNoArg 
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray3.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -161,7 +161,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::parseWithArg { 
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray3.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var NewValue >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var NewValue >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -171,7 +171,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::parseWithArg { 
 
 function Options::generateOption::caseStringArray3::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray3.sh"
-  run Options::optionVarName help
+  run Options::option help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 1 times)"
   assert_line --index 1 "    No help available"
@@ -185,12 +185,12 @@ function Options::generateOption::caseStringArray4::success { #@test
   Options::generateOption --variable-type StringArray --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory --help "super help" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseStringArray4.sh" "Options::optionVarName"
+  testCommand "generateOption.caseStringArray4.sh" "Options::option"
 }
 
 function Options::generateOption::caseStringArray4::OptionsTest::noArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray4.sh"
-  run Options::optionVarName
+  run Options::option
   assert_failure 1
   assert_lines_count 1
   assert_output --partial "ERROR   - Option command invalid: ''"
@@ -200,7 +200,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::parseWithNoArg 
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray4.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -213,7 +213,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::parseWithArg { 
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray4.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "NewValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "NewValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -225,7 +225,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::parseMultipleAr
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray4.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "NewValue" -v "NewValue2" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "NewValue" -v "NewValue2" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -235,7 +235,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::parseMultipleAr
 
 function Options::generateOption::caseStringArray4::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray4.sh"
-  run Options::optionVarName help
+  run Options::option help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 1 times)"
   assert_line --index 1 "    super help"
@@ -249,33 +249,33 @@ function Options::generateOption::caseStringArray5::success { #@test
   Options::generateOption --variable-type StringArray --variable-name "varName" \
     --alt "--var" --alt "-v" --min 2 --max 3 --authorized-values "value1|value2|value3" \
     --help "super help" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseStringArray5.sh" "Options::optionVarName"
+  testCommand "generateOption.caseStringArray5.sh" "Options::option"
 }
 
 function Options::generateOption::caseStringArray5::otherCommands { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
-  run Options::optionVarName variableName
+  run Options::option variableName
   assert_success
   assert_output "varName"
 
-  run Options::optionVarName type
+  run Options::option type
   assert_success
   assert_output "Option"
 
-  run Options::optionVarName variableType
+  run Options::option variableType
   assert_success
   assert_output "StringArray"
 
-  run Options::optionVarName helpAlt
+  run Options::option helpAlt
   assert_success
   assert_output "--var|-v"
 
-  run Options::optionVarName oneLineHelp
+  run Options::option oneLineHelp
   assert_success
   assert_output "Option varName --var|-v variableType StringArray min 2 max 3 authorizedValues 'value1|value2|value3' regexp ''"
 
   local status=0
-  Options::optionVarName export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -295,7 +295,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithNotEno
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "value1" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "value1" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -308,7 +308,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithArgInv
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "NewValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "NewValue" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -321,7 +321,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseMultipleAr
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "value1" -v "value2" -v "value3" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "value1" -v "value2" -v "value3" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
@@ -333,7 +333,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithTooMuc
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
   local status=0
   local -a varName=("somethingElse")
-  Options::optionVarName parse --var "value1" -v "value2" -v "value3" -v "value3" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --var "value1" -v "value2" -v "value3" -v "value3" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
@@ -344,7 +344,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithTooMuc
 
 function Options::generateOption::caseStringArray5::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
-  run Options::optionVarName help
+  run Options::option help
   assert_lines_count 2
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 2 times) (at most 3 times)"
   assert_line --index 1 "    super help"
@@ -361,7 +361,7 @@ function Options::generateOption::caseStringArray6::success { #@test
   Options::generateOption --variable-type StringArray --variable-name "srcDirs" \
     --alt "--src-dir" --alt "-s" --max -1 --callback srcDirsCallback \
     >"${BATS_TEST_TMPDIR}/result" 2>"${BATS_TEST_TMPDIR}/error" || status=$?
-  testCommand "generateOption.caseStringArray6.sh" "Options::optionSrcDirs"
+  testCommand "generateOption.caseStringArray6.sh" "Options::option"
   run cat "${BATS_TEST_TMPDIR}/error"
   assert_output ""
 }
@@ -373,7 +373,7 @@ function Options::generateOption::caseStringArray6::OptionsTest::parseSrcDirs { 
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray6.sh"
   local status=0
   local -a srcDirs=()
-  Options::optionSrcDirs parse --src-dir test1 -s test2 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::option parse --src-dir test1 -s test2 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 2

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-Options::optionVarName() {
+Options::option() {
   local cmd="$1"
   shift || true
 
@@ -31,7 +31,7 @@ Options::optionVarName() {
     done
     export varName
   elif [[ "${cmd}" = "help" ]]; then
-    eval "$(Options::optionVarName helpTpl)"
+    eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option varName --var variableType String min 0 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then

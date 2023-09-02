@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # @description generate option parse code
+# By default the name of the random generated function name
+# is displayed as output of this function.
+# By providing the option --function-name, the output of this
+# function will be the generated function itself with the chosen name.
 # @example
 #   Options::generateOption \
 #     --variable-name "srcDirs" \
@@ -21,6 +25,7 @@
 # @option --regexp <String> if String type, regexp to use to validate the option value
 # @option --group <Function> the group to which the option will be attached
 # @option --callback <Function> the callback called if the option is parsed successfully
+# @option --function-name <String> the name of the function that will be generated
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
 # @exitcode 3 if error during template rendering
@@ -31,6 +36,7 @@
 Options::generateOption() {
   # args default values
   local variableName=""
+  local functionName=""
   local -a alts=()
   local variableType="Boolean"
   local variableTypeOptionProvided=0
@@ -129,6 +135,18 @@ Options::generateOption() {
         fi
         callback="$1"
         ;;
+      --function-name)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
+          return 1
+        fi
+        if ! Assert::posixFunctionName "$1"; then
+          Log::displayError "Options::generateOption - Option ${arg} - only posix function name are accepted - invalid '$1'"
+          return 1
+        fi
+        functionName="$1"
+        ;;
       *)
         adapterOptions+=("$1")
         ;;
@@ -166,11 +184,6 @@ Options::generateOption() {
     local optionTypeExports
     optionTypeExports="$(cat "${adapterOptionsTmpFile}")"
 
-    # generate a function name that will be the output of this script
-    local baseOptionFunctionName
-    baseOptionFunctionName=$(Options::generateFunctionName "option${variableName^}" "") || return 3
-    local optionFunctionName="Options::${baseOptionFunctionName}"
-
     # export current values
     export type="Option"
     export variableName
@@ -182,17 +195,9 @@ Options::generateOption() {
     export mandatory
     export adapterOptions
     eval "${optionTypeExports}"
-    export optionFunctionName
+    export functionName
     export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
-    # interpret the template
-    local optionFunctionTmpFile
-    optionFunctionTmpFile="${TMPDIR}/src/Options/${baseOptionFunctionName}.sh"
-    mkdir -p "$(dirname "${optionFunctionTmpFile}")" || return 3
-    Options::bashTpl "${_COMPILE_ROOT_DIR}/src/Options/templates/option.tpl" >"${optionFunctionTmpFile}" || return 3
-    Log::displayDebug "Generated function for option ${variableName} in ${optionFunctionTmpFile}"
-
-    # display the functionOption
-    echo "${optionFunctionName}"
+    Options::generateFunction "${functionName}" "option" || return 3
   ) || return $?
 }

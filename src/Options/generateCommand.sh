@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # @description generate command parse function
+# By default the name of the random generated function name
+# is displayed as output of this function.
+# By providing the option --function-name, the output of this
+# function will be the generated function itself with the chosen name.
 # @example
 #   declare commandForm=<% Options::generateCommand \
 #     --help "Command help" \
@@ -21,6 +25,7 @@
 # @option --copyright <String|Function> (optional) provides copyright section. Section not generated if not provided.
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
 # @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options.
+# @option --function-name <String> the name of the function that will be generated
 # @warning arguments list have to be provided in correct order
 # @exitcode 1 if error during option parsing
 # @exitcode 2 if error during option type parsing
@@ -40,6 +45,7 @@ Options::generateCommand() {
   local copyright=""
   local helpTemplate=""
   local errorIfUnknownOption="1"
+  local functionName=""
   local -a optionListUnordered=()
   local -a argumentList=()
   local -a variableNameList=()
@@ -100,6 +106,14 @@ Options::generateCommand() {
         ;;
       --no-error-if-unknown-option)
         errorIfUnknownOption="0"
+        ;;
+      --function-name)
+        shift
+        setArg "${option}" functionName "$#" "$1" || return 1
+        if ! Assert::posixFunctionName "${functionName}"; then
+          Log::displayError "Options::generateOption - Option ${option} - only posix function name are accepted - invalid '$1'"
+          return 1
+        fi
         ;;
       *)
         if [[ "${option}" =~ ^-- ]]; then
@@ -207,11 +221,6 @@ Options::generateCommand() {
   readarray -t optionList <<<"${optionListToSort}"
 
   (
-    # generate a function name that will be the output of this script
-    local baseCommandFunctionName
-    baseCommandFunctionName=$(Options::generateFunctionName "command" "") || return 3
-    local commandFunctionName="Options::${baseCommandFunctionName}"
-
     # export current values
     export help
     export version
@@ -222,19 +231,10 @@ Options::generateCommand() {
     export helpTemplate
     export optionList
     export argumentList
-    export commandFunctionName
+    export functionName
     export sourceFile
     export errorIfUnknownOption
-    export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
-    # interpret the template
-    local commandFunctionTmpFile
-    commandFunctionTmpFile="${TMPDIR}/src/Options/${baseCommandFunctionName}.sh"
-    mkdir -p "$(dirname "${commandFunctionTmpFile}")" || return 3
-    Options::bashTpl "${tplDir}/command.tpl" | sed -E -e 's/[\t ]+$//' >"${commandFunctionTmpFile}" || return 3
-    Log::displayDebug "Generated command function in ${commandFunctionTmpFile}"
-
-    # display the functionOption
-    echo "${commandFunctionName}"
+    Options::generateFunction "${functionName}" "command" || return 3
   ) || return $?
 }

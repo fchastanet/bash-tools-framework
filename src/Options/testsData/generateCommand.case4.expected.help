@@ -1,7 +1,7 @@
 Description: super command
 
 USAGE: test [OPTIONS] [ARGUMENTS]
-USAGE: test [--src-dirs|-s <String>] [--verbose|-v]
+USAGE: test [--verbose|-v] [--src-dirs|-s <String>]
 
 ARGUMENTS:
   srcFile {single} (mandatory)
@@ -10,7 +10,7 @@ ARGUMENTS:
     No help available
 
 OPTIONS:
-  --src-dirs, -s <String> (optional)
-    provide the directory where to find the functions source code.
   --verbose, -v (optional) (at most 1 times)
     verbose mode
+  --src-dirs, -s <String> (optional)
+    provide the directory where to find the functions source code.

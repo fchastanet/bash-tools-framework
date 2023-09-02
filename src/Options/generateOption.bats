@@ -96,7 +96,7 @@ function Options::generateOption::groupOptionValid { #@test
   }
   local status=0
   Options::generateOption --variable-name "varName" --alt "--var" --group group >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseGroupOption.sh" "Options::optionVarName"
+  testCommand "generateOption.caseGroupOption.sh" "Options::option"
 }
 
 function Options::generateOption::callbackOptionEmpty { #@test
@@ -119,5 +119,5 @@ function Options::generateOption::callbackOptionValid { #@test
   }
   local status=0
   Options::generateOption --variable-name "varName" --alt "--var" --callback callback >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  testCommand "generateOption.caseCallbackOption.sh" "Options::optionVarName"
+  testCommand "generateOption.caseCallbackOption.sh" "Options::option"
 }

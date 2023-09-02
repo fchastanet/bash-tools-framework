@@ -5,12 +5,12 @@ Options::command() {
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
-    quiet="0"
-    local -i options_parse_optionParsedCountQuiet
-    ((options_parse_optionParsedCountQuiet = 0)) || true
     verbose="0"
     local -i options_parse_optionParsedCountVerbose
     ((options_parse_optionParsedCountVerbose = 0)) || true
+    quiet="0"
+    local -i options_parse_optionParsedCountQuiet
+    ((options_parse_optionParsedCountQuiet = 0)) || true
     help="0"
     local -i options_parse_optionParsedCountHelp
     ((options_parse_optionParsedCountHelp = 0)) || true
@@ -23,19 +23,19 @@ Options::command() {
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
         # Option 1/4
-        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --quiet | -q)
-          quiet="1"
-          if ((options_parse_optionParsedCountQuiet >= 1)); then
+        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --verbose | -v)
+          verbose="1"
+          if ((options_parse_optionParsedCountVerbose >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ;;
         # Option 2/4
-        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --verbose | -v)
-          verbose="1"
-          if ((options_parse_optionParsedCountVerbose >= 1)); then
+        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --quiet | -q)
+          quiet="1"
+          if ((options_parse_optionParsedCountQuiet >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
@@ -94,8 +94,8 @@ Options::command() {
       esac
       shift || true
     done
-    export quiet
     export verbose
+    export quiet
     export help
     export srcDirs
     if ((options_parse_argParsedCountSrcFile < 1)); then
@@ -115,7 +115,7 @@ Options::command() {
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--quiet|-q]" "[--verbose|-v]" "[--help|-h]" "[--src-dirs|-s <String>]")"
+      "[--verbose|-v]" "[--quiet|-q]" "[--help|-h]" "[--src-dirs|-s <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}srcFile${__HELP_NORMAL} {single} (mandatory)"
@@ -126,19 +126,19 @@ Options::command() {
     echo -e "${__HELP_TITLE_COLOR}Command global options${__RESET_COLOR}"
     echo "The Console component adds some predefined options to all commands:"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--quiet, -q"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    quiet mode'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--verbose, -v"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
     echo '    verbose mode'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--quiet, -q"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    quiet mode'
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--help, -h"

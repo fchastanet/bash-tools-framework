@@ -32,7 +32,7 @@
     echo "${helpArg}"
   }
 %
-<% ${argFunctionName} %>() {
+<% ${functionName} %>() {
   local options_parse_cmd="$1"
   shift || true
 
@@ -53,7 +53,7 @@
     done
     .INCLUDE "${tplDir}/arg.parse.after.tpl"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    eval "$(<% ${argFunctionName} %> helpTpl)"
+    eval "$(<% ${functionName} %> helpTpl)"
   elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  <%% helpArg "1" %>"'

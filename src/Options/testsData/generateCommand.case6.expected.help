@@ -1,7 +1,7 @@
 Description: super command
 
 USAGE: test [OPTIONS] [ARGUMENTS]
-USAGE: test [--quiet|-q] [--verbose|-v] [--help|-h] [--src-dirs|-s <String>]
+USAGE: test [--verbose|-v] [--quiet|-q] [--help|-h] [--src-dirs|-s <String>]
 
 ARGUMENTS:
   srcFile {single} (mandatory)
@@ -11,10 +11,10 @@ ARGUMENTS:
 
 Command global options
 The Console component adds some predefined options to all commands:
-  --quiet, -q (optional) (at most 1 times)
-    quiet mode
   --verbose, -v (optional) (at most 1 times)
     verbose mode
+  --quiet, -q (optional) (at most 1 times)
+    quiet mode
 OPTIONS:
   --help, -h (optional) (at most 1 times)
     help

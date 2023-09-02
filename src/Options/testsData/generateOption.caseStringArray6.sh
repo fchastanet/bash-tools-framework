@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-Options::optionSrcDirs() {
+Options::option() {
   local cmd="$1"
   shift || true
 
@@ -25,7 +25,7 @@ Options::optionSrcDirs() {
     done
     export srcDirs
   elif [[ "${cmd}" = "help" ]]; then
-    eval "$(Options::optionSrcDirs helpTpl)"
+    eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option srcDirs --src-dir|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then

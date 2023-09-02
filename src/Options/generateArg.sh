@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # @description generate argument parse code
+# By default the name of the random generated function name
+# is displayed as output of this function.
+# By providing the option --function-name, the output of this
+# function will be the generated function itself with the chosen name.
 # @example
 #   Options::generateArg \
 #     --variable-name "fileToCompile" \
@@ -16,6 +20,7 @@
 # @option --authorized-values  <String> list of authorized values separated by |
 # @option --regexp <String> regexp to use to validate the option value
 # @option --callback <Function> the callback called if the arg is parsed successfully
+# @option --function-name <String> the name of the function that will be generated
 # @exitcode 1 if error during argument parsing
 # @exitcode 2 if error during template rendering
 # @stdout script file generated to parse the arguments following the rules provided
@@ -58,6 +63,8 @@ Options::generateArg() {
   local callback=""
   # shellcheck disable=SC2034
   local -i callbackCount=0
+
+  local functionName=""
 
   checkOption() {
     local option="$1"
@@ -148,6 +155,15 @@ Options::generateArg() {
         fi
         callback="$1"
         ;;
+      --function-name)
+        shift
+        checkOption "${option}" functionName "$#" || return 1
+        if ! Assert::posixFunctionName "$1"; then
+          Log::displayError "Options::generateOption - Option ${option} - only posix function name are accepted - invalid '$1'"
+          return 1
+        fi
+        functionName="$1"
+        ;;
       *)
         Log::displayError "Options::generateArg - Option ${option} - invalid option provided"
         return 1
@@ -171,11 +187,6 @@ Options::generateArg() {
   fi
 
   (
-    # generate a function name that will be the output of this script
-    local baseArgFunctionName
-    baseArgFunctionName=$(Options::generateFunctionName "arg${variableName^}" "") || return 3
-    local argFunctionName="Options::${baseArgFunctionName}"
-
     # export current values
     export type
     export variableType
@@ -186,18 +197,9 @@ Options::generateArg() {
     export max
     export authorizedValues
     export regexp
-    export argFunctionName
+    export functionName
     export callback
-    export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 
-    # interpret the template
-    local argFunctionTmpFile
-    argFunctionTmpFile="${TMPDIR}/src/Options/${baseArgFunctionName}.sh"
-    mkdir -p "$(dirname "${argFunctionTmpFile}")" || return 3
-    Options::bashTpl "${_COMPILE_ROOT_DIR}/src/Options/templates/arg.tpl" >"${argFunctionTmpFile}" || return 3
-    Log::displayDebug "Generated function for arg ${variableName} in ${argFunctionTmpFile}"
-
-    # display the functionOption
-    echo "${argFunctionName}"
+    Options::generateFunction "${functionName}" "arg" || return 3
   ) || return $?
 }
