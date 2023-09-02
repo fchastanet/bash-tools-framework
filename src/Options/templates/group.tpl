@@ -8,7 +8,9 @@
     eval "$(<% ${groupFunctionName} %> helpTpl)"
   elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
     echo $'    echo -e "${__HELP_TITLE_COLOR}<% ${title} %>${__RESET_COLOR}"'
+    % if [[ -n "${help}" ]]; then
     echo $'    echo "<% ${help} %>"'
+    % fi
   elif [[ "${options_parse_cmd}" = "id" ]]; then
     echo $'<% ${id} %>'
   else

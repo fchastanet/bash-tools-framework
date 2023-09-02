@@ -96,7 +96,7 @@ function Options::generateCommand::case1 { #@test
   local optionFile
   optionFile="$(Options::generateOption --variable-type String --help "file" \
     --variable-name "file" --alt "--file" --alt "-f")" || return 1
-  sourceFunctionFile "${optionFile}"
+  Options::sourceFunction "${optionFile}"
 
   local status=0
   Options::generateCommand --help "super command" ${optionFile} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
@@ -148,7 +148,7 @@ function Options::generateCommand::case2 { #@test
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
     --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
-  sourceFunctionFile "${optionVerbose}"
+  Options::sourceFunction "${optionVerbose}"
 
   local status=0
   Options::generateCommand --no-error-if-unknown-option \
@@ -200,19 +200,19 @@ function Options::generateCommand::case3 { #@test
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
     --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
-  sourceFunctionFile "${optionVerbose}"
+  Options::sourceFunction "${optionVerbose}"
 
   local optionSrcDirs
   optionSrcDirs="$(Options::generateOption --variable-type StringArray \
     --help "provide the directory where to find the functions source code." \
     --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
-  sourceFunctionFile "${optionSrcDirs}"
+  Options::sourceFunction "${optionSrcDirs}"
 
   local optionSrcDirs
   optionSrcDirs="$(Options::generateOption --variable-type StringArray \
     --help "provide the directory where to find the functions source code." \
     --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
-  sourceFunctionFile "${optionSrcDirs}"
+  Options::sourceFunction "${optionSrcDirs}"
 
   local status=0
   Options::generateCommand --help "super command" \
@@ -273,21 +273,21 @@ function Options::generateCommand::case4 { #@test
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
     --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
-  sourceFunctionFile "${optionVerbose}"
+  Options::sourceFunction "${optionVerbose}"
 
   local optionSrcDirs
   optionSrcDirs="$(Options::generateOption --variable-type StringArray \
     --help "provide the directory where to find the functions source code." \
     --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
-  sourceFunctionFile "${optionSrcDirs}"
+  Options::sourceFunction "${optionSrcDirs}"
 
   local srcFile
   srcFile="$(Options::generateArg --variable-name "srcFile")" || return 1
-  sourceFunctionFile "${srcFile}"
+  Options::sourceFunction "${srcFile}"
 
   local destFiles
   destFiles="$(Options::generateArg --variable-name "destFiles" --max 3)" || return 1
-  sourceFunctionFile "${destFiles}"
+  Options::sourceFunction "${destFiles}"
 
   local status=0
   Options::generateCommand --help "super command" \
@@ -380,11 +380,11 @@ function Options::generateCommand::case4::destFile4 { #@test
 function Options::generateCommand::case5::invalidArgOrder { #@test
   local srcFile
   srcFile="$(Options::generateArg --variable-name "srcFile")" || return 1
-  sourceFunctionFile "${srcFile}"
+  Options::sourceFunction "${srcFile}"
 
   local destFiles
   destFiles="$(Options::generateArg --variable-name "destFiles" --max 3)" || return 1
-  sourceFunctionFile "${destFiles}"
+  Options::sourceFunction "${destFiles}"
 
   run Options::generateCommand --help "super command" "${destFiles}" "${srcFile}"
   assert_lines_count 1
@@ -398,42 +398,42 @@ function Options::generateCommand::case6 { #@test
   }
   local optionHelp="$(Options::generateOption --variable-type Boolean --help "help" \
     --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)" || return 1
-  sourceFunctionFile "${optionHelp}"
+  Options::sourceFunction "${optionHelp}"
 
   local optionGroup="$(Options::generateGroup \
     --title "Command global options" \
     --help "The Console component adds some predefined options to all commands:")"
-  sourceFunctionFile "${optionGroup}"
+  Options::sourceFunction "${optionGroup}"
 
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
     --group "${optionGroup}" \
     --variable-name "verbose" \
     --alt "--verbose" --alt "-v")" || return 1
-  sourceFunctionFile "${optionVerbose}"
+  Options::sourceFunction "${optionVerbose}"
 
   local optionSrcDirs
   optionSrcDirs="$(Options::generateOption --variable-type StringArray \
     --help "provide the directory where to find the functions source code." \
     --variable-name "srcDirs" --alt "--src-dirs" --alt "-s")" || return 1
-  sourceFunctionFile "${optionSrcDirs}"
+  Options::sourceFunction "${optionSrcDirs}"
 
   local optionQuiet
   optionQuiet="$(Options::generateOption --help "quiet mode" \
     --group "${optionGroup}" \
     --variable-name "quiet" \
     --alt "--quiet" --alt "-q")" || return 1
-  sourceFunctionFile "${optionQuiet}"
+  Options::sourceFunction "${optionQuiet}"
 
   function srcFileCallback() { :; }
   local srcFile
   srcFile="$(Options::generateArg --variable-name "srcFile" --callback srcFileCallback)" || return 1
-  sourceFunctionFile "${srcFile}"
+  Options::sourceFunction "${srcFile}"
 
   function destFilesCallback() { :; }
   local destFiles
   destFiles="$(Options::generateArg --variable-name "destFiles" --max 3 --callback destFilesCallback)" || return 1
-  sourceFunctionFile "${destFiles}"
+  Options::sourceFunction "${destFiles}"
 
   local status=0
   Options::generateCommand --help "super command" \
@@ -486,7 +486,7 @@ function Options::generateCommand::case7 { #@test
   }
   local optionHelp="$(Options::generateOption --variable-type Boolean --help "help" \
     --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)" || return 1
-  sourceFunctionFile "${optionHelp}"
+  Options::sourceFunction "${optionHelp}"
 
   function subCommandCallback() { :; }
   local subCommand
@@ -511,7 +511,7 @@ function Options::generateCommand::case7 { #@test
   ''' \
       --callback subCommandCallback
   )" || return 1
-  sourceFunctionFile "${subCommand}"
+  Options::sourceFunction "${subCommand}"
 
   local status=0
   Options::generateCommand --help "super command" \

@@ -1,29 +1,125 @@
 # Todo
 
-- [Options](#options)
-- [Env::load](#envload)
-- [Framework Controller](#framework-controller)
-- [1. REQUIRE directive](#1-require-directive)
-  - [1.1. DISABLE directive](#11-disable-directive)
-  - [1.2. refact env load using require ?](#12-refact-env-load-using-require-)
-  - [1.3. Options/Args management](#13-optionsargs-management)
-- [2. Framework functions changes](#2-framework-functions-changes)
-- [3. Compiler and bash Object oriented](#3-compiler-and-bash-object-oriented)
-  - [3.1. .framework-config should contain the compiler options](#31-framework-config-should-contain-the-compiler-options)
-  - [3.2. compiler --profiler option](#32-compiler---profiler-option)
-  - [3.3. FrameworkLint](#33-frameworklint)
-- [4. project documentation improvements](#4-project-documentation-improvements)
-- [5. Miscellaneous](#5-miscellaneous)
-  - [5.1. New binaries](#51-new-binaries)
-  - [5.2. automatic help generation](#52-automatic-help-generation)
-  - [5.3. Binaries improvement](#53-binaries-improvement)
-  - [5.4. merge bash-tools into bash-tools-framework](#54-merge-bash-tools-into-bash-tools-framework)
-  - [5.5. run precommit on github action](#55-run-precommit-on-github-action)
-  - [5.6. Improve UT](#56-improve-ut)
-  - [5.7. best practices](#57-best-practices)
-  - [5.8. Other libraries integration](#58-other-libraries-integration)
+- [1. Options/Args management](#1-optionsargs-management)
+- [2. Env::load](#2-envload)
+- [3. Framework Controller](#3-framework-controller)
+- [4. REQUIRE directive](#4-require-directive)
+  - [4.1. DISABLE directive](#41-disable-directive)
+  - [4.2. refact env load using require ?](#42-refact-env-load-using-require-)
+- [5. Framework functions changes](#5-framework-functions-changes)
+- [6. Compiler and bash Object oriented](#6-compiler-and-bash-object-oriented)
+  - [6.1. .framework-config should contain the compiler options](#61-framework-config-should-contain-the-compiler-options)
+  - [6.2. compiler --profiler option](#62-compiler---profiler-option)
+  - [6.3. FrameworkLint](#63-frameworklint)
+- [7. project documentation improvements](#7-project-documentation-improvements)
+- [8. Miscellaneous](#8-miscellaneous)
+  - [8.1. New binaries](#81-new-binaries)
+  - [8.2. automatic help generation](#82-automatic-help-generation)
+  - [8.3. Binaries improvement](#83-binaries-improvement)
+  - [8.4. merge bash-tools into bash-tools-framework](#84-merge-bash-tools-into-bash-tools-framework)
+  - [8.5. run precommit on github action](#85-run-precommit-on-github-action)
+  - [8.6. Improve UT](#86-improve-ut)
+  - [8.7. best practices](#87-best-practices)
+  - [8.8. Other libraries integration](#88-other-libraries-integration)
 
-## Options
+## 1. Options/Args management
+
+Optimize format:
+
+```bash
+  Options::generateGroup \
+    --title "GLOBAL OPTIONS:" \
+    --function-name groupGlobalOptions
+
+  # no more need to of helpCallback() { :; }
+  # --callback does not check for function existence anymore
+  # the check will be done at parse start
+  # --variable-name optional if callback
+  # --function-name will directly load the function (use
+  # sourceFunction with given function name)
+  Options::generateOption \
+    --help "help" \
+    --group groupGlobalOptions \
+    --alt "--help" \
+    --alt "-h" \
+    --callback helpCallback \
+    --function-name optionHelpFunction
+
+  Options::generateOption \
+    --help "verbose mode" \
+    --group groupGlobalOptions \
+    --variable-name "verbose" \
+    --alt "--verbose" --alt "-v" \
+    --function-name optionVerboseFunction
+
+  Options::generateOption \
+    --variable-type String \
+    --help "Set log level" \
+    --group groupGlobalOptions \
+    --variable-name "logLevel" \
+    --alt "--log-level" \
+    --function-name optionLogLevel
+
+  Options::generateOption \
+    --variable-type String \
+    --help "set display level" \
+    --group groupGlobalOptions \
+    --variable-name "displayLevel" \
+    --alt "--display-level" \
+    --function-name optionDisplayLevel
+
+  Options::generateOption \
+    --help "Produce monochrome output." \
+    --group groupGlobalOptions \
+    --variable-name "noColor" \
+    --alt "--no-color" \
+    --function-name optionNoColor
+
+  Options::generateOption \
+    --help "Print version information and quit" \
+    --group groupGlobalOptions \
+    --alt "--version" \
+    --callback versionCallback \
+    --function-name optionNoColor
+
+  Options::generateOption \
+    --variable-name "quiet" \
+    --help "quiet mode" \
+    --group groupGlobalOptions \
+    --alt "--quiet" --alt "-q" \
+    --function-name optionQuiet
+
+  local -a options=(
+    --author "[François Chastanet](https://github.com/fchastanet)"
+    --source-file "${REPOSITORY_URL}/tree/master/${SRC_FILE_PATH}"
+    --license "MIT License"
+    --copyright "Copyright (c) 2022 François Chastanet"
+    --version "${versionNumber}"
+    optionHelp
+    optionVersion
+    optionQuiet
+    optionNoColor
+    optionLogLevel
+    optionDisplayLevel
+    optionVerbose
+  )
+```
+
+- best practice: scope arg/option variable names
+- default arguments
+
+  - Args::version to display binary version
+  - IMPLEMENT special to manage options: --verbose, --version, --help, ...
+  - other default options to the binaries: log-level, display-log-level, ...
+  - arg configuration: display whole bash framework configuration
+
+- generate options parsing + doc from template
+
+  - <https://github.com/ko1nksm/getoptions>
+  - <https://github.com/matejak/argbash>
+  - <https://argbash.dev>
+  - <https://github.com/adoyle-h/lobash>
+  - <https://github.com/elibs/ebash>
 
 - remove action to remove args already managed
 - manage String|Function
@@ -31,7 +127,7 @@
   - option type File, would check if String after is a valid file
 - option type env --env OPTION=\*
 
-## Env::load
+## 2. Env::load
 
 - add --log-level and --display-log-level args
   - add --version
@@ -42,7 +138,7 @@
   - default facade template
   - How to create your first binary file
 
-## Framework Controller
+## 3. Framework Controller
 
 - Framework controller/listener
   - Facade becomes a controller with some actions
@@ -61,9 +157,9 @@
   - manage events
 - if IMPLEMENT help => @require Args::requireHelpArg
 
-## 1. REQUIRE directive
+## 4. REQUIRE directive
 
-### 1.1. DISABLE directive
+### 4.1. DISABLE directive
 
 - define REQUIRE_DISABLED array in .framework-config
 - Compiler::Requirement::parseDisable + add automatically to global variable
@@ -73,7 +169,7 @@
 - compiler pass
   - will ignore the disabled requirements
 
-### 1.2. refact env load using require ?
+### 4.2. refact env load using require ?
 
 - test Env::load
   - eg: Env::get "HOME" will get HOME variable from .env file if exists or get
@@ -90,24 +186,7 @@
   - no but load src/Env/testsData/.env by default ? using var
     BASH_FRAMEWORK_DEFAULT_ENV_FILE ?
 
-### 1.3. Options/Args management
-
-- default arguments
-
-  - Args::version to display binary version
-  - IMPLEMENT special to manage options: --verbose, --version, --help, ...
-  - other default options to the binaries: log-level, display-log-level, ...
-  - arg configuration: display whole bash framework configuration
-
-- generate options parsing + doc from template
-
-  - <https://github.com/ko1nksm/getoptions>
-  - <https://github.com/matejak/argbash>
-  - <https://argbash.dev>
-  - <https://github.com/adoyle-h/lobash>
-  - <https://github.com/elibs/ebash>
-
-## 2. Framework functions changes
+## 5. Framework functions changes
 
 - remove all process substitution as it hides exit code > 0
 - replace `_colors.sh` with `Log/theme`
@@ -119,10 +198,15 @@
   - but no way to know if variable exists except by using `wslvar -S` or
     `wslvar -L`
 
-## 3. Compiler and bash Object oriented
+## 6. Compiler and bash Object oriented
 
 TODOs linked to bin/compiler or templates .tpl:
 
+- auto import needed bash framework features like Options/\_\_all.sh without the
+  need to source it into the compiler. It would mean to authorize bash-tpl
+  template to be able to use bash framework functions automatically.
+  <https://stackoverflow.com/a/60612372/3045926> using command not found
+  handler.
 - ADAPTER directive to allow to choose between multiple implementation depending
   on require conditions
 - make compile options works with relative files
@@ -135,7 +219,7 @@ TODOs linked to bin/compiler or templates .tpl:
   [shfmt --minify option](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#generic-flags)
 - bash-tpl should be a vendor dependency
 
-### 3.1. .framework-config should contain the compiler options
+### 6.1. .framework-config should contain the compiler options
 
 - .framework-config should contain the compiler options
   - compile should use FRAMEWORK_SRC_DIRS from .framework-config
@@ -144,7 +228,7 @@ TODOs linked to bin/compiler or templates .tpl:
   - list binaries that really need FRAMEWORK_ROOT_DIR
   - deduce FRAMEWORK_ROOT_DIR based on most near .framework-config file ?
 
-### 3.2. compiler --profiler option
+### 6.2. compiler --profiler option
 
 - compile add profiler option
   - if parameter --profiler is passed to compiler, then inject profiling of all
@@ -153,7 +237,7 @@ TODOs linked to bin/compiler or templates .tpl:
   - eg: ShellDoc::generateShellDocsFromDir
   - could compute time elapsed of subShell ?
 
-### 3.3. FrameworkLint
+### 6.3. FrameworkLint
 
 - check no use of ${TMPDIR} without default value
 - check if 2 files have the same BINARY_FILE target
@@ -166,7 +250,7 @@ TODOs linked to bin/compiler or templates .tpl:
   - 2 @arg $1
   - @arg $1 after @arg $2
 
-## 4. project documentation improvements
+## 7. project documentation improvements
 
 - update CompileCommand.md examples
 - MAIN_FUNCTION_VAR_NAME add doc - more generally doc about facade template
@@ -174,16 +258,16 @@ TODOs linked to bin/compiler or templates .tpl:
 - register to <https://repology.org/projects/> in order to show matrix image
   <https://github.com/jirutka/esh/blob/master/README.adoc>
 
-## 5. Miscellaneous
+## 8. Miscellaneous
 
-### 5.1. New binaries
+### 8.1. New binaries
 
 - add githubUpgradeRelease based on Github::upgradeRelease
 - Update vendor command
   - command that allows to update the libraries in the repo
   - github cron that checks if library updates exists
 
-### 5.2. automatic help generation
+### 8.2. automatic help generation
 
 - FACADE help auto generated
 - IMPLEMENT special to manage options: --verbose, --version, --help, ...
@@ -191,7 +275,7 @@ TODOs linked to bin/compiler or templates .tpl:
   <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/>
 - [asciidoctor](https://asciidoctor.org/) to build manpages ?
 
-### 5.3. Binaries improvement
+### 8.3. Binaries improvement
 
 TODOs linked to `src/_binaries/*`:
 
@@ -202,24 +286,26 @@ TODOs linked to `src/_binaries/*`:
   - shellcheckLint
   - doc generation
 
-### 5.4. merge bash-tools into bash-tools-framework
+### 8.4. merge bash-tools into bash-tools-framework
 
 - move bash-tools binaries to bash-tools-framework
 - import bash_dev_env commands but keep this project separated
 
-### 5.5. run precommit on github action
+### 8.5. run precommit on github action
 
 - add megalinter github action
   <https://github.com/marketplace/actions/megalinter>
 - <https://github.com/pre-commit/action>
 
-### 5.6. Improve UT
+### 8.6. Improve UT
 
 - ensure filters functions never fails (check bashFrameworkFunctions) and ensure
   filters functions are not used as Assert function
 
-### 5.7. best practices
+### 8.7. best practices
 
+- use printf
+  <https://github.com/anordal/shellharden/blob/master/how_to_do_things_safely_in_bash.md#echo--printf>
 - what would be the impact to add shopt -s lastpipe
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
   using customized aliased commands by the use => but unalias --all is used in
@@ -233,7 +319,7 @@ TODOs linked to `src/_binaries/*`:
   - <https://github.com/koalaman/shellcheck/issues/468>
 - [Apply defensive suggestions](https://docs.fedoraproject.org/en-US/defensive-coding/programming-languages/Shell/)
 
-### 5.8. Other libraries integration
+### 8.8. Other libraries integration
 
 - integrate <https://github.com/adoyle-h/lobash> ?
 - integrate <https://github.com/elibs/ebash> ?

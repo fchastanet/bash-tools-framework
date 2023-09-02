@@ -18,6 +18,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionStringArray.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateArg.sh"
 # shellcheck source=src/Options/generateFunctionName.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateFunctionName.sh"
+# shellcheck source=src/Options/sourceFunction.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Options/sourceFunction.sh"
 # shellcheck source=src/Options/assertAlt.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/assertAlt.sh"
 # shellcheck source=src/Options/bashTpl.sh

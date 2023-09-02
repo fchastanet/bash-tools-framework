@@ -1,4 +1,4 @@
-echo -e "$(Array::wrap " " 80 2 <%% echo -e '"${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}"' %> "<% ${help} %>")"
+echo -e "$(Array::wrap " " 80 0 <%% echo -e '"${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}"' %> "<% ${help} %>")"
 % echo '    echo'
 
 %# ------------------------------------------
@@ -64,7 +64,8 @@ fi
 %
 if [[ -n "${version}" ]]; then
   echo '    echo'
-  echo $'    echo -e "${__HELP_TITLE_COLOR}Version:" <% ${version} %>${__RESET_COLOR}'
+  echo $'    echo -n -e "${__HELP_TITLE_COLOR}VERSION: <% ${version} %>${__RESET_COLOR}"'
+  echo "    echo '<% ${version} %>'"
 fi
 %
 %# ------------------------------------------
@@ -72,9 +73,19 @@ fi
 %# ------------------------------------------
 %
 if [[ -n "${author}" ]]; then
-  echo 'echo'
+  echo '    echo'
   echo $'    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"'
   echo "    echo '<% ${author} %>'"
+fi
+%
+%# ------------------------------------------
+%# source file section
+%# ------------------------------------------
+%
+if [[ -n "${sourceFile}" ]]; then
+  echo '    echo'
+  echo $'    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"'
+  echo "    echo '<% ${sourceFile} %>'"
 fi
 %
 %# ------------------------------------------
@@ -82,7 +93,7 @@ fi
 %# ------------------------------------------
 %
 if [[ -n "${license}" ]]; then
-  echo 'echo'
+  echo '    echo'
   echo $'    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"'
   echo "    echo '<% ${license} %>'"
 fi

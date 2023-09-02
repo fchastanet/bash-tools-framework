@@ -16,8 +16,9 @@
 # @option --version <String|Function> (optional) provides version section help. Section not generated if not provided.
 # @option --author <String|Function> (optional) provides author section help. Section not generated if not provided.
 # @option --command-name <String|Function> (optional) provides the command name. (Default: name of current command file without path)
-# @option --license <String|Function> (optional) provides License section help Section not generated if not provided.
-# @option --copyright <String|Function> (optional) provides copyright section help Section not generated if not provided.
+# @option --license <String|Function> (optional) provides License section. Section not generated if not provided.
+# @option --source-file <String|Function> (optional) provides Source file section. Section not generated if not provided.
+# @option --copyright <String|Function> (optional) provides copyright section. Section not generated if not provided.
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
 # @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options.
 # @warning arguments list have to be provided in correct order
@@ -35,6 +36,7 @@ Options::generateCommand() {
   local author=""
   local commandName=""
   local license=""
+  local sourceFile=""
   local copyright=""
   local helpTemplate=""
   local errorIfUnknownOption="1"
@@ -82,6 +84,10 @@ Options::generateCommand() {
       --license)
         shift
         setArg "${option}" license "$#" "$1" || return 1
+        ;;
+      --source-file)
+        shift
+        setArg "${option}" sourceFile "$#" "$1" || return 1
         ;;
       --copyright)
         shift
@@ -190,10 +196,13 @@ Options::generateCommand() {
   local optionListToSort
   optionListToSort="$(
     (
-      for currentOpt in "${optionListUnordered[@]}"; do
-        echo "${currentOpt} $("${currentOpt}" groupId)"
+      local -i i
+      local currentOpt
+      for ((i = 0; i < ${#optionListUnordered[@]}; ++i)); do
+        currentOpt="${optionListUnordered[i]}"
+        echo "${currentOpt} ${i} $("${currentOpt}" groupId)"
       done
-    ) | sort -k2,2 | awk '{ print $1 }'
+    ) | sort -k3,3 -k2,2 | awk '{ print $1 }'
   )"
   readarray -t optionList <<<"${optionListToSort}"
 
@@ -214,6 +223,7 @@ Options::generateCommand() {
     export optionList
     export argumentList
     export commandFunctionName
+    export sourceFile
     export errorIfUnknownOption
     export tplDir="${_COMPILE_ROOT_DIR}/src/Options/templates"
 

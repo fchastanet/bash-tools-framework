@@ -55,6 +55,8 @@ source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
 # shellcheck source=/src/File/insertFileAfterToken.sh
 source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
+# shellcheck source=src/Options/__all.sh
+source "${_COMPILE_SRC_DIR}/Options/__all.sh"
 # shellcheck source=src/Compiler/Embed/__all.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/__all.sh"
 # shellcheck source=src/Compiler/Facade/__all.sh

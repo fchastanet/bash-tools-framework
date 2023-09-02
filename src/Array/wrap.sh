@@ -21,11 +21,35 @@ Array::wrap() {
   fi
   shift || true
   (($# != 0)) || return 0
+
+  local arg
+
+  # convert multi-line arg to several args
+  local -a allArgs=()
+  for arg in "$@"; do
+    local line
+    local IFS=$'\n'
+    while read -r line; do
+      if [[ -z "${line}" ]]; then
+        allArgs+=($'\n')
+      else
+        allArgs+=("${line}")
+      fi
+    done <<<"${arg}"
+  done
+  set -- "${allArgs[@]}"
+
   local -i currentLineLength=0
   local needEcho="0"
   local arg="$1"
   while (($# > 0 || ${#arg} > 0)); do
-    if ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
+    if [[ "${arg}" = $'\n' ]]; then
+      printf $'\n\n'
+      ((currentLineLength = 0)) || true
+      ((glueLength = 0)) || true
+      shift || return 0
+      arg="$1"
+    elif ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
       # arg can be stored as a whole on current line
       if ((glueLength > 0)); then
         echo -n "${glue}"
@@ -56,7 +80,7 @@ Array::wrap() {
         echo
         echo -n "${indentStr}${arg}"
         ((glueLength = ${#glue})) || true
-        ((currentLineLength += ${#arg}))
+        ((currentLineLength = ${#arg}))
         arg="" # allows to go to next arg
         needEcho="1"
       fi

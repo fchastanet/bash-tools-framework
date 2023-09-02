@@ -34,16 +34,6 @@ testCommand() {
   }
 }
 
-# @description source option file deduced by option function name
-# @arg $1 functionName:String
-sourceFunctionFile() {
-  local functionName="$1"
-  local tmpFile
-  tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}").sh"
-  # shellcheck source=src/Options/testsData/generateOption.caseBoolean1.sh
-  source "${tmpFile}"
-}
-
 # @description allows to test generated command function
 # @env BATS_FIX_TEST int 1 to fix testsData expected files
 # @arg $1 expectedResult:String

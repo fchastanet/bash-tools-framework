@@ -77,14 +77,11 @@ function Array::wrap::realExample::noIndent { #@test
     "[--copyright <String|Function>]" \
     "[--help-template <String>]"
   assert_success
-  assert_lines_count 7
+  assert_lines_count 4
   assert_line --index 0 "Usage:  Options::generateCommand --help <String|Function>"
-  assert_line --index 1 "[--command-name <String|Function>]"
-  assert_line --index 2 "[--version <String|Function>]"
-  assert_line --index 3 "[--author <String|Function>]"
-  assert_line --index 4 "[--License <String|Function>]"
-  assert_line --index 5 "[--copyright <String|Function>]"
-  assert_line --index 6 "[--help-template <String>]"
+  assert_line --index 1 "[--command-name <String|Function>] [--version <String|Function>]"
+  assert_line --index 2 "[--author <String|Function>] [--License <String|Function>]"
+  assert_line --index 3 "[--copyright <String|Function>] [--help-template <String>]"
 }
 
 function Array::wrap::realExample::indent2 { #@test
@@ -98,12 +95,28 @@ function Array::wrap::realExample::indent2 { #@test
     "[--copyright <String|Function>]" \
     "[--help-template <String>]"
   assert_success
-  assert_lines_count 7
+  assert_lines_count 4
   assert_line --index 0 "Usage:  Options::generateCommand --help <String|Function>"
-  assert_line --index 1 "  [--command-name <String|Function>]"
-  assert_line --index 2 "  [--version <String|Function>]"
-  assert_line --index 3 "  [--author <String|Function>]"
-  assert_line --index 4 "  [--License <String|Function>]"
-  assert_line --index 5 "  [--copyright <String|Function>]"
-  assert_line --index 6 "  [--help-template <String>]"
+  assert_line --index 1 "  [--command-name <String|Function>] [--version <String|Function>]"
+  assert_line --index 2 "  [--author <String|Function>] [--License <String|Function>]"
+  assert_line --index 3 "  [--copyright <String|Function>] [--help-template <String>]"
+}
+
+function Array::wrap::realExample::indent3 { #@test
+  Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "lint awk files
+
+Lint all files with .awk extension in specified folder.
+Filters out eventual .history folder
+Result in checkstyle format." >"${BATS_TEST_TMPDIR}/result"
+
+  diff "${BATS_TEST_TMPDIR}/result" "${BATS_TEST_DIRNAME}/testsData/array_wrap_indent3.expected.result" >&3
+}
+
+function Array::wrap::realExample::indent4 { #@test
+  run Array::wrap " " 80 0 "USAGE: awkLint" "[--display-level <String>]" \
+    "[--help|-h]" "[--log-level <String>]" "[--no-color]" "[--quiet|-q]" \
+    "[--verbose|-v]" "[--version]"
+  assert_lines_count 2
+  assert_line --index 0 "USAGE: awkLint [--display-level <String>] [--help|-h] [--log-level <String>]"
+  assert_line --index 1 "[--no-color] [--quiet|-q] [--verbose|-v] [--version]"
 }

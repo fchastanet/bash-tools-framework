@@ -3,19 +3,7 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} lint awk files
-
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <directory>
-Lint all files with .awk extension in specified folder.
-Filters out eventual .history folder
-Result in checkstyle format.
-
-.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
-EOF
-)"
-Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
+.INCLUDE "$(dynamicTemplateDir _binaries/options.awkLint.tpl)"
 
 awkLintScript="$(
   cat <<'EOF'
