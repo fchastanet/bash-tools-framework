@@ -22,7 +22,10 @@ function Options::generateFunction::functionNameEmpty { #@test
 
 function Options::generateFunction::functionNameProvided { #@test
   local status=0
-  run Options::generateFunction "myFunctionName" "simpleFunction" "${BATS_TEST_DIRNAME}/testsData"
+  source <(Options::generateFunction "myFunctionName" "simpleFunction" \
+    "${BATS_TEST_DIRNAME}/testsData") || status=$?
+  [[ "${status}" = "0" ]]
+  run myFunctionName
   assert_success
-  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/generateFunction.functionNameProvided.sh")"
+  assert_output "simpleFunction"
 }

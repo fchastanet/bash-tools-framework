@@ -84,10 +84,10 @@ function Options::generateOption::groupOptionEmpty { #@test
 }
 
 function Options::generateOption::groupOptionInvalid { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --group "invalid"
+  run Options::generateOption --variable-name "varName" --alt "--var" --group "François"
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - only function type are accepted as group - invalid 'invalid'"
+  assert_output --partial "ERROR   - Options::generateOption - Option --group - only posix or bash framework function name are accepted - invalid 'François'"
 }
 
 function Options::generateOption::groupOptionValid { #@test
@@ -107,10 +107,10 @@ function Options::generateOption::callbackOptionEmpty { #@test
 }
 
 function Options::generateOption::callbackOptionInvalid { #@test
-  run Options::generateOption --variable-name "varName" --alt "--var" --callback "invalid"
+  run Options::generateOption --variable-name "varName" --alt "--var" --callback "François"
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOption - only function type are accepted as callback - invalid 'invalid'"
+  assert_output --partial "ERROR   - Options::generateOption - Option --callback - only posix or bash framework function name are accepted - invalid 'François'"
 }
 
 function Options::generateOption::callbackOptionValid { #@test

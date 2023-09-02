@@ -158,8 +158,11 @@ Options::generateArg() {
       --function-name)
         shift
         checkOption "${option}" functionName "$#" || return 1
-        if ! Assert::posixFunctionName "$1"; then
-          Log::displayError "Options::generateOption - Option ${option} - only posix function name are accepted - invalid '$1'"
+        if
+          ! Assert::posixFunctionName "$1" &&
+            ! Assert::bashFrameworkFunction "$1"
+        then
+          Log::displayError "Options::generateOption - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
           return 1
         fi
         functionName="$1"

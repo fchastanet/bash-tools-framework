@@ -122,262 +122,6 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
-# @description Log namespace provides 2 kind of functions
-# - Log::display* allows to display given message with
-#   given display level
-# - Log::log* allows to log given message with
-#   given log level
-# Log::display* functions automatically log the message too
-# @see Env::requireLoad to load the display and log level from .env file
-
-# @description log level off
-export __LEVEL_OFF=0
-# @description log level error
-export __LEVEL_ERROR=1
-# @description log level warning
-export __LEVEL_WARNING=2
-# @description log level info
-export __LEVEL_INFO=3
-# @description log level success
-export __LEVEL_SUCCESS=3
-# @description log level debug
-export __LEVEL_DEBUG=4
-
-# @description Display message using debug color (grey)
-# @arg $1 message:String the message to display
-Log::displayDebug() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_DEBUG)); then
-    echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logDebug "$1"
-}
-
-# @description Display message using info color (bg light blue/fg white)
-# @arg $1 message:String the message to display
-Log::displayInfo() {
-  local type="${2:-INFO}"
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logInfo "$1" "${type}"
-}
-
-Options::command0b4911f54dd241afb9637cb22315f406() {
-  local options_parse_cmd="$1"
-  shift || true
-
-  if [[ "${options_parse_cmd}" = "parse" ]]; then
-    help="0"
-    local -i options_parse_optionParsedCountHelp
-    ((options_parse_optionParsedCountHelp = 0)) || true
-    version="0"
-    local -i options_parse_optionParsedCountVersion
-    ((options_parse_optionParsedCountVersion = 0)) || true
-    quiet="0"
-    local -i options_parse_optionParsedCountQuiet
-    ((options_parse_optionParsedCountQuiet = 0)) || true
-    noColor="0"
-    local -i options_parse_optionParsedCountNoColor
-    ((options_parse_optionParsedCountNoColor = 0)) || true
-    local -i options_parse_optionParsedCountLogLevel
-    ((options_parse_optionParsedCountLogLevel = 0)) || true
-    local -i options_parse_optionParsedCountDisplayLevel
-    ((options_parse_optionParsedCountDisplayLevel = 0)) || true
-    verbose="0"
-    local -i options_parse_optionParsedCountVerbose
-    ((options_parse_optionParsedCountVerbose = 0)) || true
-    local -i options_parse_parsedArgIndex=0
-    while (($# > 0)); do
-      local options_parse_arg="$1"
-      case "${options_parse_arg}" in
-        # Option 1/7
-        # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --help | -h)
-          help="1"
-          if ((options_parse_optionParsedCountHelp >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          helpCallback "${help}"
-          ;;
-        # Option 2/7
-        # Option version --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --version)
-          version="1"
-          if ((options_parse_optionParsedCountVersion >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          versionCallback "${version}"
-          ;;
-        # Option 3/7
-        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --quiet | -q)
-          quiet="1"
-          if ((options_parse_optionParsedCountQuiet >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ;;
-        # Option 4/7
-        # Option noColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --no-color)
-          noColor="1"
-          if ((options_parse_optionParsedCountNoColor >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ;;
-        # Option 5/7
-        # Option logLevel --log-level variableType String min 0 max 1 authorizedValues '' regexp ''
-        --log-level)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountLogLevel >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountLogLevel))
-          logLevel="$1"
-          ;;
-        # Option 6/7
-        # Option displayLevel --display-level variableType String min 0 max 1 authorizedValues '' regexp ''
-        --display-level)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountDisplayLevel >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountDisplayLevel))
-          displayLevel="$1"
-          ;;
-        # Option 7/7
-        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --verbose | -v)
-          verbose="1"
-          if ((options_parse_optionParsedCountVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ;;
-        -*)
-          Log::displayError "Invalid option ${options_parse_arg}"
-          return 1
-          ;;
-        *)
-          ((++options_parse_parsedArgIndex))
-          ;;
-      esac
-      shift || true
-    done
-    export help
-    export version
-    export quiet
-    export noColor
-    export logLevel
-    export displayLevel
-    export verbose
-  elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "lint awk files
-
-Lint all files with .awk extension in current git folder.
-Result in checkstyle format.")"
-    echo
-
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
-      "${SCRIPT_NAME}" \
-      "[--help|-h]" "[--version]" "[--quiet|-q]" "[--no-color]" "[--log-level <String>]" "[--display-level <String>]" "[--verbose|-v]")"
-    echo
-    echo -e "${__HELP_TITLE_COLOR}COMMON OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--help, -h"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    help'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--version"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    Print version information and quit'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--quiet, -q"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    quiet mode'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--no-color"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    Produce monochrome output.'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--log-level"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    Set log level'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--display-level"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    set display level'
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--verbose, -v"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo '    verbose mode'
-    echo
-    echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-    echo '1.0'
-    echo
-    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
-    echo '[François Chastanet](https://github.com/fchastanet)'
-    echo
-    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"
-    echo 'https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/awkLint.sh'
-    echo
-    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
-    echo 'MIT License'
-    echo
-    echo 'Copyright (c) 2022 François Chastanet'
-  else
-    Log::displayError "Option command invalid: '${options_parse_cmd}'"
-    return 1
-  fi
-}
-
-# @description ensure COMMAND_BIN_DIR env var is set
-# and PATH correctly prepared
-# @noargs
-# @set COMMAND_BIN_DIR string the directory where to find this command
-# @set PATH string add directory where to find this command binary
-Compiler::Facade::requireCommandBinDir() {
-  COMMAND_BIN_DIR="${CURRENT_DIR}"
-  Env::pathPrepend "${COMMAND_BIN_DIR}"
-}
-
 # @description concat each element of an array with a separator
 # but wrapping text when line length is more than provided argument
 # The algorithm will try not to cut the array element if can
@@ -430,10 +174,10 @@ Array::wrap() {
     elif ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
       # arg can be stored as a whole on current line
       if ((glueLength > 0)); then
-        echo -n "${glue}"
+        echo -e -n "${glue}"
         ((currentLineLength += glueLength))
       fi
-      echo -n "${arg}"
+      echo -e -n "${arg}"
       needEcho="1"
       ((currentLineLength += ${#arg}))
       ((glueLength = ${#glue})) || true
@@ -443,12 +187,12 @@ Array::wrap() {
       if ((${#arg} >= (maxLineLength - indentNextLine))); then
         # arg can be stored on a whole line
         if ((glueLength > 0)); then
-          echo -n "${glue}"
+          echo -e -n "${glue}"
           ((currentLineLength += glueLength))
         fi
         local -i length
         ((length = maxLineLength - currentLineLength)) || true
-        echo "${arg:0:${length}}"
+        echo -e "${arg:0:${length}}"
         ((currentLineLength = 0)) || true
         ((glueLength = 0)) || true
         arg="${indentStr}${arg:${length}}"
@@ -456,7 +200,7 @@ Array::wrap() {
       else
         # arg cannot be stored on a whole line, so we add it on next line as a whole
         echo
-        echo -n "${indentStr}${arg}"
+        echo -e -n "${indentStr}${arg}"
         ((glueLength = ${#glue})) || true
         ((currentLineLength = ${#arg}))
         arg="" # allows to go to next arg
@@ -476,6 +220,65 @@ Array::wrap() {
 #set -x
 #Array::wrap ":" 40 0 "Lorem ipsum dolor sit amet," "consectetur adipiscing elit." "Curabitur ac elit id massa" "condimentum finibus."
 
+# @description Log namespace provides 2 kind of functions
+# - Log::display* allows to display given message with
+#   given display level
+# - Log::log* allows to log given message with
+#   given log level
+# Log::display* functions automatically log the message too
+# @see Env::requireLoad to load the display and log level from .env file
+
+# @description log level off
+export __LEVEL_OFF=0
+# @description log level error
+export __LEVEL_ERROR=1
+# @description log level warning
+export __LEVEL_WARNING=2
+# @description log level info
+export __LEVEL_INFO=3
+# @description log level success
+export __LEVEL_SUCCESS=3
+# @description log level debug
+export __LEVEL_DEBUG=4
+
+# @description Display message using debug color (grey)
+# @arg $1 message:String the message to display
+Log::displayDebug() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_DEBUG)); then
+    echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logDebug "$1"
+}
+
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
+Log::displayError() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
+    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logError "$1"
+}
+
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
+Log::displayInfo() {
+  local type="${2:-INFO}"
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logInfo "$1" "${type}"
+}
+
+# @description ensure COMMAND_BIN_DIR env var is set
+# and PATH correctly prepared
+# @noargs
+# @set COMMAND_BIN_DIR string the directory where to find this command
+# @set PATH string add directory where to find this command binary
+Compiler::Facade::requireCommandBinDir() {
+  COMMAND_BIN_DIR="${CURRENT_DIR}"
+  Env::pathPrepend "${COMMAND_BIN_DIR}"
+}
+
 # @description prepend directories to the PATH environment variable
 # @arg $@ args:String[] list of directories to prepend
 # @set PATH update PATH with the directories prepended
@@ -488,15 +291,6 @@ Env::pathPrepend() {
   done
 }
 
-# @description Display message using error color (red)
-# @arg $1 message:String the message to display
-Log::displayError() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
-    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logError "$1"
-}
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logDebug() {
@@ -507,17 +301,17 @@ Log::logDebug() {
 
 # @description log message to file
 # @arg $1 message:String the message to display
-Log::logInfo() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-INFO}" "$1"
+Log::logError() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
+    Log::logMessage "${2:-ERROR}" "$1"
   fi
 }
 
 # @description log message to file
 # @arg $1 message:String the message to display
-Log::logError() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
-    Log::logMessage "${2:-ERROR}" "$1"
+Log::logInfo() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-INFO}" "$1"
   fi
 }
 
@@ -950,11 +744,217 @@ versionCallback() {
 }
 
 helpCallback() {
-  Options::command0b4911f54dd241afb9637cb22315f406 help
+  awkLintCommand help
   exit 0
 }
 
-Options::command0b4911f54dd241afb9637cb22315f406 parse "${BASH_FRAMEWORK_ARGV[@]}"
+awkLintCommand() {
+  local options_parse_cmd="$1"
+  shift || true
+
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
+    help="0"
+    local -i options_parse_optionParsedCountHelp
+    ((options_parse_optionParsedCountHelp = 0)) || true
+    version="0"
+    local -i options_parse_optionParsedCountVersion
+    ((options_parse_optionParsedCountVersion = 0)) || true
+    quiet="0"
+    local -i options_parse_optionParsedCountQuiet
+    ((options_parse_optionParsedCountQuiet = 0)) || true
+    noColor="0"
+    local -i options_parse_optionParsedCountNoColor
+    ((options_parse_optionParsedCountNoColor = 0)) || true
+    local -i options_parse_optionParsedCountLogLevel
+    ((options_parse_optionParsedCountLogLevel = 0)) || true
+    local -i options_parse_optionParsedCountDisplayLevel
+    ((options_parse_optionParsedCountDisplayLevel = 0)) || true
+    verbose="0"
+    local -i options_parse_optionParsedCountVerbose
+    ((options_parse_optionParsedCountVerbose = 0)) || true
+    local -i options_parse_parsedArgIndex=0
+    while (($# > 0)); do
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
+        # Option 1/7
+        # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --help | -h)
+          help="1"
+          if ((options_parse_optionParsedCountHelp >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          helpCallback "${help}"
+          ;;
+        # Option 2/7
+        # Option version --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --version)
+          version="1"
+          if ((options_parse_optionParsedCountVersion >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          versionCallback "${version}"
+          ;;
+        # Option 3/7
+        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --quiet | -q)
+          quiet="1"
+          if ((options_parse_optionParsedCountQuiet >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 4/7
+        # Option noColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --no-color)
+          noColor="1"
+          if ((options_parse_optionParsedCountNoColor >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 5/7
+        # Option logLevel --log-level variableType String min 0 max 1 authorizedValues '' regexp ''
+        --log-level)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountLogLevel >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountLogLevel))
+          logLevel="$1"
+          ;;
+        # Option 6/7
+        # Option displayLevel --display-level variableType String min 0 max 1 authorizedValues '' regexp ''
+        --display-level)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountDisplayLevel >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountDisplayLevel))
+          displayLevel="$1"
+          ;;
+        # Option 7/7
+        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --verbose | -v)
+          verbose="1"
+          if ((options_parse_optionParsedCountVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        -*)
+          Log::displayError "Invalid option ${options_parse_arg}"
+          return 1
+          ;;
+        *)
+          ((++options_parse_parsedArgIndex))
+          ;;
+      esac
+      shift || true
+    done
+    export help
+    export version
+    export quiet
+    export noColor
+    export logLevel
+    export displayLevel
+    export verbose
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
+    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "lint awk files
+
+Lint all files with .awk extension in current git folder.
+Result in checkstyle format.")"
+    echo
+
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "awkLint" "[OPTIONS]")"
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
+      "awkLint" \
+      "[--help|-h]" "[--version]" "[--quiet|-q]" "[--no-color]" "[--log-level <String>]" "[--display-level <String>]" "[--verbose|-v]")"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--help, -h"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    help'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--version"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    Print version information and quit'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--quiet, -q"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    quiet mode'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--no-color"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    Produce monochrome output.'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--log-level"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    Set log level'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--display-level"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    set display level'
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--verbose, -v"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo '    verbose mode'
+    echo
+    echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
+    echo '1.0'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
+    echo '[François Chastanet](https://github.com/fchastanet)'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"
+    echo 'https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/awkLint.sh'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
+    echo 'MIT License'
+    echo
+    echo 'Copyright (c) 2022 François Chastanet'
+  else
+    Log::displayError "Option command invalid: '${options_parse_cmd}'"
+    return 1
+  fi
+}
+
+awkLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 awkLintScript="$(
   cat <<'EOF'

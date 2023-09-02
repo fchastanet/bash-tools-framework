@@ -30,6 +30,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Options/bashTpl.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Assert/validVariableName.sh"
 # shellcheck source=/src/Assert/posixFunctionName.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Assert/posixFunctionName.sh"
+# shellcheck source=/src/Assert/bashFrameworkFunction.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Assert/bashFrameworkFunction.sh"
 # shellcheck source=/src/Array/contains.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Array/contains.sh"
 # shellcheck source=/src/Array/join.sh

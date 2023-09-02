@@ -103,13 +103,12 @@ function Array::wrap::realExample::indent2 { #@test
 }
 
 function Array::wrap::realExample::indent3 { #@test
-  Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "lint awk files
+  Array::wrap " " 80 0 "\e[32mDescription:\e[0m" "lint awk files
 
 Lint all files with .awk extension in specified folder.
 Filters out eventual .history folder
 Result in checkstyle format." >"${BATS_TEST_TMPDIR}/result"
-
-  diff "${BATS_TEST_TMPDIR}/result" "${BATS_TEST_DIRNAME}/testsData/array_wrap_indent3.expected.result" >&3
+  diff "${BATS_TEST_TMPDIR}/result" <(cat "${BATS_TEST_DIRNAME}/testsData/array_wrap_indent3.expected.result") >&3
 }
 
 function Array::wrap::realExample::indent4 { #@test

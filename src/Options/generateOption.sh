@@ -117,8 +117,11 @@ Options::generateOption() {
           Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
           return 1
         fi
-        if [[ "$(type -t "$1")" != "function" ]]; then
-          Log::displayError "Options::generateOption - only function type are accepted as group - invalid '$1'"
+        if
+          ! Assert::posixFunctionName "$1" &&
+            ! Assert::bashFrameworkFunction "$1"
+        then
+          Log::displayError "Options::generateOption - Option ${arg} - only posix or bash framework function name are accepted - invalid '$1'"
           return 1
         fi
         group="$1"
@@ -129,8 +132,11 @@ Options::generateOption() {
           Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
           return 1
         fi
-        if [[ "$(type -t "$1")" != "function" ]]; then
-          Log::displayError "Options::generateOption - only function type are accepted as callback - invalid '$1'"
+        if
+          ! Assert::posixFunctionName "$1" &&
+            ! Assert::bashFrameworkFunction "$1"
+        then
+          Log::displayError "Options::generateOption - Option ${arg} - only posix or bash framework function name are accepted - invalid '$1'"
           return 1
         fi
         callback="$1"
@@ -141,8 +147,11 @@ Options::generateOption() {
           Log::displayError "Options::generateOption - Option ${arg} - a value needs to be specified"
           return 1
         fi
-        if ! Assert::posixFunctionName "$1"; then
-          Log::displayError "Options::generateOption - Option ${arg} - only posix function name are accepted - invalid '$1'"
+        if
+          ! Assert::posixFunctionName "$1" &&
+            ! Assert::bashFrameworkFunction "$1"
+        then
+          Log::displayError "Options::generateOption - Option ${arg} - only posix or bash framework function name are accepted - invalid '$1'"
           return 1
         fi
         functionName="$1"
@@ -153,8 +162,8 @@ Options::generateOption() {
     esac
     shift || true
   done
-  if [[ -z "${variableName}" ]]; then
-    Log::displayError "Options::generateOption - --variable-name option is mandatory"
+  if [[ -z "${callback}" && -z "${variableName}" ]]; then
+    Log::displayError "Options::generateOption - --variable-name option is mandatory if no callback provided"
     return 1
   fi
   if (("${#alts[@]}" == 0)); then

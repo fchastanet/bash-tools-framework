@@ -5,6 +5,8 @@
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options.awkLint.tpl)"
 
+awkLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
+
 awkLintScript="$(
   cat <<'EOF'
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_binaries/awkLint.awk"

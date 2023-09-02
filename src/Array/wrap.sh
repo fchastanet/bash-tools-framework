@@ -52,10 +52,10 @@ Array::wrap() {
     elif ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
       # arg can be stored as a whole on current line
       if ((glueLength > 0)); then
-        echo -n "${glue}"
+        echo -e -n "${glue}"
         ((currentLineLength += glueLength))
       fi
-      echo -n "${arg}"
+      echo -e -n "${arg}"
       needEcho="1"
       ((currentLineLength += ${#arg}))
       ((glueLength = ${#glue})) || true
@@ -65,12 +65,12 @@ Array::wrap() {
       if ((${#arg} >= (maxLineLength - indentNextLine))); then
         # arg can be stored on a whole line
         if ((glueLength > 0)); then
-          echo -n "${glue}"
+          echo -e -n "${glue}"
           ((currentLineLength += glueLength))
         fi
         local -i length
         ((length = maxLineLength - currentLineLength)) || true
-        echo "${arg:0:${length}}"
+        echo -e "${arg:0:${length}}"
         ((currentLineLength = 0)) || true
         ((glueLength = 0)) || true
         arg="${indentStr}${arg:${length}}"
@@ -78,7 +78,7 @@ Array::wrap() {
       else
         # arg cannot be stored on a whole line, so we add it on next line as a whole
         echo
-        echo -n "${indentStr}${arg}"
+        echo -e -n "${indentStr}${arg}"
         ((glueLength = ${#glue})) || true
         ((currentLineLength = ${#arg}))
         arg="" # allows to go to next arg

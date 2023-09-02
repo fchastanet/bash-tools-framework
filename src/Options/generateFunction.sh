@@ -41,6 +41,6 @@ Options::generateFunction() {
     echo "${functionName}"
   else
     # display the generated function
-    interpretTemplate || return 1
+    interpretTemplate | sed -E '/^#!/d' || return 1
   fi
 }

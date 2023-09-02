@@ -12,6 +12,7 @@ testCommand() {
   # shellcheck disable=SC2154
   [[ "${status}" = "0" ]] || {
     cat "${BATS_TEST_TMPDIR}/result" >&3
+    [[ -f "${BATS_TEST_TMPDIR}/error" ]] && cat "${BATS_TEST_TMPDIR}/error" >&3
     return 1
   }
   run cat "${BATS_TEST_TMPDIR}/result"

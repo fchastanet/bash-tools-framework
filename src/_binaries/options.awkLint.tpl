@@ -8,17 +8,17 @@ Result in checkstyle format."
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options.base.tpl)"
 
-%
-options+=(--help "${help}")
-
-declare command
-command="$(Options::generateCommand "${options[@]}")"
-Options::sourceFunction "${command}"
-%
-
 helpCallback() {
-  <% ${command} %> help
+  awkLintCommand help
   exit 0
 }
 
-<% ${command} %> parse "${BASH_FRAMEWORK_ARGV[@]}"
+%
+options+=(
+  --help "${help}"
+  --command-name awkLint
+  --function-name awkLintCommand
+)
+
+Options::generateCommand "${options[@]}"
+%

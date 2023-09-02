@@ -1,78 +1,66 @@
 %# Needed variables
 %# - versionNumber
 %
-  optionGroup="$(Options::generateGroup \
-    --title "COMMON OPTIONS:" \
-  )"
-  Options::sourceFunction "${optionGroup}"
+  # shellcheck source=/dev/null
+  source <(
+    Options::generateGroup \
+      --title "GLOBAL OPTIONS:" \
+      --function-name groupGlobalOptions
 
-  helpCallback() { :; }
-  optionHelp="$(Options::generateOption \
-    --variable-type Boolean \
-    --help "help" \
-    --group "${optionGroup}" \
-    --variable-name "help" \
-    --alt "--help" \
-    --alt "-h" \
-    --callback helpCallback
-  )"
-  Options::sourceFunction "${optionHelp}"
+    Options::generateOption \
+      --help "help" \
+      --group groupGlobalOptions \
+      --variable-name "help" \
+      --alt "--help" \
+      --alt "-h" \
+      --callback helpCallback \
+      --function-name optionHelp
 
-  optionVerbose="$(Options::generateOption \
-    --help "verbose mode" \
-    --group "${optionGroup}" \
-    --variable-name "verbose" \
-    --alt "--verbose" --alt "-v"
-  )"
-  Options::sourceFunction "${optionVerbose}"
+    Options::generateOption \
+      --help "verbose mode" \
+      --group groupGlobalOptions \
+      --variable-name "verbose" \
+      --alt "--verbose" --alt "-v" \
+      --function-name optionVerbose
 
-  optionLogLevel="$(Options::generateOption \
-    --variable-type String \
-    --help "Set log level" \
-    --group "${optionGroup}" \
-    --variable-name "logLevel" \
-    --alt "--log-level" \
-  )"
-  Options::sourceFunction "${optionLogLevel}"
+    Options::generateOption \
+      --variable-type String \
+      --help "Set log level" \
+      --group groupGlobalOptions \
+      --variable-name "logLevel" \
+      --alt "--log-level" \
+      --function-name optionLogLevel
 
-  optionDisplayLevel="$(Options::generateOption \
-    --variable-type String \
-    --help "set display level" \
-    --group "${optionGroup}" \
-    --variable-name "displayLevel" \
-    --alt "--display-level" \
-  )"
-  Options::sourceFunction "${optionDisplayLevel}"
+    Options::generateOption \
+      --variable-type String \
+      --help "set display level" \
+      --group groupGlobalOptions \
+      --variable-name "displayLevel" \
+      --alt "--display-level" \
+      --function-name optionDisplayLevel
 
-  optionNoColor="$(Options::generateOption \
-    --variable-type Boolean \
-    --help "Produce monochrome output." \
-    --group "${optionGroup}" \
-    --variable-name "noColor" \
-    --alt "--no-color" \
-  )"
-  Options::sourceFunction "${optionNoColor}"
+    Options::generateOption \
+      --help "Produce monochrome output." \
+      --group groupGlobalOptions \
+      --variable-name "noColor" \
+      --alt "--no-color" \
+      --function-name optionNoColor
 
-  versionCallback() {
-    :
-  }
-  optionVersion="$(Options::generateOption \
-    --variable-type Boolean \
-    --help "Print version information and quit" \
-    --group "${optionGroup}" \
-    --variable-name "version" \
-    --alt "--version" \
-    --callback versionCallback \
-  )"
-  Options::sourceFunction "${optionVersion}"
+    Options::generateOption \
+      --help "Print version information and quit" \
+      --group groupGlobalOptions \
+      --variable-name "version" \
+      --alt "--version" \
+      --callback versionCallback \
+      --function-name optionVersion
 
-  optionQuiet="$(Options::generateOption \
-    --variable-name "quiet" \
-    --help "quiet mode" \
-    --group "${optionGroup}" \
-    --alt "--quiet" --alt "-q" \
-  )"
-  Options::sourceFunction "${optionQuiet}"
+    Options::generateOption \
+      --variable-name "quiet" \
+      --help "quiet mode" \
+      --group groupGlobalOptions \
+      --alt "--quiet" --alt "-q" \
+      --function-name optionQuiet
+  )
 
   declare -a options=(
     --author "[François Chastanet](https://github.com/fchastanet)"
@@ -80,13 +68,13 @@
     --license "MIT License"
     --copyright "Copyright (c) 2022 François Chastanet"
     --version "${versionNumber}"
-    ${optionHelp}
-    ${optionVersion}
-    ${optionQuiet}
-    ${optionNoColor}
-    ${optionLogLevel}
-    ${optionDisplayLevel}
-    ${optionVerbose}
+    optionHelp
+    optionVersion
+    optionQuiet
+    optionNoColor
+    optionLogLevel
+    optionDisplayLevel
+    optionVerbose
   )
 %
 

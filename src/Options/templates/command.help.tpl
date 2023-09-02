@@ -65,7 +65,7 @@ fi
 if [[ -n "${version}" ]]; then
   echo '    echo'
   echo $'    echo -n -e "${__HELP_TITLE_COLOR}VERSION: <% ${version} %>${__RESET_COLOR}"'
-  echo "    echo '<% ${version} %>'"
+  echo "    echo '${version}'"
 fi
 %
 %# ------------------------------------------
@@ -75,7 +75,7 @@ fi
 if [[ -n "${author}" ]]; then
   echo '    echo'
   echo $'    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"'
-  echo "    echo '<% ${author} %>'"
+  echo "    echo '${author}'"
 fi
 %
 %# ------------------------------------------
@@ -85,7 +85,7 @@ fi
 if [[ -n "${sourceFile}" ]]; then
   echo '    echo'
   echo $'    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"'
-  echo "    echo '<% ${sourceFile} %>'"
+  echo "    echo '${sourceFile}'"
 fi
 %
 %# ------------------------------------------
@@ -95,7 +95,7 @@ fi
 if [[ -n "${license}" ]]; then
   echo '    echo'
   echo $'    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"'
-  echo "    echo '<% ${license} %>'"
+  echo "    echo '${license}'"
 fi
 %
 %# ------------------------------------------
@@ -104,6 +104,6 @@ fi
 %
 if [[ -n "${copyright}" ]]; then
   echo '    echo'
-  echo "    echo '<% ${copyright} %>'"
+  echo "    echo '${copyright}'"
 fi
 %
