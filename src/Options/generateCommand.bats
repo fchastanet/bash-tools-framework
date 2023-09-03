@@ -437,6 +437,7 @@ function Options::generateCommand::case6 { #@test
 
   local status=0
   Options::generateCommand --help "super command" \
+    --callback commandCallback \
     ${optionVerbose} \
     ${optionQuiet} \
     ${optionHelp} \
@@ -471,12 +472,17 @@ function Options::generateCommand::case6::parseArgsCallback { #@test
   function destFilesCallback() {
     echo "destFilesCallback $*"
   }
+
+  commandCallback() {
+    echo "command callback called"
+  }
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case6.sh"
   run Options::command parse srcFile destFile1 destFile2
-  assert_lines_count 3
+  assert_lines_count 4
   assert_line --index 0 "srcFileCallback srcFile -- destFile1 destFile2"
   assert_line --index 1 "destFilesCallback destFile1 -- destFile2"
   assert_line --index 2 "destFilesCallback destFile1 destFile2 --"
+  assert_line --index 3 "command callback called"
 }
 
 # sub command management

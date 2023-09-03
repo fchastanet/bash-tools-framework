@@ -58,6 +58,7 @@
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
 # @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options. This flag allows to disable this behavior.
 # @option --function-name <String> the name of the function that will be generated
+# @option --callback <Function> (optional) the callback called chen all options and arguments have been parsed.
 # @warning arguments function list has to be provided in correct order
 # @warning argument/option variable names have to be unique. Best practice is to scope the variable name to avoid variable name conflicts.
 # @exitcode 1 if error during option/argument parsing
@@ -80,6 +81,7 @@ Options::generateCommand() {
   local helpTemplate=""
   local errorIfUnknownOption="1"
   local functionName=""
+  local callback=""
   local -a optionListUnordered=()
   local -a argumentList=()
   local -a variableNameList=()
@@ -140,6 +142,18 @@ Options::generateCommand() {
         ;;
       --no-error-if-unknown-option)
         errorIfUnknownOption="0"
+        ;;
+      --callback)
+        shift
+        setArg "${option}" callback "$#" "$1" || return 1
+        if
+          ! Assert::posixFunctionName "$1" &&
+            ! Assert::bashFrameworkFunction "$1"
+        then
+          Log::displayError "Options::generateOption - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
+          return 1
+        fi
+        callback="$1"
         ;;
       --function-name)
         shift
@@ -263,6 +277,7 @@ Options::generateCommand() {
     export license
     export copyright
     export helpTemplate
+    export commandCallback="${callback}"
     export optionList
     export argumentList
     export functionName

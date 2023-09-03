@@ -43,6 +43,7 @@ Options::command() {
     done
     export verbose
     export srcDirs
+
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
     echo

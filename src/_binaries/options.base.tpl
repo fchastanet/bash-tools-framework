@@ -55,6 +55,15 @@
 
     Options::generateOption \
       --variable-type String \
+      --help "Set log file" \
+      --group groupGlobalOptionsFunction \
+      --alt "--log-file" \
+      --callback "optionLogFileCallback" \
+      --variable-name "optionLogFile" \
+      --function-name optionLogFileFunction
+
+    Options::generateOption \
+      --variable-type String \
       --help "set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
       --group groupGlobalOptionsFunction \
       --alt "--display-level" \
@@ -96,12 +105,14 @@
     --version "${versionNumber}"
     --function-name "${commandFunctionName}"
     --command-name "${SCRIPT_NAME}"
+    --callback commandOptionParseFinished
     --help "${help}"
     optionNoColorFunction
     optionHelpFunction
     optionVersionFunction
     optionQuietFunction
     optionLogLevelFunction
+    optionLogFileFunction
     optionDisplayLevelFunction
     optionInfoVerboseFunction
     optionDebugVerboseFunction
@@ -200,10 +211,19 @@ optionLogLevelCallback() {
   export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
 }
 
+optionLogFileCallback() {
+  local logFile="$1"
+  export BASH_FRAMEWORK_LOG_FILE="${logFile}"
+}
+
 optionQuietCallback() {
   export BASH_FRAMEWORK_QUIET_MODE=1
 }
 
 optionNoColorCallback() {
   UI::theme "noColor"
+}
+
+commandOptionParseFinished() {
+  Log::requireLoad
 }

@@ -71,3 +71,4 @@ done
   % "${argument}" export
   .INCLUDE "${tplDir}/arg.parse.after.tpl"
 % done
+<% ${commandCallback} %>
