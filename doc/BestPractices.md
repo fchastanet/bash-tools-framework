@@ -4,32 +4,33 @@
 this project because I wrote some of them while writing this project.
 
 - [1. Bash Best practices](#1-bash-best-practices)
-  - [1.1. Bash environment options](#11-bash-environment-options)
-    - [1.1.1. errexit (set -e | set -o errexit)](#111-errexit-set--e--set--o-errexit)
-      - [1.1.1.1. Caveats with command substitution](#1111-caveats-with-command-substitution)
-      - [1.1.1.2. Caveats with process substitution](#1112-caveats-with-process-substitution)
-      - [1.1.1.3. Process substitution is asynchronous](#1113-process-substitution-is-asynchronous)
-    - [1.1.2. pipefail (set -o pipefail)](#112-pipefail-set--o-pipefail)
-    - [1.1.3. errtrace (set -E | set -o errtrace)](#113-errtrace-set--e--set--o-errtrace)
-    - [1.1.4. nounset (set -u | set -o nounset)](#114-nounset-set--u--set--o-nounset)
-    - [1.1.5. shopt -s inherit_errexit](#115-shopt--s-inherit_errexit)
-    - [1.1.6. posix (set -o posix)](#116-posix-set--o-posix)
-  - [1.2. Main function](#12-main-function)
-  - [1.3. Arguments](#13-arguments)
-  - [1.4. some commands default options to use](#14-some-commands-default-options-to-use)
-  - [1.5. Bash and grep regular expressions](#15-bash-and-grep-regular-expressions)
-  - [1.6. General tips](#16-general-tips)
-  - [1.7. Variables](#17-variables)
-    - [1.7.1. Variable declaration](#171-variable-declaration)
-    - [1.7.2. variable naming convention](#172-variable-naming-convention)
-    - [1.7.3. Variable expansion](#173-variable-expansion)
-    - [1.7.4. Check if a variable is defined](#174-check-if-a-variable-is-defined)
-    - [1.7.5. Variable default value](#175-variable-default-value)
-  - [1.8. Capture output](#18-capture-output)
-    - [1.8.1. Capture output and test result](#181-capture-output-and-test-result)
-    - [1.8.2. Capture output and retrieve status code](#182-capture-output-and-retrieve-status-code)
-  - [1.9. Array](#19-array)
-  - [1.10. Temporary directory](#110-temporary-directory)
+  - [1.1. escape quotes](#11-escape-quotes)
+  - [1.2. Bash environment options](#12-bash-environment-options)
+    - [1.2.1. errexit (set -e | set -o errexit)](#121-errexit-set--e--set--o-errexit)
+      - [1.2.1.1. Caveats with command substitution](#1211-caveats-with-command-substitution)
+      - [1.2.1.2. Caveats with process substitution](#1212-caveats-with-process-substitution)
+      - [1.2.1.3. Process substitution is asynchronous](#1213-process-substitution-is-asynchronous)
+    - [1.2.2. pipefail (set -o pipefail)](#122-pipefail-set--o-pipefail)
+    - [1.2.3. errtrace (set -E | set -o errtrace)](#123-errtrace-set--e--set--o-errtrace)
+    - [1.2.4. nounset (set -u | set -o nounset)](#124-nounset-set--u--set--o-nounset)
+    - [1.2.5. shopt -s inherit_errexit](#125-shopt--s-inherit_errexit)
+    - [1.2.6. posix (set -o posix)](#126-posix-set--o-posix)
+  - [1.3. Main function](#13-main-function)
+  - [1.4. Arguments](#14-arguments)
+  - [1.5. some commands default options to use](#15-some-commands-default-options-to-use)
+  - [1.6. Bash and grep regular expressions](#16-bash-and-grep-regular-expressions)
+  - [1.7. General tips](#17-general-tips)
+  - [1.8. Variables](#18-variables)
+    - [1.8.1. Variable declaration](#181-variable-declaration)
+    - [1.8.2. variable naming convention](#182-variable-naming-convention)
+    - [1.8.3. Variable expansion](#183-variable-expansion)
+    - [1.8.4. Check if a variable is defined](#184-check-if-a-variable-is-defined)
+    - [1.8.5. Variable default value](#185-variable-default-value)
+  - [1.9. Capture output](#19-capture-output)
+    - [1.9.1. Capture output and test result](#191-capture-output-and-test-result)
+    - [1.9.2. Capture output and retrieve status code](#192-capture-output-and-retrieve-status-code)
+  - [1.10. Array](#110-array)
+  - [1.11. Temporary directory](#111-temporary-directory)
 - [2. Bin file best practices](#2-bin-file-best-practices)
   - [2.1. Bash-tpl best practice](#21-bash-tpl-best-practice)
 - [3. Bats best practices](#3-bats-best-practices)
@@ -37,10 +38,21 @@ this project because I wrote some of them while writing this project.
   - [3.2. avoid boilerplate code](#32-avoid-boilerplate-code)
   - [3.3. Override an environment variable when using bats run](#33-override-an-environment-variable-when-using-bats-run)
   - [3.4. Override a bash framework function](#34-override-a-bash-framework-function)
+- [4. Bash-tpl tricks](#4-bash-tpl-tricks)
+  - [4.1. allow simple quotes to generated correctly](#41-allow-simple-quotes-to-generated-correctly)
 
 ## 1. Bash Best practices
 
-### 1.1. Bash environment options
+### 1.1. escape quotes
+
+```bash
+help='quiet mode, doesn'\''t display any output'
+
+# alternative
+help="quiet mode, doesn't display any output"
+```
+
+### 1.2. Bash environment options
 
 See
 [Set bash builtin documentation](https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html)
@@ -51,7 +63,7 @@ This framework uses these mode by default:
 - pipefail
 - errtrace
 
-#### 1.1.1. errexit (set -e | set -o errexit)
+#### 1.2.1. errexit (set -e | set -o errexit)
 
 Check official doc but it can be summarized like this:
 
@@ -80,7 +92,7 @@ else
 fi
 ```
 
-##### 1.1.1.1. Caveats with command substitution
+##### 1.2.1.1. Caveats with command substitution
 
 ```bash
 #!/bin/bash
@@ -113,7 +125,7 @@ echo $?
 Outputs nothing because the script stopped before variable affectation, return
 code is 1.
 
-##### 1.1.1.2. Caveats with process substitution
+##### 1.2.1.2. Caveats with process substitution
 
 Consider this example that reads each line of the output of the command passed
 using process substitution in `<(...)`
@@ -191,7 +203,7 @@ Compiler::Implement::validateInterfaceFunctions \
     "${COMPILED_FILE2}" "${INPUT_FILE}" "${interfacesFunctions[@]}"
 ```
 
-##### 1.1.1.3. Process substitution is asynchronous
+##### 1.2.1.3. Process substitution is asynchronous
 
 it is why you cannot retrieve the status code, a way to do that is to wait the
 process to finish
@@ -216,7 +228,7 @@ wait $!
 echo done
 ```
 
-#### 1.1.2. pipefail (set -o pipefail)
+#### 1.2.2. pipefail (set -o pipefail)
 
 > If set, the return value of a pipeline is the value of the last (rightmost)
 > command to exit with a non-zero status, or zero if all commands in the
@@ -239,13 +251,13 @@ foo | echo "a" # 'foo' is a non-existing command
 # 0
 ```
 
-#### 1.1.3. errtrace (set -E | set -o errtrace)
+#### 1.2.3. errtrace (set -E | set -o errtrace)
 
 > If set, any trap on ERR is inherited by shell functions, command
 > substitutions, and commands executed in a subShell environment. The ERR trap
 > is normally not inherited in such cases.
 
-#### 1.1.4. nounset (set -u | set -o nounset)
+#### 1.2.4. nounset (set -u | set -o nounset)
 
 This is not implemented in current framework (TODO in future version).
 
@@ -254,7 +266,7 @@ This is not implemented in current framework (TODO in future version).
 > performing parameter expansion. An error message will be written to the
 > standard error, and a non-interactive shell will exit.
 
-#### 1.1.5. shopt -s inherit_errexit
+#### 1.2.5. shopt -s inherit_errexit
 
 set -e does not affect subShells created by Command Substitution. This rule is
 stated in Command Execution Environment:
@@ -307,7 +319,7 @@ Output:
 ./command-substitution-inherit_errexit.sh: line 5: INVALID_COMMAND: command not found
 ```
 
-#### 1.1.6. posix (set -o posix)
+#### 1.2.6. posix (set -o posix)
 
 This is not implemented in current framework (TODO in future version ? To check
 if it is a good idea to implement it and what would be the impact).
@@ -317,7 +329,7 @@ if it is a good idea to implement it and what would be the impact).
 > [Bash POSIX Mode](https://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html)).
 > This is intended to make Bash behave as a strict superset of that standard.
 
-### 1.2. Main function
+### 1.3. Main function
 
 An important best practice is to always encapsulate all your script inside a
 main function. One reason for this technique is to make sure the script does not
@@ -347,7 +359,7 @@ BASH_SOURCE=".$0"
 [[ ".$0" != ".$BASH_SOURCE" ]] || main "$@"
 ```
 
-### 1.3. Arguments
+### 1.4. Arguments
 
 - to construct complex command line, prefer to use an array
   - `declare -a cmd=(git push origin :${branch})`
@@ -360,7 +372,7 @@ BASH_SOURCE=".$0"
   `Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}"` You have to prefix
   all your constants to avoid conflicts.
 
-### 1.4. some commands default options to use
+### 1.5. some commands default options to use
 
 - <https://dougrichardson.us/notes/fail-fast-bash-scripting.html> but set -o
   nounset is not usable because empty array are considered unset
@@ -370,7 +382,7 @@ BASH_SOURCE=".$0"
 <!-- markdownlint-capture -->
 <!-- markdownlint-disable MD033 -->
 
-### 1.5. <a name="regularExpressions"></a>Bash and grep regular expressions
+### 1.6. <a name="regularExpressions"></a>Bash and grep regular expressions
 
 <!-- markdownlint-restore -->
 
@@ -380,7 +392,7 @@ BASH_SOURCE=".$0"
   - I added `export LC_ALL=POSIX` in all my headers, it can be overridden using
     a subShell
 
-### 1.6. General tips
+### 1.7. General tips
 
 - `cat << 'EOF'` avoid to interpolate variables
 - use `builtin cd` instead of `cd`, `builtin pwd` instead of `pwd`, ... to avoid
@@ -394,9 +406,9 @@ BASH_SOURCE=".$0"
 - use the right shebang, avoid `#!/bin/bash` as bash binary could be in another
   folder (especially on alpine), use this instead `#!/usr/bin/env bash`
 
-### 1.7. Variables
+### 1.8. Variables
 
-#### 1.7.1. Variable declaration
+#### 1.8.1. Variable declaration
 
 - ensure we don't have any globals, all variables should be passed to the
   functions
@@ -404,12 +416,12 @@ BASH_SOURCE=".$0"
 - local or declare multiple local a z
 - `export readonly` does not work, first `readonly` then `export`
 
-#### 1.7.2. variable naming convention
+#### 1.8.2. variable naming convention
 
 - env variable that aims to be exported should be capitalized with underscore
 - local variables should conform to camelCase
 
-#### 1.7.3. Variable expansion
+#### 1.8.3. Variable expansion
 
 `${PARAMETER:-WORD}` vs `${PARAMETER-WORD}`:
 
@@ -420,7 +432,7 @@ PARAMETER, as if it just was ${PARAMETER}.
 If you omit the `:`(colon) like in `${PARAMETER-WORD}`, the default value is
 only used when the parameter is unset, not when it was empty.
 
-#### 1.7.4. Check if a variable is defined
+#### 1.8.4. Check if a variable is defined
 
 ```bash
 if [[ -z ${varName+xxx} ]]; then
@@ -430,7 +442,7 @@ fi
 
 Alternatively you can use this framework function `Assert::varExistsAndNotEmpty`
 
-#### 1.7.5. Variable default value
+#### 1.8.5. Variable default value
 
 Always consider to set a default value to the variable that you are using.
 
@@ -450,7 +462,7 @@ Instead you can do that
 rm -Rf "${TMPDIR:-/tmp}/etc" || true
 ```
 
-### 1.8. Capture output
+### 1.9. Capture output
 
 You can use
 [command substitution](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Command-Substitution).
@@ -462,7 +474,7 @@ local output
 output="$(functionThatOutputSomething "${arg1}")"
 ```
 
-#### 1.8.1. Capture output and test result
+#### 1.9.1. Capture output and test result
 
 ```bash
 local output
@@ -472,7 +484,7 @@ output="$(functionThatOutputSomething "${arg1}")" || {
 }
 ```
 
-#### 1.8.2. Capture output and retrieve status code
+#### 1.9.2. Capture output and retrieve status code
 
 It's advised to put it on the same line using `;`. If it was on 2 lines, other
 commands could be put between the command and the status code retrieval, the
@@ -483,11 +495,11 @@ local output
 output="$(functionThatOutputSomething "${arg1}")"; status=$?
 ```
 
-### 1.9. Array
+### 1.10. Array
 
 - read each line of a file to an array `readarray -t var < /path/to/filename`
 
-### 1.10. Temporary directory
+### 1.11. Temporary directory
 
 use `${TMPDIR:-/tmp}`, TMPDIR variable does not always exist. or when mktemp is
 available, use `dirname $(mktemp -u --tmpdir)`
@@ -566,3 +578,25 @@ using stub is not possible because it does not support executable with special
 characters like `::`. So the solution is just to override the function inside
 your test function without importing the original function of course. In
 tearDown method do not forget to use `unset -f yourFunction`
+
+## 4. Bash-tpl tricks
+
+### 4.1. allow simple quotes to generated correctly
+
+bash-tpl template:
+
+```bash
+echo "echo \"    <% ${help} %>\""
+```
+
+bash script:
+
+```bash
+help="quiet mode, doesn't display any output"
+```
+
+generated script:
+
+```bash
+echo "    quiet mode, doesn't display any output"
+```

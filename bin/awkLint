@@ -241,6 +241,15 @@ export __LEVEL_SUCCESS=3
 # @description log level debug
 export __LEVEL_DEBUG=4
 
+# @description verbose level off
+export __VERBOSE_LEVEL_OFF=0
+# @description verbose level info
+export __VERBOSE_LEVEL_INFO=1
+# @description verbose level info
+export __VERBOSE_LEVEL_DEBUG=2
+# @description verbose level info
+export __VERBOSE_LEVEL_TRACE=3
+
 # @description Display message using debug color (grey)
 # @arg $1 message:String the message to display
 Log::displayDebug() {
@@ -267,6 +276,15 @@ Log::displayInfo() {
     echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   fi
   Log::logInfo "$1" "${type}"
+}
+
+# @description Display message using skip color (yellow)
+# @arg $1 message:String the message to display
+Log::displaySkipped() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logSkipped "$1"
 }
 
 # @description ensure COMMAND_BIN_DIR env var is set
@@ -312,6 +330,14 @@ Log::logError() {
 Log::logInfo() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
     Log::logMessage "${2:-INFO}" "$1"
+  fi
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSkipped() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SKIPPED}" "$1"
   fi
 }
 
@@ -506,15 +532,6 @@ Env::mergeConfFiles() {
   set +o allexport
 }
 
-# @description Display message using skip color (yellow)
-# @arg $1 message:String the message to display
-Log::displaySkipped() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logSkipped "$1"
-}
-
 # @description To be called before logging in the log file
 # @arg $1 file:string log file name
 # @arg $2 maxLogFilesCount:int maximum number of log files
@@ -679,14 +696,6 @@ Framework::createTempFile() {
   mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logSkipped() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-SKIPPED}" "$1"
-  fi
-}
-
 # @description remove verbose args from BASH_FRAMEWORK_ARGV
 # @noargs
 # @set BASH_FRAMEWORK_ARGV String[] remove args -v --verbose -vv -vvv
@@ -738,14 +747,103 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
-versionCallback() {
+optionHelpCallback() {
+  awkLintCommand help
+  exit 0
+}
+
+optionVersionCallback() {
   echo "${SCRIPT_NAME} version 1.0"
   exit 0
 }
 
-helpCallback() {
-  awkLintCommand help
-  exit 0
+optionInfoVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+}
+
+optionDebugVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
+
+optionTraceVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
+
+getLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__LEVEL_OFF}"
+      ;;
+    ERROR)
+      echo "${__LEVEL_ERROR}"
+      ;;
+    WARNING)
+      echo "${__LEVEL_WARNING}"
+      ;;
+    INFO)
+      echo "${__LEVEL_INFO}"
+      ;;
+    DEBUG | TRACE)
+      echo "${__LEVEL_DEBUG}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
+
+getVerboseLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__VERBOSE_LEVEL_OFF}"
+      ;;
+    ERROR | WARNING | INFO)
+      echo "${__VERBOSE_LEVEL_INFO}"
+      ;;
+    DEBUG)
+      echo "${__VERBOSE_LEVEL_DEBUG}"
+      ;;
+    TRACE)
+      echo "${__VERBOSE_LEVEL_TRACE}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
+
+optionDisplayLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+}
+
+optionLogLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+}
+
+optionQuietCallback() {
+  export BASH_FRAMEWORK_QUIET_MODE=1
+}
+
+optionNoColorCallback() {
+  Log::displaySkipped "no supported yet"
 }
 
 awkLintCommand() {
@@ -753,105 +851,144 @@ awkLintCommand() {
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
-    help="0"
-    local -i options_parse_optionParsedCountHelp
-    ((options_parse_optionParsedCountHelp = 0)) || true
-    version="0"
-    local -i options_parse_optionParsedCountVersion
-    ((options_parse_optionParsedCountVersion = 0)) || true
-    quiet="0"
-    local -i options_parse_optionParsedCountQuiet
-    ((options_parse_optionParsedCountQuiet = 0)) || true
-    noColor="0"
-    local -i options_parse_optionParsedCountNoColor
-    ((options_parse_optionParsedCountNoColor = 0)) || true
-    local -i options_parse_optionParsedCountLogLevel
-    ((options_parse_optionParsedCountLogLevel = 0)) || true
-    local -i options_parse_optionParsedCountDisplayLevel
-    ((options_parse_optionParsedCountDisplayLevel = 0)) || true
-    verbose="0"
-    local -i options_parse_optionParsedCountVerbose
-    ((options_parse_optionParsedCountVerbose = 0)) || true
+    optionHelp="0"
+    local -i options_parse_optionParsedCountOptionHelp
+    ((options_parse_optionParsedCountOptionHelp = 0)) || true
+    optionVersion="0"
+    local -i options_parse_optionParsedCountOptionVersion
+    ((options_parse_optionParsedCountOptionVersion = 0)) || true
+    optionQuiet="0"
+    local -i options_parse_optionParsedCountOptionQuiet
+    ((options_parse_optionParsedCountOptionQuiet = 0)) || true
+    optionNoColor="0"
+    local -i options_parse_optionParsedCountOptionNoColor
+    ((options_parse_optionParsedCountOptionNoColor = 0)) || true
+    local -i options_parse_optionParsedCountOptionLogLevel
+    ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
+    local -i options_parse_optionParsedCountOptionDisplayLevel
+    ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
+    optionInfoVerbose="0"
+    local -i options_parse_optionParsedCountOptionInfoVerbose
+    ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
+    optionDebugVerbose="0"
+    local -i options_parse_optionParsedCountOptionDebugVerbose
+    ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
+    optionTraceVerbose="0"
+    local -i options_parse_optionParsedCountOptionTraceVerbose
+    ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
-        # Option 1/7
-        # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        # Option 1/9
+        # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
-          help="1"
-          if ((options_parse_optionParsedCountHelp >= 1)); then
+          optionHelp="1"
+          if ((options_parse_optionParsedCountOptionHelp >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${help}"
+          optionHelpCallback "${optionHelp}"
           ;;
-        # Option 2/7
-        # Option version --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        # Option 2/9
+        # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
-          version="1"
-          if ((options_parse_optionParsedCountVersion >= 1)); then
+          optionVersion="1"
+          if ((options_parse_optionParsedCountOptionVersion >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          versionCallback "${version}"
+          optionVersionCallback "${optionVersion}"
           ;;
-        # Option 3/7
-        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        # Option 3/9
+        # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
-          quiet="1"
-          if ((options_parse_optionParsedCountQuiet >= 1)); then
+          optionQuiet="1"
+          if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
+          optionQuietCallback "${optionQuiet}"
           ;;
-        # Option 4/7
-        # Option noColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        # Option 4/9
+        # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
-          noColor="1"
-          if ((options_parse_optionParsedCountNoColor >= 1)); then
+          optionNoColor="1"
+          if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
+          optionNoColorCallback "${optionNoColor}"
           ;;
-        # Option 5/7
-        # Option logLevel --log-level variableType String min 0 max 1 authorizedValues '' regexp ''
+        # Option 5/9
+        # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
           if (($# == 0)); then
             Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
-          if ((options_parse_optionParsedCountLogLevel >= 1)); then
+          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          ((++options_parse_optionParsedCountLogLevel))
-          logLevel="$1"
+          ((++options_parse_optionParsedCountOptionLogLevel))
+          optionLogLevel="$1"
+          optionLogLevelCallback "${optionLogLevel}"
           ;;
-        # Option 6/7
-        # Option displayLevel --display-level variableType String min 0 max 1 authorizedValues '' regexp ''
+        # Option 6/9
+        # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
           if (($# == 0)); then
             Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
-          if ((options_parse_optionParsedCountDisplayLevel >= 1)); then
+          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          ((++options_parse_optionParsedCountDisplayLevel))
-          displayLevel="$1"
+          ((++options_parse_optionParsedCountOptionDisplayLevel))
+          optionDisplayLevel="$1"
+          optionDisplayLevelCallback "${optionDisplayLevel}"
           ;;
-        # Option 7/7
-        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        # Option 7/9
+        # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
-          verbose="1"
-          if ((options_parse_optionParsedCountVerbose >= 1)); then
+          optionInfoVerbose="1"
+          if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
+          optionInfoVerboseCallback "${optionInfoVerbose}"
+          ;;
+        # Option 8/9
+        # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vv)
+          optionDebugVerbose="1"
+          if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionDebugVerboseCallback "${optionDebugVerbose}"
+          ;;
+        # Option 9/9
+        # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vvv)
+          optionTraceVerbose="1"
+          if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionTraceVerboseCallback "${optionTraceVerbose}"
           ;;
         -*)
           Log::displayError "Invalid option ${options_parse_arg}"
@@ -863,13 +1000,15 @@ awkLintCommand() {
       esac
       shift || true
     done
-    export help
-    export version
-    export quiet
-    export noColor
-    export logLevel
-    export displayLevel
-    export verbose
+    export optionHelp
+    export optionVersion
+    export optionQuiet
+    export optionNoColor
+    export optionLogLevel
+    export optionDisplayLevel
+    export optionInfoVerbose
+    export optionDebugVerbose
+    export optionTraceVerbose
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "lint awk files
 
@@ -877,10 +1016,10 @@ Lint all files with .awk extension in current git folder.
 Result in checkstyle format.")"
     echo
 
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "awkLint" "[OPTIONS]")"
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
-      "awkLint" \
-      "[--help|-h]" "[--version]" "[--quiet|-q]" "[--no-color]" "[--log-level <String>]" "[--display-level <String>]" "[--verbose|-v]")"
+      "${SCRIPT_NAME}" \
+      "[--help|-h]" "[--version]" "[--quiet|-q]" "[--no-color]" "[--log-level <String>]" "[--display-level <String>]" "[--verbose|-v]" "[-vv]" "[-vvv]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
@@ -889,28 +1028,28 @@ Result in checkstyle format.")"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    help'
+    echo "    Display this command help"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--version"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    Print version information and quit'
+    echo "    Print version information and quit"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--quiet, -q"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    quiet mode'
+    echo "    quiet mode, doesn't display any output"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--no-color"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    Produce monochrome output.'
+    echo "    Produce monochrome output."
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--log-level"
     echo -n ' <String>'
@@ -918,7 +1057,7 @@ Result in checkstyle format.")"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    Set log level'
+    echo "    Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--display-level"
     echo -n ' <String>'
@@ -926,14 +1065,28 @@ Result in checkstyle format.")"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    set display level'
+    echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--verbose, -v"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    verbose mode'
+    echo "    info level verbose mode (alias of --display-level INFO)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "-vv"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    debug level verbose mode (alias of --display-level DEBUG)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "-vvv"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    trace level verbose mode (alias of --display-level TRACE)"
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
     echo '1.0'
@@ -1056,23 +1209,31 @@ function escapeXmlAttribute(str)
 EOF
 )"
 
-# <?xml version='1.0' encoding='UTF-8'?>
-# <checkstyle version='4.3'>
-# <file name='./tests/bash&#45;framework/ManualTest.sh' >
-# <error line='9' column='8' severity='warning' message='Can&#39;t follow non&#45;constant source. Use a directive to specify location.' source='ShellCheck.SC1090' />
-# <error line='17' column='5' severity='warning' message='Use &#39;cd ... &#124;&#124; exit&#39; or &#39;cd ... &#124;&#124; return&#39; in case cd fails.' source='ShellCheck.SC2164' />
-# <error line='27' column='5' severity='warning' message='Use &#39;cd ... &#124;&#124; exit&#39; or &#39;cd ... &#124;&#124; return&#39; in case cd fails.' source='ShellCheck.SC2164' />
-# </file>
-# </checkstyle>
-echo "<?xml version='1.0' encoding='UTF-8'?>"
-echo "<checkstyle>"
-while IFS='' read -r file; do
-  echo "<file name='${file}'>"
-  awk --source "BEGIN { exit(0) } END { exit(0) }" --lint=no-ext -f "${file}" 2>&1 </dev/null |
-    awk --source "${awkLintScript}" - || true
-  echo "</file>"
-done < <(git ls-files --exclude-standard | grep -E '\.(awk)$' || true)
-echo "</checkstyle>"
+run() {
+  # <?xml version='1.0' encoding='UTF-8'?>
+  # <checkstyle version='4.3'>
+  # <file name='./tests/bash&#45;framework/ManualTest.sh' >
+  # <error line='9' column='8' severity='warning' message='Can&#39;t follow non&#45;constant source. Use a directive to specify location.' source='ShellCheck.SC1090' />
+  # <error line='17' column='5' severity='warning' message='Use &#39;cd ... &#124;&#124; exit&#39; or &#39;cd ... &#124;&#124; return&#39; in case cd fails.' source='ShellCheck.SC2164' />
+  # <error line='27' column='5' severity='warning' message='Use &#39;cd ... &#124;&#124; exit&#39; or &#39;cd ... &#124;&#124; return&#39; in case cd fails.' source='ShellCheck.SC2164' />
+  # </file>
+  # </checkstyle>
+  echo "<?xml version='1.0' encoding='UTF-8'?>"
+  echo "<checkstyle>"
+  while IFS='' read -r file; do
+    echo "<file name='${file}'>"
+    awk --source "BEGIN { exit(0) } END { exit(0) }" --lint=no-ext -f "${file}" 2>&1 </dev/null |
+      awk --source "${awkLintScript}" - || true
+    echo "</file>"
+  done < <(git ls-files --exclude-standard | grep -E '\.(awk)$' || true)
+  echo "</checkstyle>"
+}
+
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
+else
+  run
+fi
 
 }
 

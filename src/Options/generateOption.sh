@@ -18,7 +18,7 @@
 #
 # OPTIONS:
 #   --alt <optionName>
-#   [--variable-name | --var <optionVariableName>]
+#   --variable-name | --var <optionVariableName>
 #   [--variable-type <String|Function>]
 #   [--mandatory]
 #   [--help <String|Function>]
@@ -55,7 +55,7 @@
 # * the rest of arguments not parsed yet
 #
 # @option --alt <optionName> (mandatory at least one) option name possibility, the string allowing to discriminate the option.
-# @option --variable-name | --var <varName> (optional) provides the variable name that will be used to store the parsed options.
+# @option --variable-name | --var <varName> (mandatory) provides the variable name that will be used to store the parsed options.
 # @option --variable-type <Boolean|String|StringArray> (optional) option type (default: Boolean)
 # @option --mandatory (optional) as its name indicates, by default an option is optional. But using `--mandatory` you can make the option mandatory. An error will be generated if the option is not found during parsing arguments.
 # @option --help <help> (optional) provides option help description (Default: Empty string)
@@ -195,8 +195,8 @@ Options::generateOption() {
     esac
     shift || true
   done
-  if [[ -z "${callback}" && -z "${variableName}" ]]; then
-    Log::displayError "Options::generateOption - --variable-name option is mandatory if no callback provided"
+  if [[ -z "${variableName}" ]]; then
+    Log::displayError "Options::generateOption - --variable-name option is mandatory"
     return 1
   fi
   if (("${#alts[@]}" == 0)); then

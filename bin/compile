@@ -332,12 +332,14 @@ evalTemplate() {
     eval "${varExports}"
     eval "${varCallbackExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+    SCRIPT_NAME="$(basename "${BIN_FILE}")"
     export FRAMEWORK_BIN_DIR
     export FRAMEWORK_ROOT_DIR
     export ORIGINAL_TEMPLATE_DIR
     export TEMPLATE_DIR
     export SRC_ABSOLUTE_PATH
     export SRC_FILE_PATH
+    export SCRIPT_NAME
     export TMPDIR
     # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
     trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM

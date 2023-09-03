@@ -38,7 +38,7 @@ Options::option() {
     echo "echo -n -e ' (optional)'"
     echo "echo -n -e ' (at most 1 times)'"
     echo 'echo'
-    echo "echo '    super help'"
+    echo "echo \"    super help\""
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
   elif [[ "${cmd}" = "type" ]]; then

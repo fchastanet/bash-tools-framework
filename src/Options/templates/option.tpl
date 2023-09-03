@@ -46,7 +46,7 @@
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
     % else
-        echo "echo '    <% ${help} %>'"
+        echo "echo \"    <% ${help} %>\""
     % fi
     % if [[ -n "${defaultValue}" ]]; then
         echo "echo '    Default value: <% ${defaultValue} %>'"

@@ -50,7 +50,7 @@
 # * a `--` separator.
 # * the rest of arguments not parsed yet
 #
-# @option --variable-name | --var <varName> (optional) provides the variable name that will be used to store the parsed arguments.
+# @option --variable-name | --var <varName> (mandatory) provides the variable name that will be used to store the parsed arguments.
 # @option --help <help> (optional) provides argument help description (Default: Empty string)
 # @option --name (optional) provides the argument name that will be used to display the help. (Default: variable name)
 # @option --min <int> (optional) Indicates the minimum number of args that will be parsed. (Default: 1)

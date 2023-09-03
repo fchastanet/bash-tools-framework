@@ -1,65 +1,91 @@
 %# Needed variables
 %# - versionNumber
+%# - commandFunctionName
+%# - SCRIPT_NAME
+%# - help
 %
   # shellcheck source=/dev/null
   source <(
     Options::generateGroup \
       --title "GLOBAL OPTIONS:" \
-      --function-name groupGlobalOptions
+      --function-name groupGlobalOptionsFunction
 
     Options::generateOption \
-      --help "help" \
-      --group groupGlobalOptions \
-      --variable-name "help" \
+      --help "Display this command help" \
+      --group groupGlobalOptionsFunction \
       --alt "--help" \
       --alt "-h" \
-      --callback helpCallback \
-      --function-name optionHelp
+      --callback optionHelpCallback \
+      --variable-name "optionHelp" \
+      --function-name optionHelpFunction
 
     Options::generateOption \
-      --help "verbose mode" \
-      --group groupGlobalOptions \
-      --variable-name "verbose" \
+      --help "info level verbose mode (alias of --display-level INFO)" \
+      --group groupGlobalOptionsFunction \
       --alt "--verbose" --alt "-v" \
-      --function-name optionVerbose
+      --callback optionInfoVerboseCallback \
+      --variable-name "optionInfoVerbose" \
+      --function-name optionInfoVerboseFunction
+
+    Options::generateOption \
+      --help "debug level verbose mode (alias of --display-level DEBUG)" \
+      --group groupGlobalOptionsFunction \
+      --alt "-vv" \
+      --callback optionDebugVerboseCallback \
+      --variable-name "optionDebugVerbose" \
+      --function-name optionDebugVerboseFunction
+
+    Options::generateOption \
+      --help "trace level verbose mode (alias of --display-level TRACE)" \
+      --group groupGlobalOptionsFunction \
+      --alt "-vvv" \
+      --callback optionTraceVerboseCallback \
+      --variable-name "optionTraceVerbose" \
+      --function-name optionTraceVerboseFunction
 
     Options::generateOption \
       --variable-type String \
-      --help "Set log level" \
-      --group groupGlobalOptions \
-      --variable-name "logLevel" \
+      --help "Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
+      --group groupGlobalOptionsFunction \
       --alt "--log-level" \
-      --function-name optionLogLevel
+      --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
+      --callback "optionLogLevelCallback" \
+      --variable-name "optionLogLevel" \
+      --function-name optionLogLevelFunction
 
     Options::generateOption \
       --variable-type String \
-      --help "set display level" \
-      --group groupGlobalOptions \
-      --variable-name "displayLevel" \
+      --help "set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
+      --group groupGlobalOptionsFunction \
       --alt "--display-level" \
-      --function-name optionDisplayLevel
+      --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
+      --callback optionDisplayLevelCallback \
+      --variable-name "optionDisplayLevel" \
+      --function-name optionDisplayLevelFunction
 
     Options::generateOption \
       --help "Produce monochrome output." \
-      --group groupGlobalOptions \
-      --variable-name "noColor" \
+      --group groupGlobalOptionsFunction \
       --alt "--no-color" \
-      --function-name optionNoColor
+      --callback optionNoColorCallback \
+      --variable-name "optionNoColor" \
+      --function-name optionNoColorFunction
 
     Options::generateOption \
       --help "Print version information and quit" \
-      --group groupGlobalOptions \
-      --variable-name "version" \
+      --group groupGlobalOptionsFunction \
       --alt "--version" \
-      --callback versionCallback \
-      --function-name optionVersion
+      --callback optionVersionCallback \
+      --variable-name "optionVersion" \
+      --function-name optionVersionFunction
 
     Options::generateOption \
-      --variable-name "quiet" \
-      --help "quiet mode" \
-      --group groupGlobalOptions \
+      --help "quiet mode, doesn't display any output" \
+      --group groupGlobalOptionsFunction \
       --alt "--quiet" --alt "-q" \
-      --function-name optionQuiet
+      --callback optionQuietCallback \
+      --variable-name "optionQuiet" \
+      --function-name optionQuietFunction
   )
 
   declare -a options=(
@@ -68,17 +94,116 @@
     --license "MIT License"
     --copyright "Copyright (c) 2022 François Chastanet"
     --version "${versionNumber}"
-    optionHelp
-    optionVersion
-    optionQuiet
-    optionNoColor
-    optionLogLevel
-    optionDisplayLevel
-    optionVerbose
+    --function-name "${commandFunctionName}"
+    --command-name "${SCRIPT_NAME}"
+    --help "${help}"
+    optionHelpFunction
+    optionVersionFunction
+    optionQuietFunction
+    optionNoColorFunction
+    optionLogLevelFunction
+    optionDisplayLevelFunction
+    optionInfoVerboseFunction
+    optionDebugVerboseFunction
+    optionTraceVerboseFunction
   )
 %
 
-versionCallback() {
+optionHelpCallback() {
+  awkLintCommand help
+  exit 0
+}
+
+optionVersionCallback() {
   echo "${SCRIPT_NAME} version <% ${versionNumber} %>"
   exit 0
+}
+
+optionInfoVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+}
+
+optionDebugVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
+
+optionTraceVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
+
+getLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__LEVEL_OFF}"
+      ;;
+    ERROR)
+      echo "${__LEVEL_ERROR}"
+      ;;
+    WARNING)
+      echo "${__LEVEL_WARNING}"
+      ;;
+    INFO)
+      echo "${__LEVEL_INFO}"
+      ;;
+    DEBUG | TRACE)
+      echo "${__LEVEL_DEBUG}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
+
+getVerboseLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__VERBOSE_LEVEL_OFF}"
+      ;;
+    ERROR | WARNING | INFO)
+      echo "${__VERBOSE_LEVEL_INFO}"
+      ;;
+    DEBUG)
+      echo "${__VERBOSE_LEVEL_DEBUG}"
+      ;;
+    TRACE)
+      echo "${__VERBOSE_LEVEL_TRACE}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
+
+optionDisplayLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+}
+
+optionLogLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+}
+
+optionQuietCallback() {
+  export BASH_FRAMEWORK_QUIET_MODE=1
+}
+
+optionNoColorCallback() {
+  Log::displaySkipped "no supported yet"
 }

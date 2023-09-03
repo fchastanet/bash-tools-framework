@@ -92,7 +92,7 @@ Options::command() {
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    help'
+    echo "    help"
   else
     Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1

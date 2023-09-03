@@ -131,14 +131,14 @@ Options::command() {
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    verbose mode'
+    echo "    verbose mode"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--quiet, -q"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    quiet mode'
+    echo "    quiet mode"
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--help, -h"
@@ -146,14 +146,14 @@ Options::command() {
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo '    help'
+    echo "    help"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--src-dirs, -s"
     echo -n ' <String>'
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo
-    echo '    provide the directory where to find the functions source code.'
+    echo "    provide the directory where to find the functions source code."
   else
     Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1
