@@ -44,6 +44,16 @@
       --function-name optionTraceVerboseFunction
 
     Options::generateOption \
+      --variable-type StringArray \
+      --help "Load the specified env file" \
+      --group groupGlobalOptionsFunction \
+      --alt "--env-file" \
+      --max -1 \
+      --callback optionEnvFileCallback \
+      --variable-name "optionEnvFiles" \
+      --function-name optionEnvFilesFunction
+
+    Options::generateOption \
       --variable-type String \
       --help "Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
       --group groupGlobalOptionsFunction \
@@ -73,12 +83,22 @@
       --function-name optionDisplayLevelFunction
 
     Options::generateOption \
-      --help "Produce monochrome output." \
+      --help "Produce monochrome output. alias of --theme noColor." \
       --group groupGlobalOptionsFunction \
       --alt "--no-color" \
       --callback optionNoColorCallback \
       --variable-name "optionNoColor" \
       --function-name optionNoColorFunction
+
+    Options::generateOption \
+      --variable-type String \
+      --help "choose color theme (default or noColor)" \
+      --group groupGlobalOptionsFunction \
+      --alt "--theme" \
+      --authorized-values "default|noColor" \
+      --callback optionThemeCallback \
+      --variable-name "optionTheme" \
+      --function-name optionThemeFunction
 
     Options::generateOption \
       --help "Print version information and quit" \
@@ -108,6 +128,7 @@
     --callback commandOptionParseFinished
     --help "${help}"
     optionNoColorFunction
+    optionThemeFunction
     optionHelpFunction
     optionVersionFunction
     optionQuietFunction
@@ -117,6 +138,7 @@
     optionInfoVerboseFunction
     optionDebugVerboseFunction
     optionTraceVerboseFunction
+    optionEnvFilesFunction
   )
 %
 
@@ -128,6 +150,14 @@ optionHelpCallback() {
 optionVersionCallback() {
   echo "${SCRIPT_NAME} version <% ${versionNumber} %>"
   exit 0
+}
+
+optionEnvFileCallback() {
+  local envFile="$1"
+  if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
+    Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
+    exit 1
+  fi
 }
 
 optionInfoVerboseCallback() {
@@ -224,6 +254,16 @@ optionNoColorCallback() {
   UI::theme "noColor"
 }
 
+optionThemeCallback() {
+  UI::theme "$1"
+}
+
 commandOptionParseFinished() {
+  if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    BASH_FRAMEWORK_ENV_FILES=()
+  fi
+  BASH_FRAMEWORK_ENV_FILES+=("${optionEnvFiles[@]}")
+  export BASH_FRAMEWORK_ENV_FILES
+  Env::requireLoad
   Log::requireLoad
 }

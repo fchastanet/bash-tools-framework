@@ -349,20 +349,6 @@ Log::requireLoad() {
 # @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
 Env::getOrderedConfFiles() {
   local -a configFiles=()
-  local verboseFile
-  verboseFile="$(Env::parseVerboseArg)" || return 1
-  if [[ -n "${verboseFile}" ]]; then
-    configFiles+=("${verboseFile}")
-  fi
-
-  local -a envFiles
-  envFilesStr="$(Env::parseEnvFileArg)" || return 1
-  if [[ -n "${envFilesStr}" ]]; then
-    readarray -t envFiles <<<"${envFilesStr}"
-    if ((${#envFiles[@]} > 0)); then
-      configFiles+=("${envFiles[@]}")
-    fi
-  fi
 
   if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     # BASH_FRAMEWORK_ENV_FILES is an array
@@ -498,113 +484,6 @@ Env::createDefaultEnvFile() {
   echo "${envFile}"
 }
 
-# @description if --env-file option is parsed in arguments
-# outputs the file provided after this argument to make it
-# available for Env::requireLoad
-# @option --env-file <file> the environment file to load
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
-# @exitcode 1 if Env file provided is invalid
-# @stdout the env filepath asked to be loaded
-# @stderr diagnostic information on failure
-Env::parseEnvFileArg() {
-  (
-    set -- "${BASH_FRAMEWORK_ARGV[@]}" --
-    while true; do
-      case $1 in
-        --env-file)
-          shift || true
-          if [[ "$1" = "--" ]]; then
-            Log::displayError "Env file not provided"
-            return 1
-          fi
-          if [[ ! -r "$1" ]]; then
-            Log::displayError "Env file provided '$1' is invalid"
-            return 1
-          fi
-          echo "$1"
-          ;;
-        --)
-          break
-          ;;
-        *)
-          # ignore
-          ;;
-      esac
-      shift || true
-    done
-  )
-}
-
-# @description verbose level off
-export __VERBOSE_LEVEL_OFF=0
-# @description verbose level info
-export __VERBOSE_LEVEL_INFO=1
-# @description verbose level info
-export __VERBOSE_LEVEL_DEBUG=2
-# @description verbose level info
-export __VERBOSE_LEVEL_TRACE=3
-
-# @description if --verbose|-v option is parsed in arguments
-# generates a conf file that will be loaded via Env::requireLoad
-# @option -v verbose level short option (verbose level = info,  display level = info)
-# @option --verbose verbose level long option (verbose level = info,  display level = info)
-# @option -vv more verbose logs option (verbose level = debug, display level = debug)
-# @option -vvv trace level logs option (verbose level = trace, display level = debug)
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
-# @set BASH_FRAMEWORK_ARGS_VERBOSE int 1 if -v, 2 if -vv, 3 if -vvv
-# @set BASH_FRAMEWORK_DISPLAY_LEVEL int 3 if --verbose|-v, 4 if -vv or -vvv
-# @require Env::requireRemoveVerboseArg
-Env::parseVerboseArg() {
-  local envFile
-  envFile="$(Framework::createTempFile "parseVerboseArgEnvFile")" || return 2
-
-  (
-    local verbose=${__VERBOSE_LEVEL_OFF}
-    local displayLevel=0
-    local arg
-    for arg in "${BASH_FRAMEWORK_ARGV[@]}"; do
-      case "${arg}" in
-        --verbose | -v)
-          verbose=${__VERBOSE_LEVEL_INFO}
-          displayLevel=${__LEVEL_INFO}
-          ;;
-        -vv)
-          verbose=${__VERBOSE_LEVEL_DEBUG}
-          displayLevel=${__LEVEL_DEBUG}
-          ;;
-        -vvv)
-          verbose=${__VERBOSE_LEVEL_TRACE}
-          displayLevel=${__LEVEL_DEBUG}
-          ;;
-        *)
-          # ignore
-          ;;
-      esac
-    done
-    # compute resulting option
-    local verboseOption=""
-    case ${verbose} in
-      "${__VERBOSE_LEVEL_INFO}")
-        verboseOption="--verbose"
-        ;;
-      "${__VERBOSE_LEVEL_DEBUG}")
-        verboseOption="-vv"
-        ;;
-      "${__VERBOSE_LEVEL_TRACE}")
-        verboseOption="-vvv"
-        ;;
-      *) ;;
-    esac
-
-    echo "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='${verboseOption}'"
-    echo "BASH_FRAMEWORK_ARGS_VERBOSE=${verbose}"
-    if [[ "${displayLevel}" != "0" ]]; then
-      echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${displayLevel}"
-    fi
-  ) >"${envFile}"
-  echo "${envFile}"
-}
-
 # @description remove comment lines from input or files provided as arguments
 # @arg $@ files:String[] (optional) the files to filter
 # @env commentLinePrefix String the comment line prefix (default value: #)
@@ -719,41 +598,6 @@ Assert::tty() {
   [[ -t 1 || -t 2 ]]
 }
 
-# @description remove verbose args from BASH_FRAMEWORK_ARGV
-# @noargs
-# @set BASH_FRAMEWORK_ARGV String[] remove args -v --verbose -vv -vvv
-Env::requireRemoveVerboseArg() {
-  # remove verbose args from BASH_FRAMEWORK_ARGV
-  Array::remove BASH_FRAMEWORK_ARGV -v --verbose -vv -vvv
-}
-
-# @description remove elements from array
-# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
-# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
-# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
-# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
-# @see Array::removeIf
-Array::remove() {
-  local -n arrayRemoveArray=$1
-  shift || true # $@ contains elements to remove
-  local -A valuesToRemoveKeys=()
-
-  # Tag items to remove
-  local del
-  for del in "$@"; do valuesToRemoveKeys[${del}]=1; done
-
-  # remove items
-  local k
-  for k in "${!arrayRemoveArray[@]}"; do
-    if [[ -n "${valuesToRemoveKeys[${arrayRemoveArray[k]}]+xxx}" ]]; then
-      unset 'arrayRemoveArray[k]'
-    fi
-  done
-
-  # compaction (element re-indexing, because unset makes "holes" in array )
-  arrayRemoveArray=("${arrayRemoveArray[@]}")
-}
-
 # FUNCTIONS
 
 facade_main_97645c58c9b04f378e7db4035d74f689() {
@@ -766,7 +610,6 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 Env::requireLoad
 Log::requireLoad
 UI::requireTheme
-Env::requireRemoveVerboseArg
 Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
