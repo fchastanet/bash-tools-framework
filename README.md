@@ -239,8 +239,6 @@ export PATH="${BIN_DIR}":"${FRAMEWORK_VENDOR_BIN_DIR}":${PATH}
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
-
 # FUNCTIONS
 
 ```

@@ -22,7 +22,7 @@ Options::generateOption[OPTIONS]
 
 OPTIONS:
   --alt <optionName>
-  [--variable-name | --var <optionVariableName>]
+  --variable-name | --var <optionVariableName>
   [--variable-type <String|Function>]
   [--mandatory]
   [--help <String|Function>]
@@ -66,7 +66,7 @@ the callback will be called with the following arguments:
 
 * **--variable-name** | **--var \<varName\>**
 
-  (optional) provides the variable name that will be used to store the parsed options.
+  (mandatory) provides the variable name that will be used to store the parsed options.
 
 * **--variable-type \<Boolean|String|StringArray\>**
 

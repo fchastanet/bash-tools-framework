@@ -97,10 +97,10 @@
     --function-name "${commandFunctionName}"
     --command-name "${SCRIPT_NAME}"
     --help "${help}"
+    optionNoColorFunction
     optionHelpFunction
     optionVersionFunction
     optionQuietFunction
-    optionNoColorFunction
     optionLogLevelFunction
     optionDisplayLevelFunction
     optionInfoVerboseFunction
@@ -205,5 +205,5 @@ optionQuietCallback() {
 }
 
 optionNoColorCallback() {
-  Log::displaySkipped "no supported yet"
+  UI::theme "noColor"
 }

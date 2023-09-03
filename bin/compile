@@ -69,12 +69,19 @@ source "${_COMPILE_SRC_DIR}/Compiler/Require/__all.sh"
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
+# shellcheck source=/src/Assert/tty.sh
+source "${_COMPILE_SRC_DIR}/Assert/tty.sh"
 # shellcheck source=/src/Assert/fileWritable.sh
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
+# shellcheck source=/src/UI/theme.sh
+source "${_COMPILE_SRC_DIR}/UI/theme.sh"
+# shellcheck source=/src/UI/requireTheme.sh
+source "${_COMPILE_SRC_DIR}/UI/requireTheme.sh"
 
 Env::requireLoad
+UI::requireTheme
 Log::requireLoad
 Env::requireRemoveVerboseArg
 

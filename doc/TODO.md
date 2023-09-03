@@ -103,7 +103,6 @@
 ## 5. Framework functions changes
 
 - remove all process substitution as it hides exit code > 0
-- replace `_colors.sh` with `Log/theme`
 - Conf::list findOptions as last arg so any number of args
 - merge Framework::run and Command::captureOutputAndExitCode
   - replace Command::captureOutputAndExitCode with Framework::run that mimics

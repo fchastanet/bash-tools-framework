@@ -58,7 +58,7 @@ the callback will be called with the following arguments:
 
 * **--variable-name** | **--var \<varName\>**
 
-  (optional) provides the variable name that will be used to store the parsed arguments.
+  (mandatory) provides the variable name that will be used to store the parsed arguments.
 
 * **--help \<help\>**
 

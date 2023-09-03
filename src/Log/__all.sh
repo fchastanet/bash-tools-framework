@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# shellcheck source=src/_includes/_colors.sh
-source "${FRAMEWORK_ROOT_DIR}/src/_includes/_colors.sh"
+# shellcheck source=src/UI/theme.sh
+source "${FRAMEWORK_ROOT_DIR}/src/UI/theme.sh"
 # shellcheck source=src/Log/_.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Log/_.sh"
 # shellcheck source=src/Log/displayDebug.sh

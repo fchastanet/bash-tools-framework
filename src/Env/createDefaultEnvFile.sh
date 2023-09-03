@@ -7,6 +7,7 @@ Env::createDefaultEnvFile() {
   envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
 
   (
+    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
     echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
     echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
     # shellcheck disable=SC2016
