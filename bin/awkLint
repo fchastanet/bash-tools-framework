@@ -309,6 +309,13 @@ Log::requireLoad() {
   fi
 }
 
+# @description draw a line with the character passed in parameter repeated depending on terminal width
+# @arg $1 character:String character to use as separator (default value #)
+UI::drawLine() {
+  local character="${1:-#}"
+  printf '%*s\n' "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo)}" '' | tr ' ' "${character}"
+}
+
 # @description load colors theme constants
 # @warning if tty not opened, noColor theme will be chosen
 # @arg $1 theme:String the theme to use (default, noColor)
@@ -756,6 +763,17 @@ optionThemeCallback() {
   UI::theme "$1"
 }
 
+displayConfig() {
+  echo "Config"
+  UI::drawLine "-"
+  local var
+  while read -r var; do
+    printf '%-40s = %s\n' "${var}" "$(declare -p "${var}" | sed -E -e 's/^[^=]+=(.*)/\1/')"
+  done < <(typeset -p | awk 'match($3, "^(BASH_FRAMEWORK_[^=]+)=", m) { print m[1] }' | sort)
+  exit 0
+
+}
+
 commandOptionParseFinished() {
   if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     BASH_FRAMEWORK_ENV_FILES=()
@@ -764,6 +782,9 @@ commandOptionParseFinished() {
   export BASH_FRAMEWORK_ENV_FILES
   Env::requireLoad
   Log::requireLoad
+  if [[ "${optionConfig}" = "1" ]]; then
+    displayConfig
+  fi
 }
 
 awkLintCommand() {
@@ -771,14 +792,20 @@ awkLintCommand() {
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
+    optionConfig="0"
+    local -i options_parse_optionParsedCountOptionConfig
+    ((options_parse_optionParsedCountOptionConfig = 0)) || true
     optionNoColor="0"
     local -i options_parse_optionParsedCountOptionNoColor
     ((options_parse_optionParsedCountOptionNoColor = 0)) || true
-    local -i options_parse_optionParsedCountOptionTheme
-    ((options_parse_optionParsedCountOptionTheme = 0)) || true
+    optionDebugVerbose="0"
+    local -i options_parse_optionParsedCountOptionDebugVerbose
+    ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
     optionTraceVerbose="0"
     local -i options_parse_optionParsedCountOptionTraceVerbose
     ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
+    local -i options_parse_optionParsedCountOptionTheme
+    ((options_parse_optionParsedCountOptionTheme = 0)) || true
     optionHelp="0"
     local -i options_parse_optionParsedCountOptionHelp
     ((options_parse_optionParsedCountOptionHelp = 0)) || true
@@ -797,14 +824,20 @@ awkLintCommand() {
     optionInfoVerbose="0"
     local -i options_parse_optionParsedCountOptionInfoVerbose
     ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
-    optionDebugVerbose="0"
-    local -i options_parse_optionParsedCountOptionDebugVerbose
-    ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
-        # Option 1/12
+        # Option 1/13
+        # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --config)
+          optionConfig="1"
+          if ((options_parse_optionParsedCountOptionConfig >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 2/13
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           optionNoColor="1"
@@ -814,7 +847,38 @@ awkLintCommand() {
           fi
           optionNoColorCallback "${optionNoColor}"
           ;;
-        # Option 2/12
+        # Option 3/13
+        # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vv)
+          optionDebugVerbose="1"
+          if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionDebugVerboseCallback "${optionDebugVerbose}"
+          ;;
+        # Option 4/13
+        # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vvv)
+          optionTraceVerbose="1"
+          if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionTraceVerboseCallback "${optionTraceVerbose}"
+          ;;
+        # Option 5/13
+        # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
+        --env-file)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          optionEnvFiles+=("$1")
+          optionEnvFileCallback "${optionEnvFiles[@]}"
+          ;;
+        # Option 6/13
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|noColor' regexp ''
         --theme)
           shift
@@ -834,28 +898,7 @@ awkLintCommand() {
           optionTheme="$1"
           optionThemeCallback "${optionTheme}"
           ;;
-        # Option 3/12
-        # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        -vvv)
-          optionTraceVerbose="1"
-          if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          optionTraceVerboseCallback "${optionTraceVerbose}"
-          ;;
-        # Option 4/12
-        # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
-        --env-file)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          optionEnvFiles+=("$1")
-          optionEnvFileCallback "${optionEnvFiles[@]}"
-          ;;
-        # Option 5/12
+        # Option 7/13
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           optionHelp="1"
@@ -865,7 +908,7 @@ awkLintCommand() {
           fi
           optionHelpCallback "${optionHelp}"
           ;;
-        # Option 6/12
+        # Option 8/13
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           optionVersion="1"
@@ -875,7 +918,7 @@ awkLintCommand() {
           fi
           optionVersionCallback "${optionVersion}"
           ;;
-        # Option 7/12
+        # Option 9/13
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           optionQuiet="1"
@@ -885,7 +928,7 @@ awkLintCommand() {
           fi
           optionQuietCallback "${optionQuiet}"
           ;;
-        # Option 8/12
+        # Option 10/13
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -905,7 +948,7 @@ awkLintCommand() {
           optionLogLevel="$1"
           optionLogLevelCallback "${optionLogLevel}"
           ;;
-        # Option 9/12
+        # Option 11/13
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -921,7 +964,7 @@ awkLintCommand() {
           optionLogFile="$1"
           optionLogFileCallback "${optionLogFile}"
           ;;
-        # Option 10/12
+        # Option 12/13
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -941,7 +984,7 @@ awkLintCommand() {
           optionDisplayLevel="$1"
           optionDisplayLevelCallback "${optionDisplayLevel}"
           ;;
-        # Option 11/12
+        # Option 13/13
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           optionInfoVerbose="1"
@@ -950,16 +993,6 @@ awkLintCommand() {
             return 1
           fi
           optionInfoVerboseCallback "${optionInfoVerbose}"
-          ;;
-        # Option 12/12
-        # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        -vv)
-          optionDebugVerbose="1"
-          if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          optionDebugVerboseCallback "${optionDebugVerbose}"
           ;;
         -*)
           Log::displayError "Invalid option ${options_parse_arg}"
@@ -971,10 +1004,12 @@ awkLintCommand() {
       esac
       shift || true
     done
+    export optionConfig
     export optionNoColor
-    export optionTheme
+    export optionDebugVerbose
     export optionTraceVerbose
     export optionEnvFiles
+    export optionTheme
     export optionHelp
     export optionVersion
     export optionQuiet
@@ -982,7 +1017,6 @@ awkLintCommand() {
     export optionLogFile
     export optionDisplayLevel
     export optionInfoVerbose
-    export optionDebugVerbose
     commandOptionParseFinished
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "lint awk files
@@ -994,9 +1028,16 @@ Result in checkstyle format.")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--no-color]" "[--theme <String>]" "[-vvv]" "[--env-file <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]" "[-vv]")"
+      "[--config]" "[--no-color]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--config"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Display configuration"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--no-color"
     echo -n -e "${__HELP_NORMAL}"
@@ -1005,13 +1046,12 @@ Result in checkstyle format.")"
     echo
     echo "    Produce monochrome output. alias of --theme noColor."
     echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--theme"
-    echo -n ' <String>'
+    echo -n "-vv"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo "    choose color theme (default or noColor)"
+    echo "    debug level verbose mode (alias of --display-level DEBUG)"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "-vvv"
     echo -n -e "${__HELP_NORMAL}"
@@ -1026,6 +1066,14 @@ Result in checkstyle format.")"
     echo -n -e ' (optional)'
     echo
     echo "    Load the specified env file"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--theme"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    choose color theme (default or noColor)"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--help, -h"
     echo -n -e "${__HELP_NORMAL}"
@@ -1078,13 +1126,6 @@ Result in checkstyle format.")"
     echo -n -e ' (at most 1 times)'
     echo
     echo "    info level verbose mode (alias of --display-level INFO)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "-vv"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo "    debug level verbose mode (alias of --display-level DEBUG)"
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
     echo '1.0'

@@ -20,6 +20,13 @@
       --function-name optionHelpFunction
 
     Options::generateOption \
+      --help "Display configuration" \
+      --group groupGlobalOptionsFunction \
+      --alt "--config" \
+      --variable-name "optionConfig" \
+      --function-name optionConfigFunction
+
+    Options::generateOption \
       --help "info level verbose mode (alias of --display-level INFO)" \
       --group groupGlobalOptionsFunction \
       --alt "--verbose" --alt "-v" \
@@ -127,6 +134,7 @@
     --command-name "${SCRIPT_NAME}"
     --callback commandOptionParseFinished
     --help "${help}"
+    optionConfigFunction
     optionNoColorFunction
     optionThemeFunction
     optionHelpFunction
@@ -143,7 +151,7 @@
 %
 
 optionHelpCallback() {
-  awkLintCommand help
+  <% ${commandFunctionName} %> help
   exit 0
 }
 
@@ -258,6 +266,17 @@ optionThemeCallback() {
   UI::theme "$1"
 }
 
+displayConfig() {
+  echo "Config"
+  UI::drawLine "-"
+  local var
+  while read -r var; do
+    printf '%-40s = %s\n' "${var}" "$(declare -p "${var}" | sed -E -e 's/^[^=]+=(.*)/\1/')"
+  done < <(typeset -p | awk 'match($3, "^(BASH_FRAMEWORK_[^=]+)=", m) { print m[1] }' | sort)
+  exit 0
+
+}
+
 commandOptionParseFinished() {
   if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     BASH_FRAMEWORK_ENV_FILES=()
@@ -266,4 +285,7 @@ commandOptionParseFinished() {
   export BASH_FRAMEWORK_ENV_FILES
   Env::requireLoad
   Log::requireLoad
+  if [[ "${optionConfig}" = "1" ]]; then
+    displayConfig
+  fi
 }

@@ -95,6 +95,10 @@ Options::sourceFunction "${commandForm}"
 
   the name of the function that will be generated
 
+* **--callback \<Function\>**
+
+  (optional) the callback called chen all options and arguments have been parsed.
+
 #### Arguments
 
 * **...** (args:StringArray): (mandatory, at least one) list of options/arguments functions, allowing to link the options/arguments with this command

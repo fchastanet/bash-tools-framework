@@ -27,11 +27,6 @@
 - --help-item-name "srcDir"
 - default arguments
 
-  - IMPLEMENT special to manage options: --verbose, --version, --help, ...
-  - other default options to the binaries: log-level, display-log-level, ...
-  - arg configuration: display whole bash framework configuration
-    - add --config
-
 - remove action to remove args already managed
 - manage String|Function
 - validatorCallback
