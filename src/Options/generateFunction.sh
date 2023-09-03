@@ -14,6 +14,7 @@
 # @exitcode 2 if file generation error (only if functionName argument empty)
 # @stdout random function name generated if functionName argument empty, else the generated function
 # @stderr diagnostics information is displayed
+# @internal
 Options::generateFunction() {
   local functionName="$1"
   local templateName="$2"

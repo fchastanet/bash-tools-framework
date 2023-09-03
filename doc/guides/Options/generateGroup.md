@@ -1,42 +1,69 @@
-# Option group generation
+## Index
 
-```bash
-declare optionGroup=<% Options::generateGroup \
-  --title "Command global options" \
-  --help "The Console component adds some predefined options to all commands:"
-%>
-```
+* [Options::generateGroup](#optionsgenerategroup)
 
-**Description**
+### Options::generateGroup
 
-Generates a function that allows to manipulate an option group.
+Generates a function that allows to manipulate a group of options.
+function generated allows group options using `--group` option when
+using `Options::generateOption`
 
-**Syntax**
+#### Output on stdout
+
+By default the name of the random generated function name
+is displayed as output of this function.
+By providing the option `--function-name`, the output of this
+function will be the generated function itself with the chosen name.
+
+#### Syntax
 
 ```text
 Usage:  Options::generateGroup [OPTIONS]
 
-Options::generateOption
-  --help <String|Function>
+OPTIONS:
   --title <String|Function>
+  [--help <String|Function>]
+  [--function-name <String>]
 ```
 
-**Mandatory Options:**
+#### Example
 
-`--title <String|Function>`
+```bash
+declare optionGroup="$(
+  Options::generateGroup \
+    --title "Command global options" \
+    --help "The Console component adds some predefined options to all commands:"
+)"
+Options::sourceFunction "${optionGroup}"
+"${optionGroup}" help
+```
 
-> provides the variable name that will be used to store the parsed options.
+#### Options
 
-**Options:**
+* **--title \<String|Function\>**
 
-`--help <String|Function>`
+  (mandatory) provides group title
 
-> provides option description help.
+* **--help \<String|Function\>**
 
-**Exit status:**
+  (optional) provides command description help
 
-_Exit code 1_
+* **--function-name \<String\>**
 
-> If function provided does not match any existing function in compiler srcDirs,
-> the command fails with exit code 1. Bash framework Function naming convention
-> are the only function supported in arguments.
+  (optional) the name of the function that will be generated
+
+#### Exit codes
+
+* **1**: if error during option parsing
+* **1**: if bash-tpl error during template rendering
+* **2**: if file generation error (only if functionName argument empty)
+
+#### Output on stderr
+
+* diagnostics information is displayed
+
+#### See also
+
+* [generateCommand function](#/doc/guides/Options/generateCommand)
+* [generateOption function](#/doc/guides/Options/generateOption)
+* [group function](#/doc/guides/Options/functionGroup)

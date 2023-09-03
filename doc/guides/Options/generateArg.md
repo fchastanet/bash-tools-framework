@@ -1,80 +1,107 @@
-# Arg generation
+## Index
 
-```bash
-declare positionalArg1=<% Options::generateArg \
-  --variable-name "fixedArg1" \
-  --arg-name "fixedArg1" \
-  --arg-index 1 \
-  --optional \
-  --help "positional parameter 1"
-%>
-```
+* [Options::generateArg](#optionsgeneratearg)
 
-**Description**
+### Options::generateArg
 
 Generates a function that allows to manipulate an argument.
 
-**Syntax**
+#### Output on stdout
+
+By default the name of the random generated function name
+is displayed as output of this function.
+By providing the option `--function-name`, the output of this
+function will be the generated function itself with the chosen name.
+
+#### Syntax
 
 ```text
-Usage:  Options::generateArg [OPTIONS] [TYPE_OPTIONS]
+Usage:  Options::generateArg [OPTIONS]
 
-Options::generateArg
-  --variable-name | --var <argVariableName>
+Options::generateArg [OPTIONS]
+
+OPTIONS:
+  [--variable-name | --var <argVariableName>]
   [--help <String|Function>]
   [--name <argName>]
   [--min <count>] [--max <count>]
   [--authorized-values <StringList>]
   [--regexp <String>]
-  [--callback <Function>]
+  [--callback <String>]
+  [--function-name <String>]
 ```
 
-**Mandatory Options:**
+#### Example
 
-`--variable-name [ --var <String|Function>`
+```bash
+declare positionalArg1="$(
+  Options::generateArg \
+  --variable-name "fileToCompile" \
+  --min 1 \
+  --name "File to compile" \
+  --help "provides the file to compile."
+)"
+Options::sourceFunction "${positionalArg1}"
+"${positionalArg1}" parse "$@"
+```
 
-> provides the variable name that will be used to store the parsed argument.
+#### Callback
 
-**Optional Options:**
+the callback will be called with the following arguments:
 
-`--help <String|Function>`
+* if type String Array, list of arguments collected so far
+* else the Boolean or String argument collected
+* a `--` separator.
+* the rest of arguments not parsed yet
 
-> provides argument help description Default: Empty string
+#### Options
 
-`--name <String|Function>`
+* **--variable-name** | **--var \<varName\>**
 
-> provides the argument name that will be used to display the help. Default:
-> variable name
+  (optional) provides the variable name that will be used to store the parsed arguments.
 
-`--min <int>`
+* **--help \<help\>**
 
-> Indicates the minimum number of args that will be parsed. Default: 1 If set to
-> 0, it means the argument is optional.
+  (optional) provides argument help description (Default: Empty string)
 
-`--max <int>`
+* **--name**
 
-> Indicates the maximum number of args that will be parsed. Provide -1 for
-> infinite number of arguments. Default: 1
+  (optional) provides the argument name that will be used to display the help. (Default: variable name)
 
-`--min <count-min>, --max <count-max>`
+* **--min \<int\>**
 
-> If count-max = count-min <= 1, the variable will be a simple type. If
-> count-max > count-min, the variable will be an array. If count-max <
-> count-min, an error is generated.
+  (optional) Indicates the minimum number of args that will be parsed. (Default: 1)
 
-`--authorized-values <StringList>` _(optional)_
+* **--max \<int\>**
 
-> Indicates the possible value list separated by `|` character.
->
-> Default: no check.
->
-> Eg.: --authorized-values "debug|info|warn|error"
+  (optional) Indicates the maximum number of args that will be parsed. (Default: 1)
 
-`--regexp <String>` _(optional)_
+* **--authorized-values  \<String\>**
 
-> regexp to use to validate the argument value.
+  (optional) list of authorized values separated by |
 
-`--callback <Function>` _(optional)_
+* **--regexp \<String\>**
 
-> the callback is called if the option is parsed successfully. The arg value
-> will be passed as parameter (several parameters if type StringArray).
+  (optional) regexp to use to validate the option value
+
+* **--callback \<String\>**
+
+  (optional) the name of the callback called if the arg is parsed successfully. The argument value will be passed as parameter (several parameters if type StringArray).
+
+* **--function-name \<String\>**
+
+  (optional) the name of the function that will be generated
+
+#### Exit codes
+
+* **1**: if error during argument parsing
+* **3**: if error during template rendering
+
+#### Output on stderr
+
+* diagnostics information is displayed
+
+#### See also
+
+* [generateCommand function](#/doc/guides/Options/generateCommand)
+* [arg function](#/doc/guides/Options/functionArg)

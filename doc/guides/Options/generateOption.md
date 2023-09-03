@@ -1,143 +1,110 @@
-# Option generation
+## Index
 
-```bash
-declare optionVerbose=<% Options::generateOption \
-  --help "displays more information about processed files" \
-  --variable-name "verbose" \
-  --alt "--verbose" \
-  --alt "-v" \
-  --mandatory \
-  --variable-type "Boolean" \
-%>
-```
+* [Options::generateOption](#optionsgenerateoption)
 
-**Description**
+### Options::generateOption
 
 Generates a function that allows to manipulate an option.
 
-**Syntax**
+#### Output on stdout
+
+By default the name of the random generated function name
+is displayed as output of this function.
+By providing the option `--function-name`, the output of this
+function will be the generated function itself with the chosen name.
+
+#### Syntax
 
 ```text
 Usage:  Options::generateOption [OPTIONS] [TYPE_OPTIONS]
 
-Options::generateOption
-  --help <String|Function>
-  --variable-name <optionVariableName>
-  --alt <option>
+Options::generateOption[OPTIONS]
+
+OPTIONS:
+  --alt <optionName>
+  [--variable-name | --var <optionVariableName>]
+  [--variable-type <String|Function>]
   [--mandatory]
+  [--help <String|Function>]
   [--group <Function>]
   [--callback <Function>]
-  [--variable-type <String|Function>]
-  [TYPE_OPTIONS]
+  [--function-name <String>]
+
+TYPE_OPTIONS: see Boolean/String/StringArray option documentation
 ```
 
-**Mandatory Options:**
+#### Example
 
-`--help <String|Function>`
+```bash
+declare myOption="$(
+  Options::generateOption \
+    --variable-name "srcDirs" \
+    --alt "-s" \
+    --alt "--src-dir" \
+    --variable-type "StringArray" \
+    --required \
+    --help "provides the directory where to find the functions source code."
+)"
+Options::sourceFunction "${myOption}"
+"${myOption}" parse "$@"
+```
 
-> provides option description help.
+#### Callback
 
-`--variable-name <String|Function>`
+the callback will be called with the following arguments:
 
-> provides the variable name that will be used to store the parsed options.
+* if type String Array, list of arguments collected so far
+* else the Boolean or String argument collected
+* a `--` separator.
+* the rest of arguments not parsed yet
 
-`--alt <String>` _(at least one)_
+#### Options
 
-> provides the string allowing too discriminate the option.
->
-> You must provide at least one `--alt` option.
+* **--alt \<optionName\>**
 
-**Options:**
+  (mandatory at least one) option name possibility, the string allowing to discriminate the option.
 
-`--mandatory` _(optional)_
+* **--variable-name** | **--var \<varName\>**
 
-> as its name indicates, by default an option is optional. But using
-> `--mandatory` you can make the option mandatory. An error will be generated if
-> the option is not found during parsing arguments.
+  (optional) provides the variable name that will be used to store the parsed options.
 
-`--group <Function>` _(optional)_
+* **--variable-type \<Boolean|String|StringArray\>**
 
-> associate the option to a group. grouped option will be displayed under that
-> group. Default: no group
+  (optional) option type (default: Boolean)
 
-`--callback <Function>` _(optional)_
+* **--mandatory**
 
-> the callback is called if the option is parsed successfully. The option value
-> will be passed as parameter (several parameters if type StringArray).
+  (optional) as its name indicates, by default an option is optional. But using `--mandatory` you can make the option mandatory. An error will be generated if the option is not found during parsing arguments.
 
-`--variable-type <String>` _(optional)_
+* **--help \<help\>**
 
-> the type of option to generate. Supported types are:
->
-> - **Boolean** : indicates an option that will evaluate to 1 if the option is
->   present
-> - **String** : indicates an option that should be followed by a string _Note:_
->   if `--max` parameter > 1, the type will automatically switch to StringArray
+  (optional) provides option help description (Default: Empty string)
 
-**Specific `Boolean` options**
+* **--group \<Function\>**
 
-These options are specific to `Boolean` options
+  (optional) the group to which the option will be attached. Grouped option will be displayed under that group. (Default: no group)
 
-`--off-value <Number>` _(optional)_
+* **--callback \<Function\>**
 
-> Applicable to `Boolean` option type only. Indicates the default off value of
-> the variable.
->
-> Default: 0
+  (optional) the callback called if the option is parsed successfully. The option value will be passed as parameter (several parameters if type StringArray).
 
-`--on-value <Number>` _(optional)_
+* **--function-name \<String\>**
 
-> Applicable to `Boolean` option type only. Indicates the default on value of
-> the variable.
->
-> Default: 1
+  (optional) the name of the function that will be generated
 
-**Specific `String` options**
+* --* (optional) Others options are passed to specific option handler depending on variable type
 
-These options are specific to `String` options
+#### Exit codes
 
-`--default-value <String|Function>` _(optional)_
+* **1**: if error during option parsing
+* **2**: if error during option type parsing
+* **3**: if error during template rendering
 
-> Applicable to `String` option type only. Indicates the default value of the
-> variable
->
-> Default: "" (empty string)
+#### Output on stderr
 
-**Specific `String` or `StringArray` options**
+* diagnostics information is displayed
 
-These options are specific to `String` or `StringArray` options
+#### See also
 
-`--authorized-values <StringList>` _(optional)_
-
-> Applicable to `String` or `StringArray` option type only. Indicates the
-> possible value list separated by | character
->
-> Default: no check.
->
-> Eg.: --authorized-values "debug|info|warn|error"
-
-**Specific `StringArray` options**
-
-These options are specific to `StringArray` options
-
-`--min <Number>` _(optional)_
-
-> Applicable to `StringArray` option type only. Indicates the minimum number of
-> options to provide.
->
-> - Defaults to 0 or 1 if mandatory.
-
-`--max <Number>` _(optional)_
-
-> Applicable to `StringArray` option type only. Indicates the maximum number of
-> options to provide.
->
-> - Default "" means no limit
-
-**Exit status:**
-
-_Exit code 1_
-
-> If function provided does not match any existing function in compiler srcDirs,
-> the command fails with exit code 1. Bash framework Function naming convention
-> are the only function supported in arguments.
+* [generateCommand function](#/doc/guides/Options/generateCommand)
+* [option function](#/doc/guides/Options/functionOption)

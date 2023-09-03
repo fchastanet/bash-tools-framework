@@ -1,32 +1,69 @@
 #!/usr/bin/env bash
 
-# @description generate argument parse code
+# @description Generates a function that allows to manipulate an argument.
+#
+# #### Output on stdout
+#
 # By default the name of the random generated function name
 # is displayed as output of this function.
-# By providing the option --function-name, the output of this
+# By providing the option `--function-name`, the output of this
 # function will be the generated function itself with the chosen name.
-# @example
-#   Options::generateArg \
-#     --variable-name "fileToCompile" \
-#     --name "fileToCompile"
-#     --help "provides the directory where to find the functions source code."
 #
-# @arg $@ args:StringArray
-# @option --variable-name|--var <varName> (mandatory) provides the variable name that will be used to store the parsed arguments.
+# #### Syntax
+#
+# ```text
+# Usage:  Options::generateArg [OPTIONS]
+#
+# Options::generateArg [OPTIONS]
+#
+# OPTIONS:
+#   [--variable-name | --var <argVariableName>]
+#   [--help <String|Function>]
+#   [--name <argName>]
+#   [--min <count>] [--max <count>]
+#   [--authorized-values <StringList>]
+#   [--regexp <String>]
+#   [--callback <String>]
+#   [--function-name <String>]
+# ```
+#
+# #### Example
+#
+# ```bash
+# declare positionalArg1="$(
+#   Options::generateArg \
+#   --variable-name "fileToCompile" \
+#   --min 1 \
+#   --name "File to compile" \
+#   --help "provides the file to compile."
+# )"
+# Options::sourceFunction "${positionalArg1}"
+# "${positionalArg1}" parse "$@"
+# ```
+#
+# #### Callback
+#
+# the callback will be called with the following arguments:
+#
+# * if type String Array, list of arguments collected so far
+# * else the Boolean or String argument collected
+# * a `--` separator.
+# * the rest of arguments not parsed yet
+#
+# @option --variable-name | --var <varName> (optional) provides the variable name that will be used to store the parsed arguments.
 # @option --help <help> (optional) provides argument help description (Default: Empty string)
-# @option --name (optional) provides the argument name that will be used to display the help. Default: variable name
-# @option --min <int> Indicates the minimum number of args that will be parsed. (Default: 1)
-# @option --max <int> Indicates the maximum number of args that will be parsed. (Default: 1)
-# @option --authorized-values  <String> list of authorized values separated by |
-# @option --regexp <String> regexp to use to validate the option value
-# @option --callback <Function> the callback called if the arg is parsed successfully
-# @option --function-name <String> the name of the function that will be generated
+# @option --name (optional) provides the argument name that will be used to display the help. (Default: variable name)
+# @option --min <int> (optional) Indicates the minimum number of args that will be parsed. (Default: 1)
+# @option --max <int> (optional) Indicates the maximum number of args that will be parsed. (Default: 1)
+# @option --authorized-values  <String> (optional) list of authorized values separated by |
+# @option --regexp <String> (optional) regexp to use to validate the option value
+# @option --callback <String> (optional) the name of the callback called if the arg is parsed successfully. The argument value will be passed as parameter (several parameters if type StringArray).
+# @option --function-name <String> (optional) the name of the function that will be generated
 # @exitcode 1 if error during argument parsing
-# @exitcode 2 if error during template rendering
-# @stdout script file generated to parse the arguments following the rules provided
+# @exitcode 3 if error during template rendering
 # @stderr diagnostics information is displayed
-# @see Options::generateCommand
-# @see doc/guides/Options/generateArg.md
+# @see [generateCommand function](#/doc/guides/Options/generateCommand)
+# @see [arg function](#/doc/guides/Options/functionArg)
 Options::generateArg() {
   # args default values
   local variableName=""
@@ -158,11 +195,8 @@ Options::generateArg() {
       --function-name)
         shift
         checkOption "${option}" functionName "$#" || return 1
-        if
-          ! Assert::posixFunctionName "$1" &&
-            ! Assert::bashFrameworkFunction "$1"
-        then
-          Log::displayError "Options::generateOption - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
+        if ! Assert::posixFunctionName "$1"; then
+          Log::displayError "Options::generateOption - Option ${option} - only posix name is accepted - invalid '$1'"
           return 1
         fi
         functionName="$1"

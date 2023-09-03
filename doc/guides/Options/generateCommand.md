@@ -1,34 +1,31 @@
-# Command generation
+## Index
 
-```bash
-declare commandForm=<% Options::generateCommand \
-  --help "Command help" \
-  --version "version 1.0" \
-  --author "author is me" \
-  --command-name "myCommand" \
-  --License "MIT License" \
-  --copyright "Copyright" \
-  --help-template "path/to/template.tpl" \
-  option1 \
-  option2 \
-  arg1 \
-  arg2
-%>
-```
+* [Options::generateCommand](#optionsgeneratecommand)
 
-**Description**
+### Options::generateCommand
 
-Generates a function that allows to manipulate a command and its options and/or
-arguments.
+[![2 Warning(s)](https://img.shields.io/badge/Warnings-2-yellow.svg)](#)
 
-**Syntax**
+Generates a function that allows to manipulate a command
+constituted with options, group and arguments.
+
+#### Output on stdout
+
+By default the name of the random generated function name
+is displayed as output of this function.
+By providing the option `--function-name`, the output of this
+function will be the generated function itself with the chosen name.
+
+#### Syntax
 
 ```text
 Usage:  Options::generateCommand [OPTIONS]
 [optionsVariablesReferences] [argVariablesReferences]
 
-Options::generateCommand
-  --help <String|Function>
+USAGE: Options::generateCommand [OPTIONS] [ARGS]
+
+OPTIONS:
+  [--help <String|Function>]
   [--command-name <String|Function>]
   [--version <String|Function>]
   [--author <String|Function>]
@@ -36,52 +33,90 @@ Options::generateCommand
   [--copyright <String|Function>]
   [--help-template <String>]
   [--error-if-unknown-option]
+
+ARGS: list of option/arg functions
 ```
 
-**Mandatory Options:**
+#### Example
 
-`--help <String|Function>`
+```bash
+declare commandForm="$(Options::generateCommand \
+  --help "Command help" \
+  --version "version 1.0" \
+  --author "author is me" \
+  --command-name "myCommand" \
+  --license "MIT License" \
+  --copyright "Copyright" \
+  --help-template "path/to/template.tpl"
+)"
+Options::sourceFunction "${commandForm}"
+"${commandForm}" parse "$@"
+```
 
-> provides command description help
+#### Options
 
-**Options:**
+* **--help \<String|Function\>**
 
-`--command-name <String|Function>` _(optional)_
+  (optional) provides command description help
 
-> provides the command name. By default the name of current command file without
-> path
+* **--command-name \<String|Function\>**
 
-`--version <String|Function>` _(optional)_
+  (optional) provides the command name. (Default: name of current command file without path)
 
-> provides version section help. Section not generated if not provided.
+* **--version \<String|Function\>**
 
-`--author <String|Function>` _(optional)_
+  (optional) provides version section help. Section not generated if not provided.
 
-> provides author section help. Section not generated if not provided.
+* **--author \<String|Function\>**
 
-`--license <String|Function>` _(optional)_
+  (optional) provides author section help. Section not generated if not provided.
 
-> provides License section help Section not generated if not provided.
+* **--license \<String|Function\>**
 
-`--copyright <String|Function>` _(optional)_
+  (optional) provides License section. Section not generated if not provided.
 
-> provides copyright section help Section not generated if not provided.
+* **--source-file \<String|Function\>**
 
-`--help-template <String>` _(optional)_
+  (optional) provides Source file section. Section not generated if not provided.
 
-> if you want to override the default template used to generate the help
+* **--copyright \<String|Function\>**
 
-`--no-error-if-unknown-option` _(optional)_
+  (optional) provides copyright section. Section not generated if not provided.
 
-> By default, options parser displays an error message and exit with code 1 if
-> an option provided does not match any specified options.
->
-> This flag allows to disable this behavior.
+* **--help-template \<String|Function\>**
 
-**Exit status:**
+  (optional) if you want to override the default template used to generate the help
 
-_Exit code 1_
+* **--no-error-if-unknown-option**
 
-> If function provided does not match any existing function in compiler srcDirs,
-> the command fails with exit code 1. Bash framework Function naming convention
-> are the only function supported in arguments.
+  (optional) options parser doesn't display any error message if an option provided does not match any specified options. This flag allows to disable this behavior.
+
+* **--function-name \<String\>**
+
+  the name of the function that will be generated
+
+#### Arguments
+
+* **...** (args:StringArray): (mandatory, at least one) list of options/arguments functions, allowing to link the options/arguments with this command
+
+#### Exit codes
+
+* **1**: if error during option/argument parsing
+* **2**: if error during option/argument type parsing
+* **3**: if error during template rendering
+
+#### Output on stderr
+
+* diagnostics information is displayed
+
+#### Warnings
+
+* arguments function list has to be provided in correct order
+* argument/option variable names have to be unique. Best practice is to scope the variable name to avoid variable name conflicts.
+
+#### See also
+
+* [generateOption function](#/doc/guides/Options/generateOption)
+* [generateArg function](#/doc/guides/Options/generateArg)
+* [generateGroup function](#/doc/guides/Options/generateGroup)
+* [command function](#/doc/guides/Options/functionCommand)

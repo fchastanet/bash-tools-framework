@@ -3,6 +3,7 @@
 # @description source the option file deduced by option function name
 # @arg $1 functionName:String
 # @env TMPDIR String the temp directory where the src file can be found
+# @internal
 Options::sourceFunction() {
   local functionName="$1"
   local tmpFile

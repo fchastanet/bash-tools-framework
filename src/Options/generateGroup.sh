@@ -1,24 +1,49 @@
 #!/usr/bin/env bash
 
-# @description generate command parse function
+# @description Generates a function that allows to manipulate a group of options.
+# function generated allows group options using `--group` option when
+# using `Options::generateOption`
+#
+# #### Output on stdout
+#
 # By default the name of the random generated function name
 # is displayed as output of this function.
-# By providing the option --function-name, the output of this
+# By providing the option `--function-name`, the output of this
 # function will be the generated function itself with the chosen name.
-# @example
-#   declare optionGroup=<% Options::generateGroup \
+#
+# #### Syntax
+#
+# ```text
+# Usage:  Options::generateGroup [OPTIONS]
+#
+# OPTIONS:
+#   --title <String|Function>
+#   [--help <String|Function>]
+#   [--function-name <String>]
+# ```
+#
+# #### Example
+#
+# ```bash
+# declare optionGroup="$(
+#   Options::generateGroup \
 #     --title "Command global options" \
 #     --help "The Console component adds some predefined options to all commands:"
+# )"
+# Options::sourceFunction "${optionGroup}"
+# "${optionGroup}" help
+# ```
 #
-# @arg $@ args:StringArray list of options/arguments variables references, allowing to link the options/arguments with this command
-# @option --title <String|Function> (optional) provides group title
-# @option --help <String|Function> provides command description help
-# @option --function-name <String> the name of the function that will be generated
+# @option --title <String|Function> (mandatory) provides group title
+# @option --help <String|Function> (optional) provides command description help
+# @option --function-name <String> (optional) the name of the function that will be generated
 # @exitcode 1 if error during option parsing
-# @stdout script file generated to group options and to be associated to options using --group option
+# @exitcode 1 if bash-tpl error during template rendering
+# @exitcode 2 if file generation error (only if functionName argument empty)
 # @stderr diagnostics information is displayed
-# @see Options::generateOption
-# @see doc/guides/Options/generateOption.md
+# @see [generateCommand function](#/doc/guides/Options/generateCommand)
+# @see [generateOption function](#/doc/guides/Options/generateOption)
+# @see [group function](#/doc/guides/Options/functionGroup)
 Options::generateGroup() {
   # args default values
   local title=""
@@ -56,11 +81,8 @@ Options::generateGroup() {
       --function-name)
         shift
         setArg "${option}" functionName "$#" "$1" || return 1
-        if
-          ! Assert::posixFunctionName "${functionName}" &&
-            ! Assert::bashFrameworkFunction "${functionName}"
-        then
-          Log::displayError "Options::generateOption - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
+        if ! Assert::posixFunctionName "$1"; then
+          Log::displayError "Options::generateOption - Option ${option} - only posix name is accepted - invalid '$1'"
           return 1
         fi
         ;;

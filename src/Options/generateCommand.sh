@@ -1,39 +1,73 @@
 #!/usr/bin/env bash
 
-# @description generate command parse function
+# @description Generates a function that allows to manipulate a command
+# constituted with options, group and arguments.
+#
+# #### Output on stdout
+#
 # By default the name of the random generated function name
 # is displayed as output of this function.
-# By providing the option --function-name, the output of this
+# By providing the option `--function-name`, the output of this
 # function will be the generated function itself with the chosen name.
-# @example
-#   declare commandForm=<% Options::generateCommand \
-#     --help "Command help" \
-#     --version "version 1.0" \
-#     --author "author is me" \
-#     --command-name "myCommand" \
-#     --license "MIT License" \
-#     --copyright "Copyright" \
-#     --help-template "path/to/template.tpl"
 #
-# @arg $@ args:StringArray list of options/arguments variables references, allowing to link the options/arguments with this command
-# @option --help <String|Function> provides command description help
+# #### Syntax
+#
+# ```text
+# Usage:  Options::generateCommand [OPTIONS]
+# [optionsVariablesReferences] [argVariablesReferences]
+#
+# USAGE: Options::generateCommand [OPTIONS] [ARGS]
+#
+# OPTIONS:
+#   [--help <String|Function>]
+#   [--command-name <String|Function>]
+#   [--version <String|Function>]
+#   [--author <String|Function>]
+#   [--License <String|Function>]
+#   [--copyright <String|Function>]
+#   [--help-template <String>]
+#   [--error-if-unknown-option]
+#
+# ARGS: list of option/arg functions
+# ```
+#
+# #### Example
+#
+# ```bash
+# declare commandForm="$(Options::generateCommand \
+#   --help "Command help" \
+#   --version "version 1.0" \
+#   --author "author is me" \
+#   --command-name "myCommand" \
+#   --license "MIT License" \
+#   --copyright "Copyright" \
+#   --help-template "path/to/template.tpl"
+# )"
+# Options::sourceFunction "${commandForm}"
+# "${commandForm}" parse "$@"
+# ```
+#
+# @arg $@ args:StringArray (mandatory, at least one) list of options/arguments functions, allowing to link the options/arguments with this command
+# @option --help <String|Function> (optional) provides command description help
+# @option --command-name <String|Function> (optional) provides the command name. (Default: name of current command file without path)
 # @option --version <String|Function> (optional) provides version section help. Section not generated if not provided.
 # @option --author <String|Function> (optional) provides author section help. Section not generated if not provided.
-# @option --command-name <String|Function> (optional) provides the command name. (Default: name of current command file without path)
 # @option --license <String|Function> (optional) provides License section. Section not generated if not provided.
 # @option --source-file <String|Function> (optional) provides Source file section. Section not generated if not provided.
 # @option --copyright <String|Function> (optional) provides copyright section. Section not generated if not provided.
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
-# @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options.
+# @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options. This flag allows to disable this behavior.
 # @option --function-name <String> the name of the function that will be generated
-# @warning arguments list have to be provided in correct order
-# @exitcode 1 if error during option parsing
-# @exitcode 2 if error during option type parsing
+# @warning arguments function list has to be provided in correct order
+# @warning argument/option variable names have to be unique. Best practice is to scope the variable name to avoid variable name conflicts.
+# @exitcode 1 if error during option/argument parsing
+# @exitcode 2 if error during option/argument type parsing
 # @exitcode 3 if error during template rendering
-# @stdout script file generated to parse the arguments following the rules provided
 # @stderr diagnostics information is displayed
-# @see Options::generateOption
-# @see doc/guides/Options/generateCommand.md
+# @see [generateOption function](#/doc/guides/Options/generateOption)
+# @see [generateArg function](#/doc/guides/Options/generateArg)
+# @see [generateGroup function](#/doc/guides/Options/generateGroup)
+# @see [command function](#/doc/guides/Options/functionCommand)
 Options::generateCommand() {
   # args default values
   local help=""
@@ -110,11 +144,8 @@ Options::generateCommand() {
       --function-name)
         shift
         setArg "${option}" functionName "$#" "$1" || return 1
-        if
-          ! Assert::posixFunctionName "${functionName}" &&
-            ! Assert::bashFrameworkFunction "${functionName}"
-        then
-          Log::displayError "Options::generateOption - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
+        if ! Assert::posixFunctionName "$1"; then
+          Log::displayError "Options::generateOption - Option ${option} - only posix name is accepted - invalid '$1'"
           return 1
         fi
         ;;

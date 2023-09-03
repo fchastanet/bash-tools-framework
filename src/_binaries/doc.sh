@@ -52,6 +52,20 @@ ShellDoc::generateShellDocsFromDir \
   '(/__all\.sh)$'
 cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
 
+declare -a optionsDocs=(
+  "generateGroup"
+  "generateOption"
+  "generateArg"
+  "generateCommand"
+)
+for file in "${optionsDocs[@]}"; do
+  "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" \
+    <"${FRAMEWORK_SRC_DIR}/Options/${file}.sh" \
+    >"${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
+  # make pre-commit happy
+  sed -i -E -e '${/^$/d;}' "${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
+done
+
 cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
 sed -i -E \
   -e '/<!-- remove -->/,/<!-- endRemove -->/d' \

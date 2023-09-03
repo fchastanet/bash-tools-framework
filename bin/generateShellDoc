@@ -448,7 +448,7 @@ ShellDoc::generateShellDoc() {
 
   ShellDoc::installRequirementsIfNeeded
   (
-    "${FRAMEWORK_VENDOR_DIR}//shdoc/shdoc" <"${file}" || {
+    "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" <"${file}" || {
       Log::displayError "parse error of file ${file}"
       return 0
     }

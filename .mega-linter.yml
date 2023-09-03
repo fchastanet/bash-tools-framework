@@ -39,7 +39,7 @@ BASH_SHFMT_ARGUMENTS: -i 2 -ci
 
 CREDENTIALS_SECRETLINT_CONFIG_FILE: .secretlintrc.yml
 
-EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: \.git/|testsData/.*\.(txt|help)|^Gemfile.lock$|bin/bash-tpl
+EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: \.git/|testsData/.*\.(txt|help)|^Gemfile.lock$|bin/bash-tpl|^doc/guides/Options/generate.*\.md$
 
 GIT_GIT_DIFF_PRE_COMMANDS:
   - command: git config --global core.autocrlf input
@@ -58,6 +58,7 @@ JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (report/)
 JSON_JSONLINT_FILTER_REGEX_EXCLUDE: (\.vscode/settings\.json|conf/\.vscode/settings\.json|report|\.vscode/launch\.json)
 
 MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: (report)
+MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: ^doc/guides/Options/generate.*\.md$
 
 SPELL_CSPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|.*-megalinter_file_names_cspell.txt|bin/bash-tpl|/testsData/|\.svg)
 SPELL_FILTER_REGEX_EXCLUDE: (\.git/|\.history/|IDE/.*/\.idea|bin/bash-tpl|\.svg)

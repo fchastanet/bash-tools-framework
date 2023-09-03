@@ -24,114 +24,28 @@
 
 ## 1. Options/Args management
 
-Optimize format:
-
-```bash
-  Options::generateGroup \
-    --title "GLOBAL OPTIONS:" \
-    --function-name groupGlobalOptions
-
-  # no more need to of helpCallback() { :; }
-  # --callback does not check for function existence anymore
-  # the check will be done at parse start
-  # --variable-name optional if callback
-  # --function-name will directly load the function (use
-  # sourceFunction with given function name)
-  Options::generateOption \
-    --help "help" \
-    --group groupGlobalOptions \
-    --alt "--help" \
-    --alt "-h" \
-    --callback helpCallback \
-    --function-name optionHelpFunction
-
-  Options::generateOption \
-    --help "verbose mode" \
-    --group groupGlobalOptions \
-    --variable-name "verbose" \
-    --alt "--verbose" --alt "-v" \
-    --function-name optionVerboseFunction
-
-  Options::generateOption \
-    --variable-type String \
-    --help "Set log level" \
-    --group groupGlobalOptions \
-    --variable-name "logLevel" \
-    --alt "--log-level" \
-    --function-name optionLogLevel
-
-  Options::generateOption \
-    --variable-type String \
-    --help "set display level" \
-    --group groupGlobalOptions \
-    --variable-name "displayLevel" \
-    --alt "--display-level" \
-    --function-name optionDisplayLevel
-
-  Options::generateOption \
-    --help "Produce monochrome output." \
-    --group groupGlobalOptions \
-    --variable-name "noColor" \
-    --alt "--no-color" \
-    --function-name optionNoColor
-
-  Options::generateOption \
-    --help "Print version information and quit" \
-    --group groupGlobalOptions \
-    --alt "--version" \
-    --callback versionCallback \
-    --function-name optionNoColor
-
-  Options::generateOption \
-    --variable-name "quiet" \
-    --help "quiet mode" \
-    --group groupGlobalOptions \
-    --alt "--quiet" --alt "-q" \
-    --function-name optionQuiet
-
-  local -a options=(
-    --author "[François Chastanet](https://github.com/fchastanet)"
-    --source-file "${REPOSITORY_URL}/tree/master/${SRC_FILE_PATH}"
-    --license "MIT License"
-    --copyright "Copyright (c) 2022 François Chastanet"
-    --version "${versionNumber}"
-    optionHelp
-    optionVersion
-    optionQuiet
-    optionNoColor
-    optionLogLevel
-    optionDisplayLevel
-    optionVerbose
-  )
-```
-
-- best practice: scope arg/option variable names
+- --help-item-name "srcDir"
 - default arguments
 
-  - Args::version to display binary version
   - IMPLEMENT special to manage options: --verbose, --version, --help, ...
   - other default options to the binaries: log-level, display-log-level, ...
   - arg configuration: display whole bash framework configuration
-
-- generate options parsing + doc from template
-
-  - <https://github.com/ko1nksm/getoptions>
-  - <https://github.com/matejak/argbash>
-  - <https://argbash.dev>
-  - <https://github.com/adoyle-h/lobash>
-  - <https://github.com/elibs/ebash>
+    - add --config
 
 - remove action to remove args already managed
 - manage String|Function
 - validatorCallback
+
   - option type File, would check if String after is a valid file
+  - validatorHandler could assert path is valid
+  - preProcessHandler could remove duplicates
+  - postProcessHandler could remove the argument from arg list (default
+    postProcessHandler ?)
+
 - option type env --env OPTION=\*
 
 ## 2. Env::load
 
-- add --log-level and --display-log-level args
-  - add --version
-  - add --config
 - should \_.sh files be loaded at header level ?
   - it would allow to load constants, even maybe rename it to \_header.sh
 - add in FrameworkDoc.doc

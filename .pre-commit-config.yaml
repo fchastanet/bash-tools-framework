@@ -20,9 +20,10 @@ repos:
       - id: end-of-file-fixer
         stages: [commit]
         exclude: |
-          (?x)^(
-            doc/images/.*\.svg
-          )$
+          (?x)(
+            ^doc/images/.*\.svg$|
+            ^doc/guides/Options/generate.*.md$
+          )
       - id: check-executables-have-shebangs
         stages: [commit]
       - id: check-shebang-scripts-are-executable
@@ -38,9 +39,9 @@ repos:
         stages: [commit]
       - id: check-json
         exclude: |
-          (?x)^(
-            .vscode\/settings.json
-          )$
+          (?x)(
+            ^.vscode\/settings.json$
+          )
         stages: [commit]
 
   - repo: https://github.com/fchastanet/jumanjihouse-pre-commit-hooks
@@ -55,7 +56,11 @@ repos:
       # markers and whitespace errors according to core.whitespace
       # and conflict-marker-size configuration in a git repo.
       - id: git-check
-        exclude: /testsData/
+        exclude: |
+          (?x)(
+            /testsData/|
+            ^doc/guides/Options/generate.*.md$
+          )
         stages: [commit]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -63,6 +68,7 @@ repos:
     hooks:
       - id: prettier
         stages: [commit]
+        exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: local
     hooks:
