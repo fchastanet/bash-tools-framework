@@ -11,7 +11,6 @@ source "${FRAMEWORK_SRC_DIR}/Env/__all.sh"
 
 # parse parameters
 Env::requireLoad
-Env::requireRemoveVerboseArg
 
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched
@@ -24,17 +23,22 @@ declare -a params=(
   --root-dir "${FRAMEWORK_ROOT_DIR}"
 )
 
-if ((BASH_FRAMEWORK_ARGS_VERBOSE > 0)); then
-  params+=("${BASH_FRAMEWORK_ARGS_VERBOSE_OPTION}")
-fi
+declare -a files=()
+for arg in "${BASH_FRAMEWORK_ARGV[@]}"; do
+  if [[ "${arg}" =~ .sh$ ]]; then
+    files+=("${arg}")
+  else
+    params+=("${arg}")
+  fi
+done
 
 (
   set -x
-  if ((${#BASH_FRAMEWORK_ARGV} == 0)); then
+  if ((${#files[@]} == 0)); then
     find "${FRAMEWORK_SRC_DIR}/_binaries" -name "*.sh" |
       (grep -v -E '/testsData/' || true)
   else
-    for file in "${BASH_FRAMEWORK_ARGV[@]}"; do
+    for file in "${files[@]}"; do
       realpath "${file}"
     done
   fi

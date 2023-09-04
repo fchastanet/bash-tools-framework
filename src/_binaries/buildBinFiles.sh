@@ -3,23 +3,9 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} build files using build.sh
-and check if bin file has been updated, if yes return exit code > 0
+.INCLUDE "$(dynamicTemplateDir _binaries/options.buildBinFiles.tpl)"
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--ignore-missing]
-
-    --ignore-missing  do not exit with error for missing files
-                      useful when committing because were not existing before
-
-INTERNAL TOOL
-
-.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
-EOF
-)"
-
-Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
+buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 declare beforeBuild
 computeMd5File() {
@@ -35,17 +21,29 @@ computeMd5File() {
   )
 }
 
-beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-computeMd5File "${beforeBuild}"
+run() {
+  beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+  computeMd5File "${beforeBuild}"
 
-cat "${beforeBuild}"
+  cat "${beforeBuild}"
 
-"${FRAMEWORK_ROOT_DIR}/build.sh"
+  "${FRAMEWORK_ROOT_DIR}/build.sh"
 
-# allows to add ignore missing option to md5sum when using pre-commit
-declare -a args=("${@}")
-# exit with code != 0 if at least one bin file has changed
-if ! md5sum -c "${args[@]}" "${beforeBuild}"; then
-  echo >&2 "some bin files need to be committed"
-  exit 1
+  # allows to add ignore missing option to md5sum when using pre-commit
+  declare -a args=()
+  # shellcheck disable=SC2154
+  if [[ "${optionIgnoreMissing}" = "1" ]]; then
+    args+=(--ignore-missing)
+  fi
+  # exit with code != 0 if at least one bin file has changed
+  if ! md5sum -c "${args[@]}" "${beforeBuild}"; then
+    echo >&2 "some bin files need to be committed"
+    exit 1
+  fi
+}
+
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
+else
+  run
 fi

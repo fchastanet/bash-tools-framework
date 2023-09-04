@@ -1139,7 +1139,7 @@ Result in checkstyle format.")"
     echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
     echo 'MIT License'
     echo
-    echo 'Copyright (c) 2022 François Chastanet'
+    echo 'Copyright (c) 2023 François Chastanet'
   else
     Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1

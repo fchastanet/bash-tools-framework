@@ -128,7 +128,7 @@
     --author "[François Chastanet](https://github.com/fchastanet)"
     --source-file "${REPOSITORY_URL}/tree/master/${SRC_FILE_PATH}"
     --license "MIT License"
-    --copyright "Copyright (c) 2022 François Chastanet"
+    --copyright "Copyright (c) 2023 François Chastanet"
     --version "${versionNumber}"
     --function-name "${commandFunctionName}"
     --command-name "${SCRIPT_NAME}"
