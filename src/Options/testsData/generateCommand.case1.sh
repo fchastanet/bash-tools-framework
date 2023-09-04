@@ -56,6 +56,7 @@ Options::command() {
     echo -n -e ' (at most 1 times)'
     echo
     echo "    file"
+    echo 'very long help'
   else
     Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1

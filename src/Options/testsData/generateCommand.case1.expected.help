@@ -6,3 +6,4 @@ USAGE: test [--file|-f <String>]
 OPTIONS:
   --file, -f <String> (optional) (at most 1 times)
     file
+very long help

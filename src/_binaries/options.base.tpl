@@ -122,6 +122,16 @@
       --callback optionQuietCallback \
       --variable-name "optionQuiet" \
       --function-name optionQuietFunction
+
+    if [[ "${generateFormatOption:-0}" = "1" ]]; then
+      Options::generateOption \
+        --variable-type String \
+        --help "define output format of this command (default: plain)" \
+        --alt "--format" \
+        --authorized-values "plain|checkstyle" \
+        --variable-name "optionFormat" \
+        --function-name optionFormatFunction
+    fi
   )
 
   declare -a options=(
@@ -134,6 +144,7 @@
     --command-name "${SCRIPT_NAME}"
     --callback commandOptionParseFinished
     --help "${help}"
+    --long-description """${longDescription}"""
     optionConfigFunction
     optionNoColorFunction
     optionThemeFunction
@@ -148,7 +159,15 @@
     optionTraceVerboseFunction
     optionEnvFilesFunction
   )
+  if [[ "${generateFormatOption:-0}" = "1" ]]; then
+    options+=(optionFormatFunction)
+  fi
 %
+
+# default option values
+% if [[ "${generateFormatOption:-0}" = "1" ]]; then
+  declare optionFormat="plain"
+% fi
 
 optionHelpCallback() {
   <% ${commandFunctionName} %> help

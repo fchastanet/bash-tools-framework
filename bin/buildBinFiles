@@ -647,6 +647,8 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
+# default option values
+
 optionHelpCallback() {
   buildBinFilesCommand help
   exit 0

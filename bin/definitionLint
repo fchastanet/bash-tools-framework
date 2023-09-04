@@ -83,20 +83,127 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
-# @description check if an element is contained in an array
+# @description concat each element of an array with a separator
+# but wrapping text when line length is more than provided argument
+# The algorithm will try not to cut the array element if can
 #
-# @arg $1 needle:String
+# @arg $1 glue:String
+# @arg $2 maxLineLength:int
+# @arg $3 indentNextLine:int
 # @arg $@ array:String[]
-# @exitcode 0 if found
-# @exitcode 1 otherwise
-# @example
-#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
-Array::contains() {
-  local element
-  for element in "${@:2}"; do
-    [[ "${element}" = "$1" ]] && return 0
+Array::wrap() {
+  local glue="${1-}"
+  local -i glueLength=0
+  shift || true
+  local -i maxLineLength=$1
+  shift || true
+  local -i indentNextLine=$1
+  local indentStr=""
+  if ((indentNextLine > 0)); then
+    indentStr="$(head -c "${indentNextLine}" </dev/zero | tr '\0' " ")"
+  fi
+  shift || true
+  (($# != 0)) || return 0
+
+  local arg
+
+  # convert multi-line arg to several args
+  local -a allArgs=()
+  for arg in "$@"; do
+    local line
+    local IFS=$'\n'
+    while read -r line; do
+      if [[ -z "${line}" ]]; then
+        allArgs+=($'\n')
+      else
+        allArgs+=("${line}")
+      fi
+    done <<<"${arg}"
   done
-  return 1
+  set -- "${allArgs[@]}"
+
+  local -i currentLineLength=0
+  local needEcho="0"
+  local arg="$1"
+  while (($# > 0 || ${#arg} > 0)); do
+    if [[ "${arg}" = $'\n' ]]; then
+      printf $'\n\n'
+      ((currentLineLength = 0)) || true
+      ((glueLength = 0)) || true
+      shift || return 0
+      arg="$1"
+    elif ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
+      # arg can be stored as a whole on current line
+      if ((glueLength > 0)); then
+        echo -e -n "${glue}"
+        ((currentLineLength += glueLength))
+      fi
+      echo -e -n "${arg}"
+      needEcho="1"
+      ((currentLineLength += ${#arg}))
+      ((glueLength = ${#glue})) || true
+      shift || return 0
+      arg="$1"
+    else
+      if ((${#arg} >= (maxLineLength - indentNextLine))); then
+        # arg can be stored on a whole line
+        if ((glueLength > 0)); then
+          echo -e -n "${glue}"
+          ((currentLineLength += glueLength))
+        fi
+        local -i length
+        ((length = maxLineLength - currentLineLength)) || true
+        echo -e "${arg:0:${length}}"
+        ((currentLineLength = 0)) || true
+        ((glueLength = 0)) || true
+        arg="${indentStr}${arg:${length}}"
+        needEcho="0"
+      else
+        # arg cannot be stored on a whole line, so we add it on next line as a whole
+        echo
+        echo -e -n "${indentStr}${arg}"
+        ((glueLength = ${#glue})) || true
+        ((currentLineLength = ${#arg}))
+        arg="" # allows to go to next arg
+        needEcho="1"
+      fi
+      if [[ -z "${arg}" ]]; then
+        shift || return 0
+        arg="$1"
+      fi
+    fi
+  done
+  if [[ "${needEcho}" = "1" ]]; then
+    echo
+  fi
+}
+
+#set -x
+#Array::wrap ":" 40 0 "Lorem ipsum dolor sit amet," "consectetur adipiscing elit." "Curabitur ac elit id massa" "condimentum finibus."
+
+# @description ensure env files are loaded
+# @noargs
+# @exitcode 1 if getOrderedConfFiles fails
+# @exitcode 2 if one of env files fails to load
+# @stderr diagnostics information is displayed
+Env::requireLoad() {
+  local configFilesStr
+  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
+
+  local -a configFiles
+  readarray -t configFiles <<<"${configFilesStr}"
+
+  # if empty string, there will be one element
+  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
+    # should not happen, as there is always default file
+    Log::displaySkipped "no env file to load"
+    return 0
+  fi
+
+  Env::mergeConfFiles "${configFiles[@]}" || {
+    Log::displayError "while loading config files: ${configFiles[*]}"
+    return 2
+  }
 }
 
 # @description Log namespace provides 2 kind of functions
@@ -138,6 +245,15 @@ Log::displayDebug() {
   Log::logDebug "$1"
 }
 
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
+Log::displayError() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
+    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logError "$1"
+}
+
 # @description Display message using info color (bg light blue/fg white)
 # @arg $1 message:String the message to display
 Log::displayInfo() {
@@ -148,12 +264,49 @@ Log::displayInfo() {
   Log::logInfo "$1" "${type}"
 }
 
-# @description Display message using error color (red) and exit immediately with error status 1
-# @arg $1 message:String the message to display
-Log::fatal() {
-  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
-  Log::logFatal "$1"
-  exit 1
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables loaded by Env::requireLoad
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
+# @require Env::requireLoad
+# @require UI::requireTheme
+Log::requireLoad() {
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      if
+        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
+          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
+      then
+        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+      fi
+    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+    fi
+
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    # will always be created even if not in info level
+    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
+    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+    fi
+  fi
 }
 
 # ensure all methods called dynamically are imported
@@ -337,6 +490,83 @@ ProfilesLintDefinitionFile() {
   return "${errorCount}"
 }
 
+# @description draw a line with the character passed in parameter repeated depending on terminal width
+# @arg $1 character:String character to use as separator (default value #)
+UI::drawLine() {
+  local character="${1:-#}"
+  printf '%*s\n' "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo)}" '' | tr ' ' "${character}"
+}
+
+# @description load colors theme constants
+# @warning if tty not opened, noColor theme will be chosen
+# @arg $1 theme:String the theme to use (default, noColor)
+# @arg $@ args:String[]
+# @set __ERROR_COLOR String indicate error status
+# @set __INFO_COLOR String indicate info status
+# @set __SUCCESS_COLOR String indicate success status
+# @set __WARNING_COLOR String indicate warning status
+# @set __SKIPPED_COLOR String indicate skipped status
+# @set __DEBUG_COLOR String indicate debug status
+# @set __HELP_COLOR String indicate help status
+# @set __TEST_COLOR String not used
+# @set __TEST_ERROR_COLOR String not used
+# @set __HELP_TITLE_COLOR String used to display help title in help strings
+# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
+#
+# @set __RESET_COLOR String reset default color
+#
+# @set __HELP_EXAMPLE String to remove
+# @set __HELP_TITLE String to remove
+# @set __HELP_NORMAL String to remove
+UI::theme() {
+  local theme="${1-default}"
+  if ! Assert::tty; then
+    theme="noColor"
+  fi
+  if [[ "${theme}" = "default" ]]; then
+    export BASH_FRAMEWORK_THEME="default"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    export __ERROR_COLOR='\e[31m'         # Red
+    export __INFO_COLOR='\e[44m'          # white on lightBlue
+    export __SUCCESS_COLOR='\e[32m'       # Green
+    export __WARNING_COLOR='\e[33m'       # Yellow
+    export __SKIPPED_COLOR='\e[33m'       # Yellow
+    export __DEBUG_COLOR='\e[37m'         # Grey
+    export __HELP_COLOR='\e[7;49;33m'     # Black on Gold
+    export __TEST_COLOR='\e[100m'         # Light magenta
+    export __TEST_ERROR_COLOR='\e[41m'    # white on red
+    export __HELP_TITLE_COLOR="\e[1;37m"  # Bold
+    export __HELP_OPTION_COLOR="\e[1;34m" # Blue
+    # Internal: reset color
+    export __RESET_COLOR='\e[0m' # Reset Color
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_TITLE="$(echo -e "\e[1;37m")"
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_NORMAL="$(echo -e "\033[0m")"
+  else
+    export BASH_FRAMEWORK_THEME="noColor"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    export __ERROR_COLOR=''
+    export __INFO_COLOR=''
+    export __SUCCESS_COLOR=''
+    export __WARNING_COLOR=''
+    export __SKIPPED_COLOR=''
+    export __DEBUG_COLOR=''
+    export __HELP_COLOR=''
+    export __TEST_COLOR=''
+    export __TEST_ERROR_COLOR=''
+    export __HELP_TITLE_COLOR=''
+    export __HELP_OPTION_COLOR=''
+    # Internal: reset color
+    export __RESET_COLOR=''
+    export __HELP_EXAMPLE=''
+    export __HELP_TITLE=''
+    export __HELP_NORMAL=''
+  fi
+}
+
 # @description ensure COMMAND_BIN_DIR env var is set
 # and PATH correctly prepared
 # @noargs
@@ -347,169 +577,12 @@ Compiler::Facade::requireCommandBinDir() {
   Env::pathPrepend "${COMMAND_BIN_DIR}"
 }
 
-# @description prepend directories to the PATH environment variable
-# @arg $@ args:String[] list of directories to prepend
-# @set PATH update PATH with the directories prepended
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
-}
-
-# @description Display message using error color (red)
-# @arg $1 message:String the message to display
-Log::displayError() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
-    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logError "$1"
-}
-
-# @description Display message using success color (bg green/fg white)
-# @arg $1 message:String the message to display
-Log::displaySuccess() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logSuccess "$1"
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logDebug() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_DEBUG)); then
-    Log::logMessage "${2:-DEBUG}" "$1"
-  fi
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logFatal() {
-  Log::logMessage "${2:-FATAL}" "$1"
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logInfo() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-INFO}" "$1"
-  fi
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logError() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
-    Log::logMessage "${2:-ERROR}" "$1"
-  fi
-}
-
-# @description Internal: common log message
-# @example text
-#   [date]|[levelMsg]|message
-#
-# @example text
-#   2020-01-19 19:20:21|ERROR  |log error
-#   2020-01-19 19:20:21|SKIPPED|log skipped
-#
-# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
-# @arg $2 msg:String the message to display
-# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
-# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
-# @stderr diagnostics information is displayed
-# @require Env::requireLoad
-# @require Log::requireLoad
-Log::logMessage() {
-  local levelMsg="$1"
-  local msg="$2"
-  local date
-
-  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    date="$(date '+%Y-%m-%d %H:%M:%S')"
-    touch "${BASH_FRAMEWORK_LOG_FILE}"
-    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
-  fi
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logSuccess() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-SUCCESS}" "$1"
-  fi
-}
-
-# @description ensure env files are loaded
+# @description check if tty (interactive mode) is active
 # @noargs
-# @exitcode 1 if getOrderedConfFiles fails
-# @exitcode 2 if one of env files fails to load
-# @stderr diagnostics information is displayed
-Env::requireLoad() {
-  local configFilesStr
-  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
-
-  local -a configFiles
-  readarray -t configFiles <<<"${configFilesStr}"
-
-  # if empty string, there will be one element
-  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
-    # should not happen, as there is always default file
-    Log::displaySkipped "no env file to load"
-    return 0
-  fi
-
-  Env::mergeConfFiles "${configFiles[@]}" || {
-    Log::displayError "while loading config files: ${configFiles[*]}"
-    return 2
-  }
-}
-
-# @description activate or not Log::display* and Log::log* functions
-# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
-# environment variables loaded by Env::requireLoad
-# try to create log file and rotate it if necessary
-# @noargs
-# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
-# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
-# @env BASH_FRAMEWORK_LOG_LEVEL int
-# @env BASH_FRAMEWORK_LOG_FILE String
-# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
-# @exitcode 0 always successful
-# @stderr diagnostics information about log file is displayed
-# @require Env::requireLoad
-# @require UI::requireTheme
-Log::requireLoad() {
-  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
-    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-    export BASH_FRAMEWORK_LOG_LEVEL
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      if
-        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
-          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
-      then
-        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
-      fi
-    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
-    fi
-
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    # will always be created even if not in info level
-    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
-    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-    fi
-  fi
+# @exitcode 1 if tty not active
+# @stderr diagnostic information + help if second argument is provided
+Assert::tty() {
+  [[ -t 1 || -t 2 ]]
 }
 
 # @description get list of env files to load
@@ -593,6 +666,18 @@ Env::mergeConfFiles() {
   set +o allexport
 }
 
+# @description prepend directories to the PATH environment variable
+# @arg $@ args:String[] list of directories to prepend
+# @set PATH update PATH with the directories prepended
+Env::pathPrepend() {
+  local arg
+  for arg in "$@"; do
+    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
+      PATH="$(realpath "${arg}"):${PATH}"
+    fi
+  done
+}
+
 # @description Display message using skip color (yellow)
 # @arg $1 message:String the message to display
 Log::displaySkipped() {
@@ -600,6 +685,66 @@ Log::displaySkipped() {
     echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   fi
   Log::logSkipped "$1"
+}
+
+# @description Display message using success color (bg green/fg white)
+# @arg $1 message:String the message to display
+Log::displaySuccess() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__SUCCESS_COLOR}SUCCESS - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logSuccess "$1"
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logDebug() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_DEBUG)); then
+    Log::logMessage "${2:-DEBUG}" "$1"
+  fi
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logError() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
+    Log::logMessage "${2:-ERROR}" "$1"
+  fi
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logInfo() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-INFO}" "$1"
+  fi
+}
+
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
+#
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
+# @require Env::requireLoad
+# @require Log::requireLoad
+Log::logMessage() {
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+
+  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    touch "${BASH_FRAMEWORK_LOG_FILE}"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
 }
 
 # @description To be called before logging in the log file
@@ -676,82 +821,12 @@ Log::logSkipped() {
   fi
 }
 
-# @description load colors theme constants
-# @warning if tty not opened, noColor theme will be chosen
-# @arg $1 theme:String the theme to use (default, noColor)
-# @arg $@ args:String[]
-# @set __ERROR_COLOR String indicate error status
-# @set __INFO_COLOR String indicate info status
-# @set __SUCCESS_COLOR String indicate success status
-# @set __WARNING_COLOR String indicate warning status
-# @set __SKIPPED_COLOR String indicate skipped status
-# @set __DEBUG_COLOR String indicate debug status
-# @set __HELP_COLOR String indicate help status
-# @set __TEST_COLOR String not used
-# @set __TEST_ERROR_COLOR String not used
-# @set __HELP_TITLE_COLOR String used to display help title in help strings
-# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
-#
-# @set __RESET_COLOR String reset default color
-#
-# @set __HELP_EXAMPLE String to remove
-# @set __HELP_TITLE String to remove
-# @set __HELP_NORMAL String to remove
-UI::theme() {
-  local theme="${1-default}"
-  if ! Assert::tty; then
-    theme="noColor"
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSuccess() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SUCCESS}" "$1"
   fi
-  if [[ "${theme}" = "default" ]]; then
-    export BASH_FRAMEWORK_THEME="default"
-    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-    export __ERROR_COLOR='\e[31m'         # Red
-    export __INFO_COLOR='\e[44m'          # white on lightBlue
-    export __SUCCESS_COLOR='\e[32m'       # Green
-    export __WARNING_COLOR='\e[33m'       # Yellow
-    export __SKIPPED_COLOR='\e[33m'       # Yellow
-    export __DEBUG_COLOR='\e[37m'         # Grey
-    export __HELP_COLOR='\e[7;49;33m'     # Black on Gold
-    export __TEST_COLOR='\e[100m'         # Light magenta
-    export __TEST_ERROR_COLOR='\e[41m'    # white on red
-    export __HELP_TITLE_COLOR="\e[1;37m"  # Bold
-    export __HELP_OPTION_COLOR="\e[1;34m" # Blue
-    # Internal: reset color
-    export __RESET_COLOR='\e[0m' # Reset Color
-    # shellcheck disable=SC2155,SC2034
-    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
-    # shellcheck disable=SC2155,SC2034
-    export __HELP_TITLE="$(echo -e "\e[1;37m")"
-    # shellcheck disable=SC2155,SC2034
-    export __HELP_NORMAL="$(echo -e "\033[0m")"
-  else
-    export BASH_FRAMEWORK_THEME="noColor"
-    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-    export __ERROR_COLOR=''
-    export __INFO_COLOR=''
-    export __SUCCESS_COLOR=''
-    export __WARNING_COLOR=''
-    export __SKIPPED_COLOR=''
-    export __DEBUG_COLOR=''
-    export __HELP_COLOR=''
-    export __TEST_COLOR=''
-    export __TEST_ERROR_COLOR=''
-    export __HELP_TITLE_COLOR=''
-    export __HELP_OPTION_COLOR=''
-    # Internal: reset color
-    export __RESET_COLOR=''
-    export __HELP_EXAMPLE=''
-    export __HELP_TITLE=''
-    export __HELP_NORMAL=''
-  fi
-}
-
-# @description check if tty (interactive mode) is active
-# @noargs
-# @exitcode 1 if tty not active
-# @stderr diagnostic information + help if second argument is provided
-Assert::tty() {
-  [[ -t 1 || -t 2 ]]
 }
 
 # FUNCTIONS
@@ -764,22 +839,548 @@ FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
 FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 # REQUIRES
 Env::requireLoad
-Log::requireLoad
 UI::requireTheme
+Log::requireLoad
 Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
-FORMAT="plain"
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Synopsis:${__HELP_NORMAL} lint definitions files
+# default option values
+declare optionFormat="plain"
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>] <folder>
+optionHelpCallback() {
+  definitionLintCommand help
+  exit 0
+}
 
-${__HELP_TITLE}Description:${__HELP_NORMAL}
-Lint files of the given directory
+optionVersionCallback() {
+  echo "${SCRIPT_NAME} version 1.0"
+  exit 0
+}
+
+optionEnvFileCallback() {
+  local envFile="$1"
+  if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
+    Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
+    exit 1
+  fi
+}
+
+optionInfoVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+}
+
+optionDebugVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
+
+optionTraceVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
+
+getLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__LEVEL_OFF}"
+      ;;
+    ERROR)
+      echo "${__LEVEL_ERROR}"
+      ;;
+    WARNING)
+      echo "${__LEVEL_WARNING}"
+      ;;
+    INFO)
+      echo "${__LEVEL_INFO}"
+      ;;
+    DEBUG | TRACE)
+      echo "${__LEVEL_DEBUG}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
+
+getVerboseLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__VERBOSE_LEVEL_OFF}"
+      ;;
+    ERROR | WARNING | INFO)
+      echo "${__VERBOSE_LEVEL_INFO}"
+      ;;
+    DEBUG)
+      echo "${__VERBOSE_LEVEL_DEBUG}"
+      ;;
+    TRACE)
+      echo "${__VERBOSE_LEVEL_TRACE}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
+
+optionDisplayLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+}
+
+optionLogLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+}
+
+optionLogFileCallback() {
+  local logFile="$1"
+  export BASH_FRAMEWORK_LOG_FILE="${logFile}"
+}
+
+optionQuietCallback() {
+  export BASH_FRAMEWORK_QUIET_MODE=1
+}
+
+optionNoColorCallback() {
+  UI::theme "noColor"
+}
+
+optionThemeCallback() {
+  UI::theme "$1"
+}
+
+displayConfig() {
+  echo "Config"
+  UI::drawLine "-"
+  local var
+  while read -r var; do
+    printf '%-40s = %s\n' "${var}" "$(declare -p "${var}" | sed -E -e 's/^[^=]+=(.*)/\1/')"
+  done < <(typeset -p | awk 'match($3, "^(BASH_FRAMEWORK_[^=]+)=", m) { print m[1] }' | sort)
+  exit 0
+
+}
+
+commandOptionParseFinished() {
+  if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    BASH_FRAMEWORK_ENV_FILES=()
+  fi
+  BASH_FRAMEWORK_ENV_FILES+=("${optionEnvFiles[@]}")
+  export BASH_FRAMEWORK_ENV_FILES
+  Env::requireLoad
+  Log::requireLoad
+  if [[ "${optionConfig}" = "1" ]]; then
+    displayConfig
+  fi
+}
+
+definitionLintCommand() {
+  local options_parse_cmd="$1"
+  shift || true
+
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
+    local -i options_parse_optionParsedCountOptionFormat
+    ((options_parse_optionParsedCountOptionFormat = 0)) || true
+    optionConfig="0"
+    local -i options_parse_optionParsedCountOptionConfig
+    ((options_parse_optionParsedCountOptionConfig = 0)) || true
+    optionNoColor="0"
+    local -i options_parse_optionParsedCountOptionNoColor
+    ((options_parse_optionParsedCountOptionNoColor = 0)) || true
+    optionDebugVerbose="0"
+    local -i options_parse_optionParsedCountOptionDebugVerbose
+    ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
+    optionTraceVerbose="0"
+    local -i options_parse_optionParsedCountOptionTraceVerbose
+    ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
+    local -i options_parse_optionParsedCountOptionTheme
+    ((options_parse_optionParsedCountOptionTheme = 0)) || true
+    optionHelp="0"
+    local -i options_parse_optionParsedCountOptionHelp
+    ((options_parse_optionParsedCountOptionHelp = 0)) || true
+    optionVersion="0"
+    local -i options_parse_optionParsedCountOptionVersion
+    ((options_parse_optionParsedCountOptionVersion = 0)) || true
+    optionQuiet="0"
+    local -i options_parse_optionParsedCountOptionQuiet
+    ((options_parse_optionParsedCountOptionQuiet = 0)) || true
+    local -i options_parse_optionParsedCountOptionLogLevel
+    ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
+    local -i options_parse_optionParsedCountOptionLogFile
+    ((options_parse_optionParsedCountOptionLogFile = 0)) || true
+    local -i options_parse_optionParsedCountOptionDisplayLevel
+    ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
+    optionInfoVerbose="0"
+    local -i options_parse_optionParsedCountOptionInfoVerbose
+    ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
+    local -i options_parse_argParsedCountArgFolder
+    ((options_parse_argParsedCountArgFolder = 0)) || true
+    local -i options_parse_parsedArgIndex=0
+    while (($# > 0)); do
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
+        # Option 1/14
+        # Option optionFormat --format variableType String min 0 max 1 authorizedValues 'plain|checkstyle' regexp ''
+        --format)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ plain|checkstyle ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(plain|checkstyle)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionFormat >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionFormat))
+          optionFormat="$1"
+          ;;
+        # Option 2/14
+        # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --config)
+          optionConfig="1"
+          if ((options_parse_optionParsedCountOptionConfig >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 3/14
+        # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --no-color)
+          optionNoColor="1"
+          if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionNoColorCallback "${optionNoColor}"
+          ;;
+        # Option 4/14
+        # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vv)
+          optionDebugVerbose="1"
+          if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionDebugVerboseCallback "${optionDebugVerbose}"
+          ;;
+        # Option 5/14
+        # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vvv)
+          optionTraceVerbose="1"
+          if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionTraceVerboseCallback "${optionTraceVerbose}"
+          ;;
+        # Option 6/14
+        # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
+        --env-file)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          optionEnvFiles+=("$1")
+          optionEnvFileCallback "${optionEnvFiles[@]}"
+          ;;
+        # Option 7/14
+        # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|noColor' regexp ''
+        --theme)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ default|noColor ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(default|noColor)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionTheme >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionTheme))
+          optionTheme="$1"
+          optionThemeCallback "${optionTheme}"
+          ;;
+        # Option 8/14
+        # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --help | -h)
+          optionHelp="1"
+          if ((options_parse_optionParsedCountOptionHelp >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionHelpCallback "${optionHelp}"
+          ;;
+        # Option 9/14
+        # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --version)
+          optionVersion="1"
+          if ((options_parse_optionParsedCountOptionVersion >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionVersionCallback "${optionVersion}"
+          ;;
+        # Option 10/14
+        # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --quiet | -q)
+          optionQuiet="1"
+          if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionQuietCallback "${optionQuiet}"
+          ;;
+        # Option 11/14
+        # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
+        --log-level)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionLogLevel))
+          optionLogLevel="$1"
+          optionLogLevelCallback "${optionLogLevel}"
+          ;;
+        # Option 12/14
+        # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
+        --log-file)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionLogFile >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionLogFile))
+          optionLogFile="$1"
+          optionLogFileCallback "${optionLogFile}"
+          ;;
+        # Option 13/14
+        # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
+        --display-level)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionDisplayLevel))
+          optionDisplayLevel="$1"
+          optionDisplayLevelCallback "${optionDisplayLevel}"
+          ;;
+        # Option 14/14
+        # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --verbose | -v)
+          optionInfoVerbose="1"
+          if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionInfoVerboseCallback "${optionInfoVerbose}"
+          ;;
+        -*)
+          Log::displayError "Invalid option ${options_parse_arg}"
+          return 1
+          ;;
+        *)
+          if ((0)); then
+            # Technical if never reached
+            :
+          # Argument 1/1
+          # Argument argFolder min 1 min 1 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 0)); then
+            if ((options_parse_argParsedCountArgFolder >= 1)); then
+              Log::displayError "Argument folder - Maximum number of argument occurrences reached(1)"
+              return 1
+            fi
+            ((++options_parse_argParsedCountArgFolder))
+            argFolder="${options_parse_arg}"
+          fi
+          ((++options_parse_parsedArgIndex))
+          ;;
+      esac
+      shift || true
+    done
+    export optionFormat
+    export optionConfig
+    export optionNoColor
+    export optionDebugVerbose
+    export optionTraceVerbose
+    export optionEnvFiles
+    export optionTheme
+    export optionHelp
+    export optionVersion
+    export optionQuiet
+    export optionLogLevel
+    export optionLogFile
+    export optionDisplayLevel
+    export optionInfoVerbose
+    if ((options_parse_argParsedCountArgFolder < 1)); then
+      Log::displayError "Argument 'folder' should be provided at least 1 time(s)"
+      return 1
+    fi
+    export argFolder
+    commandOptionParseFinished
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
+    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "Lint files of the given directory.")"
+    echo
+
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
+      "${SCRIPT_NAME}" \
+      "[--format <String>]" "[--config]" "[--no-color]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]")"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
+    echo -e "  ${__HELP_OPTION_COLOR}folder${__HELP_NORMAL} {single} (mandatory)"
+    echo -e "    the folder to recursively lint"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--format"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    define output format of this command (default: plain)"
+    echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--config"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Display configuration"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--no-color"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Produce monochrome output. alias of --theme noColor."
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "-vv"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    debug level verbose mode (alias of --display-level DEBUG)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "-vvv"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    trace level verbose mode (alias of --display-level TRACE)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--env-file"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo
+    echo "    Load the specified env file"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--theme"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    choose color theme (default or noColor)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--help, -h"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Display this command help"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--version"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Print version information and quit"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--quiet, -q"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    quiet mode, doesn't display any output"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--log-level"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--log-file"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Set log file"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--display-level"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--verbose, -v"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    info level verbose mode (alias of --display-level INFO)"
+    echo '
+for each definition file:
 - check that all mandatory methods are existing
   installScripts_<fileName>_helpDescription
   installScripts_<fileName>_helpVariables
@@ -798,58 +1399,41 @@ Lint files of the given directory
   the same methods
 - check if each dependency exists
 
-${__HELP_TITLE}Options:${__HELP_NORMAL}
-  -f|--format <checkstyle,plain>  define output format of this command
-    (default: plain)
+INTERNAL
+'
+    echo
+    echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
+    echo '1.0'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
+    echo '[François Chastanet](https://github.com/fchastanet)'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"
+    echo 'https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint.sh'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
+    echo 'MIT License'
+    echo
+    echo 'Copyright (c) 2023 François Chastanet'
+  else
+    Log::displayError "Option command invalid: '${options_parse_cmd}'"
+    return 1
+  fi
+}
 
-${__HELP_TITLE}Author:${__HELP_NORMAL}
-[François Chastanet](https://github.com/fchastanet)
+definitionLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-${__HELP_TITLE}Source file:${__HELP_NORMAL}
-https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint.sh
+# build image and push it ot registry
+run() {
+  # shellcheck disable=SC2154
+  Profiles::lintDefinitions "${argFolder}" "${optionFormat}"
+}
 
-${__HELP_TITLE}License:${__HELP_NORMAL}
-MIT License
-
-Copyright (c) 2022 François Chastanet
-EOF
-)"
-
-declare args
-args="$(getopt -l help,format: -o hf: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
-eval set -- "${args}"
-
-while true; do
-  case $1 in
-    -h | --help)
-      echo -e "${HELP}"
-      exit 0
-      ;;
-    -f | --format)
-      shift || true
-      if ! Array::contains "$1" "checkstyle" "plain"; then
-        Log::fatal "format option invalid"
-      fi
-      FORMAT="$1"
-      ;;
-    --)
-      shift || true
-      break
-      ;;
-    *)
-      # ignore
-      ;;
-  esac
-  shift || true
-done
-
-if (($# != 1)); then
-  Log::fatal "This command needs exactly one parameter"
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
+else
+  run
 fi
-
-scriptsDir="$1"
-
-Profiles::lintDefinitions "${scriptsDir}" "${FORMAT}"
 
 }
 

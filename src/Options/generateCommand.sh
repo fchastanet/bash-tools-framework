@@ -19,7 +19,8 @@
 # USAGE: Options::generateCommand [OPTIONS] [ARGS]
 #
 # OPTIONS:
-#   [--help <String|Function>]
+#   [--help|--short-description <String|Function>]
+#   [--long-description <String|Function>]
 #   [--command-name <String|Function>]
 #   [--version <String|Function>]
 #   [--author <String|Function>]
@@ -48,7 +49,8 @@
 # ```
 #
 # @arg $@ args:StringArray (mandatory, at least one) list of options/arguments functions, allowing to link the options/arguments with this command
-# @option --help <String|Function> (optional) provides command description help
+# @option --help | --summary | --short-description <String|Function> (optional) provides command short description help
+# @option --long-description <String|Function> (optional) provides command long description help
 # @option --command-name <String|Function> (optional) provides the command name. (Default: name of current command file without path)
 # @option --version <String|Function> (optional) provides version section help. Section not generated if not provided.
 # @option --author <String|Function> (optional) provides author section help. Section not generated if not provided.
@@ -72,6 +74,7 @@
 Options::generateCommand() {
   # args default values
   local help=""
+  local longDescription=""
   local version=""
   local author=""
   local commandName=""
@@ -107,9 +110,13 @@ Options::generateCommand() {
   while (($# > 0)); do
     local option="$1"
     case "${option}" in
-      --help)
+      --help | --summary | --short-description)
         shift
         setArg "${option}" help "$#" "$1" || return 1
+        ;;
+      --long-description)
+        shift
+        setArg "${option}" longDescription "$#" "$1" || return 1
         ;;
       --version)
         shift
@@ -271,6 +278,7 @@ Options::generateCommand() {
   (
     # export current values
     export help
+    export longDescription
     export version
     export author
     export commandName

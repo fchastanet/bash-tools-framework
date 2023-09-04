@@ -59,12 +59,20 @@ if ((${#optionList[@]} > 0)); then
 fi
 %
 %# ------------------------------------------
+%# longDescription section
+%# ------------------------------------------
+%
+if [[ -n "${longDescription}" ]]; then
+  echo "    echo '${longDescription}'"
+fi
+%
+%# ------------------------------------------
 %# version section
 %# ------------------------------------------
 %
 if [[ -n "${version}" ]]; then
   echo '    echo'
-  echo $'    echo -n -e "${__HELP_TITLE_COLOR}VERSION: <% ${version} %>${__RESET_COLOR}"'
+  echo $'    echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"'
   echo "    echo '${version}'"
 fi
 %

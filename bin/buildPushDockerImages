@@ -647,6 +647,8 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
+# default option values
+
 optionHelpCallback() {
   buildPushDockerImagesCommand help
   exit 0

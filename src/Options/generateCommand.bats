@@ -36,6 +36,13 @@ function Options::generateCommand::helpMissingValue { #@test
   assert_output --partial "ERROR   - Options::generateCommand - Option --help - a value needs to be specified"
 }
 
+function Options::generateCommand::longDescriptionMissingValue { #@test
+  run Options::generateCommand --long-description
+  assert_failure 1
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options::generateCommand - Option --long-description - a value needs to be specified"
+}
+
 function Options::generateCommand::versionMissingValue { #@test
   run Options::generateCommand --version
   assert_failure 1
@@ -99,7 +106,9 @@ function Options::generateCommand::case1 { #@test
   Options::sourceFunction "${optionFile}"
 
   local status=0
-  Options::generateCommand --help "super command" ${optionFile} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::generateCommand --help "super command" \
+    --long-description "very long help" \
+    ${optionFile} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
 
   testCommand "generateCommand.case1.sh" "Options::command"
 }
