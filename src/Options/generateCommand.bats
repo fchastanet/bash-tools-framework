@@ -409,14 +409,16 @@ function Options::generateCommand::case6 { #@test
     --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)" || return 1
   Options::sourceFunction "${optionHelp}"
 
-  local optionGroup="$(Options::generateGroup \
-    --title "Command global options" \
-    --help "The Console component adds some predefined options to all commands:")"
-  Options::sourceFunction "${optionGroup}"
+  source <(
+    Options::generateGroup \
+      --function-name "globalOptionsFunction" \
+      --title "Command global options" \
+      --help "The Console component adds some predefined options to all commands:"
+  )
 
   local optionVerbose
   optionVerbose="$(Options::generateOption --help "verbose mode" \
-    --group "${optionGroup}" \
+    --group globalOptionsFunction \
     --variable-name "verbose" \
     --alt "--verbose" --alt "-v")" || return 1
   Options::sourceFunction "${optionVerbose}"
@@ -429,7 +431,7 @@ function Options::generateCommand::case6 { #@test
 
   local optionQuiet
   optionQuiet="$(Options::generateOption --help "quiet mode" \
-    --group "${optionGroup}" \
+    --group globalOptionsFunction \
     --variable-name "quiet" \
     --alt "--quiet" --alt "-q")" || return 1
   Options::sourceFunction "${optionQuiet}"
@@ -447,10 +449,10 @@ function Options::generateCommand::case6 { #@test
   local status=0
   Options::generateCommand --help "super command" \
     --callback commandCallback \
-    ${optionVerbose} \
-    ${optionQuiet} \
     ${optionHelp} \
     ${optionSrcDirs} \
+    ${optionVerbose} \
+    ${optionQuiet} \
     ${srcFile} \
     ${destFiles} \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?

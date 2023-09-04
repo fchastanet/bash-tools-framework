@@ -1,7 +1,7 @@
 Description: super command
 
 USAGE: test [OPTIONS] [ARGUMENTS]
-USAGE: test [--verbose|-v] [--quiet|-q] [--help|-h] [--src-dirs|-s <String>]
+USAGE: test [--help|-h] [--src-dirs|-s <String>] [--verbose|-v] [--quiet|-q]
 
 ARGUMENTS:
   srcFile {single} (mandatory)
@@ -9,14 +9,15 @@ ARGUMENTS:
   destFiles {list} (at least 1 times) (at most 3 times)
     No help available
 
+OPTIONS:
+  --help, -h (optional) (at most 1 times)
+    help
+  --src-dirs, -s <String> (optional)
+    provide the directory where to find the functions source code.
+
 Command global options
 The Console component adds some predefined options to all commands:
   --verbose, -v (optional) (at most 1 times)
     verbose mode
   --quiet, -q (optional) (at most 1 times)
     quiet mode
-OPTIONS:
-  --help, -h (optional) (at most 1 times)
-    help
-  --src-dirs, -s <String> (optional)
-    provide the directory where to find the functions source code.

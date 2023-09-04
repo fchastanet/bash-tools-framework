@@ -5,15 +5,15 @@ Options::command() {
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
+    help="0"
+    local -i options_parse_optionParsedCountHelp
+    ((options_parse_optionParsedCountHelp = 0)) || true
     verbose="0"
     local -i options_parse_optionParsedCountVerbose
     ((options_parse_optionParsedCountVerbose = 0)) || true
     quiet="0"
     local -i options_parse_optionParsedCountQuiet
     ((options_parse_optionParsedCountQuiet = 0)) || true
-    help="0"
-    local -i options_parse_optionParsedCountHelp
-    ((options_parse_optionParsedCountHelp = 0)) || true
     local -i options_parse_argParsedCountSrcFile
     ((options_parse_argParsedCountSrcFile = 0)) || true
     local -i options_parse_argParsedCountDestFiles
@@ -23,24 +23,6 @@ Options::command() {
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
         # Option 1/4
-        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --verbose | -v)
-          verbose="1"
-          if ((options_parse_optionParsedCountVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ;;
-        # Option 2/4
-        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --quiet | -q)
-          quiet="1"
-          if ((options_parse_optionParsedCountQuiet >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ;;
-        # Option 3/4
         # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           help="1"
@@ -50,7 +32,7 @@ Options::command() {
           fi
           helpCallback "${help}"
           ;;
-        # Option 4/4
+        # Option 2/4
         # Option srcDirs --src-dirs|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --src-dirs | -s)
           shift
@@ -59,6 +41,24 @@ Options::command() {
             return 1
           fi
           srcDirs+=("$1")
+          ;;
+        # Option 3/4
+        # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --verbose | -v)
+          verbose="1"
+          if ((options_parse_optionParsedCountVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 4/4
+        # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --quiet | -q)
+          quiet="1"
+          if ((options_parse_optionParsedCountQuiet >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
           ;;
         -*)
           Log::displayError "Invalid option ${options_parse_arg}"
@@ -94,10 +94,10 @@ Options::command() {
       esac
       shift || true
     done
-    export verbose
-    export quiet
     export help
     export srcDirs
+    export verbose
+    export quiet
     if ((options_parse_argParsedCountSrcFile < 1)); then
       Log::displayError "Argument 'srcFile' should be provided at least 1 time(s)"
       return 1
@@ -116,13 +116,29 @@ Options::command() {
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--verbose|-v]" "[--quiet|-q]" "[--help|-h]" "[--src-dirs|-s <String>]")"
+      "[--help|-h]" "[--src-dirs|-s <String>]" "[--verbose|-v]" "[--quiet|-q]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}srcFile${__HELP_NORMAL} {single} (mandatory)"
     echo '    No help available'
     echo -e "  ${__HELP_OPTION_COLOR}destFiles${__HELP_NORMAL} {list} (at least 1 times) (at most 3 times)"
     echo '    No help available'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--help, -h"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    help"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--src-dirs, -s"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo
+    echo "    provide the directory where to find the functions source code."
     echo
     echo -e "${__HELP_TITLE_COLOR}Command global options${__RESET_COLOR}"
     echo "The Console component adds some predefined options to all commands:"
@@ -140,21 +156,6 @@ Options::command() {
     echo -n -e ' (at most 1 times)'
     echo
     echo "    quiet mode"
-    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--help, -h"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo "    help"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--src-dirs, -s"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo
-    echo "    provide the directory where to find the functions source code."
   else
     Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1

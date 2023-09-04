@@ -83,19 +83,127 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
-# @description display help and exits if one of args is -h|--help
-# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
-# @arg $@ args:String[] list of options
-# @option -h short help option
-# @option --help long help option
-# @exitcode 0 displays help and exit with code 0 if -h or --help option is in the args list
-# @stdout displays help if -h or --help option is in the args list
-Args::defaultHelp() {
-  local helpArg=$1
+# @description concat each element of an array with a separator
+# but wrapping text when line length is more than provided argument
+# The algorithm will try not to cut the array element if can
+#
+# @arg $1 glue:String
+# @arg $2 maxLineLength:int
+# @arg $3 indentNextLine:int
+# @arg $@ array:String[]
+Array::wrap() {
+  local glue="${1-}"
+  local -i glueLength=0
   shift || true
-  if ! Args::defaultHelpNoExit "${helpArg}" "$@"; then
-    exit 0
+  local -i maxLineLength=$1
+  shift || true
+  local -i indentNextLine=$1
+  local indentStr=""
+  if ((indentNextLine > 0)); then
+    indentStr="$(head -c "${indentNextLine}" </dev/zero | tr '\0' " ")"
   fi
+  shift || true
+  (($# != 0)) || return 0
+
+  local arg
+
+  # convert multi-line arg to several args
+  local -a allArgs=()
+  for arg in "$@"; do
+    local line
+    local IFS=$'\n'
+    while read -r line; do
+      if [[ -z "${line}" ]]; then
+        allArgs+=($'\n')
+      else
+        allArgs+=("${line}")
+      fi
+    done <<<"${arg}"
+  done
+  set -- "${allArgs[@]}"
+
+  local -i currentLineLength=0
+  local needEcho="0"
+  local arg="$1"
+  while (($# > 0 || ${#arg} > 0)); do
+    if [[ "${arg}" = $'\n' ]]; then
+      printf $'\n\n'
+      ((currentLineLength = 0)) || true
+      ((glueLength = 0)) || true
+      shift || return 0
+      arg="$1"
+    elif ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
+      # arg can be stored as a whole on current line
+      if ((glueLength > 0)); then
+        echo -e -n "${glue}"
+        ((currentLineLength += glueLength))
+      fi
+      echo -e -n "${arg}"
+      needEcho="1"
+      ((currentLineLength += ${#arg}))
+      ((glueLength = ${#glue})) || true
+      shift || return 0
+      arg="$1"
+    else
+      if ((${#arg} >= (maxLineLength - indentNextLine))); then
+        # arg can be stored on a whole line
+        if ((glueLength > 0)); then
+          echo -e -n "${glue}"
+          ((currentLineLength += glueLength))
+        fi
+        local -i length
+        ((length = maxLineLength - currentLineLength)) || true
+        echo -e "${arg:0:${length}}"
+        ((currentLineLength = 0)) || true
+        ((glueLength = 0)) || true
+        arg="${indentStr}${arg:${length}}"
+        needEcho="0"
+      else
+        # arg cannot be stored on a whole line, so we add it on next line as a whole
+        echo
+        echo -e -n "${indentStr}${arg}"
+        ((glueLength = ${#glue})) || true
+        ((currentLineLength = ${#arg}))
+        arg="" # allows to go to next arg
+        needEcho="1"
+      fi
+      if [[ -z "${arg}" ]]; then
+        shift || return 0
+        arg="$1"
+      fi
+    fi
+  done
+  if [[ "${needEcho}" = "1" ]]; then
+    echo
+  fi
+}
+
+#set -x
+#Array::wrap ":" 40 0 "Lorem ipsum dolor sit amet," "consectetur adipiscing elit." "Curabitur ac elit id massa" "condimentum finibus."
+
+# @description ensure env files are loaded
+# @noargs
+# @exitcode 1 if getOrderedConfFiles fails
+# @exitcode 2 if one of env files fails to load
+# @stderr diagnostics information is displayed
+Env::requireLoad() {
+  local configFilesStr
+  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
+
+  local -a configFiles
+  readarray -t configFiles <<<"${configFilesStr}"
+
+  # if empty string, there will be one element
+  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
+    # should not happen, as there is always default file
+    Log::displaySkipped "no env file to load"
+    return 0
+  fi
+
+  Env::mergeConfFiles "${configFiles[@]}" || {
+    Log::displayError "while loading config files: ${configFiles[*]}"
+    return 2
+  }
 }
 
 # @description Log namespace provides 2 kind of functions
@@ -137,6 +245,15 @@ Log::displayDebug() {
   Log::logDebug "$1"
 }
 
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
+Log::displayError() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
+    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logError "$1"
+}
+
 # @description Display message using info color (bg light blue/fg white)
 # @arg $1 message:String the message to display
 Log::displayInfo() {
@@ -145,6 +262,51 @@ Log::displayInfo() {
     echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   fi
   Log::logInfo "$1" "${type}"
+}
+
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables loaded by Env::requireLoad
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
+# @require Env::requireLoad
+# @require UI::requireTheme
+Log::requireLoad() {
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      if
+        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
+          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
+      then
+        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+      fi
+    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+    fi
+
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    # will always be created even if not in info level
+    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
+    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+    fi
+  fi
 }
 
 # @description fix markdown TOC generated by Markdown all in one vscode extension
@@ -308,6 +470,83 @@ ShellDoc::installRequirementsIfNeeded() {
   fi
 }
 
+# @description draw a line with the character passed in parameter repeated depending on terminal width
+# @arg $1 character:String character to use as separator (default value #)
+UI::drawLine() {
+  local character="${1:-#}"
+  printf '%*s\n' "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo)}" '' | tr ' ' "${character}"
+}
+
+# @description load colors theme constants
+# @warning if tty not opened, noColor theme will be chosen
+# @arg $1 theme:String the theme to use (default, noColor)
+# @arg $@ args:String[]
+# @set __ERROR_COLOR String indicate error status
+# @set __INFO_COLOR String indicate info status
+# @set __SUCCESS_COLOR String indicate success status
+# @set __WARNING_COLOR String indicate warning status
+# @set __SKIPPED_COLOR String indicate skipped status
+# @set __DEBUG_COLOR String indicate debug status
+# @set __HELP_COLOR String indicate help status
+# @set __TEST_COLOR String not used
+# @set __TEST_ERROR_COLOR String not used
+# @set __HELP_TITLE_COLOR String used to display help title in help strings
+# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
+#
+# @set __RESET_COLOR String reset default color
+#
+# @set __HELP_EXAMPLE String to remove
+# @set __HELP_TITLE String to remove
+# @set __HELP_NORMAL String to remove
+UI::theme() {
+  local theme="${1-default}"
+  if ! Assert::tty; then
+    theme="noColor"
+  fi
+  if [[ "${theme}" = "default" ]]; then
+    export BASH_FRAMEWORK_THEME="default"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    export __ERROR_COLOR='\e[31m'         # Red
+    export __INFO_COLOR='\e[44m'          # white on lightBlue
+    export __SUCCESS_COLOR='\e[32m'       # Green
+    export __WARNING_COLOR='\e[33m'       # Yellow
+    export __SKIPPED_COLOR='\e[33m'       # Yellow
+    export __DEBUG_COLOR='\e[37m'         # Grey
+    export __HELP_COLOR='\e[7;49;33m'     # Black on Gold
+    export __TEST_COLOR='\e[100m'         # Light magenta
+    export __TEST_ERROR_COLOR='\e[41m'    # white on red
+    export __HELP_TITLE_COLOR="\e[1;37m"  # Bold
+    export __HELP_OPTION_COLOR="\e[1;34m" # Blue
+    # Internal: reset color
+    export __RESET_COLOR='\e[0m' # Reset Color
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_TITLE="$(echo -e "\e[1;37m")"
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_NORMAL="$(echo -e "\033[0m")"
+  else
+    export BASH_FRAMEWORK_THEME="noColor"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    export __ERROR_COLOR=''
+    export __INFO_COLOR=''
+    export __SUCCESS_COLOR=''
+    export __WARNING_COLOR=''
+    export __SKIPPED_COLOR=''
+    export __DEBUG_COLOR=''
+    export __HELP_COLOR=''
+    export __TEST_COLOR=''
+    export __TEST_ERROR_COLOR=''
+    export __HELP_TITLE_COLOR=''
+    export __HELP_OPTION_COLOR=''
+    # Internal: reset color
+    export __RESET_COLOR=''
+    export __HELP_EXAMPLE=''
+    export __HELP_TITLE=''
+    export __HELP_NORMAL=''
+  fi
+}
+
 # @description ensure COMMAND_BIN_DIR env var is set
 # and PATH correctly prepared
 # @noargs
@@ -318,39 +557,12 @@ Compiler::Facade::requireCommandBinDir() {
   Env::pathPrepend "${COMMAND_BIN_DIR}"
 }
 
-# @description display help if one of args is -h|--help
-# @arg $1 helpArg:String|Function the help string to display or the function to call to display the help
-# @arg $@ args:String[] list of options
-# @option -h short help option
-# @option --help long help option
-# @exitcode 1 displays help and returns with code 1 if -h or --help option is in the args list
-# @stdout displays help if -h or --help option is in the args list
-Args::defaultHelpNoExit() {
-  local helpArg=$1
-  shift || true
-  # shellcheck disable=SC2034
-  local args
-  args="$(getopt -l help -o h -- "$@" 2>/dev/null)" || true
-  eval set -- "${args}"
-
-  while true; do
-    case $1 in
-      -h | --help)
-        if [[ "$(type -t "${helpArg}")" = "function" ]]; then
-          "${helpArg}" "$@"
-        else
-          Args::showHelp "${helpArg}"
-        fi
-        return 1
-        ;;
-      --)
-        break
-        ;;
-      *)
-        # ignore
-        ;;
-    esac
-  done
+# @description check if tty (interactive mode) is active
+# @noargs
+# @exitcode 1 if tty not active
+# @stderr diagnostic information + help if second argument is provided
+Assert::tty() {
+  [[ -t 1 || -t 2 ]]
 }
 
 # @description get file content if file not expired
@@ -370,6 +582,87 @@ Cache::getFileContentIfNotExpired() {
     return 2
   fi
   cat "${file}"
+}
+
+# @description get list of env files to load
+# in order to make them available for Env::requireLoad
+# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @exitcode 1 if one of the env file cannot be generated
+# @exitcode 2 if one of the env file is not a file or readable
+# @stdout the env files asked to be loaded
+# @stderr diagnostic information on failure
+# @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
+Env::getOrderedConfFiles() {
+  local -a configFiles=()
+
+  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    # BASH_FRAMEWORK_ENV_FILES is an array
+    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
+  fi
+
+  local defaultEnvFile
+  defaultEnvFile="$(Env::createDefaultEnvFile)" || return 1
+  configFiles+=("${defaultEnvFile}")
+
+  local file
+  for file in "${configFiles[@]}"; do
+    if [[ ! -f "${file}" || ! -r "${file}" ]]; then
+      Log::displayError "One of the config file is not available '${file}'"
+      return 2
+    fi
+    echo "${file}"
+  done
+}
+
+# @description merge and load conf files specified as argument
+# - files are cleaned from ay comment
+# - missing quotes after property = sign are added automatically
+# - automatic remove of all whitespace before and after declarations
+# - bash arrays are not supported
+# - if a variable is declared in first file and overridden later on
+#   in the same file or in subsequent files, those overloads will be
+#   ignored
+# @warning if an error occurs while loading one of the config file, exit code 3 but environment could be partially loaded
+# @arg $@ args:String[] list of configuration files to load in order
+# @set envVars String will set in environment all the variables that have been declared in the config files
+# @env envVars String the env variables of the current script could be used to interpret variables during config files parsing
+# @exitcode 0 if no config files provided or load completed successfully
+# @exitcode 1 if error occurred during parsing the config files (file not found, grep, awk or sed error)
+# @exitcode 2 if temporary file cannot be created
+# @exitcode 3 if an error occurred during config file sourcing
+# @stderr diagnostics information is displayed
+# @see largely inspired but modified from https://opensource.com/article/21/5/processing-configuration-files-shell
+Env::mergeConfFiles() {
+  local -a configFileList=("$@")
+
+  if ((${#configFileList[@]} == 0)); then
+    return 0
+  fi
+
+  local combinedConfigFile
+  combinedConfigFile="$(Framework::createTempFile "mergeConfFiles")" || return 2
+
+  (
+    # removes any trailing whitespace from each file, if any
+    # this is absolutely required when importing into ConfigMaps
+    # put quotes around values
+    sed -E -e $'s/\s*$// ; /^$/d ; /^#.*$/d ; s/=([^"\'].*)$/="\\1"/' "${configFileList[@]}" |
+      # remove all comment lines
+      Filters::commentLines |
+      # iterates over each file and prints (default awk behavior)
+      # each unique line; only takes first value and ignores duplicates
+      awk -F= '!line[$1]++'
+  ) >"${combinedConfigFile}" || return 1
+
+  # have to export everything, and source it twice:
+  # 1) first source is to realize variables
+  # 2) second time is to realize references
+  set -o allexport
+  # shellcheck source=.framework-config
+  source "${combinedConfigFile}" || return 3
+  # shellcheck source=.framework-config
+  source "${combinedConfigFile}" || return 3
+  set +o allexport
 }
 
 # @description prepend directories to the PATH environment variable
@@ -444,15 +737,6 @@ Git::cloneOrPullIfNoChanges() {
   fi
 }
 
-# @description Display message using error color (red)
-# @arg $1 message:String the message to display
-Log::displayError() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
-    echo -e "${__ERROR_COLOR}ERROR   - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logError "$1"
-}
-
 # @description Display message using skip color (yellow)
 # @arg $1 message:String the message to display
 Log::displaySkipped() {
@@ -489,9 +773,65 @@ Log::logDebug() {
 
 # @description log message to file
 # @arg $1 message:String the message to display
+Log::logError() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
+    Log::logMessage "${2:-ERROR}" "$1"
+  fi
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logInfo() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
     Log::logMessage "${2:-INFO}" "$1"
+  fi
+}
+
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
+#
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
+# @require Env::requireLoad
+# @require Log::requireLoad
+Log::logMessage() {
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+
+  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    touch "${BASH_FRAMEWORK_LOG_FILE}"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
+}
+
+# @description To be called before logging in the log file
+# @arg $1 file:string log file name
+# @arg $2 maxLogFilesCount:int maximum number of log files
+Log::rotate() {
+  local file="$1"
+  local maxLogFilesCount="${2:-5}"
+
+  if [[ ! -f "${file}" ]]; then
+    Log::displaySkipped "Log file ${file} doesn't exist yet"
+    return 0
+  fi
+  for i in $(seq $((maxLogFilesCount - 1)) -1 1); do
+    Log::displayInfo "Log rotation ${file}.${i} to ${file}.$((i + 1))"
+    mv "${file}."{"${i}","$((i + 1))"} &>/dev/null || true
+  done
+  if cp "${file}" "${file}.1" &>/dev/null; then
+    echo >"${file}" # reset log file
+    Log::displayInfo "Log rotation ${file} to ${file}.1"
   fi
 }
 
@@ -584,12 +924,29 @@ ShellDoc::generateShellDocDir() {
   )
 }
 
-# @description display help
-# @arg $1 helpArg:String the help string to show
-# @stdout display help arg
-Args::showHelp() {
-  local helpArg="$1"
-  echo -e "${helpArg}"
+# @description load color theme
+# @noargs
+# @env BASH_FRAMEWORK_THEME String theme to use
+# @exitcode 0 always successful
+UI::requireTheme() {
+  UI::theme "${BASH_FRAMEWORK_THEME-default}"
+}
+
+# @description default env file with all default values
+# @stdout the default env filepath
+Env::createDefaultEnvFile() {
+  local envFile
+  envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
+
+  (
+    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
+    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
+    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
+    # shellcheck disable=SC2016
+    echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
+    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+  ) >"${envFile}"
+  echo "${envFile}"
 }
 
 # @description get number of seconds since last modification of the file
@@ -605,6 +962,18 @@ File::elapsedTimeSinceLastModification() {
   lastModificationTimeSeconds="$(stat -c %Y "${file}")"
   ((diff = $(date +%s) - lastModificationTimeSeconds))
   echo -n "${diff}"
+}
+
+# @description remove comment lines from input or files provided as arguments
+# @arg $@ files:String[] (optional) the files to filter
+# @env commentLinePrefix String the comment line prefix (default value: #)
+# @exitcode 0 if lines filtered or not
+# @exitcode 2 if grep fails for any other reasons than not found
+# @stdin the file as stdin to filter (alternative to files argument)
+# @stdout the filtered lines
+# shellcheck disable=SC2120
+Filters::commentLines() {
+  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
 }
 
 # @description remove ansi codes from input or files given as argument
@@ -656,43 +1025,8 @@ Git::pullIfNoChanges() {
 
 # @description log message to file
 # @arg $1 message:String the message to display
-Log::logError() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
-    Log::logMessage "${2:-ERROR}" "$1"
-  fi
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
 Log::logFatal() {
   Log::logMessage "${2:-FATAL}" "$1"
-}
-
-# @description Internal: common log message
-# @example text
-#   [date]|[levelMsg]|message
-#
-# @example text
-#   2020-01-19 19:20:21|ERROR  |log error
-#   2020-01-19 19:20:21|SKIPPED|log skipped
-#
-# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
-# @arg $2 msg:String the message to display
-# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
-# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
-# @stderr diagnostics information is displayed
-# @require Env::requireLoad
-# @require Log::requireLoad
-Log::logMessage() {
-  local levelMsg="$1"
-  local msg="$2"
-  local date
-
-  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    date="$(date '+%Y-%m-%d %H:%M:%S')"
-    touch "${BASH_FRAMEWORK_LOG_FILE}"
-    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
-  fi
 }
 
 # @description log message to file
@@ -734,76 +1068,6 @@ Git::requireGitCommand() {
   Assert::commandExists git
 }
 
-# @description ensure env files are loaded
-# @noargs
-# @exitcode 1 if getOrderedConfFiles fails
-# @exitcode 2 if one of env files fails to load
-# @stderr diagnostics information is displayed
-Env::requireLoad() {
-  local configFilesStr
-  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
-
-  local -a configFiles
-  readarray -t configFiles <<<"${configFilesStr}"
-
-  # if empty string, there will be one element
-  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
-    # should not happen, as there is always default file
-    Log::displaySkipped "no env file to load"
-    return 0
-  fi
-
-  Env::mergeConfFiles "${configFiles[@]}" || {
-    Log::displayError "while loading config files: ${configFiles[*]}"
-    return 2
-  }
-}
-
-# @description activate or not Log::display* and Log::log* functions
-# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
-# environment variables loaded by Env::requireLoad
-# try to create log file and rotate it if necessary
-# @noargs
-# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
-# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
-# @env BASH_FRAMEWORK_LOG_LEVEL int
-# @env BASH_FRAMEWORK_LOG_FILE String
-# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
-# @exitcode 0 always successful
-# @stderr diagnostics information about log file is displayed
-# @require Env::requireLoad
-# @require UI::requireTheme
-Log::requireLoad() {
-  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
-    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-    export BASH_FRAMEWORK_LOG_LEVEL
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      if
-        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
-          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
-      then
-        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
-      fi
-    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
-    fi
-
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    # will always be created even if not in info level
-    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
-    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-    fi
-  fi
-}
-
 # @description check if command specified exists or return 1
 # with error and message if not
 #
@@ -826,223 +1090,6 @@ Assert::commandExists() {
   return 0
 }
 
-# @description get list of env files to load
-# in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
-# @exitcode 1 if one of the env file cannot be generated
-# @exitcode 2 if one of the env file is not a file or readable
-# @stdout the env files asked to be loaded
-# @stderr diagnostic information on failure
-# @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
-Env::getOrderedConfFiles() {
-  local -a configFiles=()
-
-  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
-    # BASH_FRAMEWORK_ENV_FILES is an array
-    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
-  fi
-
-  local defaultEnvFile
-  defaultEnvFile="$(Env::createDefaultEnvFile)" || return 1
-  configFiles+=("${defaultEnvFile}")
-
-  local file
-  for file in "${configFiles[@]}"; do
-    if [[ ! -f "${file}" || ! -r "${file}" ]]; then
-      Log::displayError "One of the config file is not available '${file}'"
-      return 2
-    fi
-    echo "${file}"
-  done
-}
-
-# @description merge and load conf files specified as argument
-# - files are cleaned from ay comment
-# - missing quotes after property = sign are added automatically
-# - automatic remove of all whitespace before and after declarations
-# - bash arrays are not supported
-# - if a variable is declared in first file and overridden later on
-#   in the same file or in subsequent files, those overloads will be
-#   ignored
-# @warning if an error occurs while loading one of the config file, exit code 3 but environment could be partially loaded
-# @arg $@ args:String[] list of configuration files to load in order
-# @set envVars String will set in environment all the variables that have been declared in the config files
-# @env envVars String the env variables of the current script could be used to interpret variables during config files parsing
-# @exitcode 0 if no config files provided or load completed successfully
-# @exitcode 1 if error occurred during parsing the config files (file not found, grep, awk or sed error)
-# @exitcode 2 if temporary file cannot be created
-# @exitcode 3 if an error occurred during config file sourcing
-# @stderr diagnostics information is displayed
-# @see largely inspired but modified from https://opensource.com/article/21/5/processing-configuration-files-shell
-Env::mergeConfFiles() {
-  local -a configFileList=("$@")
-
-  if ((${#configFileList[@]} == 0)); then
-    return 0
-  fi
-
-  local combinedConfigFile
-  combinedConfigFile="$(Framework::createTempFile "mergeConfFiles")" || return 2
-
-  (
-    # removes any trailing whitespace from each file, if any
-    # this is absolutely required when importing into ConfigMaps
-    # put quotes around values
-    sed -E -e $'s/\s*$// ; /^$/d ; /^#.*$/d ; s/=([^"\'].*)$/="\\1"/' "${configFileList[@]}" |
-      # remove all comment lines
-      Filters::commentLines |
-      # iterates over each file and prints (default awk behavior)
-      # each unique line; only takes first value and ignores duplicates
-      awk -F= '!line[$1]++'
-  ) >"${combinedConfigFile}" || return 1
-
-  # have to export everything, and source it twice:
-  # 1) first source is to realize variables
-  # 2) second time is to realize references
-  set -o allexport
-  # shellcheck source=.framework-config
-  source "${combinedConfigFile}" || return 3
-  # shellcheck source=.framework-config
-  source "${combinedConfigFile}" || return 3
-  set +o allexport
-}
-
-# @description To be called before logging in the log file
-# @arg $1 file:string log file name
-# @arg $2 maxLogFilesCount:int maximum number of log files
-Log::rotate() {
-  local file="$1"
-  local maxLogFilesCount="${2:-5}"
-
-  if [[ ! -f "${file}" ]]; then
-    Log::displaySkipped "Log file ${file} doesn't exist yet"
-    return 0
-  fi
-  for i in $(seq $((maxLogFilesCount - 1)) -1 1); do
-    Log::displayInfo "Log rotation ${file}.${i} to ${file}.$((i + 1))"
-    mv "${file}."{"${i}","$((i + 1))"} &>/dev/null || true
-  done
-  if cp "${file}" "${file}.1" &>/dev/null; then
-    echo >"${file}" # reset log file
-    Log::displayInfo "Log rotation ${file} to ${file}.1"
-  fi
-}
-
-# @description load color theme
-# @noargs
-# @env BASH_FRAMEWORK_THEME String theme to use
-# @exitcode 0 always successful
-UI::requireTheme() {
-  UI::theme "${BASH_FRAMEWORK_THEME-default}"
-}
-
-# @description default env file with all default values
-# @stdout the default env filepath
-Env::createDefaultEnvFile() {
-  local envFile
-  envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
-
-  (
-    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
-    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
-    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
-    # shellcheck disable=SC2016
-    echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
-    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-  ) >"${envFile}"
-  echo "${envFile}"
-}
-
-# @description remove comment lines from input or files provided as arguments
-# @arg $@ files:String[] (optional) the files to filter
-# @env commentLinePrefix String the comment line prefix (default value: #)
-# @exitcode 0 if lines filtered or not
-# @exitcode 2 if grep fails for any other reasons than not found
-# @stdin the file as stdin to filter (alternative to files argument)
-# @stdout the filtered lines
-# shellcheck disable=SC2120
-Filters::commentLines() {
-  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
-}
-
-# @description load colors theme constants
-# @warning if tty not opened, noColor theme will be chosen
-# @arg $1 theme:String the theme to use (default, noColor)
-# @arg $@ args:String[]
-# @set __ERROR_COLOR String indicate error status
-# @set __INFO_COLOR String indicate info status
-# @set __SUCCESS_COLOR String indicate success status
-# @set __WARNING_COLOR String indicate warning status
-# @set __SKIPPED_COLOR String indicate skipped status
-# @set __DEBUG_COLOR String indicate debug status
-# @set __HELP_COLOR String indicate help status
-# @set __TEST_COLOR String not used
-# @set __TEST_ERROR_COLOR String not used
-# @set __HELP_TITLE_COLOR String used to display help title in help strings
-# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
-#
-# @set __RESET_COLOR String reset default color
-#
-# @set __HELP_EXAMPLE String to remove
-# @set __HELP_TITLE String to remove
-# @set __HELP_NORMAL String to remove
-UI::theme() {
-  local theme="${1-default}"
-  if ! Assert::tty; then
-    theme="noColor"
-  fi
-  if [[ "${theme}" = "default" ]]; then
-    export BASH_FRAMEWORK_THEME="default"
-    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-    export __ERROR_COLOR='\e[31m'         # Red
-    export __INFO_COLOR='\e[44m'          # white on lightBlue
-    export __SUCCESS_COLOR='\e[32m'       # Green
-    export __WARNING_COLOR='\e[33m'       # Yellow
-    export __SKIPPED_COLOR='\e[33m'       # Yellow
-    export __DEBUG_COLOR='\e[37m'         # Grey
-    export __HELP_COLOR='\e[7;49;33m'     # Black on Gold
-    export __TEST_COLOR='\e[100m'         # Light magenta
-    export __TEST_ERROR_COLOR='\e[41m'    # white on red
-    export __HELP_TITLE_COLOR="\e[1;37m"  # Bold
-    export __HELP_OPTION_COLOR="\e[1;34m" # Blue
-    # Internal: reset color
-    export __RESET_COLOR='\e[0m' # Reset Color
-    # shellcheck disable=SC2155,SC2034
-    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
-    # shellcheck disable=SC2155,SC2034
-    export __HELP_TITLE="$(echo -e "\e[1;37m")"
-    # shellcheck disable=SC2155,SC2034
-    export __HELP_NORMAL="$(echo -e "\033[0m")"
-  else
-    export BASH_FRAMEWORK_THEME="noColor"
-    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-    export __ERROR_COLOR=''
-    export __INFO_COLOR=''
-    export __SUCCESS_COLOR=''
-    export __WARNING_COLOR=''
-    export __SKIPPED_COLOR=''
-    export __DEBUG_COLOR=''
-    export __HELP_COLOR=''
-    export __TEST_COLOR=''
-    export __TEST_ERROR_COLOR=''
-    export __HELP_TITLE_COLOR=''
-    export __HELP_OPTION_COLOR=''
-    # Internal: reset color
-    export __RESET_COLOR=''
-    export __HELP_EXAMPLE=''
-    export __HELP_TITLE=''
-    export __HELP_NORMAL=''
-  fi
-}
-
-# @description check if tty (interactive mode) is active
-# @noargs
-# @exitcode 1 if tty not active
-# @stderr diagnostic information + help if second argument is provided
-Assert::tty() {
-  [[ -t 1 || -t 2 ]]
-}
-
 # FUNCTIONS
 
 facade_main_99f4010ed2924ca7be559c41ae7aef48() {
@@ -1052,109 +1099,623 @@ FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
 FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 # REQUIRES
-Git::requireGitCommand
 Env::requireLoad
-Log::requireLoad
 UI::requireTheme
+Log::requireLoad
+Git::requireGitCommand
 Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
-PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+# default option values
 
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} generate markdown documentation
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
+optionHelpCallback() {
+  docCommand help
+  exit 0
+}
 
-${__HELP_TITLE}Author:${__HELP_NORMAL}
-[François Chastanet](https://github.com/fchastanet)
+optionVersionCallback() {
+  echo "${SCRIPT_NAME} version 1.0"
+  exit 0
+}
 
-${__HELP_TITLE}Source file:${__HELP_NORMAL}
-https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/doc.sh
+optionEnvFileCallback() {
+  local envFile="$1"
+  if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
+    Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
+    exit 1
+  fi
+}
 
-${__HELP_TITLE}License:${__HELP_NORMAL}
-MIT License
+optionInfoVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+}
 
-Copyright (c) 2022 François Chastanet
-EOF
-)"
-Args::defaultHelp "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"
+optionDebugVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
 
-ShellDoc::installRequirementsIfNeeded
+optionTraceVerboseCallback() {
+  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+}
 
-if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-  "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "$@"
-  exit $?
-fi
+getLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__LEVEL_OFF}"
+      ;;
+    ERROR)
+      echo "${__LEVEL_ERROR}"
+      ;;
+    WARNING)
+      echo "${__LEVEL_WARNING}"
+      ;;
+    INFO)
+      echo "${__LEVEL_INFO}"
+      ;;
+    DEBUG | TRACE)
+      echo "${__LEVEL_DEBUG}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
 
-export FRAMEWORK_ROOT_DIR
+getVerboseLevel() {
+  local levelName="$1"
+  case "${levelName^^}" in
+    OFF)
+      echo "${__VERBOSE_LEVEL_OFF}"
+      ;;
+    ERROR | WARNING | INFO)
+      echo "${__VERBOSE_LEVEL_INFO}"
+      ;;
+    DEBUG)
+      echo "${__VERBOSE_LEVEL_DEBUG}"
+      ;;
+    TRACE)
+      echo "${__VERBOSE_LEVEL_TRACE}"
+      ;;
+    *)
+      Log::displayError "Invalid level ${level}"
+      return 1
+  esac
+}
 
-#-----------------------------
-# doc generation
-#-----------------------------
+optionDisplayLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+}
 
-Log::displayInfo 'generate Commands.md'
-((TOKEN_NOT_FOUND_COUNT = 0)) || true
-ShellDoc::generateMdFileFromTemplate \
-  "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
-  "${PAGES_DIR}/Commands.md" \
-  "${COMMAND_BIN_DIR}" \
-  TOKEN_NOT_FOUND_COUNT \
-  '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
+optionLogLevelCallback() {
+  local level="$1"
+  local logLevel verboseLevel
+  logLevel="$(getLevel "${level}")"
+  verboseLevel="$(getVerboseLevel "${level}")"
+  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+}
 
-# clean folder before generate
-rm -f "${PAGES_DIR}/Index.md" || true
-rm -Rf "${PAGES_DIR}/bashDoc" || true
-rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
+optionLogFileCallback() {
+  local logFile="$1"
+  export BASH_FRAMEWORK_LOG_FILE="${logFile}"
+}
 
-ShellDoc::generateShellDocsFromDir \
-  "${FRAMEWORK_SRC_DIR}" \
-  "src" \
-  "${PAGES_DIR}/bashDoc" \
-  "${PAGES_DIR}/FrameworkIndex.md" \
-  "https://github.com/fchastanet/bash-tools-framework" \
-  '/testsData|/_.*' \
-  '(/__all\.sh)$'
-cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
+optionQuietCallback() {
+  export BASH_FRAMEWORK_QUIET_MODE=1
+}
 
-declare -a optionsDocs=(
-  "generateGroup"
-  "generateOption"
-  "generateArg"
-  "generateCommand"
-)
-for file in "${optionsDocs[@]}"; do
-  "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" \
-    <"${FRAMEWORK_SRC_DIR}/Options/${file}.sh" \
-    >"${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
-  # make pre-commit happy
-  sed -i -E -e '${/^$/d;}' "${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
-done
+optionNoColorCallback() {
+  UI::theme "noColor"
+}
 
-cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
-sed -i -E \
-  -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
-  -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
-  -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
-  "${PAGES_DIR}/README.md"
+optionThemeCallback() {
+  UI::theme "$1"
+}
 
-cp -R "${FRAMEWORK_ROOT_DIR}/doc" "${PAGES_DIR}"
-rm -Rf "${PAGES_DIR}/doc/guides/templates"
+displayConfig() {
+  echo "Config"
+  UI::drawLine "-"
+  local var
+  while read -r var; do
+    printf '%-40s = %s\n' "${var}" "$(declare -p "${var}" | sed -E -e 's/^[^=]+=(.*)/\1/')"
+  done < <(typeset -p | awk 'match($3, "^(BASH_FRAMEWORK_[^=]+)=", m) { print m[1] }' | sort)
+  exit 0
 
-Log::displayInfo 'generate FrameworkFullDoc.md'
-cp "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkFullDoc.tmpl.md" "${PAGES_DIR}/FrameworkFullDoc.md"
-(
-  echo
-  find "${PAGES_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
-) >>"${PAGES_DIR}/FrameworkFullDoc.md"
+}
 
-while read -r path; do
-  ShellDoc::fixMarkdownToc "${path}"
-done < <(find "${PAGES_DIR}" -type f -name '*.md')
+commandOptionParseFinished() {
+  if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    BASH_FRAMEWORK_ENV_FILES=()
+  fi
+  BASH_FRAMEWORK_ENV_FILES+=("${optionEnvFiles[@]}")
+  export BASH_FRAMEWORK_ENV_FILES
+  Env::requireLoad
+  Log::requireLoad
+  if [[ "${optionConfig}" = "1" ]]; then
+    displayConfig
+  fi
+}
 
-if ((TOKEN_NOT_FOUND_COUNT > 0)); then
-  exit 1
+docCommand() {
+  local options_parse_cmd="$1"
+  shift || true
+
+  if [[ "${options_parse_cmd}" = "parse" ]]; then
+    optionSkipDockerBuild="0"
+    local -i options_parse_optionParsedCountOptionSkipDockerBuild
+    ((options_parse_optionParsedCountOptionSkipDockerBuild = 0)) || true
+    optionConfig="0"
+    local -i options_parse_optionParsedCountOptionConfig
+    ((options_parse_optionParsedCountOptionConfig = 0)) || true
+    optionNoColor="0"
+    local -i options_parse_optionParsedCountOptionNoColor
+    ((options_parse_optionParsedCountOptionNoColor = 0)) || true
+    optionDebugVerbose="0"
+    local -i options_parse_optionParsedCountOptionDebugVerbose
+    ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
+    optionTraceVerbose="0"
+    local -i options_parse_optionParsedCountOptionTraceVerbose
+    ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
+    local -i options_parse_optionParsedCountOptionTheme
+    ((options_parse_optionParsedCountOptionTheme = 0)) || true
+    optionHelp="0"
+    local -i options_parse_optionParsedCountOptionHelp
+    ((options_parse_optionParsedCountOptionHelp = 0)) || true
+    optionVersion="0"
+    local -i options_parse_optionParsedCountOptionVersion
+    ((options_parse_optionParsedCountOptionVersion = 0)) || true
+    optionQuiet="0"
+    local -i options_parse_optionParsedCountOptionQuiet
+    ((options_parse_optionParsedCountOptionQuiet = 0)) || true
+    local -i options_parse_optionParsedCountOptionLogLevel
+    ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
+    local -i options_parse_optionParsedCountOptionLogFile
+    ((options_parse_optionParsedCountOptionLogFile = 0)) || true
+    local -i options_parse_optionParsedCountOptionDisplayLevel
+    ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
+    optionInfoVerbose="0"
+    local -i options_parse_optionParsedCountOptionInfoVerbose
+    ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
+    local -i options_parse_parsedArgIndex=0
+    while (($# > 0)); do
+      local options_parse_arg="$1"
+      case "${options_parse_arg}" in
+        # Option 1/14
+        # Option optionSkipDockerBuild --skip-docker-build variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --skip-docker-build)
+          optionSkipDockerBuild="1"
+          if ((options_parse_optionParsedCountOptionSkipDockerBuild >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 2/14
+        # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --config)
+          optionConfig="1"
+          if ((options_parse_optionParsedCountOptionConfig >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ;;
+        # Option 3/14
+        # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --no-color)
+          optionNoColor="1"
+          if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionNoColorCallback "${optionNoColor}"
+          ;;
+        # Option 4/14
+        # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vv)
+          optionDebugVerbose="1"
+          if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionDebugVerboseCallback "${optionDebugVerbose}"
+          ;;
+        # Option 5/14
+        # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        -vvv)
+          optionTraceVerbose="1"
+          if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionTraceVerboseCallback "${optionTraceVerbose}"
+          ;;
+        # Option 6/14
+        # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
+        --env-file)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          optionEnvFiles+=("$1")
+          optionEnvFileCallback "${optionEnvFiles[@]}"
+          ;;
+        # Option 7/14
+        # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|noColor' regexp ''
+        --theme)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ default|noColor ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(default|noColor)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionTheme >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionTheme))
+          optionTheme="$1"
+          optionThemeCallback "${optionTheme}"
+          ;;
+        # Option 8/14
+        # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --help | -h)
+          optionHelp="1"
+          if ((options_parse_optionParsedCountOptionHelp >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionHelpCallback "${optionHelp}"
+          ;;
+        # Option 9/14
+        # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --version)
+          optionVersion="1"
+          if ((options_parse_optionParsedCountOptionVersion >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionVersionCallback "${optionVersion}"
+          ;;
+        # Option 10/14
+        # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --quiet | -q)
+          optionQuiet="1"
+          if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionQuietCallback "${optionQuiet}"
+          ;;
+        # Option 11/14
+        # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
+        --log-level)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionLogLevel))
+          optionLogLevel="$1"
+          optionLogLevelCallback "${optionLogLevel}"
+          ;;
+        # Option 12/14
+        # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
+        --log-file)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionLogFile >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionLogFile))
+          optionLogFile="$1"
+          optionLogFileCallback "${optionLogFile}"
+          ;;
+        # Option 13/14
+        # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
+        --display-level)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionDisplayLevel))
+          optionDisplayLevel="$1"
+          optionDisplayLevelCallback "${optionDisplayLevel}"
+          ;;
+        # Option 14/14
+        # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --verbose | -v)
+          optionInfoVerbose="1"
+          if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
+            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionInfoVerboseCallback "${optionInfoVerbose}"
+          ;;
+        -*)
+          Log::displayError "Invalid option ${options_parse_arg}"
+          return 1
+          ;;
+        *)
+          ((++options_parse_parsedArgIndex))
+          ;;
+      esac
+      shift || true
+    done
+    export optionSkipDockerBuild
+    export optionConfig
+    export optionNoColor
+    export optionDebugVerbose
+    export optionTraceVerbose
+    export optionEnvFiles
+    export optionTheme
+    export optionHelp
+    export optionVersion
+    export optionQuiet
+    export optionLogLevel
+    export optionLogFile
+    export optionDisplayLevel
+    export optionInfoVerbose
+    commandOptionParseFinished
+  elif [[ "${options_parse_cmd}" = "help" ]]; then
+    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "Generate markdown documentation.")"
+    echo
+
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
+      "${SCRIPT_NAME}" \
+      "[--skip-docker-build]" "[--config]" "[--no-color]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]")"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--skip-docker-build"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    skip docker image build if option provided"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--config"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Display configuration"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--no-color"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Produce monochrome output. alias of --theme noColor."
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "-vv"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    debug level verbose mode (alias of --display-level DEBUG)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "-vvv"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    trace level verbose mode (alias of --display-level TRACE)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--env-file"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo
+    echo "    Load the specified env file"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--theme"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    choose color theme (default or noColor)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--help, -h"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Display this command help"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--version"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Print version information and quit"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--quiet, -q"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    quiet mode, doesn't display any output"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--log-level"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--log-file"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Set log file"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--display-level"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--verbose, -v"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    info level verbose mode (alias of --display-level INFO)"
+    echo '
+INTERNAL TOOL
+'
+    echo
+    echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
+    echo '1.0'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
+    echo '[François Chastanet](https://github.com/fchastanet)'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"
+    echo 'https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/doc.sh'
+    echo
+    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
+    echo 'MIT License'
+    echo
+    echo 'Copyright (c) 2023 François Chastanet'
+  else
+    Log::displayError "Option command invalid: '${options_parse_cmd}'"
+    return 1
+  fi
+}
+
+docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
+
+run() {
+  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+
+  ShellDoc::installRequirementsIfNeeded
+
+  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+    "${SCRIPT_NAME}" "/bash/bin/doc"
+    exit $?
+  fi
+
+  export FRAMEWORK_ROOT_DIR
+
+  #-----------------------------
+  # doc generation
+  #-----------------------------
+
+  Log::displayInfo 'generate Commands.md'
+  ((TOKEN_NOT_FOUND_COUNT = 0)) || true
+  ShellDoc::generateMdFileFromTemplate \
+    "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
+    "${PAGES_DIR}/Commands.md" \
+    "${COMMAND_BIN_DIR}" \
+    TOKEN_NOT_FOUND_COUNT \
+    '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
+
+  # clean folder before generate
+  rm -f "${PAGES_DIR}/Index.md" || true
+  rm -Rf "${PAGES_DIR}/bashDoc" || true
+  rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
+
+  ShellDoc::generateShellDocsFromDir \
+    "${FRAMEWORK_SRC_DIR}" \
+    "src" \
+    "${PAGES_DIR}/bashDoc" \
+    "${PAGES_DIR}/FrameworkIndex.md" \
+    "https://github.com/fchastanet/bash-tools-framework" \
+    '/testsData|/_.*' \
+    '(/__all\.sh)$'
+  cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
+
+  declare -a optionsDocs=(
+    "generateGroup"
+    "generateOption"
+    "generateArg"
+    "generateCommand"
+  )
+  for file in "${optionsDocs[@]}"; do
+    "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" \
+      <"${FRAMEWORK_SRC_DIR}/Options/${file}.sh" \
+      >"${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
+    # make pre-commit happy
+    sed -i -E -e '${/^$/d;}' "${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
+  done
+
+  cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
+  sed -i -E \
+    -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
+    -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
+    -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
+    "${PAGES_DIR}/README.md"
+
+  cp -R "${FRAMEWORK_ROOT_DIR}/doc" "${PAGES_DIR}"
+  rm -Rf "${PAGES_DIR}/doc/guides/templates"
+
+  Log::displayInfo 'generate FrameworkFullDoc.md'
+  cp "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkFullDoc.tmpl.md" "${PAGES_DIR}/FrameworkFullDoc.md"
+  (
+    echo
+    find "${PAGES_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
+  ) >>"${PAGES_DIR}/FrameworkFullDoc.md"
+
+  while read -r path; do
+    ShellDoc::fixMarkdownToc "${path}"
+  done < <(find "${PAGES_DIR}" -type f -name '*.md')
+
+  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
+    exit 1
+  fi
+}
+
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
+else
+  run
 fi
 
 }

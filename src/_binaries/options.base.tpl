@@ -3,6 +3,8 @@
 %# - commandFunctionName
 %# - SCRIPT_NAME
 %# - help
+%# - generateFormatOption
+%# - generateSkipDockerBuildOption
 %
   # shellcheck source=/dev/null
   source <(
@@ -132,6 +134,13 @@
         --variable-name "optionFormat" \
         --function-name optionFormatFunction
     fi
+    if [[ "${generateSkipDockerBuildOption:-0}" = "1" ]]; then
+      Options::generateOption \
+        --help "skip docker image build if option provided" \
+        --alt "--skip-docker-build" \
+        --variable-name "optionSkipDockerBuild" \
+        --function-name optionSkipDockerBuildFunction
+    fi
   )
 
   declare -a options=(
@@ -161,6 +170,9 @@
   )
   if [[ "${generateFormatOption:-0}" = "1" ]]; then
     options+=(optionFormatFunction)
+  fi
+  if [[ "${generateSkipDockerBuildOption:-0}" = "1" ]]; then
+    options+=(optionSkipDockerBuildFunction)
   fi
 %
 

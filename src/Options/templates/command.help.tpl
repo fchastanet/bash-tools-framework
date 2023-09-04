@@ -40,13 +40,13 @@ fi
 %# ------------------------------------------
 %
 if ((${#optionList[@]} > 0)); then
-  echo '    echo'
   local option
   local previousGroupId=""
   local groupId
   for option in ${optionList[@]}; do
     groupId="$("${option}" groupId)"
     if [[ "${groupId}" != "${previousGroupId}" ]]; then
+      echo '    echo'
       if [[ "${groupId}" = "__default" ]]; then
         echo $'    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"'
       else
