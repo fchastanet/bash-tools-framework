@@ -112,11 +112,10 @@ jobs:
       - name: Pull/Build/Push docker image
         env:
           BRANCH: ${{ github.ref }}
-          PUSH: push
         run: |
           ./bin/buildPushDockerImages "${{matrix.vendor}}" \
             "${{matrix.bashTarVersion}}" "${{matrix.bashImage}}" "${BRANCH}" \
-            "${PUSH}"
+            --push
 
       - name: Check image
         run: |
