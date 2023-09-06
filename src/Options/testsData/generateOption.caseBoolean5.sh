@@ -17,7 +17,8 @@ Options::option() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${help}"
+          helpCallback "${options_parse_arg}" "${help}"
+          helpCallback2 "${options_parse_arg}" "${help}"
           ;;
         *)
           # ignore
@@ -60,7 +61,7 @@ Options::option() {
     export offValue="0"
     export onValue="1"
     export defaultValue=""
-    export callback="helpCallback"
+    export callbacks=(helpCallback helpCallback2)
     export min="0"
     export max="1"
     export authorizedValues=""

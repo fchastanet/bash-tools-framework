@@ -41,10 +41,10 @@ Options::command() {
           ;;
         *)
           if ((0)); then
-            # Technical if never reached
+            # Technical if - never reached
             :
           # Argument 1/2
-          # Argument srcFile min 1 min 1 authorizedValues '' regexp ''
+          # Argument srcFile min 1 max 1 authorizedValues '' regexp ''
           elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
             if ((options_parse_argParsedCountSrcFile >= 1)); then
               Log::displayError "Argument srcFile - Maximum number of argument occurrences reached(1)"
@@ -53,14 +53,17 @@ Options::command() {
             ((++options_parse_argParsedCountSrcFile))
             srcFile="${options_parse_arg}"
           # Argument 2/2
-          # Argument destFiles min 1 min 3 authorizedValues '' regexp ''
-          elif ((options_parse_parsedArgIndex >= 1)); then
+          # Argument destFiles min 1 max 3 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 1 && options_parse_parsedArgIndex < 4)); then
             if ((options_parse_argParsedCountDestFiles >= 3)); then
               Log::displayError "Argument destFiles - Maximum number of argument occurrences reached(3)"
               return 1
             fi
             ((++options_parse_argParsedCountDestFiles))
             destFiles+=("${options_parse_arg}")
+          else
+            Log::displayError "Argument - too much arguments provided: $*"
+            return 1
           fi
           ((++options_parse_parsedArgIndex))
           ;;
@@ -79,7 +82,6 @@ Options::command() {
       return 1
     fi
     export destFiles
-
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
     echo

@@ -27,7 +27,8 @@
 #   [--License <String|Function>]
 #   [--copyright <String|Function>]
 #   [--help-template <String>]
-#   [--error-if-unknown-option]
+#   [--unknown-option-callback]
+#   [--unknown-arg-callback]
 #
 # ARGS: list of option/arg functions
 # ```
@@ -48,6 +49,18 @@
 # "${commandForm}" parse "$@"
 # ```
 #
+# #### --callback option
+# you can set several callbacks
+# callback is called without any parameter.
+#
+# #### --unknown-option-callback/--unknown-arg-callback option
+# You can set several callbacks.
+# Callback is called with the option/argument that is invalid.
+# An invalid option is a string that begin with `-`
+# and that does not match any option configured.
+# An invalid argument is an argument that does not
+# match any configured argument.
+#
 # @arg $@ args:StringArray (mandatory, at least one) list of options/arguments functions, allowing to link the options/arguments with this command
 # @option --help | --summary | --short-description <String|Function> (optional) provides command short description help
 # @option --long-description <String|Function> (optional) provides command long description help
@@ -58,9 +71,10 @@
 # @option --source-file <String|Function> (optional) provides Source file section. Section not generated if not provided.
 # @option --copyright <String|Function> (optional) provides copyright section. Section not generated if not provided.
 # @option --help-template <String|Function> (optional) if you want to override the default template used to generate the help
-# @option --no-error-if-unknown-option (optional) options parser doesn't display any error message if an option provided does not match any specified options. This flag allows to disable this behavior.
 # @option --function-name <String> the name of the function that will be generated
-# @option --callback <Function> (optional) the callback called chen all options and arguments have been parsed.
+# @option --unknown-option-callback <Function> (0 or more) the callback called when an option is unknown (Default: options parser display error message if option provided does not match any specified options).
+# @option --unknown-argument-callback <Function> (0 or more) the callback called when an argument is unknown (Default: parser does not report any error).
+# @option --callback <Function> (0 or more) the callback called when all options and arguments have been parsed.
 # @warning arguments function list has to be provided in correct order
 # @warning argument/option variable names have to be unique. Best practice is to scope the variable name to avoid variable name conflicts.
 # @exitcode 1 if error during option/argument parsing
@@ -82,9 +96,10 @@ Options::generateCommand() {
   local sourceFile=""
   local copyright=""
   local helpTemplate=""
-  local errorIfUnknownOption="1"
   local functionName=""
-  local callback=""
+  local -a unknownOptionCallbacks=()
+  local -a unknownArgumentCallbacks=()
+  local -a commandCallbacks=()
   local -a optionListUnordered=()
   local -a argumentList=()
   local -a variableNameList=()
@@ -147,20 +162,25 @@ Options::generateCommand() {
         setArg "${option}" helpTemplate "$#" "$1" || return 1
         # TODO check if valid template file
         ;;
-      --no-error-if-unknown-option)
-        errorIfUnknownOption="0"
-        ;;
-      --callback)
+      --callback | --unknown-option-callback | --unknown-argument-callback)
         shift
-        setArg "${option}" callback "$#" "$1" || return 1
+        if (($# == 0)); then
+          Log::displayError "Options::generateCommand - Option ${option} - a value needs to be specified"
+          return 1
+        fi
         if
           ! Assert::posixFunctionName "$1" &&
             ! Assert::bashFrameworkFunction "$1"
         then
-          Log::displayError "Options::generateOption - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
+          Log::displayError "Options::generateCommand - Option ${option} - only posix or bash framework function name are accepted - invalid '$1'"
           return 1
         fi
-        callback="$1"
+        case "${option}" in
+          --callback) commandCallbacks+=("$1") ;;
+          --unknown-option-callback) unknownOptionCallbacks+=("$1") ;;
+          --unknown-argument-callback) unknownArgumentCallbacks+=("$1") ;;
+          *) ;;
+        esac
         ;;
       --function-name)
         shift
@@ -273,7 +293,10 @@ Options::generateCommand() {
       done
     ) | sort -k3,3 -k2,2 | awk '{ print $1 }'
   )"
-  readarray -t optionList <<<"${optionListToSort}"
+  optionList=()
+  if [[ -n "${optionListToSort}" ]]; then
+    readarray -t optionList <<<"${optionListToSort}"
+  fi
 
   (
     # export current values
@@ -285,12 +308,13 @@ Options::generateCommand() {
     export license
     export copyright
     export helpTemplate
-    export commandCallback="${callback}"
     export optionList
     export argumentList
     export functionName
     export sourceFile
-    export errorIfUnknownOption
+    export commandCallbacks
+    export unknownOptionCallbacks
+    export unknownArgumentCallbacks
 
     Options::generateFunction "${functionName}" "command" || return 3
   ) || return $?

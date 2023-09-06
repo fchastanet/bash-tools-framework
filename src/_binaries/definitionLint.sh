@@ -5,6 +5,7 @@
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options.definitionLint.tpl)"
 
+declare optionFormat="plain"
 definitionLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 # build image and push it ot registry

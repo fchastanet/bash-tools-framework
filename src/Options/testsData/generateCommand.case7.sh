@@ -22,7 +22,7 @@ Options::command() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${help}"
+          helpCallback "${options_parse_arg}" "${help}"
           ;;
         -*)
           Log::displayError "Invalid option ${options_parse_arg}"
@@ -30,11 +30,11 @@ Options::command() {
           ;;
         *)
           if ((0)); then
-            # Technical if never reached
+            # Technical if - never reached
             :
           # Argument 1/1
-          # Argument subCommand min 1 min 1 authorizedValues 'run|exec|ps|build|pull|push|images|login|logout|search|version|info' regexp ''
-          elif ((options_parse_parsedArgIndex >= 0)); then
+          # Argument subCommand min 1 max 1 authorizedValues 'run|exec|ps|build|pull|push|images|login|logout|search|version|info' regexp ''
+          elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
             if [[ ! "${options_parse_arg}" =~ run|exec|ps|build|pull|push|images|login|logout|search|version|info ]]; then
               Log::displayError "Argument subCommand - value '${options_parse_arg}' is not part of authorized values(run|exec|ps|build|pull|push|images|login|logout|search|version|info)"
               return 1
@@ -46,6 +46,9 @@ Options::command() {
             ((++options_parse_argParsedCountSubCommand))
             subCommand="${options_parse_arg}"
             subCommandCallback "${subCommand}" -- "${@:2}"
+          else
+            Log::displayError "Argument - too much arguments provided: $*"
+            return 1
           fi
           ((++options_parse_parsedArgIndex))
           ;;
@@ -58,7 +61,6 @@ Options::command() {
       return 1
     fi
     export subCommand
-
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
     echo

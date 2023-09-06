@@ -377,6 +377,6 @@ function Options::generateOption::caseStringArray6::OptionsTest::parseSrcDirs { 
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 2
-  assert_line --index 0 "srcDirsCallback called test1"
-  assert_line --index 1 "srcDirsCallback called test1 test2"
+  assert_line --index 0 "srcDirsCallback called --src-dir test1"
+  assert_line --index 1 "srcDirsCallback called -s test1 test2"
 }

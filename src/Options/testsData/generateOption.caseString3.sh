@@ -68,7 +68,7 @@ Options::option() {
     export offValue=""
     export onValue=""
     export defaultValue=""
-    export callback=""
+    export callbacks=()
     export min="1"
     export max="1"
     export authorizedValues=""

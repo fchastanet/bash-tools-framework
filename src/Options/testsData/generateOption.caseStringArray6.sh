@@ -15,7 +15,7 @@ Options::option() {
             return 1
           fi
           srcDirs+=("$1")
-          srcDirsCallback "${srcDirs[@]}"
+          srcDirsCallback "${options_parse_arg}" "${srcDirs[@]}"
           ;;
         *)
           # ignore
@@ -58,7 +58,7 @@ Options::option() {
     export offValue=""
     export onValue=""
     export defaultValue=""
-    export callback="srcDirsCallback"
+    export callbacks=(srcDirsCallback)
     export min="0"
     export max="-1"
     export authorizedValues=""

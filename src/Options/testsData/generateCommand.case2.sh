@@ -22,16 +22,16 @@ Options::command() {
           fi
           ;;
         -*)
-          # ignore
+          ignoreOptionError "${options_parse_arg}"
           ;;
         *)
-          ((++options_parse_parsedArgIndex))
+          Log::displayError 'Argument - too much arguments provided'
+          return 1
           ;;
       esac
       shift || true
     done
     export verbose
-
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
     echo

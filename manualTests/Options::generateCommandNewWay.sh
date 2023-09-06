@@ -9,6 +9,7 @@ srcDir="$(cd "${rootDir}/src" && pwd -P)"
 source "${srcDir}/Options/__all.sh"
 # shellcheck source=/src/Log/__all.sh
 source "${srcDir}/Log/__all.sh"
+Log::requireLoad
 
 set -o errexit
 set -o pipefail
@@ -18,59 +19,65 @@ export TMPDIR="/tmp"
 source <(
   Options::generateGroup \
     --title "GLOBAL OPTIONS:" \
-    --function-name groupGlobalOptions
+    --function-name groupGlobalOptionsFunction || exit 2
 
   Options::generateOption \
     --help "help" \
-    --group groupGlobalOptions \
+    --group groupGlobalOptionsFunction \
+    --variable-name "helpOption" \
     --alt "--help" \
     --alt "-h" \
     --callback helpCallback \
-    --function-name optionHelp
+    --function-name optionHelpFunction || exit 2
 
   Options::generateOption \
     --help "verbose mode" \
-    --group groupGlobalOptions \
-    --variable-name "verbose" \
+    --variable-name "verboseOption" \
+    --group groupGlobalOptionsFunction \
     --alt "--verbose" --alt "-v" \
-    --function-name optionVerbose
+    --function-name optionVerboseFunction || exit 3
 
   Options::generateOption \
     --variable-type String \
+    --variable-name "logLevelOption" \
     --help "Set log level" \
-    --group groupGlobalOptions \
-    --variable-name "logLevel" \
+    --group groupGlobalOptionsFunction \
     --alt "--log-level" \
-    --function-name optionLogLevel
+    --function-name optionLogLevelFunction || exit 4
 
   Options::generateOption \
     --variable-type String \
+    --variable-name "displayLevelOption" \
     --help "set display level" \
-    --group groupGlobalOptions \
-    --variable-name "displayLevel" \
+    --group groupGlobalOptionsFunction \
     --alt "--display-level" \
-    --function-name optionDisplayLevel
+    --function-name optionDisplayLevelFunction || exit 5
 
   Options::generateOption \
     --help "Produce monochrome output." \
-    --group groupGlobalOptions \
-    --variable-name "noColor" \
+    --variable-name "noColorOption" \
+    --group groupGlobalOptionsFunction \
     --alt "--no-color" \
-    --function-name optionNoColor
+    --function-name optionNoColorFunction || exit 6
 
   Options::generateOption \
     --help "Print version information and quit" \
-    --group groupGlobalOptions \
+    --variable-name "versionOption" \
+    --group groupGlobalOptionsFunction \
     --alt "--version" \
     --callback versionCallback \
-    --function-name optionVersion
+    --function-name optionVersionFunction || exit 7
 
   Options::generateOption \
-    --variable-name "quiet" \
+    --variable-name "quietOption" \
     --help "quiet mode" \
-    --group groupGlobalOptions \
+    --group groupGlobalOptionsFunction \
     --alt "--quiet" --alt "-q" \
-    --function-name optionQuiet
+    --function-name optionQuietFunction || exit 8
+
+  Options::generateArg \
+    --variable-name "srcFile" \
+    --function-name srcFileArgFunction || exit 9
 )
 
 declare -a options=(
@@ -79,13 +86,14 @@ declare -a options=(
   --license "MIT License"
   --copyright "Copyright (c) 2022 François Chastanet"
   --version "${versionNumber}"
-  optionHelp
-  optionVersion
-  optionQuiet
-  optionNoColor
-  optionLogLevel
-  optionDisplayLevel
-  optionVerbose
+  optionHelpFunction
+  optionVersionFunction
+  optionQuietFunction
+  optionNoColorFunction
+  optionLogLevelFunction
+  optionDisplayLevelFunction
+  optionVerboseFunction
+  srcFileArgFunction
 )
 
 declare versionNumber="1.0"
@@ -95,11 +103,17 @@ Lint all files with .awk extension in current git folder.
 Result in checkstyle format."
 options+=(--help "${help}")
 
+unknownArgumentCallback() {
+  echo "unknown argument $1"
+}
+
 # shellcheck source=/dev/null
 source <(
   Options::generateCommand "${options[@]}" \
     --command-name awkLint \
+    --unknown-argument-callback unknownArgumentCallback \
     --function-name awkLintCommand
-)
+) || exit 10
 
-awkLintCommand help
+set -x
+awkLintCommand parse "$@"

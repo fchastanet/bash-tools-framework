@@ -63,7 +63,9 @@ fi
 %# ------------------------------------------
 %
 if [[ -n "${longDescription}" ]]; then
-  echo "    echo '${longDescription}'"
+%
+echo -e """<% ${longDescription} %>"""
+%
 fi
 %
 %# ------------------------------------------

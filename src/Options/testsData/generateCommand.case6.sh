@@ -30,7 +30,7 @@ Options::command() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${help}"
+          helpCallback "${options_parse_arg}" "${help}"
           ;;
         # Option 2/4
         # Option srcDirs --src-dirs|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''
@@ -66,10 +66,10 @@ Options::command() {
           ;;
         *)
           if ((0)); then
-            # Technical if never reached
+            # Technical if - never reached
             :
           # Argument 1/2
-          # Argument srcFile min 1 min 1 authorizedValues '' regexp ''
+          # Argument srcFile min 1 max 1 authorizedValues '' regexp ''
           elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
             if ((options_parse_argParsedCountSrcFile >= 1)); then
               Log::displayError "Argument srcFile - Maximum number of argument occurrences reached(1)"
@@ -79,8 +79,8 @@ Options::command() {
             srcFile="${options_parse_arg}"
             srcFileCallback "${srcFile}" -- "${@:2}"
           # Argument 2/2
-          # Argument destFiles min 1 min 3 authorizedValues '' regexp ''
-          elif ((options_parse_parsedArgIndex >= 1)); then
+          # Argument destFiles min 1 max 3 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 1 && options_parse_parsedArgIndex < 4)); then
             if ((options_parse_argParsedCountDestFiles >= 3)); then
               Log::displayError "Argument destFiles - Maximum number of argument occurrences reached(3)"
               return 1
@@ -88,6 +88,9 @@ Options::command() {
             ((++options_parse_argParsedCountDestFiles))
             destFiles+=("${options_parse_arg}")
             destFilesCallback "${destFiles[@]}" -- "${@:2}"
+          else
+            Log::displayError "Argument - too much arguments provided: $*"
+            return 1
           fi
           ((++options_parse_parsedArgIndex))
           ;;

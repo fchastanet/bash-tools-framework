@@ -1,5 +1,6 @@
 # Todo
 
+- [coverage](#coverage)
 - [1. Options/Args management](#1-optionsargs-management)
 - [2. Env::load](#2-envload)
 - [3. Framework Controller](#3-framework-controller)
@@ -22,8 +23,28 @@
   - [8.7. best practices](#87-best-practices)
   - [8.8. Other libraries integration](#88-other-libraries-integration)
 
+## coverage
+
+- coverage <https://github.com/bats-core/bats-core/issues/15>
+  - bats has to be in PATH
+  - kcov needs sudo apt install libdw-dev
+  - from src dir
+    - usr/local/bin/kcov --collect-only --exclude-path=/tmp $PWD/logs/coverage
+      bats -r src/Options/generateCommand.bats -j 30
+    - usr/local/bin/kcov --collect-only
+      --include-path=$(pwd)/src --exclude-pattern=/testsData/ --exclude-path=/tmp --exclude-path=$PWD/vendor
+      $PWD/logs/coverage bats -r src -j 30
+    - coverage is in logs/coverage/bats/coverage.json
+  - if some test has to be excluded
+    - add `# bats test_tags=no-kcov` before the test
+  - github <https://github.com/bats-core/bats-core/pull/718/files>
+  - integrate with <https://coveralls.io/>
+  - to integrate coverage of all files even those not tested, I should generate
+    a bats file that source all the src files of the framework.
+
 ## 1. Options/Args management
 
+- bin/doc fix args management
 - --help-item-name "srcDir"
 - default arguments
 

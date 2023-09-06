@@ -22,10 +22,10 @@ fi
 % else
 <% ${variableName} %>+=("${options_parse_arg}")
 % fi
-% if [[ -n "${callback}" ]]; then
+% for callback in "${callbacks[@]}"; do
   % if [[ "${variableType}" = "StringArray" ]]; then
   <% ${callback} %> "${<% ${variableName} %>[@]}" -- "${@:2}"
   % else
   <% ${callback} %> "${<% ${variableName} %>}" -- "${@:2}"
   % fi
-% fi
+% done

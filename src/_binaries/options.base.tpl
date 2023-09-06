@@ -24,7 +24,7 @@
     Options::generateOption \
       --help "Display configuration" \
       --group groupGlobalOptionsFunction \
-      --alt "--config" \
+      --alt "--bash-framework-config" \
       --variable-name "optionConfig" \
       --function-name optionConfigFunction
 
@@ -33,6 +33,7 @@
       --group groupGlobalOptionsFunction \
       --alt "--verbose" --alt "-v" \
       --callback optionInfoVerboseCallback \
+      --callback updateArgListInfoVerboseCallback \
       --variable-name "optionInfoVerbose" \
       --function-name optionInfoVerboseFunction
 
@@ -41,6 +42,7 @@
       --group groupGlobalOptionsFunction \
       --alt "-vv" \
       --callback optionDebugVerboseCallback \
+      --callback updateArgListDebugVerboseCallback \
       --variable-name "optionDebugVerbose" \
       --function-name optionDebugVerboseFunction
 
@@ -49,6 +51,7 @@
       --group groupGlobalOptionsFunction \
       --alt "-vvv" \
       --callback optionTraceVerboseCallback \
+      --callback updateArgListTraceVerboseCallback \
       --variable-name "optionTraceVerbose" \
       --function-name optionTraceVerboseFunction
 
@@ -59,6 +62,7 @@
       --alt "--env-file" \
       --max -1 \
       --callback optionEnvFileCallback \
+      --callback updateArgListEnvFileCallback \
       --variable-name "optionEnvFiles" \
       --function-name optionEnvFilesFunction
 
@@ -69,6 +73,7 @@
       --alt "--log-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
       --callback "optionLogLevelCallback" \
+      --callback updateArgListLogLevelCallback \
       --variable-name "optionLogLevel" \
       --function-name optionLogLevelFunction
 
@@ -78,6 +83,7 @@
       --group groupGlobalOptionsFunction \
       --alt "--log-file" \
       --callback "optionLogFileCallback" \
+      --callback updateArgListLogFileCallback \
       --variable-name "optionLogFile" \
       --function-name optionLogFileFunction
 
@@ -88,6 +94,7 @@
       --alt "--display-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
       --callback optionDisplayLevelCallback \
+      --callback updateArgListDisplayLevelCallback \
       --variable-name "optionDisplayLevel" \
       --function-name optionDisplayLevelFunction
 
@@ -96,6 +103,7 @@
       --group groupGlobalOptionsFunction \
       --alt "--no-color" \
       --callback optionNoColorCallback \
+      --callback updateArgListNoColorCallback \
       --variable-name "optionNoColor" \
       --function-name optionNoColorFunction
 
@@ -106,6 +114,7 @@
       --alt "--theme" \
       --authorized-values "default|noColor" \
       --callback optionThemeCallback \
+      --callback updateArgListThemeCallback \
       --variable-name "optionTheme" \
       --function-name optionThemeFunction
 
@@ -122,6 +131,7 @@
       --group groupGlobalOptionsFunction \
       --alt "--quiet" --alt "-q" \
       --callback optionQuietCallback \
+      --callback updateArgListQuietCallback \
       --variable-name "optionQuiet" \
       --function-name optionQuietFunction
 
@@ -131,6 +141,7 @@
         --help "define output format of this command (default: plain)" \
         --alt "--format" \
         --authorized-values "plain|checkstyle" \
+        --callback updateArgListFormatCallback \
         --variable-name "optionFormat" \
         --function-name optionFormatFunction
     fi
@@ -181,36 +192,75 @@
   declare optionFormat="plain"
 % fi
 
+%# default add option callbacks
+declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListInfoVerboseCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListDebugVerboseCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListTraceVerboseCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListEnvFileCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListLogLevelCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListDisplayLevelCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListNoColorCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--no-color)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListThemeCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListQuietCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListFormatCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=("$@")
+}
+
+# shellcheck disable=SC2317 # if function is overridden
 optionHelpCallback() {
   <% ${commandFunctionName} %> help
   exit 0
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   echo "${SCRIPT_NAME} version <% ${versionNumber} %>"
   exit 0
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionEnvFileCallback() {
-  local envFile="$1"
+  local envFile="$2"
   if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
     Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
     exit 1
   fi
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionInfoVerboseCallback() {
   export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
   export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
   export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
   export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
   export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
   export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
@@ -262,8 +312,9 @@ getVerboseLevel() {
   esac
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionDisplayLevelCallback() {
-  local level="$1"
+  local level="$2"
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
@@ -271,8 +322,9 @@ optionDisplayLevelCallback() {
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionLogLevelCallback() {
-  local level="$1"
+  local level="$2"
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
@@ -280,21 +332,25 @@ optionLogLevelCallback() {
   export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
-  local logFile="$1"
+  local logFile="$2"
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
   export BASH_FRAMEWORK_QUIET_MODE=1
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionNoColorCallback() {
   UI::theme "noColor"
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionThemeCallback() {
-  UI::theme "$1"
+  UI::theme "$2"
 }
 
 displayConfig() {

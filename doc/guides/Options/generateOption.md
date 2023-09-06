@@ -86,7 +86,7 @@ the callback will be called with the following arguments:
 
 * **--callback \<Function\>**
 
-  (optional) the callback called if the option is parsed successfully. The option value will be passed as parameter (several parameters if type StringArray).
+  (0 or several times) the callback called if the option is parsed successfully. The option value will be passed as parameter (several parameters if type StringArray).
 
 * **--function-name \<String\>**
 

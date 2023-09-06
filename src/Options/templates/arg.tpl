@@ -71,7 +71,7 @@
   elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
     echo "<%% helpArg "0" %>"
   elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
-    echo "Argument <% ${variableName} %> min <% ${min} %> min <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
+    echo "Argument <% ${variableName} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${options_parse_cmd}" = "min" ]]; then
     echo "<% ${min} %>"
   elif [[ "${options_parse_cmd}" = "max" ]]; then
@@ -85,7 +85,7 @@
     export max="<% ${max} %>"
     export authorizedValues="<% ${authorizedValues} %>"
     export regexp="<% ${regexp} %>"
-    export callback="<% ${callback} %>"
+    export callbacks=(<%% Array::join " " "${callbacks[@]}" %>)
   else
     Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1

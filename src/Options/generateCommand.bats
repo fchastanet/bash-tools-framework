@@ -160,7 +160,8 @@ function Options::generateCommand::case2 { #@test
   Options::sourceFunction "${optionVerbose}"
 
   local status=0
-  Options::generateCommand --no-error-if-unknown-option \
+  ignoreOptionError() { :; }
+  Options::generateCommand --unknown-option-callback ignoreOptionError \
     --help "super command" ${optionVerbose} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
 
   testCommand "generateCommand.case2.sh" "Options::command"
@@ -176,6 +177,7 @@ function Options::generateCommand::case2::parseNoArg { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
   local status=0
   local verbose
+  ignoreOptionError() { :; }
   Options::command parse >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   [[ "${verbose}" = "0" ]]
@@ -187,6 +189,7 @@ function Options::generateCommand::case2::parseVerbose { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
   local status=0
   local verbose
+  ignoreOptionError() { :; }
   Options::command parse --verbose >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   [[ "${verbose}" = "1" ]]
@@ -198,6 +201,7 @@ function Options::generateCommand::case2::parseInvalidOption { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case2.sh"
   local status=0
   local verbose
+  ignoreOptionError() { :; }
   Options::command parse --invalid-option >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   [[ "${verbose}" = "0" ]]
@@ -359,13 +363,13 @@ function Options::generateCommand::case4::parseAll { #@test
   local srcFile="initialFile"
   local -a destFiles=("initialDestDir")
   Options::command parse initialFile2 --verbose destFile1 --src-dirs srcDir1 destFile2 -s srcDir2 destFile3 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  run cat "${BATS_TEST_TMPDIR}/result"
+  assert_output ""
   [[ "${status}" = "0" ]]
   [[ "${verbose}" = "1" ]]
   [[ "${srcDirs[*]}" = "initialDir srcDir1 srcDir2" ]]
   [[ "${srcFile}" = "initialFile2" ]]
   [[ "${destFiles[*]}" = "initialDestDir destFile1 destFile2 destFile3" ]]
-  run cat "${BATS_TEST_TMPDIR}/result"
-  assert_output ""
 }
 
 function Options::generateCommand::case4::destFile4 { #@test
@@ -375,7 +379,7 @@ function Options::generateCommand::case4::destFile4 { #@test
   local -a srcDirs=("initialDir")
   local srcFile="initialFile"
   local -a destFiles=("initialDestDir")
-  Options::command parse initialFile2 --verbose destFile1 --src-dirs srcDir1 destFile2 -s srcDir2 destFile3 destFile4 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::command parse initialFile2 --verbose destFile1 --src-dirs srcDir1 destFile2 -s srcDir2 destFile3 destFile4 destFile5 >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   [[ "${verbose}" = "1" ]]
   [[ "${srcDirs[*]}" = "initialDir srcDir1 srcDir2" ]]
@@ -383,7 +387,7 @@ function Options::generateCommand::case4::destFile4 { #@test
   [[ "${destFiles[*]}" = "initialDestDir destFile1 destFile2 destFile3" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument destFiles - Maximum number of argument occurrences reached(3)"
+  assert_output --partial "ERROR   - Argument - too much arguments provided: destFile4 destFile5"
 }
 
 function Options::generateCommand::case5::invalidArgOrder { #@test
@@ -569,7 +573,7 @@ function Options::generateCommand::case7::parseArgsCallback { #@test
   run Options::command parse run --help
   assert_lines_count 2
   assert_line --index 0 "subCommandCallback run -- --help"
-  assert_line --index 1 "helpCallback 1"
+  assert_line --index 1 "helpCallback --help 1"
 }
 
 function Options::generateCommand::case7::parseArgsInvalidSubCommand { #@test
@@ -587,4 +591,45 @@ function Options::generateCommand::case7::parseArgsInvalidSubCommand { #@test
   run Options::command parse François --help
   assert_lines_count 1
   assert_output --partial "ERROR   - Argument subCommand - value 'François' is not part of authorized values(run|exec|ps|build|pull|push|images|login|logout|search|version|info)"
+}
+
+# group management
+function Options::generateCommand::case8 { #@test
+  source <(
+    function srcFileCallback() { :; }
+    Options::generateArg \
+      --variable-name "srcFile" \
+      --callback srcFileCallback \
+      --function-name srcFileArgFunction
+  )
+
+  local status=0
+  unknownArgumentCallback() { :; }
+  Options::generateCommand \
+    --help "super command" \
+    --unknown-argument-callback unknownArgumentCallback \
+    srcFileArgFunction \
+    >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  testCommand "generateCommand.case8.sh" "Options::command"
+}
+
+function Options::generateCommand::case8::help { #@test
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case8.sh"
+  run Options::command help
+  checkCommandResult "generateCommand.case8.expected.help"
+}
+
+function Options::generateCommand::case8::parseArgsCallback { #@test
+  function srcFileCallback() {
+    echo "srcFileCallback $*"
+  }
+  unknownArgumentCallback() {
+    echo "unknown argument $1"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case8.sh"
+  run Options::command parse srcFile destFile1
+  assert_lines_count 2
+  assert_line --index 0 "srcFileCallback srcFile -- destFile1"
+  assert_line --index 1 "unknown argument destFile1"
 }

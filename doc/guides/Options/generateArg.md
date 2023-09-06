@@ -86,7 +86,7 @@ the callback will be called with the following arguments:
 
 * **--callback \<String\>**
 
-  (optional) the name of the callback called if the arg is parsed successfully. The argument value will be passed as parameter (several parameters if type StringArray).
+  (0 or several times) the name of the callback called if the arg is parsed successfully. The argument value will be passed as parameter (several parameters if type StringArray).
 
 * **--function-name \<String\>**
 

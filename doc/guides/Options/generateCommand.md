@@ -25,14 +25,16 @@ Usage:  Options::generateCommand [OPTIONS]
 USAGE: Options::generateCommand [OPTIONS] [ARGS]
 
 OPTIONS:
-  [--help <String|Function>]
+  [--help|--short-description <String|Function>]
+  [--long-description <String|Function>]
   [--command-name <String|Function>]
   [--version <String|Function>]
   [--author <String|Function>]
   [--License <String|Function>]
   [--copyright <String|Function>]
   [--help-template <String>]
-  [--error-if-unknown-option]
+  [--unknown-option-callback]
+  [--unknown-arg-callback]
 
 ARGS: list of option/arg functions
 ```
@@ -53,11 +55,27 @@ Options::sourceFunction "${commandForm}"
 "${commandForm}" parse "$@"
 ```
 
+#### --callback option
+you can set several callbacks
+callback is called without any parameter.
+
+#### --unknown-option-callback/--unknown-arg-callback option
+You can set several callbacks.
+Callback is called with the option/argument that is invalid.
+An invalid option is a string that begin with `-`
+and that does not match any option configured.
+An invalid argument is an argument that does not
+match any configured argument.
+
 #### Options
 
-* **--help \<String|Function\>**
+* **--help** | **--summary** | **--short-description \<String|Function\>**
 
-  (optional) provides command description help
+  (optional) provides command short description help
+
+* **--long-description \<String|Function\>**
+
+  (optional) provides command long description help
 
 * **--command-name \<String|Function\>**
 
@@ -87,17 +105,21 @@ Options::sourceFunction "${commandForm}"
 
   (optional) if you want to override the default template used to generate the help
 
-* **--no-error-if-unknown-option**
-
-  (optional) options parser doesn't display any error message if an option provided does not match any specified options. This flag allows to disable this behavior.
-
 * **--function-name \<String\>**
 
   the name of the function that will be generated
 
+* **--unknown-option-callback \<Function\>**
+
+  (0 or more) the callback called when an option is unknown (Default: options parser display error message if option provided does not match any specified options).
+
+* **--unknown-argument-callback \<Function\>**
+
+  (0 or more) the callback called when an argument is unknown (Default: parser does not report any error).
+
 * **--callback \<Function\>**
 
-  (optional) the callback called chen all options and arguments have been parsed.
+  (0 or more) the callback called when all options and arguments have been parsed.
 
 #### Arguments
 

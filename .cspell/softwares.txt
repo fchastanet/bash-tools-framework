@@ -140,3 +140,5 @@ docsify
 nojekyll
 gitleaks
 mypy
+kcov
+libdw

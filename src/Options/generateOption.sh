@@ -60,7 +60,7 @@
 # @option --mandatory (optional) as its name indicates, by default an option is optional. But using `--mandatory` you can make the option mandatory. An error will be generated if the option is not found during parsing arguments.
 # @option --help <help> (optional) provides option help description (Default: Empty string)
 # @option --group <Function> (optional) the group to which the option will be attached. Grouped option will be displayed under that group. (Default: no group)
-# @option --callback <Function> (optional) the callback called if the option is parsed successfully. The option value will be passed as parameter (several parameters if type StringArray).
+# @option --callback <Function> (0 or several times) the callback called if the option is parsed successfully. The option value will be passed as parameter (several parameters if type StringArray).
 # @option --function-name <String> (optional) the name of the function that will be generated
 # @option --* (optional) Others options are passed to specific option handler depending on variable type
 # @exitcode 1 if error during option parsing
@@ -79,7 +79,7 @@ Options::generateOption() {
   local help=""
   local mandatory=0
   local group=""
-  local callback=""
+  local -a callbacks=()
   local -a adapterOptions=()
 
   while (($# > 0)); do
@@ -175,7 +175,7 @@ Options::generateOption() {
           Log::displayError "Options::generateOption - Option ${arg} - only posix or bash framework function name are accepted - invalid '$1'"
           return 1
         fi
-        callback="$1"
+        callbacks+=("$1")
         ;;
       --function-name)
         shift
@@ -233,7 +233,7 @@ Options::generateOption() {
     export alts
     export help
     export group
-    export callback
+    export callbacks
     export mandatory
     export adapterOptions
     eval "${optionTypeExports}"

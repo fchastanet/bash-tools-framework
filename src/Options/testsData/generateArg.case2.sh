@@ -45,7 +45,7 @@ Options::arg() {
   elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
     echo "[varName {list} (at most 3 times)]"
   elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
-    echo "Argument varName min 0 min 3 authorizedValues 'debug|info|warn' regexp ''"
+    echo "Argument varName min 0 max 3 authorizedValues 'debug|info|warn' regexp ''"
   elif [[ "${options_parse_cmd}" = "min" ]]; then
     echo "0"
   elif [[ "${options_parse_cmd}" = "max" ]]; then
@@ -59,7 +59,7 @@ Options::arg() {
     export max="3"
     export authorizedValues="debug|info|warn"
     export regexp=""
-    export callback=""
+    export callbacks=()
   else
     Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1

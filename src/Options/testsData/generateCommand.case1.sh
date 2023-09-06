@@ -31,13 +31,13 @@ Options::command() {
           return 1
           ;;
         *)
-          ((++options_parse_parsedArgIndex))
+          Log::displayError 'Argument - too much arguments provided'
+          return 1
           ;;
       esac
       shift || true
     done
     export file
-
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
     echo
@@ -56,7 +56,7 @@ Options::command() {
     echo -n -e ' (at most 1 times)'
     echo
     echo "    file"
-    echo 'very long help'
+    echo -e """very long help"""
   else
     Log::displayError "Option command invalid: '${options_parse_cmd}'"
     return 1

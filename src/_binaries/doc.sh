@@ -13,7 +13,7 @@ run() {
   ShellDoc::installRequirementsIfNeeded
 
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-    "${SCRIPT_NAME}" "/bash/bin/doc"
+    "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc"
     exit $?
   fi
 

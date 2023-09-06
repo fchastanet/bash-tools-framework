@@ -248,7 +248,7 @@ function Options::generateArg::case1::ArgTest::otherCommands { #@test
 
   run Options::arg oneLineHelp
   assert_success
-  assert_output "Argument varName min 1 min 1 authorizedValues '' regexp ''"
+  assert_output "Argument varName min 1 max 1 authorizedValues '' regexp ''"
 
   local status=0
   Options::arg export >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?

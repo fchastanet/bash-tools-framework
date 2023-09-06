@@ -649,36 +649,74 @@ Compiler::Facade::requireCommandBinDir
 
 # default option values
 
+declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListInfoVerboseCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListDebugVerboseCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListTraceVerboseCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListEnvFileCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListLogLevelCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListDisplayLevelCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListNoColorCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=(--no-color)
+}
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListThemeCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListQuietCallback() { :; }
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListFormatCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=("$@")
+}
+
+# shellcheck disable=SC2317 # if function is overridden
 optionHelpCallback() {
   buildPushDockerImagesCommand help
   exit 0
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   echo "${SCRIPT_NAME} version 1.0"
   exit 0
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionEnvFileCallback() {
-  local envFile="$1"
+  local envFile="$2"
   if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
     Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
     exit 1
   fi
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionInfoVerboseCallback() {
   export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
   export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
   export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
   export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
   export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
   export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
@@ -730,8 +768,9 @@ getVerboseLevel() {
   esac
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionDisplayLevelCallback() {
-  local level="$1"
+  local level="$2"
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
@@ -739,8 +778,9 @@ optionDisplayLevelCallback() {
   export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionLogLevelCallback() {
-  local level="$1"
+  local level="$2"
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
@@ -748,21 +788,25 @@ optionLogLevelCallback() {
   export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
-  local logFile="$1"
+  local logFile="$2"
   export BASH_FRAMEWORK_LOG_FILE="${logFile}"
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
   export BASH_FRAMEWORK_QUIET_MODE=1
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionNoColorCallback() {
   UI::theme "noColor"
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 optionThemeCallback() {
-  UI::theme "$1"
+  UI::theme "$2"
 }
 
 displayConfig() {
@@ -851,8 +895,8 @@ buildPushDockerImagesCommand() {
           fi
           ;;
         # Option 2/14
-        # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --config)
+        # Option optionConfig --bash-framework-config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --bash-framework-config)
           optionConfig="1"
           if ((options_parse_optionParsedCountOptionConfig >= 1)); then
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -867,7 +911,8 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionNoColorCallback "${optionNoColor}"
+          optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
+          updateArgListNoColorCallback "${options_parse_arg}" "${optionNoColor}"
           ;;
         # Option 4/14
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -877,7 +922,8 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionDebugVerboseCallback "${optionDebugVerbose}"
+          optionDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
+          updateArgListDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
           ;;
         # Option 5/14
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -887,7 +933,8 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionTraceVerboseCallback "${optionTraceVerbose}"
+          optionTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
+          updateArgListTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
           ;;
         # Option 6/14
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
@@ -898,7 +945,8 @@ buildPushDockerImagesCommand() {
             return 1
           fi
           optionEnvFiles+=("$1")
-          optionEnvFileCallback "${optionEnvFiles[@]}"
+          optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
+          updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
         # Option 7/14
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|noColor' regexp ''
@@ -918,7 +966,8 @@ buildPushDockerImagesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionTheme))
           optionTheme="$1"
-          optionThemeCallback "${optionTheme}"
+          optionThemeCallback "${options_parse_arg}" "${optionTheme}"
+          updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
         # Option 8/14
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -928,7 +977,7 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionHelpCallback "${optionHelp}"
+          optionHelpCallback "${options_parse_arg}" "${optionHelp}"
           ;;
         # Option 9/14
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -938,7 +987,7 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionVersionCallback "${optionVersion}"
+          optionVersionCallback "${options_parse_arg}" "${optionVersion}"
           ;;
         # Option 10/14
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -948,7 +997,8 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionQuietCallback "${optionQuiet}"
+          optionQuietCallback "${options_parse_arg}" "${optionQuiet}"
+          updateArgListQuietCallback "${options_parse_arg}" "${optionQuiet}"
           ;;
         # Option 11/14
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
@@ -968,7 +1018,8 @@ buildPushDockerImagesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionLogLevel))
           optionLogLevel="$1"
-          optionLogLevelCallback "${optionLogLevel}"
+          optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
+          updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
         # Option 12/14
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
@@ -984,7 +1035,8 @@ buildPushDockerImagesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionLogFile))
           optionLogFile="$1"
-          optionLogFileCallback "${optionLogFile}"
+          optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
+          updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
         # Option 13/14
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
@@ -1004,7 +1056,8 @@ buildPushDockerImagesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionDisplayLevel))
           optionDisplayLevel="$1"
-          optionDisplayLevelCallback "${optionDisplayLevel}"
+          optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
+          updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           ;;
         # Option 14/14
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1014,7 +1067,8 @@ buildPushDockerImagesCommand() {
             Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionInfoVerboseCallback "${optionInfoVerbose}"
+          optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
+          updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
           ;;
         -*)
           Log::displayError "Invalid option ${options_parse_arg}"
@@ -1022,10 +1076,10 @@ buildPushDockerImagesCommand() {
           ;;
         *)
           if ((0)); then
-            # Technical if never reached
+            # Technical if - never reached
             :
           # Argument 1/4
-          # Argument argVendor min 1 min 1 authorizedValues 'alpine|ubuntu' regexp ''
+          # Argument argVendor min 1 max 1 authorizedValues 'alpine|ubuntu' regexp ''
           elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
             if [[ ! "${options_parse_arg}" =~ alpine|ubuntu ]]; then
               Log::displayError "Argument vendor - value '${options_parse_arg}' is not part of authorized values(alpine|ubuntu)"
@@ -1038,7 +1092,7 @@ buildPushDockerImagesCommand() {
             ((++options_parse_argParsedCountArgVendor))
             argVendor="${options_parse_arg}"
           # Argument 2/4
-          # Argument argBashTarVersion min 1 min 1 authorizedValues '4.4|5.0|5.1|5.2' regexp ''
+          # Argument argBashTarVersion min 1 max 1 authorizedValues '4.4|5.0|5.1|5.2' regexp ''
           elif ((options_parse_parsedArgIndex >= 1 && options_parse_parsedArgIndex < 2)); then
             if [[ ! "${options_parse_arg}" =~ 4.4|5.0|5.1|5.2 ]]; then
               Log::displayError "Argument bash_tar_version - value '${options_parse_arg}' is not part of authorized values(4.4|5.0|5.1|5.2)"
@@ -1051,7 +1105,7 @@ buildPushDockerImagesCommand() {
             ((++options_parse_argParsedCountArgBashTarVersion))
             argBashTarVersion="${options_parse_arg}"
           # Argument 3/4
-          # Argument argBashBaseImage min 1 min 1 authorizedValues '' regexp ''
+          # Argument argBashBaseImage min 1 max 1 authorizedValues '' regexp ''
           elif ((options_parse_parsedArgIndex >= 2 && options_parse_parsedArgIndex < 3)); then
             if ((options_parse_argParsedCountArgBashBaseImage >= 1)); then
               Log::displayError "Argument bash_base_image - Maximum number of argument occurrences reached(1)"
@@ -1060,14 +1114,17 @@ buildPushDockerImagesCommand() {
             ((++options_parse_argParsedCountArgBashBaseImage))
             argBashBaseImage="${options_parse_arg}"
           # Argument 4/4
-          # Argument argBranchName min 0 min 1 authorizedValues '' regexp ''
-          elif ((options_parse_parsedArgIndex >= 3)); then
+          # Argument argBranchName min 0 max 1 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 3 && options_parse_parsedArgIndex < 4)); then
             if ((options_parse_argParsedCountArgBranchName >= 1)); then
               Log::displayError "Argument branch_name - Maximum number of argument occurrences reached(1)"
               return 1
             fi
             ((++options_parse_argParsedCountArgBranchName))
             argBranchName="${options_parse_arg}"
+          else
+            Log::displayError "Argument - too much arguments provided: $*"
+            return 1
           fi
           ((++options_parse_parsedArgIndex))
           ;;
@@ -1124,7 +1181,7 @@ INTERNAL
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--push]" "[--config]" "[--no-color]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]")"
+      "[--push]" "[--bash-framework-config]" "[--no-color]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}vendor${__HELP_NORMAL} {single} (mandatory)"
@@ -1147,7 +1204,7 @@ INTERNAL
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--config"
+    echo -n "--bash-framework-config"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'

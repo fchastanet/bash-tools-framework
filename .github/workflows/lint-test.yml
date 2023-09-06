@@ -25,7 +25,7 @@ jobs:
       - name: Linting - Dockerfile
         run: |
           set -exo pipefail
-          ./bin/dockerLint | tee logs/docker-checkstyle.xml
+          ./bin/dockerLint -f checkstyle | tee logs/docker-checkstyle.xml
 
       - name: Linting - Shellcheck
         run: |

@@ -6,7 +6,7 @@
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=src/Args/defaultHelp.sh
-source "${srcDir}/Args/defaultHelp.bats"
+source "${srcDir}/Args/defaultHelp.sh"
 # shellcheck source=src/Args/showHelp.sh
 source "${srcDir}/Args/showHelp.sh"
 # shellcheck source=src/Args/defaultHelpNoExit.sh

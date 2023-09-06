@@ -45,7 +45,7 @@ Options::arg() {
   elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
     echo "varName {single} (mandatory)"
   elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
-    echo "Argument varName min 1 min 1 authorizedValues '' regexp ''"
+    echo "Argument varName min 1 max 1 authorizedValues '' regexp ''"
   elif [[ "${options_parse_cmd}" = "min" ]]; then
     echo "1"
   elif [[ "${options_parse_cmd}" = "max" ]]; then
@@ -59,7 +59,7 @@ Options::arg() {
     export max="1"
     export authorizedValues=""
     export regexp=""
-    export callback=""
+    export callbacks=()
   else
     Log::displayError "Argument command invalid: '${options_parse_cmd}'"
     return 1
