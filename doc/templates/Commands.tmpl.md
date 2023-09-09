@@ -2,14 +2,13 @@
 
 - [1. Compilation tools](#1-compilation-tools)
   - [1.1. bin/compile](#11-bincompile)
-  - [2.1. bin/buildBinFiles](#21-binbuildbinfiles)
+  - [1.2. bin/buildBinFiles](#12-binbuildbinfiles)
 - [2. build tools](#2-build-tools)
-  - [2.2. bin/findShebangFiles](#22-binfindshebangfiles)
-  - [2.3. bin/test](#23-bintest)
-  - [2.4. bin/runBuildContainer](#24-binrunbuildcontainer)
-  - [2.5. bin/buildPushDockerImage](#25-binbuildpushdockerimages)
-  - [2.6. bin/doc](#26-bindoc)
-  - [2.6. bin/plantuml](#26-binplantuml)
+  - [2.1. bin/findShebangFiles](#21-binfindshebangfiles)
+  - [2.2. bin/test](#22-bintest)
+  - [2.3. bin/runBuildContainer](#23-binrunbuildcontainer)
+  - [2.4. bin/buildPushDockerImage](#24-binbuildpushdockerimage)
+  - [2.5. bin/doc](#25-bindoc)
 - [3. Linters](#3-linters)
   - [3.1. bin/frameworkLint](#31-binframeworklint)
   - [3.2. bin/dockerLint](#32-bindockerlint)
@@ -18,7 +17,7 @@
   - [3.5. bin/definitionLint](#35-bindefinitionlint)
   - [3.6. bin/megalinter](#36-binmegalinter)
 - [4. Converter and Generator tools](#4-converter-and-generator-tools)
-  - [4.1. bin/generateShellDoc](#41-bingenerateshelldoc)
+  - [4.1. bin/plantuml](#41-binplantuml)
 
 ## 1. Compilation tools
 
@@ -32,7 +31,7 @@ Here the command's help output:
 @@@compile_help@@@
 ```
 
-### 2.1. bin/buildBinFiles
+### 1.2. bin/buildBinFiles
 
 ```text
 @@@buildBinFiles_help@@@
@@ -40,40 +39,34 @@ Here the command's help output:
 
 ## 2. build tools
 
-### 2.2. bin/findShebangFiles
+### 2.1. bin/findShebangFiles
 
 ```text
 @@@findShebangFiles_help@@@
 ```
 
-### 2.3. bin/test
+### 2.2. bin/test
 
 ```text
 @@@test_help@@@
 ```
 
-### 2.4. bin/runBuildContainer
+### 2.3. bin/runBuildContainer
 
 ```text
 @@@runBuildContainer_help@@@
 ```
 
-### 2.5. bin/buildPushDockerImage
+### 2.4. bin/buildPushDockerImage
 
 ```text
 @@@buildPushDockerImage_help@@@
 ```
 
-### 2.6. bin/doc
+### 2.5. bin/doc
 
 ```text
 @@@doc_help@@@
-```
-
-### 2.6. bin/plantuml
-
-```text
-@@@plantuml_help@@@
 ```
 
 ## 3. Linters
@@ -116,8 +109,8 @@ Here the command's help output:
 
 ## 4. Converter and Generator tools
 
-### 4.1. bin/generateShellDoc
+### 4.1. bin/plantuml
 
 ```text
-@@@generateShellDoc_help@@@
+@@@plantuml_help@@@
 ```

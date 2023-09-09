@@ -92,8 +92,6 @@ see related documentation [Compile command](doc/CompileCommand.md).
 - **awkLint** : Lint all files with .awk extension in specified folder.
 - **dockerLint** : hadolint wrapper, auto installing hadolint
 - **shellcheckLint** : shellcheck wrapper, auto installing shellcheck
-- **generateShellDoc**: find all .sh files and generate shDoc in markdown format
-  in the specified target directory
 
 ### 1.3. Internal tools
 
