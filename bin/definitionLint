@@ -1175,7 +1175,7 @@ commandOptionParseFinished() {
 }
 
 # default option values
-declare optionFormat="plain"
+declare optionFormat="${optionFormatDefault:-plain}"
 
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListFormatCallback() {
@@ -1511,7 +1511,7 @@ definitionLintCommand() {
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo "    define output format of this command (default: plain)"
+    echo "    define output format of this command(available: ) (default: plain)"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"

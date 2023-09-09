@@ -3,9 +3,9 @@
 source <(
   Options::generateOption \
     --variable-type String \
-    --help "define output format of this command (default: plain)" \
+    --help "define output format of this command(available: ${optionFormatAuthorizedValues}) (default: ${optionFormatDefault:-plain})" \
     --alt "--format" \
-    --authorized-values "plain|checkstyle" \
+    --authorized-values "${optionFormatAuthorizedValues:-plain|checkstyle}" \
     --callback updateArgListFormatCallback \
     --variable-name "optionFormat" \
     --function-name optionFormatFunction
@@ -16,7 +16,7 @@ options+=(
 %
 
 # default option values
-declare optionFormat="plain"
+declare optionFormat="${optionFormatDefault:-plain}"
 
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListFormatCallback() {
