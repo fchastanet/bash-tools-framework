@@ -3,85 +3,15 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-CONFIG_FILENAME="${FRAMEWORK_ROOT_DIR}/.framework-config"
-FORMAT="plain"
-DEFAULT_ARGS=(-f plain)
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Synopsis:${__HELP_NORMAL} This framework linter
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.frameworkLint.tpl)"
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] displays this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f|--format <checkstyle,plain>] [--verbose|-v]
-
-${__HELP_TITLE}Description:${__HELP_NORMAL}
-Lint files of the current repository
-- check if all Namespace::functions are existing in the framework
-- check that function defined in a .sh is correctly named
-- check each function has a bats file associated
-- shdoc
-  - check that shdoc valid annotations are used
-  - check that @require function matches naming convention and exists
-  - check that at least @description is provided
-
-${__HELP_TITLE}Options:${__HELP_NORMAL}
-  -f|--format <checkstyle,plain>  define output format of this command
-  -v|--verbose display more information about processed files
-  --src-dir|-s <srcDir> provide the directory where to find the functions source code.
-    Prefer using .framework-config file
-
-.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
-EOF
-)"
-
+# BASH_FRAMEWORK_CONFIG_FILE default options
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 NON_FRAMEWORK_FILES_REGEXP=^$
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
 
-if (($# == 0)); then
-  set -- "${DEFAULT_ARGS[@]}"
-fi
-
-declare args
-args="$(getopt -l help,format:,src-dir: -o hs:f: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
-eval set -- "${args}"
-
-while true; do
-  case $1 in
-    -h | --help)
-      echo -e "${HELP}"
-      exit 0
-      ;;
-    -f | --format)
-      shift || true
-      if ! Array::contains "$1" "checkstyle" "plain"; then
-        Log::fatal "format option invalid"
-      fi
-      FORMAT="$1"
-      ;;
-    --src-dir | -s)
-      shift || true
-      if [[ ! -d "$1" ]]; then
-        Log::fatal "Directory '$1' does not exists"
-      fi
-      FRAMEWORK_SRC_DIRS+=("$(realpath --physical "$1")")
-      ;;
-    --)
-      shift || true
-      break
-      ;;
-    *)
-      # ignore
-      ;;
-  esac
-  shift || true
-done
-
-# load .framework-config
-# shellcheck disable=SC2034
-configFile=""
-# shellcheck source=/.framework-config
-Framework::loadConfig configFile "${FRAMEWORK_ROOT_DIR}" || Log::fatal "error while loading .framework-config file"
+frameworkLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 checkEachFunctionHasSrcFile() {
   local file="$1"
@@ -90,7 +20,7 @@ checkEachFunctionHasSrcFile() {
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${file}"; then
-    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
   readarray -t functionsToImport < <(
@@ -102,7 +32,7 @@ checkEachFunctionHasSrcFile() {
   )
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+      Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
       continue
     fi
     local fileNameToImport
@@ -115,7 +45,8 @@ checkEachFunctionHasSrcFile() {
       fi
     done
     if [[ "${found}" = "0" ]]; then
-      if [[ "${FORMAT}" = "plain" ]]; then
+      # shellcheck disable=SC2154
+      if [[ "${optionFormat}" = "plain" ]]; then
         Log::displayError "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} - does not have a matching source file ${fileNameToImport} in any source directories specified"
       else
         echo "<error severity='error' source='checkEachFunctionHasSrcFile' message='Function ${functionToImport} does not have a matching source file ${fileNameToImport} in any source directories specified'/>"
@@ -139,7 +70,7 @@ deduceBashFunctionFromSrcFile() {
 checkEachSrcFileHasBatsFile() {
   local file="$1"
   if [[ "${file}" =~ ${BATS_FILE_NOT_NEEDED_REGEXP} ]]; then
-    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - rule BATS_FILE_NOT_NEEDED_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - rule BATS_FILE_NOT_NEEDED_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
   if [[ ! "${file}" =~ .sh$ ]]; then
@@ -147,11 +78,11 @@ checkEachSrcFileHasBatsFile() {
     return 0
   fi
   if [[ ! "${file}" =~ ^$(getRelativeSrcDir) ]]; then
-    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - src directory not declared in ${CONFIG_FILENAME}"
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - src directory not declared in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
   if deduceBashFunctionFromSrcFile "${file}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - matching function name matches FRAMEWORK_FUNCTIONS_IGNORE_REGEXP defined in ${CONFIG_FILENAME}"
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - matching function name matches FRAMEWORK_FUNCTIONS_IGNORE_REGEXP defined in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
   local batsFile="${file%.*}.bats"
@@ -165,11 +96,11 @@ checkEachSrcFileHasBatsFile() {
 checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local srcFile="$1"
   if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
-    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
-    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
 
@@ -178,7 +109,7 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local file="${srcFile#src/}"
   expectedFunctionName="$(sed -E 's#/#::#g' <<<"${file%.sh}")"
   if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - Function ${expectedFunctionName} - rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - Function ${expectedFunctionName} - rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
 
@@ -198,11 +129,11 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
 checkEachSrcFileHasCorrectShdoc() {
   local srcFile="$1"
   if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
-    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
-    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${CONFIG_FILENAME}"
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
     return 0
   fi
 
@@ -268,7 +199,7 @@ reportError() {
   local category="$1"
   local file="$2"
   local msg="$3"
-  if [[ "${FORMAT}" = "plain" ]]; then
+  if [[ "${optionFormat}" = "plain" ]]; then
     Log::displayError "${category} - File ${file} - ${msg}"
   else
     echo "<error severity='error' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
@@ -280,7 +211,7 @@ reportWarning() {
   local category="$1"
   local file="$2"
   local msg="$3"
-  if [[ "${FORMAT}" = "plain" ]]; then
+  if [[ "${optionFormat}" = "plain" ]]; then
     Log::displayWarning "${category} - File ${file} - ${msg}"
   else
     echo "<error severity='warning' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
@@ -288,60 +219,68 @@ reportWarning() {
   ((++warningCount))
 }
 
-((errorCount = 0)) || true
-((warningCount = 0)) || true
-if [[ "${FORMAT}" = "checkstyle" ]]; then
-  echo "<?xml version='1.0' encoding='UTF-8'?>"
-  echo "<checkstyle>"
-fi
-export -f File::detectBashFile
-export -f Assert::bashFile
-
-# shellcheck disable=SC2016
-while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "checkstyle" ]]; then
-    echo "<file name='${file}'>"
+run() {
+  ((errorCount = 0)) || true
+  ((warningCount = 0)) || true
+  if [[ "${optionFormat}" = "checkstyle" ]]; then
+    echo "<?xml version='1.0' encoding='UTF-8'?>"
+    echo "<checkstyle>"
   fi
-  Log::displayInfo "Checking file ${file}"
-  checkEachFunctionHasSrcFile "${file}" "$@" || ((++errorCount))
-  checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" "$@" || ((++errorCount))
-  checkEachSrcFileHasBatsFile "${file}" "$@" || ((++errorCount))
-  checkEachSrcFileHasCorrectShdoc "${file}" "$@" || ((++errorCount))
+  export -f File::detectBashFile
+  export -f Assert::bashFile
 
-  if [[ "${FORMAT}" = "checkstyle" ]]; then
-    echo "</file>"
-  fi
-done < <(
-  git ls-files --exclude-standard |
-    xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
-    true
-)
+  # shellcheck disable=SC2016
+  while IFS='' read -r file; do
+    if [[ "${optionFormat}" = "checkstyle" ]]; then
+      echo "<file name='${file}'>"
+    fi
+    Log::displayInfo "Checking file ${file}"
+    checkEachFunctionHasSrcFile "${file}" || ((++errorCount))
+    checkEachSrcFileHasOneFunctionCorrectlyNamed "${file}" || ((++errorCount))
+    checkEachSrcFileHasBatsFile "${file}" || ((++errorCount))
+    checkEachSrcFileHasCorrectShdoc "${file}" || ((++errorCount))
 
-# shellcheck disable=SC2154
-while IFS='' read -r file; do
-  if [[ "${FORMAT}" = "checkstyle" ]]; then
-    echo "<file name='${file}'>"
-  fi
-  reportWarning "fileExistence" "${file}" \
-    "File ${file} does not exist, git renamed file ?"
-  if [[ "${FORMAT}" = "checkstyle" ]]; then
-    echo "</file>"
-  fi
-done < <(cat "${missingBashFileList}" 2>/dev/null || true)
+    if [[ "${optionFormat}" = "checkstyle" ]]; then
+      echo "</file>"
+    fi
+  done < <(
+    git ls-files --exclude-standard |
+      xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
+      true
+  )
 
-if [[ "${FORMAT}" = "checkstyle" ]]; then
-  echo "</checkstyle>"
-fi
-if [[ "${FORMAT}" = "plain" ]]; then
+  # shellcheck disable=SC2154
+  while IFS='' read -r file; do
+    if [[ "${optionFormat}" = "checkstyle" ]]; then
+      echo "<file name='${file}'>"
+    fi
+    reportWarning "fileExistence" "${file}" \
+      "File ${file} does not exist, git renamed file ?"
+    if [[ "${optionFormat}" = "checkstyle" ]]; then
+      echo "</file>"
+    fi
+  done < <(cat "${missingBashFileList}" 2>/dev/null || true)
+
+  if [[ "${optionFormat}" = "checkstyle" ]]; then
+    echo "</checkstyle>"
+  fi
+  if [[ "${optionFormat}" = "plain" ]]; then
+    if ((errorCount > 0)); then
+      Log::displayError "${errorCount} errors/${warningCount} warnings found !"
+    elif ((warningCount > 0)); then
+      Log::displayWarning "0 error/${warningCount} warnings found !"
+    else
+      Log::displaySuccess "No error/warning found !"
+    fi
+  fi
+
   if ((errorCount > 0)); then
-    Log::displayError "${errorCount} errors/${warningCount} warnings found !"
-  elif ((warningCount > 0)); then
-    Log::displayWarning "0 error/${warningCount} warnings found !"
-  else
-    Log::displaySuccess "No error/warning found !"
+    exit 1
   fi
-fi
+}
 
-if ((errorCount > 0)); then
-  exit 1
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
+else
+  run
 fi

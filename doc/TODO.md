@@ -45,9 +45,12 @@
 ## 1. Options/Args management
 
 - USAGE [OPTIONS] [GlobalOptions]
+  - specific Usage [--options] if number of options under 3
   - then describe below each of them
   - check if alt not used twice
   - order options not working
+- special group for options --bash-framework-config and --config
+- Default template for option using run
 - --help-item-name "srcDir"
 - manage String|Function
 - validatorCallback

@@ -208,6 +208,20 @@ Env::requireLoad() {
   }
 }
 
+# @description load .framework-config
+# @arg $1 loadedConfigFile:&String (passed by reference) the finally loaded configuration file path
+# @arg $@ srcDirs:String[] the src directories in which .framework-config file will be searched
+# @stdout the config file path loaded if any
+# @exitcode 0 if .framework-config file has been found in srcDirs provided
+# @exitcode 1 if .framework-config file not found
+# @see Conf::loadNearestFile
+Framework::loadConfig() {
+  # shellcheck disable=SC2034
+  local -n loadConfig_loadedConfigFile=$1
+  shift || true
+  Conf::loadNearestFile ".framework-config" loadConfig_loadedConfigFile "$@"
+}
+
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
 #   given display level
@@ -264,6 +278,14 @@ Log::displayInfo() {
     echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
   fi
   Log::logInfo "$1" "${type}"
+}
+
+# @description Display message using error color (red) and exit immediately with error status 1
+# @arg $1 message:String the message to display
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
 }
 
 # @description activate or not Log::display* and Log::log* functions
@@ -406,6 +428,41 @@ Assert::tty() {
   [[ -t 1 || -t 2 ]]
 }
 
+# @description Load the nearest config file
+# in next example will search first .framework-config file in "srcDir1"
+# then if not found will go in up directories until /
+# then will search in "srcDir2"
+# then if not found will go in up directories until /
+# source the file if found
+# @example
+#   Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
+#
+# @arg $1 configFileName:String config file name to search
+# @arg $2 loadedFile:String (passed by reference) will return the loaded config file name
+# @arg $@ srcDirs:String[] source directories in which the config file will be searched
+# @exitcode 0 if file found
+# @exitcode 1 if file not found
+Conf::loadNearestFile() {
+  local configFileName="$1"
+  local -n loadedFile="$2"
+  shift 2 || true
+  local -a srcDirs=("$@")
+  for srcDir in "${srcDirs[@]}"; do
+    configFile="$(File::upFind "${srcDir}" "${configFileName}" || true)"
+    if [[ -n "${configFile}" ]]; then
+      # shellcheck source=/.framework-config
+      source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
+      Log::displayDebug "Config file ${configFile} is loaded"
+      # shellcheck disable=SC2034
+      loadedFile="${configFile}"
+      return 0
+    fi
+  done
+
+  Log::displayWarning "Config file '${configFileName}' not found in any source directories provided"
+  return 1
+}
+
 # @description get list of env files to load
 # in order to make them available for Env::requireLoad
 # @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
@@ -526,6 +583,12 @@ Log::logError() {
 
 # @description log message to file
 # @arg $1 message:String the message to display
+Log::logFatal() {
+  Log::logMessage "${2:-FATAL}" "$1"
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
 Log::logInfo() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
     Log::logMessage "${2:-INFO}" "$1"
@@ -605,6 +668,38 @@ Env::createDefaultEnvFile() {
   echo "${envFile}"
 }
 
+# @description search a file in parent directories
+#
+# @arg $1 fromPath:String path
+# @arg $2 fileName:String
+# @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
+# @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
+# @stdout The filename if found
+# @exitcode 1 if the command failed or file not found
+File::upFind() {
+  local fromPath="$1"
+  shift || true
+  local fileName="$1"
+  shift || true
+  local untilInclusivePath="${1:-/}"
+  shift || true
+
+  if [[ -f "${fromPath}" ]]; then
+    fromPath="$(dirname "${fromPath}")"
+  fi
+  while true; do
+    if [[ -f "${fromPath}/${fileName}" ]]; then
+      echo "${fromPath}/${fileName}"
+      return 0
+    fi
+    if Array::contains "${fromPath}" "${untilInclusivePath}" "$@" "/"; then
+      return 1
+    fi
+    fromPath="$(readlink -f "${fromPath}"/..)"
+  done
+  return 1
+}
+
 # @description remove comment lines from input or files provided as arguments
 # @arg $@ files:String[] (optional) the files to filter
 # @env commentLinePrefix String the comment line prefix (default value: #)
@@ -625,11 +720,44 @@ Framework::createTempFile() {
   mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
 
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
+Log::displayWarning() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
+    echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logWarning "$1"
+}
+
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logSkipped() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
     Log::logMessage "${2:-SKIPPED}" "$1"
+  fi
+}
+
+# @description check if an element is contained in an array
+#
+# @arg $1 needle:String
+# @arg $@ array:String[]
+# @exitcode 0 if found
+# @exitcode 1 otherwise
+# @example
+#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
+Array::contains() {
+  local element
+  for element in "${@:2}"; do
+    [[ "${element}" = "$1" ]] && return 0
+  done
+  return 1
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logWarning() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
+    Log::logMessage "${2:-WARNING}" "$1"
   fi
 }
 
@@ -693,7 +821,7 @@ optionVersionCallback() {
 optionEnvFileCallback() {
   local envFile="$2"
   if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
-    Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
+    Log::displayError "Command ${SCRIPT_NAME} - Option --env-file - File '${envFile}' doesn't exist"
     exit 1
   fi
 }
@@ -738,7 +866,7 @@ getLevel() {
       echo "${__LEVEL_DEBUG}"
       ;;
     *)
-      Log::displayError "Invalid level ${level}"
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
   esac
 }
@@ -759,7 +887,7 @@ getVerboseLevel() {
       echo "${__VERBOSE_LEVEL_TRACE}"
       ;;
     *)
-      Log::displayError "Invalid level ${level}"
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
   esac
 }
@@ -813,7 +941,12 @@ displayConfig() {
     printf '%-40s = %s\n' "${var}" "$(declare -p "${var}" | sed -E -e 's/^[^=]+=(.*)/\1/')"
   done < <(typeset -p | awk 'match($3, "^(BASH_FRAMEWORK_[^=]+)=", m) { print m[1] }' | sort)
   exit 0
+}
 
+optionBashFrameworkConfigCallback() {
+  if [[ ! -f "$2" ]]; then
+    Log::fatal "Command ${SCRIPT_NAME} - Bash framework config file '$2' does not exists"
+  fi
 }
 
 commandOptionParseFinished() {
@@ -824,6 +957,20 @@ commandOptionParseFinished() {
   export BASH_FRAMEWORK_ENV_FILES
   Env::requireLoad
   Log::requireLoad
+
+  # load .framework-config
+  if [[ -n "${optionBashFrameworkConfig}" ]]; then
+    BASH_FRAMEWORK_CONFIG_FILE="${optionBashFrameworkConfig}"
+    # shellcheck source=/.framework-config
+    source "${optionBashFrameworkConfig}"
+  else
+    # shellcheck disable=SC2034
+    BASH_FRAMEWORK_CONFIG_FILE=""
+    # shellcheck source=/.framework-config
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" ||
+      Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config file"
+  fi
+
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig
   fi
@@ -837,18 +984,23 @@ buildBinFilesCommand() {
     optionIgnoreMissing="0"
     local -i options_parse_optionParsedCountOptionIgnoreMissing
     ((options_parse_optionParsedCountOptionIgnoreMissing = 0)) || true
+    local -i options_parse_optionParsedCountOptionBashFrameworkConfig
+    ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
     optionConfig="0"
     local -i options_parse_optionParsedCountOptionConfig
     ((options_parse_optionParsedCountOptionConfig = 0)) || true
-    optionNoColor="0"
-    local -i options_parse_optionParsedCountOptionNoColor
-    ((options_parse_optionParsedCountOptionNoColor = 0)) || true
+    optionInfoVerbose="0"
+    local -i options_parse_optionParsedCountOptionInfoVerbose
+    ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
     optionDebugVerbose="0"
     local -i options_parse_optionParsedCountOptionDebugVerbose
     ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
     optionTraceVerbose="0"
     local -i options_parse_optionParsedCountOptionTraceVerbose
     ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
+    optionNoColor="0"
+    local -i options_parse_optionParsedCountOptionNoColor
+    ((options_parse_optionParsedCountOptionNoColor = 0)) || true
     local -i options_parse_optionParsedCountOptionTheme
     ((options_parse_optionParsedCountOptionTheme = 0)) || true
     optionHelp="0"
@@ -866,14 +1018,11 @@ buildBinFilesCommand() {
     ((options_parse_optionParsedCountOptionLogFile = 0)) || true
     local -i options_parse_optionParsedCountOptionDisplayLevel
     ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
-    optionInfoVerbose="0"
-    local -i options_parse_optionParsedCountOptionInfoVerbose
-    ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
-        # Option 1/14
+        # Option 1/15
         # Option optionIgnoreMissing --ignore-missing variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --ignore-missing)
           optionIgnoreMissing="1"
@@ -882,27 +1031,43 @@ buildBinFilesCommand() {
             return 1
           fi
           ;;
-        # Option 2/14
-        # Option optionConfig --bash-framework-config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        # Option 2/15
+        # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionBashFrameworkConfig >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionBashFrameworkConfig))
+          optionBashFrameworkConfig="$1"
+          optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
+          ;;
+        # Option 3/15
+        # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --config)
           optionConfig="1"
           if ((options_parse_optionParsedCountOptionConfig >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ;;
-        # Option 3/14
-        # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --no-color)
-          optionNoColor="1"
-          if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
+        # Option 4/15
+        # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --verbose | -v)
+          optionInfoVerbose="1"
+          if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
-          updateArgListNoColorCallback "${options_parse_arg}" "${optionNoColor}"
+          optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
+          updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
           ;;
-        # Option 4/14
+        # Option 5/15
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           optionDebugVerbose="1"
@@ -913,7 +1078,7 @@ buildBinFilesCommand() {
           optionDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
           updateArgListDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
           ;;
-        # Option 5/14
+        # Option 6/15
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           optionTraceVerbose="1"
@@ -924,7 +1089,7 @@ buildBinFilesCommand() {
           optionTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
           updateArgListTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
           ;;
-        # Option 6/14
+        # Option 7/15
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -936,7 +1101,18 @@ buildBinFilesCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 7/14
+        # Option 8/15
+        # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --no-color)
+          optionNoColor="1"
+          if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
+          updateArgListNoColorCallback "${options_parse_arg}" "${optionNoColor}"
+          ;;
+        # Option 9/15
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|noColor' regexp ''
         --theme)
           shift
@@ -957,7 +1133,7 @@ buildBinFilesCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 8/14
+        # Option 10/15
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           optionHelp="1"
@@ -967,7 +1143,7 @@ buildBinFilesCommand() {
           fi
           optionHelpCallback "${options_parse_arg}" "${optionHelp}"
           ;;
-        # Option 9/14
+        # Option 11/15
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           optionVersion="1"
@@ -977,7 +1153,7 @@ buildBinFilesCommand() {
           fi
           optionVersionCallback "${options_parse_arg}" "${optionVersion}"
           ;;
-        # Option 10/14
+        # Option 12/15
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           optionQuiet="1"
@@ -988,7 +1164,7 @@ buildBinFilesCommand() {
           optionQuietCallback "${options_parse_arg}" "${optionQuiet}"
           updateArgListQuietCallback "${options_parse_arg}" "${optionQuiet}"
           ;;
-        # Option 11/14
+        # Option 13/15
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1009,7 +1185,7 @@ buildBinFilesCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 12/14
+        # Option 14/15
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1026,7 +1202,7 @@ buildBinFilesCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 13/14
+        # Option 15/15
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1047,17 +1223,6 @@ buildBinFilesCommand() {
           optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           ;;
-        # Option 14/14
-        # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --verbose | -v)
-          optionInfoVerbose="1"
-          if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
-          updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
-          ;;
         -*)
           Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
           return 1
@@ -1070,11 +1235,13 @@ buildBinFilesCommand() {
       shift || true
     done
     export optionIgnoreMissing
+    export optionBashFrameworkConfig
     export optionConfig
-    export optionNoColor
+    export optionInfoVerbose
     export optionDebugVerbose
     export optionTraceVerbose
     export optionEnvFiles
+    export optionNoColor
     export optionTheme
     export optionHelp
     export optionVersion
@@ -1082,7 +1249,6 @@ buildBinFilesCommand() {
     export optionLogLevel
     export optionLogFile
     export optionDisplayLevel
-    export optionInfoVerbose
     commandOptionParseFinished
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
@@ -1096,7 +1262,7 @@ INTERNAL TOOL")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--ignore-missing]" "[--bash-framework-config]" "[--no-color]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]" "[--verbose|-v]")"
+      "[--ignore-missing]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
@@ -1110,18 +1276,26 @@ INTERNAL TOOL")"
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--bash-framework-config"
+    echo -n ' <String>'
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    use alternate bash framework configuration."
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--config"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
     echo "    Display configuration"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--no-color"
+    echo -n "--verbose, -v"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo "    Produce monochrome output. alias of --theme noColor."
+    echo "    info level verbose mode (alias of --display-level INFO)"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "-vv"
     echo -n -e "${__HELP_NORMAL}"
@@ -1143,6 +1317,13 @@ INTERNAL TOOL")"
     echo -n -e ' (optional)'
     echo
     echo "    Load the specified env file"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--no-color"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Produce monochrome output. alias of --theme noColor."
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--theme"
     echo -n ' <String>'
@@ -1196,13 +1377,6 @@ INTERNAL TOOL")"
     echo -n -e ' (at most 1 times)'
     echo
     echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--verbose, -v"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
-    echo "    info level verbose mode (alias of --display-level INFO)"
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
     echo '1.0'

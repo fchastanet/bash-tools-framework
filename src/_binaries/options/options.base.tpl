@@ -23,9 +23,18 @@
     Options::generateOption \
       --help "Display configuration" \
       --group groupGlobalOptionsFunction \
-      --alt "--bash-framework-config" \
+      --alt "--config" \
       --variable-name "optionConfig" \
       --function-name optionConfigFunction
+
+    Options::generateOption \
+      --variable-type String \
+      --help "use alternate bash framework configuration." \
+      --group groupGlobalOptionsFunction \
+      --alt "--bash-framework-config" \
+      --callback optionBashFrameworkConfigCallback \
+      --variable-name "optionBashFrameworkConfig" \
+      --function-name optionBashFrameworkConfigFunction
 
     Options::generateOption \
       --help "info level verbose mode (alias of --display-level INFO)" \
@@ -146,6 +155,7 @@
     --callback commandOptionParseFinished
     --help "${help}"
     --long-description """${longDescription}"""
+    optionBashFrameworkConfigFunction
     optionConfigFunction
     optionNoColorFunction
     optionThemeFunction
@@ -207,7 +217,7 @@ optionVersionCallback() {
 optionEnvFileCallback() {
   local envFile="$2"
   if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
-    Log::displayError "Option --env-file - File '${envFile}' doesn't exist"
+    Log::displayError "Command ${SCRIPT_NAME} - Option --env-file - File '${envFile}' doesn't exist"
     exit 1
   fi
 }
@@ -252,7 +262,7 @@ getLevel() {
       echo "${__LEVEL_DEBUG}"
       ;;
     *)
-      Log::displayError "Invalid level ${level}"
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
   esac
 }
@@ -273,7 +283,7 @@ getVerboseLevel() {
       echo "${__VERBOSE_LEVEL_TRACE}"
       ;;
     *)
-      Log::displayError "Invalid level ${level}"
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
   esac
 }
@@ -327,7 +337,12 @@ displayConfig() {
     printf '%-40s = %s\n' "${var}" "$(declare -p "${var}" | sed -E -e 's/^[^=]+=(.*)/\1/')"
   done < <(typeset -p | awk 'match($3, "^(BASH_FRAMEWORK_[^=]+)=", m) { print m[1] }' | sort)
   exit 0
+}
 
+optionBashFrameworkConfigCallback() {
+  if [[ ! -f "$2" ]]; then
+    Log::fatal "Command ${SCRIPT_NAME} - Bash framework config file '$2' does not exists"
+  fi
 }
 
 commandOptionParseFinished() {
@@ -338,6 +353,20 @@ commandOptionParseFinished() {
   export BASH_FRAMEWORK_ENV_FILES
   Env::requireLoad
   Log::requireLoad
+
+  # load .framework-config
+  if [[ -n "${optionBashFrameworkConfig}" ]]; then
+    BASH_FRAMEWORK_CONFIG_FILE="${optionBashFrameworkConfig}"
+    # shellcheck source=/.framework-config
+    source "${optionBashFrameworkConfig}"
+  else
+    # shellcheck disable=SC2034
+    BASH_FRAMEWORK_CONFIG_FILE=""
+    # shellcheck source=/.framework-config
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" ||
+      Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config file"
+  fi
+
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig
   fi
