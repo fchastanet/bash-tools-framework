@@ -28,7 +28,7 @@
 #   [--copyright <String|Function>]
 #   [--help-template <String>]
 #   [--unknown-option-callback]
-#   [--unknown-arg-callback]
+#   [--unknown-argument-callback]
 #
 # ARGS: list of option/arg functions
 # ```
@@ -53,7 +53,7 @@
 # you can set several callbacks
 # callback is called without any parameter.
 #
-# #### --unknown-option-callback/--unknown-arg-callback option
+# #### --unknown-option-callback/--unknown-argument-callback option
 # You can set several callbacks.
 # Callback is called with the option/argument that is invalid.
 # An invalid option is a string that begin with `-`

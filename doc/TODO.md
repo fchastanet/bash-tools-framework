@@ -44,16 +44,11 @@
 
 ## 1. Options/Args management
 
-- runBuildContainer - replace arg vendor, ... by option then args would be the
-  command to docker run
-- check if alt not used twice
-- order options not working
-- add command name in error message in case a command is called inside another
-- bin/doc fix args management
+- USAGE [OPTIONS] [GlobalOptions]
+  - then describe below each of them
+  - check if alt not used twice
+  - order options not working
 - --help-item-name "srcDir"
-- default arguments
-
-- remove action to remove args already managed
 - manage String|Function
 - validatorCallback
 

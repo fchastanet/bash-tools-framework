@@ -3,6 +3,7 @@
 %# - commandFunctionName
 %# - SCRIPT_NAME
 %# - help
+%# - longDescription
 %
   # shellcheck source=/dev/null
   source <(
