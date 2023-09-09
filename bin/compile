@@ -103,21 +103,21 @@ export BIN_FILE
 showHelp() {
   SCRIPT_NAME=${0##*/}
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the
+${__HELP_TITLE}DESCRIPTION:${__HELP_NORMAL} inlines all the functions used in the
 script given in parameter
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
+${__HELP_TITLE}USAGE:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
+${__HELP_TITLE}USAGE:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
     [--src-dir|-s <srcDir>] [--bin-dir|-b <binDir>] [--bin-file|-f <binFile>]
     [--root-dir|-r <rootDir>] [--src-path <srcPath>]
     [--template <templateName>] [--keep-temp-files|-k]
 
-${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
+${__HELP_TITLE}MANDATORY ARGUMENTS:${__HELP_NORMAL}
 
     <fileToCompile> the relative or absolute path to compile into
       one file
 
-${__HELP_TITLE}Options:${__HELP_NORMAL}
+${__HELP_TITLE}OPTIONS:${__HELP_NORMAL}
     --help,-h prints this help and exits
 
     --src-dir|-s <srcDir> provide the directory where to find the

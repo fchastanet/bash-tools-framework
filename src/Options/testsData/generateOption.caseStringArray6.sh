@@ -11,7 +11,7 @@ Options::option() {
         --src-dir | -s)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           srcDirs+=("$1")
@@ -64,7 +64,7 @@ Options::option() {
     export authorizedValues=""
     export alts=("--src-dir" "-s")
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${cmd}'"
     return 1
   fi
 }

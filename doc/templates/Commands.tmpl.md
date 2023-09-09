@@ -7,7 +7,7 @@
   - [2.2. bin/findShebangFiles](#22-binfindshebangfiles)
   - [2.3. bin/test](#23-bintest)
   - [2.4. bin/runBuildContainer](#24-binrunbuildcontainer)
-  - [2.5. bin/buildPushDockerImages](#25-binbuildpushdockerimages)
+  - [2.5. bin/buildPushDockerImage](#25-binbuildpushdockerimages)
   - [2.6. bin/doc](#26-bindoc)
   - [2.6. bin/plantuml](#26-binplantuml)
 - [3. Linters](#3-linters)
@@ -58,10 +58,10 @@ Here the command's help output:
 @@@runBuildContainer_help@@@
 ```
 
-### 2.5. bin/buildPushDockerImages
+### 2.5. bin/buildPushDockerImage
 
 ```text
-@@@buildPushDockerImages_help@@@
+@@@buildPushDockerImage_help@@@
 ```
 
 ### 2.6. bin/doc

@@ -40,8 +40,10 @@ export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 
 # store command arguments for later usage
-export BASH_FRAMEWORK_ARGV=("$@")
-export ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
+# shellcheck disable=SC2034
+declare -a BASH_FRAMEWORK_ARGV=("$@")
+# shellcheck disable=SC2034
+declare -a ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
 interruptManagement() {
@@ -845,9 +847,6 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
-# default option values
-declare optionFormat="plain"
-
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListInfoVerboseCallback() {
@@ -855,11 +854,11 @@ updateArgListInfoVerboseCallback() {
 }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListDebugVerboseCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+  BASH_FRAMEWORK_ARGV_FILTERED+=(-vv)
 }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListTraceVerboseCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+  BASH_FRAMEWORK_ARGV_FILTERED+=(-vvv)
 }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListEnvFileCallback() { :; }
@@ -875,10 +874,6 @@ updateArgListNoColorCallback() {
 updateArgListThemeCallback() { :; }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListQuietCallback() { :; }
-# shellcheck disable=SC2317 # if function is overridden
-updateArgListFormatCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$@")
-}
 
 # shellcheck disable=SC2317 # if function is overridden
 optionHelpCallback() {
@@ -903,23 +898,23 @@ optionEnvFileCallback() {
 
 # shellcheck disable=SC2317 # if function is overridden
 optionInfoVerboseCallback() {
-  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+  BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
+  BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
-  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
+  BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
-  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
+  BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
 }
 
 getLevel() {
@@ -973,8 +968,8 @@ optionDisplayLevelCallback() {
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+  BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -983,19 +978,19 @@ optionLogLevelCallback() {
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+  BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
-  export BASH_FRAMEWORK_LOG_FILE="${logFile}"
+  BASH_FRAMEWORK_LOG_FILE="${logFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
-  export BASH_FRAMEWORK_QUIET_MODE=1
+  BASH_FRAMEWORK_QUIET_MODE=1
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -1030,6 +1025,14 @@ commandOptionParseFinished() {
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig
   fi
+}
+
+# default option values
+declare optionFormat="plain"
+
+# shellcheck disable=SC2317 # if function is overridden
+updateArgListFormatCallback() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=("$@")
 }
 
 definitionLintCommand() {
@@ -1082,15 +1085,15 @@ definitionLintCommand() {
         --format)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if [[ ! "$1" =~ plain|checkstyle ]]; then
-            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(plain|checkstyle)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(plain|checkstyle)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionFormat >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountOptionFormat))
@@ -1102,7 +1105,7 @@ definitionLintCommand() {
         --bash-framework-config)
           optionConfig="1"
           if ((options_parse_optionParsedCountOptionConfig >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ;;
@@ -1111,7 +1114,7 @@ definitionLintCommand() {
         --no-color)
           optionNoColor="1"
           if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
@@ -1122,7 +1125,7 @@ definitionLintCommand() {
         -vv)
           optionDebugVerbose="1"
           if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
@@ -1133,7 +1136,7 @@ definitionLintCommand() {
         -vvv)
           optionTraceVerbose="1"
           if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
@@ -1144,7 +1147,7 @@ definitionLintCommand() {
         --env-file)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           optionEnvFiles+=("$1")
@@ -1156,15 +1159,15 @@ definitionLintCommand() {
         --theme)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if [[ ! "$1" =~ default|noColor ]]; then
-            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(default|noColor)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(default|noColor)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionTheme >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountOptionTheme))
@@ -1177,7 +1180,7 @@ definitionLintCommand() {
         --help | -h)
           optionHelp="1"
           if ((options_parse_optionParsedCountOptionHelp >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionHelpCallback "${options_parse_arg}" "${optionHelp}"
@@ -1187,7 +1190,7 @@ definitionLintCommand() {
         --version)
           optionVersion="1"
           if ((options_parse_optionParsedCountOptionVersion >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionVersionCallback "${options_parse_arg}" "${optionVersion}"
@@ -1197,7 +1200,7 @@ definitionLintCommand() {
         --quiet | -q)
           optionQuiet="1"
           if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionQuietCallback "${options_parse_arg}" "${optionQuiet}"
@@ -1208,15 +1211,15 @@ definitionLintCommand() {
         --log-level)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
-            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountOptionLogLevel))
@@ -1229,11 +1232,11 @@ definitionLintCommand() {
         --log-file)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionLogFile >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountOptionLogFile))
@@ -1246,15 +1249,15 @@ definitionLintCommand() {
         --display-level)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
-            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountOptionDisplayLevel))
@@ -1267,14 +1270,14 @@ definitionLintCommand() {
         --verbose | -v)
           optionInfoVerbose="1"
           if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
           updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
           ;;
         -*)
-          Log::displayError "Invalid option ${options_parse_arg}"
+          Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
           return 1
           ;;
         *)
@@ -1285,13 +1288,13 @@ definitionLintCommand() {
           # Argument argFolder min 1 max 1 authorizedValues '' regexp ''
           elif ((options_parse_parsedArgIndex >= 0 && options_parse_parsedArgIndex < 1)); then
             if ((options_parse_argParsedCountArgFolder >= 1)); then
-              Log::displayError "Argument folder - Maximum number of argument occurrences reached(1)"
+              Log::displayError "Command ${SCRIPT_NAME} - Argument folder - Maximum number of argument occurrences reached(1)"
               return 1
             fi
             ((++options_parse_argParsedCountArgFolder))
             argFolder="${options_parse_arg}"
           else
-            Log::displayError "Argument - too much arguments provided: $*"
+            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
             return 1
           fi
           ((++options_parse_parsedArgIndex))
@@ -1314,13 +1317,15 @@ definitionLintCommand() {
     export optionDisplayLevel
     export optionInfoVerbose
     if ((options_parse_argParsedCountArgFolder < 1)); then
-      Log::displayError "Argument 'folder' should be provided at least 1 time(s)"
+      Log::displayError "Command ${SCRIPT_NAME} - Argument 'folder' should be provided at least 1 time(s)"
       return 1
     fi
     export argFolder
     commandOptionParseFinished
+    Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
+    Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "Lint files of the given directory.")"
+    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "Lint files of the given directory.")"
     echo
 
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
@@ -1475,7 +1480,7 @@ INTERNAL
     echo
     echo 'Copyright (c) 2023 François Chastanet'
   else
-    Log::displayError "Option command invalid: '${options_parse_cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1
   fi
 }

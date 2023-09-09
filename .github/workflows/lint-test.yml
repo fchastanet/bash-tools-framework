@@ -113,7 +113,7 @@ jobs:
         env:
           BRANCH: ${{ github.ref }}
         run: |
-          ./bin/buildPushDockerImages "${{matrix.vendor}}" \
+          ./bin/buildPushDockerImage "${{matrix.vendor}}" \
             "${{matrix.bashTarVersion}}" "${{matrix.bashImage}}" "${BRANCH}" \
             --push
 

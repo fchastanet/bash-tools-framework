@@ -3,7 +3,7 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-.INCLUDE "$(dynamicTemplateDir _binaries/options.doc.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.doc.tpl)"
 
 docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
@@ -11,9 +11,8 @@ run() {
   PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
 
   ShellDoc::installRequirementsIfNeeded
-
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-    "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc"
+    "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "${RUN_CONTAINER_ARGV_FILTERED[@]}"
     exit $?
   fi
 

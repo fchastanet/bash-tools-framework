@@ -7,7 +7,7 @@ Lint all files with .awk extension in current git folder.
 Result in checkstyle format."
 %
 
-.INCLUDE "$(dynamicTemplateDir _binaries/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
 
 %
 Options::generateCommand "${options[@]}"

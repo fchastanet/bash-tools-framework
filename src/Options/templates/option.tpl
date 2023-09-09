@@ -93,7 +93,7 @@
     % exportAlts="$(printf ' "%s"' "${alts[@]}")"
     export alts=(<% ${exportAlts:1} %>)
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${cmd}'"
     return 1
   fi
 }

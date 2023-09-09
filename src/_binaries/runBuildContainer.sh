@@ -3,71 +3,95 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-showHelp() {
-  cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} run the container specified by args provided.
-Command to run is passed via the rest of arguments
-TTY allocation is detected automatically
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.runBuildContainer.tpl)"
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <vendor> <bash_tar_version> <bash_base_image> <bash_image> ...
-additional docker build options can be passed via DOCKER_BUILD_OPTIONS env variable
-additional docker run options can be passed via DOCKER_RUN_OPTIONS env variable
+declare -a dockerRunCmd=()
+declare -a dockerRunArgs=()
+declare -a dockerRunArgs=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
+export DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
+export DOCKER_RUN_OPTIONS="${DOCKER_RUN_OPTIONS:-}"
 
-.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
-EOF
-}
-Args::defaultHelp showHelp "${BASH_FRAMEWORK_ARGV[@]}" || true
+runBuildContainerCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-VENDOR="${VENDOR:-ubuntu}"
-BASH_TAR_VERSION="${BASH_TAR_VERSION:-5.1}"
-BASH_IMAGE="${BASH_IMAGE:-ubuntu:20.04}"
-DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
-
-Log::displayInfo "Using ${VENDOR}:${BASH_TAR_VERSION}"
-
-if [[ "${SKIP_BUILD:-0}" = "0" && -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
-  "${FRAMEWORK_BIN_DIR}/buildPushDockerImages" "${VENDOR}" "${BASH_TAR_VERSION}" "${BASH_IMAGE}"
-
-  # build docker image with user configuration
-  # shellcheck disable=SC2086
-  DOCKER_BUILDKIT=1 docker build \
-    ${DOCKER_BUILD_OPTIONS} \
-    --cache-from "scrasnups/build:bash-tools-${VENDOR}-${BASH_TAR_VERSION}" \
-    --build-arg "BASH_IMAGE=bash-tools-${VENDOR}-${BASH_TAR_VERSION}:latest" \
-    --build-arg SKIP_USER="${SKIP_USER:-0}" \
-    --build-arg USER_ID="${USER_ID:-$(id -u)}" \
-    --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-    -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
-    -t "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "${FRAMEWORK_ROOT_DIR}/.docker"
-fi
-
-# run tests
-args=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
 if tty -s; then
-  args+=("-it")
+  dockerRunArgs+=("-it")
 fi
-
-if ! Array::contains '--ci' "${BASH_FRAMEWORK_ARGV[@]}"; then
-  args+=("-v")
-  args+=("/tmp:/tmp")
-fi
-
-Array::remove BASH_FRAMEWORK_ARGV --ci
-
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
-  args+=(-v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework")
+  dockerRunArgs+=(
+    -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"
+  )
 fi
-(
-  set -x
-  # shellcheck disable=SC2086
-  docker run \
-    --rm \
-    "${DOCKER_RUN_OPTIONS[@]}" \
-    "${args[@]}" \
-    -w /bash \
-    -v "$(pwd):/bash" \
-    --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
-    "bash-tools-${VENDOR}-${BASH_TAR_VERSION}-user" \
-    "${BASH_FRAMEWORK_ARGV[@]}"
-)
+
+# shellcheck disable=SC2154
+if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
+  dockerRunArgs+=(-v "/tmp:/tmp")
+fi
+
+run() {
+  # shellcheck disable=SC2154
+  Log::displayInfo "Using ${optionVendor}:${optionBashVersion}"
+
+  imageRef="bash-tools-${optionVendor}-${optionBashVersion}"
+  if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
+    Log::displayInfo "Build docker image ${imageRef}"
+    # shellcheck disable=SC2154
+    (
+      if [[ "${optionTraceVerbose}" = "1" ]]; then
+        set -x
+      fi
+      "${FRAMEWORK_BIN_DIR}/buildPushDockerImage" \
+        --vendor "${optionVendor}" \
+        --bash-version "${optionBashVersion}" \
+        --bash-base-image "${optionBashBaseImage}" \
+        "${RUN_CONTAINER_ARGV_FILTERED[@]}"
+    )
+  fi
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
+    imageRef="${imageRef}-user"
+    if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
+      Log::displayInfo "build docker image ${imageRef} with user configuration"
+      # shellcheck disable=SC2154
+      (
+        if [[ "${optionTraceVerbose}" = "1" ]]; then
+          set -x
+        fi
+        # shellcheck disable=SC2086
+        DOCKER_BUILDKIT=1 docker build \
+          ${DOCKER_BUILD_OPTIONS} \
+          --cache-from "scrasnups/build:${imageRef}" \
+          --build-arg "BASH_IMAGE=${imageRef}:latest" \
+          --build-arg SKIP_USER="${SKIP_USER:-0}" \
+          --build-arg USER_ID="${USER_ID:-$(id -u)}" \
+          --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
+          -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
+          -t "${imageRef}" \
+          "${FRAMEWORK_ROOT_DIR}/.docker"
+      )
+    fi
+  fi
+
+  Log::displayInfo "Run container with command: '${dockerRunCmd[*]} ${RUN_CONTAINER_ARGV_FILTERED[*]}'"
+  (
+    # shellcheck disable=SC2154
+    if [[ "${optionTraceVerbose}" = "1" ]]; then
+      set -x
+    fi
+    # shellcheck disable=SC2086
+    docker run \
+      --rm \
+      ${DOCKER_RUN_OPTIONS} \
+      "${dockerRunArgs[@]}" \
+      -w /bash \
+      -v "$(pwd):/bash" \
+      --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
+      "${imageRef}" \
+      "${dockerRunCmd[@]}" \
+      "${RUN_CONTAINER_ARGV_FILTERED[@]}"
+  )
+}
+
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
+else
+  run
+fi

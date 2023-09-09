@@ -1,4 +1,4 @@
-Description: super command
+DESCRIPTION: super command
 
 USAGE: test [OPTIONS] [ARGUMENTS]
 USAGE: test [--verbose|-v] [--src-dirs|-s <String>]

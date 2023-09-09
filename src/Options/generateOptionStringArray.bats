@@ -83,10 +83,16 @@ function Options::generateOptionStringArray::minValueGreaterThanMaxValue { #@tes
 }
 
 function Options::generateOptionStringArray::setAll { #@test
-  run Options::generateOptionStringArray --authorized-values "valid|invalid" --min "1" --max "2" --other-param
+  run Options::generateOptionStringArray --authorized-values "valid|invalid" --min "1" --max "2"
   assert_success
   assert_lines_count 3
   assert_line --index 0 "export min='1'"
   assert_line --index 1 "export max='2'"
   assert_line --index 2 "export authorizedValues='valid|invalid'"
+}
+
+function Options::generateOptionStringArray::setInvalidOption { #@test
+  run Options::generateOptionStringArray --authorized-values "valid|invalid" --min "1" --max "2" --other-param
+  assert_failure 1
+  assert_output --partial "ERROR   - Options::generateOption - invalid option '--other-param'"
 }

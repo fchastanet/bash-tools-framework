@@ -13,11 +13,11 @@ Options::option() {
         --var | -v)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if ((options_parse_optionParsedCountVarName >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountVarName))
@@ -30,7 +30,7 @@ Options::option() {
       shift || true
     done
     if ((options_parse_optionParsedCountVarName < 1)); then
-      Log::displayError "Option '--var' should be provided at least 1 time(s)"
+      Log::displayError "Command ${SCRIPT_NAME} - Option '--var' should be provided at least 1 time(s)"
       return 1
     fi
     export varName
@@ -74,7 +74,7 @@ Options::option() {
     export authorizedValues=""
     export alts=("--var" "-v")
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${cmd}'"
     return 1
   fi
 }

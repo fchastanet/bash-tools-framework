@@ -44,6 +44,11 @@
 
 ## 1. Options/Args management
 
+- runBuildContainer - replace arg vendor, ... by option then args would be the
+  command to docker run
+- check if alt not used twice
+- order options not working
+- add command name in error message in case a command is called inside another
 - bin/doc fix args management
 - --help-item-name "srcDir"
 - default arguments
@@ -131,6 +136,8 @@
 
 TODOs linked to bin/compiler or templates .tpl:
 
+- build watch mode
+- review all exported variables
 - auto import needed bash framework features like Options/\_\_all.sh without the
   need to source it into the compiler. It would mean to authorize bash-tpl
   template to be able to use bash framework functions automatically.
@@ -208,7 +215,7 @@ TODOs linked to bin/compiler or templates .tpl:
 
 TODOs linked to `src/_binaries/*`:
 
-- refact buildPushDockerImages.sh with Docker/functions... and using correct
+- refact buildPushDockerImage.sh with Docker/functions... and using correct
   tagging
 - parallelization (use xargs)
   - awkLint

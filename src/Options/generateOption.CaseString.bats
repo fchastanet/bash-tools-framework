@@ -28,7 +28,7 @@ function Options::generateOption::caseString1::OptionTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseString1::OptionTest::parseWithNoArg { #@test
@@ -39,7 +39,7 @@ function Options::generateOption::caseString1::OptionTest::parseWithNoArg { #@te
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option --var - a value needs to be specified"
+  assert_output --partial "ERROR   - Command test - Option --var - a value needs to be specified"
   [[ "${varName}" = "somethingElse" ]]
 }
 
@@ -77,7 +77,7 @@ function Options::generateOption::caseString2::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseString2::OptionsTest::parseWithNoArg { #@test
@@ -137,7 +137,7 @@ function Options::generateOption::caseString3::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseString3::OptionsTest::parseWithNoArg { #@test
@@ -148,7 +148,7 @@ function Options::generateOption::caseString3::OptionsTest::parseWithNoArg { #@t
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option '--var' should be provided"
+  assert_output --partial "ERROR   - Command test - Option '--var' should be provided"
   [[ "${varName}" = "somethingElse" ]]
 }
 
@@ -226,7 +226,7 @@ function Options::generateOption::caseString4::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseString4::OptionsTest::parseWithNoArg { #@test
@@ -237,7 +237,7 @@ function Options::generateOption::caseString4::OptionsTest::parseWithNoArg { #@t
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option '--var' should be provided"
+  assert_output --partial "ERROR   - Command test - Option '--var' should be provided"
   [[ "${varName}" = "somethingElse" ]]
 }
 
@@ -259,7 +259,7 @@ function Options::generateOption::caseString4::OptionsTest::parseMultipleArg { #
   Options::option parse --var "NewValue" -v "NewValue2" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
-  assert_output --partial "ERROR   - Option -v - Maximum number of option occurrences reached(1)"
+  assert_output --partial "ERROR   - Command test - Option -v - Maximum number of option occurrences reached(1)"
   [[ "${varName}" = "NewValue" ]]
 }
 

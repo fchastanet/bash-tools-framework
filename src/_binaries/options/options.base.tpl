@@ -3,8 +3,6 @@
 %# - commandFunctionName
 %# - SCRIPT_NAME
 %# - help
-%# - generateFormatOption
-%# - generateSkipDockerBuildOption
 %
   # shellcheck source=/dev/null
   source <(
@@ -134,24 +132,6 @@
       --callback updateArgListQuietCallback \
       --variable-name "optionQuiet" \
       --function-name optionQuietFunction
-
-    if [[ "${generateFormatOption:-0}" = "1" ]]; then
-      Options::generateOption \
-        --variable-type String \
-        --help "define output format of this command (default: plain)" \
-        --alt "--format" \
-        --authorized-values "plain|checkstyle" \
-        --callback updateArgListFormatCallback \
-        --variable-name "optionFormat" \
-        --function-name optionFormatFunction
-    fi
-    if [[ "${generateSkipDockerBuildOption:-0}" = "1" ]]; then
-      Options::generateOption \
-        --help "skip docker image build if option provided" \
-        --alt "--skip-docker-build" \
-        --variable-name "optionSkipDockerBuild" \
-        --function-name optionSkipDockerBuildFunction
-    fi
   )
 
   declare -a options=(
@@ -179,18 +159,7 @@
     optionTraceVerboseFunction
     optionEnvFilesFunction
   )
-  if [[ "${generateFormatOption:-0}" = "1" ]]; then
-    options+=(optionFormatFunction)
-  fi
-  if [[ "${generateSkipDockerBuildOption:-0}" = "1" ]]; then
-    options+=(optionSkipDockerBuildFunction)
-  fi
 %
-
-# default option values
-% if [[ "${generateFormatOption:-0}" = "1" ]]; then
-  declare optionFormat="plain"
-% fi
 
 %# default add option callbacks
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
@@ -200,11 +169,11 @@ updateArgListInfoVerboseCallback() {
 }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListDebugVerboseCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+  BASH_FRAMEWORK_ARGV_FILTERED+=(-vv)
 }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListTraceVerboseCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
+  BASH_FRAMEWORK_ARGV_FILTERED+=(-vvv)
 }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListEnvFileCallback() { :; }
@@ -220,10 +189,6 @@ updateArgListNoColorCallback() {
 updateArgListThemeCallback() { :; }
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListQuietCallback() { :; }
-# shellcheck disable=SC2317 # if function is overridden
-updateArgListFormatCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$@")
-}
 
 # shellcheck disable=SC2317 # if function is overridden
 optionHelpCallback() {
@@ -248,23 +213,23 @@ optionEnvFileCallback() {
 
 # shellcheck disable=SC2317 # if function is overridden
 optionInfoVerboseCallback() {
-  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+  BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
+  BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
-  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
+  BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
-  export BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
+  BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
 }
 
 getLevel() {
@@ -318,8 +283,8 @@ optionDisplayLevelCallback() {
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+  BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -328,19 +293,19 @@ optionLogLevelCallback() {
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
-  export BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  export BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+  BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
+  BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
-  export BASH_FRAMEWORK_LOG_FILE="${logFile}"
+  BASH_FRAMEWORK_LOG_FILE="${logFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
-  export BASH_FRAMEWORK_QUIET_MODE=1
+  BASH_FRAMEWORK_QUIET_MODE=1
 }
 
 # shellcheck disable=SC2317 # if function is overridden

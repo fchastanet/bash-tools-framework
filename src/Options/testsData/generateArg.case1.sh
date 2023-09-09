@@ -16,7 +16,7 @@ Options::arg() {
         *)
           # positional arg
           if ((options_parse_argParsedCountVarName >= 1)); then
-            Log::displayError "Argument varName - Maximum number of argument occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Argument varName - Maximum number of argument occurrences reached(1)"
             return 1
           fi
           ((++options_parse_argParsedCountVarName))
@@ -26,7 +26,7 @@ Options::arg() {
       shift || true
     done
     if ((options_parse_argParsedCountVarName < 1)); then
-      Log::displayError "Argument 'varName' should be provided at least 1 time(s)"
+      Log::displayError "Command ${SCRIPT_NAME} - Argument 'varName' should be provided at least 1 time(s)"
       return 1
     fi
     export varName

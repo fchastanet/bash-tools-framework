@@ -3,7 +3,7 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-.INCLUDE "$(dynamicTemplateDir _binaries/options.buildBinFiles.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.buildBinFiles.tpl)"
 
 buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 

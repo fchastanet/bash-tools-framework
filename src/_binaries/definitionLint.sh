@@ -3,7 +3,7 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-.INCLUDE "$(dynamicTemplateDir _binaries/options.definitionLint.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.definitionLint.tpl)"
 
 declare optionFormat="plain"
 definitionLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"

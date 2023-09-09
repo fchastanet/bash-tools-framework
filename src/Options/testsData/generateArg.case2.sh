@@ -16,11 +16,11 @@ Options::arg() {
         *)
           # positional arg
           if [[ ! "${options_parse_arg}" =~ debug|info|warn ]]; then
-            Log::displayError "Argument varName - value '${options_parse_arg}' is not part of authorized values(debug|info|warn)"
+            Log::displayError "Command ${SCRIPT_NAME} - Argument varName - value '${options_parse_arg}' is not part of authorized values(debug|info|warn)"
             return 1
           fi
           if ((options_parse_argParsedCountVarName >= 3)); then
-            Log::displayError "Argument varName - Maximum number of argument occurrences reached(3)"
+            Log::displayError "Command ${SCRIPT_NAME} - Argument varName - Maximum number of argument occurrences reached(3)"
             return 1
           fi
           ((++options_parse_argParsedCountVarName))

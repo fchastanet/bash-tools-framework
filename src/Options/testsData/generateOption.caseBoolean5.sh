@@ -14,7 +14,7 @@ Options::option() {
         --help | -h)
           help="1"
           if ((options_parse_optionParsedCountHelp >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           helpCallback "${options_parse_arg}" "${help}"
@@ -67,7 +67,7 @@ Options::option() {
     export authorizedValues=""
     export alts=("--help" "-h")
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${cmd}'"
     return 1
   fi
 }

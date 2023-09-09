@@ -8,7 +8,7 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/Env/requireRemoveVerboseArg.sh"
 
 function Env::requireRemoveVerboseArg::empty { #@test
-  export BASH_FRAMEWORK_ARGV=()
+  BASH_FRAMEWORK_ARGV=()
   local status=0
   Env::requireRemoveVerboseArg >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
@@ -18,7 +18,7 @@ function Env::requireRemoveVerboseArg::empty { #@test
 }
 
 function Env::requireRemoveVerboseArg::noVerboseArg { #@test
-  export BASH_FRAMEWORK_ARGV=(--help arg1 arg2)
+  BASH_FRAMEWORK_ARGV=(--help arg1 arg2)
   local status=0
   Env::requireRemoveVerboseArg >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
@@ -28,7 +28,7 @@ function Env::requireRemoveVerboseArg::noVerboseArg { #@test
 }
 
 function Env::requireRemoveVerboseArg::verboseArgs { #@test
-  export BASH_FRAMEWORK_ARGV=(--verbose --help -v arg1 -vv arg2 -vvv)
+  BASH_FRAMEWORK_ARGV=(--verbose --help -v arg1 -vv arg2 -vvv)
   local status=0
   Env::requireRemoveVerboseArg >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]

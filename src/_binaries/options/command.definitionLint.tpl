@@ -27,7 +27,8 @@ INTERNAL
 """
 
 %
-.INCLUDE "$(dynamicTemplateDir _binaries/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.format.tpl)"
 %
 # shellcheck source=/dev/null
 source <(

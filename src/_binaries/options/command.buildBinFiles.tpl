@@ -7,7 +7,7 @@ and check if bin file has been updated, if yes return exit code > 0
 INTERNAL TOOL"
 
 %
-.INCLUDE "$(dynamicTemplateDir _binaries/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
 %
 # shellcheck source=/dev/null
 source <(

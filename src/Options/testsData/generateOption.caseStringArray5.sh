@@ -13,15 +13,15 @@ Options::option() {
         --var | -v)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if [[ ! "$1" =~ value1|value2|value3 ]]; then
-            Log::displayError "Option ${options_parse_arg} - value '$1' is not part of authorized values(value1|value2|value3)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(value1|value2|value3)"
             return 1
           fi
           if ((options_parse_optionParsedCountVarName >= 3)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(3)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(3)"
             return 1
           fi
           ((++options_parse_optionParsedCountVarName))
@@ -34,7 +34,7 @@ Options::option() {
       shift || true
     done
     if ((options_parse_optionParsedCountVarName < 2)); then
-      Log::displayError "Option '--var' should be provided at least 2 time(s)"
+      Log::displayError "Command ${SCRIPT_NAME} - Option '--var' should be provided at least 2 time(s)"
       return 1
     fi
     export varName
@@ -79,7 +79,7 @@ Options::option() {
     export authorizedValues="value1|value2|value3"
     export alts=("--var" "-v")
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${cmd}'"
     return 1
   fi
 }

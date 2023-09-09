@@ -14,7 +14,7 @@ Options::option() {
         --var)
           varName="1"
           if ((options_parse_optionParsedCountVarName >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ;;
@@ -64,7 +64,7 @@ Options::option() {
     export authorizedValues=""
     export alts=("--var")
   else
-    Log::displayError "Option command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${cmd}'"
     return 1
   fi
 }

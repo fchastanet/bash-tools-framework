@@ -1,4 +1,4 @@
-echo -e "$(Array::wrap " " 80 0 <%% echo -e '"${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}"' %> "<% ${help} %>")"
+echo -e "$(Array::wrap " " 80 0 <%% echo -e '"${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"' %> "<% ${help} %>")"
 % echo '    echo'
 
 %# ------------------------------------------
@@ -20,7 +20,7 @@ if ((${#optionList[@]} > 0)); then
 %
 echo -e "$(Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %> \
   <%% printf '"%s"' "${commandName}" %> \
-  <%%  printf '"%s" ' "${optionsAltList[@]}" | sed -E 's/[ ]*$//' %>)"
+  <%% printf '"%s" ' "${optionsAltList[@]}" | sed -E 's/[ ]*$//' %>)"
 % fi
 %# ------------------------------------------
 %# arguments section

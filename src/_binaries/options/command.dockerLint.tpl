@@ -14,7 +14,7 @@ ${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
 '''
 %
 
-.INCLUDE "$(dynamicTemplateDir _binaries/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
 
 
 optionHelpCallback() {

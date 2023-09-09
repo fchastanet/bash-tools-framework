@@ -231,8 +231,8 @@ Binaries of this framework are using this feature:
 
 - [awkLint](https://github.com/fchastanet/bash-tools-framework/blob/master/src/_binaries/awkLint.sh)
   that uses:
-  - [options.base.tpl](https://github.com/fchastanet/bash-tools-framework/blob/master/src/_binaries/options.base.tpl)
-  - [options.awkLint.tpl](https://github.com/fchastanet/bash-tools-framework/blob/master/src/_binaries/options.awkLint.tpl)
+  - [options.base.tpl](https://github.com/fchastanet/bash-tools-framework/blob/master/src/_binaries/options/options.base.tpl)
+  - [options.awkLint.tpl](https://github.com/fchastanet/bash-tools-framework/blob/master/src/_binaries/options/options.awkLint.tpl)
 
 Here the help generated:
 

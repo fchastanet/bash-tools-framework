@@ -139,7 +139,7 @@ function Options::generateCommand::case1::missingFile { #@test
   [[ "${file}" = "fileBefore" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option --file - a value needs to be specified"
+  assert_output --partial "ERROR   - Command test - Option --file - a value needs to be specified"
 }
 
 function Options::generateCommand::case1::parseFile { #@test
@@ -266,7 +266,7 @@ function Options::generateCommand::case3::parseInvalidOption { #@test
   [[ "${srcDirs[*]}" = "initialDir" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Invalid option --invalid-option"
+  assert_output --partial "ERROR   - Command test - Invalid option --invalid-option"
 }
 
 function Options::generateCommand::case3::parseAll { #@test
@@ -334,7 +334,7 @@ function Options::generateCommand::case4::parseNoArg { #@test
   [[ "${destFiles[*]}" = "initialDestDir" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument 'srcFile' should be provided at least 1 time(s)"
+  assert_output --partial "ERROR   - Command test - Argument 'srcFile' should be provided at least 1 time(s)"
 }
 
 function Options::generateCommand::case4::parseInvalidOption { #@test
@@ -352,7 +352,7 @@ function Options::generateCommand::case4::parseInvalidOption { #@test
   [[ "${destFiles[*]}" = "initialDestDir" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Invalid option --invalid-option"
+  assert_output --partial "ERROR   - Command test - Invalid option --invalid-option"
 }
 
 function Options::generateCommand::case4::parseAll { #@test
@@ -387,7 +387,7 @@ function Options::generateCommand::case4::destFile4 { #@test
   [[ "${destFiles[*]}" = "initialDestDir destFile1 destFile2 destFile3" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument - too much arguments provided: destFile4 destFile5"
+  assert_output --partial "ERROR   - Command test - Argument - too much arguments provided: destFile4 destFile5"
 }
 
 function Options::generateCommand::case5::invalidArgOrder { #@test
@@ -590,7 +590,7 @@ function Options::generateCommand::case7::parseArgsInvalidSubCommand { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case7.sh"
   run Options::command parse François --help
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument subCommand - value 'François' is not part of authorized values(run|exec|ps|build|pull|push|images|login|logout|search|version|info)"
+  assert_output --partial "ERROR   - Command test - Argument subCommand - value 'François' is not part of authorized values(run|exec|ps|build|pull|push|images|login|logout|search|version|info)"
 }
 
 # group management

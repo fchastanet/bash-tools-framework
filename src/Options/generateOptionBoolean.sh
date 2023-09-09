@@ -34,6 +34,10 @@ Options::generateOptionBoolean() {
         fi
         offValue="$1"
         ;;
+      -*)
+        Log::displayError "Options::generateOptionBoolean - invalid option '$1'"
+        return 1
+        ;;
       *) ;;
     esac
     shift || true

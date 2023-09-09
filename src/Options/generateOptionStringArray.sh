@@ -13,9 +13,6 @@
 Options::generateOptionStringArray() {
   # args default values
   local min="0"
-  if Array::contains "--mandatory" "$@"; then
-    min="1"
-  fi
   local max="-1"
   local authorizedValues=""
 
@@ -46,9 +43,12 @@ Options::generateOptionStringArray() {
         fi
         max="$1"
         ;;
-      --)
-        shift || true
-        break
+      --mandatory)
+        min="1"
+        ;;
+      -*)
+        Log::displayError "Options::generateOption - invalid option '$1'"
+        return 1
         ;;
       *) ;;
     esac

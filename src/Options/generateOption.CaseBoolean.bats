@@ -66,7 +66,7 @@ function Options::generateOption::caseBoolean1::OptionTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseBoolean1::OptionTest::parseWithNoArg { #@test
@@ -114,7 +114,7 @@ function Options::generateOption::caseBoolean2::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseBoolean2::OptionsTest::parseWithNoArg { #@test
@@ -166,7 +166,7 @@ function Options::generateOption::caseBoolean3::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseBoolean3::OptionsTest::parseWithNoArg { #@test
@@ -218,7 +218,7 @@ function Options::generateOption::caseBoolean4::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseBoolean4::OptionsTest::parseWithNoArg { #@test

@@ -7,8 +7,15 @@
     {
       "type": "bashdb",
       "request": "launch",
-      "name": "Bash-Debug (simplest configuration)",
+      "name": "Bash-Debug (generic)",
       "program": "${file}"
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
+      "name": "Bash-Debug (runBuildContainer)",
+      "program": "bin/runBuildContainer",
+      "args": ["/bash/bin/doc", "--skip-docker-build", "-vvv"]
     }
   ]
 }

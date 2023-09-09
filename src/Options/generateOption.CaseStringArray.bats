@@ -28,7 +28,7 @@ function Options::generateOption::caseStringArray1::OptionTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseStringArray1::OptionTest::parseWithNoArg { #@test
@@ -39,7 +39,7 @@ function Options::generateOption::caseStringArray1::OptionTest::parseWithNoArg {
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option --var - a value needs to be specified"
+  assert_output --partial "ERROR   - Command test - Option --var - a value needs to be specified"
   [[ "${#varName[@]}" = "0" ]]
 }
 
@@ -78,7 +78,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseStringArray2::OptionsTest::parseWithNoArg { #@test
@@ -141,7 +141,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseStringArray3::OptionsTest::parseWithNoArg { #@test
@@ -152,7 +152,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::parseWithNoArg 
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option '--var' should be provided at least 1 time(s)"
+  assert_output --partial "ERROR   - Command test - Option '--var' should be provided at least 1 time(s)"
   [[ "${#varName[@]}" = "1" ]]
   [[ "${varName[*]}" = "somethingElse" ]]
 }
@@ -193,7 +193,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::noArg { #@test
   run Options::option
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Option command invalid: ''"
 }
 
 function Options::generateOption::caseStringArray4::OptionsTest::parseWithNoArg { #@test
@@ -204,7 +204,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::parseWithNoArg 
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option '--var' should be provided"
+  assert_output --partial "ERROR   - Command test - Option '--var' should be provided"
   [[ "${#varName[@]}" = "1" ]]
   [[ "${varName[*]}" = "somethingElse" ]]
 }
@@ -299,7 +299,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithNotEno
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option '--var' should be provided at least 2 time(s)"
+  assert_output --partial "ERROR   - Command test - Option '--var' should be provided at least 2 time(s)"
   [[ "${#varName[@]}" = "2" ]]
   [[ "${varName[*]}" = "somethingElse value1" ]]
 }
@@ -312,7 +312,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithArgInv
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option --var - value 'NewValue' is not part of authorized values(value1|value2|value3)"
+  assert_output --partial "ERROR   - Command test - Option --var - value 'NewValue' is not part of authorized values(value1|value2|value3)"
   [[ "${#varName[@]}" = "1" ]]
   [[ "${varName[*]}" = "somethingElse" ]]
 }
@@ -337,7 +337,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithTooMuc
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Option -v - Maximum number of option occurrences reached(3)"
+  assert_output --partial "ERROR   - Command test - Option -v - Maximum number of option occurrences reached(3)"
   [[ "${#varName[@]}" = "4" ]]
   [[ "${varName[*]}" = "somethingElse value1 value2 value3" ]]
 }

@@ -185,7 +185,7 @@ function Options::generateArg::case1::ArgTest::parseWithNoArg { #@test
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument 'varName' should be provided at least 1 time(s)"
+  assert_output --partial "ERROR   - Command test - Argument 'varName' should be provided at least 1 time(s)"
   [[ "${varName}" = "somethingElse" ]]
 }
 
@@ -197,7 +197,7 @@ function Options::generateArg::case1::ArgTest::parseWithOption { #@test
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument 'varName' should be provided at least 1 time(s)"
+  assert_output --partial "ERROR   - Command test - Argument 'varName' should be provided at least 1 time(s)"
   [[ "${varName}" = "somethingElse" ]]
 }
 
@@ -315,7 +315,7 @@ function Options::generateArg::case2::ArgTest::parseWithArgInvalid { #@test
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument varName - value 'Argument' is not part of authorized values(debug|info|warn)"
+  assert_output --partial "ERROR   - Command test - Argument varName - value 'Argument' is not part of authorized values(debug|info|warn)"
   [[ "${varName[*]}" = "somethingElse" ]]
 }
 
@@ -349,7 +349,7 @@ function Options::generateArg::case2::ArgTest::parseWith4ArgsValid { #@test
   [[ "${status}" = "1" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument varName - Maximum number of argument occurrences reached(3)"
+  assert_output --partial "ERROR   - Command test - Argument varName - Maximum number of argument occurrences reached(3)"
   [[ "${varName[*]}" = "somethingElse debug info warn" ]]
 }
 

@@ -16,30 +16,32 @@ Options::command() {
         --file | -f)
           shift
           if (($# == 0)); then
-            Log::displayError "Option ${options_parse_arg} - a value needs to be specified"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
           if ((options_parse_optionParsedCountFile >= 1)); then
-            Log::displayError "Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
           ((++options_parse_optionParsedCountFile))
           file="$1"
           ;;
         -*)
-          Log::displayError "Invalid option ${options_parse_arg}"
+          Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
           return 1
           ;;
         *)
-          Log::displayError 'Argument - too much arguments provided'
+          Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"
           return 1
           ;;
       esac
       shift || true
     done
     export file
+    Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
+    Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}Description:${__RESET_COLOR}" "super command")"
+    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "super command")"
     echo
 
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
@@ -58,7 +60,7 @@ Options::command() {
     echo "    file"
     echo -e """very long help"""
   else
-    Log::displayError "Option command invalid: '${options_parse_cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1
   fi
 }

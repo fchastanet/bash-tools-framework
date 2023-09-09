@@ -19,7 +19,7 @@ while (($# > 0)); do
     % done
     -*)
       % if (( ${#unknownOptionCallbacks[@]} == 0 )); then
-        Log::displayError "Invalid option ${options_parse_arg}"
+        Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
         return 1
       % else
         % for unknownOptionCallback in "${unknownOptionCallbacks[@]}"; do
@@ -67,7 +67,7 @@ while (($# > 0)); do
           done
         else
           # too much args and no unknownArgumentCallbacks configured
-          echo '            Log::displayError "Argument - too much arguments provided: $*"'
+          echo '            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"'
           echo "            return 1"
         fi
         echo '          fi'
@@ -78,7 +78,7 @@ while (($# > 0)); do
         done
       else
         # no arg and no unknownArgumentCallbacks configured
-        echo "          Log::displayError 'Argument - too much arguments provided'"
+        echo '          Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"'
         echo "          return 1"
         incrementArg=0 # to avoid parse error after return
       fi

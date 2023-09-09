@@ -69,3 +69,10 @@ function Options::generateOptionString::setMandatory { #@test
   assert_line --index 2 "export defaultValue='valid'"
   assert_line --index 3 "export authorizedValues='valid|invalid'"
 }
+
+function Options::generateOptionString::invalidOption { #@test
+  run Options::generateOptionString --authorized-values "valid|invalid" --default-value "valid" --invalid
+  assert_failure 1
+  assert_lines_count 1
+  assert_line --index 0 --partial "ERROR   - Options::generateOptionString - invalid option '--invalid'"
+}

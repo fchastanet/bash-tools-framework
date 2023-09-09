@@ -160,7 +160,7 @@ Here an excerpt of the namespaces available in Bash tools framework:
     target db connection
 - Dns : various methods like Dns::pingHost or allowing etc/hosts manipulation.
 - Docker : various docker cli abstractions that allowed to construct
-  `bin/buildPushDockerImages` command.
+  `bin/buildPushDockerImage` command.
 - Embed : functions that allows `bin/compiler` to manage `EMBED directives` (see
   [Compile command](doc/CompileCommand.md)).
 - Env : functions allowing to load env variables or to alter them like
