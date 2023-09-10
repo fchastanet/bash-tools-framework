@@ -142,3 +142,6 @@ gitleaks
 mypy
 kcov
 libdw
+SpacesAftertabs
+PROSELINT
+TRUFFLEHOG

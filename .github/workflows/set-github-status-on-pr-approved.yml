@@ -1,7 +1,7 @@
 ---
 name: Github pr approved status
 
-on:
+on: # yamllint disable-line rule:truthy
   pull_request_review:
     types: [submitted]
 

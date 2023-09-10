@@ -197,3 +197,11 @@ zipstream
 difftool
 apos
 tagname
+GRYPE
+UNINDEXED
+cpes
+cyclonedx
+logrus
+megalinter
+oxsecurity
+unindexed

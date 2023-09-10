@@ -2,6 +2,7 @@
 ###############################################################################
 # GENERATED FACADE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/awkLint.sh
 # DO NOT EDIT IT
+# @generated
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/awkLint

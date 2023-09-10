@@ -1,5 +1,7 @@
 # The commands
 
+<!-- @generated -->
+
 - [1. Compilation tools](#1-compilation-tools)
   - [1.1. bin/compile](#11-bincompile)
   - [1.2. bin/buildBinFiles](#12-binbuildbinfiles)

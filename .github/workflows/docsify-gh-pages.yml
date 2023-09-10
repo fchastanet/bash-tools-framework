@@ -2,7 +2,7 @@
 # build and deploy Docsify site to GitHub Pages
 name: Deploy Docsify
 
-on:
+on: # yamllint disable-line rule:truthy
   # Runs on pushes targeting the default branch
   push:
     branches: ['master']

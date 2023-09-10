@@ -2,6 +2,7 @@
 ###############################################################################
 # GENERATED FACADE FROM <% $REPOSITORY_URL %>/tree/master/<% $SRC_FILE_PATH %>
 # DO NOT EDIT IT
+# @generated
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
 %# FACADE_HEADERS here the headers of original script file will be copied
