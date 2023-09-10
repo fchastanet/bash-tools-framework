@@ -47,6 +47,15 @@ jobs:
           set -exo pipefail
           ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
 
+      - name: check megalinter version
+        run: |
+          set -exo pipefail
+          status=0
+          newVersion="$(./bin/megalinter --check-megalinter-version)" || status=$?
+          if [[ "${status}" != "0" ]] ; then
+            echo "::warning file=.mega-linter.yml,title=new version of megalinter available::${newVersion}"
+          fi
+
       - name: Archive results
         uses: actions/upload-artifact@v3
         with:

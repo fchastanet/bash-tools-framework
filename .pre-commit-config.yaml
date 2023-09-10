@@ -105,7 +105,7 @@ repos:
         require_serial: true
         fail_fast: true
         verbose: true
-        stages: [commit]
+        stages: [push]
 
   - repo: local
     hooks:
@@ -148,6 +148,18 @@ repos:
       - id: megalinter
         name: megalinter
         entry: bash -c './bin/megalinter --incremental --fix'
+        language: system
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        verbose: true
+        stages: [push]
+
+  - repo: local
+    hooks:
+      - id: megalinter
+        name: megalinter
+        entry: bash -c './bin/megalinter --check-megalinter-version || true'
         language: system
         always_run: true
         require_serial: true
