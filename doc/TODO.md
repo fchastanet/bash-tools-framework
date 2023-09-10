@@ -44,9 +44,6 @@
 
 ## 1. Options/Args management
 
-- megalinter
-  - check if new megalinter available
-- plantuml
 - shellcheckLint
 - test
 - USAGE [OPTIONS] [GlobalOptions]
