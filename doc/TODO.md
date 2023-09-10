@@ -44,6 +44,13 @@
 
 ## 1. Options/Args management
 
+- activate megalinter SPELL_VALE, SPELL_PROSELINT
+- check if i can speed up megalinter linters REPOSITORY_TRUFFLEHOG,
+  REPOSITORY_GRYPE
+- help style like vale --help
+- megalinter
+  - check if new megalinter available
+- plantuml
 - shellcheckLint
 - test
 - USAGE [OPTIONS] [GlobalOptions]

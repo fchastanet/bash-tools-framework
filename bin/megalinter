@@ -2,6 +2,7 @@
 ###############################################################################
 # GENERATED FACADE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter.sh
 # DO NOT EDIT IT
+# @generated
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/megalinter
@@ -1561,14 +1562,14 @@ megalinterCommand() {
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo "    Specify docker megalinter image name to use (default: oxsecurity/megalinter-terraform:v6.16.0)"
+    echo "    Specify docker megalinter image name to use (default: oxsecurity/megalinter-terraform:v7.3.0)"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
     echo -n "--check-megalinter-version"
     echo -n -e "${__HELP_NORMAL}"
     echo -n -e ' (optional)'
     echo -n -e ' (at most 1 times)'
     echo
-    echo "    Check if new version of megalinter is available (compared to oxsecurity/megalinter-terraform:v6.16.0) and exit 1 if yes and display new version number."
+    echo "    Check if new version of megalinter is available (compared to oxsecurity/megalinter-terraform:v7.3.0) and exit 1 if yes and display new version number."
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
@@ -1675,7 +1676,7 @@ megalinterCommand() {
     echo
     echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
     echo -e """
-megalinter image oxsecurity/megalinter-terraform:v6.16.0 will be used.
+megalinter image oxsecurity/megalinter-terraform:v7.3.0 will be used.
 
 <files> optionally you can provide a list of files to run megalinter on
   this mode is incompatible with --incremental option
@@ -1700,7 +1701,7 @@ megalinter image oxsecurity/megalinter-terraform:v6.16.0 will be used.
   fi
 }
 
-declare optionMegalinterImage="oxsecurity/megalinter-terraform:v6.16.0"
+declare optionMegalinterImage="oxsecurity/megalinter-terraform:v7.3.0"
 declare -a megalinterArgs=()
 unknownArg() {
   if [[ -f "$1" ]]; then
@@ -1719,7 +1720,7 @@ optionCheckMegalinterVersionCallback() {
   local newVersion
   Github::getLatestRelease "oxsecurity/megalinter" newVersion
   local currentVersion
-  currentVersion="$(Version::parse <<<"oxsecurity/megalinter-terraform:v6.16.0")"
+  currentVersion="$(Version::parse <<<"oxsecurity/megalinter-terraform:v7.3.0")"
   local status=0
   Version::compare "${currentVersion}" "${newVersion}" || status=$?
   case ${status} in

@@ -1,7 +1,7 @@
 ---
 # Lint the code base and launch unit test at each push or pull request
 name: Lint and test
-on:
+on: # yamllint disable-line rule:truthy
   push:
   workflow_dispatch:
 
