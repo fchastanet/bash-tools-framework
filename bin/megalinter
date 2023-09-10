@@ -238,6 +238,34 @@ Framework::loadConfig() {
   Conf::loadNearestFile ".framework-config" loadConfig_loadedConfigFile "$@"
 }
 
+# @description Retrieve the latest version number of a github release using Github API using retry
+# repo arg with fchastanet/bash-tools value would match https://github.com/fchastanet/bash-tools
+# @arg $1 repo:String repository in the format fchastanet/bash-tools
+# @arg $2 resultRef:&String reference to a variable that will contain the result of the command
+# @stdout log messages about retry
+Github::getLatestRelease() {
+  local repo="$1"
+  # we need to pass the result through a reference instead of output directly
+  # because retry can output too
+  local -n resultRef=$2
+  resultRef=""
+  local resultFile
+  resultFile="$(mktemp -p "${TMPDIR:-/tmp}" -t githubLatestRelease.XXXX)"
+  # Get latest release from GitHub api
+  if Retry::default curl \
+    -o "${resultFile}" \
+    --fail \
+    --silent \
+    "https://api.github.com/repos/${repo}/releases/latest"; then
+    # shellcheck disable=SC2034
+    resultRef="$(Version::githubApiExtractVersion <"${resultFile}")"
+    return 0
+  fi
+  # display curl result in case of failure
+  cat >&2 "${resultFile}"
+  rm -f "${resultFile}"
+}
+
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
 #   given display level
@@ -424,6 +452,48 @@ UI::theme() {
     export __HELP_TITLE=''
     export __HELP_NORMAL=''
   fi
+}
+
+# @description compare 2 version numbers
+# @arg $1 version1:String version 1
+# @arg $2 version2:String version 2
+# @exitcode 0 if equal
+# @exitcode 1 if version1 > version2
+# @exitcode 2 else
+Version::compare() {
+  if [[ "$1" = "$2" ]]; then
+    return 0
+  fi
+  local IFS=.
+  # shellcheck disable=2206
+  local i ver1=($1) ver2=($2)
+  # fill empty fields in ver1 with zeros
+  for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
+    ver1[i]=0
+  done
+  for ((i = 0; i < ${#ver1[@]}; i++)); do
+    if [[ -z "${ver2[i]+unset}" ]] || [[ -z ${ver2[i]} ]]; then
+      # fill empty fields in ver2 with zeros
+      ver2[i]=0
+    fi
+    if ((10#${ver1[i]} > 10#${ver2[i]})); then
+      return 1
+    fi
+    if ((10#${ver1[i]} < 10#${ver2[i]})); then
+      return 2
+    fi
+  done
+  return 0
+}
+
+# @description filter to keep only version number from a string
+# @arg $@ files:String[] the files to filter
+# @exitcode * if one of the filter command fails
+# @stdin you can use stdin as alternative to files argument
+# @stdout the filtered content
+# shellcheck disable=SC2120
+Version::parse() {
+  sed -En 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' "$@" | head -n1
 }
 
 # @description ensure COMMAND_BIN_DIR env var is set
@@ -659,6 +729,24 @@ Log::rotate() {
   fi
 }
 
+# @description Retry a command 5 times with a delay of 15 seconds between each attempt
+# @arg $@ command:String[] the command to run
+# @exitcode 0 on success
+# @exitcode 1 if max retries count reached
+Retry::default() {
+  Retry::parameterized 5 15 "" "$@"
+}
+
+# @description extract version number from github api
+# @noargs
+# @stdin json result of github API
+# @exitcode 1 if jq or Version::parse fails
+# @stdout the version parsed
+# @require Linux::requireJqCommand
+Version::githubApiExtractVersion() {
+  jq -r ".tag_name" | Version::parse
+}
+
 # @description load color theme
 # @noargs
 # @env BASH_FRAMEWORK_THEME String theme to use
@@ -753,6 +841,50 @@ Log::logSkipped() {
   fi
 }
 
+# @description Retry a command several times depending on parameters
+# @arg $1 maxRetries:int    $1 max retries
+# @arg $2 delay:int between attempt
+# @arg $3 message:String to display to describe the attempt
+# @arg $@ rest of parameters, the command to run
+# @exitcode 0 on success
+# @exitcode 1 if max retries count reached
+# @exitcode 2 if maxRetries invalid value
+Retry::parameterized() {
+  local maxRetries=$1
+  shift || true
+  local delayBetweenTries=$1
+  shift || true
+  local message="$1"
+  shift || true
+  local retriesCount=1
+  if [[ "${maxRetries}" -lt 1 ]]; then
+    Log::displayError "invalid maxRetry value"
+    return 2
+  fi
+
+  while true; do
+    Log::displayInfo "Attempt ${retriesCount}/${maxRetries}: ${message}"
+    if "$@"; then
+      break
+    elif [[ "${retriesCount}" -lt "${maxRetries}" ]]; then
+      Log::displayWarning "Command failed. Wait for ${delayBetweenTries} seconds"
+      ((retriesCount++))
+      sleep "${delayBetweenTries}"
+    else
+      Log::displayError "The command has failed after ${retriesCount} attempts."
+      return 1
+    fi
+  done
+  return 0
+}
+
+# @description ensure command jq is available
+# @exitcode 1 if jq command not available
+# @stderr diagnostics information is displayed
+Linux::requireJqCommand() {
+  Assert::commandExists jq
+}
+
 # @description check if an element is contained in an array
 #
 # @arg $1 needle:String
@@ -767,6 +899,28 @@ Array::contains() {
     [[ "${element}" = "$1" ]] && return 0
   done
   return 1
+}
+
+# @description check if command specified exists or return 1
+# with error and message if not
+#
+# @arg $1 commandName:String on which existence must be checked
+# @arg $2 helpIfNotExists:String a help command to display if the command does not exist
+#
+# @exitcode 1 if the command specified does not exist
+# @stderr diagnostic information + help if second argument is provided
+Assert::commandExists() {
+  local commandName="$1"
+  local helpIfNotExists="$2"
+
+  "${BASH_FRAMEWORK_COMMAND:-command}" -v "${commandName}" >/dev/null 2>/dev/null || {
+    Log::displayError "${commandName} is not installed, please install it"
+    if [[ -n "${helpIfNotExists}" ]]; then
+      Log::displayInfo "${helpIfNotExists}"
+    fi
+    return 1
+  }
+  return 0
 }
 
 # @description log message to file
@@ -789,6 +943,7 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 Env::requireLoad
 UI::requireTheme
 Log::requireLoad
+Linux::requireJqCommand
 Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
@@ -1018,6 +1173,9 @@ megalinterCommand() {
     ((options_parse_optionParsedCountOptionIncremental = 0)) || true
     local -i options_parse_optionParsedCountOptionMegalinterImage
     ((options_parse_optionParsedCountOptionMegalinterImage = 0)) || true
+    optionCheckMegalinterVersion="0"
+    local -i options_parse_optionParsedCountOptionCheckMegalinterVersion
+    ((options_parse_optionParsedCountOptionCheckMegalinterVersion = 0)) || true
     local -i options_parse_optionParsedCountOptionBashFrameworkConfig
     ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
     optionConfig="0"
@@ -1056,7 +1214,7 @@ megalinterCommand() {
     while (($# > 0)); do
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
-        # Option 1/19
+        # Option 1/20
         # Option optionFormat --format variableType String min 0 max 1 authorizedValues 'plain|json' regexp ''
         --format)
           shift
@@ -1076,7 +1234,7 @@ megalinterCommand() {
           optionFormat="$1"
           updateArgListFormatCallback "${options_parse_arg}" "${optionFormat}"
           ;;
-        # Option 2/19
+        # Option 2/20
         # Option optionFix --fix variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --fix)
           optionFix="1"
@@ -1086,7 +1244,7 @@ megalinterCommand() {
           fi
           optionFixCallback "${options_parse_arg}" "${optionFix}"
           ;;
-        # Option 3/19
+        # Option 3/20
         # Option optionFilesOnly --filesOnly variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --filesOnly)
           optionFilesOnly="1"
@@ -1096,7 +1254,7 @@ megalinterCommand() {
           fi
           filesOnlyCallback "${options_parse_arg}" "${optionFilesOnly}"
           ;;
-        # Option 4/19
+        # Option 4/20
         # Option optionIncremental --incremental|-i variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --incremental | -i)
           optionIncremental="1"
@@ -1105,7 +1263,7 @@ megalinterCommand() {
             return 1
           fi
           ;;
-        # Option 5/19
+        # Option 5/20
         # Option optionMegalinterImage --image variableType String min 0 max 1 authorizedValues '' regexp ''
         --image)
           shift
@@ -1120,7 +1278,17 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionMegalinterImage))
           optionMegalinterImage="$1"
           ;;
-        # Option 6/19
+        # Option 6/20
+        # Option optionCheckMegalinterVersion --check-megalinter-version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --check-megalinter-version)
+          optionCheckMegalinterVersion="1"
+          if ((options_parse_optionParsedCountOptionCheckMegalinterVersion >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          optionCheckMegalinterVersionCallback "${options_parse_arg}" "${optionCheckMegalinterVersion}"
+          ;;
+        # Option 7/20
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -1136,7 +1304,7 @@ megalinterCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 7/19
+        # Option 8/20
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           optionConfig="1"
@@ -1145,7 +1313,7 @@ megalinterCommand() {
             return 1
           fi
           ;;
-        # Option 8/19
+        # Option 9/20
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           optionInfoVerbose="1"
@@ -1156,7 +1324,7 @@ megalinterCommand() {
           optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
           updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
           ;;
-        # Option 9/19
+        # Option 10/20
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           optionDebugVerbose="1"
@@ -1167,7 +1335,7 @@ megalinterCommand() {
           optionDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
           updateArgListDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
           ;;
-        # Option 10/19
+        # Option 11/20
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           optionTraceVerbose="1"
@@ -1178,7 +1346,7 @@ megalinterCommand() {
           optionTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
           updateArgListTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
           ;;
-        # Option 11/19
+        # Option 12/20
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -1190,7 +1358,7 @@ megalinterCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 12/19
+        # Option 13/20
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           optionNoColor="1"
@@ -1201,7 +1369,7 @@ megalinterCommand() {
           optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
           updateArgListNoColorCallback "${options_parse_arg}" "${optionNoColor}"
           ;;
-        # Option 13/19
+        # Option 14/20
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|noColor' regexp ''
         --theme)
           shift
@@ -1222,7 +1390,7 @@ megalinterCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 14/19
+        # Option 15/20
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           optionHelp="1"
@@ -1232,7 +1400,7 @@ megalinterCommand() {
           fi
           optionHelpCallback "${options_parse_arg}" "${optionHelp}"
           ;;
-        # Option 15/19
+        # Option 16/20
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           optionVersion="1"
@@ -1242,7 +1410,7 @@ megalinterCommand() {
           fi
           optionVersionCallback "${options_parse_arg}" "${optionVersion}"
           ;;
-        # Option 16/19
+        # Option 17/20
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           optionQuiet="1"
@@ -1253,7 +1421,7 @@ megalinterCommand() {
           optionQuietCallback "${options_parse_arg}" "${optionQuiet}"
           updateArgListQuietCallback "${options_parse_arg}" "${optionQuiet}"
           ;;
-        # Option 17/19
+        # Option 18/20
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1274,7 +1442,7 @@ megalinterCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 18/19
+        # Option 19/20
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1291,7 +1459,7 @@ megalinterCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 19/19
+        # Option 20/20
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1328,6 +1496,7 @@ megalinterCommand() {
     export optionFilesOnly
     export optionIncremental
     export optionMegalinterImage
+    export optionCheckMegalinterVersion
     export optionBashFrameworkConfig
     export optionConfig
     export optionInfoVerbose
@@ -1353,7 +1522,7 @@ megalinterCommand() {
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--format <String>]" "[--fix]" "[--filesOnly]" "[--incremental|-i]" "[--image <String>]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--format <String>]" "[--fix]" "[--filesOnly]" "[--incremental|-i]" "[--image <String>]" "[--check-megalinter-version]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
@@ -1393,6 +1562,13 @@ megalinterCommand() {
     echo -n -e ' (at most 1 times)'
     echo
     echo "    Specify docker megalinter image name to use (default: oxsecurity/megalinter-terraform:v6.16.0)"
+    echo -n -e "  ${__HELP_OPTION_COLOR}"
+    echo -n "--check-megalinter-version"
+    echo -n -e "${__HELP_NORMAL}"
+    echo -n -e ' (optional)'
+    echo -n -e ' (at most 1 times)'
+    echo
+    echo "    Check if new version of megalinter is available (compared to oxsecurity/megalinter-terraform:v6.16.0) and exit 1 if yes and display new version number."
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -n -e "  ${__HELP_OPTION_COLOR}"
@@ -1539,13 +1715,37 @@ filesOnlyCallback() {
   megalinterOptions+=(-e SKIP_CLI_LINT_MODES=project)
 }
 
+optionCheckMegalinterVersionCallback() {
+  local newVersion
+  Github::getLatestRelease "oxsecurity/megalinter" newVersion
+  local currentVersion
+  currentVersion="$(Version::parse <<<"oxsecurity/megalinter-terraform:v6.16.0")"
+  local status=0
+  Version::compare "${currentVersion}" "${newVersion}" || status=$?
+  case ${status} in
+  1)
+    echo -e "${__ERROR_COLOR}version ${currentVersion} is greater than ${newVersion}${__RESET_COLOR}"
+    exit 2
+    ;;
+  2)
+    echo -e "${__WARNING_COLOR}new version ${newVersion} is available, your version is ${currentVersion}${__RESET_COLOR}"
+    exit 1
+    ;;
+  *)
+    echo -e "${__INFO_COLOR}no new version available${__RESET_COLOR}"
+  esac
+  exit 0
+}
+
 commandCallback() {
   if [[ "${optionIncremental}" = "1"  ]] && ((${#megalinterArgs[@]}>0)); then
     Log::fatal "you cannot provide a list of files and the --incremental option"
   fi
-  megalinterOptions+=(
-    -e MEGALINTER_FILES_TO_LINT="$(Array::join "," "${megalinterArgs[@]}")"
-  )
+  if (( ${#megalinterArgs[@]} > 0 )); then
+    megalinterOptions+=(
+      -e MEGALINTER_FILES_TO_LINT="$(Array::join "," "${megalinterArgs[@]}")"
+    )
+  fi
 }
 
 optionFixCallback() {
@@ -1590,6 +1790,7 @@ updateArgListTraceVerboseCallback() {
 
 declare -a megalinterOptions=(
   -e CLEAR_REPORT_FOLDER=true
+  --workdir /tmp/lint
 )
 
 megalinterCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
@@ -1597,7 +1798,13 @@ megalinterCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 # shellcheck disable=SC2154
 run() {
   if [[ "${optionIncremental}" = "1" ]]; then
+    local -a updatedFiles
     IFS=$'\n' read -r -d '' -a updatedFiles < <(git --no-pager diff --name-only --cached || true) || true
+    if ((${#updatedFiles[@]} > 0)); then
+      Log::displayError "No files to lint in incremental mode"
+      exit 1
+    fi
+
     megalinterOptions+=(-e MEGALINTER_FILES_TO_LINT="$(Array::join "," "${updatedFiles[@]}")")
   fi
   checkIfMegalinterImageExists() {

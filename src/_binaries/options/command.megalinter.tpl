@@ -48,6 +48,13 @@ source <(
     --alt "--image" \
     --variable-name "optionMegalinterImage" \
     --function-name optionMegalinterImageFunction
+
+  Options::generateOption \
+    --help "Check if new version of megalinter is available (compared to ${defaultMegalinterImage}) and exit 1 if yes and display new version number." \
+    --alt "--check-megalinter-version" \
+    --callback optionCheckMegalinterVersionCallback \
+    --variable-name "optionCheckMegalinterVersion" \
+    --function-name optionCheckMegalinterVersionFunction
 )
 
 options+=(
@@ -57,6 +64,7 @@ options+=(
   optionFilesOnlyFunction
   optionIncrementalFunction
   optionMegalinterImageFunction
+  optionCheckMegalinterVersionFunction
 )
 Options::generateCommand "${options[@]}"
 %
@@ -76,13 +84,37 @@ filesOnlyCallback() {
   megalinterOptions+=(-e SKIP_CLI_LINT_MODES=project)
 }
 
+optionCheckMegalinterVersionCallback() {
+  local newVersion
+  Github::getLatestRelease "oxsecurity/megalinter" newVersion
+  local currentVersion
+  currentVersion="$(Version::parse <<<"<% "${defaultMegalinterImage}" %>")"
+  local status=0
+  Version::compare "${currentVersion}" "${newVersion}" || status=$?
+  case ${status} in
+  1)
+    echo -e "${__ERROR_COLOR}version ${currentVersion} is greater than ${newVersion}${__RESET_COLOR}"
+    exit 2
+    ;;
+  2)
+    echo -e "${__WARNING_COLOR}new version ${newVersion} is available, your version is ${currentVersion}${__RESET_COLOR}"
+    exit 1
+    ;;
+  *)
+    echo -e "${__INFO_COLOR}no new version available${__RESET_COLOR}"
+  esac
+  exit 0
+}
+
 commandCallback() {
   if [[ "${optionIncremental}" = "1"  ]] && ((${#megalinterArgs[@]}>0)); then
     Log::fatal "you cannot provide a list of files and the --incremental option"
   fi
-  megalinterOptions+=(
-    -e MEGALINTER_FILES_TO_LINT="$(Array::join "," "${megalinterArgs[@]}")"
-  )
+  if (( ${#megalinterArgs[@]} > 0 )); then
+    megalinterOptions+=(
+      -e MEGALINTER_FILES_TO_LINT="$(Array::join "," "${megalinterArgs[@]}")"
+    )
+  fi
 }
 
 optionFixCallback() {
