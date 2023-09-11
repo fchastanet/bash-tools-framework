@@ -50,13 +50,7 @@ Options::command() {
       "[--file|-f <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--file, -f"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--file${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    file"
     echo -e """very long help"""
   else

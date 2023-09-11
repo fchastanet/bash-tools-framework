@@ -44,12 +44,7 @@ Options::command() {
       "[--verbose|-v]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--verbose, -v"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    verbose mode"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

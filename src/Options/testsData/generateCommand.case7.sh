@@ -91,12 +91,7 @@ Options::command() {
       "
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--help, -h"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    help"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

@@ -1416,156 +1416,47 @@ runBuildContainerCommand() {
     echo -e "    command arguments including command name"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--vendor"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--vendor <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    vendor image to use: alpine|ubuntu (Default: ubuntu)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--bash-version"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-version <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    version of bash to use: 4.4|5.0|5.1|5.2 (Default: 5.1)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--bash-base-image"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-base-image <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    bash bash image to use (eg: ubuntu:20.04, amd64/bash:4.4-alpine3.18) (Default: ubuntu:20.04)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--branch-name"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--branch-name <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    branch name being built, will help to create docker image tag name"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--ci"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    activate continuous integration mode (tmp folder not shared with host)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--skip-docker-build"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--skip-docker-build${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    skip docker image build if option provided"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--bash-framework-config"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    use alternate bash framework configuration."
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--config"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Display configuration"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--verbose, -v"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    info level verbose mode (alias of --display-level INFO)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "-vv"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    debug level verbose mode (alias of --display-level DEBUG)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "-vvv"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    trace level verbose mode (alias of --display-level TRACE)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--env-file"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
     echo "    Load the specified env file"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--no-color"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Produce monochrome output. alias of --theme noColor."
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--theme"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    choose color theme (default or noColor)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--help, -h"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Display this command help"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--version"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Print version information and quit"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--quiet, -q"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    quiet mode, doesn't display any output"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--log-level"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--log-file"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Set log file"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--display-level"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
     echo -e """
 run the container specified by args provided.

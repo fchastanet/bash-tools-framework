@@ -36,13 +36,7 @@ Options::option() {
     echo "Option varName --var|-v variableType StringArray min 1 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'
-    echo 'echo -n "--var, -v"'
-    echo "echo -n ' <String>'"
-    # shellcheck disable=SC2016
-    echo 'echo -n -e "${__HELP_NORMAL}"'
-    echo "echo -n -e ' (at least 1 times)'"
-    echo 'echo'
+    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} (at least 1 times)"'
     echo "echo \"    super help\""
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
