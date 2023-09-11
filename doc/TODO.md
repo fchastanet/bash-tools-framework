@@ -47,7 +47,7 @@
 - activate megalinter SPELL_VALE, SPELL_PROSELINT
 - check if i can speed up megalinter linters REPOSITORY_TRUFFLEHOG,
   REPOSITORY_GRYPE
-- help style like vale --help
+- check if alt used multiple times
 - megalinter
   - check if new megalinter available
 - plantuml

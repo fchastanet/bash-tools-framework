@@ -30,13 +30,7 @@ Options::option() {
     echo "Option srcDirs --src-dir|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'
-    echo 'echo -n "--src-dir, -s"'
-    echo "echo -n ' <String>'"
-    # shellcheck disable=SC2016
-    echo 'echo -n -e "${__HELP_NORMAL}"'
-    echo "echo -n -e ' (optional)'"
-    echo 'echo'
+    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--src-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "srcDirs"

@@ -1526,154 +1526,47 @@ megalinterCommand() {
       "[--format <String>]" "[--fix]" "[--filesOnly]" "[--incremental|-i]" "[--image <String>]" "[--check-megalinter-version]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--format"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--format <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    define output format of this command(available: plain|json) (default: plain)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--fix"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--fix${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Apply linters fixes automatically."
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--filesOnly"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--filesOnly${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Skip linters that run in project mode."
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--incremental, -i"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--incremental${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-i${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Run megalinter only on files that are git staged"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--image"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--image <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Specify docker megalinter image name to use (default: oxsecurity/megalinter-terraform:v7.3.0)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--check-megalinter-version"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--check-megalinter-version${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Check if new version of megalinter is available (compared to oxsecurity/megalinter-terraform:v7.3.0) and exit 1 if yes and display new version number."
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--bash-framework-config"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    use alternate bash framework configuration."
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--config"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Display configuration"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--verbose, -v"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    info level verbose mode (alias of --display-level INFO)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "-vv"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    debug level verbose mode (alias of --display-level DEBUG)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "-vvv"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    trace level verbose mode (alias of --display-level TRACE)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--env-file"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
     echo "    Load the specified env file"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--no-color"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Produce monochrome output. alias of --theme noColor."
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--theme"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    choose color theme (default or noColor)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--help, -h"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Display this command help"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--version"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Print version information and quit"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--quiet, -q"
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    quiet mode, doesn't display any output"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--log-level"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--log-file"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    Set log file"
-    echo -n -e "  ${__HELP_OPTION_COLOR}"
-    echo -n "--display-level"
-    echo -n ' <String>'
-    echo -n -e "${__HELP_NORMAL}"
-    echo -n -e ' (optional)'
-    echo -n -e ' (at most 1 times)'
-    echo
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     echo "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
     echo -e """
 megalinter image oxsecurity/megalinter-terraform:v7.3.0 will be used.

@@ -22,27 +22,28 @@
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option <% ${variableName} %> <%% Array::join '|' "${alts[@]}" %> variableType <% ${variableType} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${cmd}" = "helpTpl" ]]; then
+    %
+      altStr='${__HELP_OPTION_COLOR}'
+      altStr+="$(Array::join '${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}' "${alts[@]}")"
+      if [[ "${variableType}" != "Boolean" ]]; then
+        altStr+=' <String>'
+      fi
+      altStr+='${__HELP_NORMAL}'
+      if ((min == 1 && max == 1)); then
+        altStr+=' (mandatory)'
+      else
+        if ((min > 0)); then
+          altStr+=" (at least ${min} times)"
+        else
+          altStr+=' (optional)'
+        fi
+        if ((max > 0)); then
+          altStr+=" (at most ${max} times)"
+        fi
+      fi
+    %
     # shellcheck disable=SC2016
-    echo 'echo -n -e "  ${__HELP_OPTION_COLOR}"'
-    echo 'echo -n "<%% Array::join ", " "${alts[@]}" %>"'
-    % if [[ "${variableType}" != "Boolean" ]]; then
-      echo "echo -n ' <String>'"
-    % fi
-    # shellcheck disable=SC2016
-    echo 'echo -n -e "${__HELP_NORMAL}"'
-    % if ((min == 1 && max == 1)); then
-      echo "echo -n -e ' (mandatory)'"
-    % else
-      % if ((min > 0)); then
-        echo "echo -n -e ' (at least <% ${min} %> times)'"
-      % else
-        echo "echo -n -e ' (optional)'"
-      % fi
-      % if ((max > 0)); then
-        echo "echo -n -e ' (at most <% ${max} %> times)'"
-      % fi
-    % fi
-    echo 'echo'
+    echo 'printf "  %b\n" "<% ${altStr} %>"'
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
     % else
