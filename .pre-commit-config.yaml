@@ -75,7 +75,7 @@ repos:
     hooks:
       - id: shellcheckLint
         name: shellcheckLint
-        entry: bash -c './bin/shellcheckLint --staged -f tty'
+        entry: bash -c './bin/shellcheckLint --staged -f tty --xargs'
         language: system
         always_run: true
         require_serial: true

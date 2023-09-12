@@ -57,10 +57,13 @@
   elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  <%% helpArg "1" %>"'
+    % nl=$'\n'
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
+    % elif [[ "${help}" =~ ${nl} ]]; then
+      echo 'echo -e """    <% ${help} %>"""'
     % else
-        echo 'echo -e "    <% ${help} %>"'
+        echo 'echo -e "    $(Array::wrap " " 75 4 "<% ${help} %>")"'
     % fi
   elif [[ "${options_parse_cmd}" = "variableName" ]]; then
     echo "<% ${variableName} %>"

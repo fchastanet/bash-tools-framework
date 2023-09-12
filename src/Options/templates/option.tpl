@@ -44,10 +44,13 @@
     %
     # shellcheck disable=SC2016
     echo 'printf "  %b\n" "<% ${altStr} %>"'
+    % nl=$'\n'
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
+    % elif [[ "${help}" =~ ${nl} ]]; then
+      echo 'echo -e """    <% ${help} %>"""'
     % else
-        echo "echo \"    <% ${help} %>\""
+      echo "echo -e \"    $(Array::wrap " " 75 0 "<% ${help} %>")\""
     % fi
     % if [[ -n "${defaultValue}" ]]; then
         echo "echo '    Default value: <% ${defaultValue} %>'"

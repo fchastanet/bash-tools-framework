@@ -47,20 +47,20 @@
 - activate megalinter SPELL_VALE, SPELL_PROSELINT
 - check if i can speed up megalinter linters REPOSITORY_TRUFFLEHOG,
   REPOSITORY_GRYPE
-- check if alt used multiple times
-- megalinter
-  - check if new megalinter available
-- plantuml
 - shellcheckLint
 - test
+- support option String with equal sign
+  - --format plain or --format=plain but -f plain or -fplain
+- make Array::wrap cut on space
 - USAGE [OPTIONS] [GlobalOptions]
   - specific Usage [--options] if number of options under 3
   - then describe below each of them
   - check if alt not used twice
   - order options not working
+- check if alt used multiple times
 - special group for options --bash-framework-config and --config
 - Default template for option using run
-- --help-item-name "srcDir"
+- --help-item-name "srcDir" - underline srcDir in --help (see man xargs)
 - manage String|Function
 - validatorCallback
 
@@ -213,7 +213,6 @@ TODOs linked to bin/compiler or templates .tpl:
 ### 8.2. automatic help generation
 
 - FACADE help auto generated
-- IMPLEMENT special to manage options: --verbose, --version, --help, ...
 - use this interface to generate man page
   <https://www.cyberciti.biz/faq/linux-unix-creating-a-manpage/>
 - [asciidoctor](https://asciidoctor.org/) to build manpages ?
@@ -227,6 +226,12 @@ TODOs linked to `src/_binaries/*`:
 - parallelization (use xargs)
   - awkLint
   - shellcheckLint
+    - --parallel uses GNU parallel
+    - --xargs to use xargs
+      - for checkstyle(xml) format
+        - create a temp directory
+        - redirect each process to a new temp file
+        - use oq to merge xml files at the end
   - doc generation
 
 ### 8.4. merge bash-tools into bash-tools-framework

@@ -74,7 +74,7 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}subCommand${__HELP_NORMAL} {single} (mandatory)"
-    echo -e "
+    echo -e """
       ${__HELP_TITLE_COLOR}Common Commands:${__RESET_COLOR}
       run         Create and run a new container from an image
       exec        Execute a command in a running container
@@ -88,11 +88,11 @@ Options::command() {
       search      Search Docker Hub for images
       version     Show the Docker version information
       info        Display system-wide information
-      "
+      """
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo "    help"
+    echo -e "    help"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1
