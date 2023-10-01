@@ -1236,7 +1236,7 @@ testCommand() {
           optionVendor="$1"
           updateOptionVendorCallback "${options_parse_arg}" "${optionVendor}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionVendor" "${options_parse_arg}" "${optionVendor}" || true
+          everyOptOrArgCallback  optionVendor  "${options_parse_arg}" "${optionVendor}" || true
           ;;
         # Option 2/20
         # Option optionBashVersion --bash-version variableType String min 0 max 1 authorizedValues '4.4|5.0|5.1|5.2' regexp ''
@@ -1258,7 +1258,7 @@ testCommand() {
           optionBashVersion="$1"
           updateOptionBashVersionCallback "${options_parse_arg}" "${optionBashVersion}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionBashVersion" "${options_parse_arg}" "${optionBashVersion}" || true
+          everyOptOrArgCallback  optionBashVersion  "${options_parse_arg}" "${optionBashVersion}" || true
           ;;
         # Option 3/20
         # Option optionBashBaseImage --bash-base-image variableType String min 0 max 1 authorizedValues '' regexp ''
@@ -1276,7 +1276,7 @@ testCommand() {
           optionBashBaseImage="$1"
           updateOptionBashBaseImageCallback "${options_parse_arg}" "${optionBashBaseImage}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionBashBaseImage" "${options_parse_arg}" "${optionBashBaseImage}" || true
+          everyOptOrArgCallback  optionBashBaseImage  "${options_parse_arg}" "${optionBashBaseImage}" || true
           ;;
         # Option 4/20
         # Option optionBranchName --branch-name variableType String min 0 max 1 authorizedValues '' regexp ''
@@ -1294,7 +1294,7 @@ testCommand() {
           optionBranchName="$1"
           updateOptionBranchNameCallback "${options_parse_arg}" "${optionBranchName}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionBranchName" "${options_parse_arg}" "${optionBranchName}" || true
+          everyOptOrArgCallback  optionBranchName  "${options_parse_arg}" "${optionBranchName}" || true
           ;;
         # Option 5/20
         # Option optionContinuousIntegrationMode --ci variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1307,7 +1307,7 @@ testCommand() {
           ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
           updateOptionContinuousIntegrationMode "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionContinuousIntegrationMode" "${options_parse_arg}" "${optionContinuousIntegrationMode}" || true
+          everyOptOrArgCallback  optionContinuousIntegrationMode  "${options_parse_arg}" "${optionContinuousIntegrationMode}" || true
           ;;
         # Option 6/20
         # Option optionSkipDockerBuild --skip-docker-build variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1320,7 +1320,7 @@ testCommand() {
           ((++options_parse_optionParsedCountOptionSkipDockerBuild))
           updateOptionSkipDockerBuildCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionSkipDockerBuild" "${options_parse_arg}" "${optionSkipDockerBuild}" || true
+          everyOptOrArgCallback  optionSkipDockerBuild  "${options_parse_arg}" "${optionSkipDockerBuild}" || true
           ;;
         # Option 7/20
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
@@ -1338,7 +1338,7 @@ testCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionBashFrameworkConfig" "${options_parse_arg}" "${optionBashFrameworkConfig}" || true
+          everyOptOrArgCallback  optionBashFrameworkConfig  "${options_parse_arg}" "${optionBashFrameworkConfig}" || true
           ;;
         # Option 8/20
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1350,7 +1350,7 @@ testCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionConfig" "${options_parse_arg}" "${optionConfig}" || true
+          everyOptOrArgCallback  optionConfig  "${options_parse_arg}" "${optionConfig}" || true
           ;;
         # Option 9/20
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1364,7 +1364,7 @@ testCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionInfoVerbose" "${options_parse_arg}" "${optionInfoVerbose}" || true
+          everyOptOrArgCallback  optionInfoVerbose  "${options_parse_arg}" "${optionInfoVerbose}" || true
           ;;
         # Option 10/20
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1378,7 +1378,7 @@ testCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionDebugVerbose" "${options_parse_arg}" "${optionDebugVerbose}" || true
+          everyOptOrArgCallback  optionDebugVerbose  "${options_parse_arg}" "${optionDebugVerbose}" || true
           ;;
         # Option 11/20
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1392,7 +1392,7 @@ testCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionTraceVerbose" "${options_parse_arg}" "${optionTraceVerbose}" || true
+          everyOptOrArgCallback  optionTraceVerbose  "${options_parse_arg}" "${optionTraceVerbose}" || true
           ;;
         # Option 12/20
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
@@ -1407,7 +1407,7 @@ testCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionEnvFiles" "${options_parse_arg}" "${optionEnvFiles[@]}" || true
+          everyOptOrArgCallback  optionEnvFiles  "${options_parse_arg}" "${optionEnvFiles[@]}" || true
           ;;
         # Option 13/20
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1421,7 +1421,7 @@ testCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionNoColor" "${options_parse_arg}" "${optionNoColor}" || true
+          everyOptOrArgCallback  optionNoColor  "${options_parse_arg}" "${optionNoColor}" || true
           ;;
         # Option 14/20
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-always|noColor' regexp ''
@@ -1444,7 +1444,7 @@ testCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionTheme" "${options_parse_arg}" "${optionTheme}" || true
+          everyOptOrArgCallback  optionTheme  "${options_parse_arg}" "${optionTheme}" || true
           ;;
         # Option 15/20
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1457,7 +1457,7 @@ testCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionHelp" "${options_parse_arg}" "${optionHelp}" || true
+          everyOptOrArgCallback  optionHelp  "${options_parse_arg}" "${optionHelp}" || true
           ;;
         # Option 16/20
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1470,7 +1470,7 @@ testCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionVersion" "${options_parse_arg}" "${optionVersion}" || true
+          everyOptOrArgCallback  optionVersion  "${options_parse_arg}" "${optionVersion}" || true
           ;;
         # Option 17/20
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -1484,7 +1484,7 @@ testCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionQuiet" "${options_parse_arg}" "${optionQuiet}" || true
+          everyOptOrArgCallback  optionQuiet  "${options_parse_arg}" "${optionQuiet}" || true
           ;;
         # Option 18/20
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
@@ -1507,7 +1507,7 @@ testCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionLogLevel" "${options_parse_arg}" "${optionLogLevel}" || true
+          everyOptOrArgCallback  optionLogLevel  "${options_parse_arg}" "${optionLogLevel}" || true
           ;;
         # Option 19/20
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
@@ -1526,7 +1526,7 @@ testCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionLogFile" "${options_parse_arg}" "${optionLogFile}" || true
+          everyOptOrArgCallback  optionLogFile  "${options_parse_arg}" "${optionLogFile}" || true
           ;;
         # Option 20/20
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
@@ -1549,7 +1549,7 @@ testCommand() {
           optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           # shellcheck disable=SC2317
-          everyOptOrArgCallback "optionDisplayLevel" "${options_parse_arg}" "${optionDisplayLevel}" || true
+          everyOptOrArgCallback  optionDisplayLevel  "${options_parse_arg}" "${optionDisplayLevel}" || true
           ;;
         -*)
           # shellcheck disable=SC2317

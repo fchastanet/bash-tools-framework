@@ -143,6 +143,8 @@ TODOs linked to bin/compiler or templates .tpl:
 - build watch mode
 - issue with " or ', create a new string symbol in the template in order to get
   the right escape
+  - try to use printf %q "$quote-me"
+    <https://stackoverflow.com/a/39463371/3045926>
 - review all exported variables
 - auto import needed bash framework features like Options/\_\_all.sh without the
   need to source it into the compiler. It would mean to authorize bash-tpl

@@ -633,3 +633,82 @@ function Options::generateCommand::case8::parseArgsCallback { #@test
   assert_line --index 0 "srcFileCallback srcFile -- destFile1"
   assert_line --index 1 "unknown argument destFile1"
 }
+
+# --every-option-callback
+function Options::generateCommand::case9 { #@test
+  local optionVerbose
+  optionVerbose="$(Options::generateOption --help "verbose mode" \
+    --variable-name "verbose" --alt "--verbose" --alt "-v")" || return 1
+  Options::sourceFunction "${optionVerbose}"
+
+  local status=0
+  everyOptionCallback() { :; }
+  Options::generateCommand --every-option-callback everyOptionCallback \
+    --help "super command" ${optionVerbose} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  testCommand "generateCommand.case9.sh" "Options::command"
+}
+
+function Options::generateCommand::case9::parseArgsCallbackDefaultBehavior { #@test
+  function everyOptionCallback() {
+    printf "everyOptionCallback "%q" "%q" "%q"\n" "$@"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case9.sh"
+  run Options::command parse --verbose --test --otherOpt
+  assert_lines_count 3
+  assert_line --index 0 "everyOptionCallback verbose --verbose 1"
+  assert_line --index 1 "everyOptionCallback '' --test ''"
+  assert_line --index 2 --partial "ERROR   - Command test - Invalid option --test"
+}
+
+function Options::generateCommand::case9::parseArgsCallbackOverrideDefaultBehavior { #@test
+  function everyOptionCallback() {
+    printf "everyOptionCallback "%q" "%q" "%q"\n" "$@"
+    return 1
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case9.sh"
+  run Options::command parse --verbose --test --otherOpt
+  assert_lines_count 3
+  assert_line --index 0 "everyOptionCallback verbose --verbose 1"
+  assert_line --index 1 "everyOptionCallback '' --test ''"
+  assert_line --index 2 "everyOptionCallback '' --otherOpt ''"
+}
+
+# --every-argument-callback
+function Options::generateCommand::case10 { #@test
+  local srcFile
+  srcFile="$(Options::generateArg --variable-name "srcFile")" || return 1
+  Options::sourceFunction "${srcFile}"
+
+  local status=0
+  everyArgumentCallback() { :; }
+  Options::generateCommand --every-argument-callback everyArgumentCallback \
+    --help "super command" ${srcFile} >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+
+  testCommand "generateCommand.case10.sh" "Options::command"
+}
+
+function Options::generateCommand::case10::parseArgsCallbackDefaultBehavior { #@test
+  function everyArgumentCallback() {
+    printf "everyArgumentCallback "%q" "%q"\n" "$@"
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case10.sh"
+  run Options::command parse file1 file2
+  assert_lines_count 3
+  assert_line --index 0 "everyArgumentCallback srcFile file1"
+  assert_line --index 1 "everyArgumentCallback '' file2"
+  assert_line --index 2 --partial "ERROR   - Command test - Argument - too much arguments provided: file2"
+}
+
+function Options::generateCommand::case10::parseArgsCallbackOverrideDefaultBehavior { #@test
+  function everyArgumentCallback() {
+    printf "everyArgumentCallback "%q" "%q"\n" "$@"
+    return 1
+  }
+  source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case10.sh"
+  run Options::command parse file1 file2 file3
+  assert_lines_count 3
+  assert_line --index 0 "everyArgumentCallback srcFile file1"
+  assert_line --index 1 "everyArgumentCallback '' file2"
+  assert_line --index 2 "everyArgumentCallback '' file3"
+}

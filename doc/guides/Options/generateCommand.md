@@ -67,6 +67,13 @@ and that does not match any option configured.
 An invalid argument is an argument that does not
 match any configured argument.
 
+#### --every-option-callback/--every-argument-callback option
+You can set several callbacks.
+Callback is called on every option/argument
+returning 1 from the callback allows to ignore the default behavior
+eg: default behavior for options is to display invalid option
+note: it doesn't prevent to call other callbacks
+
 #### Options
 
 * **--help** | **--summary** | **--short-description \<String|Function\>**

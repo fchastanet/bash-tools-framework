@@ -114,6 +114,7 @@ repos:
         name: plantuml
         entry: bash -c './bin/plantuml -f png -f svg'
         language: system
+        require_serial: true
         always_run: true
         fail_fast: true
         verbose: true
@@ -147,6 +148,7 @@ repos:
         name: build-doc-files
         entry: bash -c 'SKIP_BUILD=1 ./bin/doc --verbose'
         language: system
+        require_serial: true
         always_run: true
         fail_fast: true
         verbose: true

@@ -64,7 +64,7 @@ while (($# > 0)); do
         .INCLUDE "${tplDir}/arg.parse.arg.tpl"
       %
           for everyArgumentCallback in "${everyArgumentCallbacks[@]}"; do
-            echo "            ${everyArgumentCallback} '<% ${variableName} %>'" '"${options_parse_arg}" || true'
+            echo "            ${everyArgumentCallback} '${variableName}'" '"${options_parse_arg}" || true'
           done
           ((maxParsedArgIndex+=argMax))
           ((++argIndex))
