@@ -3,44 +3,25 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.test.tpl)"
 
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME}
-Launch bats inside docker container
+testCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-${__HELP_TITLE}Examples:${__HELP_NORMAL}
-to force image rebuilding
-    DOCKER_BUILD_OPTIONS=--no-cache ./bin/test
+# shellcheck disable=SC2154
+run() {
+  Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
 
-rebuild alpine image
-    DOCKER_BUILD_OPTIONS=--no-cache VENDOR=alpine BASH_IMAGE=bash:5.1 BASH_TAR_VERSION=5.1 ./bin/test
+  if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
+    (
+      "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" "${batsArgs[@]}"
+    )
+  else
+    "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/test" "${batsArgs[@]}"
+  fi
+}
 
-${__HELP_TITLE}In order to debug inside container:${__HELP_NORMAL}
-    docker build -t bash-tools-ubuntu:5.1 -f .docker/Dockerfile.ubuntu
-    docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-ubuntu-5.1-user bash
-    docker run --rm -it -v "$(pwd):/bash"  --user "$(id -u):$(id -g)"  bash-tools-alpine-5.1-user bash
-
-.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
-
-${__HELP_TITLE}Bats help:${__HELP_NORMAL}
-
-EOF
-)"
-if ! Args::defaultHelpNoExit "${HELP}" "${BASH_FRAMEWORK_ARGV[@]}"; then
-  "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" --help
-  exit 0
-fi
-
-if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
-  (
-    if (($# < 1)); then
-      "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" -r src
-    else
-      "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" "$@"
-    fi
-  )
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
 else
-  "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/test" "$@"
+  run
 fi
