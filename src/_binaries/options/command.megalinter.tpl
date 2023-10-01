@@ -12,6 +12,7 @@ megalinter image ${defaultMegalinterImage} will be used.
 """
 declare optionFormatAuthorizedValues="plain|json"
 declare optionFormatDefault="plain"
+declare optionMegalinterImage="${defaultMegalinterImage}"
 %
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
@@ -122,8 +123,8 @@ optionFixCallback() {
 }
 
 optionVersionCallback() {
-  echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version: ${__RESET_COLOR} <% ${versionNumber} %>"
-  echo -e "${__HELP_TITLE_COLOR}megalinter image Version: ${__RESET_COLOR} <% ${optionImageVersion} %>"
+  echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version:${__RESET_COLOR} <% ${versionNumber} %>"
+  echo -e "${__HELP_TITLE_COLOR}megalinter image Version:${__RESET_COLOR} <% ${optionMegalinterImage} %>"
   exit 0
 }
 

@@ -21,6 +21,7 @@ Options::command() {
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
+      local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
         # Option 1/4
         # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -30,7 +31,8 @@ Options::command() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${options_parse_arg}" "${help}"
+          ((++options_parse_optionParsedCountHelp))
+          helpCallback "${options_parse_arg}"
           ;;
         # Option 2/4
         # Option srcDirs --src-dirs|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''
@@ -40,6 +42,7 @@ Options::command() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
+          ((++options_parse_optionParsedCountSrcDirs))
           srcDirs+=("$1")
           ;;
         # Option 3/4
@@ -50,6 +53,7 @@ Options::command() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
+          ((++options_parse_optionParsedCountVerbose))
           ;;
         # Option 4/4
         # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -59,10 +63,13 @@ Options::command() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
+          ((++options_parse_optionParsedCountQuiet))
           ;;
         -*)
-          Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
-          return 1
+          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
+            return 1
+          fi
           ;;
         *)
           if ((0)); then
@@ -89,8 +96,10 @@ Options::command() {
             destFiles+=("${options_parse_arg}")
             destFilesCallback "${destFiles[@]}" -- "${@:2}"
           else
-            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
-            return 1
+            if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+              Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
+              return 1
+            fi
           fi
           ((++options_parse_parsedArgIndex))
           ;;

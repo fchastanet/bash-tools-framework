@@ -10,6 +10,7 @@ Options::command() {
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
+      local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
         # Option 1/1
         # Option file --file|-f variableType String min 0 max 1 authorizedValues '' regexp ''
@@ -27,12 +28,16 @@ Options::command() {
           file="$1"
           ;;
         -*)
-          Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
-          return 1
+          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
+            return 1
+          fi
           ;;
         *)
-          Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"
-          return 1
+          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"
+            return 1
+          fi
           ;;
       esac
       shift || true

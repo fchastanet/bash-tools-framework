@@ -17,8 +17,9 @@ Options::option() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${options_parse_arg}" "${help}"
-          helpCallback2 "${options_parse_arg}" "${help}"
+          ((++options_parse_optionParsedCountHelp))
+          helpCallback "${options_parse_arg}"
+          helpCallback2 "${options_parse_arg}"
           ;;
         *)
           # ignore

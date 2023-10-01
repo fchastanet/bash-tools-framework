@@ -237,7 +237,7 @@ function Options::generateOption::caseStringArray4::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray4.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 1 times)"
+  assert_line --index 0 "$(echo -e "  ${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} (at least 1 times)")"
   assert_line --index 1 "    super help"
 }
 

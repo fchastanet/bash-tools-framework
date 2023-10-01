@@ -13,6 +13,7 @@ Options::command() {
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
+      local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
         # Option 1/1
         # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -22,11 +23,14 @@ Options::command() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
-          helpCallback "${options_parse_arg}" "${help}"
+          ((++options_parse_optionParsedCountHelp))
+          helpCallback "${options_parse_arg}"
           ;;
         -*)
-          Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
-          return 1
+          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
+            return 1
+          fi
           ;;
         *)
           if ((0)); then
@@ -47,8 +51,10 @@ Options::command() {
             subCommand="${options_parse_arg}"
             subCommandCallback "${subCommand}" -- "${@:2}"
           else
-            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
-            return 1
+            if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+              Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
+              return 1
+            fi
           fi
           ((++options_parse_parsedArgIndex))
           ;;

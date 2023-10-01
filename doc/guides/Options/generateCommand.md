@@ -117,6 +117,14 @@ match any configured argument.
 
   (0 or more) the callback called when an argument is unknown (Default: parser does not report any error).
 
+* **--every-option-callback \<Function\>**
+
+  (0 or more) the callback called for every option.
+
+* **--every-argument-callback \<Function\>**
+
+  (0 or more) the callback called for every argument.
+
 * **--callback \<Function\>**
 
   (0 or more) the callback called when all options and arguments have been parsed.

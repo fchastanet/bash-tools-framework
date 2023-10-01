@@ -1,12 +1,6 @@
 <%% Array::join ' | ' "${alts[@]}" %>)
   % if [[ "${variableType}" = "Boolean" ]]; then
     <% ${variableName} %>="<% ${onValue} %>"
-    % if (( max > 0 )); then
-    if ((options_parse_optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
-      Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(<% ${max} %>)"
-      return 1
-    fi
-    % fi
   % else
     shift
     if (($# == 0)); then
@@ -19,26 +13,34 @@
       return 1
     fi
     % fi
-    % if (( max > 0 )); then
-    if ((options_parse_optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
-      Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(<% ${max} %>)"
-      return 1
-    fi
-    % fi
-    % if ((min > 0 || max > 0)); then
-    ((++options_parse_optionParsedCount<% ${variableName^} %>))
-    % fi
-    % if [[ "${variableType}" = "String" ]]; then
-    <% ${variableName} %>="$1"
-    % else
-    <% ${variableName} %>+=("$1")
-    % fi
+  % fi
+  % if (( max > 0 )); then
+  if ((options_parse_optionParsedCount<% ${variableName^} %> >= <% ${max} %>)); then
+    Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(<% ${max} %>)"
+    return 1
+  fi
+  % fi
+  ((++options_parse_optionParsedCount<% ${variableName^} %>))
+  % if [[ "${variableType}" = "String" ]]; then
+  <% ${variableName} %>="$1"
+  % elif [[ "${variableType}" = "StringArray" ]]; then
+  <% ${variableName} %>+=("$1")
   % fi
   % for callback in "${callbacks[@]}"; do
     % if [[ "${variableType}" = "StringArray" ]]; then
     <% ${callback} %> "${options_parse_arg}" "${<% ${variableName} %>[@]}"
-    % else
+    % elif [[ "${variableType}" = "String" ]]; then
     <% ${callback} %> "${options_parse_arg}" "${<% ${variableName} %>}"
+    % else
+    <% ${callback} %> "${options_parse_arg}"
+    % fi
+  % done
+  % for everyOptionCallback in "${everyOptionCallbacks[@]}"; do
+    # shellcheck disable=SC2317
+    % if [[ "${variableType}" = "StringArray" ]]; then
+    <% ${everyOptionCallback} %> "<% ${variableName} %>" "${options_parse_arg}" "${<% ${variableName} %>[@]}" || true
+    % else
+    <% ${everyOptionCallback} %> "<% ${variableName} %>" "${options_parse_arg}" "${<% ${variableName} %>}" || true
     % fi
   % done
   ;;

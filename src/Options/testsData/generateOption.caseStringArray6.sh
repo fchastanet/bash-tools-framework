@@ -14,6 +14,7 @@ Options::option() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
+          ((++options_parse_optionParsedCountSrcDirs))
           srcDirs+=("$1")
           srcDirsCallback "${options_parse_arg}" "${srcDirs[@]}"
           ;;

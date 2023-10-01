@@ -283,6 +283,6 @@ function Options::generateOption::caseBoolean5::OptionsTest::parseHelp { #@test
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 2
-  assert_line --index 0 "helpCallback called --help 1"
-  assert_line --index 1 "helpCallback2 called --help 1"
+  assert_line --index 0 "helpCallback called --help"
+  assert_line --index 1 "helpCallback2 called --help"
 }

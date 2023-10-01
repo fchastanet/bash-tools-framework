@@ -11,6 +11,7 @@ Options::command() {
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
+      local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
         # Option 1/1
         # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
@@ -20,13 +21,16 @@ Options::command() {
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
             return 1
           fi
+          ((++options_parse_optionParsedCountVerbose))
           ;;
         -*)
           ignoreOptionError "${options_parse_arg}"
           ;;
         *)
-          Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"
-          return 1
+          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"
+            return 1
+          fi
           ;;
       esac
       shift || true

@@ -74,6 +74,8 @@
 # @option --function-name <String> the name of the function that will be generated
 # @option --unknown-option-callback <Function> (0 or more) the callback called when an option is unknown (Default: options parser display error message if option provided does not match any specified options).
 # @option --unknown-argument-callback <Function> (0 or more) the callback called when an argument is unknown (Default: parser does not report any error).
+# @option --every-option-callback <Function> (0 or more) the callback called for every option.
+# @option --every-argument-callback <Function> (0 or more) the callback called for every argument.
 # @option --callback <Function> (0 or more) the callback called when all options and arguments have been parsed.
 # @warning arguments function list has to be provided in correct order
 # @warning argument/option variable names have to be unique. Best practice is to scope the variable name to avoid variable name conflicts.
@@ -99,6 +101,8 @@ Options::generateCommand() {
   local functionName=""
   local -a unknownOptionCallbacks=()
   local -a unknownArgumentCallbacks=()
+  local -a everyOptionCallbacks=()
+  local -a everyArgumentCallbacks=()
   local -a commandCallbacks=()
   local -a optionListUnordered=()
   local -a argumentList=()
@@ -162,7 +166,7 @@ Options::generateCommand() {
         setArg "${option}" helpTemplate "$#" "$1" || return 1
         # TODO check if valid template file
         ;;
-      --callback | --unknown-option-callback | --unknown-argument-callback)
+      --callback | --unknown-option-callback | --unknown-argument-callback | --every-option-callback | --every-argument-callback)
         shift
         if (($# == 0)); then
           Log::displayError "Options::generateCommand - Option ${option} - a value needs to be specified"
@@ -179,6 +183,8 @@ Options::generateCommand() {
           --callback) commandCallbacks+=("$1") ;;
           --unknown-option-callback) unknownOptionCallbacks+=("$1") ;;
           --unknown-argument-callback) unknownArgumentCallbacks+=("$1") ;;
+          --every-option-callback) everyOptionCallbacks+=("$1") ;;
+          --every-argument-callback) everyArgumentCallbacks+=("$1") ;;
           *) ;;
         esac
         ;;
@@ -315,6 +321,8 @@ Options::generateCommand() {
     export commandCallbacks
     export unknownOptionCallbacks
     export unknownArgumentCallbacks
+    export everyOptionCallbacks
+    export everyArgumentCallbacks
 
     Options::generateFunction "${functionName}" "command" || return 3
   ) || return $?

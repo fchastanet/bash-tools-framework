@@ -10,10 +10,13 @@ Options::command() {
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
+      local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
         -*)
-          Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
-          return 1
+          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
+            return 1
+          fi
           ;;
         *)
           if ((0)); then

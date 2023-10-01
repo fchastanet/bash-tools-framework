@@ -70,6 +70,7 @@ EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: |
     bin/bash-tpl|
     ^doc/guides/Options/generate.*\.md$|
     ^pages/Commands.md
+    ^.*-megalinter_file_names_cspell.txt
   )
 
 GIT_GIT_DIFF_PRE_COMMANDS:

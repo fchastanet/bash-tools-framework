@@ -573,7 +573,7 @@ function Options::generateCommand::case7::parseArgsCallback { #@test
   run Options::command parse run --help
   assert_lines_count 2
   assert_line --index 0 "subCommandCallback run -- --help"
-  assert_line --index 1 "helpCallback --help 1"
+  assert_line --index 1 "helpCallback --help"
 }
 
 function Options::generateCommand::case7::parseArgsInvalidSubCommand { #@test
