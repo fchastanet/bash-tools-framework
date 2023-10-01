@@ -23,9 +23,18 @@
 # @set __HELP_NORMAL String to remove
 UI::theme() {
   local theme="${1-default}"
-  if ! Assert::tty; then
+  if [[ ! "${theme}" =~ -always$ ]] && ! Assert::tty; then
     theme="noColor"
   fi
+  case "${theme}" in
+  default | default-always)
+    theme="default"
+    ;;
+  noColor)
+    ;;
+  *)
+    Log::fatal "invalid theme provided"
+  esac
   if [[ "${theme}" = "default" ]]; then
     export BASH_FRAMEWORK_THEME="default"
     # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting

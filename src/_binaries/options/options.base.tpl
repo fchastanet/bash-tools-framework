@@ -117,10 +117,11 @@
 
     Options::generateOption \
       --variable-type String \
-      --help "choose color theme (default or noColor)" \
+      --help "$(echo "choose color theme (default, default-always or noColor) -" \
+          "default-always means colors will be produced even if command is piped")" \
       --group groupGlobalOptionsFunction \
       --alt "--theme" \
-      --authorized-values "default|noColor" \
+      --authorized-values "default|default-always|noColor" \
       --callback optionThemeCallback \
       --callback updateArgListThemeCallback \
       --variable-name "optionTheme" \

@@ -78,7 +78,6 @@ repos:
         entry: bash -c './bin/shellcheckLint --staged -f tty --xargs'
         language: system
         always_run: true
-        require_serial: true
         fail_fast: true
         verbose: true
         stages: [commit]
@@ -87,10 +86,24 @@ repos:
     hooks:
       - id: frameworkLint
         name: frameworkLint
-        entry: bash -c './bin/frameworkLint --format plain --verbose'
+        entry: |
+          bash -c '
+            if ./bin/frameworkLint --format plain --verbose --theme default-always 2>&1 | tee /tmp/frameworkLintResult; then
+              # check warning count
+              expectedResult="0 error/72 warnings"
+              result="$(tail -1 /tmp/frameworkLintResult | grep -P -o "([0-9]+ error/[0-9]+ warnings)")"
+              if [[ "${result}" = "${expectedResult}" ]]; then
+                (>&2 echo "frameworkLint no new warnings")
+              else
+                (>&2 echo "frameworkLint result \"${result}\" is different than expected one \"${expectedResult}\"")
+                exit 1
+              fi
+            else
+              exit 1
+            fi
+          '
         language: system
         always_run: true
-        require_serial: true
         fail_fast: true
         verbose: true
         stages: [commit]
@@ -102,7 +115,6 @@ repos:
         entry: bash -c './bin/plantuml -f png -f svg'
         language: system
         always_run: true
-        require_serial: true
         fail_fast: true
         verbose: true
         stages: [push]
@@ -114,7 +126,6 @@ repos:
         entry: bash -c './bin/buildBinFiles'
         language: system
         always_run: true
-        require_serial: true
         fail_fast: true
         verbose: true
         stages: [commit]
@@ -126,7 +137,6 @@ repos:
         entry: bash -c './bin/test -r src -j 30'
         language: system
         always_run: true
-        require_serial: true
         fail_fast: true
         verbose: true
         stages: [commit]
@@ -138,7 +148,6 @@ repos:
         entry: bash -c 'SKIP_BUILD=1 ./bin/doc --verbose'
         language: system
         always_run: true
-        require_serial: true
         fail_fast: true
         verbose: true
         stages: [push]
