@@ -33,7 +33,6 @@ UI::theme() {
     noColor) ;;
     *)
       Log::fatal "invalid theme provided"
-      ;;
   esac
   if [[ "${theme}" = "default" ]]; then
     export BASH_FRAMEWORK_THEME="default"
