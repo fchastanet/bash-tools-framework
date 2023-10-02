@@ -1574,9 +1574,9 @@ run() {
     )
   fi
   if [[ -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
-    imageRef="${imageRef}-user"
+    local imageRefUser="${imageRef}-user"
     if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
-      Log::displayInfo "build docker image ${imageRef} with user configuration"
+      Log::displayInfo "build docker image ${imageRefUser} with user configuration"
       # shellcheck disable=SC2154
       (
         if [[ "${optionTraceVerbose}" = "1" ]]; then
@@ -1586,12 +1586,12 @@ run() {
         DOCKER_BUILDKIT=1 docker build \
           ${DOCKER_BUILD_OPTIONS} \
           --cache-from "scrasnups/build:${imageRef}" \
-          --build-arg "BASH_IMAGE=${imageRef}:latest" \
+          --build-arg "BASH_IMAGE=scrasnups/build:${imageRef}" \
           --build-arg SKIP_USER="${SKIP_USER:-0}" \
           --build-arg USER_ID="${USER_ID:-$(id -u)}" \
           --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
           -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
-          -t "${imageRef}" \
+          -t "${imageRefUser}" \
           "${FRAMEWORK_ROOT_DIR}/.docker"
       )
     fi
@@ -1611,7 +1611,7 @@ run() {
       -w /bash \
       -v "$(pwd):/bash" \
       --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
-      "${imageRef}" \
+      "${imageRefUser}" \
       "${dockerRunCmd[@]}" \
       "${RUN_CONTAINER_ARGV_FILTERED[@]}"
   )

@@ -43,7 +43,7 @@ run() {
   )
 
   Log::displayInfo "Image ${image} - bash version check"
-  docker run --rm "bash-tools-${optionVendor}-${optionBashVersion}" bash --version
+  docker run --rm "${imageTag}" bash --version
 
   # shellcheck disable=SC2154
   if [[ "${optionPush}" = "1" ]]; then
@@ -52,7 +52,7 @@ run() {
       if [[ "${optionTraceVerbose}" = "1" ]]; then
         set -x
       fi
-      docker push "scrasnups/build:bash-tools-${optionVendor}-${optionBashVersion}"
+      docker push "scrasnups/${imageTag}"
     )
   fi
 }

@@ -127,12 +127,12 @@ jobs:
             --bash-version "${{matrix.bashTarVersion}}" \
             --bash-base-image "${{matrix.bashImage}}" \
             --branch-name "${BRANCH}" \
-            --push
+            --push -vvv
 
       - name: Check image
         run: |
           docker run --rm \
-            "bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}" bash \
+            "build:bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}" bash \
             --version
 
       - name: run unit tests
@@ -142,11 +142,11 @@ jobs:
           USER_ID=1000 \
           GROUP_ID=1000 \
           ./bin/test \
+            -vvv \
             --vendor "${{matrix.vendor}}" \
             --bash-version "${{matrix.bashTarVersion}}" \
             --bash-base-image "${{matrix.bashImage}}" \
             --branch-name "${BRANCH}" \
-            --ci \
             ${{matrix.options}} --report-formatter junit -o logs -r src --ci
 
       - name: Upload Test Results

@@ -1754,15 +1754,27 @@ updateArgListLogLevelCallback() {
 
 updateArgListDisplayLevelCallback() {
   local level="$2"
-  batsLevel="$(getBatsLevel "${level}")" || return 0
-  batsArgs+=("${batsLevel}")
+  if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
+    batsLevel="$(getBatsLevel "${level}")" || return 0
+    batsArgs+=("${batsLevel}")
+  else
+    batsArgs+=("$1" "${level}")
+  fi
 }
 
 updateArgListDebugVerboseCallback() {
-  batsArgs+=("--verbose-run")
+  if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
+    batsArgs+=("--verbose-run")
+  else
+    batsArgs+=("-vv")
+  fi
 }
 updateArgListTraceVerboseCallback() {
-  batsArgs+=("--trace")
+  if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
+    batsArgs+=("--trace")
+  else
+    batsArgs+=("-vvv")
+  fi
 }
 
 addOptionsSpecificToRunBuildContainer() {
