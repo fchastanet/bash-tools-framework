@@ -122,8 +122,11 @@ jobs:
         env:
           BRANCH: ${{ github.ref }}
         run: |
-          ./bin/buildPushDockerImage "${{matrix.vendor}}" \
-            "${{matrix.bashTarVersion}}" "${{matrix.bashImage}}" "${BRANCH}" \
+          ./bin/buildPushDockerImage \
+            --vendor "${{matrix.vendor}}" \
+            --bash-version "${{matrix.bashTarVersion}}" \
+            --bash-base-image "${{matrix.bashImage}}" \
+            --branch-name "${BRANCH}" \
             --push
 
       - name: Check image
@@ -136,13 +139,15 @@ jobs:
         run: |
           chmod -R 777 logs
           # shellcheck disable=SC2266
-          VENDOR="${{ matrix.vendor }}" \
-          BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
-          BASH_IMAGE="${{ matrix.bashImage }}" \
           USER_ID=1000 \
           GROUP_ID=1000 \
-          SKIP_BUILD=0 \
-          ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src --ci
+          ./bin/test \
+            --vendor "${{matrix.vendor}}" \
+            --bash-version "${{matrix.bashTarVersion}}" \
+            --bash-base-image "${{matrix.bashImage}}" \
+            --branch-name "${BRANCH}" \
+            --ci \
+            ${{matrix.options}} --report-formatter junit -o logs -r src --ci
 
       - name: Upload Test Results
         if: always()
