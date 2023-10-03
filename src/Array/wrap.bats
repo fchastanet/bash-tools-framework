@@ -5,6 +5,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Array/wrap.sh
 source "${srcDir}/Array/wrap.sh"
+# shellcheck source=/src/Filters/removeAnsiCodes.sh
+source "${srcDir}/Filters/removeAnsiCodes.sh"
 
 function Array::wrap::noArg { #@test
   run Array::wrap
@@ -118,4 +120,9 @@ function Array::wrap::realExample::indent4 { #@test
   assert_lines_count 2
   assert_line --index 0 "USAGE: awkLint [--display-level <String>] [--help|-h] [--log-level <String>]"
   assert_line --index 1 "[--no-color] [--quiet|-q] [--verbose|-v] [--version]"
+}
+
+function Array::wrap::help { #@test
+  run Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "test" "[--help|-h]" "[--src-dirs|-s <String>]" "[--verbose|-v]" "[--quiet|-q]"
+  assert_output "$(echo -e "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR} test [--help|-h] [--src-dirs|-s <String>] [--verbose|-v] [--quiet|-q]")"
 }

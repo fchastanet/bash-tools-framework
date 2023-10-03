@@ -29,6 +29,7 @@ Array::wrap() {
   for arg in "$@"; do
     local line
     local IFS=$'\n'
+    arg="$(echo -e "${arg}")"
     while read -r line; do
       if [[ -z "${line}" ]]; then
         allArgs+=($'\n')
@@ -42,14 +43,21 @@ Array::wrap() {
   local -i currentLineLength=0
   local needEcho="0"
   local arg="$1"
-  while (($# > 0 || ${#arg} > 0)); do
+  local argNoAnsi
+  local -i argNoAnsiLength=0
+  while (($# > 0)); do
+    argNoAnsi="$(echo "${arg}" | Filters::removeAnsiCodes)"
+    ((argNoAnsiLength = ${#argNoAnsi})) || true
+    if (($# < 1 && argNoAnsiLength == 0)); then
+      break
+    fi
     if [[ "${arg}" = $'\n' ]]; then
       printf $'\n\n'
       ((currentLineLength = 0)) || true
       ((glueLength = 0)) || true
       shift || return 0
       arg="$1"
-    elif ((${#arg} < maxLineLength - currentLineLength - glueLength)); then
+    elif ((argNoAnsiLength < maxLineLength - currentLineLength - glueLength)); then
       # arg can be stored as a whole on current line
       if ((glueLength > 0)); then
         echo -e -n "${glue}"
@@ -57,12 +65,12 @@ Array::wrap() {
       fi
       echo -e -n "${arg}"
       needEcho="1"
-      ((currentLineLength += ${#arg}))
+      ((currentLineLength += argNoAnsiLength))
       ((glueLength = ${#glue})) || true
       shift || return 0
       arg="$1"
     else
-      if ((${#arg} >= (maxLineLength - indentNextLine))); then
+      if ((argNoAnsiLength >= (maxLineLength - indentNextLine))); then
         # arg can be stored on a whole line
         if ((glueLength > 0)); then
           echo -e -n "${glue}"
@@ -80,7 +88,7 @@ Array::wrap() {
         echo
         echo -e -n "${indentStr}${arg}"
         ((glueLength = ${#glue})) || true
-        ((currentLineLength = ${#arg}))
+        ((currentLineLength = argNoAnsiLength))
         arg="" # allows to go to next arg
         needEcho="1"
       fi

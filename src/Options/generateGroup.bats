@@ -54,7 +54,7 @@ function Options::generateOption::groupOptionValid { #@test
   testCommand "generateGroup.caseGroupOptionValid.sh" "Options::group"
   source "${BATS_TEST_DIRNAME}/testsData/generateGroup.caseGroupOptionValid.sh"
   run Options::group help
-  assert_line --index 0 "Global options"
+  assert_line --index 0 "$(echo -e "${__HELP_TITLE_COLOR}Global options${__RESET_COLOR}")"
   assert_line --index 1 "help"
   run Options::group id
   assert_output "Options::group"

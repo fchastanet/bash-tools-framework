@@ -7,6 +7,8 @@ source "${srcDir}/Options/_bats.sh"
 
 # shellcheck source=src/Options/__all.sh
 source "${srcDir}/Options/__all.sh"
+# shellcheck source=src/Filters/removeAnsiCodes.sh
+source "${srcDir}/Filters/removeAnsiCodes.sh"
 
 function setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
@@ -121,7 +123,7 @@ function Options::generateOption::caseStringArray2::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray2.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (optional)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v <String>${__HELP_NORMAL} (optional)"
   assert_line --index 1 "    No help available"
 }
 
@@ -173,7 +175,7 @@ function Options::generateOption::caseStringArray3::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray3.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 1 times)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v <String>${__HELP_NORMAL} (at least 1 times)"
   assert_line --index 1 "    No help available"
 }
 
@@ -346,7 +348,7 @@ function Options::generateOption::caseStringArray5::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var, -v <String>${__HELP_NORMAL} (at least 2 times) (at most 3 times)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v <String>${__HELP_NORMAL} (at least 2 times) (at most 3 times)"
   assert_line --index 1 "    super help"
 }
 

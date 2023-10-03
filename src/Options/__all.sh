@@ -36,6 +36,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Assert/bashFrameworkFunction.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Array/contains.sh"
 # shellcheck source=/src/Array/join.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Array/join.sh"
+# shellcheck source=/src/Filters/removeAnsiCodes.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Filters/removeAnsiCodes.sh"
 # shellcheck source=/src/Array/wrap.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Array/wrap.sh"
 # shellcheck source=/src/Framework/createTempFile.sh
