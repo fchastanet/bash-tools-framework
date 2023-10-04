@@ -79,6 +79,7 @@ repos:
         language: system
         always_run: true
         fail_fast: true
+        require_serial: true
         verbose: true
         stages: [commit]
 
@@ -104,6 +105,7 @@ repos:
           '
         language: system
         always_run: true
+        require_serial: true
         fail_fast: true
         verbose: true
         stages: [commit]
@@ -127,6 +129,7 @@ repos:
         entry: bash -c './bin/buildBinFiles'
         language: system
         always_run: true
+        require_serial: true
         fail_fast: true
         verbose: true
         stages: [commit]
@@ -139,6 +142,7 @@ repos:
         language: system
         always_run: true
         fail_fast: true
+        require_serial: true
         verbose: true
         stages: [commit]
 

@@ -426,6 +426,7 @@ UI::theme() {
     noColor) ;;
     *)
       Log::fatal "invalid theme provided"
+      ;;
   esac
   if [[ "${theme}" = "default" ]]; then
     export BASH_FRAMEWORK_THEME="default"
@@ -1206,6 +1207,8 @@ megalinterCommand() {
     optionCheckMegalinterVersion="0"
     local -i options_parse_optionParsedCountOptionCheckMegalinterVersion
     ((options_parse_optionParsedCountOptionCheckMegalinterVersion = 0)) || true
+    local -i options_parse_optionParsedCountOptionMegalinterConfigFile
+    ((options_parse_optionParsedCountOptionMegalinterConfigFile = 0)) || true
     local -i options_parse_optionParsedCountOptionBashFrameworkConfig
     ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
     optionConfig="0"
@@ -1245,7 +1248,7 @@ megalinterCommand() {
       local options_parse_arg="$1"
       local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
-        # Option 1/20
+        # Option 1/21
         # Option optionFormat --format variableType String min 0 max 1 authorizedValues 'plain|json' regexp ''
         --format)
           shift
@@ -1265,7 +1268,7 @@ megalinterCommand() {
           optionFormat="$1"
           updateArgListFormatCallback "${options_parse_arg}" "${optionFormat}"
           ;;
-        # Option 2/20
+        # Option 2/21
         # Option optionFix --fix variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --fix)
           optionFix="1"
@@ -1276,7 +1279,7 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionFix))
           optionFixCallback "${options_parse_arg}"
           ;;
-        # Option 3/20
+        # Option 3/21
         # Option optionFilesOnly --filesOnly variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --filesOnly)
           optionFilesOnly="1"
@@ -1287,7 +1290,7 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionFilesOnly))
           filesOnlyCallback "${options_parse_arg}"
           ;;
-        # Option 4/20
+        # Option 4/21
         # Option optionIncremental --incremental|-i variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --incremental | -i)
           optionIncremental="1"
@@ -1297,7 +1300,7 @@ megalinterCommand() {
           fi
           ((++options_parse_optionParsedCountOptionIncremental))
           ;;
-        # Option 5/20
+        # Option 5/21
         # Option optionMegalinterImage --image variableType String min 0 max 1 authorizedValues '' regexp ''
         --image)
           shift
@@ -1312,7 +1315,7 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionMegalinterImage))
           optionMegalinterImage="$1"
           ;;
-        # Option 6/20
+        # Option 6/21
         # Option optionCheckMegalinterVersion --check-megalinter-version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --check-megalinter-version)
           optionCheckMegalinterVersion="1"
@@ -1323,7 +1326,22 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionCheckMegalinterVersion))
           optionCheckMegalinterVersionCallback "${options_parse_arg}"
           ;;
-        # Option 7/20
+        # Option 7/21
+        # Option optionMegalinterConfigFile --config-file variableType String min 0 max 1 authorizedValues '' regexp ''
+        --config-file)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionMegalinterConfigFile >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionMegalinterConfigFile))
+          optionMegalinterConfigFile="$1"
+          ;;
+        # Option 8/21
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -1339,7 +1357,7 @@ megalinterCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 8/20
+        # Option 9/21
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           optionConfig="1"
@@ -1349,7 +1367,7 @@ megalinterCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           ;;
-        # Option 9/20
+        # Option 10/21
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           optionInfoVerbose="1"
@@ -1361,7 +1379,7 @@ megalinterCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 10/20
+        # Option 11/21
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           optionDebugVerbose="1"
@@ -1373,7 +1391,7 @@ megalinterCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 11/20
+        # Option 12/21
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           optionTraceVerbose="1"
@@ -1385,7 +1403,7 @@ megalinterCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 12/20
+        # Option 13/21
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -1398,7 +1416,7 @@ megalinterCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 13/20
+        # Option 14/21
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           optionNoColor="1"
@@ -1410,7 +1428,7 @@ megalinterCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
-        # Option 14/20
+        # Option 15/21
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-always|noColor' regexp ''
         --theme)
           shift
@@ -1431,7 +1449,7 @@ megalinterCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 15/20
+        # Option 16/21
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           optionHelp="1"
@@ -1442,7 +1460,7 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           ;;
-        # Option 16/20
+        # Option 17/21
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           optionVersion="1"
@@ -1453,7 +1471,7 @@ megalinterCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           ;;
-        # Option 17/20
+        # Option 18/21
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           optionQuiet="1"
@@ -1465,7 +1483,7 @@ megalinterCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
-        # Option 18/20
+        # Option 19/21
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1486,7 +1504,7 @@ megalinterCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 19/20
+        # Option 20/21
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1503,7 +1521,7 @@ megalinterCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 20/20
+        # Option 21/21
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1543,6 +1561,7 @@ megalinterCommand() {
     export optionIncremental
     export optionMegalinterImage
     export optionCheckMegalinterVersion
+    export optionMegalinterConfigFile
     export optionBashFrameworkConfig
     export optionConfig
     export optionInfoVerbose
@@ -1568,7 +1587,7 @@ megalinterCommand() {
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--format <String>]" "[--fix]" "[--filesOnly]" "[--incremental|-i]" "[--image <String>]" "[--check-megalinter-version]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--format <String>]" "[--fix]" "[--filesOnly]" "[--incremental|-i]" "[--image <String>]" "[--check-megalinter-version]" "[--config-file <String>]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--format <String>${__HELP_NORMAL} (optional) (at most 1 times)"
@@ -1586,6 +1605,8 @@ megalinterCommand() {
     printf "  %b\n" "${__HELP_OPTION_COLOR}--check-megalinter-version${__HELP_NORMAL} (optional) (at most 1 times)"
     echo -e "    Check if new version of megalinter is available (compared to oxsecurity/meg
     alinter-terraform:v7.4.0) and exit 1 if yes and display new version number."
+    printf "  %b\n" "${__HELP_OPTION_COLOR}--config-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "    Specify megalinter config filename to use (default: .mega-linter-light.yml)"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
@@ -1643,6 +1664,7 @@ megalinter image oxsecurity/megalinter-terraform:v7.4.0 will be used.
   fi
 }
 
+declare optionMegalinterConfigFile=".mega-linter-light.yml"
 declare optionMegalinterImage="oxsecurity/megalinter-terraform:v7.4.0"
 declare -a megalinterArgs=()
 unknownArg() {
@@ -1781,6 +1803,7 @@ run() {
     docker run --rm --name=megalinter
     -e HOST_USER_ID="${HOST_USER_ID:-$(id -u)}"
     -e HOST_GROUP_ID="${HOST_GROUP_ID:-$(id -g)}"
+    -e MEGALINTER_CONFIG="${optionMegalinterConfigFile}"
     "${megalinterOptions[@]}"
     -v /var/run/docker.sock:/var/run/docker.sock:rw
     -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw

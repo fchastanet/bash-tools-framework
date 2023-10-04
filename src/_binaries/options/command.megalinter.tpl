@@ -1,4 +1,5 @@
 %
+declare defaultMegalinterConfigFile=".mega-linter-light.yml"
 declare defaultMegalinterImage=oxsecurity/megalinter-terraform:v7.4.0
 declare versionNumber="1.0"
 declare commandFunctionName="megalinterCommand"
@@ -51,6 +52,13 @@ source <(
     --function-name optionMegalinterImageFunction
 
   Options::generateOption \
+    --variable-type "String" \
+    --help "Specify megalinter config filename to use (default: ${defaultMegalinterConfigFile})" \
+    --alt "--config-file" \
+    --variable-name "optionMegalinterConfigFile" \
+    --function-name optionMegalinterConfigFileFunction
+
+  Options::generateOption \
     --help "Check if new version of megalinter is available (compared to ${defaultMegalinterImage}) and exit 1 if yes and display new version number." \
     --alt "--check-megalinter-version" \
     --callback optionCheckMegalinterVersionCallback \
@@ -66,10 +74,12 @@ options+=(
   optionIncrementalFunction
   optionMegalinterImageFunction
   optionCheckMegalinterVersionFunction
+  optionMegalinterConfigFileFunction
 )
 Options::generateCommand "${options[@]}"
 %
 
+declare optionMegalinterConfigFile="<% ${defaultMegalinterConfigFile} %>"
 declare optionMegalinterImage="<% ${defaultMegalinterImage} %>"
 declare -a megalinterArgs=()
 unknownArg() {

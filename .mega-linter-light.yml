@@ -1,0 +1,26 @@
+---
+EXTENDS:
+  - .mega-linter.yml
+DISABLE_LINTERS:
+  - JAVASCRIPT_ES
+  - JAVASCRIPT_PRETTIER
+  - RUBY_RUBOCOP
+  - REPOSITORY_CHECKOV
+  - REPOSITORY_TRIVY
+  - REPOSITORY_KICS
+  - SPELL_VALE
+  - SPELL_LYCHEE
+  - SPELL_PROSELINT
+  # REPOSITORY_TRUFFLEHOG disabled because too slow
+  - REPOSITORY_TRUFFLEHOG
+  # REPOSITORY_GRYPE disabled because too slow
+  - REPOSITORY_GRYPE
+
+POST_COMMANDS:
+  # FIX files set as root user
+  # HOST_USER_ID and HOST_GROUP_ID set in package.json
+  - command: |
+      if [[ "{HOST_USER_ID:-0}" != "0" && "{HOST_GROUP_ID:-0}" != "0" ]]; then
+        find . -user 0 -exec chown ${HOST_USER_ID}:${HOST_GROUP_ID} {} ';'
+      fi
+    cwd: 'workspace'

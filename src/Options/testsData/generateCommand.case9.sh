@@ -23,7 +23,7 @@ Options::command() {
           fi
           ((++options_parse_optionParsedCountVerbose))
           # shellcheck disable=SC2317
-          everyOptionCallback verbose "${options_parse_arg}" "${verbose}" || true
+          everyOptionCallback "verbose" "${options_parse_arg}" "${verbose}" || true
           ;;
         -*)
           # shellcheck disable=SC2317

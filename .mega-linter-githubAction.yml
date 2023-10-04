@@ -1,0 +1,4 @@
+---
+EXTENDS:
+  - .mega-linter.yml
+SHOW_ELAPSED_TIME: false

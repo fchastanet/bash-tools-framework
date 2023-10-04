@@ -18,7 +18,7 @@
     "package-lock.json",
     "report",
     ".jscpd.json",
-    ".mega-linter.yml",
+    ".mega-linter*.yml",
     ".shellcheckrc",
     ".env",
     "**/*/svg"

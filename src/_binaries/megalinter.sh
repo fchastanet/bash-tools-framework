@@ -55,6 +55,7 @@ run() {
     docker run --rm --name=megalinter
     -e HOST_USER_ID="${HOST_USER_ID:-$(id -u)}"
     -e HOST_GROUP_ID="${HOST_GROUP_ID:-$(id -g)}"
+    -e MEGALINTER_CONFIG="${optionMegalinterConfigFile}"
     "${megalinterOptions[@]}"
     -v /var/run/docker.sock:/var/run/docker.sock:rw
     -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw

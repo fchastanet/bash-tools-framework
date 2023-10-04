@@ -38,9 +38,9 @@
   % for everyOptionCallback in "${everyOptionCallbacks[@]}"; do
     # shellcheck disable=SC2317
     % if [[ "${variableType}" = "StringArray" ]]; then
-    <% ${everyOptionCallback} %> <%" ${variableName} "%> "${options_parse_arg}" "${<% ${variableName} %>[@]}" || true
+    <% ${everyOptionCallback} %> "<% ${variableName} %>" "${options_parse_arg}" "${<% ${variableName} %>[@]}" || true
     % else
-    <% ${everyOptionCallback} %> <%" ${variableName} "%> "${options_parse_arg}" "${<% ${variableName} %>}" || true
+    <% ${everyOptionCallback} %> "<% ${variableName} %>" "${options_parse_arg}" "${<% ${variableName} %>}" || true
     % fi
   % done
   ;;
