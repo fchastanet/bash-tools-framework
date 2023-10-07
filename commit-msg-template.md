@@ -2,16 +2,18 @@ Title
 
 Short 3 lines summary
 
-**Breaking changes:**
+# Breaking changes
 
-- **Compiler changes:**
+# Bug fixes
 
-- **Binaries changes:**
+# Compiler changes
 
-- **Updated Bash framework functions:**
+# Binaries changes
 
-- **New Bash framework functions:**
+# Updated Bash framework functions
 
-- **Documentation:**
+# New Bash framework functions
 
--
+# Documentation
+
+# Validation
