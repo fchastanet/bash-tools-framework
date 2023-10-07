@@ -88,20 +88,12 @@ repos:
       - id: frameworkLint
         name: frameworkLint
         entry: |
-          bash -c '
-            if ./bin/frameworkLint --format plain --verbose --theme default-always 2>&1 | tee /tmp/frameworkLintResult; then
-              # check warning count
-              expectedResult="0 error/72 warnings"
-              result="$(tail -1 /tmp/frameworkLintResult | grep -P -o "([0-9]+ error/[0-9]+ warnings)")"
-              if [[ "${result}" = "${expectedResult}" ]]; then
-                (>&2 echo "frameworkLint no new warnings")
-              else
-                (>&2 echo "frameworkLint result \"${result}\" is different than expected one \"${expectedResult}\"")
-                exit 1
-              fi
-            else
-              exit 1
-            fi
+          bash -c './bin/frameworkLint \
+            --expected-warnings-count 72 \
+            --format plain \
+            --verbose \
+            --theme default-always \
+            2>&1 | tee /tmp/frameworkLintResult
           '
         language: system
         always_run: true

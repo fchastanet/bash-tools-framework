@@ -19,5 +19,28 @@ Lint files of the current repository
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.format.tpl)"
 
 %
+# shellcheck source=/dev/null
+source <(
+  Options::generateOption \
+    --variable-type "String" \
+    --help "Specify expected warning count (default: 0)" \
+    --alt "--expected-warnings-count" \
+    --callback optionExpectedWarningsCountCallback \
+    --variable-name optionExpectedWarningsCount \
+    --function-name optionExpectedWarningsCountFunction
+)
+
+options+=(
+  optionExpectedWarningsCountFunction
+)
+
 Options::generateCommand "${options[@]}"
 %
+
+declare -i optionExpectedWarningsCount=0
+
+optionExpectedWarningsCountCallback() {
+  if [[ ! "$2" =~ ^[0-9]+$ ]] || (( $2 < 0 )); then
+    Log::fatal "Command ${SCRIPT_NAME} - Expected warnings count value should be a number greater or equal to 0"
+  fi
+}

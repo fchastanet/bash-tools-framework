@@ -261,9 +261,6 @@ run() {
     fi
   done < <(cat "${missingBashFileList}" 2>/dev/null || true)
 
-  if [[ "${optionFormat}" = "checkstyle" ]]; then
-    echo "</checkstyle>"
-  fi
   if [[ "${optionFormat}" = "plain" ]]; then
     if ((errorCount > 0)); then
       Log::displayError "${errorCount} errors/${warningCount} warnings found !"
@@ -274,9 +271,32 @@ run() {
     fi
   fi
 
-  if ((errorCount > 0)); then
-    exit 1
+  ((exitCode = 0)) || true
+  # shellcheck disable=SC2154
+  if ((warningCount > optionExpectedWarningsCount)); then
+    local errorMsg="Warnings count(${warningCount}) is greater than expected warnings count(${optionExpectedWarningsCount})"
+    if [[ "${optionFormat}" = "plain" ]]; then
+      Log::displayError "${errorMsg} !"
+    else
+      echo "<error severity='error' source='warningsCount' message='${errorMsg}'/>"
+    fi
+    ((exitCode = 2))
+  elif ((warningCount < optionExpectedWarningsCount)); then
+    local errorMsg="you can set expected warnings count to ${warningCount} to match the current warnings count"
+    if [[ "${optionFormat}" = "plain" ]]; then
+      Log::displayWarning "${errorMsg}"
+    else
+      echo "<error severity='warning' source='warningsCount' message='${errorMsg}'/>"
+    fi
   fi
+  if ((errorCount > 0)); then
+    ((exitCode = 1))
+  fi
+  if [[ "${optionFormat}" = "checkstyle" ]]; then
+    echo "</checkstyle>"
+  fi
+
+  return "${exitCode}"
 }
 
 if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then

@@ -34,8 +34,9 @@ jobs:
             tee logs/shellcheck-checkstyle.xml
 
       - name: Linting - Framework
-        run:
-          ./bin/frameworkLint -f checkstyle | tee logs/framework-checkstyle.xml
+        run: |
+          ./bin/frameworkLint -f checkstyle --expected-warnings-count 72 |
+            tee logs/framework-checkstyle.xml
 
       - name: Linting - Awk
         run: |
