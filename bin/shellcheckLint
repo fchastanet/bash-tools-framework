@@ -480,11 +480,11 @@ UI::drawLine() {
 # @set __HELP_NORMAL String to remove
 UI::theme() {
   local theme="${1-default}"
-  if [[ ! "${theme}" =~ -always$ ]] && ! Assert::tty; then
+  if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then
     theme="noColor"
   fi
   case "${theme}" in
-    default | default-always)
+    default | default-force)
       theme="default"
       ;;
     noColor) ;;
@@ -1530,15 +1530,15 @@ shellcheckLintCommand() {
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
         # Option 11/17
-        # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-always|noColor' regexp ''
+        # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
         --theme)
           shift
           if (($# == 0)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
-          if [[ ! "$1" =~ default|default-always|noColor ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(default|default-always|noColor)"
+          if [[ ! "$1" =~ default|default-force|noColor ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(default|default-force|noColor)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionTheme >= 1)); then
@@ -1728,8 +1728,8 @@ shellcheckLintCommand() {
     printf "  %b\n" "${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
     echo -e "    Produce monochrome output. alias of --theme noColor."
     printf "  %b\n" "${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    choose color theme (default, default-always or noColor) - default-always me
-    ans colors will be produced even if command is piped"
+    echo -e "    choose color theme (default, default-force or noColor) - default-force mean
+    s colors will be produced even if command is piped"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     echo -e "    Display this command help"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"

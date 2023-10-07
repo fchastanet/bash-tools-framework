@@ -44,29 +44,23 @@
 
 ## 2. Options/Args management
 
-- check if i can speed up megalinter linters REPOSITORY_TRUFFLEHOG,
-  REPOSITORY_GRYPE
 - support option String with equal sign
   - --format plain or --format=plain but -f plain or -fplain
-- make Array::wrap cut on space
+- --help-item-name "srcDir" - underline srcDir in --help (see man xargs)
+- special group for options --bash-framework-config and --config
 - USAGE [OPTIONS] [GlobalOptions]
   - specific Usage [--options] if number of options under 3
   - then describe below each of them
-  - check if alt not used twice
+  - check if alt used multiple times
   - order options not working
-- check if alt used multiple times
-- special group for options --bash-framework-config and --config
 - Default template for option using run
-- --help-item-name "srcDir" - underline srcDir in --help (see man xargs)
 - manage String|Function
 - validatorCallback
-
   - option type File, would check if String after is a valid file
   - validatorHandler could assert path is valid
   - preProcessHandler could remove duplicates
   - postProcessHandler could remove the argument from arg list (default
     postProcessHandler ?)
-
 - option type env --env OPTION=\*
 
 ## 3. Env::load
@@ -127,6 +121,7 @@
 
 ## 6. Framework functions changes
 
+- make Array::wrap cut on space
 - remove all process substitution as it hides exit code > 0
 - Conf::list findOptions as last arg so any number of args
 - merge Framework::run and Command::captureOutputAndExitCode

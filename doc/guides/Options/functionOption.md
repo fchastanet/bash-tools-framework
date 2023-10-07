@@ -2,9 +2,10 @@
 
 ## Description
 
-`Options::generateOption` has generated this Option function that can display
-help and parse the configured option. Several commands are available on option
-function:
+`Options::generateOption` generated this function that allows to display help
+and parse the configured option.
+
+Several commands are available on the function generated:
 
 - variableName
 - variableType (Boolean, String, StringArray)

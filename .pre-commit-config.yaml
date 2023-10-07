@@ -92,7 +92,7 @@ repos:
             --expected-warnings-count 72 \
             --format plain \
             --verbose \
-            --theme default-always \
+            --theme default-force \
             2>&1 | tee /tmp/frameworkLintResult
           '
         language: system

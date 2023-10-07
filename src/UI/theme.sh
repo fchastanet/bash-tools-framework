@@ -23,11 +23,11 @@
 # @set __HELP_NORMAL String to remove
 UI::theme() {
   local theme="${1-default}"
-  if [[ ! "${theme}" =~ -always$ ]] && ! Assert::tty; then
+  if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then
     theme="noColor"
   fi
   case "${theme}" in
-    default | default-always)
+    default | default-force)
       theme="default"
       ;;
     noColor) ;;

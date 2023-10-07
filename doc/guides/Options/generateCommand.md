@@ -30,11 +30,16 @@ OPTIONS:
   [--command-name <String|Function>]
   [--version <String|Function>]
   [--author <String|Function>]
-  [--License <String|Function>]
+  [--license <String|Function>]
+  [--source-file <String|Function>]
   [--copyright <String|Function>]
   [--help-template <String>]
-  [--unknown-option-callback]
-  [--unknown-argument-callback]
+  [--unknown-option-callback <Function>]
+  [--unknown-argument-callback <Function>]
+  [--every-option-callback <Function>]
+  [--every-argument-callback <Function>]
+  [--callback <Function>]
+  [--function-name <String>]
 
 ARGS: list of option/arg functions
 ```

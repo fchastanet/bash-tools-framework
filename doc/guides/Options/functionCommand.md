@@ -2,8 +2,8 @@
 
 ## Description
 
-`Options::generateCommand` has generated this Command function that can display
-help and parse all arguments at once.
+`Options::generateCommand` generated this function that allows to display help
+and parse all arguments or options at once.
 
 ## Syntax
 

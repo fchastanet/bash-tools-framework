@@ -2,7 +2,7 @@
 
 ## Description
 
-`Options::generateArg` has generated this Arg function that can display help and
+`Options::generateArg` generated this function that allows to display help and
 parse the configured argument.
 
 ## Syntax

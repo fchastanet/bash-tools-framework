@@ -2,9 +2,11 @@
 
 ## Description
 
-`Options::generateGroup` has generated this Group function to use with `__group`
-option of the function `Options::generateOption` in order to group options when
-using `Options::generateCommand`.
+`Options::generateGroup` generated this function that allows to group options.
+
+The function generated can be use with `--group` option of the function
+`Options::generateOption` in order to group options when using
+`Options::generateCommand`.
 
 ## Syntax
 
