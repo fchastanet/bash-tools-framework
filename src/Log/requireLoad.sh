@@ -13,6 +13,7 @@
 # @exitcode 0 always successful
 # @stderr diagnostics information about log file is displayed
 # @require Env::requireLoad
+# @require UI::requireTheme
 Log::requireLoad() {
   if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
     BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}

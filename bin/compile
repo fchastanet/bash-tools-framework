@@ -55,6 +55,8 @@ source "${_COMPILE_SRC_DIR}/Compiler/injectFileOnce.sh"
 source "${_COMPILE_SRC_DIR}/File/insertFileBeforeToken.sh"
 # shellcheck source=/src/File/insertFileAfterToken.sh
 source "${_COMPILE_SRC_DIR}/File/insertFileAfterToken.sh"
+# shellcheck source=src/Options/__all.sh
+source "${_COMPILE_SRC_DIR}/Options/__all.sh"
 # shellcheck source=src/Compiler/Embed/__all.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/__all.sh"
 # shellcheck source=src/Compiler/Facade/__all.sh
@@ -67,12 +69,19 @@ source "${_COMPILE_SRC_DIR}/Compiler/Require/__all.sh"
 source "${_COMPILE_SRC_DIR}/Filters/removeExternalQuotes.sh"
 # shellcheck source=/src/Assert/bashFrameworkFunction.sh
 source "${_COMPILE_SRC_DIR}/Assert/bashFrameworkFunction.sh"
+# shellcheck source=/src/Assert/tty.sh
+source "${_COMPILE_SRC_DIR}/Assert/tty.sh"
 # shellcheck source=/src/Assert/fileWritable.sh
 source "${_COMPILE_SRC_DIR}/Assert/fileWritable.sh"
 # shellcheck source=/src/Compiler/Embed/getSrcDirsFromOptions.sh
 source "${_COMPILE_SRC_DIR}/Compiler/Embed/getSrcDirsFromOptions.sh"
+# shellcheck source=/src/UI/theme.sh
+source "${_COMPILE_SRC_DIR}/UI/theme.sh"
+# shellcheck source=/src/UI/requireTheme.sh
+source "${_COMPILE_SRC_DIR}/UI/requireTheme.sh"
 
 Env::requireLoad
+UI::requireTheme
 Log::requireLoad
 Env::requireRemoveVerboseArg
 
@@ -94,21 +103,21 @@ export BIN_FILE
 showHelp() {
   SCRIPT_NAME=${0##*/}
   cat <<EOF
-${__HELP_TITLE}Description:${__HELP_NORMAL} inlines all the functions used in the
+${__HELP_TITLE}DESCRIPTION:${__HELP_NORMAL} inlines all the functions used in the
 script given in parameter
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
+${__HELP_TITLE}USAGE:${__HELP_NORMAL} ${SCRIPT_NAME} [-h|--help] prints this help and exits
+${__HELP_TITLE}USAGE:${__HELP_NORMAL} ${SCRIPT_NAME} <fileToCompile>
     [--src-dir|-s <srcDir>] [--bin-dir|-b <binDir>] [--bin-file|-f <binFile>]
     [--root-dir|-r <rootDir>] [--src-path <srcPath>]
     [--template <templateName>] [--keep-temp-files|-k]
 
-${__HELP_TITLE}Mandatory Arguments:${__HELP_NORMAL}
+${__HELP_TITLE}MANDATORY ARGUMENTS:${__HELP_NORMAL}
 
     <fileToCompile> the relative or absolute path to compile into
       one file
 
-${__HELP_TITLE}Options:${__HELP_NORMAL}
+${__HELP_TITLE}OPTIONS:${__HELP_NORMAL}
     --help,-h prints this help and exits
 
     --src-dir|-s <srcDir> provide the directory where to find the
@@ -229,6 +238,10 @@ done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 _COMPILE_FILE_ARGUMENTS+=(-s "${_COMPILE_SRC_DIR}")
+# add temporary generated functions src dir(Options)
+mkdir -p "${TMPDIR}/src" || true
+srcDirs+=("${TMPDIR}/src")
+_COMPILE_FILE_ARGUMENTS+=(-s "${TMPDIR}/src")
 
 if (($# != 1)); then
   Log::fatal "You must provide exactly 1 fixed parameter"
@@ -326,12 +339,14 @@ evalTemplate() {
     eval "${varExports}"
     eval "${varCallbackExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
+    SCRIPT_NAME="$(basename "${BIN_FILE}")"
     export FRAMEWORK_BIN_DIR
     export FRAMEWORK_ROOT_DIR
     export ORIGINAL_TEMPLATE_DIR
     export TEMPLATE_DIR
     export SRC_ABSOLUTE_PATH
     export SRC_FILE_PATH
+    export SCRIPT_NAME
     export TMPDIR
     # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
     trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM

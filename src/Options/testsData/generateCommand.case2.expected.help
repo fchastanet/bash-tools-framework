@@ -1,0 +1,8 @@
+DESCRIPTION: super command
+
+USAGE: test [OPTIONS]
+USAGE: test [--verbose|-v]
+
+OPTIONS:
+  --verbose, -v (optional) (at most 1 times)
+    verbose mode

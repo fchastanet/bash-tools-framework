@@ -1,0 +1,10 @@
+DESCRIPTION: super command
+
+USAGE: test [OPTIONS]
+USAGE: test [--verbose|-v] [--src-dirs|-s <String>]
+
+OPTIONS:
+  --verbose, -v (optional) (at most 1 times)
+    verbose mode
+  --src-dirs, -s <String> (optional)
+    provide the directory where to find the functions source code.

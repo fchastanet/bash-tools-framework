@@ -1,7 +1,7 @@
 ---
 # Lint the code base and launch unit test at each push or pull request
 name: Lint and test
-on:
+on: # yamllint disable-line rule:truthy
   push:
   workflow_dispatch:
 
@@ -25,7 +25,7 @@ jobs:
       - name: Linting - Dockerfile
         run: |
           set -exo pipefail
-          ./bin/dockerLint | tee logs/docker-checkstyle.xml
+          ./bin/dockerLint -f checkstyle | tee logs/docker-checkstyle.xml
 
       - name: Linting - Shellcheck
         run: |
@@ -34,8 +34,9 @@ jobs:
             tee logs/shellcheck-checkstyle.xml
 
       - name: Linting - Framework
-        run:
-          ./bin/frameworkLint -f checkstyle | tee logs/framework-checkstyle.xml
+        run: |
+          ./bin/frameworkLint -f checkstyle --expected-warnings-count 72 |
+            tee logs/framework-checkstyle.xml
 
       - name: Linting - Awk
         run: |
@@ -47,10 +48,14 @@ jobs:
           set -exo pipefail
           ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
 
-      - name: Checkstyle aggregation
-        uses: jwgmeligmeyling/checkstyle-github-action@master
-        with:
-          path: 'logs/*-checkstyle.xml'
+      - name: check megalinter version
+        run: |
+          set -exo pipefail
+          status=0
+          newVersion="$(./bin/megalinter --check-megalinter-version)" || status=$?
+          if [[ "${status}" != "0" ]] ; then
+            echo "::warning file=.mega-linter.yml,title=new version of megalinter available::${newVersion}"
+          fi
 
       - name: Archive results
         uses: actions/upload-artifact@v3
@@ -86,17 +91,14 @@ jobs:
           - vendor: alpine
             bashTarVersion: 4.4
             bashImage: amd64/bash:4.4-alpine3.18
-            # when using 8 jobs, junit report.xml is empty
             options: -j 30
           - vendor: alpine
             bashTarVersion: 5.0
             bashImage: amd64/bash:5.0-alpine3.18
-            # when using 8 jobs, junit report.xml is empty
             options: -j 30
           - vendor: alpine
             bashTarVersion: 5.1
             bashImage: amd64/bash:5.1-alpine3.18
-            # when using 8 jobs, junit report.xml is empty
             options: -j 30
 
     steps:
@@ -120,36 +122,40 @@ jobs:
       - name: Pull/Build/Push docker image
         env:
           BRANCH: ${{ github.ref }}
-          PUSH: push
         run: |
-          ./bin/buildPushDockerImages "${{matrix.vendor}}" \
-            "${{matrix.bashTarVersion}}" "${{matrix.bashImage}}" "${BRANCH}" \
-            "${PUSH}"
+          ./bin/buildPushDockerImage \
+            --vendor "${{matrix.vendor}}" \
+            --bash-version "${{matrix.bashTarVersion}}" \
+            --bash-base-image "${{matrix.bashImage}}" \
+            --branch-name "${BRANCH}" \
+            --push -vvv
 
       - name: Check image
         run: |
           docker run --rm \
-            "bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}" bash \
+            "build:bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}" bash \
             --version
 
       - name: run unit tests
         run: |
+          chmod -R 777 logs
           # shellcheck disable=SC2266
-          VENDOR="${{ matrix.vendor }}" \
-          BASH_TAR_VERSION="${{ matrix.bashTarVersion }}" \
-          BASH_IMAGE="${{ matrix.bashImage }}" \
-          USER_ID=$(id -u) \
-          GROUP_ID=$(id -g) \
-          SKIP_BUILD=0 \
-          ./bin/test ${{matrix.options}} --report-formatter junit -o logs -r src
+          USER_ID=1000 \
+          GROUP_ID=1000 \
+          ./bin/test \
+            -vvv \
+            --vendor "${{matrix.vendor}}" \
+            --bash-version "${{matrix.bashTarVersion}}" \
+            --bash-base-image "${{matrix.bashImage}}" \
+            --branch-name "${BRANCH}" \
+            ${{matrix.options}} --report-formatter junit -o logs -r src --ci
 
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+      - name: Upload Test Results
         if: always()
+        uses: actions/upload-artifact@v3
         with:
-          files: logs/report.xml
-          check_name:
-            'Unit Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}'
+          name: Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}
+          path: logs/report.xml
 
       - uses: ouzi-dev/commit-status-updater@v2
         if: always()
@@ -157,17 +163,34 @@ jobs:
           name: build bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: ${{ job.status }}
 
-  buildResults:
+  publishTestResults:
+    name: 'Publish Tests Results'
     if: ${{ always() }}
-    runs-on: ubuntu-latest
-    name: Final Build Results
     needs: [linters, buildDockerImagesAndTest]
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+
+      # needed by ouzi-dev/commit-status-updater@v2
+      statuses: write
+
+      # only needed unless run with comment_mode: off
+      pull-requests: write
     steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Checkstyle aggregation
+        uses: jwgmeligmeyling/checkstyle-github-action@master
+        with:
+          path: 'artifacts/**/*.xml'
+
       # run this action to get the workflow conclusion
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
       - uses: technote-space/workflow-conclusion-action@v3
 
-      # run other action with the workflow conclusion
       - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build

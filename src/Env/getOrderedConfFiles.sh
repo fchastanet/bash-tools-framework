@@ -10,20 +10,6 @@
 # @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
 Env::getOrderedConfFiles() {
   local -a configFiles=()
-  local verboseFile
-  verboseFile="$(Env::parseVerboseArg)" || return 1
-  if [[ -n "${verboseFile}" ]]; then
-    configFiles+=("${verboseFile}")
-  fi
-
-  local -a envFiles
-  envFilesStr="$(Env::parseEnvFileArg)" || return 1
-  if [[ -n "${envFilesStr}" ]]; then
-    readarray -t envFiles <<<"${envFilesStr}"
-    if ((${#envFiles[@]} > 0)); then
-      configFiles+=("${envFiles[@]}")
-    fi
-  fi
 
   if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     # BASH_FRAMEWORK_ENV_FILES is an array

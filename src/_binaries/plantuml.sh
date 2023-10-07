@@ -3,58 +3,36 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-HELP="$(
-  cat <<EOF
-${__HELP_TITLE}Synopsis:${__HELP_NORMAL} Generates plantuml diagrams from puml files
+.INCLUDE "$(dynamicTemplateDir _binaries/options/command.plantuml.tpl)"
 
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [--help] prints this help and exits.
-${__HELP_TITLE}Usage:${__HELP_NORMAL} ${SCRIPT_NAME} [-f svg|png]
-
-${__HELP_TITLE}Description:${__HELP_NORMAL}
-Generates plantuml diagrams from puml files in formats provided
-
-.INCLUDE "$(dynamicTemplateDir _includes/author.tpl)"
-EOF
-)"
-
-declare args
-args="$(getopt -l help,format: -o hf: -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null)" || true
-eval set -- "${args}"
-declare FORMATS=()
-
-while true; do
-  case $1 in
-    -h | --help)
-      echo -e "${HELP}"
-      exit 0
-      ;;
-    -f | --format)
-      shift || true
-      FORMATS+=("$1")
-      ;;
-    --)
-      shift || true
-      break
-      ;;
-    *)
-      # ignore
-      ;;
-  esac
-  shift || true
-done
+plantumlCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 detectChangedAddedFiles() {
   git ls-files --exclude-standard --modified --others
 }
 
-changedFilesBefore=$(detectChangedAddedFiles)
-for format in "${FORMATS[@]}"; do
+declare -a files
+# shellcheck disable=SC2154
+if ((${#argPlantumlFiles[@]} > 0)); then
+  files=("${argPlantumlFiles[@]}")
+else
+  changedFilesBefore=$(detectChangedAddedFiles)
+  files=("**/*.puml")
+fi
+
+if ((${#files[@]} == 0)); then
+  Log::displayError "Command ${SCRIPT_NAME} - no file provided"
+fi
+# shellcheck disable=SC2154
+for format in "${optionFormats[@]}"; do
+  # shellcheck disable=SC2154
   docker run --rm -v "$(pwd -P)":/app/project plantuml/plantuml \
     -u "$(id -u):$(id -g)" -t"${format}" -failfast \
-    -o/app/project/doc/images "/app/project/src/**/*.puml"
+    -o "/app/project/${optionOutputDir}" "${files[@]/#/\/app\/project\/}"
 done
-changedFilesAfter=$(detectChangedAddedFiles)
-
-diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
-  Log::fatal "files have been added"
-}
+if ((${#argPlantumlFiles[@]} == 0)); then
+  changedFilesAfter=$(detectChangedAddedFiles)
+  diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
+    Log::fatal "files have been added"
+  }
+fi

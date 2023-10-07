@@ -27,7 +27,7 @@ Git::cloneOrPullIfNoChanges() {
   else
     Log::displayInfo "cloning ${repo} ..."
     mkdir -p "$(dirname "${dir}")"
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086,SC2248
     git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}" && (
       # shellcheck disable=SC2086
       if [[ "$(type -t ${cloneCallback})" = "function" ]]; then

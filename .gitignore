@@ -1,15 +1,19 @@
-/logs/*
-!/logs/.gitkeep
-/vendor/
-/.history/
-/megalinter-reports/
+logs/**
+!logs/.gitkeep
+vendor/
+.history/
 *.bak
+commit-msg.md
+
+# megalinter
+megalinter-reports/
+*megalinter_file_names_cspell.txt
 
 # docsify github pages
-/pages/*.md
-/pages/_site
-/pages/doc
-/pages/bashDoc
-/pages/tests
-!/**/_sidebar.md
-!/**/_navbar.md
+pages/*.md
+pages/_site/
+pages/doc/
+pages/bashDoc/
+pages/tests/
+!**/_sidebar.md
+!**/_navbar.md

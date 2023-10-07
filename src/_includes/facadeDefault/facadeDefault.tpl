@@ -2,6 +2,7 @@
 ###############################################################################
 # GENERATED FACADE FROM <% $REPOSITORY_URL %>/tree/master/<% $SRC_FILE_PATH %>
 # DO NOT EDIT IT
+# @generated
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
 %# FACADE_HEADERS here the headers of original script file will be copied
@@ -12,7 +13,6 @@ SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
 %# END MANDATORY HEADERS
 

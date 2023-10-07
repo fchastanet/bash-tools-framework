@@ -16,38 +16,7 @@ function teardown() {
   unstub_all
 }
 
-function Env::getOrderedConfFiles::parseVerboseArgError { #@test
-  Env::parseVerboseArg() {
-    return 1
-  }
-  local status=0
-  Env::getOrderedConfFiles >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  [[ "${status}" = "1" ]]
-  run cat "${BATS_TEST_TMPDIR}/result"
-  assert_output ""
-}
-
-function Env::getOrderedConfFiles::parseEnvFileArgError { #@test
-  Env::parseVerboseArg() {
-    return 0
-  }
-  Env::parseEnvFileArg() {
-    return 1
-  }
-  local status=0
-  Env::getOrderedConfFiles >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
-  [[ "${status}" = "1" ]]
-  run cat "${BATS_TEST_TMPDIR}/result"
-  assert_output ""
-}
-
 function Env::getOrderedConfFiles::createDefaultEnvFileError { #@test
-  Env::parseVerboseArg() {
-    return 0
-  }
-  Env::parseEnvFileArg() {
-    return 0
-  }
   Env::createDefaultEnvFile() {
     return 1
   }
@@ -59,12 +28,6 @@ function Env::getOrderedConfFiles::createDefaultEnvFileError { #@test
 }
 
 function Env::getOrderedConfFiles::noArgFileNotFound { #@test
-  Env::parseVerboseArg() {
-    return 0
-  }
-  Env::parseEnvFileArg() {
-    return 0
-  }
   Env::createDefaultEnvFile() {
     echo "defaultEnvFile"
     return 0
@@ -78,12 +41,6 @@ function Env::getOrderedConfFiles::noArgFileNotFound { #@test
 }
 
 function Env::getOrderedConfFiles::FromEnv { #@test
-  Env::parseVerboseArg() {
-    return 0
-  }
-  Env::parseEnvFileArg() {
-    return 0
-  }
   Env::createDefaultEnvFile() {
     echo "defaultEnvFile"
     return 0
@@ -99,14 +56,6 @@ function Env::getOrderedConfFiles::FromEnv { #@test
 }
 
 function Env::getOrderedConfFiles::FromAll { #@test
-  Env::parseVerboseArg() {
-    echo "${BATS_TEST_DIRNAME}/testsData/.env"
-    return 0
-  }
-  Env::parseEnvFileArg() {
-    echo "${BATS_TEST_DIRNAME}/testsData/.envForced"
-    return 0
-  }
   local -a BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/.envParam")
   export BASH_FRAMEWORK_ENV_FILES
 
@@ -119,9 +68,7 @@ function Env::getOrderedConfFiles::FromAll { #@test
   Env::getOrderedConfFiles >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
-  assert_lines_count 4
-  assert_line --index 0 "${BATS_TEST_DIRNAME}/testsData/.env"
-  assert_line --index 1 "${BATS_TEST_DIRNAME}/testsData/.envForced"
-  assert_line --index 2 "${BATS_TEST_DIRNAME}/testsData/.envParam"
-  assert_line --index 3 "${BATS_TEST_DIRNAME}/testsData/.envHomeDir"
+  assert_lines_count 2
+  assert_line --index 0 "${BATS_TEST_DIRNAME}/testsData/.envParam"
+  assert_line --index 1 "${BATS_TEST_DIRNAME}/testsData/.envHomeDir"
 }

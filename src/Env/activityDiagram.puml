@@ -11,11 +11,6 @@ start
 partition "Env::requireLoad" #LightSkyBlue {
 
   partition "Env::getOrderedConfigFiles" #LightSkyBlue {
-    #DeepSkyBlue:Env::parseEnvFileArgument;
-
-    #DeepSkyBlue:Env::parseVerboseArgument;
-    note right: generate a file to load if necessary
-
     #DeepSkyBlue:add eventual BASH_FRAMEWORK_ENV_FILES;
     note right
     //Example://

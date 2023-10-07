@@ -138,3 +138,11 @@ gtid
 fchastanet
 docsify
 nojekyll
+gitleaks
+mypy
+kcov
+libdw
+SpacesAftertabs
+PROSELINT
+TRUFFLEHOG
+nproc

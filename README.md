@@ -92,8 +92,6 @@ see related documentation [Compile command](doc/CompileCommand.md).
 - **awkLint** : Lint all files with .awk extension in specified folder.
 - **dockerLint** : hadolint wrapper, auto installing hadolint
 - **shellcheckLint** : shellcheck wrapper, auto installing shellcheck
-- **generateShellDoc**: find all .sh files and generate shDoc in markdown format
-  in the specified target directory
 
 ### 1.3. Internal tools
 
@@ -160,7 +158,7 @@ Here an excerpt of the namespaces available in Bash tools framework:
     target db connection
 - Dns : various methods like Dns::pingHost or allowing etc/hosts manipulation.
 - Docker : various docker cli abstractions that allowed to construct
-  `bin/buildPushDockerImages` command.
+  `bin/buildPushDockerImage` command.
 - Embed : functions that allows `bin/compiler` to manage `EMBED directives` (see
   [Compile command](doc/CompileCommand.md)).
 - Env : functions allowing to load env variables or to alter them like
@@ -238,8 +236,6 @@ FRAMEWORK_VENDOR_BIN_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor/bin' %>"
 export PATH="${BIN_DIR}":"${FRAMEWORK_VENDOR_BIN_DIR}":${PATH}
 
 .INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
-
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_colors.sh"
 
 # FUNCTIONS
 

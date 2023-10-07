@@ -32,8 +32,8 @@ source "${srcDir}/Compiler/Embed/embedFrameworkFunction.sh"
 source "${srcDir}/Compiler/Embed/extractFileFromBase64.sh"
 # shellcheck source=src/_includes/_commonHeader.sh
 source "${srcDir}/_includes/_commonHeader.sh"
-# shellcheck source=src/_includes/_colors.sh
-source "${srcDir}/_includes/_colors.sh"
+# shellcheck source=src/UI/theme.sh
+source "${srcDir}/UI/theme.sh"
 # shellcheck source=src/Env/requireLoad.sh
 source "${srcDir}/Env/requireLoad.sh"
 # shellcheck source=src/Log/__all.sh

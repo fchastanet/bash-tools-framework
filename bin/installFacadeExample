@@ -2,6 +2,7 @@
 ###############################################################################
 # GENERATED FACADE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/installFacadeExample.sh
 # DO NOT EDIT IT
+# @generated
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/installFacadeExample
@@ -42,8 +43,10 @@ export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 
 # store command arguments for later usage
-export BASH_FRAMEWORK_ARGV=("$@")
-export ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
+# shellcheck disable=SC2034
+declare -a BASH_FRAMEWORK_ARGV=("$@")
+# shellcheck disable=SC2034
+declare -a ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
 interruptManagement() {
@@ -57,43 +60,6 @@ trap interruptManagement INT
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
-
-if [[ -t 1 || -t 2 ]]; then
-  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-  export __ERROR_COLOR='\e[31m'      # Red
-  export __INFO_COLOR='\e[44m'       # white on lightBlue
-  export __SUCCESS_COLOR='\e[32m'    # Green
-  export __WARNING_COLOR='\e[33m'    # Yellow
-  export __TEST_COLOR='\e[100m'      # Light magenta
-  export __TEST_ERROR_COLOR='\e[41m' # white on red
-  export __SKIPPED_COLOR='\e[33m'    # Yellow
-  export __HELP_COLOR='\e[7;49;33m'  # Black on Gold
-  export __DEBUG_COLOR='\e[37m'      # Grey
-  # Internal: reset color
-  export __RESET_COLOR='\e[0m' # Reset Color
-  # shellcheck disable=SC2155,SC2034
-  export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
-  # shellcheck disable=SC2155,SC2034
-  export __HELP_TITLE="$(echo -e "\e[1;37m")"
-  # shellcheck disable=SC2155,SC2034
-  export __HELP_NORMAL="$(echo -e "\033[0m")"
-else
-  # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-  export __ERROR_COLOR=''
-  export __INFO_COLOR=''
-  export __SUCCESS_COLOR=''
-  export __WARNING_COLOR=''
-  export __SKIPPED_COLOR=''
-  export __HELP_COLOR=''
-  export __TEST_COLOR=''
-  export __TEST_ERROR_COLOR=''
-  export __DEBUG_COLOR=''
-  # Internal: reset color
-  export __RESET_COLOR=''
-  export __HELP_EXAMPLE=''
-  export __HELP_TITLE=''
-  export __HELP_NORMAL=''
-fi
 
 ################################################
 # Temp dir management
@@ -142,6 +108,15 @@ export __LEVEL_INFO=3
 export __LEVEL_SUCCESS=3
 # @description log level debug
 export __LEVEL_DEBUG=4
+
+# @description verbose level off
+export __VERBOSE_LEVEL_OFF=0
+# @description verbose level info
+export __VERBOSE_LEVEL_INFO=1
+# @description verbose level info
+export __VERBOSE_LEVEL_DEBUG=2
+# @description verbose level info
+export __VERBOSE_LEVEL_TRACE=3
 
 # @description Display message using debug color (grey)
 # @arg $1 message:String the message to display
@@ -282,6 +257,7 @@ Env::requireLoad() {
 # @exitcode 0 always successful
 # @stderr diagnostics information about log file is displayed
 # @require Env::requireLoad
+# @require UI::requireTheme
 Log::requireLoad() {
   if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
     BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
@@ -323,20 +299,6 @@ Log::requireLoad() {
 # @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
 Env::getOrderedConfFiles() {
   local -a configFiles=()
-  local verboseFile
-  verboseFile="$(Env::parseVerboseArg)" || return 1
-  if [[ -n "${verboseFile}" ]]; then
-    configFiles+=("${verboseFile}")
-  fi
-
-  local -a envFiles
-  envFilesStr="$(Env::parseEnvFileArg)" || return 1
-  if [[ -n "${envFilesStr}" ]]; then
-    readarray -t envFiles <<<"${envFilesStr}"
-    if ((${#envFiles[@]} > 0)); then
-      configFiles+=("${envFiles[@]}")
-    fi
-  fi
 
   if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     # BASH_FRAMEWORK_ENV_FILES is an array
@@ -438,6 +400,14 @@ Log::rotate() {
   fi
 }
 
+# @description load color theme
+# @noargs
+# @env BASH_FRAMEWORK_THEME String theme to use
+# @exitcode 0 always successful
+UI::requireTheme() {
+  UI::theme "${BASH_FRAMEWORK_THEME-default}"
+}
+
 # @description default env file with all default values
 # @stdout the default env filepath
 Env::createDefaultEnvFile() {
@@ -445,118 +415,12 @@ Env::createDefaultEnvFile() {
   envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
 
   (
+    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
     echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
     echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
     # shellcheck disable=SC2016
     echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
     echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-  ) >"${envFile}"
-  echo "${envFile}"
-}
-
-# @description if --env-file option is parsed in arguments
-# outputs the file provided after this argument to make it
-# available for Env::requireLoad
-# @option --env-file <file> the environment file to load
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
-# @exitcode 1 if Env file provided is invalid
-# @stdout the env filepath asked to be loaded
-# @stderr diagnostic information on failure
-Env::parseEnvFileArg() {
-  (
-    set -- "${BASH_FRAMEWORK_ARGV[@]}" --
-    while true; do
-      case $1 in
-        --env-file)
-          shift || true
-          if [[ "$1" = "--" ]]; then
-            Log::displayError "Env file not provided"
-            return 1
-          fi
-          if [[ ! -r "$1" ]]; then
-            Log::displayError "Env file provided '$1' is invalid"
-            return 1
-          fi
-          echo "$1"
-          ;;
-        --)
-          break
-          ;;
-        *)
-          # ignore
-          ;;
-      esac
-      shift || true
-    done
-  )
-}
-
-# @description verbose level off
-export __VERBOSE_LEVEL_OFF=0
-# @description verbose level info
-export __VERBOSE_LEVEL_INFO=1
-# @description verbose level info
-export __VERBOSE_LEVEL_DEBUG=2
-# @description verbose level info
-export __VERBOSE_LEVEL_TRACE=3
-
-# @description if --verbose|-v option is parsed in arguments
-# generates a conf file that will be loaded via Env::requireLoad
-# @option -v verbose level short option (verbose level = info,  display level = info)
-# @option --verbose verbose level long option (verbose level = info,  display level = info)
-# @option -vv more verbose logs option (verbose level = debug, display level = debug)
-# @option -vvv trace level logs option (verbose level = trace, display level = debug)
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
-# @set BASH_FRAMEWORK_ARGS_VERBOSE int 1 if -v, 2 if -vv, 3 if -vvv
-# @set BASH_FRAMEWORK_DISPLAY_LEVEL int 3 if --verbose|-v, 4 if -vv or -vvv
-# @require Env::requireRemoveVerboseArg
-Env::parseVerboseArg() {
-  local envFile
-  envFile="$(Framework::createTempFile "parseVerboseArgEnvFile")" || return 2
-
-  (
-    local verbose=${__VERBOSE_LEVEL_OFF}
-    local displayLevel=0
-    local arg
-    for arg in "${BASH_FRAMEWORK_ARGV[@]}"; do
-      case "${arg}" in
-        --verbose | -v)
-          verbose=${__VERBOSE_LEVEL_INFO}
-          displayLevel=${__LEVEL_INFO}
-          ;;
-        -vv)
-          verbose=${__VERBOSE_LEVEL_DEBUG}
-          displayLevel=${__LEVEL_DEBUG}
-          ;;
-        -vvv)
-          verbose=${__VERBOSE_LEVEL_TRACE}
-          displayLevel=${__LEVEL_DEBUG}
-          ;;
-        *)
-          # ignore
-          ;;
-      esac
-    done
-    # compute resulting option
-    local verboseOption=""
-    case ${verbose} in
-      "${__VERBOSE_LEVEL_INFO}")
-        verboseOption="--verbose"
-        ;;
-      "${__VERBOSE_LEVEL_DEBUG}")
-        verboseOption="-vv"
-        ;;
-      "${__VERBOSE_LEVEL_TRACE}")
-        verboseOption="-vvv"
-        ;;
-      *) ;;
-    esac
-
-    echo "BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='${verboseOption}'"
-    echo "BASH_FRAMEWORK_ARGS_VERBOSE=${verbose}"
-    if [[ "${displayLevel}" != "0" ]]; then
-      echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${displayLevel}"
-    fi
   ) >"${envFile}"
   echo "${envFile}"
 }
@@ -589,39 +453,105 @@ Log::logSkipped() {
   fi
 }
 
-# @description remove verbose args from BASH_FRAMEWORK_ARGV
-# @noargs
-# @set BASH_FRAMEWORK_ARGV String[] remove args -v --verbose -vv -vvv
-Env::requireRemoveVerboseArg() {
-  # remove verbose args from BASH_FRAMEWORK_ARGV
-  Array::remove BASH_FRAMEWORK_ARGV -v --verbose -vv -vvv
+# @description load colors theme constants
+# @warning if tty not opened, noColor theme will be chosen
+# @arg $1 theme:String the theme to use (default, noColor)
+# @arg $@ args:String[]
+# @set __ERROR_COLOR String indicate error status
+# @set __INFO_COLOR String indicate info status
+# @set __SUCCESS_COLOR String indicate success status
+# @set __WARNING_COLOR String indicate warning status
+# @set __SKIPPED_COLOR String indicate skipped status
+# @set __DEBUG_COLOR String indicate debug status
+# @set __HELP_COLOR String indicate help status
+# @set __TEST_COLOR String not used
+# @set __TEST_ERROR_COLOR String not used
+# @set __HELP_TITLE_COLOR String used to display help title in help strings
+# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
+#
+# @set __RESET_COLOR String reset default color
+#
+# @set __HELP_EXAMPLE String to remove
+# @set __HELP_TITLE String to remove
+# @set __HELP_NORMAL String to remove
+UI::theme() {
+  local theme="${1-default}"
+  if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then
+    theme="noColor"
+  fi
+  case "${theme}" in
+    default | default-force)
+      theme="default"
+      ;;
+    noColor) ;;
+    *)
+      Log::fatal "invalid theme provided"
+      ;;
+  esac
+  if [[ "${theme}" = "default" ]]; then
+    export BASH_FRAMEWORK_THEME="default"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    export __ERROR_COLOR='\e[31m'         # Red
+    export __INFO_COLOR='\e[44m'          # white on lightBlue
+    export __SUCCESS_COLOR='\e[32m'       # Green
+    export __WARNING_COLOR='\e[33m'       # Yellow
+    export __SKIPPED_COLOR='\e[33m'       # Yellow
+    export __DEBUG_COLOR='\e[37m'         # Grey
+    export __HELP_COLOR='\e[7;49;33m'     # Black on Gold
+    export __TEST_COLOR='\e[100m'         # Light magenta
+    export __TEST_ERROR_COLOR='\e[41m'    # white on red
+    export __HELP_TITLE_COLOR="\e[1;37m"  # Bold
+    export __HELP_OPTION_COLOR="\e[1;34m" # Blue
+    # Internal: reset color
+    export __RESET_COLOR='\e[0m' # Reset Color
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_TITLE="$(echo -e "\e[1;37m")"
+    # shellcheck disable=SC2155,SC2034
+    export __HELP_NORMAL="$(echo -e "\033[0m")"
+  else
+    export BASH_FRAMEWORK_THEME="noColor"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    export __ERROR_COLOR=''
+    export __INFO_COLOR=''
+    export __SUCCESS_COLOR=''
+    export __WARNING_COLOR=''
+    export __SKIPPED_COLOR=''
+    export __DEBUG_COLOR=''
+    export __HELP_COLOR=''
+    export __TEST_COLOR=''
+    export __TEST_ERROR_COLOR=''
+    export __HELP_TITLE_COLOR=''
+    export __HELP_OPTION_COLOR=''
+    # Internal: reset color
+    export __RESET_COLOR=''
+    export __HELP_EXAMPLE=''
+    export __HELP_TITLE=''
+    export __HELP_NORMAL=''
+  fi
 }
 
-# @description remove elements from array
-# @arg $1 arrayRemoveArray:&String[] (reference) array from which elements have to be removed
-# @arg $@ valuesToRemoveKeys:String[] list of elements to remove
-# @warning Performance1 : version taken from https://stackoverflow.com/a/59030460
-# @warning Performance2 : for multiple values to remove, prefer using Array::removeIf
-# @see Array::removeIf
-Array::remove() {
-  local -n arrayRemoveArray=$1
-  shift || true # $@ contains elements to remove
-  local -A valuesToRemoveKeys=()
+# @description check if tty (interactive mode) is active
+# @noargs
+# @exitcode 1 if tty not active
+# @stderr diagnostic information + help if second argument is provided
+Assert::tty() {
+  [[ -t 1 || -t 2 ]]
+}
 
-  # Tag items to remove
-  local del
-  for del in "$@"; do valuesToRemoveKeys[${del}]=1; done
+# @description Display message using error color (red) and exit immediately with error status 1
+# @arg $1 message:String the message to display
+Log::fatal() {
+  echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
+}
 
-  # remove items
-  local k
-  for k in "${!arrayRemoveArray[@]}"; do
-    if [[ -n "${valuesToRemoveKeys[${arrayRemoveArray[k]}]+xxx}" ]]; then
-      unset 'arrayRemoveArray[k]'
-    fi
-  done
-
-  # compaction (element re-indexing, because unset makes "holes" in array )
-  arrayRemoveArray=("${arrayRemoveArray[@]}")
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logFatal() {
+  Log::logMessage "${2:-FATAL}" "$1"
 }
 
 # FUNCTIONS
@@ -635,7 +565,7 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 # REQUIRES
 Env::requireLoad
 Log::requireLoad
-Env::requireRemoveVerboseArg
+UI::requireTheme
 Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir

@@ -32,8 +32,10 @@ export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 
 # store command arguments for later usage
-export BASH_FRAMEWORK_ARGV=("$@")
-export ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
+# shellcheck disable=SC2034
+declare -a BASH_FRAMEWORK_ARGV=("$@")
+# shellcheck disable=SC2034
+declare -a ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
 interruptManagement() {

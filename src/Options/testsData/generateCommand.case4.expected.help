@@ -1,0 +1,16 @@
+DESCRIPTION: super command
+
+USAGE: test [OPTIONS] [ARGUMENTS]
+USAGE: test [--verbose|-v] [--src-dirs|-s <String>]
+
+ARGUMENTS:
+  srcFile {single} (mandatory)
+    No help available
+  destFiles {list} (at least 1 times) (at most 3 times)
+    No help available
+
+OPTIONS:
+  --verbose, -v (optional) (at most 1 times)
+    verbose mode
+  --src-dirs, -s <String> (optional)
+    provide the directory where to find the functions source code.
