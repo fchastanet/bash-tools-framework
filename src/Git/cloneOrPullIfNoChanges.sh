@@ -18,21 +18,24 @@ Git::cloneOrPullIfNoChanges() {
   shift || true
 
   if [[ -d "${dir}/.git" ]]; then
-    Git::pullIfNoChanges "${dir}" && (
+    if Git::pullIfNoChanges "${dir}"; then
       # shellcheck disable=SC2086
       if [[ "$(type -t ${pullCallback})" = "function" ]]; then
         ${pullCallback} "${dir}"
       fi
-    )
+    fi
   else
     Log::displayInfo "cloning ${repo} ..."
     mkdir -p "$(dirname "${dir}")"
     # shellcheck disable=SC2086,SC2248
-    git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}" && (
+    if git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
       # shellcheck disable=SC2086
       if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
         ${cloneCallback} "${dir}"
       fi
-    )
+    else
+      Log::displayError "Cloning '${repo}' on '${dir}' failed"
+      return 1
+    fi
   fi
 }
