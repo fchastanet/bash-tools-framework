@@ -98,7 +98,9 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    help"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< help
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1

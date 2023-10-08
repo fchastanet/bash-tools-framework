@@ -56,7 +56,9 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--file${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    file"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< file
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e """very long help"""
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

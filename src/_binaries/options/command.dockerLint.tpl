@@ -4,14 +4,14 @@ declare versionNumber="1.0"
 declare commandFunctionName="dockerLintCommand"
 declare help="Lint docker files of the given directory using hadolint."
 # shellcheck disable=SC2016
-declare longDescription='''
+declare longDescription="""
 - installs new hadolint version(>${MIN_HADOLINT_VERSION}) automatically
 - lint this project files using default files filter
 
 ${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
 
 @@@HADOLINT_HELP@@@
-'''
+"""
 %
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"

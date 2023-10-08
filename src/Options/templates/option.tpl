@@ -44,13 +44,15 @@
     %
     # shellcheck disable=SC2016
     echo 'printf "  %b\n" "<% ${altStr} %>"'
-    % nl=$'\n'
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
-    % elif [[ "${help}" =~ ${nl} ]]; then
-      echo 'echo -e """    <% ${help} %>"""'
+    % elif [[ $(type -t "${help}") == "function" ]]; then
+      echo "echo -e \"    \$(Array::wrap ' ' 76 4 \$(<% ${help} %>))\""
     % else
-      echo "echo -e \"    $(Array::wrap " " 75 0 "<% ${help} %>")\""
+      echo "local -a helpArray"
+      % printf -v helpEscaped '%q' "${help}"
+      echo "IFS=' ' read -r -a helpArray <<< <% ${helpEscaped} %>"
+      echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
     % fi
     % if [[ -n "${defaultValue}" ]]; then
         echo "echo '    Default value: <% ${defaultValue} %>'"

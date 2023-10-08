@@ -108,9 +108,13 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    verbose mode"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< verbose\ mode
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"
-    echo -e "    provide the directory where to find the functions source code."
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1

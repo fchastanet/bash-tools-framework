@@ -33,7 +33,9 @@ Options::option() {
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"'
-    echo "echo -e \"    $(Array::wrap " " 75 0 "super help")\""
+    echo "local -a helpArray"
+    echo "IFS=' ' read -r -a helpArray <<< super\ help"
+    echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
   elif [[ "${cmd}" = "type" ]]; then

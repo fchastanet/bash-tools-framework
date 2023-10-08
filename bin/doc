@@ -1737,38 +1737,67 @@ docCommand() {
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--skip-docker-build${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    skip docker image build if option provided"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< skip\ docker\ image\ build\ if\ option\ provided
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    use alternate bash framework configuration."
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< use\ alternate\ bash\ framework\ configuration.
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    Display configuration"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Display\ configuration
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    info level verbose mode (alias of --display-level INFO)"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    debug level verbose mode (alias of --display-level DEBUG)"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    trace level verbose mode (alias of --display-level TRACE)"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
-    echo -e "    Load the specified env file"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Load\ the\ specified\ env\ file
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    Produce monochrome output. alias of --theme noColor."
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    choose color theme (default, default-force or noColor) - default-force mean
-    s colors will be produced even if command is piped"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< choose\ color\ theme\ \(default\,\ default-force\ or\ noColor\)\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    Display this command help"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Display\ this\ command\ help
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    Print version information and quit"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Print\ version\ information\ and\ quit
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    quiet mode, doesn't display any output"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< quiet\ mode\,\ doesn\'t\ display\ any\ output
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Set\ log\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    Set log file"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< Set\ log\ file
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e """
 INTERNAL TOOL
 """

@@ -56,7 +56,9 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    verbose mode"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< verbose\ mode
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1
