@@ -351,10 +351,17 @@ evalTemplate() {
     # make srcDirs array available for dynamicSrcFile and dynamicSrcDir
     trap 'rm -f "${TMPDIR:-/tmp}/srcDirs"' INT EXIT HUP QUIT ABRT TERM
     printf '%s\n' "${srcDirs[@]}" >"${TMPDIR:-/tmp}/srcDirs"
-    local bashtplLogFile
+    local bashtplLogFile="/dev/null"
+
     bashtplLogFile="$(Framework::createTempFile "bashtplLogFile")"
+    local bashTplTemplate="/dev/null"
+    if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
+      bashTplTemplate="$(mktemp -t bashtplTemplateFileXXXX -p /tmp)"
+      echo >&2 "debug file ${bashTplTemplate}"
+    fi
     # shellcheck source=/dev/null
-    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${file}" 2>"${bashtplLogFile}")
+    source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${file}" 2>"${bashtplLogFile}" |
+      tee "${bashTplTemplate}")
     wait $!
     if [[ -s "${bashtplLogFile}" ]]; then
       Log::displayError "bash-tpl found some errors"
