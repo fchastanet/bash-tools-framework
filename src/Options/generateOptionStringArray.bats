@@ -16,28 +16,31 @@ function setup() {
 function Options::generateOptionStringArray::noOption { #@test
   run Options::generateOptionStringArray
   assert_success
-  assert_lines_count 3
+  assert_lines_count 4
   assert_line --index 0 "export min='0'"
   assert_line --index 1 "export max='-1'"
   assert_line --index 2 "export authorizedValues=''"
+  assert_line --index 3 "export helpValueName='String'"
 }
 
 function Options::generateOptionStringArray::mandatory { #@test
   run Options::generateOptionStringArray --mandatory
   assert_success
-  assert_lines_count 3
+  assert_lines_count 4
   assert_line --index 0 "export min='1'"
   assert_line --index 1 "export max='-1'"
   assert_line --index 2 "export authorizedValues=''"
+  assert_line --index 3 "export helpValueName='String'"
 }
 
 function Options::generateOptionStringArray::authorizedValuesValueMissingValue { #@test
   run Options::generateOptionStringArray --authorized-values
   assert_success
-  assert_lines_count 3
+  assert_lines_count 4
   assert_line --index 0 "export min='0'"
   assert_line --index 1 "export max='-1'"
   assert_line --index 2 "export authorizedValues=''"
+  assert_line --index 3 "export helpValueName='String'"
 }
 
 function Options::generateOptionStringArray::authorizedValuesValueInvalidValue { #@test
@@ -85,10 +88,11 @@ function Options::generateOptionStringArray::minValueGreaterThanMaxValue { #@tes
 function Options::generateOptionStringArray::setAll { #@test
   run Options::generateOptionStringArray --authorized-values "valid|invalid" --min "1" --max "2"
   assert_success
-  assert_lines_count 3
+  assert_lines_count 4
   assert_line --index 0 "export min='1'"
   assert_line --index 1 "export max='2'"
   assert_line --index 2 "export authorizedValues='valid|invalid'"
+  assert_line --index 3 "export helpValueName='String'"
 }
 
 function Options::generateOptionStringArray::setInvalidOption { #@test

@@ -26,7 +26,7 @@
       altStr='${__HELP_OPTION_COLOR}'
       altStr+="$(Array::join '${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}' "${alts[@]}")"
       if [[ "${variableType}" != "Boolean" ]]; then
-        altStr+=' <String>'
+        altStr+=" <${helpValueName}>"
       fi
       altStr+='${__HELP_NORMAL}'
       if ((min == 1 && max == 1)); then
@@ -75,7 +75,8 @@
         helpAlt=""
         ((min == 0)) && helpAlt+="["
         helpAlt+="$(Array::join '|' "${alts[@]}")"
-        ((min == 0)) && helpAlt+=" <String>]"
+        helpAlt+=" <${helpValueName}>"
+        ((min == 0)) && helpAlt+="]"
       fi
     %
     echo '<% ${helpAlt%, } %>'

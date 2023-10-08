@@ -6,6 +6,7 @@
 # @option --min <value> (optional) minimum number of options to provide (Defaults to 0 or 1 if mandatory).
 # @option --max <value> (optional) maximum number of options to provide (Default "" means no limit)
 # @option --authorized-values <value> (optional) Indicates the possible value list separated by | character (Default: "" means no check)
+# @option --help-value-name <valueName> (optional) Indicates the name of value of the option to display in help (Default: "String")
 # @exitcode 1 if error during option parsing
 # @stdout script file generated to parse the arguments following the rules provided
 # @stderr diagnostics information is displayed
@@ -15,6 +16,7 @@ Options::generateOptionStringArray() {
   local min="0"
   local max="-1"
   local authorizedValues=""
+  local helpValueName="String"
 
   while (($# > 0)); do
     case "$1" in
@@ -43,6 +45,15 @@ Options::generateOptionStringArray() {
         fi
         max="$1"
         ;;
+      --help-value-name)
+        shift || true
+        # TODO check if valid regexp
+        if [[ "$1" =~ [[:space:]] ]]; then
+          Log::displayError "Options::generateOptionString - --help-value-name invalid regexp '$1'"
+          return 1
+        fi
+        helpValueName="$1"
+        ;;
       --mandatory)
         min="1"
         ;;
@@ -63,4 +74,5 @@ Options::generateOptionStringArray() {
   echo "export min='${min}'"
   echo "export max='${max}'"
   echo "export authorizedValues='${authorizedValues}'"
+  echo "export helpValueName='${helpValueName}'"
 }

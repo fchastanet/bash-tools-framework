@@ -5,6 +5,7 @@
 # @option --default-value <value> (optional) value set by default on the variable (Default: "")
 # @option --authorized-values <value> (optional) Indicates the possible value list separated by | character (Default: "" means no check)
 # @option --mandatory (optional) makes this option mandatory
+# @option --help-value-name <valueName> (optional) Indicates the name of value of the option to display in help (Default: "String")
 # @exitcode 1 if error during option parsing
 # @stdout script file generated to parse the arguments following the rules provided
 # @stderr diagnostics information is displayed
@@ -14,6 +15,7 @@ Options::generateOptionString() {
   local min="0"
   local defaultValue=""
   local authorizedValues=""
+  local helpValueName="String"
 
   while (($# > 0)); do
     case "$1" in
@@ -29,6 +31,15 @@ Options::generateOptionString() {
           return 1
         fi
         authorizedValues="$1"
+        ;;
+      --help-value-name)
+        shift || true
+        # TODO check if valid regexp
+        if [[ "$1" =~ [[:space:]] ]]; then
+          Log::displayError "Options::generateOptionString - --help-value-name invalid regexp '$1'"
+          return 1
+        fi
+        helpValueName="$1"
         ;;
       --mandatory)
         min="1"
@@ -46,4 +57,5 @@ Options::generateOptionString() {
   echo "export max='1'"
   echo "export defaultValue='${defaultValue}'"
   echo "export authorizedValues='${authorizedValues}'"
+  echo "export helpValueName='${helpValueName}'"
 }

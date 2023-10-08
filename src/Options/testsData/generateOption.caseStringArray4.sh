@@ -50,7 +50,7 @@ Options::option() {
     echo '--var'
     echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
-    echo '--var|-v'
+    echo '--var|-v <String>'
   elif [[ "${cmd}" = "groupId" ]]; then
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then

@@ -40,7 +40,7 @@ Options::option() {
     echo "Option varName --var|-v variableType String min 1 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} (mandatory)"'
+    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <myVarName>${__HELP_NORMAL} (mandatory)"'
     echo "local -a helpArray"
     echo "IFS=' ' read -r -a helpArray <<< super\ help"
     echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
@@ -54,7 +54,7 @@ Options::option() {
     echo '--var'
     echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
-    echo '--var|-v'
+    echo '--var|-v <myVarName>'
   elif [[ "${cmd}" = "groupId" ]]; then
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then

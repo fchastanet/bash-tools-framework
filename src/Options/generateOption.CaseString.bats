@@ -180,6 +180,7 @@ function Options::generateOption::caseString4::success { #@test
   local status=0
   Options::generateOption --variable-type String --variable-name "varName" \
     --alt "--var" --alt "-v" --mandatory --help "super help" \
+    --help-value-name "myVarName" \
     >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   testCommand "generateOption.caseString4.sh" "Options::option"
 }
@@ -200,7 +201,7 @@ function Options::generateOption::caseString4::otherCommands { #@test
 
   run Options::option helpAlt
   assert_success
-  assert_output "--var|-v"
+  assert_output "--var|-v <myVarName>"
 
   run Options::option oneLineHelp
   assert_success
@@ -269,6 +270,6 @@ function Options::generateOption::caseString4::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseString4.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v <String>${__HELP_NORMAL} (mandatory)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v <myVarName>${__HELP_NORMAL} (mandatory)"
   assert_line --index 1 "    super help"
 }
