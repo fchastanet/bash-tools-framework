@@ -10,6 +10,7 @@ declare -a dockerRunArgs=()
 declare -a dockerRunArgs=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
 export DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 export DOCKER_RUN_OPTIONS="${DOCKER_RUN_OPTIONS:-}"
+export BASH_FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
 
 runBuildContainerCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
@@ -17,8 +18,9 @@ if tty -s; then
   dockerRunArgs+=("-it")
 fi
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
+  BASH_FRAMEWORK_ROOT_DIR="$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P)"
   dockerRunArgs+=(
-    -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"
+    -v "${BASH_FRAMEWORK_ROOT_DIR}:/bash/vendor/bash-tools-framework"
   )
 fi
 
@@ -46,7 +48,7 @@ run() {
         "${RUN_CONTAINER_ARGV_FILTERED[@]}"
     )
   fi
-  if [[ -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
+  if [[ -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
     local imageRefUser="${imageRef}-user"
     if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
       Log::displayInfo "build docker image ${imageRefUser} with user configuration"
@@ -63,9 +65,9 @@ run() {
           --build-arg SKIP_USER="${SKIP_USER:-0}" \
           --build-arg USER_ID="${USER_ID:-$(id -u)}" \
           --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-          -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
+          -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
           -t "${imageRefUser}" \
-          "${FRAMEWORK_ROOT_DIR}/.docker"
+          "${BASH_FRAMEWORK_ROOT_DIR}/.docker"
       )
     fi
   fi

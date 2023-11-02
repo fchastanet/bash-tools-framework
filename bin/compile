@@ -83,7 +83,6 @@ source "${_COMPILE_SRC_DIR}/UI/requireTheme.sh"
 Env::requireLoad
 UI::requireTheme
 Log::requireLoad
-Env::requireRemoveVerboseArg
 
 # shellcheck disable=SC2034
 ((failures = 0)) || true
@@ -94,6 +93,8 @@ TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
 # root dir absolute path
 FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}"
 BIN_FILE=""
+BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_OFF}
+
 export BIN_FILE
 
 ################################################
@@ -140,6 +141,8 @@ ${__HELP_TITLE}OPTIONS:${__HELP_NORMAL}
       has been compiled (SRC_FILE_PATH).
       By default, it is initialized with path relative to FRAMEWORK_ROOT_DIR
 
+    --verbose|-v|-vv|-vvv : set log level
+
     --keep-temp-files|-k keep temporary files for debug purpose
 
 ${__HELP_TITLE}More information on options and directives:${__HELP_NORMAL}
@@ -159,9 +162,9 @@ declare -agx _COMPILE_FILE_ARGUMENTS=()
 # -o is for short options like -h
 # -l is for long options with double dash like --help
 # the comma separates different long options
-longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path:,bin-file:,keep-temp-files"
-shortOpts="hks:t:b:r:f:"
-options=$(getopt -l "${longOpts}" -o "${shortOpts}" -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
+longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path:,bin-file:,keep-temp-files,verbose,vv,vvv"
+shortOpts="hks:t:b:r:f:v"
+options=$(getopt -l "${longOpts}" -o "${shortOpts}" -a -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
   showHelp
   Log::fatal "invalid options specified"
 }
@@ -224,6 +227,15 @@ while true; do
       KEEP_TEMP_FILES=1
       _COMPILE_FILE_ARGUMENTS+=(-k)
       ;;
+    --vv)
+      BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
+      ;;
+    --vvv)
+      BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
+      ;;
+    --verbose | --v)
+      BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
+      ;;
     --)
       shift || true
       break
@@ -235,6 +247,7 @@ while true; do
   esac
   shift || true
 done
+
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 _COMPILE_FILE_ARGUMENTS+=(-s "${_COMPILE_SRC_DIR}")
@@ -249,6 +262,7 @@ fi
 
 # The file to compile
 INPUT_FILE="$1"
+export CURRENT_COMPILED_RELATIVE_FILE="${INPUT_FILE#"${FRAMEWORK_ROOT_DIR}"}"
 
 # if bin dir has not been set, set a default value
 if [[ -z "${FRAMEWORK_BIN_DIR+xxx}" ]]; then
@@ -261,7 +275,7 @@ loggedMessages=()
 # load .framework-config
 configFile=""
 # shellcheck source=/.framework-config
-Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "error while loading .framework-config file"
+Framework::loadConfig configFile "${srcDirs[@]}" || Log::fatal "File '${CURRENT_COMPILED_RELATIVE_FILE}' - error while loading .framework-config file"
 
 # shellcheck disable=SC2317
 dynamicTemplateDir() {
@@ -273,7 +287,7 @@ dynamicTemplateDir() {
     echo "${ORIGINAL_TEMPLATE_DIR}/${file}"
     return 0
   fi
-  local msg="dynamicTemplateDir - ${file} does not exist in any template dirs declared"
+  local msg="File '${CURRENT_COMPILED_RELATIVE_FILE}' - dynamicTemplateDir - ${file} does not exist in any template dirs declared"
   echo -e "\e[31m${msg}\e[0m" >&2
   return 1
 }
@@ -290,7 +304,7 @@ dynamicSrcFile() {
       return 0
     fi
   done
-  local msg="dynamicSrcFile - ${file} does not exist in any src dirs declared"
+  local msg="File '${CURRENT_COMPILED_RELATIVE_FILE}' - dynamicSrcFile - ${file} does not exist in any src dirs declared"
   echo -e "\e[31m${msg}\e[0m" >&2
   return 1
 }
@@ -307,7 +321,7 @@ dynamicSrcDir() {
       return 0
     fi
   done
-  local msg="dynamicSrcDir - ${dir} does not exist in any src dirs declared"
+  local msg="File '${CURRENT_COMPILED_RELATIVE_FILE}' - dynamicSrcDir - ${dir} does not exist in any src dirs declared"
   echo -e "\e[31m${msg}\e[0m" >&2
   return 1
 }
@@ -357,14 +371,14 @@ evalTemplate() {
     local bashTplTemplate="/dev/null"
     if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
       bashTplTemplate="$(mktemp -t bashtplTemplateFileXXXX -p /tmp)"
-      echo >&2 "debug file ${bashTplTemplate}"
+      echo >&2 "File '${CURRENT_COMPILED_RELATIVE_FILE}' - debug file ${bashTplTemplate}"
     fi
     # shellcheck source=/dev/null
     source <("${_COMPILE_ROOT_DIR}/bin/bash-tpl" "${file}" 2>"${bashtplLogFile}" |
       tee "${bashTplTemplate}")
     wait $!
     if [[ -s "${bashtplLogFile}" ]]; then
-      Log::displayError "bash-tpl found some errors"
+      Log::displayError "File '${CURRENT_COMPILED_RELATIVE_FILE}' - bash-tpl found some errors"
       cat >&2 "${bashtplLogFile}"
       exit 1
     fi
@@ -388,13 +402,13 @@ importFunctions() {
   functionsToImport+=("${requireFunctionsToImport[@]}")
 
   ((newFilesAdded = 0)) || true
-  if [[ "${ARGS_VERBOSE:-0}" = "2" ]]; then
-    Log::displayDebug "importing ${file} with ${#functionsToImport[@]} functions to import"
+  if (( BASH_FRAMEWORK_ARGS_VERBOSE >= __VERBOSE_LEVEL_DEBUG )); then
+    Log::displayDebug "File '${CURRENT_COMPILED_RELATIVE_FILE}' - importing ${file} with ${#functionsToImport[@]} functions to import"
   fi
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      if [[ "${ARGS_VERBOSE:-0}" = "1" ]]; then
-        msg="File ${INPUT_FILE} Function ${functionToImport} ignored, because of rule defined in ${configFile}"
+      if (( BASH_FRAMEWORK_ARGS_VERBOSE >= __VERBOSE_LEVEL_INFO )); then
+        msg="File '${CURRENT_COMPILED_RELATIVE_FILE}' - Function ${functionToImport} ignored, because of rule defined in ${configFile}"
         if ! Array::contains "${msg}" "${loggedMessages[@]}"; then
           loggedMessages+=("${msg}")
           Log::displayHelp "${msg}" "HINT"
@@ -405,7 +419,7 @@ importFunctions() {
 
     local fileToImport
     fileToImport="$(Compiler::findFunctionInSrcDirs "${functionToImport}" "${srcDirs[@]}")" || {
-      Log::displayError "File ${INPUT_FILE} Function ${functionToImport} not found in any src directories"
+      Log::displayError "File '${CURRENT_COMPILED_RELATIVE_FILE}' - Function ${functionToImport} not found in any src directories"
       ((importFailures++)) || true
       continue
     }
@@ -433,7 +447,7 @@ importFunctions() {
       # shellcheck disable=SC2034
       ((newFilesAdded = 1)) # as we added some files, we need to do another pass
     else
-      Log::displayError "File ${INPUT_FILE} File ${fileToImport} does not exist${__RESET_COLOR}"
+      Log::displayError "File '${CURRENT_COMPILED_RELATIVE_FILE}' - Import file ${fileToImport} does not exist${__RESET_COLOR}"
       # even if not existing, consider the file as imported to avoid other same errors
       filesImportedWithFunctions+=("${fileToImport}")
       ((importFailures++)) || true
@@ -459,8 +473,8 @@ injectImportedFunctions() {
   ((needAnotherPass = 1))
   ((iteration = 1))
   while ((needAnotherPass >= 1)); do
-    if [[ "${ARGS_VERBOSE:-0}" = "2" ]]; then
-      Log::displayDebug "File ${INPUT_FILE} Iteration #${iteration}"
+    if (( BASH_FRAMEWORK_ARGS_VERBOSE >= __VERBOSE_LEVEL_DEBUG )); then
+      Log::displayDebug "File '${CURRENT_COMPILED_RELATIVE_FILE}' - Iteration #${iteration}"
     fi
     echo >"${importedFunctionsTempFile}"
     echo >"${importedZZZTempFile}"
@@ -520,11 +534,11 @@ if [[ -z "${BIN_FILE}" ]]; then
   BIN_FILE=$(Compiler::getBinFile "${INPUT_FILE}")
   if [[ -z "${BIN_FILE}" ]]; then
     # BIN_FILE directive not provided => skipped
-    Log::displaySkipped "File '${INPUT_FILE}' - BIN_FILE directive not provided"
+    Log::displaySkipped "File '${CURRENT_COMPILED_RELATIVE_FILE}' - BIN_FILE directive not provided"
     exit 0
   fi
 fi
-Log::displayInfo "Compiling ${INPUT_FILE} ..."
+Log::displayInfo "Compiling '${CURRENT_COMPILED_RELATIVE_FILE}' ..."
 
 # inject embed
 injectEmbed "${COMPILED_FILE}"
@@ -560,5 +574,5 @@ Compiler::Implement::validateInterfaceFunctions \
 cat -s "${COMPILED_FILE2}" | Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADERS}" >"${BIN_FILE}"
 chmod +x "${BIN_FILE}"
 
-Log::displayStatus "Compiled ${INPUT_FILE} to Binfile ${BIN_FILE}"
+Log::displayStatus "Compiled '${CURRENT_COMPILED_RELATIVE_FILE}' to Binfile '${BIN_FILE}'"
 exit "${failures}"

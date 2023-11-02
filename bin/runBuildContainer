@@ -483,7 +483,7 @@ Conf::loadNearestFile() {
 
 # @description get list of env files to load
 # in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
 # @exitcode 1 if one of the env file cannot be generated
 # @exitcode 2 if one of the env file is not a file or readable
 # @stdout the env files asked to be loaded
@@ -1458,7 +1458,9 @@ runBuildContainerCommand() {
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  [${__HELP_OPTION_COLOR}arg${__HELP_NORMAL} {list}]"
-    echo -e "    $(Array::wrap " " 75 4 "command arguments including command name")"
+    local -a helpArray
+    IFS=' ' read -r -a helpArray <<< command\ arguments\ including\ command\ name
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--vendor <String>${__HELP_NORMAL} (optional) (at most 1 times)"
@@ -1598,6 +1600,7 @@ declare -a dockerRunArgs=()
 declare -a dockerRunArgs=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
 export DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
 export DOCKER_RUN_OPTIONS="${DOCKER_RUN_OPTIONS:-}"
+export BASH_FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
 
 runBuildContainerCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
@@ -1605,8 +1608,9 @@ if tty -s; then
   dockerRunArgs+=("-it")
 fi
 if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
+  BASH_FRAMEWORK_ROOT_DIR="$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P)"
   dockerRunArgs+=(
-    -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"
+    -v "${BASH_FRAMEWORK_ROOT_DIR}:/bash/vendor/bash-tools-framework"
   )
 fi
 
@@ -1634,7 +1638,7 @@ run() {
         "${RUN_CONTAINER_ARGV_FILTERED[@]}"
     )
   fi
-  if [[ -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
+  if [[ -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
     local imageRefUser="${imageRef}-user"
     if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
       Log::displayInfo "build docker image ${imageRefUser} with user configuration"
@@ -1651,9 +1655,9 @@ run() {
           --build-arg SKIP_USER="${SKIP_USER:-0}" \
           --build-arg USER_ID="${USER_ID:-$(id -u)}" \
           --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-          -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
+          -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
           -t "${imageRefUser}" \
-          "${FRAMEWORK_ROOT_DIR}/.docker"
+          "${BASH_FRAMEWORK_ROOT_DIR}/.docker"
       )
     fi
   fi

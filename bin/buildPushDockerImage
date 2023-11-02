@@ -483,7 +483,7 @@ Conf::loadNearestFile() {
 
 # @description get list of env files to load
 # in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
 # @exitcode 1 if one of the env file cannot be generated
 # @exitcode 2 if one of the env file is not a file or readable
 # @stdout the env files asked to be loaded
@@ -1532,6 +1532,10 @@ buildPushDockerImageCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 # build image and push it ot registry
 run() {
   DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
+  BASH_FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
+  if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
+    BASH_FRAMEWORK_ROOT_DIR="$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P)"
+  fi
   # shellcheck disable=SC2154
   local imageTag="build:bash-tools-${optionVendor}-${optionBashVersion}"
   local image="scrasnups/${imageTag}"
@@ -1554,14 +1558,14 @@ run() {
     fi
     DOCKER_BUILDKIT=1 docker build \
       ${DOCKER_BUILD_OPTIONS} \
-      -f "${BASH_TOOLS_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker/Dockerfile.${optionVendor}" \
+      -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
       --cache-from "${image}" \
       --build-arg BUILDKIT_INLINE_CACHE=1 \
       --build-arg argBashVersion="${optionBashVersion}" \
       --build-arg BASH_IMAGE="${optionBashBaseImage}" \
       -t "${imageTag}" \
       -t "${image}" \
-      "${BASH_TOOLS_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/.docker"
+      "${BASH_FRAMEWORK_ROOT_DIR}/.docker"
   )
 
   Log::displayInfo "Image ${image} - bash version check"
