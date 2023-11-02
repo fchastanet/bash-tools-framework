@@ -20,6 +20,7 @@ Options::arg() {
             return 1
           fi
           ((++options_parse_argParsedCountVarName))
+          # shellcheck disable=SC2034
           varName="${options_parse_arg}"
           ;;
       esac
@@ -29,7 +30,6 @@ Options::arg() {
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'varName' should be provided at least 1 time(s)"
       return 1
     fi
-    export varName
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     eval "$(Options::arg helpTpl)"
   elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then

@@ -37,16 +37,16 @@ Options::option() {
       Log::displayError "Command ${SCRIPT_NAME} - Option '--var' should be provided at least 2 time(s)"
       return 1
     fi
-    export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option varName --var|-v variableType StringArray min 2 max 3 authorizedValues 'value1|value2|value3' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
-    # shellcheck disable=SC2016
+    # shellcheck disable=SC2016,SC2028
     echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <myVarName>${__HELP_NORMAL} (at least 2 times) (at most 3 times)"'
     echo "local -a helpArray"
-    echo "IFS=' ' read -r -a helpArray <<< super\ help"
+    echo "# shellcheck disable=SC2054"
+    echo "helpArray=(super\ help)"
     echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"

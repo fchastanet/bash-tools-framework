@@ -1,5 +1,6 @@
 <%% Array::join ' | ' "${alts[@]}" %>)
   % if [[ "${variableType}" = "Boolean" ]]; then
+    # shellcheck disable=SC2034
     <% ${variableName} %>="<% ${onValue} %>"
   % else
     shift
@@ -22,6 +23,7 @@
   % fi
   ((++options_parse_optionParsedCount<% ${variableName^} %>))
   % if [[ "${variableType}" = "String" ]]; then
+  # shellcheck disable=SC2034
   <% ${variableName} %>="$1"
   % elif [[ "${variableType}" = "StringArray" ]]; then
   <% ${variableName} %>+=("$1")

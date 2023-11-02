@@ -48,7 +48,7 @@ Array::wrap() {
   local -i argNoAnsiLength=0
 
   while (($# > 0)); do
-    argNoAnsi="$(echo "${arg}" | Filters::removeAnsiCodes)"
+    argNoAnsi="$(echo "${arg%%*( )}" | Filters::removeAnsiCodes)"
     ((argNoAnsiLength = ${#argNoAnsi})) || true
     if (($# < 1 && argNoAnsiLength == 0)); then
       break
@@ -71,7 +71,7 @@ Array::wrap() {
       if ((currentLineLength == 0 && firstLine == 0)); then
         echo -n "${indentStr}"
       fi
-      echo -e -n "${arg}"
+      echo -e -n "${arg}" | sed 's/[\t ]*$//g'
       needEcho="1"
       ((currentLineLength += argNoAnsiLength))
       ((glueLength = ${#glue})) || true
@@ -90,7 +90,7 @@ Array::wrap() {
         fi
         local -i length
         ((length = maxLineLength - currentLineLength)) || true
-        echo -e "${arg:0:${length}}"
+        echo -e "${arg:0:${length}}" | sed 's/[\t ]*$//g'
         ((currentLineLength = 0)) || true
         ((glueLength = 0)) || true
         arg="${arg:${length}}"
@@ -98,7 +98,7 @@ Array::wrap() {
       else
         # arg cannot be stored on a whole line, so we add it on next line as a whole
         echo
-        echo -e -n "${indentStr}${arg}"
+        echo -e -n "${indentStr}${arg}" | sed 's/[\t ]*$//g'
         ((glueLength = ${#glue})) || true
         ((currentLineLength = argNoAnsiLength))
         arg="" # allows to go to next arg

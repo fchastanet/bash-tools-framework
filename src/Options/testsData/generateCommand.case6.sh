@@ -18,6 +18,7 @@ Options::command() {
     ((options_parse_argParsedCountSrcFile = 0)) || true
     local -i options_parse_argParsedCountDestFiles
     ((options_parse_argParsedCountDestFiles = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -26,6 +27,7 @@ Options::command() {
         # Option 1/4
         # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
+          # shellcheck disable=SC2034
           help="1"
           if ((options_parse_optionParsedCountHelp >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -48,6 +50,7 @@ Options::command() {
         # Option 3/4
         # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
+          # shellcheck disable=SC2034
           verbose="1"
           if ((options_parse_optionParsedCountVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -58,6 +61,7 @@ Options::command() {
         # Option 4/4
         # Option quiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
+          # shellcheck disable=SC2034
           quiet="1"
           if ((options_parse_optionParsedCountQuiet >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -83,6 +87,7 @@ Options::command() {
               return 1
             fi
             ((++options_parse_argParsedCountSrcFile))
+            # shellcheck disable=SC2034
             srcFile="${options_parse_arg}"
             srcFileCallback "${srcFile}" -- "${@:2}"
           # Argument 2/2
@@ -93,6 +98,7 @@ Options::command() {
               return 1
             fi
             ((++options_parse_argParsedCountDestFiles))
+            # shellcheck disable=SC2034
             destFiles+=("${options_parse_arg}")
             destFilesCallback "${destFiles[@]}" -- "${@:2}"
           else
@@ -106,20 +112,14 @@ Options::command() {
       esac
       shift || true
     done
-    export help
-    export srcDirs
-    export verbose
-    export quiet
     if ((options_parse_argParsedCountSrcFile < 1)); then
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'srcFile' should be provided at least 1 time(s)"
       return 1
     fi
-    export srcFile
     if ((options_parse_argParsedCountDestFiles < 1)); then
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'destFiles' should be provided at least 1 time(s)"
       return 1
     fi
-    export destFiles
     commandCallback
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
@@ -141,22 +141,26 @@ Options::command() {
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< help
+    # shellcheck disable=SC2054
+    helpArray=(help)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.
+    # shellcheck disable=SC2054
+    helpArray=(provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}Command global options${__RESET_COLOR}"
     echo "The Console component adds some predefined options to all commands:"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< verbose\ mode
+    # shellcheck disable=SC2054
+    helpArray=(verbose\ mode)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< quiet\ mode
+    # shellcheck disable=SC2054
+    helpArray=(quiet\ mode)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

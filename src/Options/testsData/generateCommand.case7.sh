@@ -10,6 +10,7 @@ Options::command() {
     ((options_parse_optionParsedCountHelp = 0)) || true
     local -i options_parse_argParsedCountSubCommand
     ((options_parse_argParsedCountSubCommand = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -18,6 +19,7 @@ Options::command() {
         # Option 1/1
         # Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
+          # shellcheck disable=SC2034
           help="1"
           if ((options_parse_optionParsedCountHelp >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -48,6 +50,7 @@ Options::command() {
               return 1
             fi
             ((++options_parse_argParsedCountSubCommand))
+            # shellcheck disable=SC2034
             subCommand="${options_parse_arg}"
             subCommandCallback "${subCommand}" -- "${@:2}"
           else
@@ -61,12 +64,10 @@ Options::command() {
       esac
       shift || true
     done
-    export help
     if ((options_parse_argParsedCountSubCommand < 1)); then
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'subCommand' should be provided at least 1 time(s)"
       return 1
     fi
-    export subCommand
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
@@ -80,26 +81,16 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}subCommand${__HELP_NORMAL} {single} (mandatory)"
-    echo -e """
-      ${__HELP_TITLE_COLOR}Common Commands:${__RESET_COLOR}
-      run         Create and run a new container from an image
-      exec        Execute a command in a running container
-      ps          List containers
-      build       Build an image from a Dockerfile
-      pull        Download an image from a registry
-      push        Upload an image to a registry
-      images      List images
-      login       Log in to a registry
-      logout      Log out from a registry
-      search      Search Docker Hub for images
-      version     Show the Docker version information
-      info        Display system-wide information
-      """
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=($'\n  Common Commands:\n  run         Create and run a new container from an image\n  exec        Execute a command in a running container\n  ps          List containers\n  build       Build an image from a Dockerfile\n  pull        Download an image from a registry\n  push        Upload an image to a registry\n  images      List images\n  login       Log in to a registry\n  logout      Log out from a registry\n  search      Search Docker Hub for images\n  version     Show the Docker version information\n  info        Display system-wide information\n  ')
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< help
+    # shellcheck disable=SC2054
+    helpArray=(help)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

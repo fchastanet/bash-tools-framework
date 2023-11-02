@@ -23,13 +23,12 @@ Options::option() {
       esac
       shift || true
     done
-    export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option varName --var variableType StringArray min 0 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
-    # shellcheck disable=SC2016
+    # shellcheck disable=SC2016,SC2028
     echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var <String>${__HELP_NORMAL} (optional)"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then

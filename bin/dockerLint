@@ -105,6 +105,7 @@ Array::wrap() {
   if ((indentNextLine > 0)); then
     indentStr="$(head -c "${indentNextLine}" </dev/zero | tr '\0' " ")"
   fi
+  local -i firstLine=1
   shift || true
   (($# != 0)) || return 0
 
@@ -131,14 +132,18 @@ Array::wrap() {
   local arg="$1"
   local argNoAnsi
   local -i argNoAnsiLength=0
+
   while (($# > 0)); do
-    argNoAnsi="$(echo "${arg}" | Filters::removeAnsiCodes)"
+    argNoAnsi="$(echo "${arg%%*( )}" | Filters::removeAnsiCodes)"
     ((argNoAnsiLength = ${#argNoAnsi})) || true
     if (($# < 1 && argNoAnsiLength == 0)); then
       break
     fi
     if [[ "${arg}" = $'\n' ]]; then
-      printf $'\n\n'
+      if [[ "${needEcho}" = "1" ]]; then
+        needEcho="0"
+      fi
+      echo ""
       ((currentLineLength = 0)) || true
       ((glueLength = 0)) || true
       shift || return 0
@@ -149,7 +154,10 @@ Array::wrap() {
         echo -e -n "${glue}"
         ((currentLineLength += glueLength))
       fi
-      echo -e -n "${arg}"
+      if ((currentLineLength == 0 && firstLine == 0)); then
+        echo -n "${indentStr}"
+      fi
+      echo -e -n "${arg}" | sed 's/[\t ]*$//g'
       needEcho="1"
       ((currentLineLength += argNoAnsiLength))
       ((glueLength = ${#glue})) || true
@@ -157,6 +165,10 @@ Array::wrap() {
       arg="$1"
     else
       if ((argNoAnsiLength >= (maxLineLength - indentNextLine))); then
+        if ((currentLineLength == 0 && firstLine == 0)); then
+          echo -n "${indentStr}"
+          ((currentLineLength += indentNextLine))
+        fi
         # arg can be stored on a whole line
         if ((glueLength > 0)); then
           echo -e -n "${glue}"
@@ -164,15 +176,15 @@ Array::wrap() {
         fi
         local -i length
         ((length = maxLineLength - currentLineLength)) || true
-        echo -e "${arg:0:${length}}"
+        echo -e "${arg:0:${length}}" | sed 's/[\t ]*$//g'
         ((currentLineLength = 0)) || true
         ((glueLength = 0)) || true
-        arg="${indentStr}${arg:${length}}"
+        arg="${arg:${length}}"
         needEcho="0"
       else
         # arg cannot be stored on a whole line, so we add it on next line as a whole
         echo
-        echo -e -n "${indentStr}${arg}"
+        echo -e -n "${indentStr}${arg}" | sed 's/[\t ]*$//g'
         ((glueLength = ${#glue})) || true
         ((currentLineLength = argNoAnsiLength))
         arg="" # allows to go to next arg
@@ -183,6 +195,7 @@ Array::wrap() {
         arg="$1"
       fi
     fi
+    ((firstLine = 0)) || true
   done
   if [[ "${needEcho}" = "1" ]]; then
     echo
@@ -458,7 +471,7 @@ UI::theme() {
     # Internal: reset color
     export __RESET_COLOR='\e[0m' # Reset Color
     # shellcheck disable=SC2155,SC2034
-    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+    export __HELP_EXAMPLE="$(echo -e "\e[2;97m")"
     # shellcheck disable=SC2155,SC2034
     export __HELP_TITLE="$(echo -e "\e[1;37m")"
     # shellcheck disable=SC2155,SC2034
@@ -558,8 +571,16 @@ Assert::commandExists() {
 # @description check if tty (interactive mode) is active
 # @noargs
 # @exitcode 1 if tty not active
+# @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
+# @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
 # @stderr diagnostic information + help if second argument is provided
 Assert::tty() {
+  if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
+    return 1
+  fi
+  if [[ "${INTERACTIVE:-0}" = "1" ]]; then
+    return 0
+  fi
   [[ -t 1 || -t 2 ]]
 }
 
@@ -600,7 +621,7 @@ Conf::loadNearestFile() {
 
 # @description get list of env files to load
 # in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
 # @exitcode 1 if one of the env file cannot be generated
 # @exitcode 2 if one of the env file is not a file or readable
 # @stdout the env files asked to be loaded
@@ -767,6 +788,7 @@ Github::getLatestRelease() {
   resultFile="$(mktemp -p "${TMPDIR:-/tmp}" -t githubLatestRelease.XXXX)"
   # Get latest release from GitHub api
   if Retry::default curl \
+    -L \
     -o "${resultFile}" \
     --fail \
     --silent \
@@ -1109,6 +1131,16 @@ Compiler::Facade::requireCommandBinDir
 # @require Compiler::Facade::requireCommandBinDir
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+
+copyrightCallback() {
+  local years
+  years="$(date +%Y)"
+  if [[ -n "${copyrightBeginYear}" && "${copyrightBeginYear}" != "${years}" ]]; then
+    years="${copyrightBeginYear}-${years}"
+  fi
+  echo "Copyright (c) ${years} François Chastanet"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
@@ -1378,6 +1410,7 @@ dockerLintCommand() {
     ((options_parse_optionParsedCountOptionLogFile = 0)) || true
     local -i options_parse_optionParsedCountOptionDisplayLevel
     ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -1396,12 +1429,14 @@ dockerLintCommand() {
             return 1
           fi
           ((++options_parse_optionParsedCountOptionBashFrameworkConfig))
+          # shellcheck disable=SC2034
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
         # Option 2/14
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
+          # shellcheck disable=SC2034
           optionConfig="1"
           if ((options_parse_optionParsedCountOptionConfig >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1412,6 +1447,7 @@ dockerLintCommand() {
         # Option 3/14
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
+          # shellcheck disable=SC2034
           optionInfoVerbose="1"
           if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1424,6 +1460,7 @@ dockerLintCommand() {
         # Option 4/14
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
+          # shellcheck disable=SC2034
           optionDebugVerbose="1"
           if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1436,6 +1473,7 @@ dockerLintCommand() {
         # Option 5/14
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
+          # shellcheck disable=SC2034
           optionTraceVerbose="1"
           if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1461,6 +1499,7 @@ dockerLintCommand() {
         # Option 7/14
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
+          # shellcheck disable=SC2034
           optionNoColor="1"
           if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1487,6 +1526,7 @@ dockerLintCommand() {
             return 1
           fi
           ((++options_parse_optionParsedCountOptionTheme))
+          # shellcheck disable=SC2034
           optionTheme="$1"
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
@@ -1494,6 +1534,7 @@ dockerLintCommand() {
         # Option 9/14
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
+          # shellcheck disable=SC2034
           optionHelp="1"
           if ((options_parse_optionParsedCountOptionHelp >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1505,6 +1546,7 @@ dockerLintCommand() {
         # Option 10/14
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
+          # shellcheck disable=SC2034
           optionVersion="1"
           if ((options_parse_optionParsedCountOptionVersion >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1516,6 +1558,7 @@ dockerLintCommand() {
         # Option 11/14
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
+          # shellcheck disable=SC2034
           optionQuiet="1"
           if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -1542,6 +1585,7 @@ dockerLintCommand() {
             return 1
           fi
           ((++options_parse_optionParsedCountOptionLogLevel))
+          # shellcheck disable=SC2034
           optionLogLevel="$1"
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
@@ -1559,6 +1603,7 @@ dockerLintCommand() {
             return 1
           fi
           ((++options_parse_optionParsedCountOptionLogFile))
+          # shellcheck disable=SC2034
           optionLogFile="$1"
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
@@ -1580,6 +1625,7 @@ dockerLintCommand() {
             return 1
           fi
           ((++options_parse_optionParsedCountOptionDisplayLevel))
+          # shellcheck disable=SC2034
           optionDisplayLevel="$1"
           optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
@@ -1594,20 +1640,6 @@ dockerLintCommand() {
       esac
       shift || true
     done
-    export optionBashFrameworkConfig
-    export optionConfig
-    export optionInfoVerbose
-    export optionDebugVerbose
-    export optionTraceVerbose
-    export optionEnvFiles
-    export optionNoColor
-    export optionTheme
-    export optionHelp
-    export optionVersion
-    export optionQuiet
-    export optionLogLevel
-    export optionLogFile
-    export optionDisplayLevel
     commandOptionParseFinished
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
@@ -1623,68 +1655,81 @@ dockerLintCommand() {
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< use\ alternate\ bash\ framework\ configuration.
+    # shellcheck disable=SC2054
+    helpArray=(use\ alternate\ bash\ framework\ configuration.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Display\ configuration
+    # shellcheck disable=SC2054
+    helpArray=(Display\ configuration)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\)
+    # shellcheck disable=SC2054
+    helpArray=(info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\)
+    # shellcheck disable=SC2054
+    helpArray=(debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\)
+    # shellcheck disable=SC2054
+    helpArray=(trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Load\ the\ specified\ env\ file
+    # shellcheck disable=SC2054
+    helpArray=(Load\ the\ specified\ env\ file)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.
+    # shellcheck disable=SC2054
+    helpArray=(Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< choose\ color\ theme\ \(default\,\ default-force\ or\ noColor\)\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped
+    # shellcheck disable=SC2054
+    helpArray=(choose\ color\ theme\ \(default\,\ default-force\ or\ noColor\)\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Display\ this\ command\ help
+    # shellcheck disable=SC2054
+    helpArray=(Display\ this\ command\ help)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Print\ version\ information\ and\ quit
+    # shellcheck disable=SC2054
+    helpArray=(Print\ version\ information\ and\ quit)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< quiet\ mode\,\ doesn\'t\ display\ any\ output
+    # shellcheck disable=SC2054
+    helpArray=(quiet\ mode\,\ doesn\'t\ display\ any\ output)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Set\ log\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\)
+    # shellcheck disable=SC2054
+    helpArray=(Set\ log\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< Set\ log\ file
+    # shellcheck disable=SC2054
+    helpArray=(Set\ log\ file)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\)
+    # shellcheck disable=SC2054
+    helpArray=(set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e """
 - installs new hadolint version(>2.12.0) automatically
 - lint this project files using default files filter
 
-HADOLINT HELP
+\e[1;37mHADOLINT HELP\e[0m
 
-@@@HADOLINT_HELP@@@
-"""
+@@@HADOLINT_HELP@@@"""
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
     echo '1.0'
@@ -1698,7 +1743,7 @@ HADOLINT HELP
     echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
     echo 'MIT License'
     echo
-    echo 'Copyright (c) 2023 François Chastanet'
+    Array::wrap ' ' 76 4 "$(copyrightCallback)"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1

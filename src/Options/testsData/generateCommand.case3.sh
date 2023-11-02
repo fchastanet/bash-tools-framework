@@ -8,6 +8,7 @@ Options::command() {
     verbose="0"
     local -i options_parse_optionParsedCountVerbose
     ((options_parse_optionParsedCountVerbose = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -16,6 +17,7 @@ Options::command() {
         # Option 1/2
         # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
+          # shellcheck disable=SC2034
           verbose="1"
           if ((options_parse_optionParsedCountVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -49,8 +51,6 @@ Options::command() {
       esac
       shift || true
     done
-    export verbose
-    export srcDirs
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
@@ -65,11 +65,13 @@ Options::command() {
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< verbose\ mode
+    # shellcheck disable=SC2054
+    helpArray=(verbose\ mode)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     printf "  %b\n" "${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"
     local -a helpArray
-    IFS=' ' read -r -a helpArray <<< provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.
+    # shellcheck disable=SC2054
+    helpArray=(provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

@@ -64,6 +64,7 @@
     % else
       echo "local -a helpArray"
       % printf -v helpEscaped '%q' "${help}"
+      echo "# shellcheck disable=SC2054"
       echo "helpArray=(<% ${helpEscaped} %>)"
       echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
     % fi

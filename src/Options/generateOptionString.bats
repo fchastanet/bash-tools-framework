@@ -16,63 +16,46 @@ function setup() {
 function Options::generateOptionString::noOption { #@test
   run Options::generateOptionString
   assert_success
-  assert_lines_count 5
+  assert_lines_count 3
   assert_line --index 0 "export min='0'"
   assert_line --index 1 "export max='1'"
   assert_line --index 2 "export defaultValue=''"
-  assert_line --index 3 "export authorizedValues=''"
-  assert_line --index 4 "export helpValueName='String'"
 }
 
 function Options::generateOptionString::defaultValueMissingValue { #@test
   run Options::generateOptionString --default-value
   assert_success
-  assert_lines_count 5
+  assert_lines_count 3
   assert_line --index 0 "export min='0'"
   assert_line --index 1 "export max='1'"
   assert_line --index 2 "export defaultValue=''"
-  assert_line --index 3 "export authorizedValues=''"
-  assert_line --index 4 "export helpValueName='String'"
 }
 
 function Options::generateOptionString::authorizedValuesValueMissingValue { #@test
   run Options::generateOptionString --authorized-values
   assert_success
-  assert_lines_count 5
+  assert_lines_count 3
   assert_line --index 0 "export min='0'"
   assert_line --index 1 "export max='1'"
   assert_line --index 2 "export defaultValue=''"
-  assert_line --index 3 "export authorizedValues=''"
-  assert_line --index 4 "export helpValueName='String'"
-}
-
-function Options::generateOptionString::authorizedValuesValueInvalidValue { #@test
-  run Options::generateOptionString --authorized-values " invalid | valid"
-  assert_failure 1
-  assert_lines_count 1
-  assert_output --partial "ERROR   - Options::generateOptionString - --authorized-values invalid regexp ' invalid | valid'"
 }
 
 function Options::generateOptionString::setBoth { #@test
-  run Options::generateOptionString --authorized-values "valid|invalid" --default-value "valid"
+  run Options::generateOptionString --mandatory --default-value "valid" --help-value-name "ignore"
   assert_success
-  assert_lines_count 5
-  assert_line --index 0 "export min='0'"
+  assert_lines_count 3
+  assert_line --index 0 "export min='1'"
   assert_line --index 1 "export max='1'"
   assert_line --index 2 "export defaultValue='valid'"
-  assert_line --index 3 "export authorizedValues='valid|invalid'"
-  assert_line --index 4 "export helpValueName='String'"
 }
 
 function Options::generateOptionString::setMandatory { #@test
   run Options::generateOptionString --authorized-values "valid|invalid" --default-value "valid" --mandatory
   assert_success
-  assert_lines_count 5
+  assert_lines_count 3
   assert_line --index 0 "export min='1'"
   assert_line --index 1 "export max='1'"
   assert_line --index 2 "export defaultValue='valid'"
-  assert_line --index 3 "export authorizedValues='valid|invalid'"
-  assert_line --index 4 "export helpValueName='String'"
 }
 
 function Options::generateOptionString::invalidOption { #@test

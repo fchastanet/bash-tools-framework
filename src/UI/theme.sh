@@ -52,7 +52,7 @@ UI::theme() {
     # Internal: reset color
     export __RESET_COLOR='\e[0m' # Reset Color
     # shellcheck disable=SC2155,SC2034
-    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+    export __HELP_EXAMPLE="$(echo -e "\e[2;97m")"
     # shellcheck disable=SC2155,SC2034
     export __HELP_TITLE="$(echo -e "\e[1;37m")"
     # shellcheck disable=SC2155,SC2034

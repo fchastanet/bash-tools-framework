@@ -14,8 +14,8 @@
 #       - localhost-root
 Conf::getMergedList() {
   local confFolder="$1"
-  local extension="${2:-sh}"
-  local indentStr="${3:-       - }"
+  local extension="${2-sh}"
+  local indentStr="${3-       - }"
 
   local DEFAULT_CONF_DIR="${FRAMEWORK_ROOT_DIR}/conf/${confFolder}"
   local HOME_CONF_DIR="${HOME}/.bash-tools/${confFolder}"

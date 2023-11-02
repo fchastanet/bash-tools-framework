@@ -12,6 +12,7 @@ Options::option() {
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
         --help | -h)
+          # shellcheck disable=SC2034
           help="1"
           if ((options_parse_optionParsedCountHelp >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -27,13 +28,12 @@ Options::option() {
       esac
       shift || true
     done
-    export help
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option help --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
-    # shellcheck disable=SC2016
+    # shellcheck disable=SC2016,SC2028
     echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then

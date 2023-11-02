@@ -24,12 +24,12 @@ Options::arg() {
             return 1
           fi
           ((++options_parse_argParsedCountVarName))
+          # shellcheck disable=SC2034
           varName+=("${options_parse_arg}")
           ;;
       esac
       shift || true
     done
-    export varName
   elif [[ "${options_parse_cmd}" = "help" ]]; then
     eval "$(Options::arg helpTpl)"
   elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then

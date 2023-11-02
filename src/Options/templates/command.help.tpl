@@ -64,7 +64,7 @@ fi
 %
 if [[ -n "${longDescription}" ]]; then
 %
-%# removing las empty line
+%# removing last empty line
 echo -e """<%% echo "${longDescription}" | sed -E -e '${/^$/d;}' %>"""
 %
 fi

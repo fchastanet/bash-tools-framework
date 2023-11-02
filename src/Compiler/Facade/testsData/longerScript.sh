@@ -5,6 +5,7 @@
 # IMPLEMENT Install::InstallInterface
 # FACADE
 
+# shellcheck disable=SC2034
 HELP="$(
   cat <<EOF
 ${__HELP_TITLE}Description:${__HELP_NORMAL} build files using build.sh

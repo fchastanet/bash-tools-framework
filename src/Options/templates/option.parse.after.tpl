@@ -4,4 +4,3 @@ if ((options_parse_optionParsedCount<% ${variableName^} %> < <% ${min} %>)); the
   return 1
 fi
 % fi
-export <% ${variableName} %>

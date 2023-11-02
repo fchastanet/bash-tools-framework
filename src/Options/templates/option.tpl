@@ -42,7 +42,7 @@
         fi
       fi
     %
-    # shellcheck disable=SC2016
+    # shellcheck disable=SC2016,SC2028
     echo 'printf "  %b\n" "<% ${altStr} %>"'
     % if [[ -z "${help}" ]]; then
         echo "echo '    No help available'"
@@ -51,6 +51,7 @@
     % else
       echo "local -a helpArray"
       % printf -v helpEscaped '%q' "${help}"
+      echo "# shellcheck disable=SC2054"
       echo "helpArray=(<% ${helpEscaped} %>)"
       echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
     % fi

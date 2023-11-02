@@ -291,7 +291,7 @@ Log::requireLoad() {
 
 # @description get list of env files to load
 # in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
 # @exitcode 1 if one of the env file cannot be generated
 # @exitcode 2 if one of the env file is not a file or readable
 # @stdout the env files asked to be loaded
@@ -505,7 +505,7 @@ UI::theme() {
     # Internal: reset color
     export __RESET_COLOR='\e[0m' # Reset Color
     # shellcheck disable=SC2155,SC2034
-    export __HELP_EXAMPLE="$(echo -e "\e[1;30m")"
+    export __HELP_EXAMPLE="$(echo -e "\e[2;97m")"
     # shellcheck disable=SC2155,SC2034
     export __HELP_TITLE="$(echo -e "\e[1;37m")"
     # shellcheck disable=SC2155,SC2034
@@ -535,8 +535,16 @@ UI::theme() {
 # @description check if tty (interactive mode) is active
 # @noargs
 # @exitcode 1 if tty not active
+# @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
+# @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
 # @stderr diagnostic information + help if second argument is provided
 Assert::tty() {
+  if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
+    return 1
+  fi
+  if [[ "${INTERACTIVE:-0}" = "1" ]]; then
+    return 0
+  fi
   [[ -t 1 || -t 2 ]]
 }
 

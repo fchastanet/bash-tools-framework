@@ -16,7 +16,6 @@ function Assert::tty_non_interactive { #@test
   assert_output ""
 }
 
-
 function Assert::tty_force_interactive { #@test
   export INTERACTIVE=1
   run Assert::tty
