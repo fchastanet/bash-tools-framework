@@ -145,11 +145,12 @@
       --function-name optionQuietFunction
   )
 
+  copyrightCallback() { :; }
   declare -a options=(
     --author "[François Chastanet](https://github.com/fchastanet)"
     --source-file "${REPOSITORY_URL}/tree/master/${SRC_FILE_PATH}"
     --license "MIT License"
-    --copyright "Copyright (c) 2023 François Chastanet"
+    --copyright copyrightCallback
     --version "${versionNumber}"
     --function-name "${commandFunctionName}"
     --command-name "${SCRIPT_NAME}"
@@ -175,6 +176,16 @@
 
 %# default add option callbacks
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+
+copyrightCallback() {
+  local years
+  years="$(date +%Y)"
+  if [[ -n "${copyrightBeginYear}" && "${copyrightBeginYear}" != "${years}" ]]; then
+    years="${copyrightBeginYear}-${years}"
+  fi
+  echo "Copyright (c) ${years} François Chastanet"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
