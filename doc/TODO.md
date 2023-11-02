@@ -237,6 +237,8 @@ TODOs linked to `src/_binaries/*`:
 
 ### 9.5. run precommit on github action
 
+- use github action docker cache
+  - <https://github.com/moby/buildkit#github-actions-cache-experimental>
 - add megalinter github action
   <https://github.com/marketplace/actions/megalinter>
 - <https://github.com/pre-commit/action>

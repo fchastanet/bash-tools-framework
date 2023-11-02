@@ -51,7 +51,7 @@
     % else
       echo "local -a helpArray"
       % printf -v helpEscaped '%q' "${help}"
-      echo "IFS=' ' read -r -a helpArray <<< <% ${helpEscaped} %>"
+      echo "helpArray=(<% ${helpEscaped} %>)"
       echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
     % fi
     % if [[ -n "${defaultValue}" ]]; then
