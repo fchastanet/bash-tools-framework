@@ -9,11 +9,11 @@
   source <(
     Options::generateGroup \
       --title "GLOBAL OPTIONS:" \
-      --function-name groupGlobalOptionsFunction
+      --function-name zzzGroupGlobalOptionsFunction
 
     Options::generateOption \
       --help "Display this command help" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--help" \
       --alt "-h" \
       --callback optionHelpCallback \
@@ -22,7 +22,7 @@
 
     Options::generateOption \
       --help "Display configuration" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--config" \
       --variable-name "optionConfig" \
       --function-name optionConfigFunction
@@ -30,7 +30,7 @@
     Options::generateOption \
       --variable-type String \
       --help "use alternate bash framework configuration." \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--bash-framework-config" \
       --callback optionBashFrameworkConfigCallback \
       --variable-name "optionBashFrameworkConfig" \
@@ -38,7 +38,7 @@
 
     Options::generateOption \
       --help "info level verbose mode (alias of --display-level INFO)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--verbose" --alt "-v" \
       --callback optionInfoVerboseCallback \
       --callback updateArgListInfoVerboseCallback \
@@ -47,7 +47,7 @@
 
     Options::generateOption \
       --help "debug level verbose mode (alias of --display-level DEBUG)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "-vv" \
       --callback optionDebugVerboseCallback \
       --callback updateArgListDebugVerboseCallback \
@@ -56,7 +56,7 @@
 
     Options::generateOption \
       --help "trace level verbose mode (alias of --display-level TRACE)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "-vvv" \
       --callback optionTraceVerboseCallback \
       --callback updateArgListTraceVerboseCallback \
@@ -66,7 +66,7 @@
     Options::generateOption \
       --variable-type StringArray \
       --help "Load the specified env file" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--env-file" \
       --max -1 \
       --callback optionEnvFileCallback \
@@ -77,7 +77,7 @@
     Options::generateOption \
       --variable-type String \
       --help "Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--log-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
       --callback "optionLogLevelCallback" \
@@ -88,7 +88,7 @@
     Options::generateOption \
       --variable-type String \
       --help "Set log file" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--log-file" \
       --callback "optionLogFileCallback" \
       --callback updateArgListLogFileCallback \
@@ -98,7 +98,7 @@
     Options::generateOption \
       --variable-type String \
       --help "set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--display-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
       --callback optionDisplayLevelCallback \
@@ -108,7 +108,7 @@
 
     Options::generateOption \
       --help "Produce monochrome output. alias of --theme noColor." \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--no-color" \
       --callback optionNoColorCallback \
       --callback updateArgListNoColorCallback \
@@ -119,7 +119,7 @@
       --variable-type String \
       --help "$(echo "choose color theme (default, default-force or noColor) -" \
           "default-force means colors will be produced even if command is piped")" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--theme" \
       --authorized-values "default|default-force|noColor" \
       --callback optionThemeCallback \
@@ -129,7 +129,7 @@
 
     Options::generateOption \
       --help "Print version information and quit" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--version" \
       --callback optionVersionCallback \
       --variable-name "optionVersion" \
@@ -137,7 +137,7 @@
 
     Options::generateOption \
       --help "quiet mode, doesn't display any output" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--quiet" --alt "-q" \
       --callback optionQuietCallback \
       --callback updateArgListQuietCallback \
