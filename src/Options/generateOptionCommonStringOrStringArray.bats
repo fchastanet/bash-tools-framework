@@ -31,7 +31,7 @@ function Options::generateOptionCommonStringOrStringArray::authorizedValuesValue
 }
 
 function Options::generateOptionCommonStringOrStringArray::authorizedValuesValueInvalidValue { #@test
-  run Options::generateOptionCommonStringOrStringArray "Options::generateOptionString"\
+  run Options::generateOptionCommonStringOrStringArray "Options::generateOptionString" \
     --authorized-values " invalid | valid"
   assert_failure 1
   assert_lines_count 1
@@ -45,7 +45,6 @@ function Options::generateOptionCommonStringOrStringArray::helpValueNameInvalidO
   assert_lines_count 1
   assert_output --partial "ERROR   - Options::generateOptionString - --help-value-name should be a single word 'invalid help'"
 }
-
 
 function Options::generateOptionCommonStringOrStringArray::setAll { #@test
   run Options::generateOptionCommonStringOrStringArray "Options::generateOptionString" \

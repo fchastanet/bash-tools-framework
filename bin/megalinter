@@ -1236,11 +1236,13 @@ megalinterCommand() {
     optionIncremental="0"
     local -i options_parse_optionParsedCountOptionIncremental
     ((options_parse_optionParsedCountOptionIncremental = 0)) || true
+    optionMegalinterImage=oxsecurity/megalinter-terraform:v7.4.0
     local -i options_parse_optionParsedCountOptionMegalinterImage
     ((options_parse_optionParsedCountOptionMegalinterImage = 0)) || true
     optionCheckMegalinterVersion="0"
     local -i options_parse_optionParsedCountOptionCheckMegalinterVersion
     ((options_parse_optionParsedCountOptionCheckMegalinterVersion = 0)) || true
+    optionMegalinterConfigFile=.mega-linter-light.yml
     local -i options_parse_optionParsedCountOptionMegalinterConfigFile
     ((options_parse_optionParsedCountOptionMegalinterConfigFile = 0)) || true
     local -i options_parse_optionParsedCountOptionBashFrameworkConfig
@@ -1647,8 +1649,9 @@ megalinterCommand() {
     echo -e "  ${__HELP_OPTION_COLOR}--image <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(Specify\ docker\ megalinter\ image\ name\ to\ use\ \(default:\ oxsecurity/megalinter-terraform:v7.4.0\))
+    helpArray=(Specify\ docker\ megalinter\ image\ name\ to\ use)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo '    Default value: oxsecurity/megalinter-terraform:v7.4.0'
     echo -e "  ${__HELP_OPTION_COLOR}--check-megalinter-version${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
@@ -1657,8 +1660,9 @@ megalinterCommand() {
     echo -e "  ${__HELP_OPTION_COLOR}--config-file <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(Specify\ megalinter\ config\ filename\ to\ use\ \(default:\ .mega-linter-light.yml\))
+    helpArray=(Specify\ megalinter\ config\ filename\ to\ use)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo '    Default value: .mega-linter-light.yml'
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} {single}"
@@ -1776,7 +1780,7 @@ optionCheckMegalinterVersionCallback() {
   local newVersion
   Github::getLatestRelease "oxsecurity/megalinter" newVersion
   local currentVersion
-  currentVersion="$(Version::parse <<<"oxsecurity/megalinter-terraform:v7.4.0")"
+  currentVersion="$(Version::parse <<<"${optionMegalinterImage}")"
   local status=0
   Version::compare "${currentVersion}" "${newVersion}" || status=$?
   case ${status} in
@@ -1857,7 +1861,7 @@ run() {
   if [[ "${optionIncremental}" = "1" ]]; then
     local -a updatedFiles
     IFS=$'\n' read -r -d '' -a updatedFiles < <(git --no-pager diff --name-only --cached || true) || true
-    if ((${#updatedFiles[@]} > 0)); then
+    if ((${#updatedFiles[@]} == 0)); then
       Log::displayError "No files to lint in incremental mode"
       exit 1
     fi

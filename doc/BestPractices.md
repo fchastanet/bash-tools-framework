@@ -13,7 +13,7 @@ this project because I wrote some of them while writing this project.
     - [1.2.2. pipefail (set -o pipefail)](#122-pipefail-set--o-pipefail)
     - [1.2.3. errtrace (set -E | set -o errtrace)](#123-errtrace-set--e--set--o-errtrace)
     - [1.2.4. nounset (set -u | set -o nounset)](#124-nounset-set--u--set--o-nounset)
-    - [1.2.5. shopt -s inherit\_errexit](#125-shopt--s-inherit_errexit)
+    - [1.2.5. inherit error exit code in sub shells](#125-inherit-error-exit-code-in-sub-shells)
     - [1.2.6. posix (set -o posix)](#126-posix-set--o-posix)
   - [1.3. Main function](#13-main-function)
   - [1.4. Arguments](#14-arguments)
@@ -266,7 +266,9 @@ This is not implemented in current framework (TODO in future version).
 > performing parameter expansion. An error message will be written to the
 > standard error, and a non-interactive shell will exit.
 
-#### 1.2.5. shopt -s inherit_errexit
+#### 1.2.5. inherit error exit code in sub shells
+
+let's see why using `shopt -s inherit_errexit` ?
 
 set -e does not affect subShells created by Command Substitution. This rule is
 stated in Command Execution Environment:
@@ -293,7 +295,7 @@ Output:
 MY_VAR is StartEnd
 ```
 
-shopt -s inherit_errexit, added in Bash 4.4 allows you to have command
+`shopt -s inherit_errexit`, added in Bash 4.4 allows you to have command
 substitution parameters inherit your set -e from the parent script.
 
 From the Shopt Builtin documentation:
@@ -435,7 +437,8 @@ If you omit the `:`(colon) like in `${PARAMETER-WORD}`, the default value is
 only used when the parameter is unset, not when it was empty.
 
 > :warning: use this latter syntax when using function arguments in order to be
-> able to reset a value to empty string, otherwise default value would be applied.
+> able to reset a value to empty string, otherwise default value would be
+> applied.
 
 #### 1.8.4. Check if a variable is defined
 

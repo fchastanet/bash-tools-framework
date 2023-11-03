@@ -24,6 +24,8 @@
     "**/testsData/**",
     "manualTests/**",
     "src/Options/templates/command.help.tpl",
+    "src/Options/templates/arg.tpl",
+    "src/Options/templates/option.tpl",
     "**/.venv/**",
     "**/*cache*/**",
     "**/.github/**",

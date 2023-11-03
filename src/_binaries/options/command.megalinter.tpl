@@ -46,15 +46,17 @@ source <(
 
   Options::generateOption \
     --variable-type "String" \
-    --help "Specify docker megalinter image name to use (default: ${defaultMegalinterImage})" \
+    --help "Specify docker megalinter image name to use" \
     --alt "--image" \
     --variable-name "optionMegalinterImage" \
+    --default-value "${defaultMegalinterImage}" \
     --function-name optionMegalinterImageFunction
 
   Options::generateOption \
     --variable-type "String" \
-    --help "Specify megalinter config filename to use (default: ${defaultMegalinterConfigFile})" \
+    --help "Specify megalinter config filename to use" \
     --alt "--config-file" \
+    --default-value "${defaultMegalinterConfigFile}" \
     --variable-name "optionMegalinterConfigFile" \
     --function-name optionMegalinterConfigFileFunction
 
@@ -99,7 +101,7 @@ optionCheckMegalinterVersionCallback() {
   local newVersion
   Github::getLatestRelease "oxsecurity/megalinter" newVersion
   local currentVersion
-  currentVersion="$(Version::parse <<<"<% "${defaultMegalinterImage}" %>")"
+  currentVersion="$(Version::parse <<<"${optionMegalinterImage}")"
   local status=0
   Version::compare "${currentVersion}" "${newVersion}" || status=$?
   case ${status} in
