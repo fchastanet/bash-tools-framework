@@ -39,8 +39,8 @@ Options::option() {
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option varName --var|-v variableType String min 1 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
-    # shellcheck disable=SC2016,SC2028
-    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <myVarName>${__HELP_NORMAL} (mandatory)"'
+    # shellcheck disable=SC2016
+    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <myVarName>${__HELP_NORMAL} (mandatory)"'
     echo "local -a helpArray"
     echo "# shellcheck disable=SC2054"
     echo "helpArray=(super\ help)"

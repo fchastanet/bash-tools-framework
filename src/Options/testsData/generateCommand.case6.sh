@@ -139,12 +139,12 @@ Options::command() {
     echo '    No help available'
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(help)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"
+    echo -e "  ${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.)
@@ -152,12 +152,12 @@ Options::command() {
     echo
     echo -e "${__HELP_TITLE_COLOR}Command global options${__RESET_COLOR}"
     echo "The Console component adds some predefined options to all commands:"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(verbose\ mode)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(quiet\ mode)

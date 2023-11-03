@@ -33,10 +33,10 @@
   }
 %
 <% ${functionName} %>() {
-  local options_parse_cmd="$1"
+  local cmd="$1"
   shift || true
 
-  if [[ "${options_parse_cmd}" = "parse" ]]; then
+  if [[ "${cmd}" = "parse" ]]; then
     .INCLUDE "${tplDir}/arg.parse.before.tpl"
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -52,37 +52,27 @@
       shift || true
     done
     .INCLUDE "${tplDir}/arg.parse.after.tpl"
-  elif [[ "${options_parse_cmd}" = "help" ]]; then
+  elif [[ "${cmd}" = "help" ]]; then
     eval "$(<% ${functionName} %> helpTpl)"
-  elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
+  elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  <%% helpArg "1" %>"'
-    % if [[ -z "${help}" ]]; then
-        echo "echo '    No help available'"
-    % elif [[ $(type -t "${help}") == "function" ]]; then
-      echo "echo -e \"    \$(Array::wrap ' ' 76 4 \$(<% ${help} %>))\""
-    % else
-      echo "local -a helpArray"
-      % printf -v helpEscaped '%q' "${help}"
-      echo "# shellcheck disable=SC2054"
-      echo "helpArray=(<% ${helpEscaped} %>)"
-      echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
-    % fi
-  elif [[ "${options_parse_cmd}" = "variableName" ]]; then
+    .INCLUDE "${tplDir}/helpArg.tpl"
+  elif [[ "${cmd}" = "variableName" ]]; then
     echo "<% ${variableName} %>"
-  elif [[ "${options_parse_cmd}" = "type" ]]; then
+  elif [[ "${cmd}" = "type" ]]; then
     echo "<% ${type} %>"
-  elif [[ "${options_parse_cmd}" = "variableType" ]]; then
+  elif [[ "${cmd}" = "variableType" ]]; then
     echo "<% ${variableType} %>"
-  elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
+  elif [[ "${cmd}" = "helpArg" ]]; then
     echo "<%% helpArg "0" %>"
-  elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Argument <% ${variableName} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
-  elif [[ "${options_parse_cmd}" = "min" ]]; then
+  elif [[ "${cmd}" = "min" ]]; then
     echo "<% ${min} %>"
-  elif [[ "${options_parse_cmd}" = "max" ]]; then
+  elif [[ "${cmd}" = "max" ]]; then
     echo "<% ${max} %>"
-  elif [[ "${options_parse_cmd}" = "export" ]]; then
+  elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
     export variableName="<% ${variableName} %>"
     export variableType="<% ${variableType} %>"
@@ -93,7 +83,7 @@
     export regexp="<% ${regexp} %>"
     export callbacks=(<%% Array::join " " "${callbacks[@]}" %>)
   else
-    Log::displayError "Argument command invalid: '${options_parse_cmd}'"
+    Log::displayError "Argument command invalid: '${cmd}'"
     return 1
   fi
 }

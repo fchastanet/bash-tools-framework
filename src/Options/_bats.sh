@@ -25,6 +25,7 @@ testCommand() {
   local tmpFile
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}").sh"
   [[ -f "${tmpFile}" ]]
+
   sed -i -E "s#${functionPrefixName}[A-F0-9][a-f0-9]{31}#${functionPrefixName}#" "${tmpFile}"
   diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/${testCase}" >&3 || {
     cat "${tmpFile}" >&3

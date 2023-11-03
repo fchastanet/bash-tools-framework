@@ -1,5 +1,38 @@
 #!/usr/bin/env bash
 
+%
+  helpOpt() {
+    local withColors="$1"
+    local spec=""
+    if [[ "${withColors}" = "1" ]]; then
+      spec+='${__HELP_OPTION_COLOR}'
+      spec+="$(Array::join '${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}' "${alts[@]}")"
+    else
+      spec+="$(Array::join ', ' "${alts[@]}")"
+    fi
+    if [[ "${variableType}" != "Boolean" ]]; then
+      spec+=" <${helpValueName}>"
+    fi
+    if [[ "${withColors}" = "1" ]]; then
+      spec+='${__HELP_NORMAL}'
+    fi
+    if ((min == 1 && max == 1)); then
+      spec+=' (mandatory)'
+    else
+      if ((min > 0)); then
+        spec+=" (at least ${min} times)"
+      else
+        spec+=' (optional)'
+      fi
+      if ((max > 0)); then
+        spec+=" (at most ${max} times)"
+      fi
+    fi
+    local helpOpt=""
+    helpOpt+="${spec//^[[:blank:]]/}"
+    echo "${helpOpt}"
+  }
+%
 <% ${functionName} %>() {
   local cmd="$1"
   shift || true
@@ -22,39 +55,9 @@
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option <% ${variableName} %> <%% Array::join '|' "${alts[@]}" %> variableType <% ${variableType} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${cmd}" = "helpTpl" ]]; then
-    %
-      altStr='${__HELP_OPTION_COLOR}'
-      altStr+="$(Array::join '${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}' "${alts[@]}")"
-      if [[ "${variableType}" != "Boolean" ]]; then
-        altStr+=" <${helpValueName}>"
-      fi
-      altStr+='${__HELP_NORMAL}'
-      if ((min == 1 && max == 1)); then
-        altStr+=' (mandatory)'
-      else
-        if ((min > 0)); then
-          altStr+=" (at least ${min} times)"
-        else
-          altStr+=' (optional)'
-        fi
-        if ((max > 0)); then
-          altStr+=" (at most ${max} times)"
-        fi
-      fi
-    %
-    # shellcheck disable=SC2016,SC2028
-    echo 'printf "  %b\n" "<% ${altStr} %>"'
-    % if [[ -z "${help}" ]]; then
-        echo "echo '    No help available'"
-    % elif [[ $(type -t "${help}") == "function" ]]; then
-      echo "echo -e \"    \$(Array::wrap ' ' 76 4 \$(<% ${help} %>))\""
-    % else
-      echo "local -a helpArray"
-      % printf -v helpEscaped '%q' "${help}"
-      echo "# shellcheck disable=SC2054"
-      echo "helpArray=(<% ${helpEscaped} %>)"
-      echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
-    % fi
+    # shellcheck disable=SC2016
+    echo 'echo -e "  <%% helpOpt "1" %>"'
+    .INCLUDE "${tplDir}/helpArg.tpl"
     % if [[ -n "${defaultValue}" ]]; then
         echo "echo '    Default value: <% ${defaultValue} %>'"
     % fi

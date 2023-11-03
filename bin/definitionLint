@@ -1584,79 +1584,79 @@ definitionLintCommand() {
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--format <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--format <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(define\ output\ format\ of\ this\ command\(available:\ \)\ \(default:\ plain\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(use\ alternate\ bash\ framework\ configuration.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Display\ configuration)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
+    echo -e "  ${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Load\ the\ specified\ env\ file)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(choose\ color\ theme\ \(default\,\ default-force\ or\ noColor\)\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Display\ this\ command\ help)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Print\ version\ information\ and\ quit)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(quiet\ mode\,\ doesn\'t\ display\ any\ output)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Set\ log\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Set\ log\ file)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
