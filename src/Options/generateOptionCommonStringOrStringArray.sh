@@ -22,7 +22,7 @@ Options::generateOptionCommonStringOrStringArray() {
         shift || true
         # TODO check if valid regexp
         if [[ "$1" =~ [[:space:]] ]]; then
-          Log::displayError "Options::generateOptionString - --authorized-values invalid regexp '$1'"
+          Log::displayError "${type} - --authorized-values invalid regexp '$1'"
           return 1
         fi
         authorizedValues="$1"
@@ -31,7 +31,7 @@ Options::generateOptionCommonStringOrStringArray() {
         shift || true
         # TODO check if valid regexp
         if [[ "$1" =~ [[:space:]] ]]; then
-          Log::displayError "Options::generateOptionString - --help-value-name invalid regexp '$1'"
+          Log::displayError "${type} - --help-value-name invalid regexp '$1'"
           return 1
         fi
         helpValueName="$1"

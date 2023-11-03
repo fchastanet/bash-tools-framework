@@ -415,6 +415,8 @@ BASH_SOURCE=".$0"
 - declare all variables as local in functions to avoid making them global
 - local or declare multiple local a z
 - `export readonly` does not work, first `readonly` then `export`
+- avoid using export most of the times, export is needed only when variables has
+  to be passed to child process.
 
 #### 1.8.2. variable naming convention
 

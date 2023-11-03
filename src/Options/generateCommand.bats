@@ -13,6 +13,8 @@ source "${srcDir}/Filters/removeAnsiCodes.sh"
 function setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
   export _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
+  export INTERACTIVE=1
+  UI::theme default
 }
 
 function Options::generateCommand::noOption { #@test
@@ -501,7 +503,7 @@ function Options::generateCommand::case6::parseArgsCallback { #@test
 }
 
 # sub command management
-function Options::generateCommand::case7 { #@test
+function Options::generateCommand::case7::init { #@test
   function helpCallback() {
     echo "helpCallback"
   }
