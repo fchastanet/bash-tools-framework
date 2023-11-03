@@ -233,7 +233,7 @@ while true; do
     --vvv)
       BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
       ;;
-    --verbose | --v)
+    --verbose | -v)
       BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
       ;;
     --)

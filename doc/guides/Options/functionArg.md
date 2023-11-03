@@ -121,8 +121,6 @@ argumentVarName() {
     echo "Argument"
   elif [[ "${options_parse_cmd}" = "variableType" ]]; then
     echo "StringArray"
-  elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
-    echo "[varName {list} (at most 3 times)]"
   elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
     echo "Argument varName min 0 min 3 authorizedValues 'debug|info|warn' regexp ''"
   elif [[ "${options_parse_cmd}" = "min" ]]; then

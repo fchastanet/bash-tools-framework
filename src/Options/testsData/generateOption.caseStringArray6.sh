@@ -30,7 +30,7 @@ Options::option() {
     echo "Option srcDirs --src-dir|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'echo -e "  ${__HELP_OPTION_COLOR}--src-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"'
+    echo 'echo -e "  ${__HELP_OPTION_COLOR}--src-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} {list} (optional)"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "srcDirs"
@@ -47,8 +47,8 @@ Options::option() {
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
-    export variableType="StringArray"
     export variableName="srcDirs"
+    export variableType="StringArray"
     export offValue=""
     export onValue=""
     export defaultValue=""

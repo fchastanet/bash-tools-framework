@@ -174,7 +174,7 @@ function Options::generateArg::case1::ArgTest::noArg { #@test
   run Options::arg
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Argument command invalid: ''"
 }
 
 function Options::generateArg::case1::ArgTest::parseWithNoArg { #@test
@@ -242,10 +242,6 @@ function Options::generateArg::case1::ArgTest::otherCommands { #@test
   assert_success
   assert_output "1"
 
-  run Options::arg helpArg
-  assert_success
-  assert_output "varName {single} (mandatory)"
-
   run Options::arg oneLineHelp
   assert_success
   assert_output "Argument varName min 1 max 1 authorizedValues '' regexp ''"
@@ -282,7 +278,7 @@ function Options::generateArg::case2::ArgTest::noArg { #@test
   run Options::arg
   assert_failure 1
   assert_lines_count 1
-  assert_output --partial "ERROR   - Argument command invalid: ''"
+  assert_output --partial "ERROR   - Command test - Argument command invalid: ''"
 }
 
 function Options::generateArg::case2::ArgTest::parseWithNoArg { #@test
@@ -357,6 +353,6 @@ function Options::generateArg::case2::ArgTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateArg.case2.sh"
   run Options::arg help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "[${__HELP_OPTION_COLOR}")varName${__HELP_NORMAL} {list} (at most 3 times)]"
+  assert_line --index 0 "  $(echo -e "[${__HELP_OPTION_COLOR}")varName${__HELP_NORMAL} {list} (optional) (at most 3 times)]"
   assert_line --index 1 "    No help available"
 }

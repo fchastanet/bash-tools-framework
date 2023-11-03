@@ -32,7 +32,7 @@ Options::option() {
     echo "Option varName --var|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"'
+    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"'
     echo "local -a helpArray"
     echo "# shellcheck disable=SC2054"
     echo "helpArray=(super\ help)"
@@ -52,8 +52,8 @@ Options::option() {
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
-    export variableType="Boolean"
     export variableName="varName"
+    export variableType="Boolean"
     export offValue="0"
     export onValue="1"
     export defaultValue=""

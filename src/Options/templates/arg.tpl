@@ -20,6 +20,8 @@
       spec+=' {list}'
       if ((min > 0)); then
         spec+=" (at least ${min} times)"
+      else
+        spec+=' (optional)'
       fi
       if ((max > 0)); then
         spec+=" (at most ${max} times)"
@@ -54,6 +56,8 @@
     .INCLUDE "${tplDir}/arg.parse.after.tpl"
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(<% ${functionName} %> helpTpl)"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Argument <% ${variableName} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  <%% helpArg "1" %>"'
@@ -64,14 +68,6 @@
     echo "<% ${type} %>"
   elif [[ "${cmd}" = "variableType" ]]; then
     echo "<% ${variableType} %>"
-  elif [[ "${cmd}" = "helpArg" ]]; then
-    echo "<%% helpArg "0" %>"
-  elif [[ "${cmd}" = "oneLineHelp" ]]; then
-    echo "Argument <% ${variableName} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
-  elif [[ "${cmd}" = "min" ]]; then
-    echo "<% ${min} %>"
-  elif [[ "${cmd}" = "max" ]]; then
-    echo "<% ${max} %>"
   elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
     export variableName="<% ${variableName} %>"
@@ -82,8 +78,12 @@
     export authorizedValues="<% ${authorizedValues} %>"
     export regexp="<% ${regexp} %>"
     export callbacks=(<%% Array::join " " "${callbacks[@]}" %>)
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "<% ${min} %>"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "<% ${max} %>"
   else
-    Log::displayError "Argument command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Argument command invalid: '${cmd}'"
     return 1
   fi
 }

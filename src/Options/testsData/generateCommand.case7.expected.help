@@ -1,12 +1,12 @@
-DESCRIPTION: super command
+[1;37mDESCRIPTION:[0m super command
 
-USAGE: test [OPTIONS] [ARGUMENTS]
-USAGE: test [--help|-h]
+[1;37mUSAGE:[0m test [OPTIONS] [ARGUMENTS]
+[1;37mUSAGE:[0m test [--help|-h]
 
-ARGUMENTS:
-  subCommand {single} (mandatory)
+[1;37mARGUMENTS:[0m
+  [1;34msubCommand[0m {single} (mandatory)
     
-      Common Commands:
+      [1;37mCommon Commands:[0m
       run         Create and run a new container from an image
       exec        Execute a command in a running container
       ps          List containers
@@ -18,6 +18,6 @@ ARGUMENTS:
       version     Show the Docker version information
       info        Display system-wide information 
 
-OPTIONS:
-  --help, -h (optional) (at most 1 times)
+[1;37mOPTIONS:[0m
+  [1;34m--help[0m, [1;34m-h[0m {single}
     help

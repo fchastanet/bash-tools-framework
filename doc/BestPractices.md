@@ -13,7 +13,7 @@ this project because I wrote some of them while writing this project.
     - [1.2.2. pipefail (set -o pipefail)](#122-pipefail-set--o-pipefail)
     - [1.2.3. errtrace (set -E | set -o errtrace)](#123-errtrace-set--e--set--o-errtrace)
     - [1.2.4. nounset (set -u | set -o nounset)](#124-nounset-set--u--set--o-nounset)
-    - [1.2.5. shopt -s inherit_errexit](#125-shopt--s-inherit_errexit)
+    - [1.2.5. shopt -s inherit\_errexit](#125-shopt--s-inherit_errexit)
     - [1.2.6. posix (set -o posix)](#126-posix-set--o-posix)
   - [1.3. Main function](#13-main-function)
   - [1.4. Arguments](#14-arguments)
@@ -433,6 +433,9 @@ PARAMETER, as if it just was ${PARAMETER}.
 
 If you omit the `:`(colon) like in `${PARAMETER-WORD}`, the default value is
 only used when the parameter is unset, not when it was empty.
+
+> :warning: use this latter syntax when using function arguments in order to be
+> able to reset a value to empty string, otherwise default value would be applied.
 
 #### 1.8.4. Check if a variable is defined
 

@@ -97,7 +97,7 @@ function Options::generateOption::caseBoolean1::OptionTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean1.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL} (optional) (at most 1 times)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL} {single}"
   assert_line --index 1 "    No help available"
 }
 
@@ -145,7 +145,7 @@ function Options::generateOption::caseBoolean2::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean2.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v${__HELP_NORMAL} (optional) (at most 1 times)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v${__HELP_NORMAL} {single}"
   assert_line --index 1 "    No help available"
 }
 
@@ -197,7 +197,7 @@ function Options::generateOption::caseBoolean3::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean3.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v${__HELP_NORMAL} (optional) (at most 1 times)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v${__HELP_NORMAL} {single}"
   assert_line --index 1 "    No help available"
 }
 
@@ -249,7 +249,7 @@ function Options::generateOption::caseBoolean4::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseBoolean4.sh"
   run Options::option help
   assert_lines_count 2
-  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v${__HELP_NORMAL} (optional) (at most 1 times)"
+  assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v${__HELP_NORMAL} {single}"
   assert_line --index 1 "    super help"
 }
 

@@ -16,9 +16,13 @@
     if [[ "${withColors}" = "1" ]]; then
       spec+='${__HELP_NORMAL}'
     fi
-    if ((min == 1 && max == 1)); then
-      spec+=' (mandatory)'
+    if ((max == 1)); then
+      spec+=' {single}'
+      if ((min == 1)); then
+        spec+=' (mandatory)'
+      fi
     else
+      spec+=' {list}'
       if ((min > 0)); then
         spec+=" (at least ${min} times)"
       else
@@ -92,8 +96,8 @@
     % fi
   elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
-    export variableType="<% ${variableType} %>"
     export variableName="<% ${variableName} %>"
+    export variableType="<% ${variableType} %>"
     export offValue="<% ${offValue} %>"
     export onValue="<% ${onValue} %>"
     export defaultValue="<% ${defaultValue} %>"

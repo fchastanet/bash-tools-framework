@@ -32,6 +32,8 @@ Options::arg() {
     fi
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::arg helpTpl)"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Argument varName min 1 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
     echo 'echo -e "  ${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {single} (mandatory)"'
@@ -42,14 +44,6 @@ Options::arg() {
     echo "Argument"
   elif [[ "${cmd}" = "variableType" ]]; then
     echo "String"
-  elif [[ "${cmd}" = "helpArg" ]]; then
-    echo "varName {single} (mandatory)"
-  elif [[ "${cmd}" = "oneLineHelp" ]]; then
-    echo "Argument varName min 1 max 1 authorizedValues '' regexp ''"
-  elif [[ "${cmd}" = "min" ]]; then
-    echo "1"
-  elif [[ "${cmd}" = "max" ]]; then
-    echo "1"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Argument"
     export variableName="varName"
@@ -60,8 +54,12 @@ Options::arg() {
     export authorizedValues=""
     export regexp=""
     export callbacks=()
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "1"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "1"
   else
-    Log::displayError "Argument command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Argument command invalid: '${cmd}'"
     return 1
   fi
 }

@@ -383,6 +383,7 @@ UI::drawLine() {
 # @set __HELP_EXAMPLE String to remove
 # @set __HELP_TITLE String to remove
 # @set __HELP_NORMAL String to remove
+# shellcheck disable=SC2034
 UI::theme() {
   local theme="${1-default}"
   if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then
@@ -1460,99 +1461,99 @@ INTERNAL
       "[--vendor <String>]" "[--bash-version <String>]" "[--bash-base-image <String>]" "[--branch-name <String>]" "[--push]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -e "  ${__HELP_OPTION_COLOR}--vendor <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--vendor <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(vendor\ image\ to\ use:\ alpine\|ubuntu\ \(Default:\ ubuntu\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--bash-version <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--bash-version <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(version\ of\ bash\ to\ use:\ 4.4\|5.0\|5.1\|5.2\ \(Default:\ 5.1\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--bash-base-image <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--bash-base-image <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(bash\ bash\ image\ to\ use\ \(eg:\ ubuntu:20.04\,\ amd64/bash:4.4-alpine3.18\)\ \(Default:\ ubuntu:20.04\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--branch-name <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--branch-name <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(branch\ name\ being\ built\,\ will\ help\ to\ create\ docker\ image\ tag\ name)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--push${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--push${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(if\ provided\,\ push\ the\ image\ to\ the\ registry)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
-    echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(use\ alternate\ bash\ framework\ configuration.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Display\ configuration)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} (optional)"
+    echo -e "  ${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} {list} (optional)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Load\ the\ specified\ env\ file)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(choose\ color\ theme\ \(default\,\ default-force\ or\ noColor\)\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Display\ this\ command\ help)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Print\ version\ information\ and\ quit)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(quiet\ mode\,\ doesn\'t\ display\ any\ output)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Set\ log\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Set\ log\ file)
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} (optional) (at most 1 times)"
+    echo -e "  ${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))

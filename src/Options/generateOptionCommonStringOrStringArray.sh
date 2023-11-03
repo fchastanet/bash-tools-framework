@@ -29,9 +29,8 @@ Options::generateOptionCommonStringOrStringArray() {
         ;;
       --help-value-name)
         shift || true
-        # TODO check if valid regexp
-        if [[ "$1" =~ [[:space:]] ]]; then
-          Log::displayError "${type} - --help-value-name invalid regexp '$1'"
+        if [[ ! "$1" =~ ^[A-Za-z0-9_-]+$ ]]; then
+          Log::displayError "${type} - --help-value-name should be a single word '$1'"
           return 1
         fi
         helpValueName="$1"

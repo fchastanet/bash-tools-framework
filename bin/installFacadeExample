@@ -474,6 +474,7 @@ Log::logSkipped() {
 # @set __HELP_EXAMPLE String to remove
 # @set __HELP_TITLE String to remove
 # @set __HELP_NORMAL String to remove
+# shellcheck disable=SC2034
 UI::theme() {
   local theme="${1-default}"
   if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then

@@ -32,9 +32,11 @@ Options::arg() {
     done
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::arg helpTpl)"
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
+    echo "Argument varName min 0 max 3 authorizedValues 'debug|info|warn' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'echo -e "  [${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {list} (at most 3 times)]"'
+    echo 'echo -e "  [${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {list} (optional) (at most 3 times)]"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
@@ -42,14 +44,6 @@ Options::arg() {
     echo "Argument"
   elif [[ "${cmd}" = "variableType" ]]; then
     echo "StringArray"
-  elif [[ "${cmd}" = "helpArg" ]]; then
-    echo "[varName {list} (at most 3 times)]"
-  elif [[ "${cmd}" = "oneLineHelp" ]]; then
-    echo "Argument varName min 0 max 3 authorizedValues 'debug|info|warn' regexp ''"
-  elif [[ "${cmd}" = "min" ]]; then
-    echo "0"
-  elif [[ "${cmd}" = "max" ]]; then
-    echo "3"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Argument"
     export variableName="varName"
@@ -60,8 +54,12 @@ Options::arg() {
     export authorizedValues="debug|info|warn"
     export regexp=""
     export callbacks=()
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "0"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "3"
   else
-    Log::displayError "Argument command invalid: '${cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Argument command invalid: '${cmd}'"
     return 1
   fi
 }

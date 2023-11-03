@@ -1,23 +1,23 @@
-DESCRIPTION: super command
+[1;37mDESCRIPTION:[0m super command
 
-USAGE: test [OPTIONS] [ARGUMENTS]
-USAGE: test [--help|-h] [--src-dirs|-s <String>] [--verbose|-v] [--quiet|-q]
+[1;37mUSAGE:[0m test [OPTIONS] [ARGUMENTS]
+[1;37mUSAGE:[0m test [--help|-h] [--src-dirs|-s <String>] [--verbose|-v] [--quiet|-q]
 
-ARGUMENTS:
-  srcFile {single} (mandatory)
+[1;37mARGUMENTS:[0m
+  [1;34msrcFile[0m {single} (mandatory)
     No help available
-  destFiles {list} (at least 1 times) (at most 3 times)
+  [1;34mdestFiles[0m {list} (at least 1 times) (at most 3 times)
     No help available
 
-OPTIONS:
-  --help, -h (optional) (at most 1 times)
+[1;37mOPTIONS:[0m
+  [1;34m--help[0m, [1;34m-h[0m {single}
     help
-  --src-dirs, -s <String> (optional)
+  [1;34m--src-dirs[0m, [1;34m-s <String>[0m {list} (optional)
     provide the directory where to find the functions source code.
 
-Command global options
+[1;37mCommand global options[0m
 The Console component adds some predefined options to all commands:
-  --verbose, -v (optional) (at most 1 times)
+  [1;34m--verbose[0m, [1;34m-v[0m {single}
     verbose mode
-  --quiet, -q (optional) (at most 1 times)
+  [1;34m--quiet[0m, [1;34m-q[0m {single}
     quiet mode

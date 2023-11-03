@@ -29,7 +29,7 @@ Options::option() {
     echo "Option varName --var variableType StringArray min 0 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var <String>${__HELP_NORMAL} (optional)"'
+    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var <String>${__HELP_NORMAL} {list} (optional)"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
@@ -45,8 +45,8 @@ Options::option() {
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
-    export variableType="StringArray"
     export variableName="varName"
+    export variableType="StringArray"
     export offValue=""
     export onValue=""
     export defaultValue=""
