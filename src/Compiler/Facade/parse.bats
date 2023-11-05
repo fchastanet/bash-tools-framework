@@ -41,6 +41,9 @@ function Compiler::Facade::parse::defaultFacade { #@test
   assertFacadeTemplateReturnStatus=0
   local status=0
 
+  dynamicTemplateDir() {
+    echo "/$1"
+  }
   Compiler::Facade::parse '# FACADE' \
     templateName >${BATS_TEST_TMPDIR}/result 2>&1 || status=$?
   [[ "${status}" = "0" ]]
@@ -53,7 +56,9 @@ function Compiler::Facade::parse::defaultFacade2 { #@test
   local templateName=""
   assertFacadeTemplateReturnStatus=0
   local status=0
-
+  dynamicTemplateDir() {
+    echo "/$1"
+  }
   Compiler::Facade::parse '# FACADE     ' \
     templateName >${BATS_TEST_TMPDIR}/result 2>&1 || status=$?
   [[ "${status}" = "0" ]]
@@ -68,8 +73,12 @@ function Compiler::Facade::parse::facadeTemplate { #@test
   assertFacadeTemplateReturnStatus=0
   local status=0
 
+  dynamicTemplateDir() {
+    echo "$1"
+  }
   Compiler::Facade::parse '# FACADE    "template"' \
     templateName >${BATS_TEST_TMPDIR}/result 2>&1 || status=$?
+
   [[ "${status}" = "0" ]]
   [[ "${templateName}" = 'template' ]]
   run cat "${BATS_TEST_TMPDIR}/result"
@@ -82,6 +91,9 @@ function Compiler::Facade::parse::targetFile::withoutQuotes { #@test
   assertFacadeTemplateReturnStatus=0
   local status=0
 
+  dynamicTemplateDir() {
+    echo "$1"
+  }
   Compiler::Facade::parse \
     '# FACADE _includes/facadeNewTemplate.tpl   ' \
     templateName >${BATS_TEST_TMPDIR}/result 2>&1 || status=$?
@@ -97,6 +109,9 @@ function Compiler::Facade::parse::invalidTemplateFile { #@test
   local templateName=""
   local status=0
   export BATS_TEST_DIRNAME
+  dynamicTemplateDir() {
+    echo "$1"
+  }
   Compiler::Facade::parse $'# FACADE "invalidTemplateFile"' \
     templateName >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "1" ]]

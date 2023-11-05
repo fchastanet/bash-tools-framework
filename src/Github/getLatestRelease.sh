@@ -15,6 +15,7 @@ Github::getLatestRelease() {
   resultFile="$(mktemp -p "${TMPDIR:-/tmp}" -t githubLatestRelease.XXXX)"
   # Get latest release from GitHub api
   if Retry::default curl \
+    -L \
     -o "${resultFile}" \
     --fail \
     --silent \

@@ -12,7 +12,7 @@ INTERNAL TOOL
 %
 Options::generateCommand "${options[@]}"
 %
-
+declare copyrightBeginYear="2022"
 declare -a RUN_CONTAINER_ARGV_FILTERED=()
 updateOptionSkipDockerBuildCallback() {
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then

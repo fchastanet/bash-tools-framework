@@ -18,8 +18,10 @@ fi
 % fi
 ((++options_parse_argParsedCount<% ${variableName^} %>))
 % if [[ "${variableType}" = "String" ]]; then
+# shellcheck disable=SC2034
 <% ${variableName} %>="${options_parse_arg}"
 % else
+# shellcheck disable=SC2034
 <% ${variableName} %>+=("${options_parse_arg}")
 % fi
 % for callback in "${callbacks[@]}"; do

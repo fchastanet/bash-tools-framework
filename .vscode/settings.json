@@ -17,6 +17,9 @@
   "markdown.extension.toc.omittedFromToc": {
     "*.md": ["# %%"]
   },
+  "workbench.editorAssociations": {
+    "*.md": "default"
+  },
   "markdown.extension.toc.levels": "2..6",
   "plantuml.server": "http://localhost:8080/",
   "shellcheck.customArgs": ["--source-path=SCRIPTDIR", "--external-sources"],

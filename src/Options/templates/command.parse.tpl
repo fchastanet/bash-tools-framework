@@ -6,6 +6,7 @@
   % "${argument}" export
   .INCLUDE "${tplDir}/arg.parse.before.tpl"
 % done
+# shellcheck disable=SC2034
 local -i options_parse_parsedArgIndex=0
 while (($# > 0)); do
   local options_parse_arg="$1"

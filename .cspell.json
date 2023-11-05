@@ -26,13 +26,34 @@
   "noConfigSearch": true,
   "words": ["megalinter", "oxsecurity"],
   "dictionaryDefinitions": [
-    {"name": "bashCustom", "path": ".cspell/bash.txt"},
-    {"name": "plantuml", "path": ".cspell/plantuml.txt"},
-    {"name": "loremIpsum", "path": ".cspell/loremIpsum.txt"},
-    {"name": "config", "path": ".cspell/config.txt"},
-    {"name": "softwares", "path": ".cspell/softwares.txt"},
-    {"name": "readme", "path": ".cspell/readme.txt"},
-    {"name": "dirColors", "path": ".cspell/dirColors.txt"}
+    {
+      "name": "bashCustom",
+      "path": ".cspell/bash.txt"
+    },
+    {
+      "name": "plantuml",
+      "path": ".cspell/plantuml.txt"
+    },
+    {
+      "name": "loremIpsum",
+      "path": ".cspell/loremIpsum.txt"
+    },
+    {
+      "name": "config",
+      "path": ".cspell/config.txt"
+    },
+    {
+      "name": "softwares",
+      "path": ".cspell/softwares.txt"
+    },
+    {
+      "name": "readme",
+      "path": ".cspell/readme.txt"
+    },
+    {
+      "name": "dirColors",
+      "path": ".cspell/dirColors.txt"
+    }
   ],
   "dictionaries": [
     "bash",
@@ -116,5 +137,6 @@
       "pattern": "\\]\\(#[^)]+\\)$"
     }
   ],
-  "ignoreRegExpList": ["urls", "packages", "markdownToc"]
+  "ignoreRegExpList": ["urls", "packages", "markdownToc"],
+  "enableFiletypes": ["shellscript"]
 }

@@ -29,15 +29,17 @@ Options::option() {
       Log::displayError "Command ${SCRIPT_NAME} - Option '--var' should be provided at least 1 time(s)"
       return 1
     fi
-    export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option varName --var|-v variableType StringArray min 1 max -1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} (at least 1 times)"'
-    echo "echo -e \"    $(Array::wrap " " 75 0 "super help")\""
+    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} {list} (at least 1 times)"'
+    echo "local -a helpArray"
+    echo "# shellcheck disable=SC2054"
+    echo "helpArray=(super\ help)"
+    echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
   elif [[ "${cmd}" = "type" ]]; then
@@ -48,13 +50,13 @@ Options::option() {
     echo '--var'
     echo '-v'
   elif [[ "${cmd}" = "helpAlt" ]]; then
-    echo '--var|-v'
+    echo '--var|-v <String>'
   elif [[ "${cmd}" = "groupId" ]]; then
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
-    export variableType="StringArray"
     export variableName="varName"
+    export variableType="StringArray"
     export offValue=""
     export onValue=""
     export defaultValue=""

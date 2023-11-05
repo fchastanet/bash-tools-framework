@@ -106,7 +106,8 @@ MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
     ^pages/README.md|
     ^pages/doc|
     ^pages/bashDoc|
-    ^pages/tests
+    ^pages/tests|
+    ^pages/_sidebar.md
   )
 MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
   (?x)(

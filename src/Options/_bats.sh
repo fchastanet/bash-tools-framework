@@ -25,6 +25,7 @@ testCommand() {
   local tmpFile
   tmpFile="${TMPDIR}/src/$(sed -E -e 's#::#/#' <<<"${functionName}").sh"
   [[ -f "${tmpFile}" ]]
+
   sed -i -E "s#${functionPrefixName}[A-F0-9][a-f0-9]{31}#${functionPrefixName}#" "${tmpFile}"
   diff "${tmpFile}" "${BATS_TEST_DIRNAME}/testsData/${testCase}" >&3 || {
     cat "${tmpFile}" >&3
@@ -45,7 +46,7 @@ checkCommandResult() {
   tmpFileResultAnsi="$(mktemp -p "${BATS_TEST_TMPDIR}" -t resultAnsi-$$-XXXXXX)"
   echo -e "${output}" >"${tmpFileResultAnsi}"
 
-  diff <(Filters::removeAnsiCodes "${tmpFileResultAnsi}") <(Filters::removeAnsiCodes <"${BATS_TEST_DIRNAME}/testsData/${expectedResult}") >&3 || {
+  diff -u <(Filters::removeAnsiCodes "${tmpFileResultAnsi}") <(Filters::removeAnsiCodes <"${BATS_TEST_DIRNAME}/testsData/${expectedResult}") >&3 || {
     echo -e "${output}" >&3
     if [[ "${BATS_FIX_TEST}" = "1" ]]; then
       echo "writing output to ${BATS_TEST_DIRNAME}/testsData/${expectedResult}" >&3

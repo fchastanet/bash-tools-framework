@@ -7,6 +7,7 @@ Options::command() {
   if [[ "${options_parse_cmd}" = "parse" ]]; then
     local -i options_parse_argParsedCountSrcFile
     ((options_parse_argParsedCountSrcFile = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -30,6 +31,7 @@ Options::command() {
               return 1
             fi
             ((++options_parse_argParsedCountSrcFile))
+            # shellcheck disable=SC2034
             srcFile="${options_parse_arg}"
             everyArgumentCallback 'srcFile' "${options_parse_arg}" || true
           else
@@ -48,7 +50,6 @@ Options::command() {
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'srcFile' should be provided at least 1 time(s)"
       return 1
     fi
-    export srcFile
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then

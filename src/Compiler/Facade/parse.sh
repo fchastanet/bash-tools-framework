@@ -11,7 +11,7 @@
 Compiler::Facade::parse() {
   local str="$1"
   local -n ref_template=$2
-  local defaultFacadeTemplate="${3:-${TEMPLATE_DIR}/_includes/facadeDefault/facadeDefault.tpl}"
+  local defaultFacadeTemplate="${3:-_includes/facadeDefault/facadeDefault.tpl}"
 
   if [[ "${str}" =~ ^#\ FACADE(.*)$ ]]; then
     # shellcheck disable=SC2034
@@ -19,6 +19,7 @@ Compiler::Facade::parse() {
     if [[ -z "${ref_template}" ]]; then
       ref_template="${defaultFacadeTemplate}"
     fi
+    ref_template="$(dynamicTemplateDir "${ref_template}")"
 
     Compiler::Facade::assertFacadeTemplate "${ref_template}" || return $?
   fi

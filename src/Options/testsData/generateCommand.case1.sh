@@ -7,6 +7,7 @@ Options::command() {
   if [[ "${options_parse_cmd}" = "parse" ]]; then
     local -i options_parse_optionParsedCountFile
     ((options_parse_optionParsedCountFile = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -25,6 +26,7 @@ Options::command() {
             return 1
           fi
           ((++options_parse_optionParsedCountFile))
+          # shellcheck disable=SC2034
           file="$1"
           ;;
         -*)
@@ -42,7 +44,6 @@ Options::command() {
       esac
       shift || true
     done
-    export file
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
@@ -55,8 +56,11 @@ Options::command() {
       "[--file|-f <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--file${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <String>${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    file"
+    echo -e "  ${__HELP_OPTION_COLOR}--file${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <String>${__HELP_NORMAL} {single}"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(file)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e """very long help"""
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"

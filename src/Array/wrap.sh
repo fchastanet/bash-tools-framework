@@ -19,6 +19,7 @@ Array::wrap() {
   if ((indentNextLine > 0)); then
     indentStr="$(head -c "${indentNextLine}" </dev/zero | tr '\0' " ")"
   fi
+  local -i firstLine=1
   shift || true
   (($# != 0)) || return 0
 
@@ -45,14 +46,18 @@ Array::wrap() {
   local arg="$1"
   local argNoAnsi
   local -i argNoAnsiLength=0
+
   while (($# > 0)); do
-    argNoAnsi="$(echo "${arg}" | Filters::removeAnsiCodes)"
+    argNoAnsi="$(echo "${arg%%*( )}" | Filters::removeAnsiCodes)"
     ((argNoAnsiLength = ${#argNoAnsi})) || true
     if (($# < 1 && argNoAnsiLength == 0)); then
       break
     fi
     if [[ "${arg}" = $'\n' ]]; then
-      printf $'\n\n'
+      if [[ "${needEcho}" = "1" ]]; then
+        needEcho="0"
+      fi
+      echo ""
       ((currentLineLength = 0)) || true
       ((glueLength = 0)) || true
       shift || return 0
@@ -63,7 +68,10 @@ Array::wrap() {
         echo -e -n "${glue}"
         ((currentLineLength += glueLength))
       fi
-      echo -e -n "${arg}"
+      if ((currentLineLength == 0 && firstLine == 0)); then
+        echo -n "${indentStr}"
+      fi
+      echo -e -n "${arg}" | sed 's/[\t ]*$//g'
       needEcho="1"
       ((currentLineLength += argNoAnsiLength))
       ((glueLength = ${#glue})) || true
@@ -71,6 +79,10 @@ Array::wrap() {
       arg="$1"
     else
       if ((argNoAnsiLength >= (maxLineLength - indentNextLine))); then
+        if ((currentLineLength == 0 && firstLine == 0)); then
+          echo -n "${indentStr}"
+          ((currentLineLength += indentNextLine))
+        fi
         # arg can be stored on a whole line
         if ((glueLength > 0)); then
           echo -e -n "${glue}"
@@ -78,15 +90,15 @@ Array::wrap() {
         fi
         local -i length
         ((length = maxLineLength - currentLineLength)) || true
-        echo -e "${arg:0:${length}}"
+        echo -e "${arg:0:${length}}" | sed 's/[\t ]*$//g'
         ((currentLineLength = 0)) || true
         ((glueLength = 0)) || true
-        arg="${indentStr}${arg:${length}}"
+        arg="${arg:${length}}"
         needEcho="0"
       else
         # arg cannot be stored on a whole line, so we add it on next line as a whole
         echo
-        echo -e -n "${indentStr}${arg}"
+        echo -e -n "${indentStr}${arg}" | sed 's/[\t ]*$//g'
         ((glueLength = ${#glue})) || true
         ((currentLineLength = argNoAnsiLength))
         arg="" # allows to go to next arg
@@ -97,6 +109,7 @@ Array::wrap() {
         arg="$1"
       fi
     fi
+    ((firstLine = 0)) || true
   done
   if [[ "${needEcho}" = "1" ]]; then
     echo

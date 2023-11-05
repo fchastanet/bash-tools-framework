@@ -4,16 +4,17 @@
 %# - SCRIPT_NAME
 %# - help
 %# - longDescription
+%# - copyrightBeginYear
 %
   # shellcheck source=/dev/null
   source <(
     Options::generateGroup \
       --title "GLOBAL OPTIONS:" \
-      --function-name groupGlobalOptionsFunction
+      --function-name zzzGroupGlobalOptionsFunction
 
     Options::generateOption \
       --help "Display this command help" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--help" \
       --alt "-h" \
       --callback optionHelpCallback \
@@ -22,7 +23,7 @@
 
     Options::generateOption \
       --help "Display configuration" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--config" \
       --variable-name "optionConfig" \
       --function-name optionConfigFunction
@@ -30,7 +31,7 @@
     Options::generateOption \
       --variable-type String \
       --help "use alternate bash framework configuration." \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--bash-framework-config" \
       --callback optionBashFrameworkConfigCallback \
       --variable-name "optionBashFrameworkConfig" \
@@ -38,7 +39,7 @@
 
     Options::generateOption \
       --help "info level verbose mode (alias of --display-level INFO)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--verbose" --alt "-v" \
       --callback optionInfoVerboseCallback \
       --callback updateArgListInfoVerboseCallback \
@@ -47,7 +48,7 @@
 
     Options::generateOption \
       --help "debug level verbose mode (alias of --display-level DEBUG)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "-vv" \
       --callback optionDebugVerboseCallback \
       --callback updateArgListDebugVerboseCallback \
@@ -56,7 +57,7 @@
 
     Options::generateOption \
       --help "trace level verbose mode (alias of --display-level TRACE)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "-vvv" \
       --callback optionTraceVerboseCallback \
       --callback updateArgListTraceVerboseCallback \
@@ -66,7 +67,7 @@
     Options::generateOption \
       --variable-type StringArray \
       --help "Load the specified env file" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--env-file" \
       --max -1 \
       --callback optionEnvFileCallback \
@@ -77,7 +78,7 @@
     Options::generateOption \
       --variable-type String \
       --help "Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--log-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
       --callback "optionLogLevelCallback" \
@@ -88,7 +89,7 @@
     Options::generateOption \
       --variable-type String \
       --help "Set log file" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--log-file" \
       --callback "optionLogFileCallback" \
       --callback updateArgListLogFileCallback \
@@ -98,7 +99,7 @@
     Options::generateOption \
       --variable-type String \
       --help "set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--display-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
       --callback optionDisplayLevelCallback \
@@ -108,7 +109,7 @@
 
     Options::generateOption \
       --help "Produce monochrome output. alias of --theme noColor." \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--no-color" \
       --callback optionNoColorCallback \
       --callback updateArgListNoColorCallback \
@@ -119,7 +120,7 @@
       --variable-type String \
       --help "$(echo "choose color theme (default, default-force or noColor) -" \
           "default-force means colors will be produced even if command is piped")" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--theme" \
       --authorized-values "default|default-force|noColor" \
       --callback optionThemeCallback \
@@ -129,7 +130,7 @@
 
     Options::generateOption \
       --help "Print version information and quit" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--version" \
       --callback optionVersionCallback \
       --variable-name "optionVersion" \
@@ -137,7 +138,7 @@
 
     Options::generateOption \
       --help "quiet mode, doesn't display any output" \
-      --group groupGlobalOptionsFunction \
+      --group zzzGroupGlobalOptionsFunction \
       --alt "--quiet" --alt "-q" \
       --callback optionQuietCallback \
       --callback updateArgListQuietCallback \
@@ -145,11 +146,12 @@
       --function-name optionQuietFunction
   )
 
+  copyrightCallback() { :; }
   declare -a options=(
     --author "[François Chastanet](https://github.com/fchastanet)"
     --source-file "${REPOSITORY_URL}/tree/master/${SRC_FILE_PATH}"
     --license "MIT License"
-    --copyright "Copyright (c) 2023 François Chastanet"
+    --copyright copyrightCallback
     --version "${versionNumber}"
     --function-name "${commandFunctionName}"
     --command-name "${SCRIPT_NAME}"
@@ -175,6 +177,14 @@
 
 %# default add option callbacks
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+
+copyrightCallback() {
+  if [[ -z "${copyrightBeginYear}" ]]; then
+    copyrightBeginYear="$(date +%Y)"
+  fi
+  echo "Copyright (c) ${copyrightBeginYear}-now François Chastanet"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 updateArgListInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
@@ -346,6 +356,13 @@ optionBashFrameworkConfigCallback() {
   fi
 }
 
+defaultFrameworkConfig="$(
+  cat <<'EOF'
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/.framework-config.default"
+EOF
+)"
+
+
 commandOptionParseFinished() {
   if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     BASH_FRAMEWORK_ENV_FILES=()
@@ -356,16 +373,25 @@ commandOptionParseFinished() {
   Log::requireLoad
 
   # load .framework-config
-  if [[ -n "${optionBashFrameworkConfig}" ]]; then
+  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
     BASH_FRAMEWORK_CONFIG_FILE="${optionBashFrameworkConfig}"
     # shellcheck source=/.framework-config
-    source "${optionBashFrameworkConfig}"
+    source "${optionBashFrameworkConfig}" ||
+      Log::fatal "Command ${SCRIPT_NAME} - error while loading specific .framework-config file: ${optionBashFrameworkConfig}"
   else
     # shellcheck disable=SC2034
     BASH_FRAMEWORK_CONFIG_FILE=""
     # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" ||
-      Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config file"
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
+      # load default template framework config
+      if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
+        echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
+      fi
+      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
+        Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+      }
+      Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
+    }
   fi
 
   if [[ "${optionConfig}" = "1" ]]; then

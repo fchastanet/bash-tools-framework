@@ -14,6 +14,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionBoolean.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionString.sh"
 # shellcheck source=src/Options/generateOptionStringArray.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionStringArray.sh"
+# shellcheck source=src/Options/generateOptionCommonStringOrStringArray.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Options/generateOptionCommonStringOrStringArray.sh"
 # shellcheck source=src/Options/generateFunction.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Options/generateFunction.sh"
 # shellcheck source=src/Options/generateArg.sh

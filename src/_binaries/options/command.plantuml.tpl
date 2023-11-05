@@ -54,6 +54,7 @@ options+=(
 )
 Options::generateCommand "${options[@]}"
 %
+declare copyrightBeginYear="2022"
 declare optionOutputDir="<% ${optionDefaultOutputDir} %>"
 
 plantumlCallback() {

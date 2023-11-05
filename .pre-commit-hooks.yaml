@@ -1,0 +1,95 @@
+- id: fixShebangExecutionBit
+  name: fixShebangExecutionBit
+  description: |
+    Find all files containing a shebang and
+    mark them as executable if not yet
+  language: system
+  entry: ./bin/findShebangFiles
+  args: [chmod, +x]
+  pass_filenames: false
+  types: ['file', 'shell', 'text']
+  always_run: false
+  fail_fast: true
+  stages: [commit, manual]
+
+- id: frameworkLinter
+  name: Bash Framework Linter
+  description: |
+    Check if your files uses the right syntax
+    for using bash-tools-framework
+  language: system
+  entry: ./bin/frameworkLint
+  args:
+    [--expected-warnings-count, '0', --format, plain, --theme, default-force]
+  pass_filenames: false
+  types: ['executable', 'file', 'shell', 'text']
+  always_run: false
+  fail_fast: true
+  stages: [commit, manual]
+
+- id: shellcheckLint
+  name: shellcheck Linter
+  description: |
+    Lint bash files using shellcheck.
+    Installing last version automatically
+  language: system
+  entry: ./bin/shellcheckLint
+  args: [-f, tty, --xargs, --staged]
+  pass_filenames: true
+  types: ['executable', 'file', 'shell', 'text']
+  always_run: false
+  fail_fast: true
+  stages: [commit]
+
+- id: runUnitTests
+  name: Run unit tests
+  description: run unit test using bats in docker isolated environment
+  language: system
+  entry: ./bin/test
+  args: [-r, src, -j, '30']
+  pass_filenames: false
+  always_run: true
+  fail_fast: true
+  require_serial: true
+  stages: [commit]
+
+- id: plantuml
+  name: Plantuml Converter
+  description: Convert plantuml files to images
+  language: system
+  entry: ./bin/plantuml
+  args: [-f, png, -f, svg]
+  pass_filenames: true
+  types: ['file', 'non-executable', 'plantuml', 'text']
+  always_run: false
+  fail_fast: true
+  stages: [push, manual]
+
+- id: megalinter-check-version
+  name: Megalinter Check Version
+  description: Megalinter Check if new version is available
+  language: system
+  entry: ./bin/megalinter
+  args:
+    [
+      --check-megalinter-version,
+      --image,
+      'oxsecurity/megalinter-terraform:v7.5.0',
+    ]
+  pass_filenames: false
+  always_run: true
+  fail_fast: true
+  stages: [push, manual]
+
+- id: megalinter
+  name: Megalinter
+  description: use megalinter to check your project
+  language: system
+  entry: './hooks/megalinter.sh'
+  args: ['oxsecurity/megalinter-terraform:v7.5.0']
+  pass_filenames: false
+  require_serial: true
+  always_run: true
+  fail_fast: true
+  verbose: true
+  stages: [push, manual]

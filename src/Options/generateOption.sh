@@ -213,10 +213,15 @@ Options::generateOption() {
         Options::generateOptionBoolean "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
         ;;
       String)
-        Options::generateOptionString "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
+        Options::generateOptionCommonStringOrStringArray "Options::generateOptionString" \
+          "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
+        Options::generateOptionString \
+          "${adapterOptions[@]}" >>"${adapterOptionsTmpFile}" || return 2
         ;;
       StringArray)
-        Options::generateOptionStringArray "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
+        Options::generateOptionCommonStringOrStringArray "Options::generateOptionStringArray" \
+          "${adapterOptions[@]}" >"${adapterOptionsTmpFile}" || return 2
+        Options::generateOptionStringArray "${adapterOptions[@]}" >>"${adapterOptionsTmpFile}" || return 2
         ;;
       *)
         Log::displayError "invalid option --variable-type: ${variableType}"

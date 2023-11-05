@@ -14,6 +14,7 @@ ${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
 '''
 %
 
+declare MIN_HADOLINT_VERSION="<% ${MIN_HADOLINT_VERSION} %>"
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
 
 
@@ -55,3 +56,4 @@ options+=(
 )
 Options::generateCommand "${options[@]}"
 %
+declare copyrightBeginYear="2022"

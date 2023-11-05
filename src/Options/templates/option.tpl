@@ -1,5 +1,42 @@
 #!/usr/bin/env bash
 
+%
+  helpOpt() {
+    local withColors="$1"
+    local spec=""
+    if [[ "${withColors}" = "1" ]]; then
+      spec+='${__HELP_OPTION_COLOR}'
+      spec+="$(Array::join '${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}' "${alts[@]}")"
+    else
+      spec+="$(Array::join ', ' "${alts[@]}")"
+    fi
+    if [[ "${variableType}" != "Boolean" ]]; then
+      spec+=" <${helpValueName}>"
+    fi
+    if [[ "${withColors}" = "1" ]]; then
+      spec+='${__HELP_NORMAL}'
+    fi
+    if ((max == 1)); then
+      spec+=' {single}'
+      if ((min == 1)); then
+        spec+=' (mandatory)'
+      fi
+    else
+      spec+=' {list}'
+      if ((min > 0)); then
+        spec+=" (at least ${min} times)"
+      else
+        spec+=' (optional)'
+      fi
+      if ((max > 0)); then
+        spec+=" (at most ${max} times)"
+      fi
+    fi
+    local helpOpt=""
+    helpOpt+="${spec//^[[:blank:]]/}"
+    echo "${helpOpt}"
+  }
+%
 <% ${functionName} %>() {
   local cmd="$1"
   shift || true
@@ -22,36 +59,9 @@
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option <% ${variableName} %> <%% Array::join '|' "${alts[@]}" %> variableType <% ${variableType} %> min <% ${min} %> max <% ${max} %> authorizedValues '<% ${authorizedValues} %>' regexp '<% ${regexp} %>'"
   elif [[ "${cmd}" = "helpTpl" ]]; then
-    %
-      altStr='${__HELP_OPTION_COLOR}'
-      altStr+="$(Array::join '${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}' "${alts[@]}")"
-      if [[ "${variableType}" != "Boolean" ]]; then
-        altStr+=' <String>'
-      fi
-      altStr+='${__HELP_NORMAL}'
-      if ((min == 1 && max == 1)); then
-        altStr+=' (mandatory)'
-      else
-        if ((min > 0)); then
-          altStr+=" (at least ${min} times)"
-        else
-          altStr+=' (optional)'
-        fi
-        if ((max > 0)); then
-          altStr+=" (at most ${max} times)"
-        fi
-      fi
-    %
     # shellcheck disable=SC2016
-    echo 'printf "  %b\n" "<% ${altStr} %>"'
-    % nl=$'\n'
-    % if [[ -z "${help}" ]]; then
-        echo "echo '    No help available'"
-    % elif [[ "${help}" =~ ${nl} ]]; then
-      echo 'echo -e """    <% ${help} %>"""'
-    % else
-      echo "echo -e \"    $(Array::wrap " " 75 0 "<% ${help} %>")\""
-    % fi
+    echo 'echo -e "  <%% helpOpt "1" %>"'
+    .INCLUDE "${tplDir}/helpArg.tpl"
     % if [[ -n "${defaultValue}" ]]; then
         echo "echo '    Default value: <% ${defaultValue} %>'"
     % fi
@@ -73,7 +83,8 @@
         helpAlt=""
         ((min == 0)) && helpAlt+="["
         helpAlt+="$(Array::join '|' "${alts[@]}")"
-        ((min == 0)) && helpAlt+=" <String>]"
+        helpAlt+=" <${helpValueName}>"
+        ((min == 0)) && helpAlt+="]"
       fi
     %
     echo '<% ${helpAlt%, } %>'
@@ -85,8 +96,8 @@
     % fi
   elif [[ "${cmd}" = "export" ]]; then
     export type="<% ${type} %>"
-    export variableType="<% ${variableType} %>"
     export variableName="<% ${variableName} %>"
+    export variableType="<% ${variableType} %>"
     export offValue="<% ${offValue} %>"
     export onValue="<% ${onValue} %>"
     export defaultValue="<% ${defaultValue} %>"

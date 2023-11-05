@@ -20,3 +20,7 @@ source "${srcDir}/_standalone/Bats/assert_lines_count.sh"
 source "${srcDir}/Env/__all.sh"
 # shellcheck source=src/Log/__all.sh
 source "${srcDir}/Log/__all.sh"
+# shellcheck source=src/UI/theme.sh
+source "${srcDir}/UI/theme.sh"
+# shellcheck source=src/Assert/tty.sh
+source "${srcDir}/Assert/tty.sh"

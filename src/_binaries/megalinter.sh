@@ -17,7 +17,7 @@ run() {
   if [[ "${optionIncremental}" = "1" ]]; then
     local -a updatedFiles
     IFS=$'\n' read -r -d '' -a updatedFiles < <(git --no-pager diff --name-only --cached || true) || true
-    if ((${#updatedFiles[@]} > 0)); then
+    if ((${#updatedFiles[@]} == 0)); then
       Log::displayError "No files to lint in incremental mode"
       exit 1
     fi
@@ -61,7 +61,7 @@ run() {
     -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw
     "${optionMegalinterImage}"
   )
-  Log::displayInfo "Running ${cmd[*]}"
+  Log::displayWarning "Running ${cmd[*]}"
   (
     if [[ "${optionTraceVerbose}" = "1" ]]; then
       set -x

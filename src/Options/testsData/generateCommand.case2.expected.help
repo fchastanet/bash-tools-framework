@@ -1,8 +1,8 @@
-DESCRIPTION: super command
+[1;37mDESCRIPTION:[0m super command
 
-USAGE: test [OPTIONS]
-USAGE: test [--verbose|-v]
+[1;37mUSAGE:[0m test [OPTIONS]
+[1;37mUSAGE:[0m test [--verbose|-v]
 
-OPTIONS:
-  --verbose, -v (optional) (at most 1 times)
+[1;37mOPTIONS:[0m
+  [1;34m--verbose[0m, [1;34m-v[0m {single}
     verbose mode

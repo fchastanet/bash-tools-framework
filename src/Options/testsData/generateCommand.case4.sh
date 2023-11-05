@@ -12,6 +12,7 @@ Options::command() {
     ((options_parse_argParsedCountSrcFile = 0)) || true
     local -i options_parse_argParsedCountDestFiles
     ((options_parse_argParsedCountDestFiles = 0)) || true
+    # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
       local options_parse_arg="$1"
@@ -20,6 +21,7 @@ Options::command() {
         # Option 1/2
         # Option verbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
+          # shellcheck disable=SC2034
           verbose="1"
           if ((options_parse_optionParsedCountVerbose >= 1)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
@@ -56,6 +58,7 @@ Options::command() {
               return 1
             fi
             ((++options_parse_argParsedCountSrcFile))
+            # shellcheck disable=SC2034
             srcFile="${options_parse_arg}"
           # Argument 2/2
           # Argument destFiles min 1 max 3 authorizedValues '' regexp ''
@@ -65,6 +68,7 @@ Options::command() {
               return 1
             fi
             ((++options_parse_argParsedCountDestFiles))
+            # shellcheck disable=SC2034
             destFiles+=("${options_parse_arg}")
           else
             if [[ "${argOptDefaultBehavior}" = "0" ]]; then
@@ -77,18 +81,14 @@ Options::command() {
       esac
       shift || true
     done
-    export verbose
-    export srcDirs
     if ((options_parse_argParsedCountSrcFile < 1)); then
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'srcFile' should be provided at least 1 time(s)"
       return 1
     fi
-    export srcFile
     if ((options_parse_argParsedCountDestFiles < 1)); then
       Log::displayError "Command ${SCRIPT_NAME} - Argument 'destFiles' should be provided at least 1 time(s)"
       return 1
     fi
-    export destFiles
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
@@ -107,10 +107,16 @@ Options::command() {
     echo '    No help available'
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} (optional) (at most 1 times)"
-    echo -e "    verbose mode"
-    printf "  %b\n" "${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} (optional)"
-    echo -e "    provide the directory where to find the functions source code."
+    echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(verbose\ mode)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "  ${__HELP_OPTION_COLOR}--src-dirs${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} {list} (optional)"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(provide\ the\ directory\ where\ to\ find\ the\ functions\ source\ code.)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1

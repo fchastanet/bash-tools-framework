@@ -2,7 +2,7 @@
 
 # @description get list of env files to load
 # in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ARGV String[] list of arguments passed to the command (provided by _mandatoryHeaders.sh file)
+# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
 # @exitcode 1 if one of the env file cannot be generated
 # @exitcode 2 if one of the env file is not a file or readable
 # @stdout the env files asked to be loaded

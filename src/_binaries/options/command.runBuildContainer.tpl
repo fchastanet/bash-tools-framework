@@ -39,6 +39,7 @@ options+=(
 )
 Options::generateCommand "${options[@]}"
 %
+declare copyrightBeginYear="2022"
 
 # shellcheck disable=SC2317 # if function is overridden
 unknownOption() {

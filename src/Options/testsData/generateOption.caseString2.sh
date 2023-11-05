@@ -21,6 +21,7 @@ Options::option() {
             return 1
           fi
           ((++options_parse_optionParsedCountVarName))
+          # shellcheck disable=SC2034
           varName="$1"
           ;;
         *)
@@ -29,14 +30,13 @@ Options::option() {
       esac
       shift || true
     done
-    export varName
   elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::option helpTpl)"
   elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Option varName --var|-v variableType String min 0 max 1 authorizedValues '' regexp ''"
   elif [[ "${cmd}" = "helpTpl" ]]; then
     # shellcheck disable=SC2016
-    echo 'printf "  %b\n" "${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} (optional) (at most 1 times)"'
+    echo 'echo -e "  ${__HELP_OPTION_COLOR}--var${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v <String>${__HELP_NORMAL} {single}"'
     echo "echo '    No help available'"
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
@@ -53,8 +53,8 @@ Options::option() {
     echo "__default"
   elif [[ "${cmd}" = "export" ]]; then
     export type="Option"
-    export variableType="String"
     export variableName="varName"
+    export variableType="String"
     export offValue=""
     export onValue=""
     export defaultValue=""

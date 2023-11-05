@@ -88,4 +88,4 @@ will generate this
 [generated function](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Options/testsData/generateCommand.case6.sh).
 
 The generated function will then be able to generate this
-[generated help](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Options/testsData/src/Options/testsData/generateCommand.case6.expected.help)
+[generated help](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Options/testsData/generateCommand.case6.expected.help)

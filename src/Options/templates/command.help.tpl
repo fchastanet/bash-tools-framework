@@ -64,7 +64,8 @@ fi
 %
 if [[ -n "${longDescription}" ]]; then
 %
-echo -e """<% ${longDescription} %>"""
+%# removing last empty line
+echo -e """<%% echo "${longDescription}" | sed -E -e '${/^$/d;}' %>"""
 %
 fi
 %
@@ -114,6 +115,10 @@ fi
 %
 if [[ -n "${copyright}" ]]; then
   echo '    echo'
-  echo "    echo '${copyright}'"
+  if [[ $(type -t "${copyright}") == "function" ]]; then
+    echo "    Array::wrap ' ' 76 4 \"\$(<% ${copyright} %>)\""
+  else
+    echo "    echo '${copyright}'"
+  fi
 fi
 %

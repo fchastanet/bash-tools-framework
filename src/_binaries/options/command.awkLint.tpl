@@ -12,3 +12,4 @@ Result in checkstyle format."
 %
 Options::generateCommand "${options[@]}"
 %
+declare copyrightBeginYear="2022"

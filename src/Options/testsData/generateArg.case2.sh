@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 Options::arg() {
-  local options_parse_cmd="$1"
+  local cmd="$1"
   shift || true
 
-  if [[ "${options_parse_cmd}" = "parse" ]]; then
+  if [[ "${cmd}" = "parse" ]]; then
     local -i options_parse_argParsedCountVarName
     ((options_parse_argParsedCountVarName = 0)) || true
     while (($# > 0)); do
@@ -24,33 +24,27 @@ Options::arg() {
             return 1
           fi
           ((++options_parse_argParsedCountVarName))
+          # shellcheck disable=SC2034
           varName+=("${options_parse_arg}")
           ;;
       esac
       shift || true
     done
-    export varName
-  elif [[ "${options_parse_cmd}" = "help" ]]; then
+  elif [[ "${cmd}" = "help" ]]; then
     eval "$(Options::arg helpTpl)"
-  elif [[ "${options_parse_cmd}" = "helpTpl" ]]; then
-    # shellcheck disable=SC2016
-    echo 'echo -e "  [${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {list} (at most 3 times)]"'
-    echo "echo '    No help available'"
-  elif [[ "${options_parse_cmd}" = "variableName" ]]; then
-    echo "varName"
-  elif [[ "${options_parse_cmd}" = "type" ]]; then
-    echo "Argument"
-  elif [[ "${options_parse_cmd}" = "variableType" ]]; then
-    echo "StringArray"
-  elif [[ "${options_parse_cmd}" = "helpArg" ]]; then
-    echo "[varName {list} (at most 3 times)]"
-  elif [[ "${options_parse_cmd}" = "oneLineHelp" ]]; then
+  elif [[ "${cmd}" = "oneLineHelp" ]]; then
     echo "Argument varName min 0 max 3 authorizedValues 'debug|info|warn' regexp ''"
-  elif [[ "${options_parse_cmd}" = "min" ]]; then
-    echo "0"
-  elif [[ "${options_parse_cmd}" = "max" ]]; then
-    echo "3"
-  elif [[ "${options_parse_cmd}" = "export" ]]; then
+  elif [[ "${cmd}" = "helpTpl" ]]; then
+    # shellcheck disable=SC2016
+    echo 'echo -e "  [${__HELP_OPTION_COLOR}varName${__HELP_NORMAL} {list} (optional) (at most 3 times)]"'
+    echo "echo '    No help available'"
+  elif [[ "${cmd}" = "variableName" ]]; then
+    echo "varName"
+  elif [[ "${cmd}" = "type" ]]; then
+    echo "Argument"
+  elif [[ "${cmd}" = "variableType" ]]; then
+    echo "StringArray"
+  elif [[ "${cmd}" = "export" ]]; then
     export type="Argument"
     export variableName="varName"
     export variableType="StringArray"
@@ -60,8 +54,12 @@ Options::arg() {
     export authorizedValues="debug|info|warn"
     export regexp=""
     export callbacks=()
+  elif [[ "${cmd}" = "min" ]]; then
+    echo "0"
+  elif [[ "${cmd}" = "max" ]]; then
+    echo "3"
   else
-    Log::displayError "Argument command invalid: '${options_parse_cmd}'"
+    Log::displayError "Command ${SCRIPT_NAME} - Argument command invalid: '${cmd}'"
     return 1
   fi
 }
