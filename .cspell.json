@@ -24,15 +24,39 @@
     "**/*/svg"
   ],
   "noConfigSearch": true,
-  "words": ["megalinter", "oxsecurity"],
+  "words": [
+    "megalinter",
+    "oxsecurity"
+  ],
   "dictionaryDefinitions": [
-    {"name": "bashCustom", "path": ".cspell/bash.txt"},
-    {"name": "plantuml", "path": ".cspell/plantuml.txt"},
-    {"name": "loremIpsum", "path": ".cspell/loremIpsum.txt"},
-    {"name": "config", "path": ".cspell/config.txt"},
-    {"name": "softwares", "path": ".cspell/softwares.txt"},
-    {"name": "readme", "path": ".cspell/readme.txt"},
-    {"name": "dirColors", "path": ".cspell/dirColors.txt"}
+    {
+      "name": "bashCustom",
+      "path": ".cspell/bash.txt"
+    },
+    {
+      "name": "plantuml",
+      "path": ".cspell/plantuml.txt"
+    },
+    {
+      "name": "loremIpsum",
+      "path": ".cspell/loremIpsum.txt"
+    },
+    {
+      "name": "config",
+      "path": ".cspell/config.txt"
+    },
+    {
+      "name": "softwares",
+      "path": ".cspell/softwares.txt"
+    },
+    {
+      "name": "readme",
+      "path": ".cspell/readme.txt"
+    },
+    {
+      "name": "dirColors",
+      "path": ".cspell/dirColors.txt"
+    }
   ],
   "dictionaries": [
     "bash",
@@ -47,37 +71,51 @@
     {
       "languageId": "dirColors",
       "locale": "*",
-      "dictionaries": ["dirColors"]
+      "dictionaries": [
+        "dirColors"
+      ]
     },
     {
       "languageId": "bashCustom",
       "locale": "*",
-      "dictionaries": ["bashCustom"]
+      "dictionaries": [
+        "bashCustom"
+      ]
     },
     {
       "languageId": "plantuml",
       "locale": "*",
-      "dictionaries": ["plantuml"]
+      "dictionaries": [
+        "plantuml"
+      ]
     },
     {
       "languageId": "loremIpsum",
       "locale": "*",
-      "dictionaries": ["loremIpsum"]
+      "dictionaries": [
+        "loremIpsum"
+      ]
     },
     {
       "languageId": "config",
       "locale": "*",
-      "dictionaries": ["config"]
+      "dictionaries": [
+        "config"
+      ]
     },
     {
       "languageId": "softwares",
       "locale": "*",
-      "dictionaries": ["softwares"]
+      "dictionaries": [
+        "softwares"
+      ]
     },
     {
       "languageId": "readme",
       "locale": "*",
-      "dictionaries": ["readme"]
+      "dictionaries": [
+        "readme"
+      ]
     }
   ],
   "overrides": [
@@ -116,5 +154,12 @@
       "pattern": "\\]\\(#[^)]+\\)$"
     }
   ],
-  "ignoreRegExpList": ["urls", "packages", "markdownToc"]
+  "ignoreRegExpList": [
+    "urls",
+    "packages",
+    "markdownToc"
+  ],
+  "enableFiletypes": [
+    "shellscript"
+  ]
 }
