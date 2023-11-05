@@ -24,10 +24,7 @@
     "**/*/svg"
   ],
   "noConfigSearch": true,
-  "words": [
-    "megalinter",
-    "oxsecurity"
-  ],
+  "words": ["megalinter", "oxsecurity"],
   "dictionaryDefinitions": [
     {
       "name": "bashCustom",
@@ -71,51 +68,37 @@
     {
       "languageId": "dirColors",
       "locale": "*",
-      "dictionaries": [
-        "dirColors"
-      ]
+      "dictionaries": ["dirColors"]
     },
     {
       "languageId": "bashCustom",
       "locale": "*",
-      "dictionaries": [
-        "bashCustom"
-      ]
+      "dictionaries": ["bashCustom"]
     },
     {
       "languageId": "plantuml",
       "locale": "*",
-      "dictionaries": [
-        "plantuml"
-      ]
+      "dictionaries": ["plantuml"]
     },
     {
       "languageId": "loremIpsum",
       "locale": "*",
-      "dictionaries": [
-        "loremIpsum"
-      ]
+      "dictionaries": ["loremIpsum"]
     },
     {
       "languageId": "config",
       "locale": "*",
-      "dictionaries": [
-        "config"
-      ]
+      "dictionaries": ["config"]
     },
     {
       "languageId": "softwares",
       "locale": "*",
-      "dictionaries": [
-        "softwares"
-      ]
+      "dictionaries": ["softwares"]
     },
     {
       "languageId": "readme",
       "locale": "*",
-      "dictionaries": [
-        "readme"
-      ]
+      "dictionaries": ["readme"]
     }
   ],
   "overrides": [
@@ -154,12 +137,6 @@
       "pattern": "\\]\\(#[^)]+\\)$"
     }
   ],
-  "ignoreRegExpList": [
-    "urls",
-    "packages",
-    "markdownToc"
-  ],
-  "enableFiletypes": [
-    "shellscript"
-  ]
+  "ignoreRegExpList": ["urls", "packages", "markdownToc"],
+  "enableFiletypes": ["shellscript"]
 }

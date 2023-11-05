@@ -1131,6 +1131,8 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
+declare MIN_HADOLINT_VERSION="2.12.0"
+
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
 copyrightCallback() {
@@ -1756,10 +1758,10 @@ dockerLintCommand() {
     helpArray=(set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e """
-- installs new hadolint version(>2.12.0) automatically
+- installs new hadolint version(>${MIN_HADOLINT_VERSION}) automatically
 - lint this project files using default files filter
 
-\e[1;37mHADOLINT HELP\e[0m
+${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
 
 @@@HADOLINT_HELP@@@"""
     echo
