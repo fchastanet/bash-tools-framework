@@ -1469,6 +1469,7 @@ INTERNAL TOOL")"
     return 1
   fi
 }
+declare copyrightBeginYear="2023"
 
 buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 

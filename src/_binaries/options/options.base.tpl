@@ -4,6 +4,7 @@
 %# - SCRIPT_NAME
 %# - help
 %# - longDescription
+%# - copyrightBeginYear
 %
   # shellcheck source=/dev/null
   source <(

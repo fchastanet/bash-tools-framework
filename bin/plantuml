@@ -1516,6 +1516,7 @@ Generates plantuml diagrams from puml files in formats provided"""
     return 1
   fi
 }
+declare copyrightBeginYear="2022"
 declare optionOutputDir="doc/images"
 
 plantumlCallback() {

@@ -70,6 +70,7 @@ options+=(
 Options::generateCommand "${options[@]}"
 %
 
+declare copyrightBeginYear="2022"
 declare optionFormat="<% ${optionFormatDefault} %>"
 declare -a shellcheckArgs=()
 declare -a shellcheckFiles=()

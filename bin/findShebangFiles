@@ -1490,6 +1490,7 @@ ${SCRIPT_NAME} chmod +x"""
     return 1
   fi
 }
+declare copyrightBeginYear="2023"
 
 declare -a commandToApply=()
 unknownOptionArgFunction() {

@@ -80,7 +80,7 @@ options+=(
 )
 Options::generateCommand "${options[@]}"
 %
-
+declare copyrightBeginYear="2022"
 declare optionMegalinterConfigFile="<% ${defaultMegalinterConfigFile} %>"
 declare optionMegalinterImage="<% ${defaultMegalinterImage} %>"
 declare -a megalinterArgs=()

@@ -1646,7 +1646,7 @@ Lint files of the current repository
     return 1
   fi
 }
-
+declare copyrightBeginYear="2022"
 declare -i optionExpectedWarningsCount=0
 
 optionExpectedWarningsCountCallback() {

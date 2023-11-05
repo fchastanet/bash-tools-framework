@@ -23,3 +23,4 @@ options+=(
 )
 Options::generateCommand "${options[@]}"
 %
+declare copyrightBeginYear="2023"

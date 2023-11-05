@@ -47,7 +47,7 @@ options+=(
 )
 Options::generateCommand "${options[@]}"
 %
-
+declare copyrightBeginYear="2022"
 declare -a batsArgs=()
 everyOptOrArgCallback() {
   if [[ -z "$1" || "$1" = "argBats" ]]; then

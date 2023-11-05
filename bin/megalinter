@@ -1788,7 +1788,7 @@ megalinter image oxsecurity/megalinter-terraform:v7.4.0 will be used.
     return 1
   fi
 }
-
+declare copyrightBeginYear="2022"
 declare optionMegalinterConfigFile=".mega-linter-light.yml"
 declare optionMegalinterImage="oxsecurity/megalinter-terraform:v7.4.0"
 declare -a megalinterArgs=()

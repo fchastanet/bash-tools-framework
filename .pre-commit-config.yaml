@@ -81,7 +81,6 @@ repos:
         args: [-f, tty, --xargs, --staged]
         pass_filenames: true
         types: ['executable', 'file', 'shell', 'text']
-        files: \.sh$
         always_run: false
         fail_fast: true
         stages: [commit]

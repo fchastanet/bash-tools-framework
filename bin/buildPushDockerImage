@@ -1606,6 +1606,7 @@ INTERNAL
     return 1
   fi
 }
+declare copyrightBeginYear="2023"
 
 buildPushDockerImageCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
