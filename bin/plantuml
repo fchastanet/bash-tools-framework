@@ -302,6 +302,15 @@ Log::displayInfo() {
   Log::logInfo "$1" "${type}"
 }
 
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
+Log::displayWarning() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
+    echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logWarning "$1"
+}
+
 # @description Display message using error color (red) and exit immediately with error status 1
 # @arg $1 message:String the message to display
 Log::fatal() {
@@ -675,6 +684,14 @@ Log::logMessage() {
   fi
 }
 
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logWarning() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
+    Log::logMessage "${2:-WARNING}" "$1"
+  fi
+}
+
 # @description To be called before logging in the log file
 # @arg $1 file:string log file name
 # @arg $2 maxLogFilesCount:int maximum number of log files
@@ -773,15 +790,6 @@ Framework::createTempFile() {
   mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
 
-# @description Display message using warning color (yellow)
-# @arg $1 message:String the message to display
-Log::displayWarning() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
-    echo -e "${__WARNING_COLOR}WARN    - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logWarning "$1"
-}
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logSkipped() {
@@ -804,14 +812,6 @@ Array::contains() {
     [[ "${element}" = "$1" ]] && return 0
   done
   return 1
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logWarning() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
-    Log::logMessage "${2:-WARNING}" "$1"
-  fi
 }
 
 # FUNCTIONS
@@ -1012,6 +1012,29 @@ optionBashFrameworkConfigCallback() {
   fi
 }
 
+defaultFrameworkConfig="$(
+  cat <<'EOF'
+# copied from src/_includes/.framework-config.default
+# shellcheck disable=SC2034
+
+# describe the functions that will be skipped from being imported
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|Acquire::ForceIPv4)$'
+# describe the files that do not contain function to be imported
+NON_FRAMEWORK_FILES_REGEXP="(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)"
+# describe the files that are allowed to not have an associated bats file
+BATS_FILE_NOT_NEEDED_REGEXP="(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes)"
+# describe the files that are allowed to not have a function matching the filename
+FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^build.sh$|\.tpl$|/testsData/|^manualTests/|\.bats$"
+# Source directories
+FRAMEWORK_SRC_DIRS=(
+  "${FRAMEWORK_ROOT_DIR}/src"
+)
+
+# export here all the variables that will be used in your templates
+export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
+EOF
+)"
+
 commandOptionParseFinished() {
   if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     BASH_FRAMEWORK_ENV_FILES=()
@@ -1031,8 +1054,16 @@ commandOptionParseFinished() {
     # shellcheck disable=SC2034
     BASH_FRAMEWORK_CONFIG_FILE=""
     # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" ||
-      Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config file"
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
+      # load default template framework config
+      if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
+        echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
+      fi
+      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
+        Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+      }
+      Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
+    }
   fi
 
   if [[ "${optionConfig}" = "1" ]]; then

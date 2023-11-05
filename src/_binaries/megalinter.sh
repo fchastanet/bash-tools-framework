@@ -61,7 +61,7 @@ run() {
     -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw
     "${optionMegalinterImage}"
   )
-  Log::displayInfo "Running ${cmd[*]}"
+  Log::displayWarning "Running ${cmd[*]}"
   (
     if [[ "${optionTraceVerbose}" = "1" ]]; then
       set -x

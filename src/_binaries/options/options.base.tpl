@@ -357,6 +357,13 @@ optionBashFrameworkConfigCallback() {
   fi
 }
 
+defaultFrameworkConfig="$(
+  cat <<'EOF'
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/.framework-config.default"
+EOF
+)"
+
+
 commandOptionParseFinished() {
   if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     BASH_FRAMEWORK_ENV_FILES=()
@@ -376,8 +383,16 @@ commandOptionParseFinished() {
     # shellcheck disable=SC2034
     BASH_FRAMEWORK_CONFIG_FILE=""
     # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" ||
-      Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config file"
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
+      # load default template framework config
+      if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
+        echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
+      fi
+      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
+        Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+      }
+      Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
+    }
   fi
 
   if [[ "${optionConfig}" = "1" ]]; then

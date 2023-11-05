@@ -17,6 +17,8 @@ setup() {
   mkdir -p "${BATS_TEST_TMPDIR}/dir1/dir/dir1.1"
   mkdir -p "${BATS_TEST_TMPDIR}/dir2/dir/dir2.1"
   echo "echo '.framework-config loaded'" >"${BATS_TEST_TMPDIR}/dir1/.framework-config"
+  # remove eventually default .framework-config generated
+  rm -f "${PERSISTENT_TMPDIR}/.framework-config"
 }
 
 function Framework::loadConfigNoSrcDir { #@test
