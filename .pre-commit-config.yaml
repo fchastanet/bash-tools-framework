@@ -93,7 +93,6 @@ repos:
           bash -c './bin/frameworkLint \
             --expected-warnings-count 72 \
             --format plain \
-            --verbose \
             --theme default-force \
             2>&1 | tee /tmp/frameworkLintResult
           '

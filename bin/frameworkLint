@@ -1631,6 +1631,8 @@ FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 NON_FRAMEWORK_FILES_REGEXP=^$
 FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP=^$
 FRAMEWORK_SRC_DIRS=()
+CURRENT_WARNINGS_FILE="${PERSISTENT_TMPDIR}/currentFrameworkWarningFile.log"
+LAST_WARNINGS_FILE="${PERSISTENT_TMPDIR}/lastFrameworkWarningFile.log"
 
 frameworkLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
@@ -1821,7 +1823,7 @@ reportError() {
   local file="$2"
   local msg="$3"
   if [[ "${optionFormat}" = "plain" ]]; then
-    Log::displayError "${category} - File ${file} - ${msg}"
+    Log::displayError "${category} - File ${file} - ${msg}" 2> >(tee -a "${CURRENT_WARNINGS_FILE}")
   else
     echo "<error severity='error' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
   fi
@@ -1833,7 +1835,7 @@ reportWarning() {
   local file="$2"
   local msg="$3"
   if [[ "${optionFormat}" = "plain" ]]; then
-    Log::displayWarning "${category} - File ${file} - ${msg}"
+    Log::displayWarning "${category} - File ${file} - ${msg}" 2> >(tee -a "${CURRENT_WARNINGS_FILE}")
   else
     echo "<error severity='warning' source='${category}' message='$(sed -E "s/'/\"/g" <<<"${msg}")'/>"
   fi
@@ -1849,6 +1851,7 @@ run() {
   fi
   export -f File::detectBashFile
   export -f Assert::bashFile
+  echo >"${CURRENT_WARNINGS_FILE}"
 
   # shellcheck disable=SC2016
   while IFS='' read -r file; do
@@ -1886,7 +1889,7 @@ run() {
     if ((errorCount > 0)); then
       Log::displayError "${errorCount} errors/${warningCount} warnings found !"
     elif ((warningCount > 0)); then
-      Log::displayWarning "0 error/${warningCount} warnings found !"
+      Log::displayWarning "0 error/${warningCount} warnings found !" 2> >(tee -a "${CURRENT_WARNINGS_FILE}")
     else
       Log::displaySuccess "No error/warning found !"
     fi
@@ -1897,17 +1900,28 @@ run() {
   if ((warningCount > optionExpectedWarningsCount)); then
     local errorMsg="Warnings count(${warningCount}) is greater than expected warnings count(${optionExpectedWarningsCount})"
     if [[ "${optionFormat}" = "plain" ]]; then
+      if [[ -f "${LAST_WARNINGS_FILE}" ]]; then
+        UI::drawLine "-"
+        Log::displayWarning "Differences with last report are the following:"
+        diff --old-line-format="" --new-line-format="%L" --unchanged-line-format="" \
+          "${LAST_WARNINGS_FILE}" "${CURRENT_WARNINGS_FILE}"
+      else
+        cp "${CURRENT_WARNINGS_FILE}" "${LAST_WARNINGS_FILE}"
+      fi
       Log::displayError "${errorMsg} !"
     else
       echo "<error severity='error' source='warningsCount' message='${errorMsg}'/>"
     fi
     ((exitCode = 2))
-  elif ((warningCount < optionExpectedWarningsCount)); then
-    local errorMsg="you can set expected warnings count to ${warningCount} to match the current warnings count"
-    if [[ "${optionFormat}" = "plain" ]]; then
-      Log::displayWarning "${errorMsg}"
-    else
-      echo "<error severity='warning' source='warningsCount' message='${errorMsg}'/>"
+  else
+    if ((warningCount < optionExpectedWarningsCount)); then
+      local errorMsg="you can set expected warnings count to ${warningCount} to match the current warnings count"
+      if [[ "${optionFormat}" = "plain" ]]; then
+        Log::displayWarning "${errorMsg}" 2> >(tee -a "${CURRENT_WARNINGS_FILE}")
+        cp "${CURRENT_WARNINGS_FILE}" "${LAST_WARNINGS_FILE}"
+      else
+        echo "<error severity='warning' source='warningsCount' message='${errorMsg}'/>"
+      fi
     fi
   fi
   if ((errorCount > 0)); then
