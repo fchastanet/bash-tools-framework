@@ -1252,12 +1252,10 @@ Compiler::Facade::requireCommandBinDir
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
 copyrightCallback() {
-  local years
-  years="$(date +%Y)"
-  if [[ -n "${copyrightBeginYear}" && "${copyrightBeginYear}" != "${years}" ]]; then
-    years="${copyrightBeginYear}-${years}"
+  if [[ -z "${copyrightBeginYear}" ]]; then
+    copyrightBeginYear="$(date +%Y)"
   fi
-  echo "Copyright (c) ${years} François Chastanet"
+  echo "Copyright (c) ${copyrightBeginYear}-now François Chastanet"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
