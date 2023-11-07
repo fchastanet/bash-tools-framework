@@ -1,18 +1,5 @@
 ---
 repos:
-  - repo: local
-    hooks:
-      - id: fixShebangExecutionBit
-        name: fixShebangExecutionBit
-        language: system
-        entry: ./bin/findShebangFiles
-        args: [chmod, +x]
-        pass_filenames: false
-        types: ['file', 'shell', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -72,38 +59,14 @@ repos:
         stages: [commit]
         exclude: ^doc/guides/Options/generate.*.md$
 
-  - repo: local
+  - repo: .
+    rev: 009c8a9560f43300444079ca6634251f73501d8a
     hooks:
+      - id: fixShebangExecutionBit
       - id: awkLint
-        name: awkLint
-        language: system
-        entry: ./bin/awkLint
-        args: []
-        pass_filenames: false
-        files: \.awk$
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
       - id: shellcheckLint
-        name: shellcheckLint
-        language: system
-        entry: ./bin/shellcheckLint
-        args: [-f, tty, --xargs, --staged]
-        pass_filenames: true
-        types: ['executable', 'file', 'shell', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
+      - id: shellcheckLint
       - id: frameworkLinter
-        name: Bash Framework Linter
-        language: system
-        entry: ./bin/frameworkLint
         args:
           [
             --expected-warnings-count,
@@ -113,53 +76,20 @@ repos:
             --theme,
             default-force,
           ]
-        pass_filenames: false
-        types: ['executable', 'file', 'shell', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
       - id: plantuml
-        name: plantuml
-        language: system
-        entry: ./bin/plantuml
-        args: [-f, png, -f, svg]
-        pass_filenames: true
-        types: ['file', 'non-executable', 'plantuml', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [push]
 
   - repo: local
     hooks:
-      - id: build-sh-files
-        name: build-sh-files
+      - id: buildShFiles
+        name: build sh files
         language: system
         entry: bash -c './bin/buildBinFiles'
         always_run: true
         require_serial: true
         fail_fast: true
         stages: [commit]
-
-  - repo: local
-    hooks:
-      - id: run-unit-tests
-        name: Run unit tests
-        language: system
-        entry: ./bin/test
-        args: [-r, src, -j, '30']
-        pass_filenames: false
-        always_run: true
-        fail_fast: true
-        require_serial: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
-      - id: build-doc-files
-        name: build-doc-files
+      - id: buildDocFiles
+        name: build doc files
         language: system
         entry: bash -c 'SKIP_BUILD=1 ./bin/doc --verbose'
         require_serial: true
@@ -167,40 +97,9 @@ repos:
         fail_fast: true
         stages: [push]
 
-  - repo: local
+  - repo: .
+    rev: 009c8a9560f43300444079ca6634251f73501d8a
     hooks:
-      - id: megalinter-check-version
-        name: megalinter-check-version
-        language: system
-        entry: ./bin/megalinter
-        args:
-          [
-            --image,
-            'oxsecurity/megalinter-terraform:v7.5.0',
-            --check-megalinter-version,
-          ]
-        pass_filenames: false
-        always_run: true
-        fail_fast: true
-        stages: [push]
-
-  - repo: local
-    hooks:
+      - id: runUnitTests
+      - id: megalinterCheckVersion
       - id: megalinter
-        name: megalinter
-        language: system
-        entry: ./bin/megalinter
-        args:
-          [
-            --image,
-            'oxsecurity/megalinter-terraform:v7.5.0',
-            --config-file,
-            '.mega-linter-light.yml',
-            --fix,
-          ]
-        pass_filenames: false
-        require_serial: true
-        always_run: true
-        fail_fast: true
-        verbose: true
-        stages: [push]

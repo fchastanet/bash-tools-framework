@@ -47,6 +47,7 @@ declare -a BASH_FRAMEWORK_ARGV=("$@")
 declare -a ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
+# shellcheck disable=SC2317
 interruptManagement() {
   # restore SIGINT handler
   trap - INT
@@ -76,6 +77,7 @@ TMPDIR="$(mktemp -d -p "${PERSISTENT_TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)
 export TMPDIR
 
 # temp dir cleaning
+# shellcheck disable=SC2317
 cleanOnExit() {
   if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
     Log::displayInfo "KEEP_TEMP_FILES=1 temp files kept here '${TMPDIR}'"
@@ -1265,13 +1267,13 @@ megalinterCommand() {
     optionIncremental="0"
     local -i options_parse_optionParsedCountOptionIncremental
     ((options_parse_optionParsedCountOptionIncremental = 0)) || true
-    optionMegalinterImage=oxsecurity/megalinter-terraform:v7.4.0
+    optionMegalinterImage="oxsecurity/megalinter-terraform:v7.4.0"
     local -i options_parse_optionParsedCountOptionMegalinterImage
     ((options_parse_optionParsedCountOptionMegalinterImage = 0)) || true
     optionCheckMegalinterVersion="0"
     local -i options_parse_optionParsedCountOptionCheckMegalinterVersion
     ((options_parse_optionParsedCountOptionCheckMegalinterVersion = 0)) || true
-    optionMegalinterConfigFile=.mega-linter.yml
+    optionMegalinterConfigFile=".mega-linter.yml"
     local -i options_parse_optionParsedCountOptionMegalinterConfigFile
     ((options_parse_optionParsedCountOptionMegalinterConfigFile = 0)) || true
     local -i options_parse_optionParsedCountOptionBashFrameworkConfig
