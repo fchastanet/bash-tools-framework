@@ -74,6 +74,19 @@ repos:
 
   - repo: local
     hooks:
+      - id: awkLint
+        name: awkLint
+        language: system
+        entry: ./bin/awkLint
+        args: []
+        pass_filenames: false
+        files: \.awk$
+        always_run: false
+        fail_fast: true
+        stages: [commit]
+
+  - repo: local
+    hooks:
       - id: shellcheckLint
         name: shellcheckLint
         language: system

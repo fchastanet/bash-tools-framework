@@ -27,6 +27,18 @@
   fail_fast: true
   stages: [commit, manual]
 
+- id: awkLint
+  name: awk Linter
+  description: Lint awk files using awk.
+  language: system
+  entry: ./bin/awkLint
+  args: []
+  pass_filenames: false
+  files: \.awk$
+  always_run: false
+  fail_fast: true
+  stages: [commit]
+
 - id: shellcheckLint
   name: shellcheck Linter
   description: |

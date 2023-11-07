@@ -22,15 +22,17 @@ run() {
   # <error line='27' column='5' severity='warning' message='Use &#39;cd ... &#124;&#124; exit&#39; or &#39;cd ... &#124;&#124; return&#39; in case cd fails.' source='ShellCheck.SC2164' />
   # </file>
   # </checkstyle>
+  local exitCode="0"
   echo "<?xml version='1.0' encoding='UTF-8'?>"
   echo "<checkstyle>"
   while IFS='' read -r file; do
     echo "<file name='${file}'>"
     awk --source "BEGIN { exit(0) } END { exit(0) }" --lint=no-ext -f "${file}" 2>&1 </dev/null |
-      awk --source "${awkLintScript}" - || true
+      awk --source "${awkLintScript}" - || exitCode="1"
     echo "</file>"
   done < <(git ls-files --exclude-standard | grep -E '\.(awk)$' || true)
   echo "</checkstyle>"
+  return "${exitCode}"
 }
 
 if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
