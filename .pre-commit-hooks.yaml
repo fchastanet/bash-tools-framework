@@ -77,7 +77,7 @@
   fail_fast: true
   stages: [push, manual]
 
-- id: megalinter-check-version
+- id: megalinterCheckVersion
   name: Megalinter Check Version
   description: Megalinter Check if new version is available
   language: system
@@ -97,6 +97,7 @@
   name: Megalinter
   description: use megalinter to check your project
   language: system
+  entry: ./bin/megalinter
   args:
     [
       --image,

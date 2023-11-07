@@ -44,12 +44,10 @@
 
 ## 2. Options/Args management
 
-- option/arg callback should be called when all options/args
-  have been parsed
-  - found issue with
-      ./bin/megalinter --check-megalinter-version --image 'oxsecurity/megalinter-terraform:v7.5.0'
-      not same result as
-      ./bin/megalinter --image 'oxsecurity/megalinter-terraform:v7.5.0' --check-megalinter-version
+- option/arg callback should be called when all options/args have been parsed
+  - found issue with ./bin/megalinter --check-megalinter-version --image
+    'oxsecurity/megalinter-terraform:v7.5.0' not same result as ./bin/megalinter
+    --image 'oxsecurity/megalinter-terraform:v7.5.0' --check-megalinter-version
   - or on megalinter we could use a command callback in this case
 - support option String with equal sign
   - --format plain or --format=plain but -f plain or -fplain
@@ -142,9 +140,9 @@
 
 TODOs linked to bin/compiler or templates .tpl:
 
-- since export have been removed from UI::theme some
-  colors interpreted by bash-tpl are not visible anymore
-  we have to export them only when launching bash-tpl in subshell.
+- since export have been removed from UI::theme some colors interpreted by
+  bash-tpl are not visible anymore we have to export them only when launching
+  bash-tpl in subshell.
 - migrate to templating language supported by vscode
   - Mustache template <https://github.com/tests-always-included/mo>
 - build watch mode

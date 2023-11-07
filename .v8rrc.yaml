@@ -13,9 +13,9 @@ customCatalog:
   schemas:
     - name: prettier
       description: prettier
-      fileMatch: [".prettierrc.yaml"]
+      fileMatch: ['.prettierrc.yaml']
       location: https://json.schemastore.org/prettierrc.json
     - name: megalinter
       description: megalinter
-      fileMatch: [".mega-linter*.yml"]
+      fileMatch: ['.mega-linter*.yml']
       location: https://raw.githubusercontent.com/megalinter/megalinter/main/megalinter/descriptors/schemas/megalinter-configuration.jsonschema.json
