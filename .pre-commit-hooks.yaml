@@ -84,9 +84,9 @@
   entry: ./bin/megalinter
   args:
     [
-      --check-megalinter-version,
       --image,
       'oxsecurity/megalinter-terraform:v7.5.0',
+      --check-megalinter-version,
     ]
   pass_filenames: false
   always_run: true
@@ -97,8 +97,13 @@
   name: Megalinter
   description: use megalinter to check your project
   language: system
-  entry: './hooks/megalinter.sh'
-  args: ['oxsecurity/megalinter-terraform:v7.5.0']
+  args: [
+    --image, 
+    'oxsecurity/megalinter-terraform:v7.5.0',
+    --config-file,
+    '.mega-linter-light.yml',
+    --fix
+  ]
   pass_filenames: false
   require_serial: true
   always_run: true
