@@ -97,13 +97,14 @@
   name: Megalinter
   description: use megalinter to check your project
   language: system
-  args: [
-    --image, 
-    'oxsecurity/megalinter-terraform:v7.5.0',
-    --config-file,
-    '.mega-linter-light.yml',
-    --fix
-  ]
+  args:
+    [
+      --image,
+      'oxsecurity/megalinter-terraform:v7.5.0',
+      --config-file,
+      '.mega-linter-light.yml',
+      --fix,
+    ]
   pass_filenames: false
   require_serial: true
   always_run: true

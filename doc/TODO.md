@@ -145,6 +145,8 @@ TODOs linked to bin/compiler or templates .tpl:
 - since export have been removed from UI::theme some
   colors interpreted by bash-tpl are not visible anymore
   we have to export them only when launching bash-tpl in subshell.
+- migrate to templating language supported by vscode
+  - Mustache template <https://github.com/tests-always-included/mo>
 - build watch mode
 - issue with " or ', create a new string symbol in the template in order to get
   the right escape

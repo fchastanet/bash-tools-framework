@@ -17,6 +17,7 @@ TMPDIR="$(mktemp -d -p "${PERSISTENT_TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)
 export TMPDIR
 
 # temp dir cleaning
+# shellcheck disable=SC2317
 cleanOnExit() {
   if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
     Log::displayInfo "KEEP_TEMP_FILES=1 temp files kept here '${TMPDIR}'"

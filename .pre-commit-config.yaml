@@ -190,13 +190,14 @@ repos:
         name: megalinter
         language: system
         entry: ./bin/megalinter
-        args: [
-          --image, 
-          'oxsecurity/megalinter-terraform:v7.5.0',
-          --config-file,
-          '.mega-linter-light.yml',
-          --fix
-        ]
+        args:
+          [
+            --image,
+            'oxsecurity/megalinter-terraform:v7.5.0',
+            --config-file,
+            '.mega-linter-light.yml',
+            --fix,
+          ]
         pass_filenames: false
         require_serial: true
         always_run: true
