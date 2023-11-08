@@ -21,7 +21,7 @@ jobs:
 
       - name: update pre-commit hooks to last version
         run: |
-          currentRev=26653b4d1797bac8e6a7d8e07b04a76e4c1c6ec0
+          currentRev=21d713f17712e46accf926c5c6f442251edb3cce
           if ! grep -Eq "rev: ${currentRev}" .pre-commit-config.yaml; then
             echo >&2 "Please update revision of pre-commit hooks in .pre-commit-config.yaml"
             exit 1
