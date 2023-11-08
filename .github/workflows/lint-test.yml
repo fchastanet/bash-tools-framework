@@ -8,54 +8,39 @@ on: # yamllint disable-line rule:truthy
 jobs:
   linters:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: true
-      matrix:
-        vendor:
-          - ubuntu
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: update pre-commit hooks to last version
+        run: |
+          currentRev=26653b4d1797bac8e6a7d8e07b04a76e4c1c6ec0
+          if ! grep -Eq "rev: ${currentRev}" .pre-commit-config.yaml; then
+            echo >&2 "Please update revision of pre-commit hooks in .pre-commit-config.yaml"
+            exit 1
+          fi
+          cp .pre-commit-config.yaml .pre-commit-config.yaml.bak
+          sed -i -E -e "s/rev: ${currentRev}/rev: ${GITHUB_SHA}/g" .pre-commit-config.yaml
 
       - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: lint
           status: pending
 
-      - name: Linting - Dockerfile
-        run: |
-          set -exo pipefail
-          ./bin/dockerLint -f checkstyle | tee logs/docker-checkstyle.xml
+      - name: Run pre-commit
+        run: pre-commit run -a --hook-stage manual
 
-      - name: Linting - Shellcheck
+      - name: Restore pre
         run: |
-          set -exo pipefail
-          ./bin/shellcheckLint -f checkstyle | \
-            tee logs/shellcheck-checkstyle.xml
-
-      - name: Linting - Framework
-        run: |
-          ./bin/frameworkLint -f checkstyle --expected-warnings-count 72 |
-            tee logs/framework-checkstyle.xml
-
-      - name: Linting - Awk
-        run: |
-          set -exo pipefail
-          ./bin/awkLint | tee logs/awk-checkstyle.xml
-
-      - name: build bin files + check md5
-        run: |
-          set -exo pipefail
-          ./bin/buildBinFiles 2>&1 | tee logs/buildBinFiles.log
-
-      - name: check megalinter version
-        run: |
-          set -exo pipefail
-          status=0
-          newVersion="$(./bin/megalinter --check-megalinter-version)" || status=$?
-          if [[ "${status}" != "0" ]] ; then
-            echo "::warning file=.mega-linter.yml,title=new version of megalinter available::${newVersion}"
-          fi
+          cp .pre-commit-config.yaml .pre-commit-config.yaml.bak
+          rm -f .pre-commit-config.yaml.bak
 
       - name: Archive results
         uses: actions/upload-artifact@v3
@@ -64,6 +49,16 @@ jobs:
           path: |
             logs/*.xml
             logs/*.log
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: update/pre-commit-fixes
+          title: lint fixes
+          commit-message: Auto-update lint fixes
+          body: |
+            some auto fixes have been generated during pre-commit run
+          labels: updates
 
       - uses: ouzi-dev/commit-status-updater@v2
         if: always()
@@ -178,12 +173,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
+          name: artifacts
           path: artifacts
 
       - name: Checkstyle aggregation
-        uses: jwgmeligmeyling/checkstyle-github-action@master
+        uses: lcollins/checkstyle-github-action@v2.0.0
         with:
           path: 'artifacts/**/*.xml'
 

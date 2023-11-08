@@ -47,11 +47,13 @@
   language: system
   entry: ./bin/shellcheckLint
   args: [-f, tty, --xargs, --staged]
-  pass_filenames: true
+  pass_filenames: false
+  files: \.sh$
   types: ['executable', 'file', 'shell', 'text']
+
   always_run: false
   fail_fast: true
-  stages: [pre-commit, manual]
+  stages: [pre-commit]
 
 - id: runUnitTests
   name: Run unit tests

@@ -31,6 +31,7 @@ repos:
       - id: shfmt
         args: [-i, '2', -ci]
         exclude: (^vendor/|^manualTests/data/|^bin|\.tpl$|/testsData/)
+        stages: [pre-commit]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
@@ -49,11 +50,15 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: .
-    rev: 009c8a9560f43300444079ca6634251f73501d8a
+    rev: 26653b4d1797bac8e6a7d8e07b04a76e4c1c6ec0
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
       - id: shellcheckLint
+      - id: shellcheckLint
+        args: [-f, checkstyle, --xargs]
+        pass_filenames: true
+        stages: [manual]
       - id: frameworkLinter
         args:
           [
@@ -87,9 +92,10 @@ repos:
 
   # manual stage used to select github action with megalinter full config
   - repo: .
-    rev: 009c8a9560f43300444079ca6634251f73501d8a
+    rev: 26653b4d1797bac8e6a7d8e07b04a76e4c1c6ec0
     hooks:
       - id: runUnitTests
+        stages: [pre-commit]
       - id: megalinterCheckVersion
       - id: megalinter
       - id: megalinterGithubAction
