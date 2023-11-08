@@ -1,37 +1,29 @@
 ---
+default_stages: [pre-commit, manual]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: mixed-line-ending
-        stages: [commit]
       - id: end-of-file-fixer
-        stages: [commit]
         exclude: |
           (?x)(
             ^doc/images/.*\.svg$|
             ^doc/guides/Options/generate.*.md$
           )
       - id: check-executables-have-shebangs
-        stages: [commit]
       - id: check-shebang-scripts-are-executable
-        stages: [commit]
       - id: check-xml
-        stages: [commit]
       - id: check-yaml
-        stages: [commit]
       - id: forbid-new-submodules
-        stages: [commit]
       - id: mixed-line-ending
         args: [--fix=lf]
-        stages: [commit]
       - id: check-json
         exclude: |
           (?x)(
             ^.vscode\/settings.json$|
             ^.vscode\/launch.json$
           )
-        stages: [commit]
 
   - repo: https://github.com/fchastanet/jumanjihouse-pre-commit-hooks
     rev: 3.0.2
@@ -39,7 +31,6 @@ repos:
       - id: shfmt
         args: [-i, '2', -ci]
         exclude: (^vendor/|^manualTests/data/|^bin|\.tpl$|/testsData/)
-        stages: [commit]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
@@ -50,13 +41,11 @@ repos:
             /testsData/|
             ^doc/guides/Options/generate.*.md$
           )
-        stages: [commit]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.3
     hooks:
       - id: prettier
-        stages: [commit]
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: .
@@ -64,7 +53,6 @@ repos:
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
-      - id: shellcheckLint
       - id: shellcheckLint
       - id: frameworkLinter
         args:
@@ -87,7 +75,7 @@ repos:
         always_run: true
         require_serial: true
         fail_fast: true
-        stages: [commit]
+
       - id: buildDocFiles
         name: build doc files
         language: system
@@ -95,11 +83,13 @@ repos:
         require_serial: true
         always_run: true
         fail_fast: true
-        stages: [push]
+        stages: [pre-push, manual]
 
+  # manual stage used to select github action with megalinter full config
   - repo: .
     rev: 009c8a9560f43300444079ca6634251f73501d8a
     hooks:
       - id: runUnitTests
       - id: megalinterCheckVersion
       - id: megalinter
+      - id: megalinterGithubAction

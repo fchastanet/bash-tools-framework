@@ -10,7 +10,7 @@
   types: ['file', 'shell', 'text']
   always_run: false
   fail_fast: true
-  stages: [commit, manual]
+  stages: [pre-commit, manual]
 
 - id: frameworkLinter
   name: Bash Framework Linter
@@ -25,7 +25,7 @@
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
   fail_fast: true
-  stages: [commit, manual]
+  stages: [pre-commit, manual]
 
 - id: awkLint
   name: awk Linter
@@ -37,7 +37,7 @@
   files: \.awk$
   always_run: false
   fail_fast: true
-  stages: [commit]
+  stages: [pre-commit, manual]
 
 - id: shellcheckLint
   name: shellcheck Linter
@@ -51,7 +51,7 @@
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
   fail_fast: true
-  stages: [commit]
+  stages: [pre-commit, manual]
 
 - id: runUnitTests
   name: Run unit tests
@@ -63,7 +63,7 @@
   always_run: true
   fail_fast: true
   require_serial: true
-  stages: [commit]
+  stages: [pre-commit, manual]
 
 - id: plantuml
   name: Plantuml Converter
@@ -91,7 +91,7 @@
   pass_filenames: false
   always_run: true
   fail_fast: true
-  stages: [push, manual]
+  stages: [pre-push, manual]
 
 - id: megalinter
   name: Megalinter
@@ -111,4 +111,25 @@
   always_run: true
   fail_fast: true
   verbose: true
-  stages: [push, manual]
+  stages: [pre-push]
+
+# manual stage used to select github action with megalinter full config
+- id: megalinterGithubAction
+  name: Megalinter Github Actions
+  description: use megalinter with full configuration
+  language: system
+  entry: ./bin/megalinter
+  args:
+    [
+      --image,
+      'oxsecurity/megalinter-terraform:v7.5.0',
+      --config-file,
+      '.mega-linter-githubAction.yml',
+      --fix,
+    ]
+  pass_filenames: false
+  require_serial: true
+  always_run: true
+  fail_fast: true
+  verbose: true
+  stages: [manual]
