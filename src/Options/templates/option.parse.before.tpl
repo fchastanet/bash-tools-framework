@@ -1,7 +1,7 @@
 % if [[ "${variableType}" = "Boolean" ]]; then
 <% ${variableName} %>="<% ${offValue} %>"
 % elif [[ -n "${defaultValue}" ]]; then
-<% ${variableName} %>=<% ${defaultValue} %>
+<% ${variableName} %>="<% ${defaultValue} %>"
 % fi
 % if ((min > 0 || max > 0)); then
 local -i options_parse_optionParsedCount<% ${variableName^} %>

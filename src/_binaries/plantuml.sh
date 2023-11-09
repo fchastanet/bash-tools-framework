@@ -25,6 +25,7 @@ if ((${#files[@]} == 0)); then
 fi
 # shellcheck disable=SC2154
 for format in "${optionFormats[@]}"; do
+  docker pull plantuml/plantuml
   # shellcheck disable=SC2154
   docker run --rm -v "$(pwd -P)":/app/project plantuml/plantuml \
     -u "$(id -u):$(id -g)" -t"${format}" -failfast \

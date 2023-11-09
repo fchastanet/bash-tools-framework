@@ -38,6 +38,7 @@ declare -a BASH_FRAMEWORK_ARGV=("$@")
 declare -a ORIGINAL_BASH_FRAMEWORK_ARGV=("$@")
 
 # @see https://unix.stackexchange.com/a/386856
+# shellcheck disable=SC2317
 interruptManagement() {
   # restore SIGINT handler
   trap - INT

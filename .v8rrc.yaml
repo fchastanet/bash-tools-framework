@@ -1,0 +1,21 @@
+# - Level of verbose logging. 0 is standard, higher numbers are more verbose
+# - overridden by passing --verbose / -v
+# - default = 0
+verbose: 0
+
+# - Remove cached HTTP responses older than cacheTtl seconds old.
+#   Specifying 0 clears and disables cache completely
+# - overridden by passing --cache-ttl
+# - default = 600
+cacheTtl: 86400
+
+customCatalog:
+  schemas:
+    - name: prettier
+      description: prettier
+      fileMatch: ['.prettierrc.yaml']
+      location: https://json.schemastore.org/prettierrc.json
+    - name: megalinter
+      description: megalinter
+      fileMatch: ['.mega-linter*.yml']
+      location: https://raw.githubusercontent.com/megalinter/megalinter/main/megalinter/descriptors/schemas/megalinter-configuration.jsonschema.json

@@ -10,7 +10,7 @@
   types: ['file', 'shell', 'text']
   always_run: false
   fail_fast: true
-  stages: [commit, manual]
+  stages: [pre-commit, manual]
 
 - id: frameworkLinter
   name: Bash Framework Linter
@@ -25,7 +25,19 @@
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
   fail_fast: true
-  stages: [commit, manual]
+  stages: [pre-commit, manual]
+
+- id: awkLint
+  name: awk Linter
+  description: Lint awk files using awk.
+  language: system
+  entry: ./bin/awkLint
+  args: []
+  pass_filenames: false
+  files: \.awk$
+  always_run: false
+  fail_fast: true
+  stages: [pre-commit, manual]
 
 - id: shellcheckLint
   name: shellcheck Linter
@@ -35,11 +47,13 @@
   language: system
   entry: ./bin/shellcheckLint
   args: [-f, tty, --xargs, --staged]
-  pass_filenames: true
+  pass_filenames: false
+  files: \.sh$
   types: ['executable', 'file', 'shell', 'text']
+
   always_run: false
   fail_fast: true
-  stages: [commit]
+  stages: [pre-commit]
 
 - id: runUnitTests
   name: Run unit tests
@@ -51,7 +65,7 @@
   always_run: true
   fail_fast: true
   require_serial: true
-  stages: [commit]
+  stages: [pre-commit, manual]
 
 - id: plantuml
   name: Plantuml Converter
@@ -65,31 +79,59 @@
   fail_fast: true
   stages: [push, manual]
 
-- id: megalinter-check-version
+- id: megalinterCheckVersion
   name: Megalinter Check Version
   description: Megalinter Check if new version is available
   language: system
   entry: ./bin/megalinter
   args:
     [
-      --check-megalinter-version,
       --image,
       'oxsecurity/megalinter-terraform:v7.5.0',
+      --check-megalinter-version,
     ]
   pass_filenames: false
   always_run: true
   fail_fast: true
-  stages: [push, manual]
+  stages: [pre-push, manual]
 
 - id: megalinter
   name: Megalinter
   description: use megalinter to check your project
   language: system
-  entry: './hooks/megalinter.sh'
-  args: ['oxsecurity/megalinter-terraform:v7.5.0']
+  entry: ./bin/megalinter
+  args:
+    [
+      --image,
+      'oxsecurity/megalinter-terraform:v7.5.0',
+      --config-file,
+      '.mega-linter-light.yml',
+      --fix,
+    ]
   pass_filenames: false
   require_serial: true
   always_run: true
   fail_fast: true
   verbose: true
-  stages: [push, manual]
+  stages: [pre-push]
+
+# manual stage used to select github action with megalinter full config
+- id: megalinterGithubAction
+  name: Megalinter Github Actions
+  description: use megalinter with full configuration
+  language: system
+  entry: ./bin/megalinter
+  args:
+    [
+      --image,
+      'oxsecurity/megalinter-terraform:v7.5.0',
+      --config-file,
+      '.mega-linter-githubAction.yml',
+      --fix,
+    ]
+  pass_filenames: false
+  require_serial: true
+  always_run: true
+  fail_fast: true
+  verbose: true
+  stages: [manual]

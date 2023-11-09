@@ -93,6 +93,13 @@ JAVASCRIPT_DEFAULT_STYLE: prettier
 JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
 JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: report/
 
+YAML_V8R_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^\.vscode/\.checkov\.yml|
+    ^\.secretlintrc\.yml|
+    ^\.grype\.yaml
+  )
+
 JSON_JSONLINT_FILTER_REGEX_EXCLUDE: |
   (?x)(
     ^\.vscode/settings\.json|

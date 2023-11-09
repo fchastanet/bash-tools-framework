@@ -1,50 +1,29 @@
 ---
+default_stages: [pre-commit, manual]
 repos:
-  - repo: local
-    hooks:
-      - id: fixShebangExecutionBit
-        name: fixShebangExecutionBit
-        language: system
-        entry: ./bin/findShebangFiles
-        args: [chmod, +x]
-        pass_filenames: false
-        types: ['file', 'shell', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: mixed-line-ending
-        stages: [commit]
       - id: end-of-file-fixer
-        stages: [commit]
         exclude: |
           (?x)(
             ^doc/images/.*\.svg$|
             ^doc/guides/Options/generate.*.md$
           )
       - id: check-executables-have-shebangs
-        stages: [commit]
       - id: check-shebang-scripts-are-executable
-        stages: [commit]
       - id: check-xml
-        stages: [commit]
       - id: check-yaml
-        stages: [commit]
       - id: forbid-new-submodules
-        stages: [commit]
       - id: mixed-line-ending
         args: [--fix=lf]
-        stages: [commit]
       - id: check-json
         exclude: |
           (?x)(
             ^.vscode\/settings.json$|
             ^.vscode\/launch.json$
           )
-        stages: [commit]
 
   - repo: https://github.com/fchastanet/jumanjihouse-pre-commit-hooks
     rev: 3.0.2
@@ -52,7 +31,7 @@ repos:
       - id: shfmt
         args: [-i, '2', -ci]
         exclude: (^vendor/|^manualTests/data/|^bin|\.tpl$|/testsData/)
-        stages: [commit]
+        stages: [pre-commit]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
@@ -63,34 +42,24 @@ repos:
             /testsData/|
             ^doc/guides/Options/generate.*.md$
           )
-        stages: [commit]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.3
     hooks:
       - id: prettier
-        stages: [commit]
         exclude: ^doc/guides/Options/generate.*.md$
 
-  - repo: local
+  - repo: .
+    rev: 444decc9fea1668e78ec510959a5ef3d87f2474a
     hooks:
+      - id: fixShebangExecutionBit
+      - id: awkLint
       - id: shellcheckLint
-        name: shellcheckLint
-        language: system
-        entry: ./bin/shellcheckLint
-        args: [-f, tty, --xargs, --staged]
+      - id: shellcheckLint
+        args: [-f, checkstyle, --xargs]
         pass_filenames: true
-        types: ['executable', 'file', 'shell', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
+        stages: [manual]
       - id: frameworkLinter
-        name: Bash Framework Linter
-        language: system
-        entry: ./bin/frameworkLint
         args:
           [
             --expected-warnings-count,
@@ -100,87 +69,34 @@ repos:
             --theme,
             default-force,
           ]
-        pass_filenames: false
-        types: ['executable', 'file', 'shell', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
       - id: plantuml
-        name: plantuml
-        language: system
-        entry: ./bin/plantuml
-        args: [-f, png, -f, svg]
-        pass_filenames: true
-        types: ['file', 'non-executable', 'plantuml', 'text']
-        always_run: false
-        fail_fast: true
-        stages: [push]
 
   - repo: local
     hooks:
-      - id: build-sh-files
-        name: build-sh-files
+      - id: buildShFiles
+        name: build sh files
         language: system
         entry: bash -c './bin/buildBinFiles'
         always_run: true
         require_serial: true
         fail_fast: true
-        stages: [commit]
 
-  - repo: local
-    hooks:
-      - id: run-unit-tests
-        name: Run unit tests
-        language: system
-        entry: ./bin/test
-        args: [-r, src, -j, '30']
-        pass_filenames: false
-        always_run: true
-        fail_fast: true
-        require_serial: true
-        stages: [commit]
-
-  - repo: local
-    hooks:
-      - id: build-doc-files
-        name: build-doc-files
+      - id: buildDocFiles
+        name: build doc files
         language: system
         entry: bash -c 'SKIP_BUILD=1 ./bin/doc --verbose'
         require_serial: true
         always_run: true
         fail_fast: true
-        stages: [push]
+        stages: [pre-push, manual]
 
-  - repo: local
+  # manual stage used to select github action with megalinter full config
+  - repo: .
+    rev: 444decc9fea1668e78ec510959a5ef3d87f2474a
     hooks:
-      - id: megalinter-check-version
-        name: megalinter-check-version
-        language: system
-        entry: ./bin/megalinter
-        args:
-          [
-            --image,
-            'oxsecurity/megalinter-terraform:v7.5.0',
-            --check-megalinter-version,
-          ]
-        pass_filenames: false
-        always_run: true
-        fail_fast: true
-        stages: [push]
-
-  - repo: local
-    hooks:
+      - id: runUnitTests
+        # not manual as github will run UT with several versions of bash and arch
+        stages: [pre-commit]
+      - id: megalinterCheckVersion
       - id: megalinter
-        name: megalinter
-        language: system
-        entry: './hooks/megalinter.sh'
-        args: ['oxsecurity/megalinter-terraform:v7.5.0']
-        pass_filenames: false
-        require_serial: true
-        always_run: true
-        fail_fast: true
-        verbose: true
-        stages: [push]
+      - id: megalinterGithubAction

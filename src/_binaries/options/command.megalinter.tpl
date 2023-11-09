@@ -1,5 +1,5 @@
 %
-declare defaultMegalinterConfigFile=".mega-linter-light.yml"
+declare defaultMegalinterConfigFile=".mega-linter.yml"
 declare defaultMegalinterImage=oxsecurity/megalinter-terraform:v7.4.0
 declare versionNumber="1.0"
 declare commandFunctionName="megalinterCommand"
@@ -63,7 +63,6 @@ source <(
   Options::generateOption \
     --help "Check if new version of megalinter is available (compared to ${defaultMegalinterImage}) and exit 1 if yes and display new version number." \
     --alt "--check-megalinter-version" \
-    --callback optionCheckMegalinterVersionCallback \
     --variable-name "optionCheckMegalinterVersion" \
     --function-name optionCheckMegalinterVersionFunction
 )
@@ -97,7 +96,7 @@ filesOnlyCallback() {
   megalinterOptions+=(-e SKIP_CLI_LINT_MODES=project)
 }
 
-optionCheckMegalinterVersionCallback() {
+checkMegalinterVersionAndExit() {
   local newVersion
   Github::getLatestRelease "oxsecurity/megalinter" newVersion
   local currentVersion
@@ -120,6 +119,9 @@ optionCheckMegalinterVersionCallback() {
 }
 
 commandCallback() {
+  if [[ "${optionCheckMegalinterVersion}" = "1" ]]; then
+    checkMegalinterVersionAndExit
+  fi
   if [[ "${optionIncremental}" = "1"  ]] && ((${#megalinterArgs[@]}>0)); then
     Log::fatal "you cannot provide a list of files and the --incremental option"
   fi
