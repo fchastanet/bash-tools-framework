@@ -50,7 +50,7 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: .
-    rev: 78e17a1e968cf40f4fdfb2cfff4919c55e9e2ecd
+    rev: 444decc9fea1668e78ec510959a5ef3d87f2474a
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -92,9 +92,10 @@ repos:
 
   # manual stage used to select github action with megalinter full config
   - repo: .
-    rev: 78e17a1e968cf40f4fdfb2cfff4919c55e9e2ecd
+    rev: 444decc9fea1668e78ec510959a5ef3d87f2474a
     hooks:
       - id: runUnitTests
+        # not manual as github will run UT with several versions of bash and arch
         stages: [pre-commit]
       - id: megalinterCheckVersion
       - id: megalinter
