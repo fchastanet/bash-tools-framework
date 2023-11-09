@@ -1,12 +1,12 @@
 # Best practices and recipes
 
-- [1. Bash best practicies](#1-bash-best-practicies)
-- [2. Best practicies specific to this project](#2-best-practicies-specific-to-this-project)
+- [1. Bash best practices](#1-bash-best-practices)
+- [2. Best practices specific to this project](#2-best-practices-specific-to-this-project)
   - [2.1. Bash-tpl best practice](#21-bash-tpl-best-practice)
     - [2.1.1. Avoid shellcheck errors](#211-avoid-shellcheck-errors)
     - [2.1.2. Allow simple quotes to generated correctly](#212-allow-simple-quotes-to-generated-correctly)
 
-## 1. Bash best practicies
+## 1. Bash best practices
 
 **DISCLAIMER:** Some of the best practices mentioned in this document are not
 applied in this project because I wrote some of them while writing this project.
@@ -15,7 +15,7 @@ applied in this project because I wrote some of them while writing this project.
 [Linux Best practices](https://github.com/fchastanet/my-documents/blob/master/HowTo/HowTo-Write-Bash-Scripts/10-LinuxCommands-BestPractices.md)
 [Bats Best practices](https://github.com/fchastanet/my-documents/blob/master/HowTo/HowTo-Write-Bash-Scripts/20-Bats-BestPractices.md)
 
-## 2. Best practicies specific to this project
+## 2. Best practices specific to this project
 
 ### 2.1. Bash-tpl best practice
 

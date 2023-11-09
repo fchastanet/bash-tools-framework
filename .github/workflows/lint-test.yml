@@ -19,7 +19,7 @@ jobs:
       - name: Install pre-commit
         run: pip install pre-commit
 
-      - name: update pre-commit hooks to last version
+      - name: update .pre-commit-config.yaml local hooks to last sha version
         run: |
           currentRev=21d713f17712e46accf926c5c6f442251edb3cce
           if ! grep -Eq "rev: ${currentRev}" .pre-commit-config.yaml; then
@@ -37,20 +37,23 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run -a --hook-stage manual
 
-      - name: Restore pre
+      - name: Restore .pre-commit-config.yaml file
+        if: ${{ always() }}
         run: |
           cp .pre-commit-config.yaml .pre-commit-config.yaml.bak
           rm -f .pre-commit-config.yaml.bak
 
       - name: Archive results
+        if: ${{ always() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
           name: linter-reports
           path: |
-            logs/*.xml
-            logs/*.log
+            megalinter-reports/**
 
       - name: Create Pull Request
+        if: ${{ failure() }}
         uses: peter-evans/create-pull-request@v4
         with:
           branch: update/pre-commit-fixes
