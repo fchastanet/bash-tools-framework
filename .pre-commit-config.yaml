@@ -49,8 +49,8 @@ repos:
       - id: prettier
         exclude: ^doc/guides/Options/generate.*.md$
 
-  - repo: .
-    rev: 444decc9fea1668e78ec510959a5ef3d87f2474a
+  - repo: https://github.com/fchastanet/bash-tools-framework
+    rev: 1.0.2
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -91,8 +91,8 @@ repos:
         stages: [pre-push, manual]
 
   # manual stage used to select github action with megalinter full config
-  - repo: .
-    rev: 444decc9fea1668e78ec510959a5ef3d87f2474a
+  - repo: https://github.com/fchastanet/bash-tools-framework
+    rev: 1.0.2
     hooks:
       - id: runUnitTests
         # not manual as github will run UT with several versions of bash and arch

@@ -19,15 +19,6 @@ jobs:
       - name: Install pre-commit
         run: pip install pre-commit
 
-      - name: update .pre-commit-config.yaml local hooks to last sha version
-        run: |
-          currentRev="$(grep -A 1 -m 1 -E "repo: \." .pre-commit-config.yaml |
-            grep -E 'rev:' |
-            sed -E -e 's/rev: (.*)$/\1/' -e 's/^[[:space:]]*//;s/[[:space:]]*$//'
-          )"
-          echo -n "${currentRev}" > /tmp/currentRev
-          sed -i -E -e "s/rev: ${currentRev}/rev: ${GITHUB_SHA}/g" .pre-commit-config.yaml
-
       - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: lint
@@ -35,12 +26,6 @@ jobs:
 
       - name: Run pre-commit
         run: pre-commit run -a --hook-stage manual
-
-      - name: Restore .pre-commit-config.yaml file
-        if: ${{ always() }}
-        run: |
-          currentRev="$(cat /tmp/currentRev)"
-          sed -i -E -e "s/rev: ${GITHUB_SHA}/rev: ${currentRev}/g" .pre-commit-config.yaml
 
       - name: Archive results
         if: ${{ always() }}
