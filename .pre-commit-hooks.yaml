@@ -3,7 +3,7 @@
   description: |
     Find all files containing a shebang and
     mark them as executable if not yet
-  language: system
+  language: script
   entry: bin/findShebangFiles
   args: [chmod, +x]
   pass_filenames: false
@@ -17,7 +17,7 @@
   description: |
     Check if your files uses the right syntax
     for using bash-tools-framework
-  language: system
+  language: script
   entry: bin/frameworkLint
   args:
     [--expected-warnings-count, '0', --format, plain, --theme, default-force]
@@ -30,7 +30,7 @@
 - id: awkLint
   name: awk Linter
   description: Lint awk files using awk.
-  language: system
+  language: script
   entry: bin/awkLint
   args: []
   pass_filenames: false
@@ -44,7 +44,7 @@
   description: |
     Lint bash files using shellcheck.
     Installing last version automatically
-  language: system
+  language: script
   entry: bin/shellcheckLint
   args: [-f, tty, --xargs, --staged]
   pass_filenames: false
@@ -58,7 +58,7 @@
 - id: runUnitTests
   name: Run unit tests
   description: run unit test using bats in docker isolated environment
-  language: system
+  language: script
   entry: bin/test
   args: [-r, src, -j, '30']
   pass_filenames: false
@@ -70,7 +70,7 @@
 - id: plantuml
   name: Plantuml Converter
   description: Convert plantuml files to images
-  language: system
+  language: script
   entry: bin/plantuml
   args: [-f, png, -f, svg]
   pass_filenames: true
@@ -82,7 +82,7 @@
 - id: megalinterCheckVersion
   name: Megalinter Check Version
   description: Megalinter Check if new version is available
-  language: system
+  language: script
   entry: bin/megalinter
   args:
     [
@@ -98,7 +98,7 @@
 - id: megalinter
   name: Megalinter
   description: use megalinter to check your project
-  language: system
+  language: script
   entry: bin/megalinter
   args:
     [
@@ -119,7 +119,7 @@
 - id: megalinterGithubAction
   name: Megalinter Github Actions
   description: use megalinter with full configuration
-  language: system
+  language: script
   entry: bin/megalinter
   args:
     [
