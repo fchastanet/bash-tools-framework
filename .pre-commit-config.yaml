@@ -50,7 +50,7 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 1.0.2
+    rev: 1.1.0
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -70,17 +70,11 @@ repos:
             default-force,
           ]
       - id: plantuml
+      - id: buildShFiles
+      - id: buildShFilesGithubAction
 
   - repo: local
     hooks:
-      - id: buildShFiles
-        name: build sh files
-        language: system
-        entry: bash -c './bin/buildBinFiles'
-        always_run: true
-        require_serial: true
-        fail_fast: true
-
       - id: buildDocFiles
         name: build doc files
         language: system
@@ -92,7 +86,7 @@ repos:
 
   # manual stage used to select github action with megalinter full config
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 1.0.2
+    rev: 1.1.0
     hooks:
       - id: runUnitTests
         # not manual as github will run UT with several versions of bash and arch

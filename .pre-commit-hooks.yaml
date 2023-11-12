@@ -67,6 +67,28 @@
   require_serial: true
   stages: [pre-commit, manual]
 
+- id: buildShFiles
+  name: build sh files
+  entry: bin/buildBinFiles
+  args: [--ignore-missing]
+  language: script
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+  fail_fast: true
+  stages: [pre-commit]
+
+- id: buildShFilesGithubAction
+  name: build sh files for github action
+  entry: bin/buildBinFiles
+  args: []
+  language: script
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+  fail_fast: true
+  stages: [manual]
+
 - id: plantuml
   name: Plantuml Converter
   description: Convert plantuml files to images
