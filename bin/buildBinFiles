@@ -818,7 +818,7 @@ Array::contains() {
 
 # FUNCTIONS
 
-facade_main_e0f29bb6365e4065a83c29b85a9a64cf() {
+facade_main_buildBinFilessh() {
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
@@ -1518,4 +1518,4 @@ fi
 
 }
 
-facade_main_e0f29bb6365e4065a83c29b85a9a64cf "$@"
+facade_main_buildBinFilessh "$@"

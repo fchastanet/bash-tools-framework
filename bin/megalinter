@@ -989,7 +989,7 @@ Assert::commandExists() {
 
 # FUNCTIONS
 
-facade_main_77f997d8471044b5bd6d055fe84340eb() {
+facade_main_megalintersh() {
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
@@ -1955,4 +1955,4 @@ fi
 
 }
 
-facade_main_77f997d8471044b5bd6d055fe84340eb "$@"
+facade_main_megalintersh "$@"

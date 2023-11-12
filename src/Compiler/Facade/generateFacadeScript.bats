@@ -52,7 +52,7 @@ function Compiler::Facade::generateFacadeScript::EmptyFile { #@test
   assert_line --index 1 --regexp "^export FACADE_HEADERS_FILE='/.*'$"
   assert_line --index 2 --regexp "^export FACADE_CONTENT_FILE='/.*'$"
   assert_line --index 3 --regexp "^export FACADE_CHOICE_SCRIPT_FILE='/.*'$"
-  assert_line --index 4 --regexp "^export MAIN_FUNCTION_NAME='facade_main_[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}'$"
+  assert_line --index 4 "export MAIN_FUNCTION_NAME='facade_main_script0Facadesh'"
   assert_line --index 5 "export file='template'"
 
   local script="$(tail +2 <<<"${output}")"
@@ -70,7 +70,7 @@ function Compiler::Facade::generateFacadeScript::FacadeWithoutImplement { #@test
   assert_line --index 1 --regexp "^export FACADE_HEADERS_FILE='/.*'$"
   assert_line --index 2 --regexp "^export FACADE_CONTENT_FILE='/.*'$"
   assert_line --index 3 --regexp "^export FACADE_CHOICE_SCRIPT_FILE='/.*'$"
-  assert_line --index 4 --regexp "^export MAIN_FUNCTION_NAME='facade_main_[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}'$"
+  assert_line --index 4 "export MAIN_FUNCTION_NAME='facade_main_script1Facadesh'"
   assert_line --index 5 "export file='template'"
 
   local script="$(tail +2 <<<"${output}")"
@@ -98,7 +98,7 @@ function Compiler::Facade::generateFacadeScript::facadeWithImplementImplementFun
   assert_line --index 0 --regexp "^export FACADE_HEADERS_FILE='/.*'$"
   assert_line --index 1 --regexp "^export FACADE_CONTENT_FILE='/.*'$"
   assert_line --index 2 --regexp "^export FACADE_CHOICE_SCRIPT_FILE='/.*'$"
-  assert_line --index 3 --regexp "^export MAIN_FUNCTION_NAME='facade_main_[0-9a-f]{8}[0-9a-f]{4}4[0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}'$"
+  assert_line --index 3 "export MAIN_FUNCTION_NAME='facade_main_longerScriptsh'"
   assert_line --index 4 "export file='template'"
 
   eval "${output}"
