@@ -12,10 +12,10 @@ computeMd5File() {
   local md5File="$1"
   local currentFile
   while IFS= read -r file; do
-    currentFile="$(FRAMEWORK_ROOT_DIR=${FRAMEWORK_ROOT_DIR} envsubst <<<"${file}")"
+    currentFile="$(FRAMEWORK_ROOT_DIR=$(pwd -P) envsubst <<<"${file}")"
     md5sum "${currentFile}" >>"${md5File}" 2>&1 || true
   done < <(
-    grep -R "^# BIN_FILE" "${FRAMEWORK_SRC_DIR}/_binaries" |
+    grep -R "^# BIN_FILE" "$(pwd -P)/src/_binaries" |
       (grep -v -E '/testsData/' || true) |
       sed -E 's#^.*IN_FILE=(.*)$#\1#'
   )

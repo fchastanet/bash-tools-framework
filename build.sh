@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+FRAMEWORK_ROOT_DIR="$(pwd -P)"
 FRAMEWORK_SRC_DIR="$(cd "${FRAMEWORK_ROOT_DIR}/src" && pwd -P)"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 

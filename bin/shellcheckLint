@@ -1401,15 +1401,18 @@ commandOptionParseFinished() {
     # shellcheck disable=SC2034
     BASH_FRAMEWORK_CONFIG_FILE=""
     # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
-      # load default template framework config
-      if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
-        echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
-      fi
-      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
-        Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "$(pwd)" || {
+      # shellcheck source=/.framework-config
+      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
+        # load default template framework config
+        if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
+          echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
+        fi
+        Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
+          Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+        }
+        Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
       }
-      Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
     }
   fi
 

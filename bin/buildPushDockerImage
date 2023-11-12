@@ -1058,15 +1058,18 @@ commandOptionParseFinished() {
     # shellcheck disable=SC2034
     BASH_FRAMEWORK_CONFIG_FILE=""
     # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
-      # load default template framework config
-      if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
-        echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
-      fi
-      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
-        Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "$(pwd)" || {
+      # shellcheck source=/.framework-config
+      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
+        # load default template framework config
+        if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
+          echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
+        fi
+        Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
+          Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
+        }
+        Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
       }
-      Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
     }
   fi
 
@@ -1619,10 +1622,6 @@ buildPushDockerImageCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 # build image and push it ot registry
 run() {
   DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
-  BASH_FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
-  if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
-    BASH_FRAMEWORK_ROOT_DIR="$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P)"
-  fi
   # shellcheck disable=SC2154
   local imageTag="build:bash-tools-${optionVendor}-${optionBashVersion}"
   local image="scrasnups/${imageTag}"
@@ -1645,14 +1644,14 @@ run() {
     fi
     DOCKER_BUILDKIT=1 docker build \
       ${DOCKER_BUILD_OPTIONS} \
-      -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
+      -f "${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
       --cache-from "${image}" \
       --build-arg BUILDKIT_INLINE_CACHE=1 \
       --build-arg argBashVersion="${optionBashVersion}" \
       --build-arg BASH_IMAGE="${optionBashBaseImage}" \
       -t "${imageTag}" \
       -t "${image}" \
-      "${BASH_FRAMEWORK_ROOT_DIR}/.docker"
+      "${FRAMEWORK_ROOT_DIR}/.docker"
   )
 
   Log::displayInfo "Image ${image} - bash version check"
