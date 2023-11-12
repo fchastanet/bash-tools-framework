@@ -567,7 +567,7 @@ Log::logFatal() {
 
 # FUNCTIONS
 
-facade_main_eabc2d3140cb41cfb14980eea28ad05c() {
+facade_main_installFacadeExamplesh() {
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
@@ -603,6 +603,6 @@ exit 0
 # shellcheck disable=SC2178
 BASH_SOURCE=".$0" # cannot be changed in bash
 # shellcheck disable=SC2128
-test ".$0" != ".${BASH_SOURCE}" || facade_main_eabc2d3140cb41cfb14980eea28ad05c "$@"
+test ".$0" != ".${BASH_SOURCE}" || facade_main_installFacadeExamplesh "$@"
 
-export installFacadeExampleMainFunctionName="facade_main_eabc2d3140cb41cfb14980eea28ad05c"
+export installFacadeExampleMainFunctionName="facade_main_installFacadeExamplesh"

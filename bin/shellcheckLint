@@ -1160,7 +1160,7 @@ Linux::requireJqCommand() {
 
 # FUNCTIONS
 
-facade_main_257a3dca062e4941bf9581a914b35b34() {
+facade_main_shellcheckLintsh() {
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
@@ -2054,4 +2054,4 @@ fi
 
 }
 
-facade_main_257a3dca062e4941bf9581a914b35b34 "$@"
+facade_main_shellcheckLintsh "$@"

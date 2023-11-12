@@ -818,7 +818,7 @@ Array::contains() {
 
 # FUNCTIONS
 
-facade_main_49020907c5584716833bfbb5bf5656a1() {
+facade_main_buildPushDockerImagesh() {
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
@@ -1674,4 +1674,4 @@ fi
 
 }
 
-facade_main_49020907c5584716833bfbb5bf5656a1 "$@"
+facade_main_buildPushDockerImagesh "$@"

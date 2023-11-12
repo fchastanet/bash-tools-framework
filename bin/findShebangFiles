@@ -860,7 +860,7 @@ Array::contains() {
 
 # FUNCTIONS
 
-facade_main_8d1fa1007fd044df9844065590a04bf4() {
+facade_main_findShebangFilessh() {
 FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
@@ -1516,4 +1516,4 @@ fi
 
 }
 
-facade_main_8d1fa1007fd044df9844065590a04bf4 "$@"
+facade_main_findShebangFilessh "$@"
