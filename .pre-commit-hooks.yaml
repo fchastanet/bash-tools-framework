@@ -111,6 +111,8 @@
       --image,
       'oxsecurity/megalinter-terraform:v7.5.0',
       --check-megalinter-version,
+      --bash-framework-config,
+      '.framework-config',
     ]
   pass_filenames: false
   always_run: true
@@ -128,6 +130,8 @@
       'oxsecurity/megalinter-terraform:v7.5.0',
       --config-file,
       '.mega-linter-light.yml',
+      --bash-framework-config,
+      '.framework-config',
       --fix,
     ]
   pass_filenames: false
@@ -149,6 +153,8 @@
       'oxsecurity/megalinter-terraform:v7.5.0',
       --config-file,
       '.mega-linter-githubAction.yml',
+      --bash-framework-config,
+      '.framework-config',
       --fix,
     ]
   pass_filenames: false
