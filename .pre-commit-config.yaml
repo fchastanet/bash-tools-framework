@@ -79,7 +79,13 @@ repos:
         name: build doc files
         language: script
         entry: bin/doc
-        args: [--verbose, --skip-docker-build]
+        args:
+          [
+            --bash-framework-config,
+            .framework-config,
+            --verbose,
+            --skip-docker-build,
+          ]
         pass_filenames: false
         require_serial: true
         always_run: true

@@ -6,55 +6,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 jobs:
-  linters:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
-
-      - name: Install pre-commit
-        run: pip install pre-commit
-
-      - uses: ouzi-dev/commit-status-updater@v2
-        with:
-          name: lint
-          status: pending
-
-      - name: Run pre-commit
-        run: pre-commit run -a --hook-stage manual
-
-      - name: Archive results
-        if: ${{ always() }}
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: linter-reports
-          path: |
-            megalinter-reports/**
-
-      - name: Create Pull Request
-        if: ${{ failure() }}
-        uses: peter-evans/create-pull-request@v4
-        with:
-          branch: update/pre-commit-fixes
-          title: lint fixes
-          commit-message: Auto-update lint fixes
-          body: |
-            some auto fixes have been generated during pre-commit run
-          labels: updates
-
-      - uses: ouzi-dev/commit-status-updater@v2
-        if: always()
-        with:
-          name: lint
-          status: ${{ job.status }}
-
-  buildDockerImagesAndTest:
-    needs: linters
+  build:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
@@ -69,20 +21,20 @@ jobs:
         include:
           - vendor: ubuntu
             bashImage: ubuntu:20.04
-            options: -j 30
+            batsOptions: -j 30
+            runPrecommitTests: true
           - vendor: alpine
             bashTarVersion: 4.4
             bashImage: amd64/bash:4.4-alpine3.18
-            options: -j 30
+            batsOptions: -j 30
           - vendor: alpine
             bashTarVersion: 5.0
             bashImage: amd64/bash:5.0-alpine3.18
-            options: -j 30
+            batsOptions: -j 30
           - vendor: alpine
             bashTarVersion: 5.1
             bashImage: amd64/bash:5.1-alpine3.18
-            options: -j 30
-
+            batsOptions: -j 30
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -103,21 +55,69 @@ jobs:
 
       - name: Pull/Build/Push docker image
         env:
-          BRANCH: ${{ github.ref }}
+          BRANCH: ${{ matrix.branch }}
         run: |
           ./bin/buildPushDockerImage \
-            --vendor "${{matrix.vendor}}" \
-            --bash-version "${{matrix.bashTarVersion}}" \
-            --bash-base-image "${{matrix.bashImage}}" \
-            --branch-name "${BRANCH}" \
+            --vendor "${{ matrix.vendor }}" \
+            --bash-version "${{ matrix.bashTarVersion }}" \
+            --bash-base-image "${{ matrix.bashImage }}" \
+            --branch-name "${{ matrix.branch }}" \
             --push -vvv
 
       - name: Check image
         run: |
           docker run --rm \
-            "build:bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}" bash \
+            "build:bash-tools-${{ matrix.vendor }}-${{ matrix.bashTarVersion }}" bash \
             --version
 
+      # only if pre-commit
+      - name: Set up Python
+        if: matrix.runPrecommitTests
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install pre-commit
+        if: matrix.runPrecommitTests
+        run: pip install pre-commit
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        if: matrix.runPrecommitTests
+        with:
+          name: lint
+          status: pending
+
+      - name: Run pre-commit
+        if: matrix.runPrecommitTests
+        run: pre-commit run -a --hook-stage manual
+
+      - name: Archive results
+        if: matrix.runPrecommitTests && always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: linter-reports
+          path: |
+            megalinter-reports/**
+
+      - name: Create Pull Request
+        if: matrix.runPrecommitTests && failure()
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: update/pre-commit-fixes
+          title: lint fixes
+          commit-message: Auto-update lint fixes
+          body: |
+            some auto fixes have been generated during pre-commit run
+          labels: updates
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        if: matrix.runPrecommitTests && always()
+        with:
+          name: lint
+          status: ${{ job.status }}
+
+      # Run unit tests
       - name: run unit tests
         run: |
           chmod -R 777 logs
@@ -148,7 +148,7 @@ jobs:
   publishTestResults:
     name: 'Publish Tests Results'
     if: ${{ always() }}
-    needs: [linters, buildDockerImagesAndTest]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       checks: write
