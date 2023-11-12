@@ -77,8 +77,10 @@ repos:
     hooks:
       - id: buildDocFiles
         name: build doc files
-        language: system
-        entry: bash -c 'SKIP_BUILD=1 ./bin/doc --verbose'
+        language: script
+        entry: bin/doc
+        args: [--verbose, --skip-docker-build]
+        pass_filenames: false
         require_serial: true
         always_run: true
         fail_fast: true

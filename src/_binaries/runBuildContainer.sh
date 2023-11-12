@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/runBuildContainer
+# EMBED "${FRAMEWORK_ROOT_DIR}/bin/buildPushDockerImage" AS buildPushDockerImage
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
@@ -44,7 +45,7 @@ run() {
       if [[ "${optionTraceVerbose}" = "1" ]]; then
         set -x
       fi
-      "${FRAMEWORK_BIN_DIR}/buildPushDockerImage" \
+      EMBED_CURRENT_DIR="${CURRENT_DIR}" "${embed_file_buildPushDockerImage}" \
         --vendor "${optionVendor}" \
         --bash-version "${optionBashVersion}" \
         --bash-base-image "${optionBashBaseImage}" \
