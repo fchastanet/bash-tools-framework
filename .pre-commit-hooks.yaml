@@ -20,7 +20,7 @@
   language: script
   entry: bin/frameworkLint
   args:
-    [--expected-warnings-count, '0', --format, plain, --theme, default-force]
+    [--bash-framework-config, .framework-config, --expected-warnings-count, '0', --format, plain, --theme, default-force]
   pass_filenames: false
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
@@ -46,8 +46,8 @@
     Installing last version automatically
   language: script
   entry: bin/shellcheckLint
-  args: [-f, tty, --xargs, --staged]
-  pass_filenames: false
+  args: [--bash-framework-config, .framework-config, -f, tty, --xargs]
+  pass_filenames: true
   files: \.sh$
   types: ['executable', 'file', 'shell', 'text']
 
