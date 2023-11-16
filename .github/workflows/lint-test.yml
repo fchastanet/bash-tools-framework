@@ -35,7 +35,6 @@ jobs:
             bashTarVersion: 5.1
             bashImage: amd64/bash:5.1-alpine3.18
             batsOptions: -j 30
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -73,27 +72,27 @@ jobs:
 
       # only if pre-commit
       - name: Set up Python
-        if: ${{ matrix.runPrecommitTests }}
+        if: matrix.runPrecommitTests
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
       - name: Install pre-commit
-        if: ${{ matrix.runPrecommitTests }}
+        if: matrix.runPrecommitTests
         run: pip install pre-commit
 
       - uses: ouzi-dev/commit-status-updater@v2
-        if: ${{ matrix.runPrecommitTests }}
+        if: matrix.runPrecommitTests
         with:
           name: lint
           status: pending
 
       - name: Run pre-commit
-        if: ${{ matrix.runPrecommitTests }}
+        if: matrix.runPrecommitTests
         run: pre-commit run -a --hook-stage manual
 
       - name: Archive results
-        if: ${{ matrix.runPrecommitTests && always() }}
+        if: matrix.runPrecommitTests && always()
         continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
@@ -102,7 +101,7 @@ jobs:
             megalinter-reports/**
 
       - name: Create Pull Request
-        if: ${{ matrix.runPrecommitTests && failure() }}
+        if: matrix.runPrecommitTests && failure()
         uses: peter-evans/create-pull-request@v4
         with:
           branch: update/pre-commit-fixes
@@ -113,7 +112,7 @@ jobs:
           labels: updates
 
       - uses: ouzi-dev/commit-status-updater@v2
-        if: ${{ matrix.runPrecommitTests && always() }}
+        if: matrix.runPrecommitTests && always()
         with:
           name: lint
           status: ${{ job.status }}

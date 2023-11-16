@@ -52,7 +52,7 @@ run() {
         "${RUN_CONTAINER_ARGV_FILTERED[@]}"
     )
   fi
-  if [[ -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
     local imageRefUser="${imageRef}-user"
     if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
       Log::displayInfo "build docker image ${imageRefUser} with user configuration"
@@ -69,9 +69,9 @@ run() {
           --build-arg SKIP_USER="${SKIP_USER:-0}" \
           --build-arg USER_ID="${USER_ID:-$(id -u)}" \
           --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-          -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
+          -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
           -t "${imageRefUser}" \
-          "${BASH_FRAMEWORK_ROOT_DIR}/.docker"
+          "${FRAMEWORK_ROOT_DIR}/.docker"
       )
     fi
   fi
