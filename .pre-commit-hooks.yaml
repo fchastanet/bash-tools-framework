@@ -20,7 +20,16 @@
   language: script
   entry: bin/frameworkLint
   args:
-    [--bash-framework-config, .framework-config, --expected-warnings-count, '0', --format, plain, --theme, default-force]
+    [
+      --bash-framework-config,
+      .framework-config,
+      --expected-warnings-count,
+      '0',
+      --format,
+      plain,
+      --theme,
+      default-force,
+    ]
   pass_filenames: false
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
