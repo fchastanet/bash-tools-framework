@@ -10,7 +10,7 @@ source "${FRAMEWORK_SRC_DIR}/_includes/_header.sh"
 source "${FRAMEWORK_SRC_DIR}/Env/__all.sh"
 
 # parse parameters
-Env::requireLoad
+Env::requireLoad "${FRAMEWORK_SRC_DIR}/_includes/.framework-config.default"
 
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched

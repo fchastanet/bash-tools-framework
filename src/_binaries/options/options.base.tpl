@@ -66,7 +66,7 @@
 
     Options::generateOption \
       --variable-type StringArray \
-      --help "Load the specified env file" \
+      --help "Load the specified env file (deprecated, please use --bash-framework-config option instead)" \
       --group zzzGroupGlobalOptionsFunction \
       --alt "--env-file" \
       --max -1 \
@@ -227,6 +227,7 @@ optionVersionCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionEnvFileCallback() {
   local envFile="$2"
+  Log::displayWarning "Command ${SCRIPT_NAME} - Option --env-file is deprecated and will be removed in the future"
   if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
     Log::displayError "Command ${SCRIPT_NAME} - Option --env-file - File '${envFile}' doesn't exist"
     exit 1
@@ -362,40 +363,14 @@ defaultFrameworkConfig="$(
 EOF
 )"
 
-
 commandOptionParseFinished() {
-  if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
-    BASH_FRAMEWORK_ENV_FILES=()
-  fi
-  BASH_FRAMEWORK_ENV_FILES+=("${optionEnvFiles[@]}")
-  export BASH_FRAMEWORK_ENV_FILES
-  Env::requireLoad
-  Log::requireLoad
+  # load default template framework config
+  # shellcheck disable=SC2034
+  defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
+  echo "${defaultFrameworkConfig}" > "${defaultEnvFile}"
 
-  # load .framework-config
-  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
-    BASH_FRAMEWORK_CONFIG_FILE="${optionBashFrameworkConfig}"
-    # shellcheck source=/.framework-config
-    source "${optionBashFrameworkConfig}" ||
-      Log::fatal "Command ${SCRIPT_NAME} - error while loading specific .framework-config file: ${optionBashFrameworkConfig}"
-  else
-    # shellcheck disable=SC2034
-    BASH_FRAMEWORK_CONFIG_FILE=""
-    # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "$(pwd)" || {
-      # shellcheck source=/.framework-config
-      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
-        # load default template framework config
-        if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
-          echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
-        fi
-        Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
-          Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
-        }
-        Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
-      }
-    }
-  fi
+  Env::requireLoad "${defaultEnvFile}"
+  Log::requireLoad
 
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig

@@ -27,7 +27,6 @@ Env::mergeConfFiles() {
 
   local combinedConfigFile
   combinedConfigFile="$(Framework::createTempFile "mergeConfFiles")" || return 2
-
   (
     # removes any trailing whitespace from each file, if any
     # this is absolutely required when importing into ConfigMaps

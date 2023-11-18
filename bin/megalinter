@@ -228,42 +228,38 @@ Array::wrap() {
 #Array::wrap ":" 40 0 "Lorem ipsum dolor sit amet," "consectetur adipiscing elit." "Curabitur ac elit id massa" "condimentum finibus."
 
 # @description ensure env files are loaded
-# @noargs
-# @exitcode 1 if getOrderedConfFiles fails
-# @exitcode 2 if one of env files fails to load
+# @arg $@ list of default files to load at the end
+# @exitcode 1 if one of env files fails to load
 # @stderr diagnostics information is displayed
+# shellcheck disable=SC2120
 Env::requireLoad() {
-  local configFilesStr
-  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
-
-  local -a configFiles
-  readarray -t configFiles <<<"${configFilesStr}"
-
-  # if empty string, there will be one element
-  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
-    # should not happen, as there is always default file
-    Log::displaySkipped "no env file to load"
-    return 0
+  local -a defaultFiles=("$@")
+  # get list of possible config files
+  local -a configFiles=()
+  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    # BASH_FRAMEWORK_ENV_FILES is an array
+    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
+    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
+  fi
+  if [[ -f "$(pwd)/.framework-config" ]]; then
+    configFiles+=("$(pwd)/.framework-config")
+  fi
+  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
+    # shellcheck disable=SC2034
+    configFiles+=("${optionBashFrameworkConfig}")
+  fi
+  configFiles+=("${optionEnvFiles[@]}")
+  configFiles+=("${defaultFiles[@]}")
 
-  Env::mergeConfFiles "${configFiles[@]}" || {
-    Log::displayError "while loading config files: ${configFiles[*]}"
-    return 2
-  }
-}
-
-# @description load .framework-config
-# @arg $1 loadedConfigFile:&String (passed by reference) the finally loaded configuration file path
-# @arg $@ srcDirs:String[] the src directories in which .framework-config file will be searched
-# @stdout the config file path loaded if any
-# @exitcode 0 if .framework-config file has been found in srcDirs provided
-# @exitcode 1 if .framework-config file not found
-# @see Conf::loadNearestFile
-Framework::loadConfig() {
-  # shellcheck disable=SC2034
-  local -n loadConfig_loadedConfigFile=$1
-  shift || true
-  Conf::loadNearestFile ".framework-config" loadConfig_loadedConfigFile "$@"
+  for file in "${configFiles[@]}"; do
+    # shellcheck source=/.framework-config
+    source "${file}" || {
+      Log::displayError "while loading config file: ${file}"
+      return 1
+    }
+  done
 }
 
 # @description Retrieve the latest version number of a github release using Github API using retry
@@ -570,122 +566,6 @@ Assert::tty() {
   [[ -t 1 || -t 2 ]]
 }
 
-# @description Load the nearest config file
-# in next example will search first .framework-config file in "srcDir1"
-# then if not found will go in up directories until /
-# then will search in "srcDir2"
-# then if not found will go in up directories until /
-# source the file if found
-# @example
-#   Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
-#
-# @arg $1 configFileName:String config file name to search
-# @arg $2 loadedFile:String (passed by reference) will return the loaded config file name
-# @arg $@ srcDirs:String[] source directories in which the config file will be searched
-# @exitcode 0 if file found
-# @exitcode 1 if file not found
-Conf::loadNearestFile() {
-  local configFileName="$1"
-  local -n loadedFile="$2"
-  shift 2 || true
-  local -a srcDirs=("$@")
-  for srcDir in "${srcDirs[@]}"; do
-    configFile="$(File::upFind "${srcDir}" "${configFileName}" || true)"
-    if [[ -n "${configFile}" ]]; then
-      # shellcheck source=/.framework-config
-      source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
-      Log::displayDebug "Config file ${configFile} is loaded"
-      # shellcheck disable=SC2034
-      loadedFile="${configFile}"
-      return 0
-    fi
-  done
-
-  Log::displayWarning "Config file '${configFileName}' not found in any source directories provided"
-  return 1
-}
-
-# @description get list of env files to load
-# in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
-# @exitcode 1 if one of the env file cannot be generated
-# @exitcode 2 if one of the env file is not a file or readable
-# @stdout the env files asked to be loaded
-# @stderr diagnostic information on failure
-# @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
-Env::getOrderedConfFiles() {
-  local -a configFiles=()
-
-  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
-    # BASH_FRAMEWORK_ENV_FILES is an array
-    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
-  fi
-
-  local defaultEnvFile
-  defaultEnvFile="$(Env::createDefaultEnvFile)" || return 1
-  configFiles+=("${defaultEnvFile}")
-
-  local file
-  for file in "${configFiles[@]}"; do
-    if [[ ! -f "${file}" || ! -r "${file}" ]]; then
-      Log::displayError "One of the config file is not available '${file}'"
-      return 2
-    fi
-    echo "${file}"
-  done
-}
-
-# @description merge and load conf files specified as argument
-# - files are cleaned from ay comment
-# - missing quotes after property = sign are added automatically
-# - automatic remove of all whitespace before and after declarations
-# - bash arrays are not supported
-# - if a variable is declared in first file and overridden later on
-#   in the same file or in subsequent files, those overloads will be
-#   ignored
-# @warning if an error occurs while loading one of the config file, exit code 3 but environment could be partially loaded
-# @arg $@ args:String[] list of configuration files to load in order
-# @set envVars String will set in environment all the variables that have been declared in the config files
-# @env envVars String the env variables of the current script could be used to interpret variables during config files parsing
-# @exitcode 0 if no config files provided or load completed successfully
-# @exitcode 1 if error occurred during parsing the config files (file not found, grep, awk or sed error)
-# @exitcode 2 if temporary file cannot be created
-# @exitcode 3 if an error occurred during config file sourcing
-# @stderr diagnostics information is displayed
-# @see largely inspired but modified from https://opensource.com/article/21/5/processing-configuration-files-shell
-Env::mergeConfFiles() {
-  local -a configFileList=("$@")
-
-  if ((${#configFileList[@]} == 0)); then
-    return 0
-  fi
-
-  local combinedConfigFile
-  combinedConfigFile="$(Framework::createTempFile "mergeConfFiles")" || return 2
-
-  (
-    # removes any trailing whitespace from each file, if any
-    # this is absolutely required when importing into ConfigMaps
-    # put quotes around values
-    sed -E -e $'s/\s*$// ; /^$/d ; /^#.*$/d ; s/=([^"\'].*)$/="\\1"/' "${configFileList[@]}" |
-      # remove all comment lines
-      Filters::commentLines |
-      # iterates over each file and prints (default awk behavior)
-      # each unique line; only takes first value and ignores duplicates
-      awk -F= '!line[$1]++'
-  ) >"${combinedConfigFile}" || return 1
-
-  # have to export everything, and source it twice:
-  # 1) first source is to realize variables
-  # 2) second time is to realize references
-  set -o allexport
-  # shellcheck source=.framework-config
-  source "${combinedConfigFile}" || return 3
-  # shellcheck source=.framework-config
-  source "${combinedConfigFile}" || return 3
-  set +o allexport
-}
-
 # @description prepend directories to the PATH environment variable
 # @arg $@ args:String[] list of directories to prepend
 # @set PATH update PATH with the directories prepended
@@ -709,15 +589,6 @@ Filters::removeAnsiCodes() {
   # cspell:disable
   sed -E 's/\x1b\[[0-9;]*[mGKHF]//g' "$@"
   # cspell:enable
-}
-
-# @description Display message using skip color (yellow)
-# @arg $1 message:String the message to display
-Log::displaySkipped() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logSkipped "$1"
 }
 
 # @description log message to file
@@ -832,81 +703,13 @@ UI::requireTheme() {
   UI::theme "${BASH_FRAMEWORK_THEME-default}"
 }
 
-# @description default env file with all default values
-# @stdout the default env filepath
-Env::createDefaultEnvFile() {
-  local envFile
-  envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
-
-  (
-    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
-    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
-    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
-    # shellcheck disable=SC2016
-    echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
-    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-  ) >"${envFile}"
-  echo "${envFile}"
-}
-
-# @description search a file in parent directories
-#
-# @arg $1 fromPath:String path
-# @arg $2 fileName:String
-# @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
-# @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
-# @stdout The filename if found
-# @exitcode 1 if the command failed or file not found
-File::upFind() {
-  local fromPath="$1"
-  shift || true
-  local fileName="$1"
-  shift || true
-  local untilInclusivePath="${1:-/}"
-  shift || true
-
-  if [[ -f "${fromPath}" ]]; then
-    fromPath="$(dirname "${fromPath}")"
-  fi
-  while true; do
-    if [[ -f "${fromPath}/${fileName}" ]]; then
-      echo "${fromPath}/${fileName}"
-      return 0
-    fi
-    if Array::contains "${fromPath}" "${untilInclusivePath}" "$@" "/"; then
-      return 1
-    fi
-    fromPath="$(readlink -f "${fromPath}"/..)"
-  done
-  return 1
-}
-
-# @description remove comment lines from input or files provided as arguments
-# @arg $@ files:String[] (optional) the files to filter
-# @env commentLinePrefix String the comment line prefix (default value: #)
-# @exitcode 0 if lines filtered or not
-# @exitcode 2 if grep fails for any other reasons than not found
-# @stdin the file as stdin to filter (alternative to files argument)
-# @stdout the filtered lines
-# shellcheck disable=SC2120
-Filters::commentLines() {
-  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
-}
-
-# @description create a temp file using default TMPDIR variable
-# initialized in _includes/_commonHeader.sh
-# @env TMPDIR String (default value /tmp)
-# @arg $1 templateName:String template name to use(optional)
-Framework::createTempFile() {
-  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
-}
-
-# @description log message to file
+# @description Display message using skip color (yellow)
 # @arg $1 message:String the message to display
-Log::logSkipped() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-SKIPPED}" "$1"
+Log::displaySkipped() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   fi
+  Log::logSkipped "$1"
 }
 
 # @description Retry a command several times depending on parameters
@@ -953,22 +756,6 @@ Linux::requireJqCommand() {
   Assert::commandExists jq
 }
 
-# @description check if an element is contained in an array
-#
-# @arg $1 needle:String
-# @arg $@ array:String[]
-# @exitcode 0 if found
-# @exitcode 1 otherwise
-# @example
-#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
-Array::contains() {
-  local element
-  for element in "${@:2}"; do
-    [[ "${element}" = "$1" ]] && return 0
-  done
-  return 1
-}
-
 # @description check if command specified exists or return 1
 # with error and message if not
 #
@@ -989,6 +776,14 @@ Assert::commandExists() {
     return 1
   }
   return 0
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSkipped() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SKIPPED}" "$1"
+  fi
 }
 
 # FUNCTIONS
@@ -1059,6 +854,7 @@ optionVersionCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionEnvFileCallback() {
   local envFile="$2"
+  Log::displayWarning "Command ${SCRIPT_NAME} - Option --env-file is deprecated and will be removed in the future"
   if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
     Log::displayError "Command ${SCRIPT_NAME} - Option --env-file - File '${envFile}' doesn't exist"
     exit 1
@@ -1193,57 +989,47 @@ defaultFrameworkConfig="$(
 # copied from src/_includes/.framework-config.default
 # shellcheck disable=SC2034
 
+REAL_SCRIPT_FILE="${REAL_SCRIPT_FILE:-$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")}"
+FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR:-$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")/../.." && pwd -P)}"
+FRAMEWORK_SRC_DIR="${FRAMEWORK_SRC_DIR:-${FRAMEWORK_ROOT_DIR}/src}"
+FRAMEWORK_BIN_DIR="${FRAMEWORK_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/bin}"
+FRAMEWORK_VENDOR_DIR="${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}"
+FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_VENDOR_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/vendor/bin}"
+
 # describe the functions that will be skipped from being imported
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP='^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|Acquire::ForceIPv4)$'
+FRAMEWORK_FUNCTIONS_IGNORE_REGEXP="${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP:-^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|Acquire::ForceIPv4)$}"
 # describe the files that do not contain function to be imported
-NON_FRAMEWORK_FILES_REGEXP="(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)"
+NON_FRAMEWORK_FILES_REGEXP="${NON_FRAMEWORK_FILES_REGEXP:-(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)}"
 # describe the files that are allowed to not have an associated bats file
-BATS_FILE_NOT_NEEDED_REGEXP="(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes)"
+BATS_FILE_NOT_NEEDED_REGEXP="${BATS_FILE_NOT_NEEDED_REGEXP:-(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes)}"
 # describe the files that are allowed to not have a function matching the filename
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="^bin/|^\.framework-config$|^build.sh$|\.tpl$|/testsData/|^manualTests/|\.bats$"
+FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^\.framework-config$|^build.sh$|\.tpl$|/testsData/|^manualTests/|\.bats$}"
 # Source directories
-FRAMEWORK_SRC_DIRS=(
-  "${FRAMEWORK_ROOT_DIR}/src"
-)
+if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
+  FRAMEWORK_SRC_DIRS=(
+    "${FRAMEWORK_ROOT_DIR}/src"
+  )
+fi
 
 # export here all the variables that will be used in your templates
-export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
+export REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/fchastanet/bash-tools-framework}"
+
+BASH_FRAMEWORK_THEME="${BASH_FRAMEWORK_THEME:-default}"
+BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
+BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
+BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/$(basename "$0").log}"
+BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
 EOF
 )"
 
 commandOptionParseFinished() {
-  if [[ -z "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
-    BASH_FRAMEWORK_ENV_FILES=()
-  fi
-  BASH_FRAMEWORK_ENV_FILES+=("${optionEnvFiles[@]}")
-  export BASH_FRAMEWORK_ENV_FILES
-  Env::requireLoad
-  Log::requireLoad
+  # load default template framework config
+  # shellcheck disable=SC2034
+  defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
+  echo "${defaultFrameworkConfig}" > "${defaultEnvFile}"
 
-  # load .framework-config
-  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
-    BASH_FRAMEWORK_CONFIG_FILE="${optionBashFrameworkConfig}"
-    # shellcheck source=/.framework-config
-    source "${optionBashFrameworkConfig}" ||
-      Log::fatal "Command ${SCRIPT_NAME} - error while loading specific .framework-config file: ${optionBashFrameworkConfig}"
-  else
-    # shellcheck disable=SC2034
-    BASH_FRAMEWORK_CONFIG_FILE=""
-    # shellcheck source=/.framework-config
-    Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "$(pwd)" || {
-      # shellcheck source=/.framework-config
-      Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${FRAMEWORK_ROOT_DIR}" || {
-        # load default template framework config
-        if [[ ! -f "${PERSISTENT_TMPDIR}/.framework-config" ]]; then
-          echo "${defaultFrameworkConfig}" > "${PERSISTENT_TMPDIR}/.framework-config"
-        fi
-        Framework::loadConfig BASH_FRAMEWORK_CONFIG_FILE "${PERSISTENT_TMPDIR}" || {
-          Log::fatal "Command ${SCRIPT_NAME} - error while loading .framework-config.default file"
-        }
-        Log::displayWarning "Command ${SCRIPT_NAME} - Load default .framework-config file - ${PERSISTENT_TMPDIR}/.framework-config"
-      }
-    }
-  fi
+  Env::requireLoad "${defaultEnvFile}"
+  Log::requireLoad
 
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig
@@ -1730,7 +1516,7 @@ megalinterCommand() {
     echo -e "  ${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} {list} (optional)"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(Load\ the\ specified\ env\ file)
+    helpArray=(Load\ the\ specified\ env\ file\ \(deprecated\,\ please\ use\ --bash-framework-config\ option\ instead\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
     local -a helpArray
@@ -1942,7 +1728,7 @@ run() {
     -e MEGALINTER_CONFIG="${optionMegalinterConfigFile}"
     "${megalinterOptions[@]}"
     -v /var/run/docker.sock:/var/run/docker.sock:rw
-    -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw
+    -v .:/tmp/lint:rw
     "${optionMegalinterImage}"
   )
   Log::displayWarning "Running ${cmd[*]}"

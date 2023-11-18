@@ -1,26 +1,36 @@
 #!/usr/bin/env bash
 
 # @description ensure env files are loaded
-# @noargs
-# @exitcode 1 if getOrderedConfFiles fails
-# @exitcode 2 if one of env files fails to load
+# @arg $@ list of default files to load at the end
+# @exitcode 1 if one of env files fails to load
 # @stderr diagnostics information is displayed
+# shellcheck disable=SC2120
 Env::requireLoad() {
-  local configFilesStr
-  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
-
-  local -a configFiles
-  readarray -t configFiles <<<"${configFilesStr}"
-
-  # if empty string, there will be one element
-  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
-    # should not happen, as there is always default file
-    Log::displaySkipped "no env file to load"
-    return 0
+  local -a defaultFiles=("$@")
+  # get list of possible config files
+  local -a configFiles=()
+  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    # BASH_FRAMEWORK_ENV_FILES is an array
+    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
+    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
+  fi
+  if [[ -f "$(pwd)/.framework-config" ]]; then
+    configFiles+=("$(pwd)/.framework-config")
+  fi
+  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
+    # shellcheck disable=SC2034
+    configFiles+=("${optionBashFrameworkConfig}")
+  fi
+  configFiles+=("${optionEnvFiles[@]}")
+  configFiles+=("${defaultFiles[@]}")
 
-  Env::mergeConfFiles "${configFiles[@]}" || {
-    Log::displayError "while loading config files: ${configFiles[*]}"
-    return 2
-  }
+  for file in "${configFiles[@]}"; do
+    # shellcheck source=/.framework-config
+    source "${file}" || {
+      Log::displayError "while loading config file: ${file}"
+      return 1
+    }
+  done
 }
