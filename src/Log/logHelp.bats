@@ -27,9 +27,7 @@ teardown() {
 
 generateLogs() {
   local envFile="$1"
-  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${envFile}")
-  Env::requireLoad
-  Log::requireLoad
+  initLogs "${envFile}"
 
   Log::logHelp "help"
 }

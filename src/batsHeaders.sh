@@ -24,3 +24,13 @@ source "${srcDir}/Log/__all.sh"
 source "${srcDir}/UI/theme.sh"
 # shellcheck source=src/Assert/tty.sh
 source "${srcDir}/Assert/tty.sh"
+
+initLogs() {
+  local envFile="$1"
+  unset BASH_FRAMEWORK_THEME
+  unset BASH_FRAMEWORK_LOG_LEVEL
+  unset BASH_FRAMEWORK_DISPLAY_LEVEL
+  BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${envFile}")
+  Env::requireLoad
+  Log::requireLoad
+}

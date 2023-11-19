@@ -13,6 +13,7 @@ Lint files of the current repository
   - check that @require function matches naming convention and exists
   - check that at least @description is provided
 '''
+declare optionFormatAuthorizedValues="plain|checkstyle"
 %
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
