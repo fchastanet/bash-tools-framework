@@ -93,9 +93,14 @@ JAVASCRIPT_DEFAULT_STYLE: prettier
 JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
 JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: report/
 
+ACTION_ACTIONLINT_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^\.github/workflows/dependabot\.yml$
+  )
 YAML_V8R_FILTER_REGEX_EXCLUDE: |
   (?x)(
     ^\.vscode/\.checkov\.yml|
+    ^\.github/workflows/dependabot\.yml$|
     ^\.secretlintrc\.yml|
     ^\.grype\.yaml
   )

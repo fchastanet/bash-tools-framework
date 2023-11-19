@@ -10,10 +10,6 @@ buildPushDockerImageCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 # build image and push it ot registry
 run() {
   DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
-  BASH_FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
-  if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
-    BASH_FRAMEWORK_ROOT_DIR="$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P)"
-  fi
   # shellcheck disable=SC2154
   local imageTag="build:bash-tools-${optionVendor}-${optionBashVersion}"
   local image="scrasnups/${imageTag}"
@@ -36,14 +32,14 @@ run() {
     fi
     DOCKER_BUILDKIT=1 docker build \
       ${DOCKER_BUILD_OPTIONS} \
-      -f "${BASH_FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
+      -f "${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
       --cache-from "${image}" \
       --build-arg BUILDKIT_INLINE_CACHE=1 \
       --build-arg argBashVersion="${optionBashVersion}" \
       --build-arg BASH_IMAGE="${optionBashBaseImage}" \
       -t "${imageTag}" \
       -t "${image}" \
-      "${BASH_FRAMEWORK_ROOT_DIR}/.docker"
+      "${FRAMEWORK_ROOT_DIR}/.docker"
   )
 
   Log::displayInfo "Image ${image} - bash version check"

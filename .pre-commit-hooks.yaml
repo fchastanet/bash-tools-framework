@@ -1,18 +1,26 @@
-- id: fixShebangExecutionBit
+- &FIX_SHEBANG_EXECUTION_BIT
+  id: fixShebangExecutionBit
   name: fixShebangExecutionBit
   description: |
     Find all files containing a shebang and
     mark them as executable if not yet
   language: script
   entry: bin/findShebangFiles
-  args: [--bash-framework-config, .framework-config, chmod, +x]
+  args: [chmod, +x]
   pass_filenames: false
   types: ['file', 'shell', 'text']
-  always_run: false
+  always_run: true
   fail_fast: true
-  stages: [pre-commit, manual]
+  stages: [pre-commit]
 
-- id: frameworkLinter
+- <<: *FIX_SHEBANG_EXECUTION_BIT
+  id: fixShebangExecutionBitGithubActions
+  name: fixShebangExecutionBit for Github Actions
+  fail_fast: false
+  stages: [manual]
+
+- &FRAMEWORK_LINTER
+  id: frameworkLinter
   name: Bash Framework Linter
   description: |
     Check if your files uses the right syntax
@@ -20,66 +28,72 @@
   language: script
   entry: bin/frameworkLint
   args:
-    [
-      --bash-framework-config,
-      .framework-config,
-      --expected-warnings-count,
-      '0',
-      --format,
-      plain,
-      --theme,
-      default-force,
-    ]
+    [--expected-warnings-count, '0', --format, plain, --theme, default-force]
   pass_filenames: false
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
   fail_fast: true
-  stages: [pre-commit, manual]
+  stages: [pre-commit]
+
+- <<: *FRAMEWORK_LINTER
+  id: frameworkLinterGithubAction
+  name: Bash Framework Linter for Github Actions
+  args: [--expected-warnings-count, '0', --format, checkstyle, --theme, noColor]
+  fail_fast: false
+  stages: [manual]
 
 - id: awkLint
   name: awk Linter
   description: Lint awk files using awk.
   language: script
   entry: bin/awkLint
-  args: [--bash-framework-config, .framework-config]
+  args: []
   pass_filenames: false
   files: \.awk$
   always_run: false
   fail_fast: true
   stages: [pre-commit, manual]
 
-- id: shellcheckLint
+- &SHELLCHECKLINT
+  id: shellcheckLint
   name: shellcheck Linter
   description: |
     Lint bash files using shellcheck.
     Installing last version automatically
   language: script
   entry: bin/shellcheckLint
-  args: [--bash-framework-config, .framework-config, -f, tty, --xargs]
+  args: [-f, tty, --xargs]
   pass_filenames: true
   files: \.sh$
   types: ['executable', 'file', 'shell', 'text']
-
   always_run: false
   fail_fast: true
   stages: [pre-commit]
+
+- <<: *SHELLCHECKLINT
+  id: shellcheckLintGithubAction
+  name: shellcheck Linter for Github Actions
+  args: [-f, checkstyle, --xargs]
+  fail_fast: false
+  stages: [manual]
 
 - id: runUnitTests
   name: Run unit tests
   description: run unit test using bats in docker isolated environment
   language: script
   entry: bin/test
-  args: [--bash-framework-config, .framework-config, -r, src, -j, '30']
+  args: [-r, src, -j, '30']
   pass_filenames: false
   always_run: true
   fail_fast: true
   require_serial: true
   stages: [pre-commit, manual]
 
-- id: buildShFiles
+- &BUILD_SH_FILES
+  id: buildShFiles
   name: build sh files
   entry: bin/buildBinFiles
-  args: [--bash-framework-config, .framework-config, --ignore-missing]
+  args: [--ignore-missing]
   language: script
   pass_filenames: false
   always_run: true
@@ -87,15 +101,12 @@
   fail_fast: true
   stages: [pre-commit]
 
-- id: buildShFilesGithubAction
-  name: build sh files for github action
+- <<: *BUILD_SH_FILES
+  id: buildShFilesGithubAction
+  name: build sh files for Github Actions
   entry: bin/buildBinFiles
-  args: [--bash-framework-config, .framework-config]
-  language: script
-  pass_filenames: false
-  always_run: true
-  require_serial: true
-  fail_fast: true
+  args: []
+  fail_fast: false
   stages: [manual]
 
 - id: plantuml
@@ -118,17 +129,16 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.5.0',
+      'oxsecurity/megalinter-terraform:v7.6.0',
       --check-megalinter-version,
-      --bash-framework-config,
-      '.framework-config',
     ]
   pass_filenames: false
   always_run: true
   fail_fast: true
   stages: [pre-push, manual]
 
-- id: megalinter
+- &MEGALINTER
+  id: megalinter
   name: Megalinter
   description: use megalinter to check your project
   language: script
@@ -136,11 +146,9 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.5.0',
+      'oxsecurity/megalinter-terraform:v7.6.0',
       --config-file,
       '.mega-linter-light.yml',
-      --bash-framework-config,
-      '.framework-config',
       --fix,
     ]
   pass_filenames: false
@@ -151,24 +159,15 @@
   stages: [pre-push]
 
 # manual stage used to select github action with megalinter full config
-- id: megalinterGithubAction
-  name: Megalinter Github Actions
-  description: use megalinter with full configuration
-  language: script
-  entry: bin/megalinter
+- <<: *MEGALINTER
+  id: megalinterGithubAction
+  name: Megalinter for Github Actions
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.5.0',
+      'oxsecurity/megalinter-terraform:v7.6.0',
       --config-file,
       '.mega-linter-githubAction.yml',
-      --bash-framework-config,
-      '.framework-config',
       --fix,
     ]
-  pass_filenames: false
-  require_serial: true
-  always_run: true
-  fail_fast: true
-  verbose: true
   stages: [manual]

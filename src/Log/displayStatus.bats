@@ -24,11 +24,8 @@ teardown() {
 }
 
 generateLogs() {
-  local logEnvFile="$1"
-  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${logEnvFile}")
-
-  Env::requireLoad
-  Log::requireLoad
+  local envFile="$1"
+  initLogs "${envFile}"
 
   statusMsg=$(Log::displayStatus "status" 2>&1)
   expectedStatusMsg="$(echo -e "${__INFO_COLOR}STATUS  - status${__RESET_COLOR}")"

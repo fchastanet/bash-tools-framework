@@ -226,28 +226,38 @@ Log::logMessage() {
 }
 
 # @description ensure env files are loaded
-# @noargs
-# @exitcode 1 if getOrderedConfFiles fails
-# @exitcode 2 if one of env files fails to load
+# @arg $@ list of default files to load at the end
+# @exitcode 1 if one of env files fails to load
 # @stderr diagnostics information is displayed
+# shellcheck disable=SC2120
 Env::requireLoad() {
-  local configFilesStr
-  configFilesStr="$(Env::getOrderedConfFiles)" || return 1
-
-  local -a configFiles
-  readarray -t configFiles <<<"${configFilesStr}"
-
-  # if empty string, there will be one element
-  if ((${#configFiles[@]} == 0)) || [[ -z "${configFilesStr}" ]]; then
-    # should not happen, as there is always default file
-    Log::displaySkipped "no env file to load"
-    return 0
+  local -a defaultFiles=("$@")
+  # get list of possible config files
+  local -a configFiles=()
+  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    # BASH_FRAMEWORK_ENV_FILES is an array
+    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
+    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
+  fi
+  if [[ -f "$(pwd)/.framework-config" ]]; then
+    configFiles+=("$(pwd)/.framework-config")
+  fi
+  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
+    # shellcheck disable=SC2034
+    configFiles+=("${optionBashFrameworkConfig}")
+  fi
+  configFiles+=("${optionEnvFiles[@]}")
+  configFiles+=("${defaultFiles[@]}")
 
-  Env::mergeConfFiles "${configFiles[@]}" || {
-    Log::displayError "while loading config files: ${configFiles[*]}"
-    return 2
-  }
+  for file in "${configFiles[@]}"; do
+    # shellcheck source=/.framework-config
+    source "${file}" || {
+      Log::displayError "while loading config file: ${file}"
+      return 1
+    }
+  done
 }
 
 # @description activate or not Log::display* and Log::log* functions
@@ -295,96 +305,6 @@ Log::requireLoad() {
   fi
 }
 
-# @description get list of env files to load
-# in order to make them available for Env::requireLoad
-# @env BASH_FRAMEWORK_ENV_FILES String[] list of env files that should be loaded
-# @exitcode 1 if one of the env file cannot be generated
-# @exitcode 2 if one of the env file is not a file or readable
-# @stdout the env files asked to be loaded
-# @stderr diagnostic information on failure
-# @see https://github.com/fchastanet/bash-tools-framework/blob/master/FrameworkDoc.md#config_file_order
-Env::getOrderedConfFiles() {
-  local -a configFiles=()
-
-  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
-    # BASH_FRAMEWORK_ENV_FILES is an array
-    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
-  fi
-
-  local defaultEnvFile
-  defaultEnvFile="$(Env::createDefaultEnvFile)" || return 1
-  configFiles+=("${defaultEnvFile}")
-
-  local file
-  for file in "${configFiles[@]}"; do
-    if [[ ! -f "${file}" || ! -r "${file}" ]]; then
-      Log::displayError "One of the config file is not available '${file}'"
-      return 2
-    fi
-    echo "${file}"
-  done
-}
-
-# @description merge and load conf files specified as argument
-# - files are cleaned from ay comment
-# - missing quotes after property = sign are added automatically
-# - automatic remove of all whitespace before and after declarations
-# - bash arrays are not supported
-# - if a variable is declared in first file and overridden later on
-#   in the same file or in subsequent files, those overloads will be
-#   ignored
-# @warning if an error occurs while loading one of the config file, exit code 3 but environment could be partially loaded
-# @arg $@ args:String[] list of configuration files to load in order
-# @set envVars String will set in environment all the variables that have been declared in the config files
-# @env envVars String the env variables of the current script could be used to interpret variables during config files parsing
-# @exitcode 0 if no config files provided or load completed successfully
-# @exitcode 1 if error occurred during parsing the config files (file not found, grep, awk or sed error)
-# @exitcode 2 if temporary file cannot be created
-# @exitcode 3 if an error occurred during config file sourcing
-# @stderr diagnostics information is displayed
-# @see largely inspired but modified from https://opensource.com/article/21/5/processing-configuration-files-shell
-Env::mergeConfFiles() {
-  local -a configFileList=("$@")
-
-  if ((${#configFileList[@]} == 0)); then
-    return 0
-  fi
-
-  local combinedConfigFile
-  combinedConfigFile="$(Framework::createTempFile "mergeConfFiles")" || return 2
-
-  (
-    # removes any trailing whitespace from each file, if any
-    # this is absolutely required when importing into ConfigMaps
-    # put quotes around values
-    sed -E -e $'s/\s*$// ; /^$/d ; /^#.*$/d ; s/=([^"\'].*)$/="\\1"/' "${configFileList[@]}" |
-      # remove all comment lines
-      Filters::commentLines |
-      # iterates over each file and prints (default awk behavior)
-      # each unique line; only takes first value and ignores duplicates
-      awk -F= '!line[$1]++'
-  ) >"${combinedConfigFile}" || return 1
-
-  # have to export everything, and source it twice:
-  # 1) first source is to realize variables
-  # 2) second time is to realize references
-  set -o allexport
-  # shellcheck source=.framework-config
-  source "${combinedConfigFile}" || return 3
-  # shellcheck source=.framework-config
-  source "${combinedConfigFile}" || return 3
-  set +o allexport
-}
-
-# @description Display message using skip color (yellow)
-# @arg $1 message:String the message to display
-Log::displaySkipped() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logSkipped "$1"
-}
-
 # @description To be called before logging in the log file
 # @arg $1 file:string log file name
 # @arg $2 maxLogFilesCount:int maximum number of log files
@@ -414,49 +334,13 @@ UI::requireTheme() {
   UI::theme "${BASH_FRAMEWORK_THEME-default}"
 }
 
-# @description default env file with all default values
-# @stdout the default env filepath
-Env::createDefaultEnvFile() {
-  local envFile
-  envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
-
-  (
-    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
-    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-0}"
-    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
-    # shellcheck disable=SC2016
-    echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
-    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-  ) >"${envFile}"
-  echo "${envFile}"
-}
-
-# @description remove comment lines from input or files provided as arguments
-# @arg $@ files:String[] (optional) the files to filter
-# @env commentLinePrefix String the comment line prefix (default value: #)
-# @exitcode 0 if lines filtered or not
-# @exitcode 2 if grep fails for any other reasons than not found
-# @stdin the file as stdin to filter (alternative to files argument)
-# @stdout the filtered lines
-# shellcheck disable=SC2120
-Filters::commentLines() {
-  grep -vxE "[[:blank:]]*(${commentLinePrefix:-#}.*)?" "$@" || test $? = 1
-}
-
-# @description create a temp file using default TMPDIR variable
-# initialized in _includes/_commonHeader.sh
-# @env TMPDIR String (default value /tmp)
-# @arg $1 templateName:String template name to use(optional)
-Framework::createTempFile() {
-  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
-}
-
-# @description log message to file
+# @description Display message using skip color (yellow)
 # @arg $1 message:String the message to display
-Log::logSkipped() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-SKIPPED}" "$1"
+Log::displaySkipped() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    echo -e "${__SKIPPED_COLOR}SKIPPED - ${1}${__RESET_COLOR}" >&2
   fi
+  Log::logSkipped "$1"
 }
 
 # @description load colors theme constants
@@ -561,6 +445,14 @@ Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
   exit 1
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSkipped() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SKIPPED}" "$1"
+  fi
 }
 
 # @description log message to file

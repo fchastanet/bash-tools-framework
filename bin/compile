@@ -80,7 +80,7 @@ source "${_COMPILE_SRC_DIR}/UI/theme.sh"
 # shellcheck source=/src/UI/requireTheme.sh
 source "${_COMPILE_SRC_DIR}/UI/requireTheme.sh"
 
-Env::requireLoad
+Env::requireLoad "${_COMPILE_SRC_DIR}/_includes/.framework-config.default"
 UI::requireTheme
 Log::requireLoad
 
@@ -269,7 +269,6 @@ if [[ -z "${FRAMEWORK_BIN_DIR+xxx}" ]]; then
   FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 fi
 export FRAMEWORK_BIN_DIR
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP=^$
 loggedMessages=()
 
 # load .framework-config

@@ -27,10 +27,19 @@ VAR1=value2
 ## 2. Config file overloading values
 
 - Best practice is to override variables only by
-  - command argument --env-file to allow loading alternate env before other
-    default files
+  - command argument --bash-framework-config to allow loading alternate env
+    before other default files
   - command argument (--verbose, ...) allows to override default displayed log
     level
+  - in env files, always allow value to be overridden by prioritized variables
+    - using bash variable default value mechanism, in following example,
+      BASH_FRAMEWORK_LOG_LEVEL will be equal to 0 only if it hasn't been set
+      previously
+
+```bash
+BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
+```
+
 - Provide --config argument to see resulting config file + information about
   order of loaded config files for debugging purpose.
 - It is also possible to use environment variable, but **highly discouraged to
@@ -50,23 +59,27 @@ VAR1=value2
 
 <!-- markdownlint-restore -->
 
-The framework function `Env::getOrderedConfigFiles` allows to get the list of
-configuration files that will called by `Env::requireLoad` function. You can
-override `Env::getOrderedConfigFiles` in your own project for your own needs.
-Here the rules used in `Env::getOrderedConfigFiles`:
+The framework function `Env::requireLoad` loads the following files in this
+order if they are existing and are readable:
 
-- Load files from more specific to the project to the less specific.
-- Last file contains all the mandatory default properties' values.
-- The following files will be loaded in this order if they are existing and are
-  readable:
+- files provided in BASH_FRAMEWORK_ENV_FILES env variable array
+- ${FRAMEWORK_ROOT_DIR}/.framework-config if exists
+- .framework-config from current directory if exists
+- file from option --bash-framework-config
+- files from option --env-file (option deprecated)
+- default files passed as argument to this function. _Eg:_
+  `src/_includes/.framework-config.default`
+  - this file contains all the mandatory default properties values that will be
+    set if any previous files set the variable
 
-  - if env-file argument is passed, load the provided file first
-  - if --verbose or -v argument is passed, set `BASH_FRAMEWORK_DISPLAY_LEVEL` to
-    3 (INFO)
-  - if -vv argument is passed, set `BASH_FRAMEWORK_DISPLAY_LEVEL` to 4 (DEBUG)
-  - later on, will manage other kind of arguments
-  - additional files provided by this bash array variable, see below.
-  - framework default values file, see below.
+Options can override values provided by these env files:
+
+- if --verbose or -v argument is passed, set `BASH_FRAMEWORK_DISPLAY_LEVEL` to 3
+  (INFO)
+- if -vv argument is passed, set `BASH_FRAMEWORK_DISPLAY_LEVEL` to 4 (DEBUG)
+- later on, will manage other kind of arguments
+- additional files provided by this bash array variable, see below.
+- framework default values file, see below.
 
 _Eg:_ additional environment files
 

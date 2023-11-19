@@ -24,11 +24,8 @@ teardown() {
 }
 
 generateLogs() {
-  local logEnvFile="$1"
-  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${logEnvFile}")
-
-  Env::requireLoad
-  Log::requireLoad
+  local envFile="$1"
+  initLogs "${envFile}"
 
   infoMsg=$(Log::displayInfo "info" 2>&1)
   expectedInfoMsg="$(echo -e "${__INFO_COLOR}INFO    - info${__RESET_COLOR}")"

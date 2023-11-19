@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-FRAMEWORK_ROOT_DIR=$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)
+FRAMEWORK_ROOT_DIR="$(pwd -P)"
 FRAMEWORK_SRC_DIR="$(cd "${FRAMEWORK_ROOT_DIR}/src" && pwd -P)"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
@@ -10,7 +10,7 @@ source "${FRAMEWORK_SRC_DIR}/_includes/_header.sh"
 source "${FRAMEWORK_SRC_DIR}/Env/__all.sh"
 
 # parse parameters
-Env::requireLoad
+Env::requireLoad "${FRAMEWORK_SRC_DIR}/_includes/.framework-config.default"
 
 # srcFile     : file that needs to be compiled
 # templateDir : directory from which bash-tpl templates will be searched

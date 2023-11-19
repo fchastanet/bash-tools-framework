@@ -24,11 +24,8 @@ teardown() {
 }
 
 generateLogs() {
-  local logEnvFile="$1"
-  export BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${logEnvFile}")
-
-  Env::requireLoad
-  Log::requireLoad
+  local envFile="$1"
+  initLogs "${envFile}"
 
   warningMsg=$(Log::displayWarning "warning" 2>&1)
   expectedWarningMsg="$(echo -e "${__WARNING_COLOR}WARN    - warning${__RESET_COLOR}")"

@@ -58,7 +58,7 @@ run() {
     -e MEGALINTER_CONFIG="${optionMegalinterConfigFile}"
     "${megalinterOptions[@]}"
     -v /var/run/docker.sock:/var/run/docker.sock:rw
-    -v "${FRAMEWORK_ROOT_DIR}":/tmp/lint:rw
+    -v .:/tmp/lint:rw
     "${optionMegalinterImage}"
   )
   Log::displayWarning "Running ${cmd[*]}"

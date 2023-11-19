@@ -19,7 +19,7 @@
 Options::generateCommand allows to generate a function that will help you to:
 
 - manage command options and arguments
-  - options --env-file, --verbose, ...
+  - options --bash-framework-config, --verbose, ...
   - arguments
 - check option/argument presence
 - execute callbacks on certain option/argument

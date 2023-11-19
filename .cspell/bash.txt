@@ -122,3 +122,6 @@ uuidgen
 DELIMS
 Slatis
 doesn
+Facadesh
+Scriptsh
+SHELLCHECKLINT

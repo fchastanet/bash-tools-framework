@@ -3,6 +3,9 @@
 name: Lint and test
 on: # yamllint disable-line rule:truthy
   push:
+    # execute when pushing only branches, not tags
+    branches:
+      - '**'
   workflow_dispatch:
 
 jobs:
@@ -22,28 +25,42 @@ jobs:
           - vendor: ubuntu
             bashImage: ubuntu:20.04
             batsOptions: -j 30
+            bashTarVersion: 4.4
+            runPrecommitTests: false
+          - vendor: ubuntu
+            bashImage: ubuntu:20.04
+            bashTarVersion: 5.0
+            batsOptions: -j 30
+            runPrecommitTests: false
+          - vendor: ubuntu
+            bashImage: ubuntu:20.04
+            bashTarVersion: 5.1
+            batsOptions: -j 30
             runPrecommitTests: true
           - vendor: alpine
             bashTarVersion: 4.4
             bashImage: amd64/bash:4.4-alpine3.18
             batsOptions: -j 30
+            runPrecommitTests: false
           - vendor: alpine
             bashTarVersion: 5.0
             bashImage: amd64/bash:5.0-alpine3.18
             batsOptions: -j 30
+            runPrecommitTests: false
           - vendor: alpine
             bashTarVersion: 5.1
             bashImage: amd64/bash:5.1-alpine3.18
             batsOptions: -j 30
+            runPrecommitTests: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -55,13 +72,13 @@ jobs:
 
       - name: Pull/Build/Push docker image
         env:
-          BRANCH: ${{ matrix.branch }}
+          BRANCH: ${GITHUB_REF##*/}
         run: |
           ./bin/buildPushDockerImage \
             --vendor "${{ matrix.vendor }}" \
             --bash-version "${{ matrix.bashTarVersion }}" \
             --bash-base-image "${{ matrix.bashImage }}" \
-            --branch-name "${{ matrix.branch }}" \
+            --branch-name "${GITHUB_REF##*/}" \
             --push -vvv
 
       - name: Check image
@@ -102,7 +119,7 @@ jobs:
 
       - name: Create Pull Request
         if: matrix.runPrecommitTests && failure()
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           branch: update/pre-commit-fixes
           title: lint fixes
@@ -129,8 +146,8 @@ jobs:
             --vendor "${{matrix.vendor}}" \
             --bash-version "${{matrix.bashTarVersion}}" \
             --bash-base-image "${{matrix.bashImage}}" \
-            --branch-name "${BRANCH}" \
-            ${{matrix.options}} --report-formatter junit -o logs -r src --ci
+            --branch-name "${GITHUB_REF##*/}" \
+            ${{matrix.batsOptions}} --report-formatter junit -o logs -r src --ci
 
       - name: Upload Test Results
         if: always()
