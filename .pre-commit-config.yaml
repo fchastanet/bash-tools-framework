@@ -50,7 +50,7 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 1.1.5
+    rev: 1.1.6
     hooks:
       - id: fixShebangExecutionBit
       - id: fixShebangExecutionBitGithubActions
@@ -103,7 +103,7 @@ repos:
 
   # manual stage used to select github action with megalinter full config
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 1.1.5
+    rev: 1.1.6
     hooks:
       - id: runUnitTests
         # not manual as github will run UT with several versions of bash and arch

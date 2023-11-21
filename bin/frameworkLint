@@ -281,11 +281,11 @@ Env::requireLoad() {
     # BASH_FRAMEWORK_ENV_FILES is an array
     configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
-  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
-    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
-  fi
   if [[ -f "$(pwd)/.framework-config" ]]; then
     configFiles+=("$(pwd)/.framework-config")
+  fi
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
+    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
   fi
   if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
     # shellcheck disable=SC2034
@@ -329,18 +329,6 @@ File::detectBashFile() {
   if Assert::bashFile "${file}"; then
     echo "${file}"
   fi
-}
-
-# @description print the resolved path relative to DIR
-# do not check for path existence
-# @arg $1 srcFile:String the file to resolve
-# @arg $2 relativeTo:String the directory
-# @stdout the resolved path relative to DIR
-File::relativeToDir() {
-  local srcFile="$1"
-  local relativeTo="$2"
-
-  realpath -m --relative-to="${relativeTo}" "${srcFile}"
 }
 
 # @description allows to match a bash framework function based on the naming convention
@@ -1475,7 +1463,7 @@ checkEachFunctionHasSrcFile() {
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${file}"; then
-    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches"
     return 0
   fi
   readarray -t functionsToImport < <(
@@ -1487,13 +1475,14 @@ checkEachFunctionHasSrcFile() {
   )
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-      Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+      Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - Function ${functionToImport} rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches"
       continue
     fi
     local fileNameToImport
     fileNameToImport="$(echo "${functionToImport}" | sed -E 's#::#/#g').sh"
 
     local found=0
+    local srcDir
     for srcDir in "${FRAMEWORK_SRC_DIRS[@]}"; do
       if [[ -f "${srcDir}/${fileNameToImport}" ]]; then
         found=1
@@ -1511,37 +1500,47 @@ checkEachFunctionHasSrcFile() {
   done
 }
 
-getRelativeSrcDir() {
-  File::relativeToDir "${FRAMEWORK_SRC_DIRS[0]}" "${FRAMEWORK_ROOT_DIR}"
-}
-
 deduceBashFunctionFromSrcFile() {
-  local srcFile="$1"
-  local result="${srcFile%.sh}"
-  result="${srcFile/$(getRelativeSrcDir)//}"
-  echo "${result//\//::}"
+  local file="$1"
+  local srcDir="$2"
+
+  local relativeFile
+  relativeFile="$(
+    echo "${file}" | sed -E -e "#${srcDir}##" |
+      grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"
+  )"
+  echo "${relativeFile//\//::}"
 }
 
 checkEachSrcFileHasBatsFile() {
   local file="$1"
   if [[ "${file}" =~ ${BATS_FILE_NOT_NEEDED_REGEXP} ]]; then
-    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - rule BATS_FILE_NOT_NEEDED_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - rule BATS_FILE_NOT_NEEDED_REGEXP matches"
     return 0
   fi
   if [[ ! "${file}" =~ .sh$ ]]; then
     Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - no suffix .sh"
     return 0
   fi
-  if [[ ! "${file}" =~ ^$(getRelativeSrcDir) ]]; then
-    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - src directory not declared in ${BASH_FRAMEWORK_CONFIG_FILE}"
+  local found=0
+  local srcDir
+  for srcDir in "${FRAMEWORK_SRC_DIRS[@]}"; do
+    if realpath --relative-to="${srcDir}" "${file}" &>/dev/null; then
+      found=1
+    fi
+  done
+  if [[ "${found}" = "0" ]]; then
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - src directory not declared in ${FRAMEWORK_SRC_DIRS[*]}"
     return 0
   fi
-  if deduceBashFunctionFromSrcFile "${file}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - matching function name matches FRAMEWORK_FUNCTIONS_IGNORE_REGEXP defined in ${BASH_FRAMEWORK_CONFIG_FILE}"
+
+  if deduceBashFunctionFromSrcFile "${relativeFile}" "${srcDir}" |
+    grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
+    Log::displaySkipped "checkEachSrcFileHasBatsFile - File ${file} - matching function name matches FRAMEWORK_FUNCTIONS_IGNORE_REGEXP defined"
     return 0
   fi
   local batsFile="${file%.*}.bats"
-  if [[ ! -f "${FRAMEWORK_ROOT_DIR}/${batsFile}" ]]; then
+  if [[ ! -f "${batsFile}" ]]; then
     reportWarning "checkEachSrcFileHasBatsFile" "${file}" \
       "missing bats file '${batsFile}'"
   fi
@@ -1551,11 +1550,11 @@ checkEachSrcFileHasBatsFile() {
 checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local srcFile="$1"
   if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
-    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches"
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
-    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches"
     return 0
   fi
 
@@ -1564,7 +1563,7 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
   local file="${srcFile#src/}"
   expectedFunctionName="$(sed -E 's#/#::#g' <<<"${file%.sh}")"
   if echo "${expectedFunctionName}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
-    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - Function ${expectedFunctionName} - rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "srcFileHasOneFunctionCorrectlyNamed - File ${srcFile} - Function ${expectedFunctionName} - rule FRAMEWORK_FUNCTIONS_IGNORE_REGEXP matches"
     return 0
   fi
 
@@ -1584,11 +1583,11 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
 checkEachSrcFileHasCorrectShdoc() {
   local srcFile="$1"
   if [[ "${srcFile}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
-    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule NON_FRAMEWORK_FILES_REGEXP matches"
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${srcFile}"; then
-    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches in ${BASH_FRAMEWORK_CONFIG_FILE}"
+    Log::displaySkipped "checkEachSrcFileHasCorrectShDoc - File ${srcFile} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches"
     return 0
   fi
 
@@ -1600,7 +1599,7 @@ checkEachSrcFileHasCorrectShdoc() {
   # @see https://regex101.com/r/5oMFQi/1
   # shellcheck disable=SC2120
   function filterInvalidAnnotationNames() {
-    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal)$' "$@"
+    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal|generated)$' "$@"
   }
 
   function checkValidAnnotationsAreUsed() {
