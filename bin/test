@@ -772,6 +772,8 @@ Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
 
+Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
+
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
 copyrightCallback() {
@@ -972,7 +974,7 @@ NON_FRAMEWORK_FILES_REGEXP="${NON_FRAMEWORK_FILES_REGEXP:-(^bin/|.framework-conf
 # describe the files that are allowed to not have an associated bats file
 BATS_FILE_NOT_NEEDED_REGEXP="${BATS_FILE_NOT_NEEDED_REGEXP:-(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes)}"
 # describe the files that are allowed to not have a function matching the filename
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^\.framework-config$|^build.sh$|\.tpl$|/testsData/|^manualTests/|\.bats$}"
+FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^\.framework-config$|\.tpl$|/testsData/|^manualTests/|\.bats$}"
 # Source directories
 if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
   FRAMEWORK_SRC_DIRS=(
@@ -1757,8 +1759,6 @@ testCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 # shellcheck disable=SC2154
 run() {
-  Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
-
   if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
     (
       "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" "${batsArgs[@]}"

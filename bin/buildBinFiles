@@ -831,7 +831,7 @@ NON_FRAMEWORK_FILES_REGEXP="${NON_FRAMEWORK_FILES_REGEXP:-(^bin/|.framework-conf
 # describe the files that are allowed to not have an associated bats file
 BATS_FILE_NOT_NEEDED_REGEXP="${BATS_FILE_NOT_NEEDED_REGEXP:-(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes)}"
 # describe the files that are allowed to not have a function matching the filename
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^\.framework-config$|^build.sh$|\.tpl$|/testsData/|^manualTests/|\.bats$}"
+FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^\.framework-config$|\.tpl$|/testsData/|^manualTests/|\.bats$}"
 # Source directories
 if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
   FRAMEWORK_SRC_DIRS=(
@@ -906,6 +906,8 @@ buildBinFilesCommand() {
     ((options_parse_optionParsedCountOptionLogFile = 0)) || true
     local -i options_parse_optionParsedCountOptionDisplayLevel
     ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
+    local -i options_parse_argParsedCountBuildBinFilesArgs
+    ((options_parse_argParsedCountBuildBinFilesArgs = 0)) || true
     # shellcheck disable=SC2034
     local -i options_parse_parsedArgIndex=0
     while (($# > 0)); do
@@ -1138,16 +1140,25 @@ buildBinFilesCommand() {
           updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           ;;
         -*)
-          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
-            return 1
-          fi
+          unknownOption "${options_parse_arg}"
           ;;
         *)
-          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided"
-            return 1
+          if ((0)); then
+            # Technical if - never reached
+            :
+          # Argument 1/1
+          # Argument buildBinFilesArgs min 0 max -1 authorizedValues '' regexp ''
+          elif ((options_parse_parsedArgIndex >= 0)); then
+            ((++options_parse_argParsedCountBuildBinFilesArgs))
+            # shellcheck disable=SC2034
+            buildBinFilesArgs+=("${options_parse_arg}")
+          else
+            if [[ "${argOptDefaultBehavior}" = "0" ]]; then
+              Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
+              return 1
+            fi
           fi
+          ((++options_parse_parsedArgIndex))
           ;;
       esac
       shift || true
@@ -1156,16 +1167,23 @@ buildBinFilesCommand() {
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "build files using build.sh
+    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "build files using compile
 and check if bin file has been updated, if yes return exit code > 0
 
 INTERNAL TOOL")"
     echo
 
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
+    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
       "[--ignore-missing]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
+    echo -e "  [${__HELP_OPTION_COLOR}arg${__HELP_NORMAL} {list} (optional)]"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(command\ arguments\ including\ command\ name)
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}--ignore-missing${__HELP_NORMAL} {single}"
@@ -1264,6 +1282,10 @@ INTERNAL TOOL")"
     return 1
   fi
 }
+# shellcheck disable=SC2317 # if function is overridden
+unknownOption() {
+  buildBinFilesArgs+=("$1")
+}
 declare copyrightBeginYear="2023"
 
 buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
@@ -1271,24 +1293,56 @@ buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 declare beforeBuild
 computeMd5File() {
   local md5File="$1"
-  local currentFile
-  while IFS= read -r file; do
-    currentFile="$(FRAMEWORK_ROOT_DIR=$(pwd -P) envsubst <<<"${file}")"
-    md5sum "${currentFile}" >>"${md5File}" 2>&1 || true
-  done < <(
-    grep -R "^# BIN_FILE" "$(pwd -P)/src/_binaries" |
+  shift || true
+  local -a files=("$@")
+  local -a binFiles
+  readarray -t binFiles <<<"$(getBinFiles "${files[@]}")"
+  local file
+  for file in "${binFiles[@]}"; do
+    md5sum "${file}" >>"${md5File}" 2>&1 || true
+  done
+}
+
+getBinFiles() {
+  local -a files=("$@")
+  (
+    grep -R "^# BIN_FILE" "${files[@]}" |
       (grep -v -E '/testsData/' || true) |
       sed -E 's#^.*IN_FILE=(.*)$#\1#'
-  )
+  ) | FRAMEWORK_ROOT_DIR=$(pwd -P) envsubst
+}
+
+getFiles() {
+  local -a files=("$@")
+  if ((${#files[@]} == 0)); then
+    find "${BINARIES_DIR:-src/_binaries}" -name "*.sh" |
+      (grep -v -E '/testsData/' || true)
+  else
+    for file in "${files[@]}"; do
+      realpath "${file}"
+    done
+  fi
 }
 
 run() {
+  declare -a files=()
+  # shellcheck disable=SC2154
+  for arg in "${buildBinFilesArgs[@]}"; do
+    if [[ "${arg}" =~ .sh$ ]]; then
+      files+=("${arg}")
+    else
+      params+=("${arg}")
+    fi
+  done
+  readarray -t files <<<"$(getFiles "${files[@]}")"
+
   beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-  computeMd5File "${beforeBuild}"
+  computeMd5File "${beforeBuild}" "${files[@]}"
 
   cat "${beforeBuild}"
 
-  "${FRAMEWORK_ROOT_DIR}/build.sh"
+  printf "%s\n" "${files[@]}" | xargs -t -P8 --max-args=1 --replace="{}" \
+    "${FRAMEWORK_BIN_DIR}/compile" "{}" "${COMPILE_PARAMETERS[@]}" "${params[@]}"
 
   # allows to add ignore missing option to md5sum when using pre-commit
   declare -a args=()

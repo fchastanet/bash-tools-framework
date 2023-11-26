@@ -3,6 +3,8 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
+ShellDoc::installRequirementsIfNeeded
+
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.doc.tpl)"
 
 docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
@@ -10,7 +12,6 @@ docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 run() {
   PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
 
-  ShellDoc::installRequirementsIfNeeded
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
     "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "${RUN_CONTAINER_ARGV_FILTERED[@]}"
     exit $?
@@ -29,7 +30,7 @@ run() {
     "${PAGES_DIR}/Commands.md" \
     "${COMMAND_BIN_DIR}" \
     TOKEN_NOT_FOUND_COUNT \
-    '(bash-tpl|var|simpleBinary|shdoc|installFacadeExample)$'
+    '(bash-tpl|buildBinFilesTmp|var|simpleBinary|shdoc|installFacadeExample)$'
 
   # clean folder before generate
   rm -f "${PAGES_DIR}/Index.md" || true

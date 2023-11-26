@@ -3,14 +3,14 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
+Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
+
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.test.tpl)"
 
 testCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 # shellcheck disable=SC2154
 run() {
-  Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
-
   if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
     (
       "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" "${batsArgs[@]}"

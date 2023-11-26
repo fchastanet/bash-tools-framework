@@ -10,24 +10,56 @@ buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 declare beforeBuild
 computeMd5File() {
   local md5File="$1"
-  local currentFile
-  while IFS= read -r file; do
-    currentFile="$(FRAMEWORK_ROOT_DIR=$(pwd -P) envsubst <<<"${file}")"
-    md5sum "${currentFile}" >>"${md5File}" 2>&1 || true
-  done < <(
-    grep -R "^# BIN_FILE" "$(pwd -P)/src/_binaries" |
+  shift || true
+  local -a files=("$@")
+  local -a binFiles
+  readarray -t binFiles <<<"$(getBinFiles "${files[@]}")"
+  local file
+  for file in "${binFiles[@]}"; do
+    md5sum "${file}" >>"${md5File}" 2>&1 || true
+  done
+}
+
+getBinFiles() {
+  local -a files=("$@")
+  (
+    grep -R "^# BIN_FILE" "${files[@]}" |
       (grep -v -E '/testsData/' || true) |
       sed -E 's#^.*IN_FILE=(.*)$#\1#'
-  )
+  ) | FRAMEWORK_ROOT_DIR=$(pwd -P) envsubst
+}
+
+getFiles() {
+  local -a files=("$@")
+  if ((${#files[@]} == 0)); then
+    find "${BINARIES_DIR:-src/_binaries}" -name "*.sh" |
+      (grep -v -E '/testsData/' || true)
+  else
+    for file in "${files[@]}"; do
+      realpath "${file}"
+    done
+  fi
 }
 
 run() {
+  declare -a files=()
+  # shellcheck disable=SC2154
+  for arg in "${buildBinFilesArgs[@]}"; do
+    if [[ "${arg}" =~ .sh$ ]]; then
+      files+=("${arg}")
+    else
+      params+=("${arg}")
+    fi
+  done
+  readarray -t files <<<"$(getFiles "${files[@]}")"
+
   beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-  computeMd5File "${beforeBuild}"
+  computeMd5File "${beforeBuild}" "${files[@]}"
 
   cat "${beforeBuild}"
 
-  "${FRAMEWORK_ROOT_DIR}/build.sh"
+  printf "%s\n" "${files[@]}" | xargs -t -P8 --max-args=1 --replace="{}" \
+    "${FRAMEWORK_BIN_DIR}/compile" "{}" "${COMPILE_PARAMETERS[@]}" "${params[@]}"
 
   # allows to add ignore missing option to md5sum when using pre-commit
   declare -a args=()
