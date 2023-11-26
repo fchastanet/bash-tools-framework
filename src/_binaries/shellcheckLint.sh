@@ -3,35 +3,35 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
+# check if command in PATH is already the minimal version needed
+if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
+  install() {
+    local file="$1"
+    local targetFile="$2"
+    local version="$3"
+    local tempDir
+    tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
+    (
+      cd "${tempDir}" || exit 1
+      tar -xJvf "${file}" >&2
+      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
+      chmod +x "${targetFile}"
+    )
+  }
+  Github::upgradeRelease \
+    "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" \
+    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz" \
+    "--version" \
+    Version::getCommandVersionFromPlainText \
+    install
+fi
+
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.shellcheckLint.tpl)"
 
 shellcheckLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 # shellcheck disable=SC2154
 run() {
-  # check if command in PATH is already the minimal version needed
-  if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
-    install() {
-      local file="$1"
-      local targetFile="$2"
-      local version="$3"
-      local tempDir
-      tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
-      (
-        cd "${tempDir}" || exit 1
-        tar -xJvf "${file}" >&2
-        mv "shellcheck-v${version}/shellcheck" "${targetFile}"
-        chmod +x "${targetFile}"
-      )
-    }
-    Github::upgradeRelease \
-      "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" \
-      "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz" \
-      "--version" \
-      Version::getCommandVersionFromPlainText \
-      install
-  fi
-
   getFiles() {
     exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${FRAMEWORK_ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
     if [[ -z "${exclude}" ]]; then
