@@ -21,13 +21,37 @@ computeMd5File() {
   )
 }
 
+build() {
+  declare -a files=()
+  for arg in "${BASH_FRAMEWORK_ARGV[@]}"; do
+    if [[ "${arg}" =~ .sh$ ]]; then
+      files+=("${arg}")
+    else
+      params+=("${arg}")
+    fi
+  done
+
+  (
+    set -x
+    if ((${#files[@]} == 0)); then
+      find "${BINARIES_DIR:-src/_binaries}" -name "*.sh" |
+        (grep -v -E '/testsData/' || true)
+    else
+      for file in "${files[@]}"; do
+        realpath "${file}"
+      done
+    fi
+  ) | xargs -t -P8 --max-args=1 --replace="{}" \
+    "${FRAMEWORK_BIN_DIR}/compile" "{}" "${COMPILE_PARAMETERS[@]}" "${params[@]}"
+}
+
 run() {
   beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
   computeMd5File "${beforeBuild}"
 
   cat "${beforeBuild}"
 
-  "${FRAMEWORK_ROOT_DIR}/build.sh"
+  build
 
   # allows to add ignore missing option to md5sum when using pre-commit
   declare -a args=()

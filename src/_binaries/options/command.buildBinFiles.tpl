@@ -1,7 +1,7 @@
 %
 declare versionNumber="1.0"
 declare commandFunctionName="buildBinFilesCommand"
-declare help="build files using build.sh
+declare help="build files using compile
 and check if bin file has been updated, if yes return exit code > 0
 
 INTERNAL TOOL"
