@@ -50,7 +50,7 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 1.1.7
+    rev: 1.1.8
     hooks:
       - id: fixShebangExecutionBit
       - id: fixShebangExecutionBitGithubActions
@@ -78,18 +78,32 @@ repos:
             default-force,
           ]
       - id: plantuml
-      - id: buildShFiles
-      - id: buildShFilesGithubAction
-      - id: runUnitTests
-        # not manual as github will run UT with several versions of bash and arch
-        stages: [pre-commit]
-      - id: megalinterCheckVersion
-      - id: megalinter
-      - id: megalinterGithubAction
 
   - repo: local
     hooks:
-      - &BUILD_DOC_FILES
+      - &LOCAL_BUILD_SH_FILES
+        id: buildShFiles
+        name: build sh files
+        entry:
+          bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
+          bin/buildBinFilesTmp --ignore-missing'
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+        fail_fast: true
+        stages: [pre-commit]
+
+      - <<: *LOCAL_BUILD_SH_FILES
+        id: buildShFilesGithubAction
+        name: build sh files for Github Actions
+        entry:
+          bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
+          bin/buildBinFilesTmp --ignore-missing'
+        fail_fast: false
+        stages: [manual]
+
+      - &LOCAL_BUILD_DOC_FILES
         id: buildDocFiles
         name: build doc files
         language: script
@@ -100,9 +114,20 @@ repos:
         always_run: true
         fail_fast: true
         stages: [pre-push]
-      - <<: *BUILD_DOC_FILES
+
+      - <<: *LOCAL_BUILD_DOC_FILES
         id: buildDocFilesGithubAction
         name: build doc files for Github Actions
         args: [--verbose]
         fail_fast: false
         stages: [manual]
+
+  - repo: https://github.com/fchastanet/bash-tools-framework
+    rev: 1.1.8
+    hooks:
+      - id: runUnitTests
+        # not manual as github will run UT with several versions of bash and arch
+        stages: [pre-commit]
+      - id: megalinterCheckVersion
+      - id: megalinter
+      - id: megalinterGithubAction

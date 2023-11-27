@@ -92,10 +92,8 @@
 - &BUILD_SH_FILES
   id: buildShFiles
   name: build sh files
-  entry:
-    bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp && bin/buildBinFilesTmp
-    --ignore-missing'
-  language: system
+  entry: bin/buildBinFiles --ignore-missing
+  language: script
   pass_filenames: false
   always_run: true
   require_serial: true
@@ -105,8 +103,7 @@
 - <<: *BUILD_SH_FILES
   id: buildShFilesGithubAction
   name: build sh files for Github Actions
-  entry:
-    bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp && bin/buildBinFilesTmp'
+  entry: bin/buildBinFiles
   fail_fast: false
   stages: [manual]
 
