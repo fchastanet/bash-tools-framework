@@ -253,7 +253,7 @@ Env::requireLoad() {
 
   for file in "${configFiles[@]}"; do
     # shellcheck source=/.framework-config
-    source "${file}" || {
+    CURRENT_LOADED_ENV_FILE="${file}" source "${file}" || {
       Log::displayError "while loading config file: ${file}"
       return 1
     }

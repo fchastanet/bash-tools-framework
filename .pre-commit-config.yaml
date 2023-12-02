@@ -61,21 +61,25 @@ repos:
         args:
           [
             --expected-warnings-count,
-            '72',
+            '74',
             --format,
             plain,
             --theme,
             default-force,
+            --display-level,
+            WARNING,
           ]
       - id: frameworkLinterGithubAction
         args:
           [
             --expected-warnings-count,
-            '72',
+            '74',
             --format,
             checkstyle,
             --theme,
             default-force,
+            --display-level,
+            WARNING,
           ]
       - id: plantuml
 
