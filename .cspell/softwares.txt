@@ -146,3 +146,4 @@ SpacesAftertabs
 PROSELINT
 TRUFFLEHOG
 nproc
+nbthread

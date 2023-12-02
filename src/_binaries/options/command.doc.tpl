@@ -8,11 +8,18 @@ INTERNAL TOOL
 """
 %
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.bashFrameworkDockerImage.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.ci.tpl)"
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.skipDockerBuild.tpl)"
 %
 Options::generateCommand "${options[@]}"
 %
 declare copyrightBeginYear="2022"
+
+readonly defaultVendor="ubuntu"
+readonly defaultBashVersion="5.1"
+readonly defaultBashBaseImage="ubuntu:20.04"
+
 declare -a RUN_CONTAINER_ARGV_FILTERED=()
 updateOptionSkipDockerBuildCallback() {
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then

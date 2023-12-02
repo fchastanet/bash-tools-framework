@@ -86,9 +86,12 @@ plantUmlFileCallback() {
 optionHelpCallback() {
   local plantumlHelpFile
   plantumlHelpFile="$(Framework::createTempFile "hadolintHelp")"
-  docker pull plantuml/plantuml >/dev/null
-    docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
-
+  if command -v docker &>/dev/null; then
+    docker pull plantuml/plantuml >/dev/null
+      docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
+  else
+    echo "docker was not available while generating this documentation" >"${plantumlHelpFile}"
+  fi
   <% ${commandFunctionName} %> help |
     sed -E \
       -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
