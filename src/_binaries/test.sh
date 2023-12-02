@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/test
-# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
 Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
@@ -16,7 +15,21 @@ run() {
       "${FRAMEWORK_VENDOR_DIR}/bats/bin/bats" "${batsArgs[@]}"
     )
   else
-    "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/test" "${batsArgs[@]}"
+    # shellcheck disable=SC2034
+    local -a dockerRunCmd=("/bash/bin/test")
+    # shellcheck disable=SC2034
+    local -a argvFiltered=("${batsArgs[@]}")
+
+    # shellcheck disable=SC2154
+    Docker::runBuildContainer \
+      "${optionVendor}" \
+      "${optionBashVersion}" \
+      "${optionBashBaseImage}" \
+      "${optionSkipDockerBuild}" \
+      "${optionTraceVerbose}" \
+      "${optionContinuousIntegrationMode}" \
+      dockerRunCmd \
+      dockerRunArgs
   fi
 }
 

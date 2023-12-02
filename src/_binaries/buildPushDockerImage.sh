@@ -7,54 +7,14 @@
 
 buildPushDockerImageCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-# build image and push it ot registry
 run() {
-  DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
   # shellcheck disable=SC2154
-  local imageTag="build:bash-tools-${optionVendor}-${optionBashVersion}"
-  local image="scrasnups/${imageTag}"
-
-  Log::displayInfo "Pull image ${image}"
-  # shellcheck disable=SC2154
-  (
-    if [[ "${optionTraceVerbose}" = "1" ]]; then
-      set -x
-    fi
-    docker pull "${image}" || true
-  )
-
-  Log::displayInfo "Build image ${image}"
-  # shellcheck disable=SC2086,SC2154
-  (
-    # shellcheck disable=SC2154
-    if [[ "${optionTraceVerbose}" = "1" ]]; then
-      set -x
-    fi
-    DOCKER_BUILDKIT=1 docker build \
-      ${DOCKER_BUILD_OPTIONS} \
-      -f "${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
-      --cache-from "${image}" \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
-      --build-arg argBashVersion="${optionBashVersion}" \
-      --build-arg BASH_IMAGE="${optionBashBaseImage}" \
-      -t "${imageTag}" \
-      -t "${image}" \
-      "${FRAMEWORK_ROOT_DIR}/.docker"
-  )
-
-  Log::displayInfo "Image ${image} - bash version check"
-  docker run --rm "${imageTag}" bash --version
-
-  # shellcheck disable=SC2154
-  if [[ "${optionPush}" = "1" ]]; then
-    Log::displayInfo "Push image ${image}"
-    (
-      if [[ "${optionTraceVerbose}" = "1" ]]; then
-        set -x
-      fi
-      docker push "scrasnups/${imageTag}"
-    )
-  fi
+  Docker::buildPushDockerImage \
+    "${optionVendor}" \
+    "${optionBashVersion}" \
+    "${optionBashBaseImage}" \
+    "${optionPush}" \
+    "${optionTraceVerbose}"
 }
 
 if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then

@@ -13,7 +13,21 @@ run() {
   PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
 
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-    "${COMMAND_BIN_DIR}/runBuildContainer" "/bash/bin/doc" "${RUN_CONTAINER_ARGV_FILTERED[@]}"
+    # shellcheck disable=SC2034
+    local -a dockerRunCmd=("/bash/bin/doc")
+    # shellcheck disable=SC2034
+    local -a argvFiltered=("${RUN_CONTAINER_ARGV_FILTERED[@]}")
+    # shellcheck disable=SC2154
+    Docker::runBuildContainer \
+      "${optionVendor:-ubuntu}" \
+      "${optionBashVersion:-5.1}" \
+      "${optionBashBaseImage:-ubuntu:20.04}" \
+      "${optionSkipDockerBuild}" \
+      "${optionTraceVerbose}" \
+      "${optionContinuousIntegrationMode}" \
+      dockerRunCmd \
+      dockerArgvFiltered
+
     exit $?
   fi
 

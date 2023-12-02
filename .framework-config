@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 
-REAL_SCRIPT_FILE="${REAL_SCRIPT_FILE:-$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")}"
-FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR:-$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)}"
+FRAMEWORK_ROOT_DIR="$(cd -- "$(dirname -- "${CURRENT_LOADED_ENV_FILE}")" &>/dev/null && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_SRC_DIR:-${FRAMEWORK_ROOT_DIR}/src}"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/bin}"
 FRAMEWORK_VENDOR_DIR="${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}"
