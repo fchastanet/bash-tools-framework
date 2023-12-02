@@ -17,20 +17,20 @@ Docker::runBuildContainer() {
   local optionSkipDockerBuild="$4"
   local optionTraceVerbose="$5"
   local optionContinuousIntegrationMode="$6"
-  local -n dockerRunCmd=$7
-  local -n dockerRunArgs=$8
+  local -n localDockerRunCmd=$7
+  local -n localDockerRunArgs=$8
   if tty -s; then
-    dockerRunArgs+=("-it")
+    localDockerRunArgs+=("-it")
   fi
   if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
-    dockerRunArgs+=(
+    localDockerRunArgs+=(
       -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"
     )
   fi
 
   # shellcheck disable=SC2154
   if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
-    dockerRunArgs+=(-v "/tmp:/tmp")
+    localDockerRunArgs+=(-v "/tmp:/tmp")
   fi
 
   # shellcheck disable=SC2154
@@ -76,7 +76,7 @@ Docker::runBuildContainer() {
     fi
   fi
 
-  Log::displayInfo "Run container with command: '${dockerRunCmd[*]} ${RUN_CONTAINER_ARGV_FILTERED[*]}'"
+  Log::displayInfo "Run container with command: '${localDockerRunCmd[*]} ${RUN_CONTAINER_ARGV_FILTERED[*]}'"
   (
     # shellcheck disable=SC2154
     if [[ "${optionTraceVerbose}" = "1" ]]; then
@@ -86,12 +86,12 @@ Docker::runBuildContainer() {
     docker run \
       --rm \
       ${DOCKER_RUN_OPTIONS} \
-      "${dockerRunArgs[@]}" \
+      "${localDockerRunArgs[@]}" \
       -w /bash \
       -v "$(pwd):/bash" \
       --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
       "${imageRefUser}" \
-      "${dockerRunCmd[@]}" \
+      "${localDockerRunCmd[@]}" \
       "${RUN_CONTAINER_ARGV_FILTERED[@]}"
   )
 }

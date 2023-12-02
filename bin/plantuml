@@ -1332,7 +1332,7 @@ plantumlCommand() {
     echo -e """
 Generates plantuml diagrams from puml files in formats provided
 
-\e[1;37mPLANTUML HELP\e[0m
+${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}
 
 @@@PLANTUML_HELP@@@"""
     echo
@@ -1373,9 +1373,12 @@ plantUmlFileCallback() {
 optionHelpCallback() {
   local plantumlHelpFile
   plantumlHelpFile="$(Framework::createTempFile "hadolintHelp")"
-  docker pull plantuml/plantuml >/dev/null
-    docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
-
+  if command -v docker &>/dev/null; then
+    docker pull plantuml/plantuml >/dev/null
+      docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
+  else
+    echo "docker was not available while generating this documentation" >"${plantumlHelpFile}"
+  fi
   plantumlCommand help |
     sed -E \
       -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \

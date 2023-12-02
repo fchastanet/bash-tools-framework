@@ -5,8 +5,9 @@
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.runBuildContainer.tpl)"
 
+# shellcheck disable=SC2034
 declare -a dockerRunCmd=()
-declare -a dockerRunArgs=()
+# shellcheck disable=SC2034
 declare -a dockerRunArgs=(
   -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}"
   -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
@@ -18,7 +19,16 @@ export BASH_FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
 runBuildContainerCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 run() {
-  Docker::runBuildContainer
+  # shellcheck disable=SC2154
+  Docker::runBuildContainer \
+    "${optionVendor}" \
+    "${optionBashVersion}" \
+    "${optionBashBaseImage}" \
+    "${optionSkipDockerBuild}" \
+    "${optionTraceVerbose}" \
+    "${optionContinuousIntegrationMode}" \
+    dockerRunCmd \
+    dockerRunArgs
 }
 
 if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then

@@ -3,13 +3,13 @@ declare versionNumber="1.0"
 declare commandFunctionName="plantumlCommand"
 declare help="Generates plantuml diagrams from puml files."
 # shellcheck disable=SC2016
-declare longDescription="""
+declare longDescription='''
 Generates plantuml diagrams from puml files in formats provided
 
 ${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}
 
 @@@PLANTUML_HELP@@@
-"""
+'''
 declare optionFormatAuthorizedValues="svg|png"
 declare optionFormatDefault="svg"
 declare optionDefaultOutputDir="doc/images"
@@ -86,9 +86,12 @@ plantUmlFileCallback() {
 optionHelpCallback() {
   local plantumlHelpFile
   plantumlHelpFile="$(Framework::createTempFile "hadolintHelp")"
-  docker pull plantuml/plantuml >/dev/null
-    docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
-
+  if command -v docker &>/dev/null; then
+    docker pull plantuml/plantuml >/dev/null
+      docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
+  else
+    echo "docker was not available while generating this documentation" >"${plantumlHelpFile}"
+  fi
   <% ${commandFunctionName} %> help |
     sed -E \
       -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
