@@ -1332,7 +1332,7 @@ plantumlCommand() {
     echo -e """
 Generates plantuml diagrams from puml files in formats provided
 
-\e[1;37mPLANTUML HELP\e[0m
+PLANTUML HELP
 
 @@@PLANTUML_HELP@@@"""
     echo

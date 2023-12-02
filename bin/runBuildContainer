@@ -1629,8 +1629,10 @@ updateArgListTraceVerboseCallback() {
   RUN_CONTAINER_ARGV_FILTERED+=(-vvv)
 }
 
+# shellcheck disable=SC2034
 declare -a dockerRunCmd=()
 declare -a dockerRunArgs=()
+# shellcheck disable=SC2034
 declare -a dockerRunArgs=(
   -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}"
   -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
