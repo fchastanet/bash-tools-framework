@@ -246,6 +246,29 @@ Env::requireLoad() {
   done
 }
 
+# @description get number of seconds since last modification of the file
+# @arg $1 file:String file path
+# @exitcode 1 if file does not exist
+# @stdout number of seconds since last modification of the file
+File::elapsedTimeSinceLastModification() {
+  local file="$1"
+  if [[ ! -f "${file}" ]]; then
+    return 1
+  fi
+  local lastModificationTimeSeconds diff
+  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
+  ((diff = $(date +%s) - lastModificationTimeSeconds))
+  echo -n "${diff}"
+}
+
+# @description create a temp file using default TMPDIR variable
+# initialized in _includes/_commonHeader.sh
+# @env TMPDIR String (default value /tmp)
+# @arg $1 templateName:String template name to use(optional)
+Framework::createTempFile() {
+  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
+}
+
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
 #   given display level
@@ -319,6 +342,41 @@ Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
   exit 1
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logInfo() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-INFO}" "$1"
+  fi
+}
+
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
+#
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
+# @require Env::requireLoad
+# @require Log::requireLoad
+Log::logMessage() {
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+
+  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    touch "${BASH_FRAMEWORK_LOG_FILE}"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
 }
 
 # @description activate or not Log::display* and Log::log* functions
@@ -528,41 +586,6 @@ Log::logFatal() {
 
 # @description log message to file
 # @arg $1 message:String the message to display
-Log::logInfo() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-INFO}" "$1"
-  fi
-}
-
-# @description Internal: common log message
-# @example text
-#   [date]|[levelMsg]|message
-#
-# @example text
-#   2020-01-19 19:20:21|ERROR  |log error
-#   2020-01-19 19:20:21|SKIPPED|log skipped
-#
-# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
-# @arg $2 msg:String the message to display
-# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
-# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
-# @stderr diagnostics information is displayed
-# @require Env::requireLoad
-# @require Log::requireLoad
-Log::logMessage() {
-  local levelMsg="$1"
-  local msg="$2"
-  local date
-
-  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    date="$(date '+%Y-%m-%d %H:%M:%S')"
-    touch "${BASH_FRAMEWORK_LOG_FILE}"
-    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
-  fi
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
 Log::logWarning() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
     Log::logMessage "${2:-WARNING}" "$1"
@@ -625,8 +648,8 @@ FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
 FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 # REQUIRES
 Env::requireLoad
-UI::requireTheme
 Log::requireLoad
+UI::requireTheme
 Compiler::Facade::requireCommandBinDir
 
 # @require Compiler::Facade::requireCommandBinDir
@@ -871,6 +894,9 @@ plantumlCommand() {
   if [[ "${options_parse_cmd}" = "parse" ]]; then
     local -i options_parse_optionParsedCountOptionOutputDir
     ((options_parse_optionParsedCountOptionOutputDir = 0)) || true
+    sameDirectoryOption="0"
+    local -i options_parse_optionParsedCountSameDirectoryOption
+    ((options_parse_optionParsedCountSameDirectoryOption = 0)) || true
     local -i options_parse_optionParsedCountOptionBashFrameworkConfig
     ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
     optionConfig="0"
@@ -913,7 +939,7 @@ plantumlCommand() {
       local options_parse_arg="$1"
       local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
-        # Option 1/16
+        # Option 1/17
         # Option optionFormats --format|-f variableType StringArray min 0 max -1 authorizedValues 'svg|png' regexp ''
         --format | -f)
           shift
@@ -928,7 +954,7 @@ plantumlCommand() {
           ((++options_parse_optionParsedCountOptionFormats))
           optionFormats+=("$1")
           ;;
-        # Option 2/16
+        # Option 2/17
         # Option optionOutputDir --output-dir|-o variableType String min 0 max 1 authorizedValues '' regexp ''
         --output-dir | -o)
           shift
@@ -945,7 +971,18 @@ plantumlCommand() {
           optionOutputDir="$1"
           plantUmlOutputDirCallback "${options_parse_arg}" "${optionOutputDir}"
           ;;
-        # Option 3/16
+        # Option 3/17
+        # Option sameDirectoryOption --same-dir variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --same-dir)
+          # shellcheck disable=SC2034
+          sameDirectoryOption="1"
+          if ((options_parse_optionParsedCountSameDirectoryOption >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountSameDirectoryOption))
+          ;;
+        # Option 4/17
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -962,7 +999,7 @@ plantumlCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 4/16
+        # Option 5/17
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           # shellcheck disable=SC2034
@@ -973,7 +1010,7 @@ plantumlCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           ;;
-        # Option 5/16
+        # Option 6/17
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           # shellcheck disable=SC2034
@@ -986,7 +1023,7 @@ plantumlCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 6/16
+        # Option 7/17
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           # shellcheck disable=SC2034
@@ -999,7 +1036,7 @@ plantumlCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 7/16
+        # Option 8/17
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           # shellcheck disable=SC2034
@@ -1012,7 +1049,7 @@ plantumlCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 8/16
+        # Option 9/17
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -1025,7 +1062,7 @@ plantumlCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 9/16
+        # Option 10/17
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           # shellcheck disable=SC2034
@@ -1038,7 +1075,7 @@ plantumlCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
-        # Option 10/16
+        # Option 11/17
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
         --theme)
           shift
@@ -1060,7 +1097,7 @@ plantumlCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 11/16
+        # Option 12/17
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           # shellcheck disable=SC2034
@@ -1072,7 +1109,7 @@ plantumlCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           ;;
-        # Option 12/16
+        # Option 13/17
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           # shellcheck disable=SC2034
@@ -1084,7 +1121,7 @@ plantumlCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           ;;
-        # Option 13/16
+        # Option 14/17
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           # shellcheck disable=SC2034
@@ -1097,7 +1134,7 @@ plantumlCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
-        # Option 14/16
+        # Option 15/17
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1119,7 +1156,7 @@ plantumlCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 15/16
+        # Option 16/17
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1137,7 +1174,7 @@ plantumlCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 16/16
+        # Option 17/17
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1160,10 +1197,7 @@ plantumlCommand() {
           updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
           ;;
         -*)
-          if [[ "${argOptDefaultBehavior}" = "0" ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Invalid option ${options_parse_arg}"
-            return 1
-          fi
+          unknownOption "${options_parse_arg}"
           ;;
         *)
           if ((0)); then
@@ -1198,7 +1232,7 @@ plantumlCommand() {
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--format|-f <String>]" "[--output-dir|-o <String>]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--format|-f <String>]" "[--output-dir|-o <String>]" "[--same-dir]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  [${__HELP_OPTION_COLOR}plantUmlFile${__HELP_NORMAL} {list} (optional)]"
@@ -1217,6 +1251,11 @@ plantumlCommand() {
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(define\ output\ directory\ of\ this\ command\ \(default:\ doc/images\))
+    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "  ${__HELP_OPTION_COLOR}--same-dir${__HELP_NORMAL} {single}"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(to\ write\ image\ file\ in\ same\ directory\ as\ source\ file\ and\ with\ the\ same\ base\ name\(except\ extension\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
@@ -1291,7 +1330,11 @@ plantumlCommand() {
     helpArray=(set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
     echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
     echo -e """
-Generates plantuml diagrams from puml files in formats provided"""
+Generates plantuml diagrams from puml files in formats provided
+
+\e[1;37mPLANTUML HELP\e[0m
+
+@@@PLANTUML_HELP@@@"""
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
     echo '1.0'
@@ -1313,13 +1356,41 @@ Generates plantuml diagrams from puml files in formats provided"""
 }
 declare copyrightBeginYear="2022"
 declare optionOutputDir="doc/images"
+declare -a plantumlOptions=()
 
+# shellcheck disable=SC2317 # if function is overridden
+unknownOption() {
+  plantumlOptions+=("$1")
+}
+
+# shellcheck disable=SC2317 # if function is overridden
+plantUmlFileCallback() {
+  if [[ ! -f "$1" ]]; then
+    plantumlOptions+=("$1")
+  fi
+}
+
+optionHelpCallback() {
+  local plantumlHelpFile
+  plantumlHelpFile="$(Framework::createTempFile "hadolintHelp")"
+  docker pull plantuml/plantuml >/dev/null
+    docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
+
+  plantumlCommand help |
+    sed -E \
+      -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
+      -e "/@@@PLANTUML_HELP@@@/d"
+  exit 0
+}
+
+# shellcheck disable=SC2317 # if function is overridden
 plantumlCallback() {
   if ((${#optionFormats[@]} == 0)); then
     optionFormats=("svg")
   fi
 }
 
+# shellcheck disable=SC2317 # if function is overridden
 plantUmlOutputDirCallback() {
   if [[ ! -d "$2" ]]; then
     Log::displayError "Command ${SCRIPT_NAME} - unknown directory '$2'"
@@ -1327,44 +1398,84 @@ plantUmlOutputDirCallback() {
   fi
 }
 
-plantUmlFileCallback() {
-  if [[ ! -f "$1" ]]; then
-    Log::displayError "Command ${SCRIPT_NAME} - unknown file '$1'"
-    return 1
+plantumlCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
+
+run() {
+  detectChangedAddedFiles() {
+    git ls-files --exclude-standard --modified --others
+  }
+
+  declare -a files
+  # shellcheck disable=SC2154
+  if ((${#argPlantumlFiles[@]} > 0)); then
+    files=("${argPlantumlFiles[@]}")
+  else
+    changedFilesBefore=$(detectChangedAddedFiles)
+    readarray -t files < <(find . -name '*.puml')
+  fi
+
+  if ((${#files[@]} == 0)); then
+    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
+  fi
+
+  readonly PLANTUML_PULL_TIMEOUT=$((30 * 24 * 3600))
+  if [[ ! -f "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull" ]] ||
+    (($(File::elapsedTimeSinceLastModification "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull") > PLANTUML_PULL_TIMEOUT)); then
+    docker pull plantuml/plantuml
+    touch "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull"
+  fi
+  convertPuml() {
+    local file="$1"
+    local sameDirectoryOption="$2"
+    local optionOutputDir="$3"
+    local format="$4"
+    shift 4 || true
+    local -a plantumlOptions=("$@")
+
+    local targetFile
+    if [[ "${sameDirectoryOption}" = "1" ]]; then
+      targetFile="${file%.*}.${format}"
+    else
+      local fileBasename="${file##*/}"
+      targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
+    fi
+    Log::displayInfo "Generating ${targetFile} from ${file}"
+
+    # shellcheck disable=SC2154
+    docker run -i --rm plantuml/plantuml \
+      -t"${format}" -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
+      >"${targetFile}" \
+      <"${file}"
+    if [[ "${format}" = "svg" ]]; then
+      echo >>"${targetFile}"
+    fi
+  }
+  # TODO generate convertPuml as binary to avoid all these exports
+  export -f convertPuml Log::displayInfo Log::logInfo Log::logMessage
+  export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
+
+  (
+    local file format
+    for file in "${files[@]}"; do
+      # shellcheck disable=SC2154
+      for format in "${optionFormats[@]}"; do
+        echo "convertPuml" "${file}" "${sameDirectoryOption}" "${optionOutputDir}" "${format}" "${plantumlOptions[@]}"
+      done
+    done
+  ) | xargs -P0 -r -L 1 bash -c '</dev/tty convertPuml "$@"'
+
+  if ((${#argPlantumlFiles[@]} == 0)); then
+    changedFilesAfter=$(detectChangedAddedFiles)
+    diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
+      Log::fatal "files have been added"
+    }
   fi
 }
 
-plantumlCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
-
-detectChangedAddedFiles() {
-  git ls-files --exclude-standard --modified --others
-}
-
-declare -a files
-# shellcheck disable=SC2154
-if ((${#argPlantumlFiles[@]} > 0)); then
-  files=("${argPlantumlFiles[@]}")
+if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+  run &>/dev/null
 else
-  changedFilesBefore=$(detectChangedAddedFiles)
-  files=("**/*.puml")
-fi
-
-if ((${#files[@]} == 0)); then
-  Log::displayError "Command ${SCRIPT_NAME} - no file provided"
-fi
-# shellcheck disable=SC2154
-for format in "${optionFormats[@]}"; do
-  docker pull plantuml/plantuml
-  # shellcheck disable=SC2154
-  docker run --rm -v "$(pwd -P)":/app/project plantuml/plantuml \
-    -u "$(id -u):$(id -g)" -t"${format}" -failfast \
-    -o "/app/project/${optionOutputDir}" "${files[@]/#/\/app\/project\/}"
-done
-if ((${#argPlantumlFiles[@]} == 0)); then
-  changedFilesAfter=$(detectChangedAddedFiles)
-  diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
-    Log::fatal "files have been added"
-  }
+  run
 fi
 
 }

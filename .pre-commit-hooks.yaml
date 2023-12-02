@@ -112,7 +112,7 @@
   description: Convert plantuml files to images
   language: script
   entry: bin/plantuml
-  args: [-f, png, -f, svg]
+  args: [--same-dir, -f, png, -f, svg]
   pass_filenames: true
   types: ['file', 'non-executable', 'plantuml', 'text']
   always_run: false
