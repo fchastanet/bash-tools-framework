@@ -16,9 +16,21 @@ run() {
     )
   else
     # shellcheck disable=SC2034
-    local -a dockerRunCmd=("/bash/bin/test")
+    local -a dockerRunCmd=(
+      "/bash/bin/test"
+      "${batsArgs[@]}"
+    )
     # shellcheck disable=SC2034
-    local -a argvFiltered=("${batsArgs[@]}")
+    local -a dockerRunArgs
+    if [[ "$0" =~ ^/ ]]; then
+      dockerRunArgs+=(
+        -v "$0:/bash/bin/test"
+      )
+    else
+      dockerRunArgs+=(
+        -v "$(pwd -P)/$0:/bash/bin/test"
+      )
+    fi
 
     # shellcheck disable=SC2154
     Docker::runBuildContainer \

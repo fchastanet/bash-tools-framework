@@ -12,7 +12,7 @@ RUN \
       "bc=~1" \
       "coreutils=~9" \
       "curl=~8" \
-      "gawk=~5.1" \
+      "gawk" \
       # needed for envsubst
       "gettext=~0.21" \
       "git=~2" \

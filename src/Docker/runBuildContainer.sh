@@ -9,7 +9,7 @@
 # @env GROUP_ID
 # @env FRAMEWORK_ROOT_DIR
 # @env DOCKER_OPTION_IMAGE_TAG
-# @env RUN_CONTAINER_ARGV_FILTERED
+# @env BASH_FRAMEWORK_ARGV_FILTERED
 Docker::runBuildContainer() {
   local optionVendor="$1"
   local optionBashVersion="$2"
@@ -76,7 +76,9 @@ Docker::runBuildContainer() {
     fi
   fi
 
-  Log::displayInfo "Run container with command: '${localDockerRunCmd[*]} ${RUN_CONTAINER_ARGV_FILTERED[*]}'"
+  Log::displayDebug "Run container with localDockerRunCmd: ${localDockerRunCmd[*]}"
+  Log::displayDebug "Run container with localDockerRunArgs: ${localDockerRunArgs[*]}"
+  Log::displayDebug "Run container with BASH_FRAMEWORK_ARGV_FILTERED: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   (
     # shellcheck disable=SC2154
     if [[ "${optionTraceVerbose}" = "1" ]]; then
@@ -85,13 +87,12 @@ Docker::runBuildContainer() {
     # shellcheck disable=SC2086
     docker run \
       --rm \
-      ${DOCKER_RUN_OPTIONS} \
       "${localDockerRunArgs[@]}" \
+      ${DOCKER_RUN_OPTIONS} \
       -w /bash \
       -v "$(pwd):/bash" \
       --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
       "${imageRefUser}" \
-      "${localDockerRunCmd[@]}" \
-      "${RUN_CONTAINER_ARGV_FILTERED[@]}"
+      "${localDockerRunCmd[@]}"
   )
 }

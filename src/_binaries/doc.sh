@@ -14,9 +14,12 @@ run() {
 
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
     # shellcheck disable=SC2034
-    local -a dockerRunCmd=("/bash/bin/doc")
+    local -a dockerRunCmd=(
+      "/bash/bin/doc"
+      "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
+    )
     # shellcheck disable=SC2034
-    local -a argvFiltered=("${RUN_CONTAINER_ARGV_FILTERED[@]}")
+    local -a dockerArgvFiltered=()
     # shellcheck disable=SC2154
     Docker::runBuildContainer \
       "${optionVendor:-ubuntu}" \
