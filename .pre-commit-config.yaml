@@ -50,7 +50,7 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.0.1
+    rev: 2.0.2
     hooks:
       - id: fixShebangExecutionBit
       - id: fixShebangExecutionBitGithubActions
@@ -127,7 +127,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.0.1
+    rev: 2.0.2
     hooks:
       - id: runUnitTests
         # not manual as github will run UT with several versions of bash and arch

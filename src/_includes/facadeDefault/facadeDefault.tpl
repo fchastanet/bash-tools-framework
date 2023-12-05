@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 ###############################################################################
+% if [[ -z "${SRC_FILE_PATH}" ]]; then
+# GENERATED FACADE
+% else
 # GENERATED FACADE FROM <% $REPOSITORY_URL %>/tree/master/<% $SRC_FILE_PATH %>
+% fi
 # DO NOT EDIT IT
 # @generated
 ###############################################################################

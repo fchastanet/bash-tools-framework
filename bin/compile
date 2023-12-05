@@ -345,6 +345,9 @@ evalTemplate() {
   # from which source file the binary has been generated
   if [[ -z "${SRC_FILE_PATH+xxx}" ]]; then
     SRC_FILE_PATH="$(File::relativeToDir "${INPUT_FILE}" "${FRAMEWORK_ROOT_DIR}")"
+    if [[ "${SRC_FILE_PATH}" =~ ^../ ]]; then
+      SRC_FILE_PATH=""
+    fi
   fi
   SRC_ABSOLUTE_PATH="$(realpath "${INPUT_FILE}")"
   (
