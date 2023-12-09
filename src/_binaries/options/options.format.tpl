@@ -3,7 +3,8 @@
 source <(
   Options::generateOption \
     --variable-type String \
-    --help "define output format of this command(available: ${optionFormatAuthorizedValues}) (default: ${optionFormatDefault:-plain})" \
+    --default-value "${optionFormatDefault:-plain}" \
+    --help "define output format of this command" \
     --alt "--format" \
     --authorized-values "${optionFormatAuthorizedValues:-plain|checkstyle}" \
     --callback updateArgListFormatCallback \

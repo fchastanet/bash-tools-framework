@@ -12,6 +12,8 @@ source "${srcDir}/Assert/tty.sh"
 source "${srcDir}/Filters/removeAnsiCodes.sh"
 # shellcheck source=src/Array/wrap.sh
 source "${srcDir}/Array/wrap.sh"
+# shellcheck source=src/Array/wrap2.sh
+source "${srcDir}/Array/wrap2.sh"
 # shellcheck source=/src/Log/__all.sh
 source "${srcDir}/Log/__all.sh"
 # shellcheck source=/src/UI/theme.sh
@@ -44,11 +46,25 @@ UI::theme "default"
 #   echo "if first arg is not a profile"
 # }
 
-# Array::wrap ' ' 76 4 "$(help)"
-help() {
-  echo "container should be the name of a profile from profile list,"
-  echo "check containers list below." $'\n'
-  echo "If not provided, it will load the container specified in default configuration." $'\n'
-}
+declare -a helpArray=(
+  $'\n  Common Commands:\n  run         Create and run a new container from an image\n  exec        Execute a command in a running container\n  ps          List containers\n  build       Build an image from a Dockerfile\n  pull        Download an image from a registry\n  push        Upload an image to a registry\n  images      List images\n  login       Log in to a registry\n  logout      Log out from a registry\n  search      Search Docker Hub for images\n  version     Show the Docker version information\n  info        Display system-wide information'
+)
 
-Array::wrap ' ' 76 4 "$(help)"
+echo "-------------"
+for ((j = 0; j < 1; j++)); do
+  Array::wrap2 " " 20 4 "${helpArray[@]}"
+done
+echo "-------------"
+
+echo "@@@@@@@@@@@@@ using fold"
+fold -s -w 20 - <<<"${helpArray[@]}"
+time (
+  for ((j = 0; j < 100; j++)); do
+    fold -w 20 - <<<"${helpArray[@]}" &>/dev/null
+  done
+)
+echo "@@@@@@@@@@@@@"
+
+echo "############# using fmt"
+fmt --width=20 --goal=20 -s -t -p '    ' - <<<"${helpArray[@]}" | pr -T --indent=4
+echo "#############"

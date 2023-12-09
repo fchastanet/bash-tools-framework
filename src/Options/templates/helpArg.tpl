@@ -4,11 +4,11 @@
   echo "local -a helpArray"
   echo "# shellcheck disable=SC2054,SC2206"
   echo 'mapfile -t helpArray < <(<% ${help} %>)'
-  echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
+  echo $'echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"'
 % else
   echo "local -a helpArray"
   % printf -v helpEscaped '%q' "${help}"
   echo "# shellcheck disable=SC2054"
   echo "helpArray=(<% ${helpEscaped} %>)"
-  echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
+  echo $'echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"'
 % fi

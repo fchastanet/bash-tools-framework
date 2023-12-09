@@ -1,4 +1,4 @@
-echo -e "$(Array::wrap " " 80 0 <%% echo -e '"${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"' %> "<% ${help} %>")"
+echo -e "$(Array::wrap2 " " 80 0 <%% echo -e '"${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"' %> "<% ${help} %>")"
 % echo '    echo'
 
 %# ------------------------------------------
@@ -10,7 +10,7 @@ args=($(printf '%s' "${commandName}"))
 ((${#argumentList[@]} > 0)) && args+=("[ARGUMENTS]")
 
 %
-echo -e "$(Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %><%% printf ' "%s"' "${args[@]}" %>)"
+echo -e "$(Array::wrap2 " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %><%% printf ' "%s"' "${args[@]}" %>)"
 %
 optionsAltList=()
 for option in "${optionList[@]}"; do
@@ -18,7 +18,7 @@ for option in "${optionList[@]}"; do
 done
 if ((${#optionList[@]} > 0)); then
 %
-echo -e "$(Array::wrap " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %> \
+echo -e "$(Array::wrap2 " " 80 2 <%% echo '"${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}"' %> \
   <%% printf '"%s"' "${commandName}" %> \
   <%% printf '"%s" ' "${optionsAltList[@]}" | sed -E 's/[ ]*$//' %>)"
 % fi
@@ -116,7 +116,7 @@ fi
 if [[ -n "${copyright}" ]]; then
   echo '    echo'
   if [[ $(type -t "${copyright}") == "function" ]]; then
-    echo "    Array::wrap ' ' 76 4 \"\$(<% ${copyright} %>)\""
+    echo "    Array::wrap2 ' ' 76 4 \"\$(<% ${copyright} %>)\""
   else
     echo "    echo '${copyright}'"
   fi

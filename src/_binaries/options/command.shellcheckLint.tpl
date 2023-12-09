@@ -30,8 +30,9 @@ declare optionFormatDefault="tty"
 source <(
   Options::generateOption \
     --variable-type String \
-    --help "define output format of this command(available: ${optionFormatAuthorizedValues}) (default: ${optionFormatDefault:-plain})" \
+    --help "define output format of this command" \
     --alt "--format" \
+    --default-value "${optionFormatDefault:-plain}" \
     --alt "-f" \
     --authorized-values "${optionFormatAuthorizedValues}" \
     --variable-name "optionFormat" \

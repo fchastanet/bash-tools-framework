@@ -94,122 +94,145 @@ trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
 # @description concat each element of an array with a separator
 # but wrapping text when line length is more than provided argument
-# The algorithm will try not to cut the array element if can
+# The algorithm will try not to cut the array element if it can.
+# if an arg can be placed on current line it will be,
+#   otherwise current line is printed and arg is added to the new
+#   current line
+# empty arg is interpreted as a new line.
 #
 # @arg $1 glue:String
 # @arg $2 maxLineLength:int
 # @arg $3 indentNextLine:int
 # @arg $@ array:String[]
-Array::wrap() {
+Array::wrap2() {
   local glue="${1-}"
-  local -i glueLength=0
+  local -i glueLength="${#glue}"
   shift || true
   local -i maxLineLength=$1
   shift || true
   local -i indentNextLine=$1
+  shift || true
   local indentStr=""
   if ((indentNextLine > 0)); then
     indentStr="$(head -c "${indentNextLine}" </dev/zero | tr '\0' " ")"
   fi
-  local -i firstLine=1
-  shift || true
-  (($# != 0)) || return 0
+  if (($# == 0)); then
+    return 0
+  fi
 
-  local arg
-
-  # convert multi-line arg to several args
-  local -a allArgs=()
-  for arg in "$@"; do
-    local line
-    local IFS=$'\n'
-    arg="$(echo -e "${arg}")"
-    while read -r line; do
-      if [[ -z "${line}" ]]; then
-        allArgs+=($'\n')
-      else
-        allArgs+=("${line}")
+  eatNextSpaces() {
+    if [[ "${currentChar}" != [[:space:]] ]]; then
+      ((i--)) || true
+      return 0
+    fi
+    for (( ; i < textLength; i++)); do
+      if [[ "${text:${i}:1}" != [[:space:]] ]]; then
+        ((i--)) || true
+        break
       fi
-    done <<<"${arg}"
-  done
-  set -- "${allArgs[@]}"
-
-  local -i currentLineLength=0
-  local needEcho="0"
-  local arg="$1"
-  local argNoAnsi
-  local -i argNoAnsiLength=0
-
+    done
+  }
+  printCurrentLine() {
+    echo -e "${currentLine}" | sed -E -e 's/[[:blank:]]*$//'
+    ((isNewline = 1))
+    currentLine="${indentStr}"
+    ((currentLineLength = indentNextLine)) || true
+  }
+  nextLine() {
+    printCurrentLine
+    eatNextSpaces
+  }
+  local currentLine currentChar ansiCode
+  local -i isAnsiCode currentLineLength=0 isNewline=1 textLength=0
+  local text=""
+  local arg=""
   while (($# > 0)); do
-    argNoAnsi="$(echo "${arg%%*( )}" | Filters::removeAnsiCodes)"
-    ((argNoAnsiLength = ${#argNoAnsi})) || true
-    if (($# < 1 && argNoAnsiLength == 0)); then
-      break
+    arg="$1"
+    shift || true
+    if ((${#arg} == 0)) || [[ "${arg}" = $'\n' ]]; then
+      if ((isNewline == 0)); then
+        # isNewline = 0 means currentLine is not empty
+        printCurrentLine
+      fi
+      echo
+      continue
     fi
-    if [[ "${arg}" = $'\n' ]]; then
-      if [[ "${needEcho}" = "1" ]]; then
-        needEcho="0"
-      fi
-      echo ""
-      ((currentLineLength = 0)) || true
-      ((glueLength = 0)) || true
-      shift || return 0
-      arg="$1"
-    elif ((argNoAnsiLength < maxLineLength - currentLineLength - glueLength)); then
-      # arg can be stored as a whole on current line
-      if ((glueLength > 0)); then
-        echo -e -n "${glue}"
-        ((currentLineLength += glueLength))
-      fi
-      if ((currentLineLength == 0 && firstLine == 0)); then
-        echo -n "${indentStr}"
-      fi
-      echo -e -n "${arg}" | sed 's/[\t ]*$//g'
-      needEcho="1"
-      ((currentLineLength += argNoAnsiLength))
-      ((glueLength = ${#glue})) || true
-      shift || return 0
-      arg="$1"
+    local textFirstLine
+    textFirstLine="$(echo "${arg}" | head -n 1)"
+    text="$(echo "${arg}" | sed -E '1d')"
+    ((textLength = ${#text})) || true
+    local textFirstLineNoAnsi
+    textFirstLineNoAnsi="$(echo "${textFirstLine}" | Filters::removeAnsiCodes)"
+    local -i textFirstLineNoAnsiLength=0
+    ((textFirstLineNoAnsiLength = ${#textFirstLineNoAnsi})) || true
+
+    if ((isNewline == 0)); then
+      glueLength="${#glue}"
     else
-      if ((argNoAnsiLength >= (maxLineLength - indentNextLine))); then
-        if ((currentLineLength == 0 && firstLine == 0)); then
-          echo -n "${indentStr}"
-          ((currentLineLength += indentNextLine))
-        fi
-        # arg can be stored on a whole line
-        if ((glueLength > 0)); then
-          echo -e -n "${glue}"
-          ((currentLineLength += glueLength))
-        fi
-        local -i length
-        ((length = maxLineLength - currentLineLength)) || true
-        echo -e "${arg:0:${length}}" | sed 's/[\t ]*$//g'
-        ((currentLineLength = 0)) || true
-        ((glueLength = 0)) || true
-        arg="${arg:${length}}"
-        needEcho="0"
-      else
-        # arg cannot be stored on a whole line, so we add it on next line as a whole
-        echo
-        echo -e -n "${indentStr}${arg}" | sed 's/[\t ]*$//g'
-        ((glueLength = ${#glue})) || true
-        ((currentLineLength = argNoAnsiLength))
-        arg="" # allows to go to next arg
-        needEcho="1"
-      fi
-      if [[ -z "${arg}" ]]; then
-        shift || return 0
-        arg="$1"
-      fi
+      glueLength="0"
     fi
-    ((firstLine = 0)) || true
+    if ((currentLineLength + textFirstLineNoAnsiLength + glueLength > maxLineLength)); then
+      if ((isNewline == 0)); then
+        # isNewline = 0 means currentLine is not empty
+        printCurrentLine
+      fi
+      # restore current arg without considering first line
+      text="${arg}"
+      ((textLength = ${#text})) || true
+    else
+      if ((isNewline == 0)); then
+        # isNewline = 0 means currentLine is not empty
+        currentLine+="${glue}"
+        ((currentLineLength += glueLength)) || true
+      fi
+      currentLine+="${textFirstLine}"
+      isNewline="0"
+      ((currentLineLength += ${#textFirstLine})) || true
+    fi
+
+    for ((i = 0; i < textLength; i++)); do
+      currentChar="${text:${i}:1}"
+
+      if [[ "${currentChar}" = $'\r' ]]; then
+        # ignore
+        true
+      elif [[ "${currentChar}" = "\x1b" ]]; then
+        isAnsiCode=1
+        ansiCode+="${currentChar}"
+      elif ((isAnsiCode == 1)); then
+        ansiCode+="${currentChar}"
+        if [[ "${currentChar}" =~ [mGKHF] ]]; then
+          isAnsiCode=0
+          echo -e "${ansiCode}"
+        elif [[ "${currentChar}" = $'\n' ]]; then
+          # invalid ansi code, ignore it
+          isAnsiCode=0
+          ansiCode=""
+        fi
+      else
+        # non ansi code
+        if [[ "${currentChar}" = $'\n' ]] || ((currentLineLength == maxLineLength)); then
+          nextLine
+        elif [[ "${currentChar}" = "\t" ]]; then
+          if ((currentLineLength + 2 <= maxLineLength)); then
+            currentLine+="  "
+            ((isNewline = 0)) || true
+            ((currentLineLength = currentLineLength + 2))
+          else
+            nextLine
+          fi
+        else
+          currentLine+="${currentChar}"
+          ((isNewline = 0)) || true
+          ((++currentLineLength))
+        fi
+      fi
+    done
   done
-  if [[ "${needEcho}" = "1" ]]; then
-    echo
+  if [[ "${currentLine}" != "" ]] && [[ ! "${currentLine}" =~ ^[\ \t]+$ ]]; then
+    printCurrentLine
   fi
 }
-
-#set -x
-#Array::wrap ":" 40 0 "Lorem ipsum dolor sit amet," "consectetur adipiscing elit." "Curabitur ac elit id massa" "condimentum finibus."
 
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
@@ -1228,6 +1251,7 @@ dockerLintCommand() {
     optionNoColor="0"
     local -i options_parse_optionParsedCountOptionNoColor
     ((options_parse_optionParsedCountOptionNoColor = 0)) || true
+    optionTheme="default"
     local -i options_parse_optionParsedCountOptionTheme
     ((options_parse_optionParsedCountOptionTheme = 0)) || true
     optionHelp="0"
@@ -1479,11 +1503,11 @@ dockerLintCommand() {
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "Lint docker files of the given directory using hadolint.")"
+    echo -e "$(Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "Lint docker files of the given directory using hadolint.")"
     echo
 
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
-    echo -e "$(Array::wrap " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
+    echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
+    echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
       "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
@@ -1492,72 +1516,76 @@ dockerLintCommand() {
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(use\ alternate\ bash\ framework\ configuration.)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Display\ configuration)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\))
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\))
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\))
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} {list} (optional)"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Load\ the\ specified\ env\ file\ \(deprecated\,\ please\ use\ --bash-framework-config\ option\ instead\))
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(choose\ color\ theme\ \(default\,\ default-force\ or\ noColor\)\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    helpArray=(choose\ color\ theme\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
+    echo '    Default value: default'
+    echo '    Possible values: default|default-force|noColor'
     echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Display\ this\ command\ help)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Print\ version\ information\ and\ quit)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(quiet\ mode\,\ doesn\'t\ display\ any\ output)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(Set\ log\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    helpArray=(Set\ log\ level)
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
+    echo '    Possible values: OFF|ERROR|WARNING|INFO|DEBUG|TRACE'
     echo -e "  ${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Set\ log\ file)
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(set\ display\ level\ \(one\ of\ OFF\,\ ERROR\,\ WARNING\,\ INFO\,\ DEBUG\,\ TRACE\ value\))
-    echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"
+    helpArray=(set\ display\ level)
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
+    echo '    Possible values: OFF|ERROR|WARNING|INFO|DEBUG|TRACE'
     echo -e """
 - installs new hadolint version(>${MIN_HADOLINT_VERSION}) automatically
 - lint this project files using default files filter
@@ -1578,7 +1606,7 @@ ${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
     echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
     echo 'MIT License'
     echo
-    Array::wrap ' ' 76 4 "$(copyrightCallback)"
+    Array::wrap2 ' ' 76 4 "$(copyrightCallback)"
   else
     Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
     return 1

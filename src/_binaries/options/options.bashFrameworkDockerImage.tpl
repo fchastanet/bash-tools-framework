@@ -11,7 +11,8 @@ Options::generateOption \
   --variable-type String \
   --variable-name "optionVendor" \
   --alt --vendor \
-  --help "vendor image to use: ${vendors} (Default: ${defaultVendor})" \
+  --default-value "${defaultVendor}" \
+  --help "vendor image to use: ${vendors}" \
   --authorized-values "alpine|ubuntu" \
   --callback updateOptionVendorCallback \
   --function-name optionVendorFunction
@@ -20,7 +21,8 @@ Options::generateOption \
   --variable-type String \
   --variable-name "optionBashVersion" \
   --alt --bash-version \
-  --help "version of bash to use: ${bashVersions} (Default: ${defaultBashVersion})" \
+  --default-value "${defaultBashVersion}" \
+  --help "version of bash to use: ${bashVersions}" \
   --authorized-values "${bashVersions}" \
   --callback updateOptionBashVersionCallback \
   --function-name optionBashVersionFunction
@@ -29,7 +31,8 @@ Options::generateOption \
   --variable-type String \
   --variable-name "optionBashBaseImage" \
   --alt --bash-base-image \
-  --help "bash bash image to use (eg: ubuntu:20.04, amd64/bash:4.4-alpine3.18) (Default: ${defaultBashBaseImage})" \
+  --default-value "${defaultBashBaseImage}" \
+  --help "bash bash image to use (eg: ubuntu:20.04, amd64/bash:4.4-alpine3.18)" \
   --callback updateOptionBashBaseImageCallback \
   --function-name optionBashBaseImageFunction
 

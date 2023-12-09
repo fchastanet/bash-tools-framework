@@ -348,9 +348,10 @@ function Options::generateOption::caseStringArray5::OptionsTest::parseWithTooMuc
 function Options::generateOption::caseStringArray5::OptionsTest::help { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateOption.caseStringArray5.sh"
   run Options::option help
-  assert_lines_count 2
+  assert_lines_count 3
   assert_line --index 0 "  $(echo -e "${__HELP_OPTION_COLOR}")--var${__HELP_NORMAL}, $(echo -e "${__HELP_OPTION_COLOR}")-v <myVarName>${__HELP_NORMAL} {list} (at least 2 times) (at most 3 times)"
   assert_line --index 1 "    super help"
+  assert_line --index 2 "    Possible values: value1|value2|value3"
 }
 
 # Options::generateOption::caseStringArray6 ensures

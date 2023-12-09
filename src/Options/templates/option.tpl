@@ -65,6 +65,9 @@
     % if [[ -n "${defaultValue}" ]]; then
         echo "echo '    Default value: <% ${defaultValue} %>'"
     % fi
+    % if [[ -n "${authorizedValues}" ]]; then
+        echo "echo '    Possible values: <% ${authorizedValues} %>'"
+    % fi
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "<% ${variableName} %>"
   elif [[ "${cmd}" = "type" ]]; then

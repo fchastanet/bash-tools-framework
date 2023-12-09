@@ -77,7 +77,7 @@
 
     Options::generateOption \
       --variable-type String \
-      --help "Set log level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
+      --help "Set log level" \
       --group zzzGroupGlobalOptionsFunction \
       --alt "--log-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
@@ -98,7 +98,7 @@
 
     Options::generateOption \
       --variable-type String \
-      --help "set display level (one of OFF, ERROR, WARNING, INFO, DEBUG, TRACE value)" \
+      --help "set display level" \
       --group zzzGroupGlobalOptionsFunction \
       --alt "--display-level" \
       --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
@@ -118,8 +118,8 @@
 
     Options::generateOption \
       --variable-type String \
-      --help "$(echo "choose color theme (default, default-force or noColor) -" \
-          "default-force means colors will be produced even if command is piped")" \
+      --help 'choose color theme - default-force means colors will be produced even if command is piped' \
+      --default-value "default" \
       --group zzzGroupGlobalOptionsFunction \
       --alt "--theme" \
       --authorized-values "default|default-force|noColor" \

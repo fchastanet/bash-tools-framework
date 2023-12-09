@@ -47,7 +47,8 @@ Options::option() {
     echo "local -a helpArray"
     echo "# shellcheck disable=SC2054"
     echo "helpArray=(super\ help)"
-    echo $'echo -e "    $(Array::wrap " " 76 4 "${helpArray[@]}")"'
+    echo $'echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"'
+    echo "echo '    Possible values: value1|value2|value3'"
   elif [[ "${cmd}" = "variableName" ]]; then
     echo "varName"
   elif [[ "${cmd}" = "type" ]]; then

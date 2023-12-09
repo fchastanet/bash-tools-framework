@@ -40,8 +40,8 @@ source "${FRAMEWORK_ROOT_DIR}/src/Array/contains.sh"
 source "${FRAMEWORK_ROOT_DIR}/src/Array/join.sh"
 # shellcheck source=/src/Filters/removeAnsiCodes.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Filters/removeAnsiCodes.sh"
-# shellcheck source=/src/Array/wrap.sh
-source "${FRAMEWORK_ROOT_DIR}/src/Array/wrap.sh"
+# shellcheck source=/src/Array/wrap2.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Array/wrap2.sh"
 # shellcheck source=/src/Framework/createTempFile.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Framework/createTempFile.sh"
 # shellcheck source=/src/Crypto/uuidV4.sh
