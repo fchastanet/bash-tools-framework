@@ -32,6 +32,8 @@ Docker::runBuildContainer() {
   if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
     localDockerRunArgs+=(-v "/tmp:/tmp")
   fi
+  localDockerRunArgs+=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
+  localDockerRunArgs+=(-e BATS_FIX_TEST="${BATS_FIX_TEST:-0}")
 
   # shellcheck disable=SC2154
   Log::displayInfo "Using ${optionVendor}:${optionBashVersion}"
