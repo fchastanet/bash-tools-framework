@@ -127,7 +127,7 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.6.0',
+      'oxsecurity/megalinter-terraform:v7.7.0',
       --check-megalinter-version,
     ]
   pass_filenames: false
@@ -144,7 +144,7 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.6.0',
+      'oxsecurity/megalinter-terraform:v7.7.0',
       --config-file,
       '.mega-linter-light.yml',
       --fix,
@@ -163,7 +163,7 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.6.0',
+      'oxsecurity/megalinter-terraform:v7.7.0',
       --config-file,
       '.mega-linter-githubAction.yml',
       --fix,
