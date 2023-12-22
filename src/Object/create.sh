@@ -3,7 +3,9 @@
 # @description create a simili object based on function generation
 # @exitcode 1 invalid command or invalid parameter
 # @warning this function is using eval feature which can be dangerous 
-# with unchecked data
+#   with unchecked data
+# @deprecated as this version is using eval, prefer to use 
+#   Object::getProperty version
 Object::create() {
   local -n objectCreateVariable=$1
   shift || true
@@ -49,9 +51,9 @@ Object::create() {
     echo '    while ((i < propertiesLength)); do'
     echo '      if [[ "${properties[${i}]}" = "--property-${propertyName}" ]]; then'
     echo '        propertyFound="1"'
-    echo '        newProperties+=("${properties[${i}]}" "${propertyValue}" "${properties[@]:i+2}")'
+    echo '        newProperties+=("${properties[${i}]}" "${propertyValue}")'
     echo '        if ((i < propertiesLength-2)); then'
-    echo '          newProperties+=("${properties[${i}]}" "${properties[$((i + 1))]}")'
+    echo '          newProperties+=("${properties[@]:i+2}")'
     echo '        fi'
     echo '        break'
     echo '      fi'
