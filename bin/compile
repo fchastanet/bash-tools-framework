@@ -159,17 +159,17 @@ declare -agx _COMPILE_FILE_ARGUMENTS=()
 
 # read command parameters
 # $@ is all command line parameters passed to the script.
-# -o is for short options like -h
-# -l is for long options with double dash like --help
-# the comma separates different long options
+# -o is for short compileOptions like -h
+# -l is for long compileOptions with double dash like --help
+# the comma separates different long compileOptions
 longOpts="help,src-dir:,template-dir:,bin-dir:,root-dir:,src-path:,bin-file:,keep-temp-files,verbose,vv,vvv"
 shortOpts="hks:t:b:r:f:v"
-options=$(getopt -l "${longOpts}" -o "${shortOpts}" -a -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
+compileOptions=$(getopt -l "${longOpts}" -o "${shortOpts}" -a -- "${BASH_FRAMEWORK_ARGV[@]}" 2>/dev/null) || {
   showHelp
-  Log::fatal "invalid options specified"
+  Log::fatal "invalid compileOptions specified"
 }
 
-eval set -- "${options}"
+eval set -- "${compileOptions}"
 while true; do
   case $1 in
     -h | --help)
@@ -251,7 +251,7 @@ done
 # add framework src dir by default
 srcDirs+=("${_COMPILE_SRC_DIR}")
 _COMPILE_FILE_ARGUMENTS+=(-s "${_COMPILE_SRC_DIR}")
-# add temporary generated functions src dir(Options)
+# add temporary generated functions src dir(compileOptions)
 mkdir -p "${TMPDIR}/src" || true
 srcDirs+=("${TMPDIR}/src")
 _COMPILE_FILE_ARGUMENTS+=(-s "${TMPDIR}/src")
