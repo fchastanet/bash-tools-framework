@@ -1,73 +1,116 @@
 #!/bin/bash
 
+# @description create a simili object based on function generation
+# @exitcode 1 invalid command or invalid parameter
+# @warning this function is using eval feature which can be dangerous 
+# with unchecked data
 Object::create() {
+  local -n objectCreateVariable=$1
+  shift || true
+  # shellcheck disable=SC2016
   createTemplateFunction() {
     local type="$1"
     local functionName="$2"
     shift 2 || true
     local -a properties=("$@")
-    local propertiesLength="${#properties[@]}"
-      
-    local -a allMembers=()
-    ((i=0)) || true
-    mapfile -t allMembers < <(
-      while ((i < propertiesLength)); do
-        echo "${properties[${i}]}" | sed -E 's/--(property|array)-//'
-        ((i=i+2))
-      done | sort -u
-    )
+  
     echo "${functionName}() {"
-    # shellcheck disable=SC2016
     echo '  local command="$1"'
     echo "  local strict='${strict}'"
     echo -n '  '; declare -p properties
-    # shellcheck disable=SC2016
+    echo '  local -i propertiesLength="${#properties[@]}"'
     echo '  if [[ "${command}" = "type" ]]; then'
     echo "    echo '${type}'"
-    # shellcheck disable=SC2016
     echo '  elif [[ "${command}" = "functionName" ]]; then'
     echo "   echo '${functionName}'"
-    # shellcheck disable=SC2016
     echo '  elif [[ "${command}" = "strict" ]]; then'
     echo "   echo '${strict}'"
-    # shellcheck disable=SC2016
-    echo '  elif [[ "${command}" = "get" ]]; then'
-      echo '    local i=0 || true'
-      # shellcheck disable=SC2016
-      echo '    local propertyName="$2"'
-      # shellcheck disable=SC2016
-      echo '    local propertyFound="0"'
-      echo "    while ((i < ${propertiesLength})); do"
-      # shellcheck disable=SC2016
-      echo '      if [[ "${properties[${i}]}" =~ ^--property- && "${properties[${i}]#--property-}" = "${propertyName}" ]]; then'
-      # shellcheck disable=SC2016
-      echo '        echo "${properties[$((i+1))]}"'
-      echo '        return 0'
-      # shellcheck disable=SC2016
-      echo '      elif [[ "${properties[${i}]}" =~ ^--array- && "${properties[${i}]#--array-}" = "${propertyName}" ]]; then'
-      echo '        propertyFound="1"'
-      # shellcheck disable=SC2016
-      echo '        echo "${properties[$((i+1))]}"'
-      echo '      fi'
-      echo '      ((i=i+2))'
-      echo '    done'
-      # shellcheck disable=SC2016
-      echo '    if [[ "${strict}" = "1" && "${propertyFound}" = "0" ]]; then'
-      # shellcheck disable=SC2016
-      echo '      Log::displayError "unknown property ${propertyName}"'
-      echo '      return 2'
-      echo '    fi'
-    # shellcheck disable=SC2016
+    echo '  elif [[ "${command}" = "getProperty" ]]; then'
+    echo '    local -i i=0 || true'
+    echo '    local propertyName="$2"'
+    echo '    local propertyFound="0"'
+    echo '    while ((i < propertiesLength)); do'
+    echo '      if [[ "${properties[${i}]}" = "--property-${propertyName}" ]]; then'
+    echo '        echo "${properties[$((i+1))]}"'
+    echo '        return 0'
+    echo '      fi'
+    echo '      ((i=i+2))'
+    echo '    done'
+    echo '    if [[ "${strict}" = "1" && "${propertyFound}" = "0" ]]; then'
+    echo '      Log::displayError "unknown property ${propertyName}"'
+    echo '      return 2'
+    echo '    fi'
+    echo '  elif [[ "${command}" = "setProperty" ]]; then'
+    echo '    local i=0 || true'
+    echo '    local propertyName="$2"'
+    echo '    local propertyValue="$3"'
+    echo '    local -a newProperties=()'
+    echo '    local propertyFound="0"'
+    echo '    while ((i < propertiesLength)); do'
+    echo '      if [[ "${properties[${i}]}" = "--property-${propertyName}" ]]; then'
+    echo '        propertyFound="1"'
+    echo '        newProperties+=("${properties[${i}]}" "${propertyValue}" "${properties[@]:i+2}")'
+    echo '        if ((i < propertiesLength-2)); then'
+    echo '          newProperties+=("${properties[${i}]}" "${properties[$((i + 1))]}")'
+    echo '        fi'
+    echo '        break'
+    echo '      fi'
+    echo '      newProperties+=("${properties[${i}]}" "${properties[$((i + 1))]}")'
+    echo '      ((i=i+2))'
+    echo '    done'
+    echo '    if [[ "${propertyFound}" = "0" ]]; then'
+    echo '      newProperties+=("--property-${propertyName}" "${propertyValue}")'
+    echo '    fi'
+    echo "    eval \"\$(createTemplateFunction \"${type}\" \"${functionName}\" \"\${newProperties[@]}\")\""
+    echo '  elif [[ "${command}" = "getArray" ]]; then'
+    echo '    local -i i=0 || true'
+    echo '    local propertyName="$2"'
+    echo '    local propertyFound="0"'
+    echo '    while ((i < propertiesLength)); do'
+    echo '      if [[ "${properties[${i}]}" = "--array-${propertyName}" ]]; then'
+    echo '        propertyFound="1"'
+    echo '        echo "${properties[$((i+1))]}"'
+    echo '      fi'
+    echo '      ((i=i+2))'
+    echo '    done'
+    echo '    if [[ "${strict}" = "1" && "${propertyFound}" = "0" ]]; then'
+    echo '      Log::displayError "unknown array ${propertyName}"'
+    echo '      return 2'
+    echo '    fi'
+    echo '  elif [[ "${command}" = "setArray" ]]; then'
+    echo '    local -i i=0 || true'
+    echo '    local arrayName="$2"'
+    echo '    local -a arrayValues=("$@")'
+    echo '    local -a newProperties=()'
+    echo '    local propertyFound="0"'
+    echo '    while ((i < propertiesLength)); do'
+    echo '      if [[ "${properties[${i}]}" = "--array-${propertyName}" ]]; then'
+    echo '        propertyFound="1"'
+    echo '        newProperties+=("${properties[${i}]}" "${propertyValue}")'
+    echo '        if ((i < propertiesLength-2)); then'
+    echo '          newProperties+=("${properties[@]:i+2}");'
+    echo '        fi'
+    echo '        break'
+    echo '      fi'
+    echo '      newProperties+=("${properties[${i}]}" "${properties[$((i + 1))]}")'
+    echo '      ((i=i+2))'
+    echo '    done'
+    echo '    if [[ "${propertyFound}" = "0" ]]; then'
+    echo '      newProperties+=("--property-${propertyName}" "${propertyValue}")'
+    echo '    fi'
+    echo "    eval \"\$(createTemplateFunction \"${type}\" \"${functionName}\" \"\${newProperties[@]}\")\""
     echo '  elif [[ "${command}" = "getMembers" ]]; then'
-      # shellcheck disable=SC2028
-      echo "    printf '%s\n' ${allMembers[*]}"
+    echo '    while ((i < propertiesLength)); do'
+    echo '      echo "${properties[${i}]}" | sed -E "s/--(property|array)-//"'
+    echo '      ((i=i+2))'
+    echo '    done | sort -u'
     echo '  else'
-    # shellcheck disable=SC2016
     echo '    Log::displayError "invalid command ${command}"'
     echo '    return 1'
     echo '  fi'
     echo '}'
   }
+  
   local type functionName
   local strict="1"
   local -a properties=()
@@ -77,10 +120,6 @@ Object::create() {
       shift || true
       type="$1"
       ;;
-    --function-name)
-      shift || true
-      functionName="$1"
-      ;;
     --strict)
       # strict means that property non existence is failing with error
       shift || true
@@ -89,7 +128,7 @@ Object::create() {
     --property-*)
       if Array::contains "$1" "${properties[@]}"; then
         Log::displayError "property ${1#--property-} is provided more than one time"
-        return 6
+        return 1
       fi
       properties+=("$1" "$2")
       shift || true
@@ -107,20 +146,16 @@ Object::create() {
   
   if [[ -z "${type}" ]]; then
     Log::displayError "missing object type"
-    return 2
+    return 1
   fi
   if ! Assert::posixFunctionName "${type}"; then
     Log::displayError "invalid object type ${type}"
-    return 5
+    return 1
   fi
-  if [[ -z "${functionName}" ]]; then
-    Log::displayError "missing object function name"
-    return 3
-  fi
-  if ! Assert::posixFunctionName "${functionName}"; then
-    Log::displayError "invalid object function name ${functionName}"
-    return 4
-  fi
-
+  functionName="$(Crypto::uuidV4)"
+  functionName="${functionName//-/}"
+  
   eval "$(createTemplateFunction "${type}" "${functionName}" "${properties[@]}")"
+  # shellcheck disable=SC2034
+  objectCreateVariable=${functionName}
 }
