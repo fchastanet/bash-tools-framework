@@ -36,6 +36,20 @@ function Object::setProperty::multipleProperties { #@test
   assert_output "--type multiplePropertiesType --property-property newPropertyValue --property-property2 propertyValue2"
 }
 
+function Object::setProperty::withArray { #@test
+  declare -a withArray=(
+    --type "withArrayType"
+    --property-property "propertyValue"
+    --array-list "elem1" "elem2" --
+    --property-property2 "propertyValue2"
+  )
+  local status=0
+  Object::setProperty withArray property2 "newPropertyValue" || status=1
+  [[ "${status}" = "0" ]]
+  run echo "${withArray[@]}"
+  assert_output "--type withArrayType --property-property propertyValue --array-list "elem1" "elem2" -- --property-property2 newPropertyValue"
+}
+
 function Object::setProperty::newProperty { #@test
   declare -a newPropertyObject=(
     --type "simpleObjectType"
@@ -45,5 +59,5 @@ function Object::setProperty::newProperty { #@test
   Object::setProperty newPropertyObject newProperty "value" || status=1
   [[ "${status}" = "0" ]]
   run echo "${newPropertyObject[@]}"
-  assert_output "--type simpleObjectType --property-property propertyValue --property-newProperty value"  
+  assert_output "--type simpleObjectType --property-property propertyValue --property-newProperty value"
 }

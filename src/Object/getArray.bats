@@ -28,9 +28,8 @@ function Object::getArray::simpleObject { #@test
 function Object::getArray::multipleArrayValues { #@test
   declare -a multipleArrayValues=(
     --type "multipleArrayValuesType"
-    --array-myList "elem1"
+    --array-myList "elem1" "elem2" --
     --property-type "type"
-    --array-myList "elem2"
   )
   run Object::getArray multipleArrayValues myList 1
   assert_lines_count 2
@@ -56,5 +55,24 @@ function Object::getArray::unknownProperty { #@test
 
   run Object::getArray simpleObject unknownArray 0
   assert_output ""
+  assert_success
+}
+
+function Object::getArray::customTerminator { #@test
+  declare -a simpleObject=(
+    --type "simpleObjectType"
+    --array-myList "elem1" "elem2" "@@@"
+    --property-property "propertyValue"
+  )
+  OBJECT_TEMPLATE_ARRAY_TERMINATOR="@@@" run Object::getArray simpleObject myList 1
+  assert_line --index 0 "elem1"
+  assert_line --index 1 "elem2"
+  assert_lines_count 2
+  assert_success
+
+  OBJECT_TEMPLATE_ARRAY_TERMINATOR="@@@" run Object::getArray simpleObject myList 0
+  assert_line --index 0 "elem1"
+  assert_line --index 1 "elem2"
+  assert_lines_count 2
   assert_success
 }

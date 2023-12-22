@@ -5,22 +5,34 @@ Object::setArray() {
   local arrayName="${2:-}"
   shift 2 || true
   local -a arrayValues=("$@")
-  
+
   local -i propertiesLength="${#object_set_array_objectData[@]}"
   local -a newProperties=()
-  
-  # remove all array element
+
   while ((i < propertiesLength)); do
-    if [[ "${object_set_array_objectData[${i}]}" != "--array-${arrayName}" ]]; then
-      newProperties+=("${object_set_array_objectData[@]:i:2}")
+    if [[ "${object_set_array_objectData[${i}]}" = "--array-${arrayName}" ]]; then
+      ((++i))
+      # eat next elements until finding terminator
+      while ((i < propertiesLength)); do
+        if [[ "${object_set_array_objectData[${i}]}" = "${OBJECT_TEMPLATE_ARRAY_TERMINATOR:---}" ]]; then
+          ((++i))
+          break
+        fi
+        ((++i))
+      done
+      break
     fi
-    ((i=i+2))
+    newProperties+=("${object_set_array_objectData[${i}]}")
+    ((++i))
   done
-  
-  # add all new values
-  local arrayValue
-  for arrayValue in "${arrayValues[@]}"; do
-    newProperties+=("--array-${arrayName}" "${arrayValue}")
+
+  # copy rest of the properties if any
+  while ((i < propertiesLength)); do
+    newProperties+=("${object_set_array_objectData[${i}]}")
+    ((++i))
   done
+
+  # finally set the array
+  newProperties+=("--array-${arrayName}" "${arrayValues[@]}" "${OBJECT_TEMPLATE_ARRAY_TERMINATOR:---}")
   object_set_array_objectData=("${newProperties[@]}")
 }

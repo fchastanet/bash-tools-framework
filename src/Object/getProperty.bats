@@ -38,3 +38,34 @@ function Object::getProperty::unknownProperty { #@test
   assert_output ""
   assert_success
 }
+
+function Object::getProperty::withArray { #@test
+  declare -a simpleObject=(
+    --type "simpleObjectType"
+    --array-list "elem1" --
+    --property-property "propertyValue"
+  )
+  run Object::getProperty simpleObject property 1
+  assert_output "propertyValue"
+  assert_success
+
+  run Object::getProperty simpleObject property 0
+  assert_output "propertyValue"
+  assert_success
+}
+
+function Object::getProperty::property2 { #@test
+  declare -a simpleObject=(
+    --type "simpleObjectType"
+    --array-list "elem1" --
+    --property-property "propertyValue"
+    --property-property2 "propertyValue2"
+  )
+  run Object::getProperty simpleObject property2 1
+  assert_output "propertyValue2"
+  assert_success
+
+  run Object::getProperty simpleObject property2 0
+  assert_output "propertyValue2"
+  assert_success
+}

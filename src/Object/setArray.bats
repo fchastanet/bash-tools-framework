@@ -14,29 +14,53 @@ source "${srcDir}/Array/contains.sh"
 function Object::setArray::simpleObject { #@test
   declare -a simpleObject=(
     --type "simpleObjectType"
-    --array-list "elem1"
+    --array-list "elem1" --
     --property-property "propertyValue"
   )
   local status=0
   Object::setArray simpleObject list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${simpleObject[@]}"
-  assert_output "--type simpleObjectType --property-property propertyValue --array-list newElem1 --array-list newElem2"
+  assert_output "--type simpleObjectType --property-property propertyValue --array-list newElem1 newElem2 --"
 }
 
 function Object::setArray::multipleElements { #@test
   declare -a multipleElements=(
     --type "multipleElementsType"
+    --array-list "elem1" "elem2" "elem3" --
     --property-property "propertyValue"
-    --array-list "elem1"
-    --array-list "elem2"
-    --array-list "elem3"
   )
   local status=0
   Object::setArray multipleElements list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${multipleElements[@]}"
-  assert_output "--type multipleElementsType --property-property propertyValue --array-list newElem1 --array-list newElem2"
+  assert_output "--type multipleElementsType --property-property propertyValue --array-list newElem1 newElem2 --"
+}
+
+function Object::setArray::missingArrayTerminator { #@test
+  declare -a missingArrayTerminator=(
+    --type "missingArrayTerminatorType"
+    --array-list "elem1" "elem2" "elem3"
+    --property-property "propertyValue"
+  )
+  local status=0
+  Object::setArray missingArrayTerminator list "newElem1" "newElem2" || status=1
+  [[ "${status}" = "0" ]]
+  run echo "${missingArrayTerminator[@]}"
+  assert_output "--type missingArrayTerminatorType --array-list newElem1 newElem2 --"
+}
+
+function Object::setArray::customArrayTerminator { #@test
+  declare -a customArrayTerminator=(
+    --type "customArrayTerminatorType"
+    --array-list "elem1" "elem2" "elem3" "@@@"
+    --property-property "propertyValue"
+  )
+  local status=0
+  OBJECT_TEMPLATE_ARRAY_TERMINATOR="@@@" Object::setArray customArrayTerminator list "newElem1" "newElem2" || status=1
+  [[ "${status}" = "0" ]]
+  run echo "${customArrayTerminator[@]}"
+  assert_output "--type customArrayTerminatorType --property-property "propertyValue" --array-list newElem1 newElem2 @@@"
 }
 
 function Object::setArray::newProperty { #@test
@@ -48,5 +72,5 @@ function Object::setArray::newProperty { #@test
   Object::setArray newPropertyObject list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${newPropertyObject[@]}"
-  assert_output "--type simpleObjectType --property-property propertyValue --array-list newElem1 --array-list newElem2"  
+  assert_output "--type simpleObjectType --property-property propertyValue --array-list newElem1 newElem2 --"
 }
