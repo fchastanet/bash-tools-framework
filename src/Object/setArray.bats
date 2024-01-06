@@ -18,7 +18,7 @@ function Object::setArray::simpleObject { #@test
     --property-property "propertyValue"
   )
   local status=0
-  Object::setArray simpleObject list "newElem1" "newElem2" || status=1
+  Object::setArray simpleObject --array-list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${simpleObject[@]}"
   assert_output "--type simpleObjectType --property-property propertyValue --array-list newElem1 newElem2 --"
@@ -31,7 +31,7 @@ function Object::setArray::multipleElements { #@test
     --property-property "propertyValue"
   )
   local status=0
-  Object::setArray multipleElements list "newElem1" "newElem2" || status=1
+  Object::setArray multipleElements --array-list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${multipleElements[@]}"
   assert_output "--type multipleElementsType --property-property propertyValue --array-list newElem1 newElem2 --"
@@ -44,7 +44,7 @@ function Object::setArray::missingArrayTerminator { #@test
     --property-property "propertyValue"
   )
   local status=0
-  Object::setArray missingArrayTerminator list "newElem1" "newElem2" || status=1
+  Object::setArray missingArrayTerminator --array-list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${missingArrayTerminator[@]}"
   assert_output "--type missingArrayTerminatorType --array-list newElem1 newElem2 --"
@@ -57,7 +57,7 @@ function Object::setArray::customArrayTerminator { #@test
     --property-property "propertyValue"
   )
   local status=0
-  OBJECT_TEMPLATE_ARRAY_TERMINATOR="@@@" Object::setArray customArrayTerminator list "newElem1" "newElem2" || status=1
+  OBJECT_TEMPLATE_ARRAY_TERMINATOR="@@@" Object::setArray customArrayTerminator --array-list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${customArrayTerminator[@]}"
   assert_output "--type customArrayTerminatorType --property-property "propertyValue" --array-list newElem1 newElem2 @@@"
@@ -69,7 +69,7 @@ function Object::setArray::newProperty { #@test
     --property-property "propertyValue"
   )
   local status=0
-  Object::setArray newPropertyObject list "newElem1" "newElem2" || status=1
+  Object::setArray newPropertyObject --array-list "newElem1" "newElem2" || status=1
   [[ "${status}" = "0" ]]
   run echo "${newPropertyObject[@]}"
   assert_output "--type simpleObjectType --property-property propertyValue --array-list newElem1 newElem2 --"

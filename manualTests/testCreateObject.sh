@@ -18,24 +18,24 @@ Object::create myFunction2 \
     --array-list "c"
 
 echo "--------------------------------------------"
-${myFunction} getProperty name
-${myFunction2} getProperty name
-${myFunction} getProperty name
-${myFunction2} getProperty list
+${myFunction} getProperty --property-name
+${myFunction2} getProperty --property-name
+${myFunction} getProperty --property-name
+${myFunction2} getProperty --property-list
 
 echo "------------------- setProperty -------------------------"
 ${myFunction} setProperty name "myFunctionFrançois3"
-${myFunction} getProperty name
+${myFunction} getProperty --property-name
 ${myFunction2} setProperty name "myFunction2François3"
-${myFunction2} getProperty name
+${myFunction2} getProperty --property-name
 echo -n "name2 "
 ${myFunction2} setProperty name2 "newProperty name2"
  
-${myFunction2} getProperty name2
+${myFunction2} getProperty --property-name2
 
 echo "--------------------------------------------"
 Object::create myFunction2 \
     --function-name "argFunction2Overload" \
     --type "Command2Overload" \
     --property-name "François2Overload"
-${myFunction2} getProperty name
+${myFunction2} getProperty --property-name

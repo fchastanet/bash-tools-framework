@@ -71,53 +71,54 @@ Options2::validateOptionObject() {
     return 1
   fi
   
-  local optionInstanceObject=$1
-  if [[ "$("${optionInstanceObject}" type 2>/dev/null || echo '')" != "Option" ]]; then
+  # shellcheck disable=SC2034
+  local -n validateOptionObject=$1
+  if [[ "$(Object::getProperty validateOptionObject --type)" != "Option" ]]; then
     Log::displayError "Options2::validateOptionObject - passed object is not an option"
     return 2
   fi
 
   # variable name
-  if ! "${optionInstanceObject}" get variableName &>/dev/null; then
+  if ! Object::memberExists validateOptionObject --property-variableName; then
     Log::displayError "Options2::validateOptionObject - variableName is mandatory"
     return 1
   fi
   local variableName
-  variableName="$("${optionInstanceObject}" get variableName)"
+  variableName="$(Object::getProperty validateOptionObject --property-variableName)"
   if ! Assert::validVariableName "${variableName}"; then
     Log::displayError "Options2::validateOptionObject - invalid variableName ${variableName}"
     return 2
   fi
 
   # variable type
-  if ! "${optionInstanceObject}" get variableType &>/dev/null; then
+  if ! Object::memberExists validateOptionObject --property-variableType; then
     Log::displayError "Options2::validateOptionObject - variableType is mandatory"
     return 1
   fi
   local variableType
-  variableType="$("${optionInstanceObject}" get variableType)"
+  variableType="$(Object::getProperty validateOptionObject --property-variableType)"
   if ! Array::contains "${variableType}" "Boolean" "String" "StringArray"; then
     Log::displayError "Options2::validateOptionObject - invalid variableType ${variableType}"
     return 2
   fi
 
   # group
-  if "${optionInstanceObject}" get group &>/dev/null; then
-    local groupFunction
-    groupFunction="$("${optionInstanceObject}" get group)"
-    if [[ "$("${groupFunction}" type 2>/dev/null)" != "Group" ]]; then
-      Log::displayError "Options2::validateOptionObject - Group ${groupFunction} - is not a valid group object"
+  local groupObject
+  groupObject="$(Object::getProperty validateOptionObject --property-group)"
+  if [[ -n "${groupObject}" ]]; then
+    if [[ "$(Object::getProperty "${groupObject}" --type)" != "Group" ]]; then
+      Log::displayError "Options2::validateOptionObject - Group ${groupObject} is not a valid group object"
       return 2
     fi
   fi
 
   # alts
-  if ! "${optionInstanceObject}" get alt &>/dev/null; then
+  if ! Object::memberExists validateOptionObject --array-alt; then
     Log::displayError "Options2::validateOptionObject - you must provide at least one alt option"
     return 1
   fi
   local alts
-  alts="$("${optionInstanceObject}" get alt)"
+  alts="$(Object::getArray validateOptionObject --array-alt)"
   local alt
   while IFS= read -r alt ; do 
     if ! Options::assertAlt "${alt}"; then
@@ -127,16 +128,13 @@ Options2::validateOptionObject() {
   done <<< "${alts}"
   
   # callback
-  if "${optionInstanceObject}" get callback &>/dev/null; then
+  if Object::memberExists validateOptionObject --array-callback; then
     local callbacks
-    callbacks="$("${optionInstanceObject}" get callback)"
+    callbacks="$(Object::getProperty validateOptionObject --array-callback)"
     local callback
     while IFS= read -r callback ; do 
-      if
-        ! Assert::posixFunctionName "${callback}" &&
-          ! Assert::bashFrameworkFunction "${callback}"
-      then
-        Log::displayError "Options2::validateOptionObject - only posix or bash framework function name are accepted - invalid '${callback}'"
+      if ! declare -F "${callback}" &>/dev/null; then
+        Log::displayError "Options2::validateOptionObject - callback '${callback}' - function does not exists"
         return 2
       fi
     done <<< "${callbacks}"
@@ -144,13 +142,13 @@ Options2::validateOptionObject() {
 
   if [[ "${variableType}" = "Boolean" ]]; then
     local onValue
-    onValue="$("${optionInstanceObject}" get onValue 2>/dev/null)" || onValue="1"
+    onValue="$(Object::getProperty validateOptionObject --property-onValue "strict")" || onValue="1"
     if [[ -z "${onValue}" ]]; then
       Log::displayError "Options2::validateOptionObject - onValue cannot be empty"
       return 2
     fi
     local offValue
-    offValue="$("${optionInstanceObject}" get offValue 2>/dev/null)" || offValue="0"
+    offValue="$(Object::getProperty validateOptionObject --property-offValue "strict")" || offValue="0"
     if [[ -z "${offValue}" ]]; then
       Log::displayError "Options2::validateOptionObject - offValue cannot be empty"
       return 2
@@ -160,16 +158,15 @@ Options2::validateOptionObject() {
       return 2
     fi
   elif [[ "${variableType}" = "String" || "${variableType}" = "StringArray" ]]; then
-
     local authorizedValues
-    authorizedValues="$("${optionInstanceObject}" get authorizedValues 2>/dev/null)" || authorizedValues=""
+    authorizedValues="$(Object::getProperty validateOptionObject --property-authorizedValues "strict")" || authorizedValues=""
     if [[ "${authorizedValues}" =~ [[:space:]] ]]; then
       Log::displayError "Options2::validateOptionObject - authorizedValues invalid regexp '${authorizedValues}'"
       return 2
     fi
 
     local helpValueName
-    helpValueName="$("${optionInstanceObject}" get helpValueName 2>/dev/null)" || helpValueName=""
+    helpValueName="$(Object::getProperty validateOptionObject --property-helpValueName "strict")" || helpValueName=""
     if [[ -n "${helpValueName}" && ! "${helpValueName}" =~ ^[A-Za-z0-9_-]+$ ]]; then
       Log::displayError "Options2::validateOptionObject - helpValueName should be a single word '${helpValueName}'"
       return 2
@@ -178,14 +175,14 @@ Options2::validateOptionObject() {
     if [[ "${variableType}" = "StringArray" ]]; then
 
       local min
-      min="$("${optionInstanceObject}" get min 2>/dev/null)" || min="0"
+      min="$(Object::getProperty validateOptionObject --property-min "strict")" || min="0"
       if [[ ! "${min}" =~ ^[0-9]+$ ]]; then
         Log::displayError "Options2::validateOptionObject - min value should be an integer greater than or equal to 0"
         return 2
       fi
 
       local max
-      max="$("${optionInstanceObject}" get max 2>/dev/null)" || max="-1"
+      max="$(Object::getProperty validateOptionObject --property-max "strict")" || max="-1"
       if [[ -n "${max}" && ! "${max}" =~ ^([1-9][0-9]*|-1)$ ]]; then
         Log::displayError "Options2::validateOptionObject - max value should be an integer greater than 0 or -1"
         return 2

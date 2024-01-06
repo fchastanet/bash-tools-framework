@@ -10,7 +10,7 @@ Object::setArray() {
   local -a newProperties=()
 
   while ((i < propertiesLength)); do
-    if [[ "${object_set_array_objectData[${i}]}" = "--array-${arrayName}" ]]; then
+    if [[ "${object_set_array_objectData[${i}]}" = "${arrayName}" ]]; then
       ((++i))
       # eat next elements until finding terminator
       while ((i < propertiesLength)); do
@@ -33,6 +33,6 @@ Object::setArray() {
   done
 
   # finally set the array
-  newProperties+=("--array-${arrayName}" "${arrayValues[@]}" "${OBJECT_TEMPLATE_ARRAY_TERMINATOR:---}")
+  newProperties+=("${arrayName}" "${arrayValues[@]}" "${OBJECT_TEMPLATE_ARRAY_TERMINATOR:---}")
   object_set_array_objectData=("${newProperties[@]}")
 }

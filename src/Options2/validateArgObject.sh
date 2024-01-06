@@ -51,82 +51,82 @@ Options2::validateArgObject() {
     return 1
   fi
   
-  local argInstanceObject=$1
-  if [[ "$("${argInstanceObject}" type 2>/dev/null || echo '')" != "Arg" ]]; then
+  # shellcheck disable=SC2034
+  local -n validateArgObject=$1
+  if [[ "$(Object::getProperty validateArgObject --type)" != "Arg" ]]; then
     Log::displayError "Options2::validateArgObject - passed object is not an argument"
     return 2
   fi
 
   # variable name
-  if ! "${argInstanceObject}" get variableName &>/dev/null; then
+  if ! Object::memberExists validateArgObject --property-variableName; then
     Log::displayError "Options2::validateArgObject - variableName is mandatory"
     return 1
   fi
   local variableName
-  variableName="$("${argInstanceObject}" get variableName)"
+  variableName="$(Object::getProperty validateArgObject --property-variableName)"
   if ! Assert::validVariableName "${variableName}"; then
     Log::displayError "Options2::validateArgObject - invalid variableName ${variableName}"
     return 2
   fi
 
   # name
-  if ! "${argInstanceObject}" get name &>/dev/null; then
+  if ! Object::memberExists validateArgObject --property-name; then
     Log::displayError "Options2::validateArgObject - name is mandatory"
     return 1
   fi
   local name
-  name="$("${argInstanceObject}" get name)" 
+  name="$(Object::getProperty validateArgObject --property-name)" 
   if ! Assert::validVariableName "${name}"; then
     Log::displayError "Options2::validateArgObject - invalid name ${name}"
     return 2
   fi
 
   # callback
-  if "${argInstanceObject}" get callback &>/dev/null; then
+  if Object::memberExists validateArgObject --array-callback; then
     local callbacks
-    callbacks="$("${argInstanceObject}" get callback)"
-    local callback
-    while IFS= read -r callback ; do 
-      if
-        ! Assert::posixFunctionName "${callback}" &&
-          ! Assert::bashFrameworkFunction "${callback}"
-      then
-        Log::displayError "Options2::validateArgObject - only posix or bash framework function name are accepted - invalid '${callback}'"
-        return 2
-      fi
-    done <<< "${callbacks}"
+    callbacks="$(Object::getArray validateArgObject --array-callback)"
+    if [[ -n "${callbacks}" ]]; then
+      local callback
+      while IFS= read -r callback ; do 
+        if ! declare -F "${callback}" &>/dev/null; then
+          Log::displayError "Options2::validateArgObject - callback '${callback}' - function does not exists"
+          return 2
+        fi
+      done <<< "${callbacks}"
+    fi
   fi
 
   local authorizedValues
-  authorizedValues="$("${argInstanceObject}" get authorizedValues 2>/dev/null)" || authorizedValues=""
+  authorizedValues="$(Object::getProperty validateArgObject --property-authorizedValues "strict")" || authorizedValues=""
   if [[ "${authorizedValues}" =~ [[:space:]] ]]; then
     Log::displayError "Options2::validateArgObject - authorizedValues invalid regexp '${authorizedValues}'"
     return 2
   fi
 
   local regexp
-  regexp="$("${argInstanceObject}" get regexp 2>/dev/null)" || regexp=""
+  regexp="$(Object::getProperty validateArgObject --property-regexp)"
   if [[ "${regexp}" =~ [[:space:]] ]]; then
     Log::displayError "Options2::validateArgObject - regexp invalid regexp '${regexp}'"
     return 2
   fi
 
   local helpValueName
-  helpValueName="$("${argInstanceObject}" get helpValueName 2>/dev/null)" || helpValueName=""
+  helpValueName="$(Object::getProperty validateArgObject --property-helpValueName)"
   if [[ -n "${helpValueName}" && ! "${helpValueName}" =~ ^[A-Za-z0-9_-]+$ ]]; then
     Log::displayError "Options2::validateArgObject - helpValueName should be a single word '${helpValueName}'"
     return 2
   fi
 
   local min
-  min="$("${argInstanceObject}" get min 2>/dev/null)" || min="0"
+  min="$(Object::getProperty validateArgObject --property-min "strict")" || min="0"
   if [[ ! "${min}" =~ ^[0-9]+$ ]]; then
     Log::displayError "Options2::validateArgObject - min value should be an integer greater than or equal to 0"
     return 2
   fi
 
   local max
-  max="$("${argInstanceObject}" get max 2>/dev/null)" || max="-1"
+  max="$(Object::getProperty validateArgObject --property-max "strict")" || max="-1"
   if [[ -n "${max}" && ! "${max}" =~ ^([1-9][0-9]*|-1)$ ]]; then
     Log::displayError "Options2::validateArgObject - max value should be an integer greater than 0 or -1"
     return 2

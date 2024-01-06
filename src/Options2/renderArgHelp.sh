@@ -50,16 +50,23 @@ Options2::renderArgHelp() {
     return 1
   fi
   
-  local optionArgObject=$1
-  if ! Options2::validateArgObject "${optionArgObject}"; then
+  # shellcheck disable=SC2034
+  local -n renderArgHelpObject=$1
+  if ! Options2::validateArgObject renderArgHelpObject; then
     return 2
   fi
-  local help title min max name
-  title="$("${optionArgObject}" get title 2>/dev/null)"
-  help="$("${optionArgObject}" get help  2>/dev/null || echo '')"
-  name="$("${optionArgObject}" get name 2>/dev/null|| echo '')"
-  min="$("${optionArgObject}" get min 2>/dev/null|| echo '0')"
-  max="$("${optionArgObject}" get max 2>/dev/null|| echo '-1')"
+  local help title min max name mandatory
+  title="$(Object::getProperty renderArgHelpObject --property-title)"
+  help="$(Object::getProperty renderArgHelpObject --property-help "strict" || echo '')"
+  name="$(Object::getProperty renderArgHelpObject --property-name "strict" || echo '')"
+  min="$(Object::getProperty renderArgHelpObject --property-min "strict" || echo '0')"
+  max="$(Object::getProperty renderArgHelpObject --property-max "strict" || echo '-1')"
+  if [[ "${min}" = "0" ]]; then
+    mandatory="$(Object::getProperty renderArgHelpObject --property-mandatory "strict" || echo '0')"
+    if [[ "${mandatory}" = "1" ]]; then
+      min="1"
+    fi
+  fi
 
   displayHelp() {
     echo -e "${__HELP_TITLE_COLOR}${title}${__RESET_COLOR}"

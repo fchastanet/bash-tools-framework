@@ -16,11 +16,11 @@ function Object::getProperty::simpleObject { #@test
     --type "simpleObjectType"
     --property-property "propertyValue"
   )
-  run Object::getProperty simpleObject property 1
+  run Object::getProperty simpleObject --property-property 1
   assert_output "propertyValue"
   assert_success
 
-  run Object::getProperty simpleObject property 0
+  run Object::getProperty simpleObject --property-property 0
   assert_output "propertyValue"
   assert_success
 }
@@ -30,11 +30,11 @@ function Object::getProperty::unknownProperty { #@test
     --type "simpleObjectType"
     --property-property "propertyValue"
   )
-  run Object::getProperty simpleObject unknownProperty 1
-  assert_output --partial "ERROR   - unknown property unknownProperty"
+  run Object::getProperty simpleObject --property-unknownProperty 1
+  assert_output --partial "ERROR   - unknown property --property-unknownProperty"
   assert_failure 1
 
-  run Object::getProperty simpleObject unknownProperty 0
+  run Object::getProperty simpleObject --property-unknownProperty 0
   assert_output ""
   assert_success
 }
@@ -45,11 +45,11 @@ function Object::getProperty::withArray { #@test
     --array-list "elem1" --
     --property-property "propertyValue"
   )
-  run Object::getProperty simpleObject property 1
+  run Object::getProperty simpleObject --property-property 1
   assert_output "propertyValue"
   assert_success
 
-  run Object::getProperty simpleObject property 0
+  run Object::getProperty simpleObject --property-property 0
   assert_output "propertyValue"
   assert_success
 }
@@ -61,11 +61,11 @@ function Object::getProperty::property2 { #@test
     --property-property "propertyValue"
     --property-property2 "propertyValue2"
   )
-  run Object::getProperty simpleObject property2 1
+  run Object::getProperty simpleObject --property-property2 1
   assert_output "propertyValue2"
   assert_success
 
-  run Object::getProperty simpleObject property2 0
+  run Object::getProperty simpleObject --property-property2 0
   assert_output "propertyValue2"
   assert_success
 }

@@ -15,5 +15,5 @@ declare -a newPropertyObject=(
   --type "simpleObjectType"
   --property-property "propertyValue"
 )
-Object::setProperty newPropertyObject newProperty "value"
+Object::setProperty newPropertyObject --property-newProperty "value"
 declare -p newPropertyObject

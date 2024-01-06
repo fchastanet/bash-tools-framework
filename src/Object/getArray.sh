@@ -8,7 +8,7 @@ Object::getArray() {
   local -i propertiesLength="${#object_get_array_objectData[@]}"
   local -i i=0 || true
   while ((i < propertiesLength)); do
-    if [[ "${object_get_array_objectData[${i}]}" = "--array-${arrayName}" ]]; then
+    if [[ "${object_get_array_objectData[${i}]}" = "${arrayName}" ]]; then
       ((++i))
       # eat next elements until finding terminator
       while ((i < propertiesLength)); do
@@ -23,8 +23,7 @@ Object::getArray() {
     ((++i))
   done
 
-  if [[ "${strict}" = "1" ]]; then
-    Log::displayError "unknown array ${arrayName}"
+  if [[ "${strict}" != "0" ]]; then
     return 1
   fi
 }

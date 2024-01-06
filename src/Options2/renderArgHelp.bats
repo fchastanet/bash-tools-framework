@@ -19,20 +19,26 @@ function Options2::renderArgHelp::noOption { #@test
   assert_failure 1
 }
 
-function Options2::renderArgHelp::invalidObject { #@test
-  function invalidObject() {
-    :
-  }
-  run Options2::renderArgHelp invalidObject
+function Options2::renderArgHelp::invalidObject1 { #@test
+  declare -a invalidObject1=()
+  run Options2::renderArgHelp invalidObject1
+  assert_lines_count 1
+  assert_output --partial "ERROR   - Options2::validateArgObject - passed object is not an argument"
+  assert_failure 2
+}
+
+function Options2::renderArgHelp::invalidObject2 { #@test
+  invalidObject2() { :; }
+  run Options2::renderArgHelp invalidObject2
   assert_lines_count 1
   assert_output --partial "ERROR   - Options2::validateArgObject - passed object is not an argument"
   assert_failure 2
 }
 
 function Options2::renderArgHelp::notAnOption { #@test
-  Object::create \
-    --type "NotAnOption" \
-    --function-name "notAnOptionFunction"
+   declare -a notAnOption=(
+    --type "NotAnOption"
+  )
 
   run Options2::renderArgHelp notAnOptionFunction
   assert_lines_count 1
@@ -42,18 +48,17 @@ function Options2::renderArgHelp::notAnOption { #@test
 
 function Options::renderArgHelp::OptionValid { #@test
   local status=0
-    callback() {
-    :
-  }
-  Object::create \
-    --function-name "argFunction" \
-    --type "Arg" \
-    --property-variableName "var" \
-    --property-name "name" \
-    --property-help "help" \
+  declare -a arg=(
+    --type "Arg"
+    --property-variableName "var"
+    --property-name "name"
+    --property-help "help"
     --property-title "Global options"
-
-  run Options2::renderArgHelp argFunction 2>&1
+  )
+  Options2::validateArgObject() {
+    return 0
+  }
+  run Options2::renderArgHelp arg 2>&1
   assert_success
   assert_line --index 0 "[${__HELP_OPTION_COLOR}name${__HELP_NORMAL} {list} (optional)]"
   assert_line --index 1 "Global options"

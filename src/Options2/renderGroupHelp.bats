@@ -22,13 +22,27 @@ function Options2::renderGroupHelp::noOption { #@test
 
 function Options2::renderGroupHelp::groupOptionValid { #@test
   local status=0
-  Object::create \
-    --type "Group" \
-    --property-title "Global options" \
-    --property-help "help" \
-    --function-name "groupObjectFunction"
-  run Options2::renderGroupHelp groupObjectFunction >"${BATS_TEST_TMPDIR}/result" 2>&1
+  declare -a group=(
+    --type "Group"
+    --property-title "Global options"
+    --property-help "help"
+  )
+  Options2::validateGroupObject() {
+    return 0
+  }
+  run Options2::renderGroupHelp group >"${BATS_TEST_TMPDIR}/result" 2>&1
   assert_success
   assert_line --index 0 "$(echo -e "${__HELP_TITLE_COLOR}Global options${__RESET_COLOR}")"
   assert_line --index 1 "help"
+}
+
+function Options2::renderGroupHelp::groupObjectInvalid { #@test
+  local status=0
+  declare -a group=()
+  Options2::validateGroupObject() {
+    return 1
+  }
+  run Options2::renderGroupHelp group 2>&1
+  assert_output ""
+  assert_failure 2
 }

@@ -16,7 +16,6 @@ declare -a missingArrayTerminator=(
   --array-list "elem1" "elem2" "elem3"
   --property-property "propertyValue"
 )
-set -x
-Object::setArray missingArrayTerminator list "newElem1" "newElem2"
+Object::setArray missingArrayTerminator --array-list "newElem1" "newElem2"
 
 declare -p missingArrayTerminator

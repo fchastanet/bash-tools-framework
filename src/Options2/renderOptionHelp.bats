@@ -4,6 +4,8 @@
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 # shellcheck source=src/Options/_bats.sh
 source "${srcDir}/Options/_bats.sh"
+# shellcheck source=src/Object/__all.sh
+source "${srcDir}/Object/__all.sh"
 # shellcheck source=src/Options2/__all.sh
 source "${srcDir}/Options2/__all.sh"
 
@@ -30,31 +32,31 @@ function Options2::renderOptionHelp::invalidObject { #@test
 }
 
 function Options2::renderOptionHelp::notAnOption { #@test
-  Object::create \
-    --type "NotAnOption" \
-    --function-name "notAnOptionFunction"
+  declare -a object=(
+    --type "NotAnOption"
+  )
 
-  run Options2::renderOptionHelp notAnOptionFunction
+  run Options2::renderOptionHelp object
   assert_lines_count 1
   assert_output --partial "ERROR   - Options2::validateOptionObject - passed object is not an option"
   assert_failure 2
 }
 
-function Options::renderOptionHelp::OptionValid { #@test
+function Options2::renderOptionHelp::OptionValid { #@test
   local status=0
-    callback() {
+  callback() {
     :
   }
-  Object::create \
-    --function-name "optionFunction" \
-    --type "Option" \
-    --property-variableName "var" \
-    --property-variableType "Boolean" \
-    --property-help "help" \
-    --property-title "Global options" \
+  declare -a object=(
+    --type "Option"
+    --property-variableName "var"
+    --property-variableType "Boolean"
+    --property-help "help"
+    --property-title "Global options"
     --array-alt "--help"
+  )
 
-  run Options2::renderOptionHelp optionFunction 2>&1
+  run Options2::renderOptionHelp object 2>&1
   assert_success
   assert_line --index 0 "$(echo -e "${__HELP_TITLE_COLOR}Global options${__RESET_COLOR}")"
   assert_line --index 1 "help"

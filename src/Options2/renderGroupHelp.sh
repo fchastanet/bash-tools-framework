@@ -50,13 +50,14 @@ Options2::renderGroupHelp() {
     return 1
   fi
   
-  local groupInstanceObject=$1
-  if ! Options2::validateGroupObject "${groupInstanceObject}"; then
+  # shellcheck disable=SC2034
+  local -n renderGroupHelpObject=$1
+  if ! Options2::validateGroupObject renderGroupHelpObject; then
     return 2
   fi
   local help title
-  title="$("${groupInstanceObject}" get title 2>/dev/null)"
-  help="$("${groupInstanceObject}" get help  2>/dev/null || echo '')"
+  title="$(Object::getProperty renderGroupHelpObject --property-title)"
+  help="$(Object::getProperty renderGroupHelpObject --property-help)"
   
   echo -e "${__HELP_TITLE_COLOR}${title}${__RESET_COLOR}"
   if [[ -n "${help}" ]]; then

@@ -17,28 +17,22 @@ set -o errexit
 set -o pipefail
 export TMPDIR="/tmp"
 
-Object::create \
+Object::create zzzGroupGlobalOptionsFunction \
   --type group \
-  --property-title "GLOBAL OPTIONS:" \
-  --function-name zzzGroupGlobalOptionsFunction
+  --property-title "GLOBAL OPTIONS:"
 
-Object::create \
-    --type "Group" \
-    --function-name "simpleObjectFunction"
+Object::create simpleObjectFunction \
+    --type "Group" 
 
-Object::create \
+Object::create groupObjectFunction \
     --type "Group" \
     --property-title "title" \
-    --property-help "help" \
-    --function-name "groupObjectFunction"
+    --property-help "help"
 
 BASH_FRAMEWORK_DISPLAY_LEVEL=__LEVEL_DEBUG
 
-Object::create \
-  --function-name "optionFunction" \
+Object::create optionFunction \
   --type "Option" \
   --property-variableName "varName"
 
-declare -f optionFunction
-set -x
-Options2::validateOptionObject optionFunction
+Options2::validateOptionObject "${optionFunction}"

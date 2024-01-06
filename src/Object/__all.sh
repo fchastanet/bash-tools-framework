@@ -2,6 +2,8 @@
 
 # shellcheck source=src/Object/create.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Object/create.sh"
+# shellcheck source=src/Object/memberExists.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Object/memberExists.sh"
 # shellcheck source=src/Object/getProperty.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Object/getProperty.sh"
 # shellcheck source=src/Object/setProperty.sh

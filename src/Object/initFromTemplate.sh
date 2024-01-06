@@ -1,7 +1,9 @@
 #!/bin/bash
 
-Object::setProperty() {
-  local -n object_set_property_objectData=$1
+Object::initFromTemplate() {
+  local -n object_init_from_template_template=$1
+  local -n object_init_from_template_object=$2
+  shift 2 || true
   local propertyName="${2:-}"
   local propertyValue="${3:-}"
 
@@ -10,7 +12,7 @@ Object::setProperty() {
   local -a newProperties=()
   local propertyFound="0"
   while ((i < propertiesLength)); do
-    if [[ "${object_set_property_objectData[${i}]}" = "${propertyName}" ]]; then
+    if [[ "${object_set_property_objectData[${i}]}" = "--property-${propertyName}" ]]; then
       propertyFound="1"
       newProperties+=(
         "${object_set_property_objectData[${i}]}" "${propertyValue}"
@@ -24,7 +26,7 @@ Object::setProperty() {
     ((i = i + 1))
   done
   if [[ "${propertyFound}" = "0" ]]; then
-    newProperties+=("${propertyName}" "${propertyValue}")
+    newProperties+=("--property-${propertyName}" "${propertyValue}")
   fi
   object_set_property_objectData=("${newProperties[@]}")
 }

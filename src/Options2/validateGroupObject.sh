@@ -50,12 +50,13 @@ Options2::validateGroupObject() {
     return 1
   fi
   
-  local groupInstanceObject=$1
-  if [[ "$("${groupInstanceObject}" type 2>/dev/null || echo '')" != "Group" ]]; then
+  # shellcheck disable=SC2034
+  local -n validateGroupObject=$1
+  if [[ "$(Object::getProperty validateGroupObject --type)" != "Group" ]]; then
     Log::displayError "Options2::validateGroupObject - passed object is not a group"
     return 2
   fi
-  if ! "${groupInstanceObject}" get title &>/dev/null; then
+  if ! Object::memberExists validateGroupObject --property-title; then
     Log::displayError "Options2::validateGroupObject - title is mandatory"
     return 3
   fi

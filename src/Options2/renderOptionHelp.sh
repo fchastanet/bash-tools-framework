@@ -49,18 +49,21 @@ Options2::renderOptionHelp() {
     Log::displayError "Options2::renderOptionHelp - exactly one parameter has to be provided"
     return 1
   fi
-  
-  local optionInstanceObject=$1
-  if ! Options2::validateOptionObject "${optionInstanceObject}"; then
+
+  # shellcheck disable=SC2034
+  local -n renderOptionHelpInstanceObject=$1
+  if ! Options2::validateOptionObject renderOptionHelpInstanceObject; then
     return 2
   fi
   local help title variableType helpValueName min max
-  title="$("${optionInstanceObject}" get title 2>/dev/null)"
-  help="$("${optionInstanceObject}" get help  2>/dev/null || echo '')"
-  variableType="$("${optionInstanceObject}" get variableType)"
-  helpValueName="$("${optionInstanceObject}" get helpValueName 2>/dev/null|| echo '')"
-  min="$("${optionInstanceObject}" get min 2>/dev/null|| echo '')"
-  max="$("${optionInstanceObject}" get max 2>/dev/null|| echo '')"
+  title="$(Object::getProperty renderOptionHelpInstanceObject --property-title)"
+  help="$(Object::getProperty renderOptionHelpInstanceObject --property-help)"
+  variableType="$(Object::getProperty renderOptionHelpInstanceObject --property-variableType)"
+  helpValueName="$(Object::getProperty renderOptionHelpInstanceObject --property-helpValueName)"
+  min="$(Object::getProperty renderOptionHelpInstanceObject --property-min)"
+  max="$(Object::getProperty renderOptionHelpInstanceObject --property-max)"
+  local -a alts
+  readarray -t alts < <(Object::getArray renderOptionHelpInstanceObject --array-alt)
 
   displayHelp() {  
     echo -e "${__HELP_TITLE_COLOR}${title}${__RESET_COLOR}"
