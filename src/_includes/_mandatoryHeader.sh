@@ -16,10 +16,16 @@ set -o errexit
 # Command Substitution can inherit errexit option since bash v4.4
 shopt -s inherit_errexit || true
 
+# if set, and job control is not active, the shell runs the last command
+# of a pipeline not executed in the background in the current shell
+# environment.
+shopt -s lastpipe
+
 # a log is generated when a command fails
 set -o errtrace
 
-# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+# use nullglob so that (file*.php) will return an empty array if no file
+# matches the wildcard
 shopt -s nullglob
 
 # ensure regexp are interpreted without accentuated characters

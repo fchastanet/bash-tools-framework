@@ -19,10 +19,6 @@ Env::requireLoad() {
   if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
     configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
   fi
-  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
-    # shellcheck disable=SC2034
-    configFiles+=("${optionBashFrameworkConfig}")
-  fi
   configFiles+=("${optionEnvFiles[@]}")
   configFiles+=("${defaultFiles[@]}")
 

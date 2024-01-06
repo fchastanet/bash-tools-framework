@@ -25,10 +25,16 @@ set -o errexit
 # Command Substitution can inherit errexit option since bash v4.4
 shopt -s inherit_errexit || true
 
+# if set, and job control is not active, the shell runs the last command
+# of a pipeline not executed in the background in the current shell
+# environment.
+shopt -s lastpipe
+
 # a log is generated when a command fails
 set -o errtrace
 
-# use nullglob so that (file*.php) will return an empty array if no file matches the wildcard
+# use nullglob so that (file*.php) will return an empty array if no file
+# matches the wildcard
 shopt -s nullglob
 
 # ensure regexp are interpreted without accentuated characters
@@ -269,10 +275,6 @@ Env::requireLoad() {
   if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
     configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
   fi
-  if [[ -n "${optionBashFrameworkConfig}" && -f "${optionBashFrameworkConfig}" ]]; then
-    # shellcheck disable=SC2034
-    configFiles+=("${optionBashFrameworkConfig}")
-  fi
   configFiles+=("${optionEnvFiles[@]}")
   configFiles+=("${defaultFiles[@]}")
 
@@ -283,6 +285,14 @@ Env::requireLoad() {
       return 1
     }
   done
+}
+
+# @description create a temp file using default TMPDIR variable
+# initialized in _includes/_commonHeader.sh
+# @env TMPDIR String (default value /tmp)
+# @arg $1 templateName:String template name to use(optional)
+Framework::createTempFile() {
+  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
 
 # @description Retrieve the latest version number of a github release using Github API using retry
@@ -888,21 +898,21 @@ optionEnvFileCallback() {
 optionInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >> "${overrideEnvFile}"
 }
 
 getLevel() {
@@ -911,10 +921,10 @@ getLevel() {
     OFF)
       echo "${__LEVEL_OFF}"
       ;;
-    ERROR)
+    ERR | ERROR)
       echo "${__LEVEL_ERROR}"
       ;;
-    WARNING)
+    WARN | WARNING)
       echo "${__LEVEL_WARNING}"
       ;;
     INFO)
@@ -935,7 +945,7 @@ getVerboseLevel() {
     OFF)
       echo "${__VERBOSE_LEVEL_OFF}"
       ;;
-    ERROR | WARNING | INFO)
+    ERR | ERROR | WARN | WARNING | INFO)
       echo "${__VERBOSE_LEVEL_INFO}"
       ;;
     DEBUG)
@@ -957,7 +967,7 @@ optionDisplayLevelCallback() {
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -967,18 +977,18 @@ optionLogLevelCallback() {
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+  echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
-  BASH_FRAMEWORK_LOG_FILE="${logFile}"
+  echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
-  BASH_FRAMEWORK_QUIET_MODE=1
+  echo "BASH_FRAMEWORK_QUIET_MODE=1" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -1045,15 +1055,24 @@ BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}
 EOF
 )"
 
+overrideEnvFile="$(Framework::createTempFile "overrideEnvFile")"
+
 commandOptionParseFinished() {
   # load default template framework config
-  # shellcheck disable=SC2034
   defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
   echo "${defaultFrameworkConfig}" > "${defaultEnvFile}"
-
-  Env::requireLoad "${defaultEnvFile}"
+  local -a files=("${defaultEnvFile}")
+  if [[ -f "${envFile}" ]]; then
+    files+=("${envFile}")
+  fi
+  # shellcheck disable=SC2154
+  if [[ -f "${optionBashFrameworkConfig}" ]]; then
+    files+=("${optionBashFrameworkConfig}")
+  fi
+  files+=("${overrideEnvFile}")
+  Env::requireLoad "${files[@]}"
   Log::requireLoad
-
+  # shellcheck disable=SC2154
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig
   fi
@@ -1386,15 +1405,15 @@ megalinterCommand() {
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
         # Option 19/21
-        # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
+        # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
           if (($# == 0)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
-          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+          if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
@@ -1426,15 +1445,15 @@ megalinterCommand() {
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
         # Option 21/21
-        # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERROR|WARNING|INFO|DEBUG|TRACE' regexp ''
+        # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
           if (($# == 0)); then
             Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
             return 1
           fi
-          if [[ ! "$1" =~ OFF|ERROR|WARNING|INFO|DEBUG|TRACE ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERROR|WARNING|INFO|DEBUG|TRACE)"
+          if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE)"
             return 1
           fi
           if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
@@ -1479,7 +1498,7 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(define\ output\ format\ of\ this\ command)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: plain'
+    echo "    Default value: plain"
     echo '    Possible values: plain|json'
     echo -e "  ${__HELP_OPTION_COLOR}--fix${__HELP_NORMAL} {single}"
     local -a helpArray
@@ -1501,7 +1520,7 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(Specify\ docker\ megalinter\ image\ name\ to\ use)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: oxsecurity/megalinter-terraform:v7.4.0'
+    echo "    Default value: oxsecurity/megalinter-terraform:v7.4.0"
     echo -e "  ${__HELP_OPTION_COLOR}--check-megalinter-version${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
@@ -1512,7 +1531,7 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(Specify\ megalinter\ config\ filename\ to\ use)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: .mega-linter.yml'
+    echo "    Default value: .mega-linter.yml"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} {single}"
@@ -1555,7 +1574,7 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(choose\ color\ theme\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: default'
+    echo "    Default value: default"
     echo '    Possible values: default|default-force|noColor'
     echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
     local -a helpArray
@@ -1577,7 +1596,7 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(Set\ log\ level)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Possible values: OFF|ERROR|WARNING|INFO|DEBUG|TRACE'
+    echo '    Possible values: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE'
     echo -e "  ${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
@@ -1588,7 +1607,7 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(set\ display\ level)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Possible values: OFF|ERROR|WARNING|INFO|DEBUG|TRACE'
+    echo '    Possible values: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE'
     echo -e """
 megalinter image oxsecurity/megalinter-terraform:v7.4.0 will be used.
 

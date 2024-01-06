@@ -80,7 +80,7 @@
       --help "Set log level" \
       --group zzzGroupGlobalOptionsFunction \
       --alt "--log-level" \
-      --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
+      --authorized-values "OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE" \
       --callback "optionLogLevelCallback" \
       --callback updateArgListLogLevelCallback \
       --variable-name "optionLogLevel" \
@@ -101,7 +101,7 @@
       --help "set display level" \
       --group zzzGroupGlobalOptionsFunction \
       --alt "--display-level" \
-      --authorized-values "OFF|ERROR|WARNING|INFO|DEBUG|TRACE" \
+      --authorized-values "OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE" \
       --callback optionDisplayLevelCallback \
       --callback updateArgListDisplayLevelCallback \
       --variable-name "optionDisplayLevel" \
@@ -238,21 +238,21 @@ optionEnvFileCallback() {
 optionInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >> "${overrideEnvFile}"
 }
 
 getLevel() {
@@ -261,10 +261,10 @@ getLevel() {
     OFF)
       echo "${__LEVEL_OFF}"
       ;;
-    ERROR)
+    ERR | ERROR)
       echo "${__LEVEL_ERROR}"
       ;;
-    WARNING)
+    WARN | WARNING)
       echo "${__LEVEL_WARNING}"
       ;;
     INFO)
@@ -285,7 +285,7 @@ getVerboseLevel() {
     OFF)
       echo "${__VERBOSE_LEVEL_OFF}"
       ;;
-    ERROR | WARNING | INFO)
+    ERR | ERROR | WARN | WARNING | INFO)
       echo "${__VERBOSE_LEVEL_INFO}"
       ;;
     DEBUG)
@@ -307,7 +307,7 @@ optionDisplayLevelCallback() {
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -317,18 +317,18 @@ optionLogLevelCallback() {
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  BASH_FRAMEWORK_LOG_LEVEL=${logLevel}
+  echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
-  BASH_FRAMEWORK_LOG_FILE="${logFile}"
+  echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
-  BASH_FRAMEWORK_QUIET_MODE=1
+  echo "BASH_FRAMEWORK_QUIET_MODE=1" >> "${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -363,15 +363,24 @@ defaultFrameworkConfig="$(
 EOF
 )"
 
+overrideEnvFile="$(Framework::createTempFile "overrideEnvFile")"
+
 commandOptionParseFinished() {
   # load default template framework config
-  # shellcheck disable=SC2034
   defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
   echo "${defaultFrameworkConfig}" > "${defaultEnvFile}"
-
-  Env::requireLoad "${defaultEnvFile}"
+  local -a files=("${defaultEnvFile}")
+  if [[ -f "${envFile}" ]]; then
+    files+=("${envFile}")
+  fi
+  # shellcheck disable=SC2154
+  if [[ -f "${optionBashFrameworkConfig}" ]]; then
+    files+=("${optionBashFrameworkConfig}")
+  fi
+  files+=("${overrideEnvFile}")
+  Env::requireLoad "${files[@]}"
   Log::requireLoad
-
+  # shellcheck disable=SC2154
   if [[ "${optionConfig}" = "1" ]]; then
     displayConfig
   fi
