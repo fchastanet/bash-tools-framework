@@ -1636,7 +1636,7 @@ shellcheckLintCommand() {
     # shellcheck disable=SC2054
     helpArray=(define\ output\ format\ of\ this\ command)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo "    Default value: tty"
+    echo '    Default value: tty'
     echo '    Possible values: checkstyle|diff|gcc|json|json1|quiet|tty'
     echo -e "  ${__HELP_OPTION_COLOR}--staged${__HELP_NORMAL} {single}"
     local -a helpArray
@@ -1690,7 +1690,7 @@ shellcheckLintCommand() {
     # shellcheck disable=SC2054
     helpArray=(choose\ color\ theme\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo "    Default value: default"
+    echo '    Default value: default'
     echo '    Possible values: default|default-force|noColor'
     echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
     local -a helpArray

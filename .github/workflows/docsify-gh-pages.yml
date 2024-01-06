@@ -53,9 +53,9 @@ jobs:
     needs: build
     # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-      actions: read     # actions: read needed by actions/deploy-pages 
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+      actions: read # actions: read needed by actions/deploy-pages
 
     steps:
       - name: Deploy to GitHub Pages
