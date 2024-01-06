@@ -15,7 +15,7 @@ Compiler::Embed::extractDirFromBase64() {
     mkdir -p "${targetDir}"
     (
       cd "${targetDir}" || exit 1
-      tar -xzf <(base64 -d <<<"${base64}") 2>/dev/null || {
+      base64 -d <<<"${base64}" | tar -xzf - 2>/dev/null || {
         Log::displayError "untar failure, invalid base64 string"
         exit 1
       }

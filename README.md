@@ -15,7 +15,9 @@
   - [3.4. connect to container manually](#34-connect-to-container-manually)
   - [3.5. auto generated bash doc](#35-auto-generated-bash-doc)
   - [3.6. github page](#36-github-page)
-- [4. Acknowledgements](#4-acknowledgements)
+- [4. Troubleshooting](#4-troubleshooting)
+  - [4.1. compile.bats embed not working on alpine investigation](#41-compilebats-embed-not-working-on-alpine-investigation)
+- [5. Acknowledgements](#5-acknowledgements)
 
 <!-- remove -->
 
@@ -366,7 +368,86 @@ Run the local server with docsify serve.
 
 Navigate to <http://localhost:3000/>
 
-## 4. Acknowledgements
+## 4. Troubleshooting
+
+### 4.1. compile.bats embed not working on alpine investigation
+
+exit code 127 is returned but process seems to go until the end. This error only
+occurs on alpine.
+
+commands to compile and debug:
+
+```bash
+# run docker alpine interactively
+docker run --rm -it -w /bash -v "$(pwd):/bash" --entrypoint="" --user 1000:1000 build:bash-tools-alpine-4.4-user bash
+
+# launch bats test that fails
+vendor/bats/bin/bats -r src/_binaries/compile.bats --filter embed
+
+# launch directly compile command that returns the same exit code
+bin/compile src/_binaries/testsData/bin/embed.sh --template-dir src --bin-dir bin --root-dir $PWD --src-dir src/_binaries/testsData/src
+echo $? # prints 127
+
+# try to get more logs
+KEEP_TEMP_FILES=1 BASH_FRAMEWORK_DISPLAY_LEVEL=4 bin/compile src/_binaries/testsData/bin/embed.sh --template-dir src --bin-dir bin --root-dir $PWD --src-dir src/_binaries/testsData/src
+
+# try to use strace
+docker run --rm -it -w /bash -v "$(pwd):/bash" --entrypoint="" build:bash-tools-alpine-4.4-user bash
+apk update
+apk add strace
+```
+
+Strace didn't helped me a lot. But as I added recently this option
+`shopt -u lastpipe`, I removed it from compile binary and the issue disappeared.
+
+As I was suspecting the while piped inside `Compiler::Embed::inject`. I added
+the following code in this function to remove the tracing just after the error
+occurs:
+
+```bash
+trap 'set +x' EXIT
+set -x
+```
+
+It allows me to find that the last command executed was `read -r line`.
+
+Finally I understand that the issue comes when `read -r line` exits with code 1
+because of end of file.
+
+previous simplified code:
+
+```bash
+cat file | {
+  local line
+  while IFS="" read -r line; do
+    # ...
+  done
+}
+```
+
+Resulting in exit code 127 because of pipe and `shopt -u lastpipe`.
+
+Fixed code is to remove error if :
+
+```bash
+cat file | {
+  local line
+  while true; do
+    local status=0
+    IFS="" read -r line || status=$?
+    if [[ "${status}" = "1" ]]; then
+      # end of file
+      return 0
+    elif [[ "${status}" != "0" ]]; then
+      # other error
+      return "${status}"
+    fi
+    # ...
+  done
+}
+```
+
+## 5. Acknowledgements
 
 This project is using [bash-tpl](https://github.com/TekWizely/bash-tpl) in order
 to compile several bash files into one files.

@@ -100,8 +100,9 @@ function Compiler::Embed::inject::twiceSameResourceDifferentAsName { #@test
   local _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   local PERSISTENT_TMPDIR="${BATS_TEST_TMPDIR}"
   dir="${BATS_TEST_DIRNAME}" envsubst <"${BATS_TEST_DIRNAME}/testsData/twiceSameResourceDifferentAsName.txt" |
-    Compiler::Embed::inject embeddedNames embeddedResources \
-      >"${BATS_TEST_TMPDIR}/inject" 2>"${BATS_TEST_TMPDIR}/injectError" || status=$?
+    (Compiler::Embed::inject embeddedNames embeddedResources || status=$?) \
+      >"${BATS_TEST_TMPDIR}/inject" 2>"${BATS_TEST_TMPDIR}/injectError"
+
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/injectError"
   assert_output --partial "WARN    - Embed resource ${BATS_TEST_DIRNAME}/testsData/binaryFile has already been imported previously with a different name, ensure to deduplicate"

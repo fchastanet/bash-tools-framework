@@ -11,8 +11,11 @@
 Compiler::Embed::assertResource() {
   local resource="$1"
   local -a srcDirs
+
   if Assert::bashFrameworkFunction "${resource}"; then
-    readarray -t srcDirs < <(Compiler::Embed::getSrcDirsFromOptions "${_EMBED_COMPILE_ARGUMENTS[@]}")
+    # shellcheck disable=SC2030
+    Compiler::Embed::getSrcDirsFromOptions "${_EMBED_COMPILE_ARGUMENTS[@]}" | readarray -t srcDirs
+    # shellcheck disable=SC2031
     if ! Compiler::findFunctionInSrcDirs "${resource}" "${srcDirs[@]}" >/dev/null; then
       Log::displayError "Invalid embed resource '${resource}'. The bash framework function is not found in src dirs: ${srcDirs[*]}"
       return 2

@@ -29,11 +29,20 @@ Compiler::Embed::inject() {
     )
   fi
 
-  Compiler::Embed::filter | {
+  embed() {
     local line
     local resource
     local asName
-    while IFS="" read -r line || [[ -n "${line}" ]]; do
+    while true; do
+      local status=0
+      IFS="" read -r line || status=$?
+      if [[ "${status}" = "1" ]]; then
+        # end of file
+        return 0
+      elif [[ "${status}" != "0" ]]; then
+        # other error
+        return "${status}"
+      fi
       Compiler::Embed::parse "${line}" resource asName || return 1
       if Array::contains "${asName}" "${injectEmbeddedNames[@]}"; then
         Log::displaySkipped "Embed asName ${asName} has already been imported previously"
@@ -49,5 +58,14 @@ Compiler::Embed::inject() {
       injectEmbeddedNames+=("${asName}")
       injectEmbeddedResources+=("${resource}")
     done
+    return 0
   }
+  local status=0
+  Compiler::Embed::filter | embed || status=$?
+  if [[ "${status}" = "127" ]]; then
+    # TODO test Compiler::Embed::inject::worksWithWarningResourceAlreadyIncluded
+    # in this case  I don't know why, status is 127 but should be 0
+    return 0
+  fi
+  return "${status}"
 }

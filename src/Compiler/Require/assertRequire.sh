@@ -22,8 +22,9 @@ Compiler::Require::assertRequire() {
 
   # check if function exists
   local -a srcDirs
-  readarray -t srcDirs < <(Compiler::Embed::getSrcDirsFromOptions "${_COMPILE_FILE_ARGUMENTS[@]}")
-
+  # shellcheck disable=SC2030
+  Compiler::Embed::getSrcDirsFromOptions "${_COMPILE_FILE_ARGUMENTS[@]}" | readarray -t srcDirs
+  # shellcheck disable=SC2031
   Compiler::findFunctionInSrcDirs "${requireFunctionName}" "${srcDirs[@]}" >/dev/null || {
     Log::displayError "Require function '${requireFunctionName}' cannot be found in any src dirs: ${srcDirs[*]}"
     return 3
