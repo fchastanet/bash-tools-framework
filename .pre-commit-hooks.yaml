@@ -133,7 +133,7 @@
   pass_filenames: false
   always_run: true
   fail_fast: true
-  stages: [pre-push, manual]
+  stages: [pre-commit, pre-push, manual]
 
 - &MEGALINTER
   id: megalinter
