@@ -1,5 +1,7 @@
 ---
+default_install_hook_types: [pre-commit, pre-push]
 default_stages: [pre-commit, manual]
+minimum_pre_commit_version: 3.5.0
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -69,6 +71,7 @@ repos:
             --display-level,
             WARNING,
           ]
+        stages: [pre-commit]
       - id: frameworkLinterGithubAction
         args:
           [
@@ -81,6 +84,7 @@ repos:
             --display-level,
             WARNING,
           ]
+        stages: [manual]
       - id: plantuml
 
   - repo: local
@@ -103,35 +107,23 @@ repos:
         name: build sh files for Github Actions
         entry:
           bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp --ignore-missing'
+          bin/buildBinFilesTmp'
         fail_fast: false
         stages: [manual]
 
-      - &LOCAL_BUILD_DOC_FILES
-        id: buildDocFiles
-        name: build doc files
+      - id: buildDocFilesForGithubActions
+        name: build doc files for github actions
         language: script
         entry: bin/doc
-        args: [--verbose, --skip-docker-build]
+        args: [--verbose]
         pass_filenames: false
         require_serial: true
         always_run: true
         fail_fast: true
-        stages: [pre-push]
-
-      - <<: *LOCAL_BUILD_DOC_FILES
-        id: buildDocFilesGithubAction
-        name: build doc files for Github Actions
-        args: [--verbose]
-        fail_fast: false
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
     rev: 2.1.0
     hooks:
-      - id: runUnitTests
-        # not manual as github will run UT with several versions of bash and arch
-        stages: [pre-commit]
       - id: megalinterCheckVersion
-      - id: megalinter
       - id: megalinterGithubAction
