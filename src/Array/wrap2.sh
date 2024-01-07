@@ -65,8 +65,7 @@ Array::wrap2() {
       echo
       continue
     fi
-    local textFirstLine
-    textFirstLine="$(echo "${arg}" | head -n 1)"
+    local textFirstLine="${arg%%$'\n'*}"
     text="$(echo "${arg}" | sed -E '1d')"
     ((textLength = ${#text})) || true
     local textFirstLineNoAnsi

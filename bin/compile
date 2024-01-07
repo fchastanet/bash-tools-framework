@@ -399,8 +399,8 @@ importFunctions() {
   local -a requireFunctionsToImport
   local functionToImport
 
-  readarray -t functionsToImport < <(Compiler::extractUniqueFrameworkFunctions "${file}")
-  readarray -t requireFunctionsToImport < <(Compiler::Require::requires "${file}")
+  Compiler::extractUniqueFrameworkFunctions "${file}" | readarray -t functionsToImport
+  Compiler::Require::requires "${file}" | readarray -t requireFunctionsToImport
   functionsToImport+=("${requireFunctionsToImport[@]}")
 
   ((newFilesAdded = 0)) || true
@@ -577,4 +577,8 @@ cat -s "${COMPILED_FILE2}" | Filters::directive "${FILTER_DIRECTIVE_REMOVE_HEADE
 chmod +x "${BIN_FILE}"
 
 Log::displayStatus "Compiled '${CURRENT_COMPILED_RELATIVE_FILE}' to Binfile '${BIN_FILE}'"
-exit "${failures}"
+
+if [[ "${failures}" != "0" ]]; then
+  Log::displayError "Found ${failures} errors during compilation"
+  exit 1
+fi

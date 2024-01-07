@@ -4,6 +4,7 @@ vendor/
 .history/
 *.bak
 commit-msg.md
+node_modules/
 
 # megalinter
 megalinter-reports/
