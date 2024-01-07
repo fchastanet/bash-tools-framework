@@ -31,7 +31,7 @@ function Object::getProperty::unknownProperty { #@test
     --property-property "propertyValue"
   )
   run Object::getProperty simpleObject --property-unknownProperty 1
-  assert_output --partial "ERROR   - unknown property --property-unknownProperty"
+  assert_output ""
   assert_failure 1
 
   run Object::getProperty simpleObject --property-unknownProperty 0

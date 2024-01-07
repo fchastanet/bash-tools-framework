@@ -32,7 +32,7 @@ function Options2::validateCommandObject::tooMuchArgs { #@test
   declare -a object=(
     --type "Command"
   )
-  run Options2::validateCommandObject object object 
+  run Options2::validateCommandObject object object
   assert_lines_count 1
   assert_output --partial "ERROR   - Options2::validateCommandObject - exactly one parameter has to be provided"
   assert_failure 1
@@ -51,7 +51,7 @@ function Options2::validateCommandObject::invalidObjectType { #@test
 
 function Options2::validateCommandObject::nameInvalid { #@test
   declare -a object=(
-    --type "Command" \
+    --type "Command"
     --property-name "François"
   )
 
@@ -140,4 +140,3 @@ function Options2::validateCommandObject::everyArgumentCallbackInvalid { #@test
   assert_lines_count 1
   assert_failure 2
 }
-

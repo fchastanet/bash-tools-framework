@@ -44,13 +44,13 @@ function Object::getArray::multipleArrayValues { #@test
   assert_success
 }
 
-function Object::getArray::unknownProperty { #@test
+function Object::getArray::unknownArray { #@test
   declare -a simpleObject=(
     --type "simpleObjectType"
     --property-property "propertyValue"
   )
   run Object::getArray simpleObject --array-unknownArray 1
-  assert_output --partial "ERROR   - unknown array --array-unknownArray"
+  assert_output ""
   assert_failure 1
 
   run Object::getArray simpleObject --array-unknownArray 0

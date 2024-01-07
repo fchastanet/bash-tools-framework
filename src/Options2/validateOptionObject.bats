@@ -32,7 +32,7 @@ function Options2::validateOptionObject::tooMuchArgs { #@test
   declare -a object=(
     --type "Option"
   )
-  run Options2::validateOptionObject object object 
+  run Options2::validateOptionObject object object
   assert_lines_count 1
   assert_output --partial "ERROR   - Options2::validateOptionObject - exactly one parameter has to be provided"
   assert_failure 1
@@ -104,7 +104,7 @@ function Options2::validateOptionObject::missingAltOption { #@test
     --property-variableName "varName"
     --property-variableType "String"
   )
-  
+
   run Options2::validateOptionObject object
   assert_output --partial "ERROR   - Options2::validateOptionObject - you must provide at least one alt option"
   assert_lines_count 1
@@ -331,7 +331,6 @@ function Options2::validateOptionObject::StringArray::minValueLessThan0 { #@test
   assert_failure 2
   assert_lines_count 1
 }
-
 
 function Options2::validateOptionObject::StringArray::minValueGreaterThanMaxValue { #@test
   declare -a object=(

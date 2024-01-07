@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# @description create or overwrite property value on object
+# @arg $1 object_set_property_objectData:&String[] the object
+# @arg $2 propertyName:String the name of the property to search (eg: --property)
+# @arg $3 propertyValue:String property value to set
 Object::setProperty() {
   local -n object_set_property_objectData=$1
   local propertyName="${2:-}"

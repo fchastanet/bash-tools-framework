@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# @description create or overwrite array property on object
+# @arg $1 object_set_array_objectData:&String[] the object
+# @arg $2 arrayName:String the name of the array property to search (eg: --array-property)
+# @arg $@ arrayValues:String[] array values to set
 Object::setArray() {
   local -n object_set_array_objectData=$1
   local arrayName="${2:-}"

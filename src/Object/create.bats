@@ -16,7 +16,7 @@ function Object::create::simpleObject { #@test
   Object::create simpleObjectFunction \
     --type "simpleObjectType" \
     --property-property "propertyValue"
-  
+
   run ${simpleObjectFunction} type
   assert_output "simpleObjectType"
 
@@ -43,7 +43,7 @@ function Object::create::missingPositionalArg { #@test
   run Object::create \
     --type "simpleObjectType" \
     --propertyInvalid-property "propertyValue" 2>&1
-  
+
   assert_output --partial "local: \`--type': invalid variable name for name reference"
   assert_failure 1
 }
@@ -54,7 +54,7 @@ function Object::create::simpleObjectNonStrict { #@test
     --strict 0 \
     --type "simpleObjectType" \
     --property-property "propertyValue"
-  
+
   run ${simpleObjectType} strict
   assert_output "0"
 
@@ -68,7 +68,7 @@ function Object::create::invalidProperty { #@test
   run Object::create simpleObjectType \
     --type "simpleObjectType" \
     --propertyInvalid-property "propertyValue" 2>&1
-  
+
   assert_output --partial "ERROR   - invalid object property --propertyInvalid-property"
   assert_failure 1
 }
@@ -79,17 +79,17 @@ function Object::create::duplicatedProperty { #@test
     --type "simpleObjectType" \
     --property-property "propertyValue1" \
     --property-property "propertyValue2" 2>&1
-  
+
   assert_output --partial "ERROR   - property property is provided more than one time"
   assert_failure 1
 }
 
 function Object::create::invalidObjectType { #@test
-  declare invalidObjectType 
+  declare invalidObjectType
   run Object::create invalidObjectType \
     --type "invalidéObjectType" \
     --property-property "propertyValue" 2>&1
-  
+
   assert_output --partial "ERROR   - invalid object type invalidéObjectType"
   assert_failure 1
 }
@@ -97,7 +97,7 @@ function Object::create::invalidObjectType { #@test
 function Object::create::missingObjectType { #@test
   run Object::create missingObjectType \
     --property-property "propertyValue" 2>&1
-  
+
   assert_output --partial "ERROR   - missing object type"
   assert_failure 1
 }
@@ -107,9 +107,9 @@ function Object::create::unknownArray { #@test
   Object::create unknownArray \
     --type "simpleObjectType" \
     --array-list "unknownArray" 2>&1
-  
+
   run ${unknownArray} getArray "unknownArray"
-  
+
   assert_output --partial "ERROR   - unknown array unknownArray"
   assert_failure 2
 }
@@ -121,7 +121,7 @@ function Object::create::propertyArrayOrdered { #@test
     --property-property "propertyValue" \
     --array-list "value1" \
     --array-list "value2"
-  
+
   run ${propertyArrayOrdered} type
   assert_success
   assert_output "simpleObjectType"
@@ -148,7 +148,7 @@ function Object::create::propertyArrayUnordered { #@test
     --array-list "value2" \
     --property-property "propertyValue" \
     --array-list "value3"
-  
+
   run ${propertyArrayUnordered} type
   assert_success
   assert_output "simpleObjectType"

@@ -26,6 +26,7 @@ declare -a arg=(
   --property-mandatory 1
   --property-max 2
 )
+# shellcheck disable=SC2034
 declare -a group=(
   --type "Group"
   --property-title "Global options"

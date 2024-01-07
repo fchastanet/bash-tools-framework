@@ -32,7 +32,7 @@ function Options2::validateArgObject::tooMuchArgs { #@test
   declare -a arg=(
     --type "Arg"
   )
-  run Options2::validateArgObject arg arg 
+  run Options2::validateArgObject arg arg
   assert_lines_count 1
   assert_output --partial "ERROR   - Options2::validateArgObject - exactly one parameter has to be provided"
   assert_failure 1
@@ -42,7 +42,7 @@ function Options2::validateArgObject::invalidObjectType { #@test
   declare -a arg=(
     --type "notAnArg"
   )
-  
+
   run Options2::validateArgObject arg
   assert_lines_count 1
   assert_output --partial "ERROR   - Options2::validateArgObject - passed object is not an argument"
@@ -99,7 +99,6 @@ function Options2::validateArgObject::nameInvalid { #@test
   assert_lines_count 1
 }
 
-
 function Options2::validateArgObject::callbackInvalid { #@test
   declare -a arg2=(
     --type "Arg"
@@ -109,7 +108,7 @@ function Options2::validateArgObject::callbackInvalid { #@test
     --property-name "valid"
     --array-callback "François"
   )
-  
+
   run Options2::validateArgObject arg2 2>&1
   assert_output --partial "ERROR   - Options2::validateArgObject - callback 'François' - function does not exists"
   assert_lines_count 1
@@ -252,7 +251,6 @@ function Options2::validateArgObject::StringArray::minValueLessThan0 { #@test
   assert_failure 2
   assert_lines_count 1
 }
-
 
 function Options2::validateArgObject::StringArray::minValueGreaterThanMaxValue { #@test
   declare -a arg=(
