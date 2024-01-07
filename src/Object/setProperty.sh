@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# @description create or overwrite property value on object
+# @arg $1 object_set_property_objectData:&String[] the object
+# @arg $2 propertyName:String the name of the property to search (eg: --property)
+# @arg $3 propertyValue:String property value to set
+Object::setProperty() {
+  local -n object_set_property_objectData=$1
+  local propertyName="${2:-}"
+  local propertyValue="${3:-}"
+
+  local i=0 || true
+  local -i propertiesLength="${#object_set_property_objectData[@]}"
+  local -a newProperties=()
+  local propertyFound="0"
+  while ((i < propertiesLength)); do
+    if [[ "${object_set_property_objectData[${i}]}" = "${propertyName}" ]]; then
+      propertyFound="1"
+      newProperties+=(
+        "${object_set_property_objectData[${i}]}" "${propertyValue}"
+      )
+      if ((i < propertiesLength - 2)); then
+        newProperties+=("${object_set_property_objectData[@]:i+2}")
+      fi
+      break
+    fi
+    newProperties+=("${object_set_property_objectData[${i}]}")
+    ((i = i + 1))
+  done
+  if [[ "${propertyFound}" = "0" ]]; then
+    newProperties+=("${propertyName}" "${propertyValue}")
+  fi
+  object_set_property_objectData=("${newProperties[@]}")
+}

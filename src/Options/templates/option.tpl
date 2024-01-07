@@ -63,7 +63,7 @@
     echo 'echo -e "  <%% helpOpt "1" %>"'
     .INCLUDE "${tplDir}/helpArg.tpl"
     % if [[ -n "${defaultValue}" ]]; then
-        echo "echo '    Default value: <% ${defaultValue} %>'"
+        echo 'echo "    Default value: <% ${defaultValue} %>"'
     % fi
     % if [[ -n "${authorizedValues}" ]]; then
         echo "echo '    Possible values: <% ${authorizedValues} %>'"
