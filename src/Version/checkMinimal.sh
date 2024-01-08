@@ -20,8 +20,12 @@ Version::checkMinimal() {
 
   Assert::commandExists "${commandName}" "${help}" || return 2
 
+  # shellcheck disable=SC2034
+  local status=0
+  # shellcheck disable=SC2034
+  local -a pipeStatus=()
   local version
-  version="$("${commandName}" "${argVersion}" 2>&1 | ${parseVersionCallback})"
+  version="$("${commandName}" "${argVersion}" 2>&1 | ${parseVersionCallback} || Bash::handlePipelineFailure status pipeStatus)"
 
   Log::displayDebug "check ${commandName} version ${version} against minimal ${minimalVersion}"
 
