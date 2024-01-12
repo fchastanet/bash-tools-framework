@@ -111,7 +111,7 @@ jobs:
       - name: Archive results
         if: matrix.runPrecommitTests && always()
         continue-on-error: true
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linter-reports
           path: |
@@ -151,7 +151,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}
           path: logs/report.xml
