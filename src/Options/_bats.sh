@@ -46,7 +46,7 @@ checkCommandResult() {
   tmpFileResultAnsi="$(mktemp -p "${BATS_TEST_TMPDIR}" -t resultAnsi-$$-XXXXXX)"
   echo -e "${output}" >"${tmpFileResultAnsi}"
 
-  diff -u <(Filters::removeAnsiCodes "${tmpFileResultAnsi}") <(Filters::removeAnsiCodes <"${BATS_TEST_DIRNAME}/testsData/${expectedResult}") >&3 || {
+  diff -u <(Filters::removeAnsiCodes <"${BATS_TEST_DIRNAME}/testsData/${expectedResult}") <(Filters::removeAnsiCodes "${tmpFileResultAnsi}") >&3 || {
     echo -e "${output}" >&3
     if [[ "${BATS_FIX_TEST}" = "1" ]]; then
       echo "writing output to ${BATS_TEST_DIRNAME}/testsData/${expectedResult}" >&3

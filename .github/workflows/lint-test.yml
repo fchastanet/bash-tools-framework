@@ -11,6 +11,9 @@ on: # yamllint disable-line rule:truthy
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      # needed by ouzi-dev/commit-status-updater@v2
+      statuses: write
     strategy:
       fail-fast: true
       matrix:
@@ -111,7 +114,7 @@ jobs:
       - name: Archive results
         if: matrix.runPrecommitTests && always()
         continue-on-error: true
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linter-reports
           path: |
@@ -151,7 +154,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}
           path: logs/report.xml

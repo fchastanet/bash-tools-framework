@@ -6,7 +6,10 @@
       "pattern": "^http://localhost:3000/"
     },
     {
-      "pattern": "^https://www.cyberciti.biz/.*$"
+      "pattern": "^https://www.cyberciti.biz/"
+    },
+    {
+      "pattern": "^https://tinyurl.com/"
     },
     {
       "pattern": "^#.*"

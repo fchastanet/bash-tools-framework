@@ -1,4 +1,4 @@
-container should be the name of a profile from profile list,check containers
-    list below.
+containers should be the name of list from list, check container list below.
+
     If not provided, it will load the container specified in default configu
     ration.

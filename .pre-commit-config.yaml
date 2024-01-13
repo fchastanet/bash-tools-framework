@@ -11,7 +11,8 @@ repos:
         exclude: |
           (?x)(
             ^doc/images/.*\.svg$|
-            ^doc/guides/Options/generate.*.md$
+            ^doc/guides/Options/generate.*.md$|
+            testsData/.*\.result$
           )
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
@@ -49,7 +50,11 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        exclude: ^doc/guides/Options/generate.*.md$
+        exclude: |
+          (?x)(
+            ^doc/guides/Options/generate.*.md$|
+            ^\.vscode/.*\.code-snippets$
+          )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
     rev: 2.1.0

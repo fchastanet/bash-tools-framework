@@ -389,10 +389,18 @@ bin/compile src/_binaries/testsData/bin/embed.sh --template-dir src --bin-dir bi
 echo $? # prints 127
 
 # try to get more logs
-KEEP_TEMP_FILES=1 BASH_FRAMEWORK_DISPLAY_LEVEL=4 bin/compile src/_binaries/testsData/bin/embed.sh --template-dir src --bin-dir bin --root-dir $PWD --src-dir src/_binaries/testsData/src
+KEEP_TEMP_FILES=1 BASH_FRAMEWORK_DISPLAY_LEVEL=4 bin/compile \
+  src/_binaries/testsData/bin/embed.sh \
+  --template-dir src \
+  --bin-dir bin \
+  --root-dir "${PWD}" \
+  --src-dir src/_binaries/testsData/src
 
 # try to use strace
-docker run --rm -it -w /bash -v "$(pwd):/bash" --entrypoint="" build:bash-tools-alpine-4.4-user bash
+docker run --rm -it \
+  -w /bash -v "$(pwd):/bash" \
+  --entrypoint="" \
+  build:bash-tools-alpine-4.4-user bash
 apk update
 apk add strace
 ```

@@ -46,25 +46,29 @@ UI::theme "default"
 #   echo "if first arg is not a profile"
 # }
 
-declare -a helpArray=(
-  $'\n  Common Commands:\n  run         Create and run a new container from an image\n  exec        Execute a command in a running container\n  ps          List containers\n  build       Build an image from a Dockerfile\n  pull        Download an image from a registry\n  push        Upload an image to a registry\n  images      List images\n  login       Log in to a registry\n  logout      Log out from a registry\n  search      Search Docker Hub for images\n  version     Show the Docker version information\n  info        Display system-wide information'
-)
+# declare -a helpArray=(
+#   $'\n  Common Commands:\n  run         Create and run a new container from an image\n  exec        Execute a command in a running container\n  ps          List containers\n  build       Build an image from a Dockerfile\n  pull        Download an image from a registry\n  push        Upload an image to a registry\n  images      List images\n  login       Log in to a registry\n  logout      Log out from a registry\n  search      Search Docker Hub for images\n  version     Show the Docker version information\n  info        Display system-wide information'
+# )
 
-echo "-------------"
-for ((j = 0; j < 1; j++)); do
-  Array::wrap2 " " 20 4 "${helpArray[@]}"
-done
-echo "-------------"
+# echo "-------------"
+# for ((j = 0; j < 1; j++)); do
+#   Array::wrap2 " " 20 4 "${helpArray[@]}"
+# done
+# echo "-------------"
 
-echo "@@@@@@@@@@@@@ using fold"
-fold -s -w 20 - <<<"${helpArray[@]}"
-time (
-  for ((j = 0; j < 100; j++)); do
-    fold -w 20 - <<<"${helpArray[@]}" &>/dev/null
-  done
-)
-echo "@@@@@@@@@@@@@"
+# echo "@@@@@@@@@@@@@ using fold"
+# fold -s -w 20 - <<<"${helpArray[@]}"
+# time (
+#   for ((j = 0; j < 100; j++)); do
+#     fold -w 20 - <<<"${helpArray[@]}" &>/dev/null
+#   done
+# )
+# echo "@@@@@@@@@@@@@"
 
-echo "############# using fmt"
-fmt --width=20 --goal=20 -s -t -p '    ' - <<<"${helpArray[@]}" | pr -T --indent=4
-echo "#############"
+# echo "############# using fmt"
+# fmt --width=20 --goal=20 -s -t -p '    ' - <<<"${helpArray[@]}" | pr -T --indent=4
+# echo "#############"
+
+declare -a helpArray=($'      pull        Download an image from a registry\n  push        Upload an image to a registry\r\n  images      List images\r\n  login       Log in to a registry\r\n  logout      Log out from a registry\n  search      Search Docker Hub for images\n  version     Show the Docker version information\n  info        Display system-wide information')
+
+Array::wrap2 " " 76 4 "${helpArray[@]}"
