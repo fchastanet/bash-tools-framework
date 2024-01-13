@@ -126,117 +126,102 @@ Array::wrap2() {
     return 0
   fi
 
-  eatNextSpaces() {
-    if [[ "${currentChar}" != [[:space:]] ]]; then
-      ((i--)) || true
-      return 0
-    fi
-    for (( ; i < textLength; i++)); do
-      if [[ "${text:${i}:1}" != [[:space:]] ]]; then
-        ((i--)) || true
-        break
-      fi
-    done
-  }
   printCurrentLine() {
-    echo -e "${currentLine}" | sed -E -e 's/[[:blank:]]*$//'
+    if ((isNewline == 0)) || ((previousLineEmpty == 1)); then
+      echo
+    fi
     ((isNewline = 1))
-    currentLine="${indentStr}"
+    echo -en "${indentStr}"
     ((currentLineLength = indentNextLine)) || true
   }
-  nextLine() {
-    printCurrentLine
-    eatNextSpaces
+  appendToCurrentLine() {
+    local text="$1"
+    local -i length=$2
+    ((currentLineLength += length)) || true
+    ((isNewline = 0)) || true
+    if [[ "${text: -1}" = $'\r' ]]; then
+      text="${text:0:-1}"
+      echo -en "${text%%+([[:blank:]])}"
+      printCurrentLine
+    else
+      echo -en "${text%%+([[:blank:]])}"
+    fi
   }
-  local currentLine currentChar ansiCode
-  local -i isAnsiCode currentLineLength=0 isNewline=1 textLength=0
-  local text=""
-  local arg=""
-  while (($# > 0)); do
-    arg="$1"
-    shift || true
-    if ((${#arg} == 0)) || [[ "${arg}" = $'\n' ]]; then
-      if ((isNewline == 0)); then
-        # isNewline = 0 means currentLine is not empty
+
+  (
+    local currentLine
+    local -i currentLineLength=0 isNewline=1 argLength=0
+    local -a additionalLines
+    local -i previousLineEmpty=0
+    local arg=""
+
+    while (($# > 0)); do
+      arg="$1"
+      shift || true
+
+      # replace tab by 2 spaces
+      arg="${arg//$'\t'/  }"
+      # remove trailing spaces
+      arg="${arg%[[:blank:]]}"
+      if [[ "${arg}" = $'\n' || -z "${arg}" ]]; then
         printCurrentLine
+        ((previousLineEmpty = 1))
+        continue
+      else
+        if ((previousLineEmpty == 1)); then
+          printCurrentLine
+        fi
+        ((previousLineEmpty = 0)) || true
       fi
-      echo
-      continue
-    fi
-    local textFirstLine="${arg%%$'\n'*}"
-    text="$(echo "${arg}" | sed -E '1d')"
-    ((textLength = ${#text})) || true
-    local textFirstLineNoAnsi
-    textFirstLineNoAnsi="$(echo "${textFirstLine}" | Filters::removeAnsiCodes)"
-    local -i textFirstLineNoAnsiLength=0
-    ((textFirstLineNoAnsiLength = ${#textFirstLineNoAnsi})) || true
+      # convert eol to args
+      mapfile -t additionalLines <<<"${arg}"
+      if ((${#additionalLines[@]} > 1)); then
+        set -- "${additionalLines[@]}" "$@"
+        continue
+      fi
 
-    if ((isNewline == 0)); then
-      glueLength="${#glue}"
-    else
-      glueLength="0"
-    fi
-    if ((currentLineLength + textFirstLineNoAnsiLength + glueLength > maxLineLength)); then
+      ((argLength = ${#arg})) || true
+
+      # empty arg
+      if ((argLength == 0)); then
+        if ((isNewline == 0)); then
+          # isNewline = 0 means currentLine is not empty
+          printCurrentLine
+        fi
+        continue
+      fi
+
       if ((isNewline == 0)); then
-        # isNewline = 0 means currentLine is not empty
-        printCurrentLine
+        glueLength="${#glue}"
+      else
+        glueLength="0"
       fi
-      # restore current arg without considering first line
-      text="${arg}"
-      ((textLength = ${#text})) || true
-    else
-      if ((isNewline == 0)); then
-        # isNewline = 0 means currentLine is not empty
-        currentLine+="${glue}"
-        ((currentLineLength += glueLength)) || true
-      fi
-      currentLine+="${textFirstLine}"
-      isNewline="0"
-      ((currentLineLength += ${#textFirstLine})) || true
-    fi
+      if ((currentLineLength + argLength + glueLength > maxLineLength)); then
+        if ((argLength + glueLength > maxLineLength)); then
+          # arg is too long to even fit on one line
+          # we have to split the arg on current and next line
+          local -i remainingLineLength
+          ((remainingLineLength = maxLineLength - currentLineLength - glueLength))
+          appendToCurrentLine "${glue:0:${glueLength}}${arg:0:${remainingLineLength}}" "$((glueLength + remainingLineLength))"
+          printCurrentLine
+          arg="${arg:${remainingLineLength}}"
+          # remove leading spaces
+          arg="${arg##[[:blank:]]}"
 
-    for ((i = 0; i < textLength; i++)); do
-      currentChar="${text:${i}:1}"
-
-      if [[ "${currentChar}" = $'\r' ]]; then
-        # ignore
-        true
-      elif [[ "${currentChar}" = "\x1b" ]]; then
-        isAnsiCode=1
-        ansiCode+="${currentChar}"
-      elif ((isAnsiCode == 1)); then
-        ansiCode+="${currentChar}"
-        if [[ "${currentChar}" =~ [mGKHF] ]]; then
-          isAnsiCode=0
-          echo -e "${ansiCode}"
-        elif [[ "${currentChar}" = $'\n' ]]; then
-          # invalid ansi code, ignore it
-          isAnsiCode=0
-          ansiCode=""
+          set -- "${arg}" "$@"
+        else
+          # the arg can fit on next line
+          printCurrentLine
+          appendToCurrentLine "${arg}" "${argLength}"
         fi
       else
-        # non ansi code
-        if [[ "${currentChar}" = $'\n' ]] || ((currentLineLength == maxLineLength)); then
-          nextLine
-        elif [[ "${currentChar}" = "\t" ]]; then
-          if ((currentLineLength + 2 <= maxLineLength)); then
-            currentLine+="  "
-            ((isNewline = 0)) || true
-            ((currentLineLength = currentLineLength + 2))
-          else
-            nextLine
-          fi
-        else
-          currentLine+="${currentChar}"
-          ((isNewline = 0)) || true
-          ((++currentLineLength))
-        fi
+        appendToCurrentLine "${glue:0:${glueLength}}${arg}" "$((glueLength + argLength))"
       fi
     done
-  done
-  if [[ "${currentLine}" != "" ]] && [[ ! "${currentLine}" =~ ^[\ \t]+$ ]]; then
-    printCurrentLine
-  fi
+    if [[ "${currentLine}" != "" ]] && [[ ! "${currentLine}" =~ ^[\ \t]+$ ]]; then
+      printCurrentLine
+    fi
+  ) | sed -E -e 's/[[:blank:]]+$//'
 }
 
 # @description checkout usage doc below
@@ -582,19 +567,6 @@ Env::pathPrepend() {
       PATH="$(realpath "${arg}"):${PATH}"
     fi
   done
-}
-
-# @description remove ansi codes from input or files given as argument
-# @arg $@ files:String[] the files to filter
-# @exitcode * if one of the filter command fails
-# @stdin you can use stdin as alternative to files argument
-# @stdout the filtered content
-# @see https://en.wikipedia.org/wiki/ANSI_escape_code
-# shellcheck disable=SC2120
-Filters::removeAnsiCodes() {
-  # cspell:disable
-  sed -E 's/\x1b\[[0-9;]*[mGKHF]//g' "$@"
-  # cspell:enable
 }
 
 # @description log message to file
