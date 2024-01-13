@@ -1,5 +1,6 @@
 [32mDescription:[0m lint awk files
 
+
+
 Lint all files with .awk extension in specified folder.
-Filters out eventual .history folder
-Result in checkstyle format.
+Filters out eventual .history folder Result in checkstyle format.
