@@ -53,7 +53,7 @@ repos:
         exclude: ^doc/guides/Options/generate.*.md$
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.1.0
+    rev: 2.2.0
     hooks:
       - id: fixShebangExecutionBit
       - id: fixShebangExecutionBitGithubActions
@@ -124,7 +124,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.1.0
+    rev: 2.2.0
     hooks:
       - id: megalinterCheckVersion
       - id: megalinterGithubAction
