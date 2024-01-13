@@ -13,8 +13,8 @@
       "local status=0",
       "functionToTest >\"\\${BATS_TEST_TMPDIR}/result\" 2>&1 || status=\\$?",
       "[[ \"\\${status}\" = \"0\" ]]",
-      "run cat \"\\${BATS_TEST_TMPDIR}/result\""
+      "run cat \"\\${BATS_TEST_TMPDIR}/result\"",
     ],
-    "description": "bats get status and output"
-  }
+    "description": "bats get status and output",
+  },
 }
