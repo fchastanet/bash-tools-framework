@@ -7,5 +7,5 @@
 # @stdout the version parsed
 # @require Linux::requireJqCommand
 Version::githubApiExtractVersion() {
-  jq -r ".tag_name" | Version::parse
+  jq -r ".tag_name"
 }
