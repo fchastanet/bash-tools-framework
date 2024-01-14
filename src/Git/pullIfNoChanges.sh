@@ -15,11 +15,14 @@ Git::pullIfNoChanges() {
     return 3
   fi
   (
-    cd "${dir}" || exit 3
-    git update-index --refresh &>/dev/null || exit 4
+    cd "${dir}" || return 3
+    if ! git update-index --refresh &>/dev/null; then
+      Log::displayWarning "Impossible to update git index of '${dir}' - check if you have modified file"
+      return 4
+    fi
     if ! git diff-index --quiet HEAD --; then
       Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
-      exit 2
+      return 2
     fi
     Log::displayInfo "Pull git repository '${dir}' as no changes detected"
     git pull --progress

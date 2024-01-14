@@ -18,11 +18,12 @@ Git::cloneOrPullIfNoChanges() {
   shift || true
 
   if [[ -d "${dir}/.git" ]]; then
-    if Git::pullIfNoChanges "${dir}"; then
-      # shellcheck disable=SC2086
-      if [[ "$(type -t ${pullCallback})" = "function" ]]; then
-        ${pullCallback} "${dir}"
-      fi
+    if ! Git::pullIfNoChanges "${dir}"; then
+      return 1
+    fi
+    # shellcheck disable=SC2086
+    if [[ "$(type -t ${pullCallback})" = "function" ]]; then
+      ${pullCallback} "${dir}"
     fi
   else
     Log::displayInfo "cloning ${repo} ..."
