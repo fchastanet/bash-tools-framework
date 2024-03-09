@@ -50,7 +50,7 @@ run() {
 
     # shellcheck disable=SC2154
     docker run -i --rm plantuml/plantuml \
-      -t"${format}" -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
+      -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
       >"${targetFile}" \
       <"${file}"
     if [[ "${format}" = "svg" ]]; then

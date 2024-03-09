@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-readonly FILTER_DIRECTIVE_KEEP_ONLY_HEADERS="0"
+FILTER_DIRECTIVE_KEEP_ONLY_HEADERS="0"
 # shellcheck disable=SC2034
-readonly FILTER_DIRECTIVE_REMOVE_HEADERS="1"
+FILTER_DIRECTIVE_REMOVE_HEADERS="1"
 
 # @description filter the directive only at the beginning of the file
 # we do not want to filter eventual documentation in the

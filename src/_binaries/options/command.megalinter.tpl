@@ -1,6 +1,6 @@
 %
 declare defaultMegalinterConfigFile=".mega-linter.yml"
-declare defaultMegalinterImage=oxsecurity/megalinter-terraform:v7.4.0
+declare defaultMegalinterImage=oxsecurity/megalinter-terraform:v7.9.0
 declare versionNumber="1.0"
 declare commandFunctionName="megalinterCommand"
 declare help="run megalinter over this repository."
@@ -99,6 +99,7 @@ filesOnlyCallback() {
 checkMegalinterVersionAndExit() {
   local newVersion
   Github::getLatestRelease "oxsecurity/megalinter" newVersion
+  newVersion="$(Version::parse <<<"${newVersion}")"
   local currentVersion
   currentVersion="$(Version::parse <<<"${optionMegalinterImage}")"
   local status=0
