@@ -1,8 +1,9 @@
 ---
+# kics-scan disable=555ab8f9-2001-455e-a077-f2d0f41e2fb9
 # build and deploy Docsify site to GitHub Pages
 name: Deploy Docsify
 
-on: # yamllint disable-line rule:truthy
+on:
   # Runs on pushes targeting the default branch
   push:
     branches: ['master']
@@ -42,7 +43,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'pages'
-          if-no-files-found: error
 
   # Deployment job
   deploy:
@@ -51,8 +51,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-22.04
     needs: build
-    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-    permissions:
+    permissions: # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
       pages: write # to deploy to Pages
       id-token: write # to verify the deployment originates from an appropriate source
       actions: read # actions: read needed by actions/deploy-pages

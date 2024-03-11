@@ -1,6 +1,6 @@
 %
 declare defaultMegalinterConfigFile=".mega-linter.yml"
-declare defaultMegalinterImage=oxsecurity/megalinter-terraform:v7.9.0
+declare defaultMegalinterImage=oxsecurity/megalinter-terraform:v7.10.0
 declare versionNumber="1.0"
 declare commandFunctionName="megalinterCommand"
 declare help="run megalinter over this repository."

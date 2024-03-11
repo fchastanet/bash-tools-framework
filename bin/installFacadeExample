@@ -100,6 +100,13 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
+# @description checks if function name provided exists
+# @arg $1 functionName:String
+# @exitcode 1 if function name doesn't exist
+Assert::functionExists() {
+  declare -F "$1" >/dev/null
+}
+
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
 #   given display level
@@ -490,8 +497,12 @@ case ${action} in
     install "$@"
     ;;
   *)
-    Log::displayError "invalid action requested: ${action}"
-    exit 1
+    if Assert::functionExists defaultFacadeAction; then
+      defaultFacadeAction "$1" "$@"
+    else
+      Log::displayError "invalid action requested: ${action}"
+      exit 1
+    fi
     ;;
 esac
 exit 0

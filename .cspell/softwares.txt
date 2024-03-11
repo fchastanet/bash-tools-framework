@@ -147,3 +147,4 @@ PROSELINT
 TRUFFLEHOG
 nproc
 nbthread
+kics

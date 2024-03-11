@@ -53,8 +53,13 @@ Compiler::Facade::generateFacadeChoiceScript() {
       printf "    ;;\n"
     done <<<"${interfacesFunctionsStr}"
     printf "  *)\n"
-    printf $"    Log::displayError \"invalid action requested: \${action}\"\n"
-    printf "    exit 1\n"
+    printf '    if Assert::functionExists defaultFacadeAction; then\n'
+    # shellcheck disable=SC2016
+    printf '      defaultFacadeAction "$1" "$@"\n'
+    printf '    else\n'
+    printf $"      Log::displayError \"invalid action requested: \${action}\"\n"
+    printf "      exit 1\n"
+    printf '    fi\n'
     printf "    ;;\n"
     printf 'esac\n'
     printf 'exit 0\n'

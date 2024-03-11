@@ -1076,7 +1076,7 @@ megalinterCommand() {
     optionIncremental="0"
     local -i options_parse_optionParsedCountOptionIncremental
     ((options_parse_optionParsedCountOptionIncremental = 0)) || true
-    optionMegalinterImage="oxsecurity/megalinter-terraform:v7.9.0"
+    optionMegalinterImage="oxsecurity/megalinter-terraform:v7.10.0"
     local -i options_parse_optionParsedCountOptionMegalinterImage
     ((options_parse_optionParsedCountOptionMegalinterImage = 0)) || true
     optionCheckMegalinterVersion="0"
@@ -1493,11 +1493,11 @@ megalinterCommand() {
     # shellcheck disable=SC2054
     helpArray=(Specify\ docker\ megalinter\ image\ name\ to\ use)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: oxsecurity/megalinter-terraform:v7.9.0'
+    echo '    Default value: oxsecurity/megalinter-terraform:v7.10.0'
     echo -e "  ${__HELP_OPTION_COLOR}--check-megalinter-version${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
-    helpArray=(Check\ if\ new\ version\ of\ megalinter\ is\ available\ \(compared\ to\ oxsecurity/megalinter-terraform:v7.9.0\)\ and\ exit\ 1\ if\ yes\ and\ display\ new\ version\ number.)
+    helpArray=(Check\ if\ new\ version\ of\ megalinter\ is\ available\ \(compared\ to\ oxsecurity/megalinter-terraform:v7.10.0\)\ and\ exit\ 1\ if\ yes\ and\ display\ new\ version\ number.)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--config-file <String>${__HELP_NORMAL} {single}"
     local -a helpArray
@@ -1582,7 +1582,7 @@ megalinterCommand() {
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo '    Possible values: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE'
     echo -e """
-megalinter image oxsecurity/megalinter-terraform:v7.9.0 will be used.
+megalinter image oxsecurity/megalinter-terraform:v7.10.0 will be used.
 
 <files> optionally you can provide a list of files to run megalinter on
   this mode is incompatible with --incremental option"""
@@ -1607,7 +1607,7 @@ megalinter image oxsecurity/megalinter-terraform:v7.9.0 will be used.
 }
 declare copyrightBeginYear="2022"
 declare optionMegalinterConfigFile=".mega-linter.yml"
-declare optionMegalinterImage="oxsecurity/megalinter-terraform:v7.9.0"
+declare optionMegalinterImage="oxsecurity/megalinter-terraform:v7.10.0"
 declare -a megalinterArgs=()
 unknownArg() {
   if [[ -f "$1" ]]; then
@@ -1665,7 +1665,7 @@ optionFixCallback() {
 
 optionVersionCallback() {
   echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version:${__RESET_COLOR} 1.0"
-  echo -e "${__HELP_TITLE_COLOR}megalinter image Version:${__RESET_COLOR} oxsecurity/megalinter-terraform:v7.9.0"
+  echo -e "${__HELP_TITLE_COLOR}megalinter image Version:${__RESET_COLOR} oxsecurity/megalinter-terraform:v7.10.0"
   exit 0
 }
 

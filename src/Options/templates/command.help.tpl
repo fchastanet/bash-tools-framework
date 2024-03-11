@@ -1,5 +1,14 @@
-echo -e "$(Array::wrap2 " " 80 0 <%% echo -e '"${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"' %> "<% ${help} %>")"
-% echo '    echo'
+%
+description='${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}'
+if [[ $(type -t "${help}") = "function" ]]; then
+  echo "    Array::wrap2 ' ' 80 0 \"<% ${description} %>\" \"\$(${help})\""
+else
+%
+echo -e "$(Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "<% ${help} %>")"
+%
+fi
+echo '    echo'
+%
 
 %# ------------------------------------------
 %# usage section
@@ -61,14 +70,13 @@ fi
 %# ------------------------------------------
 %# longDescription section
 %# ------------------------------------------
-%
-if [[ -n "${longDescription}" ]]; then
-%
-%# removing last empty line
+% if [[ -n "${longDescription}" ]]; then
+% if [[ $(type -t "${longDescription}") == "function" ]]; then
+Array::wrap2 ' ' 76 0 "$(<% ${longDescription} %>)"
+% else
 echo -e """<%% echo "${longDescription}" | sed -E -e '${/^$/d;}' %>"""
-%
-fi
-%
+% fi
+% fi
 %# ------------------------------------------
 %# version section
 %# ------------------------------------------

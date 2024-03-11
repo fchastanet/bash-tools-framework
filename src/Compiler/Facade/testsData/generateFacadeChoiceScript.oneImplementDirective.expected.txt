@@ -5,8 +5,12 @@ case ${action} in
     install "$@"
     ;;
   *)
-    Log::displayError "invalid action requested: ${action}"
-    exit 1
+    if Assert::functionExists defaultFacadeAction; then
+      defaultFacadeAction "$1" "$@"
+    else
+      Log::displayError "invalid action requested: ${action}"
+      exit 1
+    fi
     ;;
 esac
 exit 0
