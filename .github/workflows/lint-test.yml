@@ -93,7 +93,7 @@ jobs:
       # only if pre-commit
       - name: Set up Python
         if: matrix.runPrecommitTests
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
