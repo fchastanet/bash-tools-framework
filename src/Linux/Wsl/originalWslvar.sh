@@ -6,5 +6,5 @@
 # @stdout wslvar stdout
 # @require Linux::Wsl::requireWsl
 Linux::Wsl::originalWslvar() {
-  wslvar "$@"
+  wslvar "$@" | sed -z '$ s/[\r\n]$//'
 }

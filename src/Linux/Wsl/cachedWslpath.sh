@@ -10,9 +10,7 @@
 Linux::Wsl::cachedWslpath() {
   local -a args=("$@")
   local tempEnvFile key
-
-  tempEnvFile="${WSL_TMPDIR:-${TMPDIR:-/tmp}}/bash_tools_wslpath_$(id -un)"
-  File::garbageCollect "${tempEnvFile}" "1"
+  tempEnvFile="${WSL_TMPDIR:-${PERSISTENT_TMPDIR:-/tmp}}/bash_tools_wslpath_$(id -un)"
 
   key="$(Linux::Wsl::getKeyFromWslpathOptions "$@")"
   Cache::getPropertyValue "${tempEnvFile}" "${key}" Linux::Wsl::originalWslpath "${args[@]}"

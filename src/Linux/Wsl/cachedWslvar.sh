@@ -9,8 +9,7 @@
 # @feature cache
 Linux::Wsl::cachedWslvar() {
   local tempEnvFile
-  tempEnvFile="${WSL_TMPDIR:-${TMPDIR:-/tmp}}/bash_tools_wslvar_$(id -un)"
+  tempEnvFile="${WSL_TMPDIR:-${PERSISTENT_TMPDIR:-/tmp}}/bash_tools_wslvar_$(id -un)"
 
-  File::garbageCollect "${tempEnvFile}" "1"
   Cache::getPropertyValue "${tempEnvFile}" "$1" Linux::Wsl::originalWslvar "$@"
 }

@@ -23,7 +23,7 @@ Cache::getPropertyValue() {
     grep -E "^${key}=" "${propertyFile}" | cut -d'=' -f2
     return 0
   elif [[ "$(type -t "${propertyNotFoundCallback}")" = "function" ]]; then
-    value="$(${propertyNotFoundCallback} "$@")" || return $?
+    value="$("${propertyNotFoundCallback}" "$@")" || return $?
     if [[ -n "${value}" ]]; then
       echo -E "${key}=${value}" >>"${propertyFile}"
     fi

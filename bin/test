@@ -863,7 +863,8 @@ Log::rotate() {
     Log::displaySkipped "Log file ${file} doesn't exist yet"
     return 0
   fi
-  for i in $(seq $((maxLogFilesCount - 1)) -1 1); do
+  local i
+  for ((i = maxLogFilesCount - 1; i > 0; i--)); do
     Log::displayInfo "Log rotation ${file}.${i} to ${file}.$((i + 1))"
     mv "${file}."{"${i}","$((i + 1))"} &>/dev/null || true
   done
