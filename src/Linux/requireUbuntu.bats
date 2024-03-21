@@ -18,11 +18,19 @@ function Linux::requireUbuntu::failure { #@test
   run Linux::requireUbuntu
 
   assert_failure 1
-  assert_output ""
+  assert_output --partial "FATAL - this script should be executed under Ubuntu or Debian OS"
 }
 
 function Linux::requireUbuntu::success { #@test
   stub lsb_release '-a : echo "Distributor ID: Ubuntu"'
+  run Linux::requireUbuntu
+
+  assert_success
+  assert_output ""
+}
+
+function Linux::requireUbuntu::success2 { #@test
+  stub lsb_release '-a : echo "Distributor ID: Debian"'
   run Linux::requireUbuntu
 
   assert_success

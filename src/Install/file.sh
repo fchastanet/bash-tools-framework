@@ -20,6 +20,7 @@
 # @env USERGROUP (default: root) the group name that will be used to set target files ownership
 # @env BASE_MNT_C String windows C drive base PATH
 # @env FRAMEWORK_ROOT_DIR used to make paths relative to this directory to reduce length of messages
+# @env SUDO_USER String the user to use as sudoer
 Install::file() {
   local fromFile="$1"
   local targetFile="$2"
@@ -49,8 +50,8 @@ Install::file() {
   local targetDir
   targetDir="$(dirname "${targetFile}")"
   if [[ ! -d "${targetDir}" ]]; then
-    mkdir -p "${targetDir}"
-    chown "${userName}":"${userGroup}" "${targetDir}"
+    ${SUDO} mkdir -p "${targetDir}"
+    ${SUDO} chown "${userName}":"${userGroup}" "${targetDir}"
   fi
   local fromDir
   fromDir="$(dirname "${fromFile}")"
@@ -59,7 +60,7 @@ Install::file() {
 
   Backup::file "${targetFile}" || return 2
 
-  if cp "${fromFile}" "${targetFile}"; then
+  if ${SUDO} cp "${fromFile}" "${targetFile}"; then
     ${successCallback} "${fromFile}" "${targetFile}" "$@"
     Log::displaySuccess "Installed file '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"
   else
