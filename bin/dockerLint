@@ -666,6 +666,7 @@ Env::pathPrepend() {
 # @arg $2 targetFile:String where we want to copy the file
 # @arg $3 version:String the version that has been downloaded
 # @arg $4 installCallback:Function (optional) the callback to call with 3 first arguments
+# @env SUDO allows to use custom sudo prefix command
 # @exitcode * on failure
 # @see Github::upgradeRelease
 # @see Github::installRelease
@@ -680,10 +681,10 @@ Github::defaultInstall() {
   if [[ "$(type -t "${installCallback}")" = "function" ]]; then
     ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
   else
-    mv "${newSoftware}" "${targetFile}"
-    chmod +x "${targetFile}"
+    ${SUDO} mv "${newSoftware}" "${targetFile}"
+    ${SUDO} chmod +x "${targetFile}"
     hash -r
-    rm -f "${newSoftware}" || true
+    ${SUDO} rm -f "${newSoftware}" || true
   fi
 }
 
@@ -880,9 +881,12 @@ Version::parse() {
 # @description load color theme
 # @noargs
 # @env BASH_FRAMEWORK_THEME String theme to use
+# @env LOAD_THEME int 0 to avoid loading theme
 # @exitcode 0 always successful
 UI::requireTheme() {
-  UI::theme "${BASH_FRAMEWORK_THEME-default}"
+  if [[ "${LOAD_THEME:-1}" = "1" ]]; then
+    UI::theme "${BASH_FRAMEWORK_THEME-default}"
+  fi
 }
 
 # @description Display message using skip color (yellow)

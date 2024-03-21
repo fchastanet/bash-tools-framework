@@ -28,7 +28,7 @@ fi
 
 <% ${MAIN_FUNCTION_NAME} %>() {
 .INCLUDE "$(dynamicTemplateDir _includes/_initFrameworkVariables.tpl)"
-# REQUIRES
+.INCLUDE "$(dynamicTemplateDir _includes/facadeDefault/init.tpl)"
 
 %# FACADE_CONTENT here the content script part of the facade will be copied as is
 .INCLUDE "${FACADE_CONTENT_FILE}"

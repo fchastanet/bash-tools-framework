@@ -3,5 +3,7 @@
 # @description ensure linux distribution is ubuntu
 # @exitcode 1 if linux distribution is not ubuntu
 Linux::requireUbuntu() {
-  [[ "$(Linux::getDistributorId)" = "Ubuntu" ]]
+  if ! Array::contains "$(Linux::getDistributorId)" "Ubuntu" "Debian"; then
+    Log::fatal "this script should be executed under Ubuntu or Debian OS"
+  fi
 }

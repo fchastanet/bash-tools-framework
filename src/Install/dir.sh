@@ -45,17 +45,17 @@ Install::dir() {
   local destDir="${toDir}/${dirName}"
   Log::displayDebug "Install directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
   (
-    mkdir -p "${destDir}"
-    cd "${fromDir}/${dirName}" || exit 1
+    ${SUDO} mkdir -p "${destDir}"
+    ${SUDO} cd "${fromDir}/${dirName}" || exit 1
     shopt -s dotglob # * will match hidden files too
-    cp -R -- * "${destDir}" ||
+    ${SUDO} cp -R -- * "${destDir}" ||
       Log::fatal "unable to copy directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
-    chown -R "${userName}":"${userGroup}" "${destDir}"
+    ${SUDO} chown -R "${userName}":"${userGroup}" "${destDir}"
     # chown all parent directory with same user
     local fullDir="${fromDir}"
     for parentFolder in ${dirName////$'\n'}; do
       fullDir="${fullDir}/${parentFolder}"
-      chown "${userName}":"${userGroup}" "${fullDir}"
+      ${SUDO} chown "${userName}":"${userGroup}" "${fullDir}"
     done
   )
   Log::displaySuccess "Installed directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}')"

@@ -7,10 +7,14 @@
 # @set PATH String populated with WINDOW_PATH paths
 # @set WSL_INTEROP String with current used process
 # @set WSL_DISTRO_NAME String initialized using wslpath -m /
+# @env WSL_INIT int 0 to disable wsl env initialization
 # @stderr diagnostics information is displayed
 # @require Linux::Wsl::requireWsl
 # @feature cache
 Linux::Wsl::initEnv() {
+  if [[ "${WSL_INIT:-1}" = "0" ]]; then
+    return 0
+  fi
   if ! Assert::wsl; then
     return 0
   fi
