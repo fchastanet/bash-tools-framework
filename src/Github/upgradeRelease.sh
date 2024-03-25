@@ -4,9 +4,11 @@
 #
 # releaseUrl argument : the placeholder @latestVersion@ will be replaced by the latest release version
 # @arg $1 targetFile:String target binary file (eg: /usr/local/bin/kind)
-# @arg $2 releaseUrl:String    github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
-# @arg $3 versionCallback:Function function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
-# @arg $4 installCallback:Function function called to install the file retrieved on github (default copy as is and set execution bit)
+# @arg $2 releaseUrl:String github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
+# @arg $3 argVersion:String parameter to add to existing command to compute current version
+# @arg $4 versionCallback:Function function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
+# @arg $5 installCallback:Function function called to install the file retrieved on github (default copy as is and set execution bit)
+# @arg $6 parseVersionCallback:Function function to call to filter the version retrieved (Eg: Version::parse)
 # @stdout log messages about retry, install, upgrade
 Github::upgradeRelease() {
   local targetFile="$1"
@@ -15,12 +17,16 @@ Github::upgradeRelease() {
   local versionCallback="${4:-Version::getCommandVersionFromPlainText}"
   # shellcheck disable=SC2034
   local installCallback="${5:-}"
+  local parseVersionCallback="${6:-}"
   local latestVersion
   local repo
 
   repo="$(Github::extractRepoFromGithubUrl "${releaseUrl}")"
   Github::getLatestRelease "${repo}" latestVersion ||
     Log::fatal "Repo ${repo} latest version not found"
+  if [[ "$(type -t "${parseVersionCallback}")" = "function" ]]; then
+    latestVersion="$(${parseVersionCallback} <<<"${latestVersion}")"
+  fi
   Log::displayInfo "Repo ${repo} latest version found is ${latestVersion}"
 
   local currentVersion="not existing"
