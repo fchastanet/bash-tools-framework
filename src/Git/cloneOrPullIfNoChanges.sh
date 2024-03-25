@@ -6,6 +6,7 @@
 # @arg $3 cloneCallback:Function callback on successful clone
 # @arg $4 pullCallback:Function callback on successful pull
 # @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
+# @env SUDO String allows to use custom sudo prefix command
 # @exitcode 0 on successful pulling/cloning, 1 on failure
 Git::cloneOrPullIfNoChanges() {
   local dir="$1"
@@ -27,9 +28,9 @@ Git::cloneOrPullIfNoChanges() {
     fi
   else
     Log::displayInfo "cloning ${repo} ..."
-    mkdir -p "$(dirname "${dir}")"
+    ${SUDO:-} mkdir -p "$(${SUDO:-} dirname "${dir}")"
     # shellcheck disable=SC2086,SC2248
-    if git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
+    if ${SUDO:-} git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
       # shellcheck disable=SC2086
       if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
         ${cloneCallback} "${dir}"

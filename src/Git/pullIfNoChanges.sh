@@ -8,6 +8,7 @@
 # @exitcode 3 not a git directory
 # @exitcode 4 not able to update index
 # @stderr diagnostics information is displayed
+# @env SUDO String allows to use custom sudo prefix command
 # @require Git::requireGitCommand
 Git::pullIfNoChanges() {
   local dir="$1"
@@ -16,15 +17,15 @@ Git::pullIfNoChanges() {
   fi
   (
     cd "${dir}" || return 3
-    if ! git update-index --refresh &>/dev/null; then
+    if ! ${SUDO:-} git update-index --refresh &>/dev/null; then
       Log::displayWarning "Impossible to update git index of '${dir}' - check if you have modified file"
       return 4
     fi
-    if ! git diff-index --quiet HEAD --; then
+    if ! ${SUDO:-} git diff-index --quiet HEAD --; then
       Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
       return 2
     fi
     Log::displayInfo "Pull git repository '${dir}' as no changes detected"
-    git pull --progress
+    ${SUDO:-} git pull --progress
   )
 }
