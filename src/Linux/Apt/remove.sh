@@ -5,6 +5,8 @@
 # @feature Retry::default
 # Linux::requireSudoCommand
 # @require Linux::requireUbuntu
+# @stdout diagnostics logs
 Linux::Apt::remove() {
+  Log::displayInfo "Apt remove $*"
   Retry::default sudo dpkg --purge "$@"
 }
