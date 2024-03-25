@@ -6,6 +6,7 @@
 # @arg $3 group:String expected owner group name of the file (default: USERGROUP or id -gn command)
 # @env USERNAME String if arg $2 is not provided
 # @env USERGROUP String if arg $3 is not provided
+# @env SUDO String allows to use custom sudo prefix command
 # @exitcode 1 if missing file
 # @exitcode 2 if incorrect user ownership
 # @exitcode 3 if incorrect group ownership
@@ -15,15 +16,15 @@ Assert::fileExists() {
   local user="${2:-${USERNAME}}"
   local group="${3:-${USERGROUP}}"
   Log::displayInfo "Check ${file} exists with user ${user}:${group}"
-  if [[ ! -f "${file}" ]]; then
+  if ! ${SUDO:-} test -f "${file}" &>/dev/null; then
     Log::displayError "missing file ${file}"
     return 1
   fi
-  if [[ "${user}" != "$(stat -c '%U' "${file}")" ]]; then
+  if [[ "${user}" != "$(${SUDO:-} stat -c '%U' "${file}")" ]]; then
     Log::displayError "incorrect user ownership on file ${file}"
     return 2
   fi
-  if [[ "${group}" != "$(stat -c '%G' "${file}")" ]]; then
+  if [[ "${group}" != "$(${SUDO:-} stat -c '%G' "${file}")" ]]; then
     Log::displayError "incorrect group ownership on file ${file}"
     return 3
   fi

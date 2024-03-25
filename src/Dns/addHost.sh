@@ -5,13 +5,9 @@
 # @warning files are backup before being updated
 # @arg $1 hostName:String
 # @arg $2 ip:String optional, default value: 127.0.0.1
-# @set envVar type description
 # @env BASE_MNT_C String
-# @exitcode 1 description
-# @stdin description
-# @stdout description
 # @stderr diagnostics information is displayed
-# @see description
+# @env SUDO String allows to use custom sudo prefix command
 # @require Git::requireGitCommand
 # @require Linux::requireSudoCommand
 # @feature Retry::default
@@ -21,14 +17,14 @@ Dns::addHost() {
   local -a cmd
 
   if ! grep -q -E "[[:space:]]${hostName}([[:space:]]|$)" /etc/hosts; then
-    backupFile /etc/hosts
-    printf '%s\t%s\n' "${ip}" "${hostName}" >>/etc/hosts
+    SUDO=${SUDO:-} Backup::file /etc/hosts
+    printf '%s\t%s\n' "${ip}" "${hostName}" | ${SUDO:-} tee -a /etc/hosts
     Log::displaySuccess "Host ${hostName} added to /etc/hosts"
   fi
   if Assert::wsl; then
     [[ -f "${BASE_MNT_C}/Windows/System32/drivers/etc/hosts" ]] || return 1
     if ! dos2unix <"${BASE_MNT_C}/Windows/System32/drivers/etc/hosts" | grep -q -E "[[:space:]]${hostName}([[:space:]]|$)"; then
-      backupFile "${BASE_MNT_C}/Windows/System32/drivers/etc/hosts"
+      SUDO=${SUDO:-} Backup::file "${BASE_MNT_C}/Windows/System32/drivers/etc/hosts"
       cmd=(
         -ExecutionPolicy Bypass
         -NoProfile

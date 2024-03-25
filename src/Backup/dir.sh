@@ -7,6 +7,7 @@
 #
 # @env BACKUP_DIR String variable referencing backup directory
 # @env FRAMEWORK_ROOT_DIR String  used to remove this project directory from displayed backup path
+# @env SUDO String allows to use custom sudo prefix command
 #
 # @exitcode 1 if directory to backup does not exist, 0 if everything is OK
 # @exitcode 2 on backup failure
@@ -22,7 +23,7 @@ Backup::dir() {
     escapedDirname="$(echo "${fromDir}/${dirName}" | sed -e 's#^/##; s#/#@#g')"
     backupFile="${BACKUP_DIR}/${escapedDirname}-$(date "+%Y%m%d-%H%M%S").tgz"
     Log::displayInfo "Backup directory '${fromDir}/${dirName}' to ${backupFile#"${FRAMEWORK_ROOT_DIR}/"}"
-    if ! tar --same-owner -czf "${backupFile}" "${fromDir}/${dirName}" 2>/dev/null; then
+    if ! ${SUDO:-} tar --same-owner -czf "${backupFile}" "${fromDir}/${dirName}" 2>/dev/null; then
       Log::displayError "cannot backup '${fromDir}/${dirName}'"
       return 2
     fi

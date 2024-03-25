@@ -12,6 +12,7 @@
 # @arg $@ callbacksParams:String[] additional parameters passed to callbacks
 # @exitcode 1 if fromFile is not readable
 # @exitcode 2 if backup file failure
+# @exitcode 3 if copy failure
 # @exitcode 0 on success or if OVERWRITE_CONFIG_FILES=0
 # @exitcode 0 on success or if CHANGE_WINDOWS_FILES=0 and target file is a windows file
 # @env OVERWRITE_CONFIG_FILES Boolean (default:0) if 1 will overwrite existing directory
@@ -20,7 +21,7 @@
 # @env USERGROUP (default: root) the group name that will be used to set target files ownership
 # @env BASE_MNT_C String windows C drive base PATH
 # @env FRAMEWORK_ROOT_DIR used to make paths relative to this directory to reduce length of messages
-# @env SUDO_USER String the user to use as sudoer
+# @env SUDO String allows to use custom sudo prefix command
 Install::file() {
   local fromFile="$1"
   local targetFile="$2"
@@ -50,8 +51,8 @@ Install::file() {
   local targetDir
   targetDir="$(dirname "${targetFile}")"
   if [[ ! -d "${targetDir}" ]]; then
-    ${SUDO} mkdir -p "${targetDir}"
-    ${SUDO} chown "${userName}":"${userGroup}" "${targetDir}"
+    ${SUDO:-} mkdir -p "${targetDir}"
+    ${SUDO:-} chown "${userName}":"${userGroup}" "${targetDir}"
   fi
   local fromDir
   fromDir="$(dirname "${fromFile}")"
@@ -60,10 +61,12 @@ Install::file() {
 
   Backup::file "${targetFile}" || return 2
 
-  if ${SUDO} cp "${fromFile}" "${targetFile}"; then
-    ${successCallback} "${fromFile}" "${targetFile}" "$@"
+  if ${SUDO:-} cp "${fromFile}" "${targetFile}"; then
     Log::displaySuccess "Installed file '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"
+    ${successCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${fromDir#"${FRAMEWORK_ROOT_DIR}/"}" "${fromFilename}"
   else
-    ${failureCallback} "${fromDir}" "${fromFilename}" "${targetFile}" "$@"
+    Log::displayError "unable to copy file from '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"
+    ${failureCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${fromDir#"${FRAMEWORK_ROOT_DIR}/"}" "${fromFilename}"
+    return 3
   fi
 }

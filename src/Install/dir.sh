@@ -12,6 +12,7 @@
 # @env USERGROUP (default: root) the group name that will be used to set target files ownership
 # @env BASE_MNT_C String windows C drive base PATH
 # @env FRAMEWORK_ROOT_DIR used to make paths relative to this directory to reduce length of messages
+# @env SUDO String allows to use custom sudo prefix command
 # @exitcode 1 if source directory is not readable
 # @exitcode 0 if copy successful or OVERWRITE_CONFIG_FILES=0 or
 # @exitcode 0 with warning message if OVERWRITE_CONFIG_FILES=0 and target directory exists
@@ -45,17 +46,17 @@ Install::dir() {
   local destDir="${toDir}/${dirName}"
   Log::displayDebug "Install directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
   (
-    ${SUDO} mkdir -p "${destDir}"
-    ${SUDO} cd "${fromDir}/${dirName}" || exit 1
+    ${SUDO:-} mkdir -p "${destDir}"
+    ${SUDO:-} cd "${fromDir}/${dirName}" || exit 1
     shopt -s dotglob # * will match hidden files too
-    ${SUDO} cp -R -- * "${destDir}" ||
+    ${SUDO:-} cp -R -- * "${destDir}" ||
       Log::fatal "unable to copy directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
-    ${SUDO} chown -R "${userName}":"${userGroup}" "${destDir}"
+    ${SUDO:-} chown -R "${userName}":"${userGroup}" "${destDir}"
     # chown all parent directory with same user
     local fullDir="${fromDir}"
     for parentFolder in ${dirName////$'\n'}; do
       fullDir="${fullDir}/${parentFolder}"
-      ${SUDO} chown "${userName}":"${userGroup}" "${fullDir}"
+      ${SUDO:-} chown "${userName}":"${userGroup}" "${fullDir}"
     done
   )
   Log::displaySuccess "Installed directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}')"

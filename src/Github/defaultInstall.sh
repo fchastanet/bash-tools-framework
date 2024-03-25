@@ -13,7 +13,7 @@
 # @arg $2 targetFile:String where we want to copy the file
 # @arg $3 version:String the version that has been downloaded
 # @arg $4 installCallback:Function (optional) the callback to call with 3 first arguments
-# @env SUDO allows to use custom sudo prefix command
+# @env SUDO String allows to use custom sudo prefix command
 # @exitcode * on failure
 # @see Github::upgradeRelease
 # @see Github::installRelease
@@ -28,9 +28,9 @@ Github::defaultInstall() {
   if [[ "$(type -t "${installCallback}")" = "function" ]]; then
     ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
   else
-    ${SUDO} mv "${newSoftware}" "${targetFile}"
-    ${SUDO} chmod +x "${targetFile}"
+    ${SUDO:-} mv "${newSoftware}" "${targetFile}"
+    ${SUDO:-} chmod +x "${targetFile}"
     hash -r
-    ${SUDO} rm -f "${newSoftware}" || true
+    ${SUDO:-} rm -f "${newSoftware}" || true
   fi
 }
