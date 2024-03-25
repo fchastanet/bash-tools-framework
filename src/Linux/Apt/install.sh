@@ -5,6 +5,8 @@
 # @feature Retry::default
 # Linux::requireSudoCommand
 # @require Linux::requireUbuntu
+# @stdout diagnostics logs
 Linux::Apt::install() {
+  Log::displayInfo "Apt install $*"
   Retry::default sudo apt-get install -y -q "$@"
 }
