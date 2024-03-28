@@ -4,6 +4,8 @@
 source "${FRAMEWORK_ROOT_DIR}/src/UI/theme.sh"
 # shellcheck source=src/Log/_.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Log/_.sh"
+# shellcheck source=src/Log/computeDuration.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Log/computeDuration.sh"
 # shellcheck source=src/Log/displayDebug.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Log/displayDebug.sh"
 # shellcheck source=src/Log/displayError.sh

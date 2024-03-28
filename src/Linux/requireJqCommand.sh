@@ -4,5 +4,7 @@
 # @exitcode 1 if jq command not available
 # @stderr diagnostics information is displayed
 Linux::requireJqCommand() {
-  Assert::commandExists jq
+  if [[ "${SKIP_REQUIRE_JQ:-0}" = "0" && "${SKIP_REQUIRES:-0}" = "0" ]]; then
+    Assert::commandExists jq
+  fi
 }
