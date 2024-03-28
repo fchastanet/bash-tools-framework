@@ -311,9 +311,11 @@ Framework::createTempFile() {
 #
 # releaseUrl argument : the placeholder @latestVersion@ will be replaced by the latest release version
 # @arg $1 targetFile:String target binary file (eg: /usr/local/bin/kind)
-# @arg $2 releaseUrl:String    github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
-# @arg $3 versionCallback:Function function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
-# @arg $4 installCallback:Function function called to install the file retrieved on github (default copy as is and set execution bit)
+# @arg $2 releaseUrl:String github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
+# @arg $3 argVersion:String parameter to add to existing command to compute current version
+# @arg $4 versionCallback:Function function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
+# @arg $5 installCallback:Function function called to install the file retrieved on github (default copy as is and set execution bit)
+# @arg $6 parseVersionCallback:Function function to call to filter the version retrieved (Eg: Version::parse)
 # @stdout log messages about retry, install, upgrade
 Github::upgradeRelease() {
   local targetFile="$1"
@@ -322,12 +324,16 @@ Github::upgradeRelease() {
   local versionCallback="${4:-Version::getCommandVersionFromPlainText}"
   # shellcheck disable=SC2034
   local installCallback="${5:-}"
+  local parseVersionCallback="${6:-}"
   local latestVersion
   local repo
 
   repo="$(Github::extractRepoFromGithubUrl "${releaseUrl}")"
   Github::getLatestRelease "${repo}" latestVersion ||
     Log::fatal "Repo ${repo} latest version not found"
+  if [[ "$(type -t "${parseVersionCallback}")" = "function" ]]; then
+    latestVersion="$(${parseVersionCallback} <<<"${latestVersion}")"
+  fi
   Log::displayInfo "Repo ${repo} latest version found is ${latestVersion}"
 
   local currentVersion="not existing"
@@ -404,12 +410,31 @@ Log::displayError() {
   Log::logError "$1"
 }
 
+FIRST_LOG_DATE="$(date '+%s%3N')"
+LOG_LAST_LOG_DATE="${FIRST_LOG_DATE}"
+LOG_LAST_LOG_DATE_INIT=1
+
 # @description Display message using info color (bg light blue/fg white)
 # @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
 Log::displayInfo() {
   local type="${2:-INFO}"
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+    local durationMsg=""
+    if ((DISPLAY_DURATION == 1)); then
+      local duration
+      local -i currentLogDate
+      currentLogDate="$(date '+%s%3N')"
+      if ((LOG_LAST_LOG_DATE_INIT == 1)); then
+        LOG_LAST_LOG_DATE_INIT=0
+        duration="Ref"
+      else
+        duration="$(((currentLogDate - FIRST_LOG_DATE) / 1000))s/+$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000))s"
+      fi
+      LOG_LAST_LOG_DATE="${currentLogDate}"
+      durationMsg="$(date '+%H:%M:%S.%3N')(${duration}) - "
+    fi
+    echo -e "${__INFO_COLOR}${type}    - ${durationMsg}${1}${__RESET_COLOR}" >&2
   fi
   Log::logInfo "$1" "${type}"
 }
@@ -480,7 +505,7 @@ Log::requireLoad() {
 # @arg $1 character:String character to use as separator (default value #)
 UI::drawLine() {
   local character="${1:-#}"
-  printf '%*s\n' "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo)}" '' | tr ' ' "${character}"
+  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo '80')}")
 }
 
 # @description load colors theme constants
@@ -652,7 +677,6 @@ Assert::commandExists() {
 # @exitcode 1 if tty not active
 # @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
 # @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
-# @stderr diagnostic information + help if second argument is provided
 Assert::tty() {
   if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
     return 1
@@ -660,6 +684,7 @@ Assert::tty() {
   if [[ "${INTERACTIVE:-0}" = "1" ]]; then
     return 0
   fi
+  # check if stdout or stderr is connected to terminal
   [[ -t 1 || -t 2 ]]
 }
 
@@ -718,7 +743,7 @@ Env::pathPrepend() {
 # @arg $2 targetFile:String where we want to copy the file
 # @arg $3 version:String the version that has been downloaded
 # @arg $4 installCallback:Function (optional) the callback to call with 3 first arguments
-# @env SUDO allows to use custom sudo prefix command
+# @env SUDO String allows to use custom sudo prefix command
 # @exitcode * on failure
 # @see Github::upgradeRelease
 # @see Github::installRelease
@@ -729,14 +754,14 @@ Github::defaultInstall() {
   local version="$3"
   local installCallback=$4
   # shellcheck disable=SC2086
-  mkdir -p "$(dirname "${targetFile}")"
+  ${SUDO:-} mkdir -p "$(dirname "${targetFile}")"
   if [[ "$(type -t "${installCallback}")" = "function" ]]; then
     ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
   else
-    ${SUDO} mv "${newSoftware}" "${targetFile}"
-    ${SUDO} chmod +x "${targetFile}"
+    ${SUDO:-} mv "${newSoftware}" "${targetFile}"
+    ${SUDO:-} chmod +x "${targetFile}"
     hash -r
-    ${SUDO} rm -f "${newSoftware}" || true
+    ${SUDO:-} rm -f "${newSoftware}" || true
   fi
 }
 

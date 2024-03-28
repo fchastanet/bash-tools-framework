@@ -13,6 +13,7 @@
 # @env BASE_MNT_C String windows C drive base PATH
 # @env FRAMEWORK_ROOT_DIR used to make paths relative to this directory to reduce length of messages
 # @env SUDO String allows to use custom sudo prefix command
+# @env BACKUP_BEFORE_INSTALL Boolean (default:1) backup directory before installing the dir
 # @exitcode 1 if source directory is not readable
 # @exitcode 0 if copy successful or OVERWRITE_CONFIG_FILES=0 or
 # @exitcode 0 with warning message if OVERWRITE_CONFIG_FILES=0 and target directory exists
@@ -26,7 +27,8 @@ Install::dir() {
   local userGroup="${5:-${USERGROUP:-root}}"
 
   if [[ ! -d "${fromDir}/${dirName}" || ! -r "${fromDir}/${dirName}" ]]; then
-    Log::fatal "cannot read source directory '${fromDir}/${dirName}'"
+    Log::displayError "cannot read source directory '${fromDir}/${dirName}'"
+    return 1
   fi
 
   # skip if OVERWRITE_CONFIG_FILES=0 and target dir exists
@@ -41,13 +43,15 @@ Install::dir() {
     return 0
   fi
 
-  Backup::dir "${toDir}" "${dirName}"
+  if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]]; then
+    Backup::dir "${toDir}" "${dirName}"
+  fi
 
   local destDir="${toDir}/${dirName}"
   Log::displayDebug "Install directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
   (
     ${SUDO:-} mkdir -p "${destDir}"
-    ${SUDO:-} cd "${fromDir}/${dirName}" || exit 1
+    cd "${fromDir}/${dirName}" || exit 1
     shopt -s dotglob # * will match hidden files too
     ${SUDO:-} cp -R -- * "${destDir}" ||
       Log::fatal "unable to copy directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"

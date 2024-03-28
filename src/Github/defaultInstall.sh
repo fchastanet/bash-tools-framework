@@ -24,7 +24,7 @@ Github::defaultInstall() {
   local version="$3"
   local installCallback=$4
   # shellcheck disable=SC2086
-  mkdir -p "$(dirname "${targetFile}")"
+  ${SUDO:-} mkdir -p "$(dirname "${targetFile}")"
   if [[ "$(type -t "${installCallback}")" = "function" ]]; then
     ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
   else
