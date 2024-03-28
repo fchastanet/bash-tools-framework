@@ -21,7 +21,7 @@ Compiler::Implement::validateInterfaceFunctions() {
     return 0
   fi
   for func in "$@"; do
-    grep -q -E -e "^${func}\(\)[ \t]*\{$" "${file}" || {
+    grep -q -E -e "^${func}\(\)[ \t]*\{" "${file}" || {
       Log::displayError "function ${func} from interface is not implemented in ${originalFile}"
       return 2
     }

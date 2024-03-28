@@ -22,6 +22,7 @@
 # @env BASE_MNT_C String windows C drive base PATH
 # @env FRAMEWORK_ROOT_DIR used to make paths relative to this directory to reduce length of messages
 # @env SUDO String allows to use custom sudo prefix command
+# @env BACKUP_BEFORE_INSTALL Boolean (default: 1) backup file before installing the file
 Install::file() {
   local fromFile="$1"
   local targetFile="$2"
@@ -59,7 +60,9 @@ Install::file() {
   local fromFilename
   fromFilename="$(basename "${fromFile}")"
 
-  Backup::file "${targetFile}" || return 2
+  if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]]; then
+    Backup::file "${targetFile}" || return 2
+  fi
 
   if ${SUDO:-} cp "${fromFile}" "${targetFile}"; then
     Log::displaySuccess "Installed file '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}' to '${targetFile}'"

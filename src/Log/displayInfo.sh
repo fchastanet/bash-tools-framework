@@ -19,7 +19,7 @@ Log::displayInfo() {
         LOG_LAST_LOG_DATE_INIT=0
         duration="Ref"
       else
-        duration="$(( (currentLogDate - FIRST_LOG_DATE) /1000 ))s/+$(( (currentLogDate - LOG_LAST_LOG_DATE) /1000 ))s"
+        duration="$(((currentLogDate - FIRST_LOG_DATE) / 1000))s/+$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000))s"
       fi
       LOG_LAST_LOG_DATE="${currentLogDate}"
       durationMsg="$(date '+%H:%M:%S.%3N')(${duration}) - "

@@ -416,12 +416,31 @@ Log::displayError() {
   Log::logError "$1"
 }
 
+FIRST_LOG_DATE="$(date '+%s%3N')"
+LOG_LAST_LOG_DATE="${FIRST_LOG_DATE}"
+LOG_LAST_LOG_DATE_INIT=1
+
 # @description Display message using info color (bg light blue/fg white)
 # @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
 Log::displayInfo() {
   local type="${2:-INFO}"
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    echo -e "${__INFO_COLOR}${type}    - ${1}${__RESET_COLOR}" >&2
+    local durationMsg=""
+    if ((DISPLAY_DURATION == 1)); then
+      local duration
+      local -i currentLogDate
+      currentLogDate="$(date '+%s%3N')"
+      if ((LOG_LAST_LOG_DATE_INIT == 1)); then
+        LOG_LAST_LOG_DATE_INIT=0
+        duration="Ref"
+      else
+        duration="$(((currentLogDate - FIRST_LOG_DATE) / 1000))s/+$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000))s"
+      fi
+      LOG_LAST_LOG_DATE="${currentLogDate}"
+      durationMsg="$(date '+%H:%M:%S.%3N')(${duration}) - "
+    fi
+    echo -e "${__INFO_COLOR}${type}    - ${durationMsg}${1}${__RESET_COLOR}" >&2
   fi
   Log::logInfo "$1" "${type}"
 }
@@ -653,7 +672,7 @@ ShellDoc::installRequirementsIfNeeded() {
 # @arg $1 character:String character to use as separator (default value #)
 UI::drawLine() {
   local character="${1:-#}"
-  printf '%*s\n' "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo)}" '' | tr ' ' "${character}"
+  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo '80')}")
 }
 
 # @description load colors theme constants
@@ -751,7 +770,6 @@ Compiler::Facade::requireCommandBinDir() {
 # @exitcode 1 if tty not active
 # @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
 # @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
-# @stderr diagnostic information + help if second argument is provided
 Assert::tty() {
   if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
     return 1
@@ -759,6 +777,7 @@ Assert::tty() {
   if [[ "${INTERACTIVE:-0}" = "1" ]]; then
     return 0
   fi
+  # check if stdout or stderr is connected to terminal
   [[ -t 1 || -t 2 ]]
 }
 
@@ -879,6 +898,7 @@ File::replaceTokenByInput() {
 # @arg $3 cloneCallback:Function callback on successful clone
 # @arg $4 pullCallback:Function callback on successful pull
 # @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
+# @env SUDO String allows to use custom sudo prefix command
 # @exitcode 0 on successful pulling/cloning, 1 on failure
 Git::cloneOrPullIfNoChanges() {
   local dir="$1"
@@ -900,9 +920,9 @@ Git::cloneOrPullIfNoChanges() {
     fi
   else
     Log::displayInfo "cloning ${repo} ..."
-    mkdir -p "$(dirname "${dir}")"
+    ${SUDO:-} mkdir -p "$(${SUDO:-} dirname "${dir}")"
     # shellcheck disable=SC2086,SC2248
-    if git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
+    if ${SUDO:-} git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
       # shellcheck disable=SC2086
       if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
         ${cloneCallback} "${dir}"
@@ -1146,6 +1166,7 @@ Filters::removeAnsiCodes() {
 # @exitcode 3 not a git directory
 # @exitcode 4 not able to update index
 # @stderr diagnostics information is displayed
+# @env SUDO String allows to use custom sudo prefix command
 # @require Git::requireGitCommand
 Git::pullIfNoChanges() {
   local dir="$1"
@@ -1154,16 +1175,16 @@ Git::pullIfNoChanges() {
   fi
   (
     cd "${dir}" || return 3
-    if ! git update-index --refresh &>/dev/null; then
+    if ! ${SUDO:-} git update-index --refresh &>/dev/null; then
       Log::displayWarning "Impossible to update git index of '${dir}' - check if you have modified file"
       return 4
     fi
-    if ! git diff-index --quiet HEAD --; then
+    if ! ${SUDO:-} git diff-index --quiet HEAD --; then
       Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
       return 2
     fi
     Log::displayInfo "Pull git repository '${dir}' as no changes detected"
-    git pull --progress
+    ${SUDO:-} git pull --progress
   )
 }
 

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-# @description Backup given directory using tar gzipped
+# @description Backup given directory in the base directory or in BACKUP_DIR directory
+# backup directory name is composed by following fields separated by _:
+#   - if BACKUP_DIR is not empty then escaped full dirname separated by @
+#   - date with format %Y%m%d_%H:%M:%S (Eg: 20240326_14:45:08)
+#   - .tgz extension
 #
 # @arg $1 string the base directory
 # @arg $2 string the directory to backup from base directory
@@ -17,17 +21,23 @@
 Backup::dir() {
   local escapedDirname backupFile
   local fromDir="$1"
-  local dirName="$2"
+  local dirname="$2"
 
-  if [[ -d "${fromDir}/${dirName}" ]]; then
-    escapedDirname="$(echo "${fromDir}/${dirName}" | sed -e 's#^/##; s#/#@#g')"
-    backupFile="${BACKUP_DIR}/${escapedDirname}-$(date "+%Y%m%d-%H%M%S").tgz"
-    Log::displayInfo "Backup directory '${fromDir}/${dirName}' to ${backupFile#"${FRAMEWORK_ROOT_DIR}/"}"
-    if ! ${SUDO:-} tar --same-owner -czf "${backupFile}" "${fromDir}/${dirName}" 2>/dev/null; then
-      Log::displayError "cannot backup '${fromDir}/${dirName}'"
-      return 2
-    fi
-  else
+  if [[ ! -d "${fromDir}/${dirname}" ]]; then
+    Log::displayError "Backup::dir - directory '${fromDir}/${dirname}' doesn't exist"
     return 1
+  fi
+  if [[ -z "${BACKUP_DIR:-}" ]]; then
+    escapedDirname="$(sed -e 's#^/##; s#/#@#g' <<<"${dirname}")"
+    backupFile="${fromDir}/${escapedDirname}-$(date +"%Y%m%d_%H:%M:%S").tgz"
+  else
+    escapedDirname="$(sed -e 's#^/##; s#/#@#g' <<<"${fromDir}/${dirname}")"
+    backupFile="${BACKUP_DIR}/${escapedDirname}-$(date +"%Y%m%d_%H:%M:%S").tgz"
+  fi
+
+  Log::displayInfo "Backup directory '${fromDir}/${dirname}' to ${backupFile}"
+  if ! ${SUDO:-} tar --same-owner -czf "${backupFile}" "${fromDir}/${dirname}" 2>/dev/null; then
+    Log::displayError "cannot backup '${fromDir}/${dirname}'"
+    return 2
   fi
 }
