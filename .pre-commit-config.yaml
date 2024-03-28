@@ -68,7 +68,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            '74',
+            '75',
             --format,
             plain,
             --theme,
@@ -81,7 +81,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            '74',
+            '75',
             --format,
             checkstyle,
             --theme,
