@@ -77,5 +77,6 @@ Install::dir() {
       fi
     done
   ) || return 1
-  Log::displaySuccess "Installed directory '${destDir}' from '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}')"
+  # shellcheck disable=SC2295
+  Log::displaySuccess "Installed directory '${destDir}' from '${fromDir#${FRAMEWORK_ROOT_DIR}/}/${dirName}'"
 }
