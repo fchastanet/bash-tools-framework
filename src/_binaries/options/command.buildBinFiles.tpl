@@ -8,6 +8,7 @@ INTERNAL TOOL"
 
 %
 .INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
+.INCLUDE "$(dynamicTemplateDir _binaries/options/options.ci.tpl)"
 %
 # shellcheck source=/dev/null
 source <(

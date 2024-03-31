@@ -57,7 +57,7 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.3.3
+    rev: 2.3.4
     hooks:
       - id: fixShebangExecutionBit
       - id: fixShebangExecutionBitGithubActions
@@ -99,7 +99,7 @@ repos:
         name: build sh files
         entry:
           bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp --ignore-missing'
+          bin/buildBinFilesTmp --ignore-missing --ci'
         language: system
         pass_filenames: false
         always_run: true
@@ -112,7 +112,7 @@ repos:
         name: build sh files for Github Actions
         entry:
           bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp'
+          bin/buildBinFilesTmp --ci'
         fail_fast: false
         stages: [manual]
 
@@ -128,7 +128,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.3.3
+    rev: 2.3.4
     hooks:
       - id: megalinterCheckVersion
       - id: megalinterGithubAction
