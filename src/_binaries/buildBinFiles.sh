@@ -33,7 +33,7 @@ getFiles() {
   local -a files=("$@")
   if ((${#files[@]} == 0)); then
     find "${BINARIES_DIR:-src/_binaries}" -name "*.sh" |
-      (grep -v -E '/testsData/' || true)
+      (grep -v -E '/testsData/|/conf/' || true)
   else
     for file in "${files[@]}"; do
       realpath "${file}"
@@ -53,11 +53,12 @@ run() {
   done
   readarray -t files <<<"$(getFiles "${files[@]}")"
 
-  beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-  computeMd5File "${beforeBuild}" "${files[@]}"
-
-  cat "${beforeBuild}"
-
+  # shellcheck disable=SC2154
+  if [[ "${optionContinuousIntegrationMode}" = "1" ]]; then
+    beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+    computeMd5File "${beforeBuild}" "${files[@]}"
+    cat "${beforeBuild}"
+  fi
   printf "%s\n" "${files[@]}" | xargs -t -P8 --max-args=1 --replace="{}" \
     "${FRAMEWORK_BIN_DIR}/compile" "{}" "${COMPILE_PARAMETERS[@]}" "${params[@]}"
 
@@ -68,7 +69,8 @@ run() {
     args+=(--ignore-missing)
   fi
   # exit with code != 0 if at least one bin file has changed
-  if ! md5sum -c "${args[@]}" "${beforeBuild}"; then
+  if [[ "${optionContinuousIntegrationMode}" = "1" ]] &&
+    ! md5sum -c "${args[@]}" "${beforeBuild}"; then
     echo >&2 "some bin files need to be committed"
     exit 1
   fi

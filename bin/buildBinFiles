@@ -921,12 +921,21 @@ commandOptionParseFinished() {
     displayConfig
   fi
 }
+declare optionContinuousIntegrationMode=0
+
+# shellcheck disable=SC2317 # if function is overridden
+updateOptionContinuousIntegrationMode() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
+}
 
 buildBinFilesCommand() {
   local options_parse_cmd="$1"
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
+    optionContinuousIntegrationMode="0"
+    local -i options_parse_optionParsedCountOptionContinuousIntegrationMode
+    ((options_parse_optionParsedCountOptionContinuousIntegrationMode = 0)) || true
     optionIgnoreMissing="0"
     local -i options_parse_optionParsedCountOptionIgnoreMissing
     ((options_parse_optionParsedCountOptionIgnoreMissing = 0)) || true
@@ -973,7 +982,19 @@ buildBinFilesCommand() {
       local options_parse_arg="$1"
       local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
-        # Option 1/15
+        # Option 1/16
+        # Option optionContinuousIntegrationMode --ci variableType Boolean min 0 max 1 authorizedValues '' regexp ''
+        --ci)
+          # shellcheck disable=SC2034
+          optionContinuousIntegrationMode="1"
+          if ((options_parse_optionParsedCountOptionContinuousIntegrationMode >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
+          updateOptionContinuousIntegrationMode "${options_parse_arg}"
+          ;;
+        # Option 2/16
         # Option optionIgnoreMissing --ignore-missing variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --ignore-missing)
           # shellcheck disable=SC2034
@@ -984,7 +1005,7 @@ buildBinFilesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionIgnoreMissing))
           ;;
-        # Option 2/15
+        # Option 3/16
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -1001,7 +1022,7 @@ buildBinFilesCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 3/15
+        # Option 4/16
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           # shellcheck disable=SC2034
@@ -1012,7 +1033,7 @@ buildBinFilesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           ;;
-        # Option 4/15
+        # Option 5/16
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           # shellcheck disable=SC2034
@@ -1025,7 +1046,7 @@ buildBinFilesCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 5/15
+        # Option 6/16
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           # shellcheck disable=SC2034
@@ -1038,7 +1059,7 @@ buildBinFilesCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 6/15
+        # Option 7/16
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           # shellcheck disable=SC2034
@@ -1051,7 +1072,7 @@ buildBinFilesCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 7/15
+        # Option 8/16
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -1064,7 +1085,7 @@ buildBinFilesCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 8/15
+        # Option 9/16
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           # shellcheck disable=SC2034
@@ -1077,7 +1098,7 @@ buildBinFilesCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
-        # Option 9/15
+        # Option 10/16
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
         --theme)
           shift
@@ -1099,7 +1120,7 @@ buildBinFilesCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 10/15
+        # Option 11/16
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           # shellcheck disable=SC2034
@@ -1111,7 +1132,7 @@ buildBinFilesCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           ;;
-        # Option 11/15
+        # Option 12/16
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           # shellcheck disable=SC2034
@@ -1123,7 +1144,7 @@ buildBinFilesCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           ;;
-        # Option 12/15
+        # Option 13/16
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           # shellcheck disable=SC2034
@@ -1136,7 +1157,7 @@ buildBinFilesCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
-        # Option 13/15
+        # Option 14/16
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1158,7 +1179,7 @@ buildBinFilesCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 14/15
+        # Option 15/16
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1176,7 +1197,7 @@ buildBinFilesCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 15/15
+        # Option 16/16
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1235,7 +1256,7 @@ INTERNAL TOOL")"
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--ignore-missing]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--ci]" "[--ignore-missing]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  [${__HELP_OPTION_COLOR}arg${__HELP_NORMAL} {list} (optional)]"
@@ -1245,6 +1266,11 @@ INTERNAL TOOL")"
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+    echo -e "  ${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} {single}"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(activate\ continuous\ integration\ mode\ \(tmp\ folder\ not\ shared\ with\ host\))
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--ignore-missing${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
@@ -1379,7 +1405,7 @@ getFiles() {
   local -a files=("$@")
   if ((${#files[@]} == 0)); then
     find "${BINARIES_DIR:-src/_binaries}" -name "*.sh" |
-      (grep -v -E '/testsData/' || true)
+      (grep -v -E '/testsData/|/conf/' || true)
   else
     for file in "${files[@]}"; do
       realpath "${file}"
@@ -1399,11 +1425,12 @@ run() {
   done
   readarray -t files <<<"$(getFiles "${files[@]}")"
 
-  beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
-  computeMd5File "${beforeBuild}" "${files[@]}"
-
-  cat "${beforeBuild}"
-
+  # shellcheck disable=SC2154
+  if [[ "${optionContinuousIntegrationMode}" = "1" ]]; then
+    beforeBuild="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+    computeMd5File "${beforeBuild}" "${files[@]}"
+    cat "${beforeBuild}"
+  fi
   printf "%s\n" "${files[@]}" | xargs -t -P8 --max-args=1 --replace="{}" \
     "${FRAMEWORK_BIN_DIR}/compile" "{}" "${COMPILE_PARAMETERS[@]}" "${params[@]}"
 
@@ -1414,7 +1441,8 @@ run() {
     args+=(--ignore-missing)
   fi
   # exit with code != 0 if at least one bin file has changed
-  if ! md5sum -c "${args[@]}" "${beforeBuild}"; then
+  if [[ "${optionContinuousIntegrationMode}" = "1" ]] &&
+    ! md5sum -c "${args[@]}" "${beforeBuild}"; then
     echo >&2 "some bin files need to be committed"
     exit 1
   fi

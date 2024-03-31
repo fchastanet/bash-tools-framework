@@ -92,7 +92,7 @@
 - &BUILD_SH_FILES
   id: buildShFiles
   name: build sh files
-  entry: bin/buildBinFiles --ignore-missing
+  entry: bin/buildBinFiles --ignore-missing --ci
   language: script
   pass_filenames: false
   always_run: true
@@ -103,7 +103,7 @@
 - <<: *BUILD_SH_FILES
   id: buildShFilesGithubAction
   name: build sh files for Github Actions
-  entry: bin/buildBinFiles
+  entry: bin/buildBinFiles --ci
   fail_fast: false
   stages: [manual]
 
