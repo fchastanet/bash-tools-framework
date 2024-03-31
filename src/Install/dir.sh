@@ -15,6 +15,7 @@
 # @env SUDO String allows to use custom sudo prefix command
 # @env BACKUP_BEFORE_INSTALL Boolean (default:1) backup directory before installing the dir
 # @exitcode 1 if source directory is not readable
+# @exitcode 2 if source directory backup failed
 # @exitcode 0 if copy successful or OVERWRITE_CONFIG_FILES=0 or
 # @exitcode 0 with warning message if OVERWRITE_CONFIG_FILES=0 and target directory exists
 # @exitcode 0 with warning message if CHANGE_WINDOWS_FILES=0 and target directory in C drive
@@ -44,24 +45,37 @@ Install::dir() {
   fi
 
   if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]]; then
-    Backup::dir "${toDir}" "${dirName}"
+    Backup::dir "${toDir}" "${dirName}" || return 2
   fi
 
   local destDir="${toDir}/${dirName}"
-  Log::displayDebug "Install directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
+  local shortDir="${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}"
+  Log::displayDebug "Installing directory '${destDir}' from '${shortDir}'"
   (
     ${SUDO:-} mkdir -p "${destDir}"
     cd "${fromDir}/${dirName}" || exit 1
     shopt -s dotglob # * will match hidden files too
-    ${SUDO:-} cp -R -- * "${destDir}" ||
-      Log::fatal "unable to copy directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}'"
-    ${SUDO:-} chown -R "${userName}":"${userGroup}" "${destDir}"
+    if [[ -z "$(ls -A .)" ]]; then
+      Log::displaySkipped "directory '${shortDir}' is empty, no copy needed"
+      return 0
+    fi
+    if ! ${SUDO:-} cp -R -- * "${destDir}"; then
+      Log::displayError "unable to copy directory '${shortDir}' to '${destDir}'"
+      exit 1
+    fi
+    if ! ${SUDO:-} chown -R "${userName}":"${userGroup}" "${destDir}"; then
+      Log::displayError "unable to change directory '${destDir}' owners"
+      exit 1
+    fi
     # chown all parent directory with same user
     local fullDir="${fromDir}"
     for parentFolder in ${dirName////$'\n'}; do
       fullDir="${fullDir}/${parentFolder}"
-      ${SUDO:-} chown "${userName}":"${userGroup}" "${fullDir}"
+      if ! ${SUDO:-} chown "${userName}":"${userGroup}" "${fullDir}"; then
+        Log::displayError "unable to change parent directory '${fullDir}' owners"
+        exit 1
+      fi
     done
-  )
-  Log::displaySuccess "Installed directory '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}' to '${destDir}')"
+  ) || return 1
+  Log::displaySuccess "Installed directory '${destDir}' from '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}')"
 }
