@@ -60,18 +60,26 @@ Install::file() {
   local fromFilename
   fromFilename="$(basename "${fromFile}")"
 
-  if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]]; then
+  local prettyFromDir
+  # shellcheck disable=SC2295
+  prettyFromDir="${fromDir#${PRETTY_ROOT_DIR:-${FRAMEWORK_ROOT_DIR}}/}"
+  if diff -q "${fromFile}" "${targetFile}" &>/dev/null; then
+    Log::displayStatus "No changes detected. No need to update '${targetFile}' from '${prettyFromDir}/${fromFilename}'"
+    return 0
+  fi
+
+  if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]] ; then
     Backup::file "${targetFile}" || return 2
   fi
 
   if ${SUDO:-} cp "${fromFile}" "${targetFile}"; then
     # shellcheck disable=SC2295
-    Log::displaySuccess "Installed file '${targetFile}' from '${fromDir#${FRAMEWORK_ROOT_DIR}/}/${fromFilename}'"
-    ${successCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${fromDir#"${FRAMEWORK_ROOT_DIR}/"}" "${fromFilename}"
+    Log::displaySuccess "Installed file '${targetFile}' from '${prettyFromDir}/${fromFilename}'"
+    ${successCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${prettyFromDir}" "${fromFilename}"
   else
     # shellcheck disable=SC2295
     Log::displayError "unable to copy file '${targetFile}' from '${fromDir#${FRAMEWORK_ROOT_DIR}/}/${fromFilename}'"
-    ${failureCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${fromDir#"${FRAMEWORK_ROOT_DIR}/"}" "${fromFilename}"
+    ${failureCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${prettyFromDir}" "${fromFilename}"
     return 3
   fi
 }

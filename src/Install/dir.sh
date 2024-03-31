@@ -56,7 +56,7 @@ Install::dir() {
     cd "${fromDir}/${dirName}" || exit 1
     shopt -s dotglob # * will match hidden files too
     if [[ -z "$(ls -A .)" ]]; then
-      Log::displaySkipped "directory '${shortDir}' is empty, no copy needed"
+      Log::displayStatus "directory '${shortDir}' is empty, no copy needed"
       return 0
     fi
     if ! ${SUDO:-} cp -R -- * "${destDir}"; then
