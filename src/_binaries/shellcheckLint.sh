@@ -14,16 +14,13 @@ if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" 
     (
       cd "${tempDir}" || exit 1
       tar -xJvf "${file}" >&2
-      mv "shellcheck-${version}/shellcheck" "${targetFile}"
+      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
       chmod +x "${targetFile}"
     )
   }
-  Github::upgradeRelease \
+  INSTALL_CALLBACK=install Github::upgradeRelease \
     "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" \
-    "https://github.com/koalaman/shellcheck/releases/download/@latestVersion@/shellcheck-@latestVersion@.linux.x86_64.tar.xz" \
-    "--version" \
-    Version::getCommandVersionFromPlainText \
-    install
+    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
 fi
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.shellcheckLint.tpl)"

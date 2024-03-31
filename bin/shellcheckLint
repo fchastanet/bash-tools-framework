@@ -620,16 +620,6 @@ Version::checkMinimal() {
 
 }
 
-# @description extract software version number
-# @arg $1 command:String the command that will be called with --version parameter
-# @arg $2 argVersion:String  allows to override default --version parameter
-Version::getCommandVersionFromPlainText() {
-  local command="$1"
-  local argVersion="${2:---version}"
-  "${command}" "${argVersion}" 2>&1 |
-    Version::parse # keep only version numbers
-}
-
 # @description ensure COMMAND_BIN_DIR env var is set
 # and PATH correctly prepared
 # @noargs
@@ -957,6 +947,16 @@ Version::compare() {
   return 0
 }
 
+# @description extract software version number
+# @arg $1 command:String the command that will be called with --version parameter
+# @arg $2 argVersion:String  allows to override default --version parameter
+Version::getCommandVersionFromPlainText() {
+  local command="$1"
+  local argVersion="${2:---version}"
+  "${command}" "${argVersion}" 2>&1 |
+    Version::parse # keep only version numbers
+}
+
 # @description filter to keep only version number from a string
 # @arg $@ files:String[] the files to filter
 # @exitcode * if one of the filter command fails
@@ -1080,16 +1080,13 @@ if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" 
     (
       cd "${tempDir}" || exit 1
       tar -xJvf "${file}" >&2
-      mv "shellcheck-${version}/shellcheck" "${targetFile}"
+      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
       chmod +x "${targetFile}"
     )
   }
-  Github::upgradeRelease \
+  INSTALL_CALLBACK=install Github::upgradeRelease \
     "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" \
-    "https://github.com/koalaman/shellcheck/releases/download/@latestVersion@/shellcheck-@latestVersion@.linux.x86_64.tar.xz" \
-    "--version" \
-    Version::getCommandVersionFromPlainText \
-    install
+    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
 fi
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
