@@ -1404,8 +1404,8 @@ getBinFiles() {
 getFiles() {
   local -a files=("$@")
   if ((${#files[@]} == 0)); then
-    find "${BINARIES_DIR:-src/_binaries}" -name "*.sh" |
-      (grep -v -E '/testsData/|/conf/' || true)
+    grep --include=\*.sh -rlw "${BINARIES_DIR:-src/_binaries}" -e "^# BIN_FILE" |
+      (grep -v -E '/testsData/' || true)
   else
     for file in "${files[@]}"; do
       realpath "${file}"
