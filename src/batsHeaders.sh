@@ -6,6 +6,7 @@ vendorDir="${FRAMEWORK_ROOT_DIR}/vendor"
 srcDir="${FRAMEWORK_ROOT_DIR}/src"
 export FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
 export BASH_FRAMEWORK_DISPLAY_LEVEL=3
+export DISPLAY_DURATION=0
 
 # shellcheck source=/src/_includes/_mandatoryHeader.sh
 source "${srcDir}/_includes/_mandatoryHeader.sh"

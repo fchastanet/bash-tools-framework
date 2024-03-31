@@ -65,10 +65,12 @@ Install::file() {
   fi
 
   if ${SUDO:-} cp "${fromFile}" "${targetFile}"; then
-    Log::displaySuccess "Installed file '${targetFile}' from '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}'"
+    # shellcheck disable=SC2295
+    Log::displaySuccess "Installed file '${targetFile}' from '${fromDir#${FRAMEWORK_ROOT_DIR}/}/${fromFilename}'"
     ${successCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${fromDir#"${FRAMEWORK_ROOT_DIR}/"}" "${fromFilename}"
   else
-    Log::displayError "unable to copy file '${targetFile}' from '${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${fromFilename}'"
+    # shellcheck disable=SC2295
+    Log::displayError "unable to copy file '${targetFile}' from '${fromDir#${FRAMEWORK_ROOT_DIR}/}/${fromFilename}'"
     ${failureCallback} "${fromFile}" "${targetFile}" "${userName}" "${userGroup}" "${fromDir#"${FRAMEWORK_ROOT_DIR}/"}" "${fromFilename}"
     return 3
   fi
