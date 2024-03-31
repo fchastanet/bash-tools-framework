@@ -5,6 +5,8 @@
   - [2.1. Bash-tpl best practice](#21-bash-tpl-best-practice)
     - [2.1.1. Avoid shellcheck errors](#211-avoid-shellcheck-errors)
     - [2.1.2. Allow simple quotes to generated correctly](#212-allow-simple-quotes-to-generated-correctly)
+  - [Embed](#embed)
+    - [no need of embed_function_InstallFile](#no-need-of-embed_function_installfile)
 
 ## 1. Bash best practices
 
@@ -57,3 +59,9 @@ generated script:
 ```bash
 echo "    quiet mode, doesn't display any output"
 ```
+
+### Embed
+
+#### no need of embed_function_InstallFile
+
+use ${SUDO}
