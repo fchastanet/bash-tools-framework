@@ -32,7 +32,7 @@ Version::checkMinimal() {
   Version::compare "${version}" "${minimalVersion}" || {
     local result=$?
     if [[ "${result}" = "1" ]]; then
-      Log::displayDebug "${commandName} version is ${version} greater than ${minimalVersion}, OK let's continue"
+      Log::displayInfo "${commandName} version is ${version} greater than ${minimalVersion}"
     elif [[ "${result}" = "2" ]]; then
       Log::displayError "${commandName} minimal version is ${minimalVersion}, your version is ${version}"
       return 1

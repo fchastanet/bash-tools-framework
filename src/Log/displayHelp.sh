@@ -6,7 +6,7 @@ Log::displayHelp() {
   local type="${2:-HELP}"
   if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
     Log::computeDuration
-    echo -e "${__HELP_COLOR}${type}    - ${LOG_LAST_DURATION_STR}${1}${__RESET_COLOR}" >&2
+    echo -e "${__HELP_COLOR}${type}    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
   fi
   Log::logHelp "$1" "${type}"
 }
