@@ -19,11 +19,13 @@ export TMPDIR
 # temp dir cleaning
 # shellcheck disable=SC2317
 cleanOnExit() {
+  local rc=$?
   if [[ "${KEEP_TEMP_FILES:-0}" = "1" ]]; then
     Log::displayInfo "KEEP_TEMP_FILES=1 temp files kept here '${TMPDIR}'"
   elif [[ -n "${TMPDIR+xxx}" ]]; then
     Log::displayDebug "KEEP_TEMP_FILES=0 removing temp files '${TMPDIR}'"
     rm -Rf "${TMPDIR:-/tmp/fake}" >/dev/null 2>&1
   fi
+  exit "${rc}"
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
