@@ -14,11 +14,11 @@ Compiler::Embed::embedFile() {
   local fileAlias="$2"
   local fileMd5sum
 
-  fileMd5sum="$(md5sum "${file}" | awk '{print $1}')"
+  fileMd5sum="$(md5sum "${file}" | Filters::firstField)"
   (
     base64="$(base64 -w 0 "${file}")" \
     asName="${fileAlias}" \
-    fileMode="$(stat -c "%a %n" "${file}" | awk '{print $1}')" \
+    fileMode="$(stat -c "%a" "${file}")" \
     targetFile="\${PERSISTENT_TMPDIR:-/tmp}/${fileMd5sum}/${fileAlias}" \
       envsubst <"${_COMPILE_ROOT_DIR}/src/Compiler/Embed/embedFile.tpl"
   )

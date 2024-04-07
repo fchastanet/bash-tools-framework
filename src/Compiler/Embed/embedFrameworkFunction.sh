@@ -52,7 +52,7 @@ Compiler::Embed::embedFrameworkFunction() {
 
     # compute binFile md5 checksum to allow multiple binary with different file versions
     # to run in parallel
-    binFileMd5Sum="$(md5sum "${binSrcFile}" | awk '{print $1}')"
+    binFileMd5Sum="$(md5sum "${binSrcFile}" | Filters::firstField)"
 
     # encode bin file as base64
     # using PERSISTENT_TMPDIR to avoid directory to be deleted by traps

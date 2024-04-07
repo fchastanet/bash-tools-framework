@@ -70,7 +70,7 @@ Profiles::allDepsRecursive() {
     # remove duplicates from deps preserving order
     mapfile -t deps < <(
       IFS=$'\n'
-      echo "${deps[@]}" | awk '!x[$0]++'
+      echo "${deps[@]}" | Filters::uniqUnsorted
     )
     if ((${#newDeps} > 0)); then
       Profiles::allDepsRecursive "${scriptsDir}" "${i}" "${newDeps[@]}"

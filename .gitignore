@@ -19,3 +19,4 @@ pages/tests/
 !**/_sidebar.md
 !**/_navbar.md
 bin/buildBinFilesTmp
+bin/buildBinFilesTemp
