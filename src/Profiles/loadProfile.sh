@@ -47,7 +47,7 @@ Profiles::loadProfile() {
 
   # remove duplicates from profile preserving order
   mapfile -t CONFIG_LIST < <(
-    IFS=$'\n' printf '%s\n' "${CONFIG_LIST[@]}" | awk '!x[$0]++'
+    IFS=$'\n' printf '%s\n' "${CONFIG_LIST[@]}" | Filters::uniqUnsorted
   )
   printf '%s\n' "${CONFIG_LIST[@]}"
 }

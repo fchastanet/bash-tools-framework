@@ -24,9 +24,7 @@ checkEachFunctionHasSrcFile() {
   readarray -t functionsToImport < <(
     Filters::commentLines "${file}" |
       Filters::bashFrameworkFunctions |
-      awk '{$1=$1};1' |
-      sort |
-      uniq || true
+      Filters::uniqUnsorted || true
   )
   for functionToImport in "${functionsToImport[@]}"; do
     if echo "${functionToImport}" | grep -q -E "${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP}"; then
