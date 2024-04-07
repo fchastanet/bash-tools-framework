@@ -7,8 +7,8 @@
 #  - auto import ZZZ.sh after loading functions if at least one function imported in the directory
 
 _COMPILE_BIN_DIR="$(cd "$(readlink -e "${BASH_SOURCE[0]%/*}")" && pwd -P)"
-_COMPILE_ROOT_DIR="$(cd "${_COMPILE_BIN_DIR}/.." && pwd -P)"
-_COMPILE_SRC_DIR="$(cd "${_COMPILE_ROOT_DIR}/src" && pwd -P)"
+_COMPILE_ROOT_DIR="${_COMPILE_BIN_DIR%/*}"
+_COMPILE_SRC_DIR="${_COMPILE_ROOT_DIR}/src"
 export FRAMEWORK_ROOT_DIR="${_COMPILE_ROOT_DIR}"
 
 # shellcheck source=/src/_includes/_header.sh
@@ -252,7 +252,10 @@ done
 srcDirs+=("${_COMPILE_SRC_DIR}")
 _COMPILE_FILE_ARGUMENTS+=(-s "${_COMPILE_SRC_DIR}")
 # add temporary generated functions src dir(Options)
-mkdir -p "${TMPDIR}/src" || true
+if [[ ! -d "${TMPDIR}/src" ]]; then
+  mkdir -p "${TMPDIR}/src"
+fi
+
 srcDirs+=("${TMPDIR}/src")
 _COMPILE_FILE_ARGUMENTS+=(-s "${TMPDIR}/src")
 
@@ -355,7 +358,7 @@ evalTemplate() {
     eval "${varExports}"
     eval "${varCallbackExports}"
     ORIGINAL_TEMPLATE_DIR="${_COMPILE_SRC_DIR}"
-    SCRIPT_NAME="$(basename "${BIN_FILE}")"
+    SCRIPT_NAME="${BIN_FILE##*/}"
     export FRAMEWORK_BIN_DIR
     export FRAMEWORK_ROOT_DIR
     export ORIGINAL_TEMPLATE_DIR
@@ -432,7 +435,7 @@ importFunctions() {
 
     if [[ -f "${fileToImport}" ]]; then
       local fileToImportDir
-      fileToImportDir="$(dirname "${fileToImport}")"
+      fileToImportDir="${fileToImport%/*}"
       # check if we need to import _.sh
       if [[ -f "${fileToImportDir}/_.sh" ]]; then
         Compiler::injectFileOnce "${fileToImportDir}/_.sh" \

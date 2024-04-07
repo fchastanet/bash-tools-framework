@@ -17,7 +17,7 @@ unalias -a || true
 
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
-CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
+CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
 COMMAND_BIN_DIR="${CURRENT_DIR}"
 
 if [[ -t 1 || -t 2 ]]; then

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 declare -g FIRST_LOG_DATE LOG_LAST_LOG_DATE LOG_LAST_LOG_DATE_INIT LOG_LAST_DURATION_STR
-FIRST_LOG_DATE="$(date '+%s%3N')"
+FIRST_LOG_DATE="${EPOCHREALTIME/[^0-9]/}"
 LOG_LAST_LOG_DATE="${FIRST_LOG_DATE}"
 LOG_LAST_LOG_DATE_INIT=1
 LOG_LAST_DURATION_STR=""
@@ -14,18 +14,19 @@ Log::computeDuration() {
     local -i duration=0
     local -i delta=0
     local -i currentLogDate
-    currentLogDate="$(date '+%s%3N')"
+    currentLogDate="${EPOCHREALTIME/[^0-9]/}"
     if ((LOG_LAST_LOG_DATE_INIT == 1)); then
       LOG_LAST_LOG_DATE_INIT=0
       LOG_LAST_DURATION_STR="Ref"
     else
-      duration=$(((currentLogDate - FIRST_LOG_DATE) / 1000))
-      delta=$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000))
+      duration=$(((currentLogDate - FIRST_LOG_DATE) / 1000000))
+      delta=$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000000))
       LOG_LAST_DURATION_STR="${duration}s/+${delta}s"
     fi
     LOG_LAST_LOG_DATE="${currentLogDate}"
     # shellcheck disable=SC2034
-    LOG_LAST_DURATION_STR="$(date '+%H:%M:%S.%3N')(${LOG_LAST_DURATION_STR}) - "
+    local microSeconds="${EPOCHREALTIME#*.}"
+    LOG_LAST_DURATION_STR="$(printf '%(%T)T.%03.0f\n' "${EPOCHSECONDS}" "${microSeconds:0:3}")(${LOG_LAST_DURATION_STR}) - "
   else
     # shellcheck disable=SC2034
     LOG_LAST_DURATION_STR=""

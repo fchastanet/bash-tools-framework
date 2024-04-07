@@ -31,5 +31,10 @@ Linux::Wsl::getKeyFromWslpathOptions() {
     esac
     shift || true
   done
-  echo -E "${key}_$1"
+  key="${key}_$1"
+  # replace some characters \:/
+  key="${key//\\//}"
+  key="${key//:/_}"
+  key="${key////_}"
+  echo "${key}"
 }

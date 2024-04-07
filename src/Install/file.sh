@@ -49,16 +49,13 @@ Install::file() {
     return 0
   fi
 
-  local targetDir
-  targetDir="$(dirname "${targetFile}")"
-  if [[ ! -d "${targetDir}" ]]; then
+  local targetDir="${targetFile%/*}"
+  if ! ${SUDO} test -d "${targetDir}"; then
     ${SUDO:-} mkdir -p "${targetDir}"
     ${SUDO:-} chown "${userName}":"${userGroup}" "${targetDir}"
   fi
-  local fromDir
-  fromDir="$(dirname "${fromFile}")"
-  local fromFilename
-  fromFilename="$(basename "${fromFile}")"
+  local fromDir="${fromFile%/*}"
+  local fromFilename="${fromFile##*/}"
 
   local prettyFromDir
   # shellcheck disable=SC2295
@@ -68,7 +65,7 @@ Install::file() {
     return 0
   fi
 
-  if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]] ; then
+  if [[ "${BACKUP_BEFORE_INSTALL:-1}" = "1" ]]; then
     Backup::file "${targetFile}" || return 2
   fi
 

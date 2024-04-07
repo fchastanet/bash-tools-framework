@@ -11,7 +11,9 @@
 Ssh::fixAuthenticityOfHostCantBeEstablished() {
   local host="$1"
   Log::displayInfo "Adding ${host} to the list of known ssh hosts"
-  mkdir -p "${HOME}/.ssh" || return 1
+  if [[ ! -d "${HOME}/.ssh" ]]; then
+    mkdir -p "${HOME}/.ssh" || return 1
+  fi
   touch "${HOME}/.ssh/known_hosts" || return 1
   ssh-keygen -R "${host}" || return 1 # remove host before adding it to prevent duplication
   ssh-keyscan "${host}" >>"${HOME}/.ssh/known_hosts" || true

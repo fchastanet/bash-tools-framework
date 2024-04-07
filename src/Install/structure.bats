@@ -9,8 +9,8 @@ source "${srcDir}/Install/structure.sh"
 function Install::simpleStructure { #@test
   mkdir -p "${BATS_TEST_TMPDIR}/srcDir/dir1/dir1.1"
   touch "${BATS_TEST_TMPDIR}/srcDir/dir1/dir1-file1"
-  Install::file() { 
-    echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}" 
+  Install::file() {
+    echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}"
   }
   PRETTY_ROOT_DIR="${BATS_TEST_TMPDIR}" Install::structure \
     "${BATS_TEST_TMPDIR}/srcDir" "${BATS_TEST_TMPDIR}/destDir" \
@@ -29,7 +29,7 @@ function complexStructureDataset {
   local dirName="$1"
   mkdir -p "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1.1"
   mkdir -p "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1.2" # empty dir
-  mkdir -p "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1.2/dir1.2.1" 
+  mkdir -p "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1.2/dir1.2.1"
   mkdir -p "${BATS_TEST_TMPDIR}/${dirName}/dir2/dir2.1/dir2.1.1" # 2 files, one hidden
 }
 
@@ -44,7 +44,7 @@ function  complexStructureDatasetWithFiles {
 
 function Install::complexStructureWithHiddenFiles { #@test
   complexStructureDatasetWithFiles "srcDir"
-  Install::file() { 
+  Install::file() {
     echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}"
   }
 

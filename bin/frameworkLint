@@ -67,7 +67,7 @@ REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 if [[ -n "${EMBED_CURRENT_DIR}" ]]; then
   CURRENT_DIR="${EMBED_CURRENT_DIR}"
 else
-  CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
+  CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
 fi
 
 ################################################
@@ -80,7 +80,9 @@ export KEEP_TEMP_FILES
 # PERSISTENT_TMPDIR is not deleted by traps
 PERSISTENT_TMPDIR="${TMPDIR:-/tmp}/bash-framework"
 export PERSISTENT_TMPDIR
-mkdir -p "${PERSISTENT_TMPDIR}"
+if [[ ! -d "${PERSISTENT_TMPDIR}" ]]; then
+  mkdir -p "${PERSISTENT_TMPDIR}"
+fi
 
 # shellcheck disable=SC2034
 TMPDIR="$(mktemp -d -p "${PERSISTENT_TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)"
@@ -298,8 +300,10 @@ Env::requireLoad() {
     # BASH_FRAMEWORK_ENV_FILES is an array
     configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
-  if [[ -f "$(pwd)/.framework-config" ]]; then
-    configFiles+=("$(pwd)/.framework-config")
+  local localFrameworkConfigFile
+  localFrameworkConfigFile="$(pwd)/.framework-config"
+  if [[ -f "${localFrameworkConfigFile}" ]]; then
+    configFiles+=("${localFrameworkConfigFile}")
   fi
   if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
     configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
@@ -503,10 +507,12 @@ Log::requireLoad() {
 
   if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
     if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      if
-        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
-          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
-      then
+      if [[ ! -d "${BASH_FRAMEWORK_LOG_FILE%/*}" ]]; then
+        if ! mkdir -p "${BASH_FRAMEWORK_LOG_FILE%/*}" 2>/dev/null; then
+          BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+          echo -e "${__ERROR_COLOR}ERROR   - directory ${BASH_FRAMEWORK_LOG_FILE%/*} is not writable${__RESET_COLOR}" >&2
+        fi
+      elif ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
         BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
         echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
       fi
@@ -514,7 +520,6 @@ Log::requireLoad() {
       BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
       echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
     fi
-
   fi
 
   if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
@@ -652,7 +657,7 @@ Env::pathPrepend() {
 }
 
 declare -g FIRST_LOG_DATE LOG_LAST_LOG_DATE LOG_LAST_LOG_DATE_INIT LOG_LAST_DURATION_STR
-FIRST_LOG_DATE="$(date '+%s%3N')"
+FIRST_LOG_DATE="${EPOCHREALTIME/[^0-9]/}"
 LOG_LAST_LOG_DATE="${FIRST_LOG_DATE}"
 LOG_LAST_LOG_DATE_INIT=1
 LOG_LAST_DURATION_STR=""
@@ -665,18 +670,19 @@ Log::computeDuration() {
     local -i duration=0
     local -i delta=0
     local -i currentLogDate
-    currentLogDate="$(date '+%s%3N')"
+    currentLogDate="${EPOCHREALTIME/[^0-9]/}"
     if ((LOG_LAST_LOG_DATE_INIT == 1)); then
       LOG_LAST_LOG_DATE_INIT=0
       LOG_LAST_DURATION_STR="Ref"
     else
-      duration=$(((currentLogDate - FIRST_LOG_DATE) / 1000))
-      delta=$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000))
+      duration=$(((currentLogDate - FIRST_LOG_DATE) / 1000000))
+      delta=$(((currentLogDate - LOG_LAST_LOG_DATE) / 1000000))
       LOG_LAST_DURATION_STR="${duration}s/+${delta}s"
     fi
     LOG_LAST_LOG_DATE="${currentLogDate}"
     # shellcheck disable=SC2034
-    LOG_LAST_DURATION_STR="$(date '+%H:%M:%S.%3N')(${LOG_LAST_DURATION_STR}) - "
+    local microSeconds="${EPOCHREALTIME#*.}"
+    LOG_LAST_DURATION_STR="$(printf '%(%T)T.%03.0f\n' "${EPOCHSECONDS}" "${microSeconds:0:3}")(${LOG_LAST_DURATION_STR}) - "
   else
     # shellcheck disable=SC2034
     LOG_LAST_DURATION_STR=""
@@ -1000,7 +1006,7 @@ defaultFrameworkConfig="$(
 # shellcheck disable=SC2034
 
 REAL_SCRIPT_FILE="${REAL_SCRIPT_FILE:-$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")}"
-FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR:-$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")/../.." && pwd -P)}"
+FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR:-${REAL_SCRIPT_FILE%/*/*}}"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_SRC_DIR:-${FRAMEWORK_ROOT_DIR}/src}"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/bin}"
 FRAMEWORK_VENDOR_DIR="${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}"
@@ -1027,7 +1033,7 @@ export REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/fchastanet/bash-tool
 BASH_FRAMEWORK_THEME="${BASH_FRAMEWORK_THEME:-default}"
 BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
 BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
-BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/$(basename "$0").log}"
+BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${0##*/}.log}"
 BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
 EOF
 )"

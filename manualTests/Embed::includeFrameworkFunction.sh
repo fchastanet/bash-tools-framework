@@ -9,7 +9,7 @@ SCRIPT_NAME=${0##*/}
 BIN_DIR="${CURRENT_DIR}"
 srcDir="$(cd "${CURRENT_DIR}/../src" && pwd -P)"
 BATS_TEST_DIRNAME="${srcDir}/Compiler/Embed"
-FRAMEWORK_ROOT_DIR="$(cd "${srcDir}/.." && pwd -P)"
+FRAMEWORK_ROOT_DIR="${srcDir%/*}"
 export FRAMEWORK_ROOT_DIR
 
 # shellcheck source=src/_includes/_mandatoryHeader.sh

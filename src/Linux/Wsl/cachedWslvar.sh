@@ -6,6 +6,7 @@
 # @exitcode * if Linux::Wsl::originalWslvar cannot find the variable
 # @stderr diagnostics information is displayed
 # @require Linux::Wsl::requireWsl
+# @deprecated use Linux::Wsl::cachedWslvar2 instead
 # @feature cache
 Linux::Wsl::cachedWslvar() {
   local tempEnvFile

@@ -42,9 +42,11 @@ Install::structure() {
   # shellcheck disable=SC2317
   createStructure() {
     local dir="$1"
-    if ! ${SUDO:-} mkdir -p "${dir}"; then
-      Log::displayError "Install::structure - impossible to create directory '${dir}'"
-      exit 1
+    if ! ${SUDO} test -d "${dir}"; then
+      if ! ${SUDO:-} mkdir -p "${dir}"; then
+        Log::displayError "Install::structure - impossible to create directory '${dir}'"
+        exit 1
+      fi
     fi
 
     if ! ${SUDO:-} chown "${userName}":"${userGroup}" "${dir}"; then
@@ -66,29 +68,29 @@ Install::structure() {
           exit 1
         fi
       done || {
-        if [[ "${PIPESTATUS[0]}" != "0" ]]; then
-          Log::displayError "Install::structure - replicated directory structure - find directories on '${fromDir}' resulted in an error"
-          exit 2
-        fi
-      }
+      if [[ "${PIPESTATUS[0]}" != "0" ]]; then
+        Log::displayError "Install::structure - replicated directory structure - find directories on '${fromDir}' resulted in an error"
+        exit 2
+      fi
+    }
   ) || return 2
 
   # for each file, copy it
   (
     local file
     shopt -s lastpipe
-    ${SUDO:-} find "${fromDir}" -depth -type f -printf "%P\0" | 
+    ${SUDO:-} find "${fromDir}" -depth -type f -printf "%P\0" |
       while read -rd '' file; do
-          if ! Install::file "${fromDir}/${file}" "${toDir}/${file}"; then
-            # error already reported by Install::file
-            exit 1
-          fi
-      done || {
-        if [[ "${PIPESTATUS[0]}" != "0" ]]; then
-          Log::displayError "Install::structure - replicated file structure - find files on '${fromDir}' resulted in an error"
-          exit 2
+        if ! Install::file "${fromDir}/${file}" "${toDir}/${file}"; then
+          # error already reported by Install::file
+          exit 1
         fi
-      }
+      done || {
+      if [[ "${PIPESTATUS[0]}" != "0" ]]; then
+        Log::displayError "Install::structure - replicated file structure - find files on '${fromDir}' resulted in an error"
+        exit 2
+      fi
+    }
   ) || return 3
 
   # shellcheck disable=SC2295

@@ -52,7 +52,9 @@ Install::dir() {
   local shortDir="${fromDir#"${FRAMEWORK_ROOT_DIR}/"}/${dirName}"
   Log::displayDebug "Installing directory '${destDir}' from '${shortDir}'"
   (
-    ${SUDO:-} mkdir -p "${destDir}"
+    if ! ${SUDO} test -d "${destDir}"; then
+      ${SUDO:-} mkdir -p "${destDir}"
+    fi
     cd "${fromDir}/${dirName}" || exit 1
     shopt -s dotglob # * will match hidden files too
     if [[ -z "$(ls -A .)" ]]; then

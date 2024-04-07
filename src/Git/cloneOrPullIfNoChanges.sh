@@ -28,7 +28,9 @@ Git::cloneOrPullIfNoChanges() {
     fi
   else
     Log::displayInfo "cloning ${repo} ..."
-    ${SUDO:-} mkdir -p "$(${SUDO:-} dirname "${dir}")"
+    if ! ${SUDO:-} test -d "${dir%/*}"; then
+      ${SUDO:-} mkdir -p "${dir%/*}"
+    fi
     # shellcheck disable=SC2086,SC2248
     if ${SUDO:-} git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
       # shellcheck disable=SC2086

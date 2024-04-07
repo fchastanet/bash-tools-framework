@@ -14,7 +14,7 @@ teardown() {
 }
 
 function Linux::requireUbuntu::failure { #@test
-  stub lsb_release '-a : echo "Distributor ID: Alpine"'
+  stub source '/etc/os-release : echo "Alpine"'
   run Linux::requireUbuntu
 
   assert_failure 1
@@ -22,7 +22,7 @@ function Linux::requireUbuntu::failure { #@test
 }
 
 function Linux::requireUbuntu::success { #@test
-  stub lsb_release '-a : echo "Distributor ID: Ubuntu"'
+  stub source '/etc/os-release : echo "Ubuntu"'
   run Linux::requireUbuntu
 
   assert_success
@@ -30,7 +30,7 @@ function Linux::requireUbuntu::success { #@test
 }
 
 function Linux::requireUbuntu::success2 { #@test
-  stub lsb_release '-a : echo "Distributor ID: Debian"'
+  stub source '/etc/os-release : echo "Debian"'
   run Linux::requireUbuntu
 
   assert_success

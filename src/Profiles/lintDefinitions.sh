@@ -100,8 +100,7 @@ ProfilesListDefinitionsFiles() {
 
 ProfilesGetScriptNameFromRelativeScriptFile() {
   local relativeScriptFile="$1"
-  local scriptName
-  scriptName="$(basename "${relativeScriptFile}")"
+  local scriptName="${relativeScriptFile##*/}"
   echo "${scriptName%.sh}"
 }
 

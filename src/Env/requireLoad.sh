@@ -13,8 +13,10 @@ Env::requireLoad() {
     # BASH_FRAMEWORK_ENV_FILES is an array
     configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
-  if [[ -f "$(pwd)/.framework-config" ]]; then
-    configFiles+=("$(pwd)/.framework-config")
+  local localFrameworkConfigFile
+  localFrameworkConfigFile="$(pwd)/.framework-config"
+  if [[ -f "${localFrameworkConfigFile}" ]]; then
+    configFiles+=("${localFrameworkConfigFile}")
   fi
   if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
     configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")

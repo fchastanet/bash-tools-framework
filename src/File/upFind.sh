@@ -17,7 +17,7 @@ File::upFind() {
   shift || true
 
   if [[ -f "${fromPath}" ]]; then
-    fromPath="$(dirname "${fromPath}")"
+    fromPath="${fromPath%/*}"
   fi
   while true; do
     if [[ -f "${fromPath}/${fileName}" ]]; then

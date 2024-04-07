@@ -8,12 +8,12 @@
 # @exitcode * if Linux::Wsl::originalWslpath cannot find the path or Linux::Wsl::originalWslvar cannot find the var
 # @stderr diagnostics information is displayed
 # @require Linux::Wsl::requireWsl
-# @deprecated use Linux::Wsl::cachedWslpathFromWslVar2 instead
 # @feature cache
-Linux::Wsl::cachedWslpathFromWslVar() {
-  local var="$1"
+Linux::Wsl::cachedWslpathFromWslVar2() {
+  # shellcheck disable=SC2034
+  local -n cachedWslpathFromWslVar2_value=$1
   shift || true
   local value
-  value="$(Linux::Wsl::cachedWslvar "${var}" "$@")" || return 1
-  Linux::Wsl::cachedWslpath "${value}" || return 1
+  Linux::Wsl::cachedWslvar2 value "$@"
+  Linux::Wsl::cachedWslpath2 cachedWslpathFromWslVar2_value "${value}" || return 1
 }
