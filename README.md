@@ -227,7 +227,7 @@ simply add these lines to your script
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2034
-CURRENT_DIR="$(cd "$(readlink -e "${REAL_SCRIPT_FILE%/*}")" && pwd -P)"
+CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
 BIN_DIR="${CURRENT_DIR}"
 # shellcheck disable=SC2034
 FRAMEWORK_SRC_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/src' %>"

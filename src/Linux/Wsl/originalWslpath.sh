@@ -6,5 +6,5 @@
 # @stdout wslpath stdout
 # @require Linux::Wsl::requireWsl
 Linux::Wsl::originalWslpath() {
-  wslpath "$@"
+  wslpath "$@" | sed -z '$ s/[\r\n]$//'
 }

@@ -10,7 +10,9 @@ export KEEP_TEMP_FILES
 # PERSISTENT_TMPDIR is not deleted by traps
 PERSISTENT_TMPDIR="${TMPDIR:-/tmp}/bash-framework"
 export PERSISTENT_TMPDIR
-mkdir -p "${PERSISTENT_TMPDIR}"
+if [[ ! -d "${PERSISTENT_TMPDIR}" ]]; then
+  mkdir -p "${PERSISTENT_TMPDIR}"
+fi
 
 # shellcheck disable=SC2034
 TMPDIR="$(mktemp -d -p "${PERSISTENT_TMPDIR:-/tmp}" -t bash-framework-$$-XXXXXX)"

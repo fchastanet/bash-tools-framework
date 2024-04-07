@@ -12,14 +12,12 @@
 # @see Assert::validPath
 Assert::fileWritable() {
   local file="$1"
-  local dir
 
   Assert::validPath "${file}" || return 1
   if [[ -f "${file}" ]]; then
     [[ -w "${file}" ]] || return 3
   else
-    dir="$(dirname "${file}")"
-    [[ -w "${dir}" ]] || return 2
+    [[ -w "${file%/*}" ]] || return 2
   fi
 
 }

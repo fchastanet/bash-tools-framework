@@ -34,7 +34,8 @@ Compiler::Facade::generateFacadeScript() {
   Compiler::Facade::generateFacadeContent "${scriptFile}" >"${facadeContentTmpFile}" || return 2
 
   local mainFunctionName
-  mainFunctionName="facade_main_$(basename "${scriptFile}" | sed -E -e 's/[^A-Za-z0-9]//g')" || return 4
+  local scriptName="${scriptFile##*/}"
+  mainFunctionName="facade_main_${scriptName//[^A-Za-z0-9]/}"
 
   echo "export FACADE_HEADERS_FILE='${facadeHeadersTmpFile}'"
   echo "export FACADE_CONTENT_FILE='${facadeContentTmpFile}'"

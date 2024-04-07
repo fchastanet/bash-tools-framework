@@ -9,5 +9,5 @@
 # @exitcode 1 if regexp not matches
 # @see https://regex101.com/r/BUlPXS/1
 Assert::validVariableName() {
-  echo "$1" | LC_ALL=POSIX grep -E -q '(^[a-z][A-Za-z_0-9:]+$)|(^[A-Z_][A-Z_0-9:]+$)'
+  [[ "$1" =~ (^[a-z][A-Za-z_0-9:]+$)|(^[A-Z_][A-Z_0-9:]+$) ]]
 }

@@ -33,9 +33,12 @@ ShellDoc::generateShellDocsFromDir() {
   while IFS= read -r relativeDir; do
     relativeDir="${relativeDir#./}"
     targetDocFile="${docDir}/${relativeDir}.md"
-    targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "$(dirname "${indexFile}")" "${targetDocFile}")"
+    targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "${indexFile%/*}" "${targetDocFile}")"
 
-    mkdir -p "$(dirname "${targetDocFile}")" || true
+    local targetDocFileDir="${targetDocFile%/*}"
+    if [[ ! -d "${targetDocFileDir}" ]]; then
+      mkdir -p "${targetDocFileDir}" || true
+    fi
     if ShellDoc::generateShellDocDir \
       "${fromDir}/${relativeDir}" \
       "${fromDirRelative}/${relativeDir}" \

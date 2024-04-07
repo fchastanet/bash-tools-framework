@@ -22,10 +22,12 @@ Log::requireLoad() {
 
   if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
     if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      if
-        ! mkdir -p "$(dirname "${BASH_FRAMEWORK_LOG_FILE}")" 2>/dev/null ||
-          ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null
-      then
+      if [[ ! -d "${BASH_FRAMEWORK_LOG_FILE%/*}" ]]; then
+        if ! mkdir -p "${BASH_FRAMEWORK_LOG_FILE%/*}" 2>/dev/null; then
+          BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+          echo -e "${__ERROR_COLOR}ERROR   - directory ${BASH_FRAMEWORK_LOG_FILE%/*} is not writable${__RESET_COLOR}" >&2
+        fi
+      elif ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
         BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
         echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
       fi
@@ -33,7 +35,6 @@ Log::requireLoad() {
       BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
       echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
     fi
-
   fi
 
   if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then

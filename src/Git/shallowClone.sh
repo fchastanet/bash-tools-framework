@@ -33,7 +33,9 @@ Git::shallowClone() {
     fi
     (
       Log::displayInfo "Installing ${installDir} ..."
-      mkdir -p "${installDir}"
+      if [[ ! -d "${installDir}" ]]; then
+        mkdir -p "${installDir}"
+      fi
       cd "${installDir}" || exit 1
       git init >&2
       git remote add origin "${repository}" >&2

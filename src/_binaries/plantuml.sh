@@ -58,7 +58,7 @@ run() {
     fi
   }
   # TODO generate convertPuml as binary to avoid all these exports
-  export -f convertPuml Log::displayInfo Log::logInfo Log::logMessage
+  export -f convertPuml Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
   export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
 
   (

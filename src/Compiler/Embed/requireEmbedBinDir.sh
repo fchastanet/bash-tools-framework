@@ -7,9 +7,12 @@
 # @set PATH string add tmp bin directory where to find embed binaries
 # @stderr diagnostics information is displayed
 Compiler::Embed::requireEmbedBinDir() {
-  mkdir -p "${TMPDIR:-/tmp}/bin" || {
-    Log::displayError "unable to create directory ${TMPDIR:-/tmp}/bin"
-    return 1
-  }
-  Env::pathPrepend "${TMPDIR:-/tmp}/bin"
+  local tempDir="${TMPDIR:-/tmp}/bin"
+  if [[ ! -d "${tempDir}" ]]; then
+    if ! mkdir -p "${tempDir}"; then
+      Log::displayError "unable to create directory ${TMPDIR:-/tmp}/bin"
+      return 1
+    fi
+  fi
+  Env::pathPrepend "${tempDir}"
 }

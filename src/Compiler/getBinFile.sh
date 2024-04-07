@@ -28,6 +28,9 @@ Compiler::getBinFile() {
     Log::displayError "${srcFile} does not define a valid BIN_FILE value: '${binFile}' is a directory"
     return 2
   fi
-  mkdir -p "$(dirname "${binFile}")" || true
+
+  if [[ ! -d "${binFile%/*}" ]]; then
+    mkdir -p "${binFile%/*}" || true
+  fi
   echo "${binFile}"
 }

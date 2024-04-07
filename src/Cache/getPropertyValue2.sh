@@ -9,26 +9,31 @@
 # @exitcode 1 if value is not found
 # @exitcode * if propertyNotFoundCallback fails
 # @stdout the property value given by property file or by the propertyNotFoundCallback
-# @deprecated use Cache::getPropertyValue2 instead
-Cache::getPropertyValue() {
-  local value
+Cache::getPropertyValue2() {
   local propertyFile="$1"
-  shift || true
-  local key
-  key="$(echo -E "$1" | sed -E 's#\\#/#g')"
-  shift || true
-  local propertyNotFoundCallback=$1
-  shift || true
+  local -n propertiesMap=$2
+  local -n getPropertyValue2_val=$3
+  local key="$4"
+  local propertyNotFoundCallback=$5
+  shift 5 || true
+  local -a args=("$@")
 
-  if grep -E "^${key}=.*" "${propertyFile}" &>/dev/null; then
-    grep -E "^${key}=" "${propertyFile}" | cut -d'=' -f2
+  if [[ "${#propertiesMap[@]}" = "0" && -s "${propertyFile}" ]]; then
+    local line
+    while IFS="" read -r line; do
+      if [[ "${line}" =~ ^([^=]+)=(.+)$ ]]; then
+        propertiesMap["${BASH_REMATCH[1]}"]="${BASH_REMATCH[2]}"
+      fi
+    done <"${propertyFile}"
+  fi
+
+  if [[ -n "${propertiesMap[${key}]+abc}" ]]; then
+    getPropertyValue2_val="${propertiesMap[${key}]}"
     return 0
   elif [[ "$(type -t "${propertyNotFoundCallback}")" = "function" ]]; then
-    value="$("${propertyNotFoundCallback}" "$@")" || return $?
-    if [[ -n "${value}" ]]; then
-      echo -E "${key}=${value}" >>"${propertyFile}"
-    fi
-    echo -E "${value}"
+    getPropertyValue2_val="$("${propertyNotFoundCallback}" "${args[@]}")" || return $?
+    propertiesMap["${key}"]="${getPropertyValue2_val}"
+    echo "${key}=${getPropertyValue2_val}" >>"${propertyFile}"
     return 0
   fi
   return 1

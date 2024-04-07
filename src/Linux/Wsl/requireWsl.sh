@@ -8,8 +8,8 @@ Linux::Wsl::requireWsl() {
   if [[ "${WSL_GARBAGE_COLLECT:-1}" = "1" ]]; then
     local tempEnvDir
     tempEnvDir="${WSL_TMPDIR:-${PERSISTENT_TMPDIR:-/tmp}}"
-    File::garbageCollect "${tempEnvDir}/bash_tools_wslpath_$(id -un)" "1"
+    File::garbageCollect "${tempEnvDir}/bash_tools_wslpath_${USER_ID:-$(id -un)}" "1"
     tempEnvDir="${WSL_TMPDIR:-${PERSISTENT_TMPDIR:-/tmp}}"
-    File::garbageCollect "${tempEnvDir}/bash_tools_wslvar_$(id -un)" "1"
+    File::garbageCollect "${tempEnvDir}/bash_tools_wslvar_${USER_ID:-$(id -un)}" "1"
   fi
 }

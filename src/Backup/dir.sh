@@ -2,7 +2,7 @@
 
 # @description Backup given directory in the base directory or in BACKUP_DIR directory
 # backup directory name is composed by following fields separated by _:
-#   - if BACKUP_DIR is not empty then escaped full dirname separated by @
+#   - if BACKUP_DIR is not empty then escaped full dir name separated by @
 #   - date with format %Y%m%d_%H:%M:%S (Eg: 20240326_14:45:08)
 #   - .tgz extension
 #

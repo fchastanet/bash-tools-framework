@@ -126,3 +126,6 @@ Facadesh
 Scriptsh
 SHELLCHECKLINT
 pids
+EPOCHREALTIME
+EPOCHSECONDS
+getsys

@@ -34,7 +34,10 @@ Options::generateFunction() {
     # interpret the template
     local functionTmpFile
     functionTmpFile="${TMPDIR}/src/Options/${baseFunctionName}.sh"
-    mkdir -p "$(dirname "${functionTmpFile}")" || return 2
+    local functionTmpDir="${functionTmpFile%/*}"
+    if [[ ! -d "${functionTmpDir}" ]]; then
+      mkdir -p "${functionTmpDir}" || return 2
+    fi
     interpretTemplate >"${functionTmpFile}" || return 1
     Log::displayDebug "Generated function in ${functionTmpFile}"
 

@@ -16,8 +16,10 @@ UI::talkToUser() {
 
   Log::displayInfo "${msg}"
   if Assert::wsl && "${BASH_FRAMEWORK_COMMAND:-command}" -v powershell.exe &>/dev/null; then
+    local talkScriptPath
+    Linux::Wsl::cachedWslpath2 talkScriptPath -w "${talkScript}"
     ${POWERSHELL_BIN:-powershell.exe} -ExecutionPolicy Bypass -NoProfile -Command \
-      "$(Linux::Wsl::cachedWslpath -w "${talkScript}")" "'${msg}'" || true
+      "${talkScriptPath}" "'${msg}'" || true
   else
     tput bel || true
   fi

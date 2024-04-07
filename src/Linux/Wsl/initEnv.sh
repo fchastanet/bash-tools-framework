@@ -45,6 +45,9 @@ Linux::Wsl::initEnv() {
       grep -o -E '[0-9]+' |
       tac
   )
-  WSL_DISTRO_NAME="$(Linux::Wsl::cachedWslpath -m / | sed -E 's#.*\$/([^/]+)/$#\1#')"
+  Linux::Wsl::cachedWslpath2 WSL_DISTRO_NAME -m /
+  # eg: //wsl.localhost/UbuntuTest/
+  WSL_DISTRO_NAME="${WSL_DISTRO_NAME%*/}"  # remove last slash
+  WSL_DISTRO_NAME="${WSL_DISTRO_NAME##*/}" # keep last part after slash
   export WSL_DISTRO_NAME
 }

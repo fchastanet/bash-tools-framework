@@ -8,7 +8,7 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/Linux/getDistributorId.sh"
 
 function Linux::getDistributorId::failure { #@test
-  stub lsb_release '-a : exit 1'
+  stub source '/etc/os-release : exit 1'
 
   run Linux::getDistributorId
 
@@ -17,7 +17,7 @@ function Linux::getDistributorId::failure { #@test
 }
 
 function Linux::getDistributorId::success { #@test
-  stub lsb_release '-a : echo "Distributor ID: Ubuntu"'
+  stub source '/etc/os-release : echo "Ubuntu"'
 
   run Linux::getDistributorId
 

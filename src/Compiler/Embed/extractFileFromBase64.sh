@@ -14,14 +14,17 @@ Compiler::Embed::extractFileFromBase64() {
   local targetFile="$1"
   local binFileBase64="$2"
   local fileMode="${3:-+x}"
+  local targetDir="${targetFile%/*}"
 
   if [[ ! -f "${targetFile}" ]]; then
-    mkdir -p "$(dirname "${targetFile}")"
+    if [[ ! -d "${targetDir}" ]]; then
+      mkdir -p "${targetDir}"
+    fi
     base64 -d >"${targetFile}" <<<"${binFileBase64}"
     chmod "${fileMode}" "${targetFile}"
   fi
 
   if [[ -x "${targetFile}" ]]; then
-    Env::pathPrepend "$(dirname "${targetFile}")"
+    Env::pathPrepend "${targetDir}"
   fi
 }

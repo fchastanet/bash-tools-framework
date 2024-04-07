@@ -234,7 +234,7 @@ inline a awk script inside the resulting binary:
 ```bash
 awkScript="\$(
 cat <<'AWK_EOF'
-.INCLUDE "\$(cd "\$(dirname \${SRC_ABSOLUTE_PATH})" && pwd -P)/mysql2puml.awk"
+.INCLUDE "${SRC_ABSOLUTE_PATH%/*}/mysql2puml.awk"
 AWK_EOF
 )"
 ```
