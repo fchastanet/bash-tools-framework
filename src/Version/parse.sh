@@ -7,5 +7,10 @@
 # @stdout the filtered content
 # shellcheck disable=SC2120
 Version::parse() {
-  sed -En 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' "$@" | head -n1
+  # match anything, print(p), exit on first match(Q)
+  sed -En \
+    -e 's/\x1b\[[0-9;]*[mGKHF]//g' \
+    -e 's/[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/' \
+    -e '//{p;Q}' \
+    "$@"
 }
