@@ -14,27 +14,37 @@ teardown() {
 
 function Linux::Apt::addRepository::simple { #@test
   ((call = 0)) || true
+  Linux::Apt::repositoryExists() {
+    return 1
+  }
   Retry::default() {
     ((++call))
     if ((call == 1)); then
-      if [[ "$@" =~ 'add-apt-repository -y pkg1' ]]; then
-        echo -n "success${call} "
+      if [[ "$@" =~ 'add-apt-repository -y --update pkg1' ]]; then
+        echo -n "success${call}"
       else
-        echo -n "failure${call} "
-      fi
-    elif ((call == 2)); then
-      if [[ "$@" =~ 'Linux::Apt::update' ]]; then
-        echo -n "success${call} "
-      else
-        echo -n "failure${call} "
+        echo -n "failure${call}"
       fi
     else
-      echo -n "failure${call} "
+      echo -n "failure${call}"
     fi
   }
 
   run Linux::Apt::addRepository "pkg1"
 
   assert_success
-  assert_output "success1 success2 "
+  assert_line --index 0 --partial "INFO    - Apt add repository pkg1"
+  assert_line --index 1 "success1"
+}
+
+function Linux::Apt::addRepository::alreadyExists { #@test
+  ((call = 0)) || true
+  Linux::Apt::repositoryExists() {
+    return 0
+  }
+
+  run Linux::Apt::addRepository "pkg1"
+
+  assert_success
+  assert_output --partial "INFO    - Repository pkg1 is already installed"
 }
