@@ -13,7 +13,7 @@ function setup() {
 
 function Github::downloadReleaseVersion::curlFailure { #@test
   Retry::default() {
-    if [[ "$@" =~ ^curl\ -L\ -o ]] && [[ "$@" =~ --fail\ invalidUrl$ ]]; then
+    if [[ "$@" =~ ^curl\ -L\ --connect-timeout\ "5"\ -o ]] && [[ "$@" =~ --fail\ invalidUrl$ ]]; then
       echo "curlCallOK"
     else
       echo "curlCallFailure"
@@ -27,8 +27,8 @@ function Github::downloadReleaseVersion::curlFailure { #@test
 
 function Github::downloadReleaseVersion::curlSuccess { #@test
   Retry::default() {
-    if [[ "$@" =~ ^curl\ -L\ -o ]] && [[ "$@" =~ --fail\ validUrl$ ]]; then
-      echo "$4" >"${BATS_TEST_TMPDIR}/result"
+    if [[ "$@" =~ ^curl\ -L\ --connect-timeout\ "5"\ -o ]] && [[ "$@" =~ --fail\ validUrl$ ]]; then
+      echo "$6" >"${BATS_TEST_TMPDIR}/result"
       echo "curlCallOK"
     else
       echo "curlCallFailure"

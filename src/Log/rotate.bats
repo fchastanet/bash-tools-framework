@@ -24,7 +24,7 @@ teardown() {
 function Log::rotate::noLogFile { #@test
   run Log::rotate "${BATS_TEST_TMPDIR}/unknownLogFile" "1"
   assert_success
-  assert_output --partial "SKIPPED - Log file ${BATS_TEST_TMPDIR}/unknownLogFile doesn't exist yet"
+  assert_output --partial "DEBUG  - Log file ${BATS_TEST_TMPDIR}/unknownLogFile doesn't exist yet"
 }
 
 function Log::rotate::oneLogFile { #@test

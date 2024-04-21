@@ -16,7 +16,7 @@ function teardown() {
 }
 
 function Github::isReleaseVersionExist::curlFailure { #@test
-  stub curl '-L -o /dev/null --silent --head --fail invalidUrl : exit 1'
+  stub curl '-L --connect-timeout 5 -o /dev/null --silent --head --fail invalidUrl : exit 1'
 
   run Github::isReleaseVersionExist "invalidUrl"
   assert_failure 1
@@ -24,7 +24,7 @@ function Github::isReleaseVersionExist::curlFailure { #@test
 }
 
 function Github::isReleaseVersionExist::curlSuccess { #@test
-  stub curl '-L -o /dev/null --silent --head --fail validUrl : exit 0'
+  stub curl '-L --connect-timeout 5 -o /dev/null --silent --head --fail validUrl : exit 0'
   run Github::isReleaseVersionExist "validUrl"
   assert_success
   assert_output ""
