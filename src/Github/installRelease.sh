@@ -10,6 +10,7 @@
 # @arg $5 versionCallback:Function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
 # @arg $6 installCallback:Function called to install the file retrieved on github (default copy as is and set execution bit)
 # @stdout log messages about retry, install, upgrade
+# @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
 Github::installRelease() {
   local targetFile="$1"
   local releaseUrl="$2"
@@ -30,6 +31,7 @@ Github::installRelease() {
     newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t github.newSoftware.XXXX)
     Retry::default curl \
       -L \
+      --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
       -o "${newSoftware}" \
       --fail \
       "${url}"

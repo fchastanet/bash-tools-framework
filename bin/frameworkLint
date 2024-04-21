@@ -766,7 +766,7 @@ Log::rotate() {
   local maxLogFilesCount="${2:-5}"
 
   if [[ ! -f "${file}" ]]; then
-    Log::displaySkipped "Log file ${file} doesn't exist yet"
+    Log::displayDebug "Log file ${file} doesn't exist yet"
     return 0
   fi
   local i

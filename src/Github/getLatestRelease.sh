@@ -5,6 +5,7 @@
 # @arg $1 repo:String repository in the format fchastanet/bash-tools
 # @arg $2 resultRef:&String reference to a variable that will contain the result of the command
 # @stdout log messages about retry
+# @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
 Github::getLatestRelease() {
   local repo="$1"
   # we need to pass the result through a reference instead of output directly
@@ -16,6 +17,7 @@ Github::getLatestRelease() {
   # Get latest release from GitHub api
   if Retry::default curl \
     -L \
+    --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
     -o "${resultFile}" \
     --fail \
     --silent \
@@ -27,4 +29,5 @@ Github::getLatestRelease() {
   # display curl result in case of failure
   cat >&2 "${resultFile}"
   rm -f "${resultFile}"
+  return 1
 }
