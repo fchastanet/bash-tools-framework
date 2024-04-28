@@ -32,7 +32,8 @@ getBinFiles() {
 getFiles() {
   local -a files=("$@")
   if ((${#files[@]} == 0)); then
-    grep --include=\*.sh -rlw "${BINARIES_DIR:-src/_binaries}" -e "^# BIN_FILE" |
+    # shellcheck disable=SC2154
+    grep --include=\*.sh -rlw -e "^# BIN_FILE" "${optionSrcDirs[@]}" |
       (grep -v -E '/testsData/' || true)
   else
     for file in "${files[@]}"; do

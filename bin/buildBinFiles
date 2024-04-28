@@ -485,6 +485,35 @@ Array::wrap2() {
   ) | sed -E -e 's/[[:blank:]]+$//'
 }
 
+# @description asserts that first argument is directory that exists with specified ownership
+# @arg $1 dir:String
+# @arg $2 user:String expected owner user name of the directory (default: USERNAME or id -un command)
+# @arg $3 group:String expected owner group name of the directory (default: USERGROUP or id -gn command)
+# @env USERNAME String if arg $2 is not provided
+# @env USERGROUP String if arg $3 is not provided
+# @exitcode 1 if missing directory
+# @exitcode 2 if incorrect user ownership
+# @exitcode 3 if incorrect group ownership
+# @stderr diagnostics information is displayed
+Assert::dirExists() {
+  local dir="$1"
+  local user="${2:-${USERNAME:-$(id -un)}}"
+  local group="${3:-${USERGROUP:-$(id -gn)}}"
+  Log::displayInfo "Check if directory ${dir} exists with user ${user}:${group}"
+  if [[ ! -d "${dir}" ]]; then
+    Log::displayError "missing directory ${dir}"
+    return 1
+  fi
+  if [[ "${user}" != "$(stat -c '%U' "${dir}")" ]]; then
+    Log::displayError "incorrect user ownership on directory ${dir}"
+    return 2
+  fi
+  if [[ "${group}" != "$(stat -c '%G' "${dir}")" ]]; then
+    Log::displayError "incorrect group ownership on directory ${dir}"
+    return 3
+  fi
+}
+
 # @description ensure COMMAND_BIN_DIR env var is set
 # and PATH correctly prepared
 # @noargs
@@ -714,7 +743,7 @@ optionHelpCallback() {
 
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
-  echo "${SCRIPT_NAME} version 1.0"
+  echo "${SCRIPT_NAME} version 1.1"
   exit 0
 }
 
@@ -972,7 +1001,7 @@ buildBinFilesCommand() {
       local options_parse_arg="$1"
       local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
-        # Option 1/16
+        # Option 1/17
         # Option optionContinuousIntegrationMode --ci variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --ci)
           # shellcheck disable=SC2034
@@ -984,7 +1013,7 @@ buildBinFilesCommand() {
           ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
           updateOptionContinuousIntegrationMode "${options_parse_arg}"
           ;;
-        # Option 2/16
+        # Option 2/17
         # Option optionIgnoreMissing --ignore-missing variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --ignore-missing)
           # shellcheck disable=SC2034
@@ -995,7 +1024,19 @@ buildBinFilesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionIgnoreMissing))
           ;;
-        # Option 3/16
+        # Option 3/17
+        # Option optionSrcDirs --src-dir|-s variableType StringArray min 0 max -1 authorizedValues '' regexp ''
+        --src-dir | -s)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionSrcDirs))
+          optionSrcDirs+=("$1")
+          validateSrcDirs "${options_parse_arg}" "${optionSrcDirs[@]}"
+          ;;
+        # Option 4/17
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -1012,7 +1053,7 @@ buildBinFilesCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 4/16
+        # Option 5/17
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           # shellcheck disable=SC2034
@@ -1023,7 +1064,7 @@ buildBinFilesCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           ;;
-        # Option 5/16
+        # Option 6/17
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           # shellcheck disable=SC2034
@@ -1036,7 +1077,7 @@ buildBinFilesCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 6/16
+        # Option 7/17
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           # shellcheck disable=SC2034
@@ -1049,7 +1090,7 @@ buildBinFilesCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 7/16
+        # Option 8/17
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           # shellcheck disable=SC2034
@@ -1062,7 +1103,7 @@ buildBinFilesCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 8/16
+        # Option 9/17
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -1075,7 +1116,7 @@ buildBinFilesCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 9/16
+        # Option 10/17
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           # shellcheck disable=SC2034
@@ -1088,7 +1129,7 @@ buildBinFilesCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
-        # Option 10/16
+        # Option 11/17
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
         --theme)
           shift
@@ -1110,7 +1151,7 @@ buildBinFilesCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 11/16
+        # Option 12/17
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           # shellcheck disable=SC2034
@@ -1122,7 +1163,7 @@ buildBinFilesCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           ;;
-        # Option 12/16
+        # Option 13/17
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           # shellcheck disable=SC2034
@@ -1134,7 +1175,7 @@ buildBinFilesCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           ;;
-        # Option 13/16
+        # Option 14/17
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           # shellcheck disable=SC2034
@@ -1147,7 +1188,7 @@ buildBinFilesCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
-        # Option 14/16
+        # Option 15/17
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1169,7 +1210,7 @@ buildBinFilesCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 15/16
+        # Option 16/17
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1187,7 +1228,7 @@ buildBinFilesCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 16/16
+        # Option 17/17
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1234,6 +1275,7 @@ buildBinFilesCommand() {
       shift || true
     done
     commandOptionParseFinished
+    buildBinFilesCallback
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
@@ -1246,7 +1288,7 @@ INTERNAL TOOL")"
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--ci]" "[--ignore-missing]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--ci]" "[--ignore-missing]" "[--src-dir|-s <String>]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  [${__HELP_OPTION_COLOR}arg${__HELP_NORMAL} {list} (optional)]"
@@ -1261,10 +1303,17 @@ INTERNAL TOOL")"
     # shellcheck disable=SC2054
     helpArray=(activate\ continuous\ integration\ mode\ \(tmp\ folder\ not\ shared\ with\ host\))
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
+    echo
+    echo -e "${__HELP_TITLE_COLOR}BUILD OPTIONS:${__RESET_COLOR}"
     echo -e "  ${__HELP_OPTION_COLOR}--ignore-missing${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(Do\ not\ exit\ with\ error\ for\ missing\ files.\ Useful\ when\ committing\ because\ some\ files\ were\ not\ existing\ before)
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
+    echo -e "  ${__HELP_OPTION_COLOR}--src-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-s <String>${__HELP_NORMAL} {list} (optional)"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(list\ of\ directories\ from\ which\ files\ to\ build\ will\ be\ searched\ \(default:\ src/_binaries\))
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
@@ -1344,7 +1393,7 @@ INTERNAL TOOL")"
     echo '    Possible values: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE'
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-    echo '1.0'
+    echo '1.1'
     echo
     echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
     echo '[François Chastanet](https://github.com/fchastanet)'
@@ -1365,6 +1414,27 @@ INTERNAL TOOL")"
 unknownOption() {
   buildBinFilesArgs+=("$1")
 }
+
+# shellcheck disable=SC2317 # if function is overridden
+buildBinFilesCallback() {
+  if ((${#optionSrcDirs[@]} == 0)); then
+    if [[ -n "${BINARIES_DIR:-}" ]]; then
+      optionSrcDirs=("${BINARIES_DIR[@]}")
+    else
+      optionSrcDirs=(src/_binaries)
+    fi
+  fi
+}
+
+validateSrcDirs() {
+  local dir
+  local -i failures=0
+  for dir in "${optionSrcDirs[@]}"; do
+    Assert::dirExists "${dir}" || ((++failures))
+  done
+  return "${failures}"
+}
+
 declare copyrightBeginYear="2023"
 
 buildBinFilesCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
@@ -1394,7 +1464,8 @@ getBinFiles() {
 getFiles() {
   local -a files=("$@")
   if ((${#files[@]} == 0)); then
-    grep --include=\*.sh -rlw "${BINARIES_DIR:-src/_binaries}" -e "^# BIN_FILE" |
+    # shellcheck disable=SC2154
+    grep --include=\*.sh -rlw -e "^# BIN_FILE" "${optionSrcDirs[@]}" |
       (grep -v -E '/testsData/' || true)
   else
     for file in "${files[@]}"; do
