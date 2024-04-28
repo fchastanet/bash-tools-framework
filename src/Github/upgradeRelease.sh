@@ -31,10 +31,10 @@ Github::upgradeRelease() {
     Version::githubApiExtractVersion | "${parseGithubVersionCallback}"
   }
   FILTER_LAST_VERSION_CALLBACK=${FILTER_LAST_VERSION_CALLBACK:-extractVersion} \
-  SOFT_VERSION_CALLBACK="${softVersionCallback}" \
+    SOFT_VERSION_CALLBACK="${softVersionCallback}" \
     Web::upgradeRelease \
-      "${targetFile}" \
-      "${releasesUrl}" \
-      "${downloadReleaseUrl}" \
-      "${softVersionArg}"
+    "${targetFile}" \
+    "${releasesUrl}" \
+    "${downloadReleaseUrl}" \
+    "${softVersionArg}"
 }

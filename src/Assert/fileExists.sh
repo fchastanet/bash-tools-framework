@@ -15,16 +15,20 @@ Assert::fileExists() {
   local file="$1"
   local user="${2:-${USERNAME}}"
   local group="${3:-${USERGROUP}}"
-  Log::displayInfo "Check ${file} exists with user ${user}:${group}"
+  if [[ -n "${user}" ]]; then
+    Log::displayInfo "Check ${file} exists with user ${user}:${group}"
+  else
+    Log::displayInfo "Check ${file} exists"
+  fi
   if ! ${SUDO:-} test -f "${file}" &>/dev/null; then
     Log::displayError "missing file ${file}"
     return 1
   fi
-  if [[ "${user}" != "$(${SUDO:-} stat -c '%U' "${file}")" ]]; then
+  if [[ -n "${user}" && "${user}" != "$(${SUDO:-} stat -c '%U' "${file}")" ]]; then
     Log::displayError "incorrect user ownership on file ${file}"
     return 2
   fi
-  if [[ "${group}" != "$(${SUDO:-} stat -c '%G' "${file}")" ]]; then
+  if [[ -n "${group}" && "${group}" != "$(${SUDO:-} stat -c '%G' "${file}")" ]]; then
     Log::displayError "incorrect group ownership on file ${file}"
     return 3
   fi
