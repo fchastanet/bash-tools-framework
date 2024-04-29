@@ -1019,7 +1019,7 @@ Retry::parameterized() {
     if "$@"; then
       break
     elif [[ "${retriesCount}" -lt "${maxRetries}" ]]; then
-      Log::displayWarning "Command failed. Wait for ${delayBetweenTries} seconds"
+      Log::displayDebug "Command failed. Wait for ${delayBetweenTries} seconds"
       ((retriesCount++))
       sleep "${delayBetweenTries}"
     else

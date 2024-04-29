@@ -33,7 +33,6 @@ function Assert::testCurlPingWithRetrySuccessAtRetry2 { #@test
   assert_success
   assert_line --index 0 --partial "INFO    - Attempt 1/2: test url"
   assert_line --index 1 "curl failure"
-  assert_line --index 2 --partial "WARN    - Command failed. Wait for 0 seconds"
-  assert_line --index 3 --partial "INFO    - Attempt 2/2: test url"
-  assert_line --index 4 "curl success"
+  assert_line --index 2 --partial "INFO    - Attempt 2/2: test url"
+  assert_line --index 3 "curl success"
 }

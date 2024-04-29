@@ -128,7 +128,7 @@ checkEachSrcFileHasOneFunctionCorrectlyNamed() {
 
   if [[ "${foundFunctionMatching}" = "0" ]]; then
     reportWarning "srcFileHasOneFunctionCorrectlyNamed" "${srcFile}" \
-      "Should contain a function named '${expectedFunctionName}'"
+      "Should contain a function named '${expectedFunctionName}' - prefixing with function keyword is not recommended"
     return 0
   fi
 }

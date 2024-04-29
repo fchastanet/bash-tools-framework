@@ -849,8 +849,14 @@ Git::cloneOrPullIfNoChanges() {
   shift || true
 
   if [[ -d "${dir}/.git" ]]; then
-    if ! Git::pullIfNoChanges "${dir}"; then
-      return 1
+    local exitCode=0
+    Git::pullIfNoChanges "${dir}" || exitCode=$?
+    if Array::contains "${exitCode}" "2" "4"; then
+      # changes detected
+      return 0
+    fi
+    if [[ "${exitCode}" != "0" ]]; then
+      return "${exitCode}"
     fi
     # shellcheck disable=SC2086
     if [[ "$(type -t ${pullCallback})" = "function" ]]; then
@@ -1208,6 +1214,22 @@ Git::pullIfNoChanges() {
     Log::displayInfo "Pull git repository '${dir}' as no changes detected"
     ${SUDO:-} git pull --progress
   )
+}
+
+# @description check if an element is contained in an array
+#
+# @arg $1 needle:String
+# @arg $@ array:String[]
+# @exitcode 0 if found
+# @exitcode 1 otherwise
+# @example
+#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
+Array::contains() {
+  local element
+  for element in "${@:2}"; do
+    [[ "${element}" = "$1" ]] && return 0
+  done
+  return 1
 }
 
 # @description remove ansi codes from input or files given as argument
