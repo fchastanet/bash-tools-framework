@@ -19,8 +19,14 @@ Git::cloneOrPullIfNoChanges() {
   shift || true
 
   if [[ -d "${dir}/.git" ]]; then
-    if ! Git::pullIfNoChanges "${dir}"; then
-      return 1
+    local exitCode=0
+    Git::pullIfNoChanges "${dir}" || exitCode=$?
+    if Array::contains "${exitCode}" "2" "4"; then
+      # changes detected
+      return 0
+    fi
+    if [[ "${exitCode}" != "0" ]]; then
+      return "${exitCode}"
     fi
     # shellcheck disable=SC2086
     if [[ "$(type -t ${pullCallback})" = "function" ]]; then
