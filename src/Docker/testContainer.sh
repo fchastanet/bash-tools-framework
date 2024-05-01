@@ -28,7 +28,7 @@ Docker::testContainer() {
   (
     # shellcheck disable=SC2317  # Don't warn about unreachable commands
     cleanOnExit() {
-      Log::displayInfo "Shuting down ${title} ..."
+      Log::displayInfo "Shutting down ${title} ..."
       docker-compose down
     }
     trap cleanOnExit EXIT INT ABRT TERM

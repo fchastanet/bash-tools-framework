@@ -17,6 +17,7 @@ DISABLE_LINTERS:
   - SPELL_VALE
   - SPELL_LYCHEE
   - SPELL_PROSELINT
+  - MARKDOWN_MARKDOWN_TABLE_FORMATTER
 # DISABLE_ERRORS: true # Uncomment if you want MegaLinter to detect errors but not block CI to pass
 EXCLUDED_DIRECTORIES:
   - '.history'
