@@ -58,7 +58,7 @@ function Docker::testContainerDockerComposeUpFailure { #@test
   assert_failure 3
   assert_line --index 0 --partial "INFO    - Launching title ..."
   assert_line --index 1 --partial "docker-compose up"
-  assert_line --index 2 --partial "INFO    - Shuting down title ..."
+  assert_line --index 2 --partial "INFO    - Shutting down title ..."
 }
 
 function Docker::testContainerWithCallbackOK { #@test
@@ -76,7 +76,7 @@ function Docker::testContainerWithCallbackOK { #@test
   assert_line --index 1 --partial "docker-compose is up"
   assert_line --index 2 --partial "callback success"
   assert_line --index 3 --partial "SUCCESS - title tested successfully"
-  assert_line --index 4 --partial "INFO    - Shuting down title ..."
+  assert_line --index 4 --partial "INFO    - Shutting down title ..."
 }
 
 function Docker::testContainerWithCallbackError { #@test
@@ -97,5 +97,5 @@ function Docker::testContainerWithCallbackError { #@test
   assert_line --index 2 --partial "callback failure"
   assert_line --index 3 --partial "docker-compose logs of containerName"
   assert_line --index 4 --partial "ERROR   - title initialization has failed, check above logs"
-  assert_line --index 5 --partial "INFO    - Shuting down title ..."
+  assert_line --index 5 --partial "INFO    - Shutting down title ..."
 }

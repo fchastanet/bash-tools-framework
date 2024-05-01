@@ -22,7 +22,6 @@ function Filters::firstField::withSpaces { #@test
   }
 }
 
-
 function Filters::firstField::bash { #@test
   cat "${BATS_TEST_DIRNAME}/firstField.sh" | {
     run Filters::firstField

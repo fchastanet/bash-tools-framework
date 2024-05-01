@@ -7,7 +7,11 @@ on: # yamllint disable-line rule:truthy
 
 jobs:
   build:
-    if: github.event.review.state == 'approved'
+    # only review approved and
+    # the event is not triggered by a fork
+    if: |
+      github.event.review.state == 'approved' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4

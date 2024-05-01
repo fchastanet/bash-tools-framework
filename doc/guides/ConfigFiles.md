@@ -42,17 +42,21 @@ BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
 
 - Provide --config argument to see resulting config file + information about
   order of loaded config files for debugging purpose.
+
 - It is also possible to use environment variable, but **highly discouraged to
   generalize this practice** as it could lead to unwanted results if variables
   are not well scoped.
 
 - [1. Config file format and loading rules](#1-config-file-format-and-loading-rules)
+
 - [2. Config file overloading values](#2-config-file-overloading-values)
+
 - [3. Config files loading order](#3-config-files-loading-order)
 
 ## 3. Config files loading order
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="config_file_order" id="config_file_order"></a>
@@ -93,7 +97,7 @@ _Eg:_ framework default values file
 BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
 BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_WARNING}}"
 BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"
-BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
 ```
 
 ![activity diagram to explain how Env::requireLoad is working](../images/envRequireLoad.svg)
