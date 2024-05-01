@@ -28,6 +28,8 @@ source "${srcDir}/Compiler/Embed/embedDir.sh"
 source "${srcDir}/Compiler/Embed/embedFrameworkFunction.sh"
 # shellcheck source=src/Filters/removeExternalQuotes.sh
 source "${srcDir}/Filters/removeExternalQuotes.sh"
+# shellcheck source=src/Filters/firstField.sh
+source "${srcDir}/Filters/firstField.sh"
 
 function Compiler::Embed::inject::noMatch { #@test
   local status
@@ -106,6 +108,6 @@ function Compiler::Embed::inject::twiceSameResourceDifferentAsName { #@test
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/injectError"
   assert_output --partial "WARN    - Embed resource ${BATS_TEST_DIRNAME}/testsData/binaryFile has already been imported previously with a different name, ensure to deduplicate"
-  run diff "${BATS_TEST_TMPDIR}/inject" "${BATS_TEST_DIRNAME}/testsData/twiceSameResourceDifferentAsName.expected.txt" >&3
-  assert_success
+  run cat "${BATS_TEST_TMPDIR}/inject"
+  assert_output "$(cat "${BATS_TEST_DIRNAME}/testsData/twiceSameResourceDifferentAsName.expected.txt")"
 }

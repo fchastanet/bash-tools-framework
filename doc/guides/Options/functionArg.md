@@ -69,11 +69,11 @@ The call to following function:
 
 ```bash
 Options::generateArg \
-    --variable-name "varName" \
-    --min 0 \
-    --max 3 \
-    --authorized-values "debug|info|warn" \
-    --function-name argumentVarName
+  --variable-name "varName" \
+  --min 0 \
+  --max 3 \
+  --authorized-values "debug|info|warn" \
+  --function-name argumentVarName
 ```
 
 Generates this function:
@@ -89,22 +89,22 @@ argumentVarName() {
     while (($# > 0)); do
       local options_parse_arg="$1"
       case "${options_parse_arg}" in
-        -*)
-          # ignore options
-          ;;
-        *)
-          # positional arg
-          if [[ ! "${options_parse_arg}" =~ debug|info|warn ]]; then
-            Log::displayError "Argument varName - value '${options_parse_arg}' is not part of authorized values(debug|info|warn)"
-            return 1
-          fi
-          if ((options_parse_argParsedCountVarName >= 3)); then
-            Log::displayError "Argument varName - Maximum number of argument occurrences reached(3)"
-            return 1
-          fi
-          ((++options_parse_argParsedCountVarName))
-          varName+=("${options_parse_arg}")
-          ;;
+      -*)
+        # ignore options
+        ;;
+      *)
+        # positional arg
+        if [[ ! "${options_parse_arg}" =~ debug|info|warn ]]; then
+          Log::displayError "Argument varName - value '${options_parse_arg}' is not part of authorized values(debug|info|warn)"
+          return 1
+        fi
+        if ((options_parse_argParsedCountVarName >= 3)); then
+          Log::displayError "Argument varName - Maximum number of argument occurrences reached(3)"
+          return 1
+        fi
+        ((++options_parse_argParsedCountVarName))
+        varName+=("${options_parse_arg}")
+        ;;
       esac
       shift || true
     done

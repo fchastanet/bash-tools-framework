@@ -8,7 +8,9 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/Linux/getCodename.sh"
 
 function Linux::getCodename::failure { #@test
-  stub source '/etc/os-release : exit 1'
+  source() {
+    exit 1
+  }
 
   run Linux::getCodename
 
@@ -17,7 +19,12 @@ function Linux::getCodename::failure { #@test
 }
 
 function Linux::getCodename::success { #@test
-  stub source '/etc/os-release : echo "focal"'
+  source() {
+    if [[ "$1" != "/etc/os-release" ]]; then
+      exit 1
+    fi
+    echo "focal"
+  }
 
   run Linux::getCodename
 
