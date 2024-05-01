@@ -11,9 +11,7 @@ source "${srcDir}/Command/captureOutputAndExitCode.sh"
 source "${srcDir}/Assert/windows.sh"
 
 setup() {
-  export BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}
-  Env::requireLoad
-  Log::requireLoad
+  initLogs "Log.debug.env"
 }
 
 teardown() {

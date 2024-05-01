@@ -1,5 +1,5 @@
-startuml
-skinparam
 endswitch
-endwhile
 enduml
+endwhile
+skinparam
+startuml

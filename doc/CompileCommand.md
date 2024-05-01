@@ -89,6 +89,7 @@ You can see several examples of compiled files by checking
 ## 3. compile command help
 
 <!-- markdownlint-disable MD033 -->
+
 <!-- markdownlint-capture -->
 
 <a name="compileCommandHelp"></a>
@@ -154,7 +155,7 @@ options as it makes them more reusable.
 - `--template-dir|-t <templateDir>` the template directory used to override some
   template includes. See more information below about environment variables.
 
-- `--root-dir|-r <rootDir>` if you whish to override `FRAMEWORK_ROOT_DIR`
+- `--root-dir|-r <rootDir>` if you wish to override `FRAMEWORK_ROOT_DIR`
   variable.
 
   By default root directory is the folder above `bin/compile`.
@@ -327,6 +328,7 @@ dependent framework functions will be injected in your resulting bash file.
 #### 3.5.2. bash framework functions
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="bash_framework_functions_naming_convention"></a>
@@ -339,11 +341,11 @@ framework that respects the following naming convention:
 - Namespace::Namespace::functionName
   - we can have any number of namespaces
   - each namespace is followed by ::
-  - namespace must begin by an uppercase letter [A-Z] followed by any of these
-    characters [A-Za-z0-9_-].
+  - namespace must begin by an uppercase letter `[A-Z]` followed by any of these
+    characters `[A-Za-z0-9_-]`.
   - the function name is traditionally written using camelCase with first letter
     in small case
-  - function name authorized characters are [a-zA-Z0-9_-]+
+  - function name authorized characters are `[a-zA-Z0-9_-]+`
 - the function source code using namespace convention will be searched under
   srcDirs provided to the compiler via --src-dir argument or via
   .framework-config file
@@ -438,7 +440,7 @@ Git::shallowClone() {
 }
 ```
 
-See [compiler - Compiler::Requirement::require]#requirement_require) below for
+See [compiler - Compiler::Requirement::require](#requirement_require) below for
 more information.
 
 ##### 3.6.2.1. Requires source file naming convention
@@ -526,7 +528,7 @@ Compatibility::posix() {
   local -n compatibilityTags=$2
   local -n requireTags=$3
 
-  if ! Array::contains "posix" "${compatibilityTags[@]}"
+  if ! Array::contains "posix" "${compatibilityTags[@]}"; then
     Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
     return 1
   fi
@@ -546,11 +548,11 @@ Compatibility::posix() {
   local -n compatibilityTags=$2
   local -n requireTags=$3
 
-  if ! Array::contains "posix" "${compatibilityTags[@]}"
+  if ! Array::contains "posix" "${compatibilityTags[@]}"; then
     Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
     return 1
   fi
-  if Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"
+  if Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"; then
     Log::displayError "The function ${functionName} used in the script require jq which is incompatible with this script"
     return 1
   fi
@@ -595,9 +597,9 @@ Linux::Apt::update() {
 It means that if a binary is compiled with alpine COMPATIBILITY requirement the
 compiler will fail with an error.
 
-See [compiler -
-Compiler::Compatibility::checkCompatibility]#compatibility_directive) below for
-more information.
+See
+[compiler - Compiler::Compatibility::checkCompatibility](#compatibility_directive)
+below for more information.
 
 ### 3.8. `DISABLE` directive (optional)
 
@@ -763,7 +765,6 @@ helpDescription() {
 dependencies() {
   echo "InstallScript2"
 }
-
 ```
 
 Here the compiler will throw an error because some of the functions declared
@@ -853,12 +854,12 @@ sudo "${embed_file_backupFile}" ...
 "${embed_file_otherNeededBinary}"
 ```
 
-See [compiler - Compiler::Embed::embed]#embed_include) below for more
+See [compiler - Compiler::Embed::embed](#embed_include) below for more
 information.
 
 ### Options management
 
-```bash
+```text
 declare optionVerbose=<% Options::parse ... %>
 ```
 
@@ -896,6 +897,7 @@ export REPOSITORY_URL="https://github.com/fchastanet/bash-tools-framework"
 ### 4.1. Compiler - Compiler::Requirement::require
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="requirement_require" id="requirement_require"></a>
@@ -1078,6 +1080,7 @@ some cases, you could need to override this order.
 ### 4.2. compiler - Compiler::Compatibility::checkCompatibility
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="compatibility_directive" id="compatibility_directive"></a>
@@ -1089,6 +1092,7 @@ TODO
 ### 4.3. Compiler - Compiler::Implement::interface
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="implement_interface" id="implement_interface"></a>
@@ -1108,6 +1112,7 @@ interfaces. `Compiler::Implement::interface` allows to:
 ### 4.4. Compiler - Compiler::Facade::generate
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="implement_interface" id="implement_interface"></a>
@@ -1134,6 +1139,7 @@ be made public will be the ones declared using `IMPLEMENT` directive.
 ### 4.5. Compiler - Compiler::Embed::embed
 
 <!-- markdownlint-capture -->
+
 <!-- markdownlint-disable MD033 -->
 
 <a name="embed_include" id="embed_include"></a>

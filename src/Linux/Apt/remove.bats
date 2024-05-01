@@ -25,5 +25,7 @@ function Linux::Apt::remove::simple { #@test
   run Linux::Apt::remove "pkg1"
 
   assert_success
-  assert_output "success"
+  assert_lines_count 2
+  assert_line --index 0 --partial "INFO    - Apt remove pkg1"
+  assert_line --index 1 "success"
 }

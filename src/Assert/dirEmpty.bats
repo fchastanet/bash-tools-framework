@@ -65,7 +65,7 @@ function Assert::dirEmpty::emptyWithPatternButFileMatchingPatternNotThere { #@te
 
 function Assert::dirEmpty::notEmptyWithPatternButFileMatchingPatternNotThere { #@test
   mkdir "${BATS_TEST_TMPDIR}/myDir"
-  touch "${BATS_TEST_TMPDIR}/myDir/aFile"
+  touch "${BATS_TEST_TMPDIR}/myDir/file"
   run Assert::dirEmpty "${BATS_TEST_TMPDIR}/myDir" ".gitkeep"
   assert_failure 3
   assert_lines_count 2
