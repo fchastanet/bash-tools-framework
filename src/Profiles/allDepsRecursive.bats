@@ -5,6 +5,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 
 # shellcheck source=/src/Profiles/allDepsRecursive.sh
 source "${srcDir}/Profiles/allDepsRecursive.sh"
+# shellcheck source=/src/Filters/uniqUnsorted.sh
+source "${srcDir}/Filters/uniqUnsorted.sh"
 
 teardown() {
   unstub_all

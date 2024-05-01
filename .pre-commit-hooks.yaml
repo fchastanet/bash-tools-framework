@@ -1,5 +1,4 @@
-- &FIX_SHEBANG_EXECUTION_BIT
-  id: fixShebangExecutionBit
+- id: fixShebangExecutionBit
   name: fixShebangExecutionBit
   description: |
     Find all files containing a shebang and
@@ -10,18 +9,11 @@
   pass_filenames: false
   types: ['file', 'shell', 'text']
   always_run: true
-  fail_fast: true
-  stages: [pre-commit]
+  stages: [pre-commit, manual]
 
-- <<: *FIX_SHEBANG_EXECUTION_BIT
-  id: fixShebangExecutionBitGithubActions
-  name: fixShebangExecutionBit for Github Actions
-  fail_fast: false
-  stages: [manual]
-
-- &FRAMEWORK_LINTER
-  id: frameworkLinter
-  name: Bash Framework Linter
+- &FRAMEWORK_LINT
+  id: frameworkLint
+  name: Bash Framework Lint
   description: |
     Check if your files uses the right syntax
     for using bash-tools-framework
@@ -32,31 +24,30 @@
   pass_filenames: false
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
-  fail_fast: true
   stages: [pre-commit]
 
-- <<: *FRAMEWORK_LINTER
-  id: frameworkLinterGithubAction
-  name: Bash Framework Linter for Github Actions
+- <<: *FRAMEWORK_LINT
+  id: frameworkLintGithubAction
+  name: Bash Framework Lint for Github Actions
   args: [--expected-warnings-count, '0', --format, checkstyle, --theme, noColor]
-  fail_fast: false
+  log_file: logs/frameworkLint.xml
   stages: [manual]
 
 - id: awkLint
-  name: awk Linter
+  name: awk Lint
   description: Lint awk files using awk.
   language: script
   entry: bin/awkLint
   args: []
+  log_file: logs/awkLint.xml
   pass_filenames: false
   files: \.awk$
   always_run: false
-  fail_fast: true
   stages: [pre-commit, manual]
 
-- &SHELLCHECKLINT
+- &SHELLCHECK_LINT
   id: shellcheckLint
-  name: shellcheck Linter
+  name: shellcheck Lint
   description: |
     Lint bash files using shellcheck.
     Installing last version automatically
@@ -67,14 +58,13 @@
   files: \.sh$
   types: ['executable', 'file', 'shell', 'text']
   always_run: false
-  fail_fast: true
   stages: [pre-commit]
 
-- <<: *SHELLCHECKLINT
+- <<: *SHELLCHECK_LINT
   id: shellcheckLintGithubAction
   name: shellcheck Linter for Github Actions
   args: [-f, checkstyle, --xargs]
-  fail_fast: false
+  log_file: logs/shellcheckLint.xml
   stages: [manual]
 
 - id: runUnitTests
@@ -85,9 +75,8 @@
   args: [-r, src, -j, '30']
   pass_filenames: false
   always_run: true
-  fail_fast: true
   require_serial: true
-  stages: [pre-commit, manual]
+  stages: [pre-commit]
 
 - &BUILD_SH_FILES
   id: buildShFiles
@@ -97,14 +86,12 @@
   pass_filenames: false
   always_run: true
   require_serial: true
-  fail_fast: true
   stages: [pre-commit]
 
 - <<: *BUILD_SH_FILES
   id: buildShFilesGithubAction
   name: build sh files for Github Actions
   entry: bin/buildBinFiles --ci
-  fail_fast: false
   stages: [manual]
 
 - id: plantuml
@@ -116,8 +103,7 @@
   pass_filenames: true
   types: ['file', 'non-executable', 'plantuml', 'text']
   always_run: false
-  fail_fast: true
-  stages: [push, manual]
+  stages: [pre-commit, manual]
 
 - id: megalinterCheckVersion
   name: Megalinter Check Version
@@ -132,8 +118,7 @@
     ]
   pass_filenames: false
   always_run: true
-  fail_fast: true
-  stages: [pre-commit, pre-push, manual]
+  stages: [pre-commit, manual]
 
 - &MEGALINTER
   id: megalinter
@@ -152,9 +137,8 @@
   pass_filenames: false
   require_serial: true
   always_run: true
-  fail_fast: true
   verbose: true
-  stages: [pre-push]
+  stages: [pre-commit]
 
 # manual stage used to select github action with megalinter full config
 - <<: *MEGALINTER

@@ -1,8 +1,13 @@
 ---
+###############################################################################
+# AUTOMATICALLY GENERATED
+# DO NOT EDIT IT
+# @generated
+###############################################################################
 default_install_hook_types: [pre-commit]
 default_stages: [pre-commit, manual]
 minimum_pre_commit_version: 3.5.0
-fail_fast: true
+fail_fast: false
 repos:
   - repo: local
     # this hook is not intended to be run on gihub
@@ -16,6 +21,7 @@ repos:
         pass_filenames: false
         always_run: true
         require_serial: true
+        fail_fast: true
         stages: [pre-commit, manual]
   
   - repo: https://github.com/executablebooks/mdformat
@@ -144,13 +150,14 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 3.0.0
+    rev: 2.3.7
     hooks:
       - id: fixShebangExecutionBit
+      - id: fixShebangExecutionBitGithubActions
       - id: awkLint
       - id: shellcheckLint
       - id: shellcheckLintGithubAction
-      - id: frameworkLint
+      - id: frameworkLinter
         args:
           [
             --expected-warnings-count,
@@ -162,7 +169,7 @@ repos:
             --display-level,
             WARNING,
           ]
-      - id: frameworkLintGithubAction
+      - id: frameworkLinterGithubAction
         args:
           [
             --expected-warnings-count,
@@ -188,6 +195,7 @@ repos:
         pass_filenames: false
         always_run: true
         require_serial: true
+        fail_fast: true
         stages: [pre-commit]
 
       - <<: *LOCAL_BUILD_SH_FILES
@@ -207,10 +215,11 @@ repos:
         pass_filenames: false
         require_serial: true
         always_run: true
+        fail_fast: true
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 3.0.0
+    rev: 2.3.7
     hooks:
       - id: megalinterCheckVersion
       - id: megalinter
