@@ -6,7 +6,7 @@
     - [2.1.1. Avoid shellcheck errors](#211-avoid-shellcheck-errors)
     - [2.1.2. Allow simple quotes to generated correctly](#212-allow-simple-quotes-to-generated-correctly)
   - [Embed](#embed)
-    - [no need of embed_function_InstallFile](#no-need-of-embed_function_installfile)
+    - [no need of `embed_function_InstallFile`](#no-need-of-embed_function_installfile)
 
 ## 1. Bash best practices
 
@@ -26,13 +26,11 @@ applied in this project because I wrote some of them while writing this project.
 To avoid shellcheck reporting errors about malformed script, try to always put
 your variable replacements inside bash variable, so instead of doing:
 
-```bash
-<%% echo "${functionToCall}" %> "$@"
-```
+`<%% echo "${functionToCall}" %> "$@"`
 
 which results in shellcheck error, you can do this instead
 
-```bash
+```text
 # shellcheck disable=SC2016 # SC2016 needed because functionToCall inside quotes
 #   is known when bash-tpl is interpreted but not inside the bash script being
 # generated
@@ -62,6 +60,6 @@ echo "    quiet mode, doesn't display any output"
 
 ### Embed
 
-#### no need of embed_function_InstallFile
+#### no need of `embed_function_InstallFile`
 
 use ${SUDO}

@@ -32,7 +32,7 @@ function Log::requireLoad::logFileNotProvided { #@test
 
 function Log::requireLoad::logDirectoryNotWritable { #@test
   export BASH_FRAMEWORK_LOG_LEVEL="${__LEVEL_INFO}"
-  export BASH_FRAMEWORK_LOG_FILE="/mydir/logFile"
+  export BASH_FRAMEWORK_LOG_FILE="/myDir/logFile"
   local status=0
   Log::rotate() {
     # shouldn't be called
@@ -41,7 +41,7 @@ function Log::requireLoad::logDirectoryNotWritable { #@test
   Log::requireLoad >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
-  assert_output --partial "ERROR   - File /mydir/logFile is not writable"
+  assert_output --partial "ERROR   - directory /myDir is not writable"
   [[ "${BASH_FRAMEWORK_LOG_LEVEL}" = "${__LEVEL_OFF}" ]]
 }
 
