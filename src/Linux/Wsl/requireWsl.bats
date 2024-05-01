@@ -20,6 +20,9 @@ function Linux::Wsl::requireWsl::success { #@test
   Assert::wsl() {
     return 0
   }
+  File::garbageCollect() {
+    return 0
+  }
   run Linux::Wsl::requireWsl
   assert_success
   assert_output ""

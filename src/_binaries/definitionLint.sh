@@ -8,7 +8,6 @@
 declare optionFormat="plain"
 definitionLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-# build image and push it ot registry
 run() {
   # shellcheck disable=SC2154
   Profiles::lintDefinitions "${argFolder}" "${optionFormat}"

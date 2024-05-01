@@ -54,15 +54,19 @@ fail-on-severity: 'high'
 # db:
 # check for database updates on execution
 # same as GRYPE_DB_AUTO_UPDATE env var
-# auto-update: true
+auto-update: true
 
 # location to write the vulnerability database cache
 # same as GRYPE_DB_CACHE_DIR env var
-# cache-dir: "$XDG_CACHE_HOME/grype/db"
+cache-dir: '/tmp/lint/megalinter-reports/grype-db'
 
 # URL of the vulnerability database
 # same as GRYPE_DB_UPDATE_URL env var
 # update-url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
+
+# Timeout for downloading actual vulnerability DB
+# The DB is ~156MB as of 2024-04-17 so slower connections may exceed the default timeout; adjust as needed
+update-download-timeout: '240s'
 
 # it ensures db build is no older than the max-allowed-built-age
 # set to false to disable check
@@ -71,7 +75,7 @@ fail-on-severity: 'high'
 # Max allowed age for vulnerability database,
 # age being the time since it was built
 # Default max age is 120h (or five days)
-# max-allowed-built-age: "120h"
+max-allowed-built-age: '120h'
 
 # search:
 # the search space to look for packages (options: all-layers, squashed)

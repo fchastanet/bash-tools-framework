@@ -7,6 +7,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)/batsHeaders.sh"
 # shellcheck source=src/Linux/Wsl/originalWslpath.sh
 source "${srcDir}/Linux/Wsl/originalWslpath.sh"
 
+# bats file_tags=ubuntu_only
+
 teardown() {
   unstub_all
 }

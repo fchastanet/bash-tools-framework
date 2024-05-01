@@ -33,5 +33,6 @@ initLogs() {
   unset BASH_FRAMEWORK_DISPLAY_LEVEL
   BASH_FRAMEWORK_ENV_FILES=("${BATS_TEST_DIRNAME}/testsData/${envFile}")
   Env::requireLoad
+  export DISPLAY_DURATION=0
   Log::requireLoad
 }

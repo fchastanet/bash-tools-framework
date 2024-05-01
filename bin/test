@@ -853,7 +853,7 @@ Log::rotate() {
   fi
 }
 
-# @description build image and push it ot registry
+# @description build image and push it to registry
 # @env DOCKER_OPTION_IMAGE_TAG String computed from optionVendor and optionBashVersion if not provided
 # @env DOCKER_OPTION_IMAGE String default scrasnups/${DOCKER_OPTION_IMAGE_TAG}
 # @env DOCKER_BUILD_OPTIONS String list of docker arguments to pass to docker build command
