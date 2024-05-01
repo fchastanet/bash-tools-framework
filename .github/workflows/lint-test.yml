@@ -93,7 +93,7 @@ jobs:
       # only if pre-commit
       - name: Set up Python
         if: matrix.runPrecommitTests
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
@@ -120,10 +120,27 @@ jobs:
           path: |
             megalinter-reports/**
 
+      - uses: crazy-max/ghaction-import-gpg@v5
+        if: matrix.runPrecommitTests && always()
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - uses: tibdex/github-app-token@v1
+        if: matrix.runPrecommitTests && always()
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create Pull Request
         if: matrix.runPrecommitTests && failure()
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ steps.generate-token.outputs.token }}
+          committer: fchastanet <fchastanet@gmail.com>
           branch: update/pre-commit-fixes
           title: lint fixes
           commit-message: Auto-update lint fixes
@@ -150,14 +167,22 @@ jobs:
             --bash-version "${{matrix.bashTarVersion}}" \
             --bash-base-image "${{matrix.bashImage}}" \
             --branch-name "${GITHUB_REF##*/}" \
-            ${{matrix.batsOptions}} --report-formatter junit -o logs -r src --ci
+            ${{matrix.batsOptions}} \
+            --formatter junit -o logs -r src --ci |
+            tee "logs/junit-${{github.job}}.xml"
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: "**/junit-${{github.job}}.xml"
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}
-          path: logs/report.xml
+          path: "**/junit-${{github.job}}.xml"
 
       - uses: ouzi-dev/commit-status-updater@v2
         if: always()
@@ -187,7 +212,7 @@ jobs:
       - name: Checkstyle aggregation
         uses: lcollins/checkstyle-github-action@v2.0.0
         with:
-          path: 'artifacts/**/*.xml'
+          path: '**/junit-*.xml'
 
       # run this action to get the workflow conclusion
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)

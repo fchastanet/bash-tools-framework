@@ -148,9 +148,9 @@ function Options::generateCommand::case1::parseFile { #@test
   source "${BATS_TEST_DIRNAME}/testsData/generateCommand.case1.sh"
   local status=0
   local file="fileBefore"
-  Options::command parse --file fileTest >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
+  Options::command parse --file "test" >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
-  [[ "${file}" = "fileTest" ]]
+  [[ "${file}" = "test" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
 }

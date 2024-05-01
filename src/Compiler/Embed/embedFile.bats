@@ -8,6 +8,8 @@ source "${srcDir}/Compiler/Embed/embedFile.sh"
 source "${srcDir}/Compiler/Embed/extractFileFromBase64.sh"
 # shellcheck source=src/Env/pathPrepend.sh
 source "${srcDir}/Env/pathPrepend.sh"
+# shellcheck source=src/Filters/firstField.sh
+source "${srcDir}/Filters/firstField.sh"
 
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"

@@ -22,7 +22,7 @@ function Ssh::fixAuthenticityOfHostCantBeEstablished::sshKeygenFailure { #@test
   run Ssh::fixAuthenticityOfHostCantBeEstablished "host"
 
   assert_failure 1
-  assert_output ""
+  assert_output --partial "INFO    - Adding host to the list of known ssh hosts"
 }
 
 function Ssh::fixAuthenticityOfHostCantBeEstablished::sshKeyscanFailureButIgnored { #@test
@@ -31,7 +31,7 @@ function Ssh::fixAuthenticityOfHostCantBeEstablished::sshKeyscanFailureButIgnore
   run Ssh::fixAuthenticityOfHostCantBeEstablished "host"
 
   assert_success
-  assert_output ""
+  assert_output --partial "INFO    - Adding host to the list of known ssh hosts"
   [[ "$(cat "${BATS_TEST_TMPDIR}/.ssh/known_hosts")" = "" ]]
 }
 
@@ -41,6 +41,6 @@ function Ssh::fixAuthenticityOfHostCantBeEstablished::success { #@test
   run Ssh::fixAuthenticityOfHostCantBeEstablished "host"
 
   assert_success
-  assert_output ""
+  assert_output --partial "INFO    - Adding host to the list of known ssh hosts"
   [[ "$(cat "${BATS_TEST_TMPDIR}/.ssh/known_hosts")" = "host" ]]
 }

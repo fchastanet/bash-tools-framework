@@ -43,20 +43,29 @@ Options::generateCommand uses these functions:
 Using templating feature, you have the ability to create a kind of object.
 
 ```bash
-declare optionVerboseFunction=<% Options::generateOption \
-  --form commandForm \
-  --variable-name "verbose" \
-  --alt "-v" \
-  --alt "--verbose" \
-  --variable-type "Boolean" \
-  --default-value "0" \
-  --off-value "0" \ # default
-  --on-value "1" \ # default
-  --help "display more information about processed files" \
-  --validator "validatorHandler"\
-  --handler "handler" \
-  --post-process-handler "postProcessHandler"
-%>
+source <(
+  Options::generateGroup \
+    --title "GLOBAL OPTIONS:" \
+    --function-name groupGlobalOptionsFunction || exit 1
+
+  Options::generateOption \
+    --help "verbose mode" \
+    --variable-name "verboseOption" \
+    --group groupGlobalOptionsFunction \
+    --alt "--verbose" --alt "-v" \
+    --function-name optionVerboseFunction || exit 2
+)
+declare -a options=(
+  optionVerboseFunction
+  --command-name awkLint
+  --unknown-argument-callback unknownArgumentCallback
+  --function-name awkLintCommand
+)
+
+# shellcheck source=/dev/null
+source <(Options::generateCommand "${options[@]}") || exit 3
+
+awkLintCommand parse "$@"
 ```
 
 This will have 2 effects during compilation:
@@ -110,7 +119,7 @@ directory available to the compiler with a function name randomly generated.
 This mode has several drawbacks, it's why recommended way has been created
 afterwards:
 
-- As the function name is randomly generated, compiled files change everytime
+- As the function name is randomly generated, compiled files change every time
   they are compiled.
 - to allow generateCommand to work, we have to source the functions generated
   during template evaluation. It is still the case with new mode but with a
@@ -127,9 +136,9 @@ local optionGroup="$(Options::generateGroup \
 Options::sourceFunction "${optionGroup}"
 
 local optionHelp="$(Options::generateOption \
-    --variable-type Boolean --help "help" \
-    --group "${optionGroup}" \
-    --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)"
+  --variable-type Boolean --help "help" \
+  --group "${optionGroup}" \
+  --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)"
 Options::sourceFunction "${optionHelp}"
 
 local optionVerbose
