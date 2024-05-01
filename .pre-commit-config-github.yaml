@@ -1,8 +1,13 @@
 ---
+###############################################################################
+# AUTOMATICALLY GENERATED
+# DO NOT EDIT IT
+# @generated
+###############################################################################
 default_install_hook_types: [pre-commit]
 default_stages: [pre-commit, manual]
 minimum_pre_commit_version: 3.5.0
-fail_fast: true
+fail_fast: false
 repos:
   - repo: local
     # this hook is not intended to be run on github
@@ -130,7 +135,7 @@ repos:
             \.tpl$|
             /testsData/
           )
-        stages: [pre-commit, manual]
+        stages: [pre-commit]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace

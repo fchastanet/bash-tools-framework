@@ -33,7 +33,7 @@ Install::structure() {
   fi
 
   # skip if CHANGE_WINDOWS_FILES is 0 and target dir is c drive
-  if [[ "${CHANGE_WINDOWS_FILES:-0}" = "0" && "${toDir}" =~ ^${BASE_MNT_C} ]]; then
+  if [[ "${CHANGE_WINDOWS_FILES:-0}" = "0" && "${toDir}" =~ ^${BASE_MNT_C:-/mnt/c} ]]; then
     Log::displayWarning "Install::structure - Directory '${fromDir}' - Skip install (because CHANGE_WINDOWS_FILES=0 in .env file)"
     return 0
   fi
@@ -60,10 +60,9 @@ Install::structure() {
     local dir
     shopt -s lastpipe
     # -links 2 allows to exclude empty directories
-    # %P get file without initial directory
-    ${SUDO:-} find "${fromDir}" -depth -type d -links 2 -printf "%P\0" |
+    ${SUDO:-} find "${fromDir}" -depth -type d -links 2 -print0 |
       while read -rd '' dir; do
-        if ! createStructure "${toDir}/${dir}"; then
+        if ! createStructure "${toDir}/${dir#"${fromDir}"}"; then
           # error already reported by createStructure
           exit 1
         fi
