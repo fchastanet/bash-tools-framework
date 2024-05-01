@@ -12,9 +12,11 @@ function Install::simpleStructure { #@test
   Install::file() {
     echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}"
   }
+  local resultStatus=0
+  USERNAME="$(id -un)" USERGROUP="$(id -gn)" \
   PRETTY_ROOT_DIR="${BATS_TEST_TMPDIR}" Install::structure \
     "${BATS_TEST_TMPDIR}/srcDir" "${BATS_TEST_TMPDIR}/destDir" \
-    &>"${BATS_TEST_TMPDIR}/result" ;resultStatus=$?
+    &>"${BATS_TEST_TMPDIR}/result" || resultStatus=$?
   [[ "${resultStatus}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_lines_count 2
@@ -33,13 +35,13 @@ function complexStructureDataset {
   mkdir -p "${BATS_TEST_TMPDIR}/${dirName}/dir2/dir2.1/dir2.1.1" # 2 files, one hidden
 }
 
-function  complexStructureDatasetWithFiles {
+function complexStructureDatasetWithFiles {
   local dirName="$1"
   complexStructureDataset "${dirName}"
-  touch    "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1-file1"
-  touch    "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1.2/dir1.2.1/dir1.2.1-file1"
-  touch    "${BATS_TEST_TMPDIR}/${dirName}/dir2/dir2.1/dir2.1.1/.dir2.1.1-file1"
-  touch    "${BATS_TEST_TMPDIR}/${dirName}/dir2/dir2.1/dir2.1.1/dir2.2.1-file2"
+  touch "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1-file1"
+  touch "${BATS_TEST_TMPDIR}/${dirName}/dir1/dir1.2/dir1.2.1/dir1.2.1-file1"
+  touch "${BATS_TEST_TMPDIR}/${dirName}/dir2/dir2.1/dir2.1.1/.dir2.1.1-file1"
+  touch "${BATS_TEST_TMPDIR}/${dirName}/dir2/dir2.1/dir2.1.1/dir2.2.1-file2"
 }
 
 function Install::complexStructureWithHiddenFiles { #@test
@@ -48,9 +50,11 @@ function Install::complexStructureWithHiddenFiles { #@test
     echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}"
   }
 
+  local resultStatus=0
+  USERNAME="$(id -un)" USERGROUP="$(id -gn)" \
   PRETTY_ROOT_DIR="${BATS_TEST_TMPDIR}" Install::structure \
     "${BATS_TEST_TMPDIR}/srcDir" "${BATS_TEST_TMPDIR}/destDir" \
-    &>"${BATS_TEST_TMPDIR}/result" ;resultStatus=$?
+    &>"${BATS_TEST_TMPDIR}/result" || resultStatus=$?
   [[ "${resultStatus}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_success
@@ -73,9 +77,11 @@ function Install::complexStructureTargetStructureAlreadySet { #@test
     echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}"
   }
 
+  local resultStatus=0
+  USERNAME="$(id -un)" USERGROUP="$(id -gn)" \
   PRETTY_ROOT_DIR="${BATS_TEST_TMPDIR}" Install::structure \
     "${BATS_TEST_TMPDIR}/srcDir" "${BATS_TEST_TMPDIR}/destDir" \
-    &>"${BATS_TEST_TMPDIR}/result" ;resultStatus=$?
+    &>"${BATS_TEST_TMPDIR}/result" || resultStatus=$?
   [[ "${resultStatus}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_success
@@ -97,9 +103,11 @@ function Install::complexStructureSrcTargetIdentical { #@test
     echo "cp ${1#${BATS_TEST_TMPDIR}/} ${2#${BATS_TEST_TMPDIR}/}"
   }
 
+  local resultStatus=0
+  USERNAME="$(id -un)" USERGROUP="$(id -gn)" \
   PRETTY_ROOT_DIR="${BATS_TEST_TMPDIR}" Install::structure \
     "${BATS_TEST_TMPDIR}/srcDir" "${BATS_TEST_TMPDIR}/destDir" \
-    &>"${BATS_TEST_TMPDIR}/result" ;resultStatus=$?
+    &>"${BATS_TEST_TMPDIR}/result" || resultStatus=$?
   [[ "${resultStatus}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_success
