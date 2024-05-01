@@ -94,12 +94,12 @@ This script:
 
 ```bash
 Options::generateOption \
-  --variable-type StringArray \
-  --variable-name "srcDirs" \
-  --alt "--src-dir" --alt "-s" \
-  --max -1 \
-  --callback srcDirsCallback \
-  --function-name "Options::option"
+ --variable-type StringArray \
+ --variable-name "srcDirs" \
+ --alt "--src-dir" --alt "-s" \
+ --max -1 \
+ --callback srcDirsCallback \
+ --function-name "Options::option"
 ```
 
 will generate this
