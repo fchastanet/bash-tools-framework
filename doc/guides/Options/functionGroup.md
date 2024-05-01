@@ -35,8 +35,8 @@ This script:
 
 ```bash
 Options::generateGroup \
-  --title "Global options" \
-  --help "help"
+ --title "Global options" \
+ --help "help"
 ```
 
 will generate this

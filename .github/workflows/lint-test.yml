@@ -175,14 +175,14 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: "**/junit-${{github.job}}.xml"
+          report_paths: '**/junit-${{github.job}}.xml'
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}
-          path: "**/junit-${{github.job}}.xml"
+          path: '**/junit-${{github.job}}.xml'
 
       - uses: ouzi-dev/commit-status-updater@v2
         if: always()
