@@ -1,10 +1,32 @@
 ---
-default_install_hook_types: [pre-commit, pre-push]
+default_install_hook_types: [pre-commit]
 default_stages: [pre-commit, manual]
 minimum_pre_commit_version: 3.5.0
 repos:
+  - repo: https://github.com/executablebooks/mdformat
+    # Do this before other tools "fixing" the line endings
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        name: Format Markdown
+        entry: mdformat # Executable to run, with fixed options
+        language: python
+        types: [markdown]
+        args: [--wrap, '80', --number]
+        exclude: |
+          (?x)(
+            ^doc/guides/Options/generate.*.md$
+          )
+        additional_dependencies:
+          - mdformat-toc
+          - mdformat-shfmt
+          - mdformat-tables
+          - mdformat-config
+          - mdformat-web
+          - mdformat-gfm
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: mixed-line-ending
       - id: end-of-file-fixer
@@ -17,15 +39,66 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: check-xml
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: fix-byte-order-marker
       - id: check-yaml
+      - id: trailing-whitespace
+        exclude: |
+          (?x)(
+            testsData/
+          )
+      - id: check-added-large-files
       - id: forbid-new-submodules
       - id: mixed-line-ending
         args: [--fix=lf]
+      - id: file-contents-sorter
+        files: .cspell/.*\.txt
+        args: [--ignore-case]
       - id: check-json
+        # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
             ^.vscode\/settings.json$|
             ^.vscode\/launch.json$
+          )
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args:
+          - --dictionary
+          - '-'
+          - --dictionary
+          - .cspell/codespellrc-dic.txt
+          - --ignore-words
+          - .cspell/codespellrc-ignore.txt
+          - --quiet-level
+          - '2'
+          - --interactive
+          - '0'
+          - --check-filenames
+          - --check-hidden
+          - --write-changes
+        exclude: >
+          (?x)(
+              ^installScripts/|
+              ^bin/|
+              ^install$|
+              ^distro$|
+              ^srcAlt|
+              ^.cspell/codespellrc-.*.txt$
+          )
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        exclude: |
+          (?x)(
+            \.md$|
+            ^\.vscode/.*\.code-snippets$
           )
 
   - repo: https://github.com/fchastanet/jumanjihouse-pre-commit-hooks
@@ -33,31 +106,30 @@ repos:
     hooks:
       - id: shfmt
         args: [-i, '2', -ci]
-        exclude: (^vendor/|^manualTests/data/|^bin|\.tpl$|/testsData/)
+        # x modifier: extended. Spaces and text after a # in the pattern are ignored
+        exclude: |
+          (?x)(
+            ^vendor/|
+            ^bin/|
+            ^manualTests/data/|
+            \.tpl$|
+            /testsData/
+          )
         stages: [pre-commit]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
       # and conflict-marker-size configuration in a git repo.
       - id: git-check
+        # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
             /testsData/|
             ^doc/guides/Options/generate.*.md$
           )
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.4
-    hooks:
-      - id: prettier
-        exclude: |
-          (?x)(
-            ^doc/guides/Options/generate.*.md$|
-            ^\.vscode/.*\.code-snippets$
-          )
-
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.3.6
+    rev: 2.3.7
     hooks:
       - id: fixShebangExecutionBit
       - id: fixShebangExecutionBitGithubActions
@@ -76,7 +148,6 @@ repos:
             --display-level,
             WARNING,
           ]
-        stages: [pre-commit]
       - id: frameworkLinterGithubAction
         args:
           [
@@ -89,7 +160,6 @@ repos:
             --display-level,
             WARNING,
           ]
-        stages: [manual]
       - id: plantuml
 
   - repo: local
@@ -128,7 +198,8 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.3.6
+    rev: 2.3.7
     hooks:
       - id: megalinterCheckVersion
+      - id: megalinter
       - id: megalinterGithubAction

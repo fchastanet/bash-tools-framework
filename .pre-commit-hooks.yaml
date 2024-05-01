@@ -117,7 +117,7 @@
   types: ['file', 'non-executable', 'plantuml', 'text']
   always_run: false
   fail_fast: true
-  stages: [push, manual]
+  stages: [pre-commit, manual]
 
 - id: megalinterCheckVersion
   name: Megalinter Check Version
@@ -133,7 +133,7 @@
   pass_filenames: false
   always_run: true
   fail_fast: true
-  stages: [pre-commit, pre-push, manual]
+  stages: [pre-commit, manual]
 
 - &MEGALINTER
   id: megalinter
@@ -154,7 +154,7 @@
   always_run: true
   fail_fast: true
   verbose: true
-  stages: [pre-push]
+  stages: [pre-commit]
 
 # manual stage used to select github action with megalinter full config
 - <<: *MEGALINTER

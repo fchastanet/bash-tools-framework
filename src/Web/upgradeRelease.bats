@@ -32,18 +32,19 @@ function Web::upgradeRelease::success { #@test
   Github::defaultInstall() {
     echo "install $2 $3"
   }
+  touch "${TMPDIR}/go"
   FILTER_LAST_VERSION_CALLBACK=filterLatestNonBetaVersion \
-  SOFT_VERSION_CALLBACK=getGoVersion \
+    SOFT_VERSION_CALLBACK=getGoVersion \
     run Web::upgradeRelease \
-      "${HOME}/golang/go/bin/go" \
-      "https://go.dev/dl/?mode=json" \
-      "https://storage.googleapis.com/golang/go@latestVersion@.linux-amd64.tar.gz"
+    "${TMPDIR}/go" \
+    "https://go.dev/dl/?mode=json" \
+    "https://storage.googleapis.com/golang/go@latestVersion@.linux-amd64.tar.gz"
   assert_success
   assert_lines_count 5
   assert_line --index 0 --partial "INFO    - Latest version found is 1.22.2"
-  assert_line --index 1 --partial "INFO    - Upgrading /home/wsl/golang/go/bin/go from version 1.22.1 to 1.22.2"
+  assert_line --index 1 --partial "INFO    - Upgrading ${TMPDIR}/go from version 1.22.1 to 1.22.2"
   assert_line --index 2 --partial "INFO    - Using url https://storage.googleapis.com/golang/go1.22.2.linux-amd64.tar.gz"
-  assert_line --index 3 --regexp  "^${BATS_TMP_DIR}/"
-  assert_line --index 3 --regexp  "web.newSoftware"
-  assert_line --index 4 "install ${HOME}/golang/go/bin/go 1.22.2"
+  assert_line --index 3 --regexp "^${BATS_TMP_DIR}/"
+  assert_line --index 3 --regexp "web.newSoftware"
+  assert_line --index 4 "install ${TMPDIR}/go 1.22.2"
 }
