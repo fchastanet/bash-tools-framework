@@ -20,7 +20,7 @@ declare -ag allDepsResult=()
 #     - add in allDepsResult the current config if it was not seen yet
 #   This has constructed a tree with the most deep dependency present in the first items
 #
-# @warning allDepsResultSeen and allDepsResult global variables have to reset to empty array everytime you call this function
+# @warning allDepsResultSeen and allDepsResult global variables have to reset to empty array every time you call this function
 #
 # @arg $1 scriptsDir:String base directory where dependencies can be retrieved
 # @arg $2 parent:String set to "your software selection" when you call it

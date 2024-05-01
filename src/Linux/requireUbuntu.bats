@@ -8,21 +8,33 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 source "${srcDir}/Linux/requireUbuntu.sh"
 # shellcheck source=src/Linux/getDistributorId.sh
 source "${srcDir}/Linux/getDistributorId.sh"
+# shellcheck source=src/Array/contains.sh
+source "${srcDir}/Array/contains.sh"
 
 teardown() {
   unstub_all
 }
 
 function Linux::requireUbuntu::failure { #@test
-  stub source '/etc/os-release : echo "Alpine"'
+  source() {
+    if [[ "$1" != "/etc/os-release" ]]; then
+      exit 1
+    fi
+    echo "Alpine"
+  }
   run Linux::requireUbuntu
 
   assert_failure 1
-  assert_output --partial "FATAL - this script should be executed under Ubuntu or Debian OS"
+  assert_output --partial "FATAL   - this script should be executed under Ubuntu or Debian OS"
 }
 
 function Linux::requireUbuntu::success { #@test
-  stub source '/etc/os-release : echo "Ubuntu"'
+  source() {
+    if [[ "$1" != "/etc/os-release" ]]; then
+      exit 1
+    fi
+    echo "ubuntu"
+  }
   run Linux::requireUbuntu
 
   assert_success
@@ -30,7 +42,12 @@ function Linux::requireUbuntu::success { #@test
 }
 
 function Linux::requireUbuntu::success2 { #@test
-  stub source '/etc/os-release : echo "Debian"'
+  source() {
+    if [[ "$1" != "/etc/os-release" ]]; then
+      exit 1
+    fi
+    echo "debian"
+  }
   run Linux::requireUbuntu
 
   assert_success

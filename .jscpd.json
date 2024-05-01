@@ -33,6 +33,7 @@
     "**/.idea/**",
     "**/report/**",
     "**/*.svg",
+    ".pre-commit-config-github.yaml",
     "src/_includes/_header.tpl",
     "vendor/**"
   ]

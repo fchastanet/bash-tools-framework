@@ -2,7 +2,7 @@
 Log:displaySuccess "hello"
   	    // Maecenas vel eros id ipsum lobortis cursus id dignissim
     	Log:displaySuccess "hello"
-// turpis. Nam pretium placerat nulla in posuere. Mauris #
+// turpis. Name pretium placerat nulla in posuere. Mauris #
         	  Log:displaySuccess "hello"
 // libero purus, aliquet et commodo quis, semper sit amet sapien.
 
