@@ -175,7 +175,7 @@ file `src/build/buildDoc.sh`
 
 ```bash
 bin/compile "$(pwd)/src/_binaries/doc.sh" --src-dir "$(pwd)/src" \
-  --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
+ --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
 ```
 
 Here you want to generate the binary but overriding some or all functions of
@@ -183,15 +183,15 @@ Here you want to generate the binary but overriding some or all functions of
 
 ```bash
 bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
-  -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
+ -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" --root-dir "$(pwd)"
 ```
 
 Here you want to override the default templates too
 
 ```bash
 bin/compile "$(pwd)/src/_binaries/doc.sh" --s "$(pwd)/src" \
-  -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" \
-  --root-dir "$(pwd)" --template-dir "$(pwd)/src/templates"
+ -s "$(pwd)/vendor/bash-tools-framework/src" --bin-dir "$(pwd)/bin" \
+ --root-dir "$(pwd)" --template-dir "$(pwd)/src/templates"
 ```
 
 ### 3.1. .framework-config environment variables
@@ -436,7 +436,7 @@ case we could also ensure that a minimal version is available.
 # @require Git::requireGitCommand
 # @require Git::requireShallowClone
 Git::shallowClone() {
-  # ...
+ # ...
 }
 ```
 
@@ -524,14 +524,14 @@ A possible implementation of Compatibility::posix can be:
 #!/usr/bin/env bash
 
 Compatibility::posix() {
-  local functionName="$1"
-  local -n compatibilityTags=$2
-  local -n requireTags=$3
+ local functionName="$1"
+ local -n compatibilityTags=$2
+ local -n requireTags=$3
 
-  if ! Array::contains "posix" "${compatibilityTags[@]}"; then
-    Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
-    return 1
-  fi
+ if ! Array::contains "posix" "${compatibilityTags[@]}"; then
+  Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
+  return 1
+ fi
 }
 ```
 
@@ -544,18 +544,18 @@ Compatibility::dockerImageAlpineProjectX can be
 #!/usr/bin/env bash
 
 Compatibility::posix() {
-  local functionName="$1"
-  local -n compatibilityTags=$2
-  local -n requireTags=$3
+ local functionName="$1"
+ local -n compatibilityTags=$2
+ local -n requireTags=$3
 
-  if ! Array::contains "posix" "${compatibilityTags[@]}"; then
-    Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
-    return 1
-  fi
-  if Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"; then
-    Log::displayError "The function ${functionName} used in the script require jq which is incompatible with this script"
-    return 1
-  fi
+ if ! Array::contains "posix" "${compatibilityTags[@]}"; then
+  Log::displayError "The function ${functionName} used in the script does not comply to posix compatibility requirement"
+  return 1
+ fi
+ if Array::contains "Linux::requireJqCommand" "${compatibilityTags[@]}"; then
+  Log::displayError "The function ${functionName} used in the script require jq which is incompatible with this script"
+  return 1
+ fi
 }
 ```
 
@@ -577,7 +577,7 @@ can be used.
 # @compatibility Linux::supportAlpine
 # @compatibility Linux::supportUbuntu
 Version::githubApiExtractVersion() {
-  jq -r ".tag_name" | Version::parse
+ jq -r ".tag_name" | Version::parse
 }
 ```
 
@@ -590,7 +590,7 @@ for example we could have this kind of compatibility tag on Linux::Apt::update
 # @require Linux::requireUbuntu
 # @compatibility Linux::supportUbuntuOnly
 Linux::Apt::update() {
-  Retry::default sudo apt-get update -y --fix-missing -o Acquire::ForceIPv4=true
+ Retry::default sudo apt-get update -y --fix-missing -o Acquire::ForceIPv4=true
 }
 ```
 
@@ -621,9 +621,9 @@ in our script headers:
 # FACADE
 
 if Git::supportShallowClone; then
-  Git::shallowClone ...
+ Git::shallowClone ...
 else
-  Git::clone ...
+ Git::clone ...
 fi
 # ...
 ```
@@ -692,8 +692,8 @@ which defines 2 functions that have to be implemented if a script uses the
 #!/usr/bin/env bash
 
 InstallScript::HelpInterface() {
-  echo "helpDescription"
-  echo "fortunes"
+ echo "helpDescription"
+ echo "fortunes"
 }
 ```
 
@@ -704,7 +704,7 @@ We declare a Dependency interface in the file
 #!/usr/bin/env bash
 
 InstallScript::DependencyInterface() {
-  echo "dependencies"
+ echo "dependencies"
 }
 ```
 
@@ -715,8 +715,8 @@ We declare a Config interface in the file
 #!/usr/bin/env bash
 
 InstallScript::ConfigInterface() {
-  echo "configure"
-  echo "breakOnConfigFailure"
+ echo "configure"
+ echo "breakOnConfigFailure"
 }
 ```
 
@@ -726,8 +726,8 @@ We declare a Test interface in the file `src/InstallScripts/TestInterface.sh`:
 #!/usr/bin/env bash
 
 InstallScript::ConfigInterface() {
-  echo "test"
-  echo "breakOnTestFailure"
+ echo "test"
+ echo "breakOnTestFailure"
 }
 ```
 
@@ -738,7 +738,7 @@ Finally we declare an Install interface in the file
 #!/usr/bin/env bash
 
 InstallScript::InstallInterface() {
-  echo "install"
+ echo "install"
 }
 ```
 
@@ -759,11 +759,11 @@ Now we implement a script that respects these interfaces in the file
 # IMPLEMENT InstallScripts::InstallInterface
 
 helpDescription() {
-  echo "install help"
+ echo "install help"
 }
 
 dependencies() {
-  echo "InstallScript2"
+ echo "InstallScript2"
 }
 ```
 
@@ -1005,8 +1005,8 @@ _Pass #1:_ import functions Linux::Apt::update and Log::displayError
 Linux::Apt::update() { :; }
 # @require Log::requireLoad
 Log::displayError() {
-  #...
-  Log:logMessage #...
+ #...
+ Log:logMessage #...
 }
 # FUNCTIONS placeholder
 # we don't have any yet as we are still parsing the 3 lines
@@ -1030,8 +1030,8 @@ _Note:_ remember that require functions are only filtered using `# @require`
 Linux::Apt::update() { :; }
 # @require Log::requireLoad
 Log::displayError() {
-  #...
-  Log:logMessage #...
+ #...
+ Log:logMessage #...
 }
 Log:logMessage() { :; }
 Linux::requireSudoCommand() { :; }
