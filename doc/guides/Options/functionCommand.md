@@ -30,45 +30,45 @@ The call to following script:
 
 ```bash
 source <(
-Options::generateOption \
+ Options::generateOption \
   --variable-type Boolean \
   --help "help" \
   --alt "--help" --alt "-h" \
   --callback helpCallback \
   --functionName optionHelp
 
-Options::generateOption \
+ Options::generateOption \
   --variable-type StringArray \
   --help "provide the directory where to find the functions source code." \
   --variable-name "srcDirs" \
   --alt "--src-dirs" --alt "-s" \
   --functionName optionSrcDirs
 
-Options::generateGroup \
+ Options::generateGroup \
   --title "Command global options" \
   --help "The Console component adds some predefined options to all commands:" \
   --functionName groupGlobalOptions
 
-Options::generateOption \
+ Options::generateOption \
   --help "verbose mode" \
   --alt "--verbose" --alt "-v" \
   --group groupGlobalOptions \
   --variable-name "verbose" \
   --functionName optionVerbose
 
-Options::generateOption \
+ Options::generateOption \
   --help "quiet mode" \
   --group groupGlobalOptions \
   --variable-name "quiet" \
   --alt "--quiet" --alt "-q" \
   --functionName optionQuiet
 
-Options::generateArg \
+ Options::generateArg \
   --variable-name "srcFile" \
   --callback srcFileCallback \
   --functionName argSrcFile
 
-Options::generateArg \
+ Options::generateArg \
   --variable-name "destFiles" \
   --max 3 \
   --callback destFilesCallback \
@@ -76,12 +76,12 @@ Options::generateArg \
 )
 
 Options::generateCommand --help "super command" \
-  optionVerbose \
-  optionQuiet \
-  optionHelp \
-  optionSrcDirs \
-  argSrcFile \
-  argDestFiles
+ optionVerbose \
+ optionQuiet \
+ optionHelp \
+ optionSrcDirs \
+ argSrcFile \
+ argDestFiles
 ```
 
 will generate this

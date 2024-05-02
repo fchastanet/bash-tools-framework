@@ -43,20 +43,29 @@ Options::generateCommand uses these functions:
 Using templating feature, you have the ability to create a kind of object.
 
 ```bash
-declare optionVerboseFunction=<% Options::generateOption \
-  --form commandForm \
-  --variable-name "verbose" \
-  --alt "-v" \
-  --alt "--verbose" \
-  --variable-type "Boolean" \
-  --default-value "0" \
-  --off-value "0" \ # default
-  --on-value "1" \ # default
-  --help "display more information about processed files" \
-  --validator "validatorHandler"\
-  --handler "handler" \
-  --post-process-handler "postProcessHandler"
-%>
+source <(
+ Options::generateGroup \
+  --title "GLOBAL OPTIONS:" \
+  --function-name groupGlobalOptionsFunction || exit 1
+
+ Options::generateOption \
+  --help "verbose mode" \
+  --variable-name "verboseOption" \
+  --group groupGlobalOptionsFunction \
+  --alt "--verbose" --alt "-v" \
+  --function-name optionVerboseFunction || exit 2
+)
+declare -a options=(
+ optionVerboseFunction
+ --command-name awkLint
+ --unknown-argument-callback unknownArgumentCallback
+ --function-name awkLintCommand
+)
+
+# shellcheck source=/dev/null
+source <(Options::generateCommand "${options[@]}") || exit 3
+
+awkLintCommand parse "$@"
 ```
 
 This will have 2 effects during compilation:
@@ -122,21 +131,21 @@ Let's see an example of integration:
 
 ```bash
 local optionGroup="$(Options::generateGroup \
-  --title "Command global options" \
-  --help "The Console component adds some predefined options to all commands:")"
+ --title "Command global options" \
+ --help "The Console component adds some predefined options to all commands:")"
 Options::sourceFunction "${optionGroup}"
 
 local optionHelp="$(Options::generateOption \
-    --variable-type Boolean --help "help" \
-    --group "${optionGroup}" \
-    --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)"
+ --variable-type Boolean --help "help" \
+ --group "${optionGroup}" \
+ --variable-name "help" --alt "--help" --alt "-h" --callback helpCallback)"
 Options::sourceFunction "${optionHelp}"
 
 local optionVerbose
 optionVerbose="$(Options::generateOption --help "verbose mode" \
-  --group "${optionGroup}" \
-  --variable-name "verbose" \
-  --alt "--verbose" --alt "-v")"
+ --group "${optionGroup}" \
+ --variable-name "verbose" \
+ --alt "--verbose" --alt "-v")"
 Options::sourceFunction "${optionVerbose}"
 
 local destFiles
@@ -144,9 +153,9 @@ destFiles="$(Options::generateArg --variable-name "destFiles" --max 3 --callback
 Options::sourceFunction "${destFiles}"
 
 Options::generateCommand --help "super command" \
-  ${optionVerbose} \
-  ${optionHelp} \
-  ${destFiles}
+ ${optionVerbose} \
+ ${optionHelp} \
+ ${destFiles}
 ```
 
 The last `Options::generateCommand` will echo the function name automatically
@@ -168,37 +177,37 @@ easier to write.
 ```bash
 # shellcheck source=/dev/null
 source <(
-  Options::generateGroup \
-    --title "GLOBAL OPTIONS:" \
-    --function-name groupGlobalOptions
+ Options::generateGroup \
+  --title "GLOBAL OPTIONS:" \
+  --function-name groupGlobalOptions
 
-  Options::generateOption \
-    --help "help" \
-    --group groupGlobalOptions \
-    --variable-name "help" \
-    --alt "--help" \
-    --alt "-h" \
-    --callback helpCallback \
-    --function-name optionHelp
+ Options::generateOption \
+  --help "help" \
+  --group groupGlobalOptions \
+  --variable-name "help" \
+  --alt "--help" \
+  --alt "-h" \
+  --callback helpCallback \
+  --function-name optionHelp
 
-  Options::generateOption \
-    --help "verbose mode" \
-    --group groupGlobalOptions \
-    --variable-name "verbose" \
-    --alt "--verbose" --alt "-v" \
-    --function-name optionVerbose
+ Options::generateOption \
+  --help "verbose mode" \
+  --group groupGlobalOptions \
+  --variable-name "verbose" \
+  --alt "--verbose" --alt "-v" \
+  --function-name optionVerbose
 
-  Options::generateArg \
-    --variable-name "destFiles" \
-    --max 3 \
-    --callback destFilesCallback \
-    --function-name argDestFiles
+ Options::generateArg \
+  --variable-name "destFiles" \
+  --max 3 \
+  --callback destFilesCallback \
+  --function-name argDestFiles
 )
 
 Options::generateCommand --help "super command" \
-  optionVerbose \
-  optionHelp \
-  destFiles
+ optionVerbose \
+ optionHelp \
+ destFiles
 ```
 
 ## Best practices
@@ -283,41 +292,41 @@ in you bash-tpl template add these lines:
 ```bash
 %
 source <(
-  Options::generateOption \
-    --help "help" \
-    --group groupGlobalOptions \
-    --variable-name "help" \
-    --alt "--help" \
-    --alt "-h" \
-    --callback helpCallback \
-    --function-name optionHelp
+ Options::generateOption \
+  --help "help" \
+  --group groupGlobalOptions \
+  --variable-name "help" \
+  --alt "--help" \
+  --alt "-h" \
+  --callback helpCallback \
+  --function-name optionHelp
 
-  Options::generateOption \
-    --help "verbose mode" \
-    --group groupGlobalOptions \
-    --variable-name "verbose" \
-    --alt "--verbose" --alt "-v" \
-    --function-name optionVerbose
+ Options::generateOption \
+  --help "verbose mode" \
+  --group groupGlobalOptions \
+  --variable-name "verbose" \
+  --alt "--verbose" --alt "-v" \
+  --function-name optionVerbose
 
-  Options::generateOption \
-    --variable-name "srcDirs" \
-    --alt "-s" \
-    --alt "--src-dir" \
-    --min 1 \
-    --max 3 \
-    --help-item-name "srcDir" \
-    --variable-type "StringArray" \
-    --help "provides the directory where to find the functions source code." \
-    --function-name "optionSrcDirs"
+ Options::generateOption \
+  --variable-name "srcDirs" \
+  --alt "-s" \
+  --alt "--src-dir" \
+  --min 1 \
+  --max 3 \
+  --help-item-name "srcDir" \
+  --variable-type "StringArray" \
+  --help "provides the directory where to find the functions source code." \
+  --function-name "optionSrcDirs"
 )
 Options::generateCommand \
-  --help "Command help" \
-  --author "author is me" \
-  --command-name "myCommand" \
-  --license "MIT License" \
-  --function-name myCommand \
-  optionVerbose \
-  optionSrcDirs
+ --help "Command help" \
+ --author "author is me" \
+ --command-name "myCommand" \
+ --license "MIT License" \
+ --function-name myCommand \
+ optionVerbose \
+ optionSrcDirs
 
 %
 

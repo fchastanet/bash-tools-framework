@@ -390,17 +390,17 @@ echo $? # prints 127
 
 # try to get more logs
 KEEP_TEMP_FILES=1 BASH_FRAMEWORK_DISPLAY_LEVEL=4 bin/compile \
-  src/_binaries/testsData/bin/embed.sh \
-  --template-dir src \
-  --bin-dir bin \
-  --root-dir "${PWD}" \
-  --src-dir src/_binaries/testsData/src
+ src/_binaries/testsData/bin/embed.sh \
+ --template-dir src \
+ --bin-dir bin \
+ --root-dir "${PWD}" \
+ --src-dir src/_binaries/testsData/src
 
 # try to use strace
 docker run --rm -it \
-  -w /bash -v "$(pwd):/bash" \
-  --entrypoint="" \
-  build:bash-tools-alpine-4.4-user bash
+ -w /bash -v "$(pwd):/bash" \
+ --entrypoint="" \
+ build:bash-tools-alpine-4.4-user bash
 apk update
 apk add strace
 ```
@@ -426,10 +426,10 @@ previous simplified code:
 
 ```bash
 cat file | {
-  local line
-  while IFS="" read -r line; do
-    # ...
-  done
+ local line
+ while IFS="" read -r line; do
+  # ...
+ done
 }
 ```
 
@@ -439,19 +439,19 @@ Fixed code is to remove error if :
 
 ```bash
 cat file | {
-  local line
-  while true; do
-    local status=0
-    IFS="" read -r line || status=$?
-    if [[ "${status}" = "1" ]]; then
-      # end of file
-      return 0
-    elif [[ "${status}" != "0" ]]; then
-      # other error
-      return "${status}"
-    fi
-    # ...
-  done
+ local line
+ while true; do
+  local status=0
+  IFS="" read -r line || status=$?
+  if [[ "${status}" = "1" ]]; then
+   # end of file
+   return 0
+  elif [[ "${status}" != "0" ]]; then
+   # other error
+   return "${status}"
+  fi
+  # ...
+ done
 }
 ```
 
