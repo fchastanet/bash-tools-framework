@@ -234,10 +234,9 @@ jobs:
         if: ${{ matrix.runPrecommitTests }}
         with:
           extra_args: >-
-            -c .pre-commit-config-github.yaml
-            -a --hook-stage manual
+            -c .pre-commit-config-github.yaml -a --hook-stage manual
 
-       # MegaLinter
+        # MegaLinter
       - name: MegaLinter
         id: ml
         continue-on-error: true
@@ -280,7 +279,8 @@ jobs:
               ) &&
               env.APPLY_FIXES_MODE == 'pull_request' && (
                 github.event_name == 'push' ||
-                github.event.pull_request.head.repo.full_name == github.repository
+                github.event.pull_request.head.repo.full_name ==
+          github.repository
               ) &&
               !contains(github.event.head_commit.message, 'skip fix')
             )
