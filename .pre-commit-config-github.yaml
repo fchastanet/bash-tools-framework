@@ -135,7 +135,7 @@ repos:
             \.tpl$|
             /testsData/
           )
-        stages: [pre-commit]
+        stages: [pre-commit, manual]
 
       # Check both committed and uncommitted files for git conflict
       # markers and whitespace errors according to core.whitespace
