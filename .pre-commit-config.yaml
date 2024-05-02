@@ -17,7 +17,7 @@ repos:
         always_run: true
         require_serial: true
         stages: [pre-commit, manual]
-  
+
   - repo: https://github.com/executablebooks/mdformat
     # Do this before other tools "fixing" the line endings
     rev: 0.7.17

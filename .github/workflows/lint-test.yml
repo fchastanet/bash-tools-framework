@@ -115,7 +115,9 @@ jobs:
 
       - name: Run pre-commit
         if: matrix.runPrecommitTests
-        run: pre-commit run -c .pre-commit-config-github.yaml -a --hook-stage manual 
+        run:
+          pre-commit run -c .pre-commit-config-github.yaml -a --hook-stage
+          manual
 
       - name: Archive results
         if: matrix.runPrecommitTests && always()
