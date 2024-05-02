@@ -293,8 +293,7 @@ jobs:
       - name: Create Pull Request
         id: cpr
         if: >
-          matrix.runPrecommitTests &&
-          env.COND_UPDATED_SOURCES == 'true' &&
+          matrix.runPrecommitTests && env.COND_UPDATED_SOURCES == 'true' &&
           env.COND_APPLY_FIXES_NEEDED == 'true' &&
           !contains(github.event.head_commit.message, 'skip fix')
         uses: peter-evans/create-pull-request@v6
