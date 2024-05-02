@@ -21,7 +21,6 @@ repos:
         pass_filenames: false
         always_run: true
         require_serial: true
-        fail_fast: true
         stages: [pre-commit, manual]
   
   - repo: https://github.com/executablebooks/mdformat
@@ -150,14 +149,13 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.3.7
+    rev: 3.0.0
     hooks:
       - id: fixShebangExecutionBit
-      - id: fixShebangExecutionBitGithubActions
       - id: awkLint
       - id: shellcheckLint
       - id: shellcheckLintGithubAction
-      - id: frameworkLinter
+      - id: frameworkLint
         args:
           [
             --expected-warnings-count,
@@ -169,7 +167,7 @@ repos:
             --display-level,
             WARNING,
           ]
-      - id: frameworkLinterGithubAction
+      - id: frameworkLintGithubAction
         args:
           [
             --expected-warnings-count,
@@ -195,7 +193,6 @@ repos:
         pass_filenames: false
         always_run: true
         require_serial: true
-        fail_fast: true
         stages: [pre-commit]
 
       - <<: *LOCAL_BUILD_SH_FILES
@@ -215,11 +212,10 @@ repos:
         pass_filenames: false
         require_serial: true
         always_run: true
-        fail_fast: true
         stages: [manual]
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 2.3.7
+    rev: 3.0.0
     hooks:
       - id: megalinterCheckVersion
       - id: megalinter
