@@ -1,22 +1,31 @@
 {
   "search.useIgnoreFiles": true,
   "search.exclude": {
+    "_site": true,
     "report": true,
+    // all bin except bin/compile
+    "bin/*": true,
+    "bin/compile": false,
+    "node_modules": true,
     "backup": true,
     "megalinter-reports": true,
-    "_site": true,
     "vendor": true,
-    // all bin except bin/compile
-    "bin/[!c]*": true,
-    "pages/assets/images/compilerEmbedInjection.svg": true
+    "pages/assets/images/compilerEmbedInjection.svg": true,
   },
   "explorer.autoReveal": false,
   "files.exclude": {
+    "**/.git": true,
+    "node_modules": true,
     "_site/**": true
   },
   "markdown.extension.toc.omittedFromToc": {
     "*.md": ["# %%"]
   },
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.indentSize": "tabSize",
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
   "workbench.editorAssociations": {
     "*.md": "default"
   },

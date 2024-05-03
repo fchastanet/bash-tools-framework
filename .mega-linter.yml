@@ -24,16 +24,21 @@ EXCLUDED_DIRECTORIES:
   - '.git'
   - '.idea'
   - 'logs'
+  - 'node_modules'
+  - 'vendor'
 FILTER_REGEX_EXCLUDE: |
   (?x)(
     \.git/|
     \.history/|
     \.idea/|
-    ^vendor/
+    ^vendor/|
+    ^node_modules/
   )
 FILEIO_REPORTER: false
 PRE_COMMANDS:
   - command: env
+    cwd: 'workspace'
+  - command: yarn add --dev eslint-plugin-json eslint-config-prettier
     cwd: 'workspace'
 POST_COMMANDS:
   # FIX files set as root user
@@ -54,13 +59,13 @@ SHOW_ELAPSED_TIME: true
 # Linters configurations
 BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: |
   (?x)(
-    ^vendor/.*|
+    ^vendor/|
     /testsData/
   )
 BASH_SHELLCHECK_ARGUMENTS: --source-path=/tmp/lint
 BASH_SHFMT_ARGUMENTS: -i 2 -ci
 
-CREDENTIALS_SECRETLINT_CONFIG_FILE: .secretlintrc.yml
+REPOSITORY_SECRETLINT_CONFIG_FILE: .secretlintrc.yml
 
 EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: |
   (?x)(
@@ -76,13 +81,15 @@ EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: |
   )
 
 GIT_GIT_DIFF_PRE_COMMANDS:
-  - command: git config --global core.autocrlf input
+  - command: git config --global core.autocrlf false
     continue_if_failed: false
   - command: git config --global core.eol lf
     continue_if_failed: false
   - command: git config --global core.whitespace cr-at-eol,-trailing-space
     continue_if_failed: false
   - command: git config --global core.excludesfile .gitignore
+    continue_if_failed: false
+  - command: git config --global apply.whitespace fix
     continue_if_failed: false
   - command: git config --global --add safe.directory .git
     continue_if_failed: false
@@ -92,19 +99,9 @@ IGNORE_GENERATED_FILES: true
 
 JAVASCRIPT_DEFAULT_STYLE: prettier
 JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
-JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: report/
+JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (report/)
 
-ACTION_ACTIONLINT_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    ^\.github/workflows/dependabot\.yml$
-  )
-YAML_V8R_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    ^\.vscode/\.checkov\.yml|
-    ^\.github/workflows/dependabot\.yml$|
-    ^\.secretlintrc\.yml|
-    ^\.grype\.yaml
-  )
+JSON_ESLINT_PLUGIN_JSONC_FILE_NAME: .eslintrc.js
 
 JSON_JSONLINT_FILTER_REGEX_EXCLUDE: |
   (?x)(
@@ -112,26 +109,8 @@ JSON_JSONLINT_FILTER_REGEX_EXCLUDE: |
     ^conf/\.vscode/settings\.json|
     ^\.vscode/launch\.json
   )
-MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    ^pages/Commands.md|
-    ^pages/FrameworkFullDoc.md|
-    ^pages/README.md|
-    ^pages/doc|
-    ^pages/bashDoc|
-    ^pages/tests|
-    ^pages/_sidebar.md
-  )
-MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    ^pages/Commands.md|
-    ^pages/FrameworkFullDoc.md|
-    ^pages/README.md|
-    ^pages/doc|
-    ^pages/bashDoc|
-    ^pages/tests|
-    ^doc/guides/Options/generate.*\.md$
-  )
+
+SPELL_CSPELL_CONFIG_FILE: cspell.config.yml
 SPELL_CSPELL_FILTER_REGEX_EXCLUDE: |
   (?x)(
     \.git/|
@@ -157,4 +136,39 @@ SPELL_FILTER_REGEX_EXCLUDE: |
     IDE/.*/\.idea|
     ^bin/bash-tpl|
     \.svg
+  )
+
+MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^pages/Commands.md|
+    ^pages/FrameworkFullDoc.md|
+    ^pages/README.md|
+    ^pages/doc|
+    ^pages/bashDoc|
+    ^pages/tests|
+    ^pages/_sidebar.md
+  )
+
+ACTION_ACTIONLINT_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^\.github/workflows/dependabot\.yml$
+  )
+
+YAML_V8R_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^\.vscode/\.checkov\.yml|
+    ^\.github/workflows/dependabot\.yml$|
+    ^\.secretlintrc\.yml|
+    ^\.grype\.yaml
+  )
+
+MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^pages/Commands.md|
+    ^pages/FrameworkFullDoc.md|
+    ^pages/README.md|
+    ^pages/doc|
+    ^pages/bashDoc|
+    ^pages/tests|
+    ^doc/guides/Options/generate.*\.md$
   )

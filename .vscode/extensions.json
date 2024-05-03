@@ -1,21 +1,20 @@
 {
   "recommendations": [
-    "stylelint.vscode-stylelint",
-    "aquasecurityofficial.trivy-vulnerability-scanner",
+    "streetsidesoftware.code-spell-checker",
     "timonwong.shellcheck",
     "standard.vscode-standard",
-    "streetsidesoftware.code-spell-checker",
-    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
     "foxundermoon.shell-format",
     "esbenp.prettier-vscode",
-    "ms-azuretools.vscode-docker",
-    "lizebang.bash-extension-pack",
-    "jetmartin.bats",
-    "exiasr.hadolint",
+    "dbaeumer.vscode-eslint",
     "shd101wyy.markdown-preview-enhanced",
     "yzhang.markdown-all-in-one",
     "luggage66.awk",
+    "lizebang.bash-extension-pack",
+    "rogalmic.bash-debug",
+    "jetmartin.bats",
+    "ms-azuretools.vscode-docker",
+    "exiasr.hadolint",
     "jebbs.plantuml",
-    "rogalmic.bash-debug"
   ]
 }

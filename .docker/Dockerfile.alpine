@@ -5,40 +5,28 @@ FROM ${BASH_IMAGE}
 
 SHELL ["/bin/sh", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
 RUN \
-    apk upgrade ;\
-    echo 'http://dl-cdn.alpinelinux.org/alpine/v3.17/main' >> /etc/apk/repositories ;\
-    apk update ;\
-    apk add --no-cache \
-      "bc=~1" \
-      "coreutils=~9" \
-      "curl=~8" \
-      "gawk" \
-      # needed for envsubst
-      "gettext=~0.21" \
-      "git=~2" \
-      "jq=~1.6" \
-      "parallel=20221022-r0" \
-    ;\
-    # remove parallel nagware
-    mkdir -p ~/.parallel ;\
-    touch ~/.parallel/will-cite
+  apk upgrade ;\
+  echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories ;\
+  apk update ;\
+  apk add --no-cache \
+    "bc" \
+    "coreutils" \
+    "curl" \
+    "gawk" \
+    # needed for envsubst
+    "gettext" \
+    "git" \
+    "jq" \
+    "parallel"
+
+# Create a default www-data user
+COPY createUser.alpine.sh /usr/local/bin/createUser.sh
+RUN USER_ID=1000 GROUP_ID=1000 SKIP_USER=0 createUser.sh
 
 ENV IN_BASH_DOCKER="You're in docker"
+WORKDIR /bash
 
 ONBUILD ARG USER_ID=1000
 ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
-ONBUILD RUN \
-    if [ "${SKIP_USER:-0}" -eq "0" ] && [ "${USER_ID:-0}" -ne "0" ] && [ "${GROUP_ID:-0}" -ne "0" ]; then \
-      # del all users with group Id and the del group id
-      awk -F: "\$4 == ${GROUP_ID} {print \$1}" /etc/passwd | while read -r user; do deluser "${user}"; done ;\
-      delgroup "${GROUP_ID}" || true ;\
-      # create www-data user and group from scratch
-      delgroup www-data || true ;\
-      deluser www-data || true ;\
-      addgroup -g "${GROUP_ID}" -S www-data ;\
-      adduser -u "${USER_ID}" -D -S -h /app -s /sbin/nologin -G www-data www-data ;\
-      # remove parallel nagware
-      mkdir -p /app/.parallel ;\
-      touch /app/.parallel/will-cite; \
-    fi
+ONBUILD RUN /usr/local/bin/createUser.sh

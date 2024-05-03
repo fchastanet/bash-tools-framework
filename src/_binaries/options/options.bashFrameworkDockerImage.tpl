@@ -23,7 +23,6 @@ Options::generateOption \
   --alt --bash-version \
   --default-value "${defaultBashVersion}" \
   --help "version of bash to use: ${bashVersions}" \
-  --authorized-values "${bashVersions}" \
   --callback updateOptionBashVersionCallback \
   --function-name optionBashVersionFunction
 

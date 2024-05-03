@@ -6,11 +6,16 @@ LOG_LAST_LOG_DATE="${FIRST_LOG_DATE}"
 LOG_LAST_LOG_DATE_INIT=1
 LOG_LAST_DURATION_STR=""
 
-# @description Display message using info color (bg light blue/fg white)
-# @arg $1 message:String the message to display
+# @description compute duration since last call to this function
+# the result is set in following env variables.
+# in ss.sss (seconds followed by millliseconds precision 3 decimals)
+# @noargs
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @set LOG_LAST_LOG_DATE_INIT int (default 1) set to 0 at first call, allows to detect reference log
+# @set LOG_LAST_DURATION_STR String the last duration displayed
+# @set LOG_LAST_LOG_DATE String the last log date that will be used to compute next diff
 Log::computeDuration() {
-  if ((DISPLAY_DURATION == 1)); then
+  if ((${DISPLAY_DURATION:-0} == 1)); then
     local -i duration=0
     local -i delta=0
     local -i currentLogDate

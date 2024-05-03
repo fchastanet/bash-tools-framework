@@ -1,3 +1,4 @@
+---
 - id: fixShebangExecutionBit
   name: fixShebangExecutionBit
   description: |
