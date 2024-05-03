@@ -1,3 +1,4 @@
+---
 # - Level of verbose logging. 0 is standard, higher numbers are more verbose
 # - overridden by passing --verbose / -v
 # - default = 0
@@ -19,3 +20,7 @@ customCatalog:
       description: megalinter
       fileMatch: ['.mega-linter*.yml']
       location: https://raw.githubusercontent.com/megalinter/megalinter/main/megalinter/descriptors/schemas/megalinter-configuration.jsonschema.json
+    - name: pre-commit
+      description: pre-commit
+      fileMatch: ['.pre-commit*.yml', '.pre-commit*.yaml']
+      location: https://json.schemastore.org/pre-commit-config.json

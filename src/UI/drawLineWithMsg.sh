@@ -14,7 +14,7 @@ UI::drawLineWithMsg() {
   fi
 
   # compute screen width
-  local -i width=${COLUMNS:-}
+  local -i width=${COLUMNS:-0}
   if ((width == 0)); then
     if [[ -t 0 ]]; then
       width=$(tput cols)
@@ -25,13 +25,14 @@ UI::drawLineWithMsg() {
   fi
 
   # compute msg
-  if ((${#msg} + 4 > width)); then
+  local -i msgLen=${#msg}
+  if ((msgLen + 4 > width)); then
     msg="${msg:0:$((width - 4))}"
   fi
 
   # compute left/right line
-  local -i leftWidth=$(((width - ${#msg} - 2) / 2))
-  local -i rightWidth=$((width - ${#msg} - 2 - leftWidth))
+  local -i leftWidth=$(((width - msgLen - 2) / 2))
+  local -i rightWidth=$((width - msgLen - 2 - leftWidth))
 
   # display line
   printf -- "${character}%.0s" $(seq "${leftWidth}")

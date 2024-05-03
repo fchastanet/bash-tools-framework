@@ -12,10 +12,6 @@ on: # yamllint disable-line rule:truthy
       - '*'
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
-
 env:
   # Apply linter fixes configuration
   # When active, APPLY_FIXES must also be defined as
@@ -33,60 +29,25 @@ env:
   COND_APPLY_FIXES_NEEDED: false
 
 jobs:
-  build:
+
+  # -------------------------------------------------------
+  # Build docker images
+  # -------------------------------------------------------
+  build-docker-images:
     runs-on: ubuntu-22.04
     permissions:
       # needed by ouzi-dev/commit-status-updater@v2
       statuses: write
-      # needed by mikepenz/action-junit-report@v4
-      checks: write
     strategy:
       fail-fast: true
       matrix:
         vendor:
           - ubuntu
-          #- alpine
+          - alpine
         bashTarVersion:
-          #- '4.4'
-          #- '5.0'
-          - '5.1'
-        include:
-          # - vendor: ubuntu
-          #   bashImage: ubuntu:20.04
-          #   batsOptions: -j 30
-          #   bashTarVersion: 4.4
-          #   runPrecommitTests: false
-          #   dockerfile: .docker/Dockerfile.ubuntu
-          # - vendor: ubuntu
-          #   bashImage: ubuntu:20.04
-          #   bashTarVersion: 5.0
-          #   batsOptions: -j 30
-          #   runPrecommitTests: false
-          #   dockerfile: .docker/Dockerfile.ubuntu
-          - vendor: ubuntu
-            bashImage: ubuntu:20.04
-            bashTarVersion: 5.1
-            batsOptions: -j 30
-            runPrecommitTests: true
-            dockerfile: .docker/Dockerfile.ubuntu
-          # - vendor: alpine
-          #   bashTarVersion: 4.4
-          #   bashImage: amd64/bash:4.4-alpine3.18
-          #   batsOptions: -j 30 --filter-tags '!ubuntu_only'
-          #   runPrecommitTests: false
-          #   dockerfile: .docker/Dockerfile.alpine
-          # - vendor: alpine
-          #   bashTarVersion: 5.0
-          #   bashImage: amd64/bash:5.0-alpine3.18
-          #   batsOptions: -j 30 --filter-tags '!ubuntu_only'
-          #   runPrecommitTests: false
-          #   dockerfile: .docker/Dockerfile.alpine
-          # - vendor: alpine
-          #   bashTarVersion: 5.1
-          #   bashImage: amd64/bash:5.1-alpine3.18
-          #   batsOptions: -j 30 --filter-tags '!ubuntu_only'
-          #   runPrecommitTests: false
-          #   dockerfile: .docker/Dockerfile.alpine
+          - '4.4'
+          - '5.0'
+          - '5.3'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,33 +61,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: crazy-max/ghaction-import-gpg@v5
-        if: ${{ matrix.runPrecommitTests && success() }}
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-
-      - uses: tibdex/github-app-token@v1
-        if: ${{ matrix.runPrecommitTests && success() }}
-        id: generate-token
-        with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
+      # overall process
       - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build-bash-tools
-          status: pending
-
-      # -------------------------------------------------------
-      # Build Image
-      # -------------------------------------------------------
-
-      - uses: ouzi-dev/commit-status-updater@v2
-        with:
-          name: build-bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: pending
 
       - name: Set env vars
@@ -138,7 +76,18 @@ jobs:
             echo "image_tag=bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}"
             echo "image_name=scrasnups/build"
             echo "branch_name=${GITHUB_REF##*/}"
+            if [[ "${{ matrix.vendor }}" = "ubuntu" ]]; then
+              echo "bashImage=ubuntu:20.04"
+            else
+              echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
+            fi
           ) >> "${GITHUB_ENV}"
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        with:
+          name: build-${{ env.image_tag }}
+          status: pending
+
 
       - name: Docker meta
         id: meta
@@ -162,13 +111,13 @@ jobs:
         with:
           load: true
           context: .docker
-          file: '${{ matrix.dockerfile }}'
+          file: .docker/Dockerfile.${{ matrix.vendor }}
           pull: true
           github-token: ${{ github.token }}
           tags: |
             ${{ env.image_name }}:${{ env.image_tag }}
           build-args: |
-            BASH_IMAGE: "${{ matrix.bashImage }}"
+            BASH_IMAGE: "${{ env.bashImage }}"
             BASH_TAR_VERSION: "${{ matrix.bashTarVersion }}"
           cache-from: |
             type=gha,ref=${{ env.image_name }}:${{ env.image_tag }}
@@ -184,7 +133,7 @@ jobs:
         with:
           load: true
           context: .docker
-          file: '${{ matrix.dockerfile }}'
+          file: .docker/Dockerfile.${{ matrix.vendor }}
           push: true
           github-token: ${{ github.token }}
           tags: |
@@ -195,16 +144,62 @@ jobs:
 
       - uses: ouzi-dev/commit-status-updater@v2
         with:
-          name: build-bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}
+          name: build-${{ env.image_tag }}
           status: ${{ job.status }}
 
-      # -------------------------------------------------------
-      # Lint only if pre-commit
-      # -------------------------------------------------------
+  # -------------------------------------------------------
+  # Pre-commit
+  # -------------------------------------------------------
+
+  pre-commit:
+    runs-on: ubuntu-22.04
+    needs: [build-docker-images]
+    permissions:
+      # needed by ouzi-dev/commit-status-updater@v2
+      statuses: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: crazy-max/ghaction-import-gpg@v5
+        if: ${{ success() }}
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - uses: tibdex/github-app-token@v1
+        if: ${{ success() }}
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: ouzi-dev/commit-status-updater@v2
+        with:
+          name: pre-commit-megalinter
+          status: pending
+
+      - name: Set env vars
+        id: vars
+        # shellcheck disable=SC2129
+        run: |
+          (
+            echo "branch_name=${GITHUB_REF##*/}"
+          ) >> "${GITHUB_ENV}"
 
       - name: Cache pre-commit
         uses: actions/cache@v4
-        if: ${{ matrix.runPrecommitTests }}
         env:
           cache_name: pre-commit-${{ env.cache_version }}
           hash: ${{hashFiles('**/.pre-commit-config-github.yaml')}}
@@ -214,29 +209,19 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ env.cache_name }}-
 
       - name: Set up Python
-        if: ${{ matrix.runPrecommitTests }}
         uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
       - name: Install pre-commit
-        if: ${{ matrix.runPrecommitTests }}
         run: pip install pre-commit
 
       - uses: fchastanet/github-action-setup-shfmt@v4.0.0
-        if: ${{ matrix.runPrecommitTests }}
-
-      - uses: ouzi-dev/commit-status-updater@v2
-        if: ${{ matrix.runPrecommitTests }}
-        with:
-          name: lint
-          status: pending
 
       - name: Run pre-commit
         continue-on-error: true
         uses: pre-commit/action@v3.0.1
         id: preCommit
-        if: ${{ matrix.runPrecommitTests }}
         with:
           extra_args: >-
             -c .pre-commit-config-github.yaml -a --hook-stage manual
@@ -244,7 +229,7 @@ jobs:
       - name: MegaLinter
         id: ml
         continue-on-error: true
-        if: ${{ matrix.runPrecommitTests && always() }}
+        if: ${{ always() }}
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/flavors/
         uses: oxsecurity/megalinter/flavors/terraform@v7
@@ -295,7 +280,7 @@ jobs:
       - name: Create Pull Request
         id: cpr
         if: >
-          matrix.runPrecommitTests && env.COND_UPDATED_SOURCES == 'true' &&
+          env.COND_UPDATED_SOURCES == 'true' &&
           env.COND_APPLY_FIXES_NEEDED == 'true' &&
           !contains(github.event.head_commit.message, 'skip fix')
         uses: peter-evans/create-pull-request@v6
@@ -319,38 +304,107 @@ jobs:
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
       - uses: ouzi-dev/commit-status-updater@v2
-        if: ${{  matrix.runPrecommitTests && always() }}
+        if: ${{ always() }}
         with:
-          name: lint
+          name: pre-commit-megalinter
           status: ${{ job.status }}
 
-      # -------------------------------------------------------
-      # Run unit tests
-      # -------------------------------------------------------
+  # -------------------------------------------------------
+  # Unit tests
+  # -------------------------------------------------------
+
+  unit-tests:
+    runs-on: ubuntu-22.04
+    needs: [ build-docker-images ]
+    permissions:
+      # needed by ouzi-dev/commit-status-updater@v2
+      statuses: write
+      # needed by mikepenz/action-junit-report@v4
+      checks: write
+    strategy:
+      fail-fast: true
+      matrix:
+        vendor:
+          - ubuntu
+          - alpine
+        bashTarVersion:
+          - '4.4'
+          - '5.0'
+          - '5.3'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: crazy-max/ghaction-import-gpg@v5
+        if: ${{ success() }}
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - uses: tibdex/github-app-token@v1
+        if: ${{ success() }}
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - uses: ouzi-dev/commit-status-updater@v2
-        if: ${{ steps.preCommit.conclusion == 'success' }}
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: pending
 
+      - name: Set env vars
+        id: vars
+        # shellcheck disable=SC2129
+        run: |
+          (
+            echo "job_tag=${{github.run_id}}-${{matrix.vendor}}-${{matrix.bashTarVersion}}"
+            echo "image_tag=bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}"
+            echo "image_name=scrasnups/build"
+            echo "branch_name=${GITHUB_REF##*/}"
+            if [[ "${{ matrix.vendor }}" = "ubuntu" ]]; then
+              echo "bashImage=ubuntu:20.04"
+              echo "batsOptions=-j 30"
+            else
+              echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
+              echo "batsOptions=-j 30 --filter-tags '!ubuntu_only'"
+            fi
+          ) >> "${GITHUB_ENV}"
+
       - name: run unit tests
         id: unitTests
-        if: ${{ steps.preCommit.conclusion == 'success' }}
         continue-on-error: true
         run: |
+          set -x
           set -o errexit
           chmod -R 777 logs
-          # shellcheck disable=SC2266
-          USER_ID=1000 \
-          GROUP_ID=1000 \
-          ./bin/test \
-            -vvv \
-            --vendor "${{matrix.vendor}}" \
-            --bash-version "${{matrix.bashTarVersion}}" \
-            --bash-base-image "${{matrix.bashImage}}" \
-            --branch-name "${{ env.branch_name }}" \
-            ${{matrix.batsOptions}} \
-            --formatter junit -o logs -r src --ci 2>&1 |
+
+          bin/installRequirements
+
+          docker pull "scrasnups/build:${{env.image_tag}}"
+          docker run --rm \
+            -e KEEP_TEMP_FILES=0 \
+            -e BATS_FIX_TEST=0 \
+            -e USER_ID="1000" \
+            -e GROUP_ID="1000" \
+            --user "www-data:www-data" \
+            -w /bash \
+            -v "$(pwd):/bash" \
+            "scrasnups/build:${{env.image_tag}}" \
+              /bash/vendor/bats/bin/bats \
+              ${{env.batsOptions}} \
+              --formatter junit -o logs -r src 2>&1 |
             tee "logs/bats-${{ env.job_tag }}.log" || exit 1
 
           awk '/xml version="1.0"/{flag=1} flag; /<\/testsuites>/{flag=0}' \
@@ -362,7 +416,7 @@ jobs:
         if: ${{ always() && steps.unitTests.conclusion == 'success' }}
         with:
           token: ${{ github.token }}
-          check_name: JUnit ${{matrix.vendor}} Bash ${{matrix.bashTarVersion}}
+          check_name: JUnit ${{ env.image_tag }}
           fail_on_failure: true
           require_tests: true
           require_passed_tests: true
@@ -372,20 +426,19 @@ jobs:
         if: ${{ always() && steps.unitTests.conclusion == 'success' }}
         uses: actions/upload-artifact@v4
         with:
-          name: Test Results ${{matrix.vendor}} ${{matrix.bashTarVersion}}
+          name: Test Results ${{ env.image_tag }}
           path: |
             logs/**
 
       - uses: ouzi-dev/commit-status-updater@v2
-        if: ${{ steps.preCommit.conclusion == 'success' }}
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: ${{ job.status }}
 
-  publishTestResults:
-    name: 'Publish Tests Results'
+  overallTestResults:
+    name: 'Overall Tests Results'
     if: ${{ always() }}
-    needs: [build]
+    needs: [unit-tests]
     runs-on: ubuntu-22.04
     permissions:
       # needed by ouzi-dev/commit-status-updater@v2

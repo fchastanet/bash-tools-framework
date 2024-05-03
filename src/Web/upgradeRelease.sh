@@ -41,8 +41,7 @@ Web::upgradeRelease() {
     else
       Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${latestVersion}"
     fi
-    local url
-    url="$(echo "${downloadReleaseUrl}" | sed -E "s/@latestVersion@/${latestVersion}/g")"
+    local url="${downloadReleaseUrl//@latestVersion@/${latestVersion}}"
     Log::displayInfo "Using url ${url}"
     newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t web.newSoftware.XXXX)
     Retry::default curl \

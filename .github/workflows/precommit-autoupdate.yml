@@ -1,4 +1,5 @@
 ---
+# Check if precommit packages need to be updated and create PR if this is the case
 name: Pre-commit auto-update
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -10,6 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -39,7 +41,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           committer: fchastanet <fchastanet@gmail.com>
-          branch: update/pre-commit-autoupdate-${{ github.run_id }}
+          branch: update/pre-commit-autoupdate
           title: Auto-update pre-commit hooks
           commit-message: Auto-update pre-commit hooks
           body: |

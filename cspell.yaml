@@ -1,0 +1,146 @@
+---
+$schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+version: '0.2'
+language: en
+noConfigSearch: true
+caseSensitive: true
+useGitignore: true
+enableGlobDot: true
+ignorePaths:
+  - "/testsData/**"
+  - package-lock.json
+  - "**/*/svg"
+  - .vscode
+  - ".cspell/**"
+  - .git/**
+  - "**/.git/**"
+  - ".history/**"
+  - "**/node_modules/**"
+  - "**/vscode-extension/**"
+  - "**/logs/**"
+  - megalinter-reports
+  - report
+  - .jscpd.json
+  - "*-megalinter_file_names_cspell.txt"
+  - "**/*megalinter_file_names_cspell.txt"
+  - .shellcheckrc
+  - "**/bin/**"
+  - "**/vendor/**"
+  - "**/backup/**"
+  - commit-msg.md
+  - ".mega-linter*.yml"
+  - ".env"
+dictionaryDefinitions:
+  - name: myBash
+    path: ".cspell/bash.txt"
+    addWords: true
+  - name: plantuml
+    path: ".cspell/plantuml.txt"
+    addWords: true
+  - name: loremIpsum
+    path: ".cspell/loremIpsum.txt"
+    addWords: true
+  - name: config
+    path: ".cspell/config.txt"
+    addWords: true
+  - name: mySoftwares
+    path: ".cspell/softwares.txt"
+    addWords: true
+  - name: dirColors
+    path: ".cspell/dirColors.txt"
+    addWords: false
+  - name: readme
+    path: ".cspell/readme.txt"
+    addWords: true
+  - name: lintersConfig
+    path: '.cspell/lintersConfig.txt'
+    addWords: true
+
+dictionaries:
+  - bash
+  - plantuml
+  - myAwk
+  - myBash
+  - loremIpsum
+  - config
+  - softwares
+  - softwareTerms
+
+# https://github.com/streetsidesoftware/cspell/blob/main/packages/cspell/README.md#languagesettings
+languageSettings:
+  - languageId: dirColors
+    locale: "*"
+    dictionaries:
+      - dirColors
+  - languageId: shellscript
+    locale: '*'
+    dictionaries:
+      - bash
+      - myBash
+      - mySoftwares
+      - software
+  - languageId: markdown
+    locale: '*'
+    dictionaries:
+      - readme
+      - mySoftwares
+      - softwareTerms
+
+# OVERRIDES
+overrides:
+  - filename: '**/*.{bats,tpl}'
+    dictionaries:
+      - bash
+      - myBash
+      - mySoftwares
+      - software
+  - filename: '*.yml'
+    dictionaries:
+      - lintersConfig
+  - filename: "**/testsData/**"
+    dictionaries:
+      - loremIpsum
+  - filename: "**/*.puml"
+    dictionaries:
+      - plantuml
+  - filename: "*.md"
+    languageId: readme
+  - filename: LICENSE
+    languageId: readme
+    dictionaries:
+      - readme
+  - filename:
+      - .github/**
+      - .*
+      - '*.{yaml,yml}'
+      - src/_binaries/ShellBash/conf/home/.Xresources
+      - src/_binaries/GitDefaultConfig/conf/home/.config/tig/config
+      - src/_binaries/GitDefaultConfig/conf/home/.gitconfig
+      - src/_binaries/GitDefaultConfig/conf/home/.tigrc
+    dictionaries:
+      - bash
+      - myBash
+      - config
+      - mySoftwares
+      - software
+  - filename: '**/*.awk'
+    dictionaries:
+      - myAwk
+      - mySoftwares
+      - software
+
+patterns:
+  - name: urls
+    pattern: "/https?://([^ \t\"'()]+)/g"
+  - name: packages
+    pattern: "/[-A-Za-z0-9.]+/[-A-Za-z0-9.]+/g"
+  - name: markdownToc
+    pattern: "\\]\\(#[^)]+\\)$"
+
+ignoreRegExpList:
+  - urls
+  - packages
+  - markdownToc
+
+enableFiletypes:
+  - shellscript

@@ -24,5 +24,21 @@ module.exports = {
     commonjs: true,
     node: true,
   },
-  extends: ['eslint:recommended', 'plugin:prettier/recommended'],
+  plugins: ['json'],
+  extends: [
+    'eslint:recommended',
+    'plugin:json/recommended',
+    'eslint-config-prettier',
+  ],
+  rules: {
+    'json/*': ['error', {allowComments: false}],
+  },
+  overrides: [
+    {
+      files: ['**/.vscode/*.json'],
+      rules: {
+        'json/*': ['error', {allowComments: true}],
+      },
+    },
+  ],
 };

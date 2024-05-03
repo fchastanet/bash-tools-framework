@@ -1,9 +1,11 @@
 ---
-name: Github pr approved status
-
+# set git commit status when PR is approved
+name: Set PR approved git status
 on: # yamllint disable-line rule:truthy
   pull_request_review:
     types: [submitted]
+
+permissions: read-all
 
 jobs:
   build:
@@ -15,6 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
       - name: Run the action # You would run your tests before this using the output to set state/desc
         uses: Sibz/github-status-action@v1
         with:

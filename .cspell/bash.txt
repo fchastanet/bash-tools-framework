@@ -66,6 +66,7 @@ loadprofile
 LOCALAPPDATA
 maxdepth
 mdformat
+megalinter
 mindepth
 mkdir
 mktemp
@@ -79,6 +80,7 @@ NONINTERACTIVE
 nonportable
 nullglob
 onbuild
+oxsecurity
 pathchk
 PATHCONV
 pgrep

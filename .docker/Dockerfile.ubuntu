@@ -39,9 +39,6 @@ RUN \
     ./configure ;\
     make install ;\
   ) ;\
-  # remove parallel nagware
-  mkdir -p ~/.parallel ;\
-  touch ~/.parallel/will-cite ;\
   \
   # clean apt packages
   apt-get remove -y ca-certificates bison build-essential ;\
@@ -54,6 +51,10 @@ RUN \
     # remove apt cache and man/doc
     /var/cache/apt/archives /usr/share/{doc,man,locale}/
 
+# Create a default www-data user
+COPY createUser.ubuntu.sh /usr/local/bin/createUser.sh
+RUN USER_ID=1000 GROUP_ID=1000 SKIP_USER=0 /usr/local/bin/createUser.sh
+
 ENV IN_BASH_DOCKER="You're in docker"
 WORKDIR /bash
 
@@ -61,18 +62,4 @@ ONBUILD ARG USER_ID=1000
 ONBUILD ARG GROUP_ID=1000
 ONBUILD ARG SKIP_USER=0
 ONBUILD SHELL ["/bin/bash", "-o", "pipefail", "-o", "errexit", "-o", "xtrace", "-c"]
-ONBUILD RUN \
-    if [[ "${SKIP_USER:-0}" = "0" && "${USER_ID:-0}" != "0" && "${GROUP_ID:-0}" != "0" ]]; then \
-      # del all users with group Id and the del group id
-      awk -F: "\$4 == ${GROUP_ID} {print \$1}" /etc/passwd | while read -r user; do userdel "${user}"; done ;\
-      groupdel "${GROUP_ID}" || true ;\
-      # create www-data user and group from scratch
-      userdel -f www-data || true ;\
-      groupdel www-data || true ;\
-      groupadd -g "${GROUP_ID}" www-data ;\
-      useradd -l -u "${USER_ID}" -g www-data www-data ;\
-      install -d -m 0755 -o www-data -g www-data /home/www-data ;\
-      # remove parallel nagware
-      mkdir -p /home/www-data/.parallel ;\
-      touch /home/www-data/.parallel/will-cite ;\
-    fi
+ONBUILD RUN /usr/local/bin/createUser.sh
