@@ -34,6 +34,7 @@ FILTER_REGEX_EXCLUDE: |
     ^vendor/|
     ^node_modules/
   )
+IGNORE_GENERATED_FILES: true
 FILEIO_REPORTER: false
 PRE_COMMANDS:
   - command: env
