@@ -43,7 +43,7 @@ ShellDoc::generateMdFileFromTemplate() {
       ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${FRAMEWORK_ROOT_DIR}") --help error caught"
     else
       ((++tokenNotFoundCount))
-      Log::displayWarning "token ${token} not found in ${targetFile}"
+      Log::displayError "token ${token} not found in ${targetFile}"
     fi
     ((nbTokensGenerated++)) || true
   done < <(cd "${fromDir}" && find . -type f -executable | "${grepExclude[@]}")

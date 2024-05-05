@@ -1,4 +1,5 @@
 aacebedo
+actionlint
 adduser
 alacritty
 anacron
@@ -24,6 +25,7 @@ debconf
 deepsource
 devcert
 docsify
+dotnet
 dpkg
 ETAG
 fasd
@@ -31,6 +33,8 @@ Fasd
 fchastanet
 gdebi
 getent
+github
+GITHUB
 gitleaks
 gofmt
 golxdebindings
@@ -75,6 +79,7 @@ libgirepository
 libncurses
 libncursesw
 lightdm
+linux
 lmbuebmw
 lubuntu
 lxappearance
@@ -108,6 +113,7 @@ Phpstorm
 pixbuf
 plantuml
 Plantuml
+podman
 powerlevel
 Powerline
 precommit

@@ -601,24 +601,25 @@ missingBashFileList=""
 export missingBashFileList
 
 # @description check if file provided is a bash file
-# @arg $1 file:String
-# @arg $@ args:String[]
+# @arg $@ files:String[]
 # @set missingBashFileList String temp filepath that contains eventual missing files
 # @stdout filepath if Assert::bashFile succeed
 # @see Assert::bashFile
 File::detectBashFile() {
-  local file="$1"
-
-  if [[ ! -f "${file}" ]]; then
-    if [[ -z "${missingBashFileList}" ]]; then
-      missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+  local -a files=("$@")
+  local file
+  for file in "${files[@]}"; do
+    if [[ ! -f "${file}" ]]; then
+      if [[ -z "${missingBashFileList}" ]]; then
+        missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+      fi
+      echo "${file}" >>"${missingBashFileList}"
+      return 0
     fi
-    echo "${file}" >>"${missingBashFileList}"
-    return 0
-  fi
-  if Assert::bashFile "${file}"; then
-    echo "${file}"
-  fi
+    if Assert::bashFile "${file}"; then
+      echo "${file}"
+    fi
+  done
 }
 
 # @description ensure that file begin with a bash shebang
@@ -1807,7 +1808,7 @@ run() {
     fi
   done < <(
     git ls-files --exclude-standard |
-      xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
+      xargs -n 10 bash -c 'File::detectBashFile "$@"' ||
       true
   )
 

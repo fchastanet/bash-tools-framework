@@ -27,7 +27,7 @@ repos:
         entry: mdformat # Executable to run, with fixed options
         language: python
         types: [markdown]
-        args: [--wrap, '80', --number]
+        args: [--wrap, "80", --number]
         exclude: |
           (?x)(
             ^doc/guides/Options/generate.*.md$
@@ -76,8 +76,7 @@ repos:
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
-            ^.vscode\/settings.json$|
-            ^.vscode\/launch.json$
+            ^.vscode\/.*\.json$
           )
 
   - repo: https://github.com/rhysd/actionlint
@@ -92,15 +91,15 @@ repos:
       - id: codespell
         args:
           - --dictionary
-          - '-'
+          - "-"
           - --dictionary
           - .cspell/codespellrc-dic.txt
           - --ignore-words
           - .cspell/codespellrc-ignore.txt
           - --quiet-level
-          - '2'
+          - "2"
           - --interactive
-          - '0'
+          - "0"
           - --check-filenames
           - --check-hidden
           - --write-changes
@@ -128,7 +127,7 @@ repos:
     rev: 3.0.2
     hooks:
       - id: shfmt
-        args: [-i, '2', -ci]
+        args: [-i, "2", -ci]
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
@@ -161,7 +160,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            '75',
+            "75",
             --format,
             plain,
             --theme,
@@ -173,7 +172,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            '75',
+            "75",
             --format,
             checkstyle,
             --theme,

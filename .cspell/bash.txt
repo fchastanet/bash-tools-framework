@@ -28,6 +28,7 @@ deps
 Deps
 dhclient
 DISTRO
+distro
 distutils
 DOCKERHUB
 doesn
@@ -44,6 +45,7 @@ Facadesh
 failfast
 fgrep
 fmask
+friday
 frégate
 getopt
 getsys
@@ -93,11 +95,14 @@ realpath
 Referer
 regextype
 SAVEHIST
+sbom
 Scrasnups
 Scriptsh
 setopt
 setupsh
 SHDOC
+Shdoc
+shdoc
 SHELLCHECKLINT
 SIGINT
 signingkey

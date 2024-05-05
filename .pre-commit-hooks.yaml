@@ -8,7 +8,7 @@
   entry: bin/findShebangFiles
   args: [chmod, +x]
   pass_filenames: false
-  types: ['file', 'shell', 'text']
+  types: ["file", "shell", "text"]
   always_run: true
   stages: [pre-commit, manual]
 
@@ -21,16 +21,16 @@
   language: script
   entry: bin/frameworkLint
   args:
-    [--expected-warnings-count, '0', --format, plain, --theme, default-force]
+    [--expected-warnings-count, "0", --format, plain, --theme, default-force]
   pass_filenames: false
-  types: ['executable', 'file', 'shell', 'text']
+  types: ["executable", "file", "shell", "text"]
   always_run: false
   stages: [pre-commit]
 
 - <<: *FRAMEWORK_LINT
   id: frameworkLintGithubAction
   name: Bash Framework Lint for Github Actions
-  args: [--expected-warnings-count, '0', --format, checkstyle, --theme, noColor]
+  args: [--expected-warnings-count, "0", --format, checkstyle, --theme, noColor]
   log_file: logs/frameworkLint.xml
   stages: [manual]
 
@@ -57,7 +57,7 @@
   args: [-f, tty, --xargs]
   pass_filenames: true
   files: \.sh$
-  types: ['executable', 'file', 'shell', 'text']
+  types: ["executable", "file", "shell", "text"]
   always_run: false
   stages: [pre-commit]
 
@@ -73,7 +73,7 @@
   description: run unit test using bats in docker isolated environment
   language: script
   entry: bin/test
-  args: [-r, src, -j, '30']
+  args: [-r, src, -j, "30"]
   pass_filenames: false
   always_run: true
   require_serial: true
@@ -102,7 +102,7 @@
   entry: bin/plantuml
   args: [--same-dir, -f, png, -f, svg]
   pass_filenames: true
-  types: ['file', 'non-executable', 'plantuml', 'text']
+  types: ["file", "non-executable", "plantuml", "text"]
   always_run: false
   stages: [pre-commit, manual]
 
@@ -114,7 +114,7 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.11.1',
+      "oxsecurity/megalinter-terraform:v7.11.1",
       --check-megalinter-version,
     ]
   pass_filenames: false
@@ -130,9 +130,9 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.11.1',
+      "oxsecurity/megalinter-terraform:v7.11.1",
       --config-file,
-      '.mega-linter-light.yml',
+      ".mega-linter-light.yml",
       --fix,
     ]
   pass_filenames: false
@@ -148,9 +148,9 @@
   args:
     [
       --image,
-      'oxsecurity/megalinter-terraform:v7.11.1',
+      "oxsecurity/megalinter-terraform:v7.11.1",
       --config-file,
-      '.mega-linter-githubAction.yml',
+      ".mega-linter-githubAction.yml",
       --fix,
     ]
   stages: [manual]
