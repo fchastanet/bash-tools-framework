@@ -7,50 +7,50 @@ caseSensitive: true
 useGitignore: true
 enableGlobDot: true
 ignorePaths:
-  - "/testsData/**"
+  - '/testsData/**'
   - package-lock.json
-  - "**/*/svg"
+  - '**/*/svg'
   - .vscode
-  - ".cspell/**"
+  - '.cspell/**'
   - .git/**
-  - "**/.git/**"
-  - ".history/**"
-  - "**/node_modules/**"
-  - "**/vscode-extension/**"
-  - "**/logs/**"
+  - '**/.git/**'
+  - '.history/**'
+  - '**/node_modules/**'
+  - '**/vscode-extension/**'
+  - '**/logs/**'
   - megalinter-reports
   - report
   - .jscpd.json
-  - "*-megalinter_file_names_cspell.txt"
-  - "**/*megalinter_file_names_cspell.txt"
+  - '*-megalinter_file_names_cspell.txt'
+  - '**/*megalinter_file_names_cspell.txt'
   - .shellcheckrc
-  - "**/bin/**"
-  - "**/vendor/**"
-  - "**/backup/**"
+  - '**/bin/**'
+  - '**/vendor/**'
+  - '**/backup/**'
   - commit-msg.md
-  - ".mega-linter*.yml"
-  - ".env"
+  - '.mega-linter*.yml'
+  - '.env'
 dictionaryDefinitions:
   - name: myBash
-    path: ".cspell/bash.txt"
+    path: '.cspell/bash.txt'
     addWords: true
   - name: plantuml
-    path: ".cspell/plantuml.txt"
+    path: '.cspell/plantuml.txt'
     addWords: true
   - name: loremIpsum
-    path: ".cspell/loremIpsum.txt"
+    path: '.cspell/loremIpsum.txt'
     addWords: true
   - name: config
-    path: ".cspell/config.txt"
+    path: '.cspell/config.txt'
     addWords: true
   - name: mySoftwares
-    path: ".cspell/softwares.txt"
+    path: '.cspell/softwares.txt'
     addWords: true
   - name: dirColors
-    path: ".cspell/dirColors.txt"
+    path: '.cspell/dirColors.txt'
     addWords: false
   - name: readme
-    path: ".cspell/readme.txt"
+    path: '.cspell/readme.txt'
     addWords: true
   - name: lintersConfig
     path: '.cspell/lintersConfig.txt'
@@ -69,7 +69,7 @@ dictionaries:
 # https://github.com/streetsidesoftware/cspell/blob/main/packages/cspell/README.md#languagesettings
 languageSettings:
   - languageId: dirColors
-    locale: "*"
+    locale: '*'
     dictionaries:
       - dirColors
   - languageId: shellscript
@@ -97,13 +97,13 @@ overrides:
   - filename: '*.yml'
     dictionaries:
       - lintersConfig
-  - filename: "**/testsData/**"
+  - filename: '**/testsData/**'
     dictionaries:
       - loremIpsum
-  - filename: "**/*.puml"
+  - filename: '**/*.puml'
     dictionaries:
       - plantuml
-  - filename: "*.md"
+  - filename: '*.md'
     languageId: readme
   - filename: LICENSE
     languageId: readme
@@ -133,7 +133,7 @@ patterns:
   - name: urls
     pattern: "/https?://([^ \t\"'()]+)/g"
   - name: packages
-    pattern: "/[-A-Za-z0-9.]+/[-A-Za-z0-9.]+/g"
+    pattern: '/[-A-Za-z0-9.]+/[-A-Za-z0-9.]+/g'
   - name: markdownToc
     pattern: "\\]\\(#[^)]+\\)$"
 
