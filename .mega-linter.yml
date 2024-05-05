@@ -44,7 +44,7 @@ POST_COMMANDS:
   # FIX files set as root user
   # HOST_USER_ID and HOST_GROUP_ID set in package.json
   - command: |
-      if [[ "{HOST_USER_ID:-0}" != "0" && "{HOST_GROUP_ID:-0}" != "0" ]]; then
+      if [[ "${CI_MODE:0}" = "0" && "{HOST_USER_ID:-0}" != "0" && "{HOST_GROUP_ID:-0}" != "0" ]]; then
         find . -user 0 -exec chown ${HOST_USER_ID}:${HOST_GROUP_ID} {} ';'
       fi
     cwd: 'workspace'

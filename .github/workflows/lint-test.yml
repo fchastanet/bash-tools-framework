@@ -236,16 +236,17 @@ jobs:
         # All available variables are described in documentation
         # https://megalinter.io/configuration/
         env:
-          # Validates all source when push on main,
-          # else just the git diff with main.
+          # Validates all source when push on master,
+          # else just the git diff with master.
           # Override with true if you always want to lint all sources
           VALIDATE_ALL_CODEBASE: >-
             ${{
               github.event_name == 'push' &&
-              github.ref == 'refs/heads/main'
+              github.ref == 'refs/heads/master'
             }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: .mega-linter-githubAction.yml
+          CI_MODE: 1
 
       - name: Upload MegaLinter artifacts
         if: success() || failure()

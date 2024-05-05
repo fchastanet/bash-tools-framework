@@ -31,6 +31,8 @@ Fasd
 fchastanet
 gdebi
 getent
+github
+GITHUB
 gitleaks
 gofmt
 golxdebindings

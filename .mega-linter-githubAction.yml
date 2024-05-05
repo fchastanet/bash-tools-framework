@@ -2,3 +2,4 @@
 EXTENDS:
   - .mega-linter.yml
 SHOW_ELAPSED_TIME: false
+VALIDATE_ALL_CODEBASE: true
