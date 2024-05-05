@@ -1,6 +1,6 @@
 ---
 $schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
-version: '0.2'
+version: "0.2"
 language: en
 noConfigSearch: true
 caseSensitive: true
@@ -25,7 +25,7 @@ ignorePaths:
   - "**/*megalinter_file_names_cspell.txt"
   - .shellcheckrc
   - "**/bin/**"
-  - "**/vendor/**"
+  - "vendor/**"
   - "**/backup/**"
   - commit-msg.md
   - ".mega-linter*.yml"
@@ -53,7 +53,7 @@ dictionaryDefinitions:
     path: ".cspell/readme.txt"
     addWords: true
   - name: lintersConfig
-    path: '.cspell/lintersConfig.txt'
+    path: ".cspell/lintersConfig.txt"
     addWords: true
 
 dictionaries:
@@ -73,14 +73,14 @@ languageSettings:
     dictionaries:
       - dirColors
   - languageId: shellscript
-    locale: '*'
+    locale: "*"
     dictionaries:
       - bash
       - myBash
       - mySoftwares
       - software
   - languageId: markdown
-    locale: '*'
+    locale: "*"
     dictionaries:
       - readme
       - mySoftwares
@@ -88,13 +88,13 @@ languageSettings:
 
 # OVERRIDES
 overrides:
-  - filename: '**/*.{bats,tpl}'
+  - filename: "**/*.{bats,tpl}"
     dictionaries:
       - bash
       - myBash
       - mySoftwares
       - software
-  - filename: '*.yml'
+  - filename: "*.yml"
     dictionaries:
       - lintersConfig
   - filename: "**/testsData/**"
@@ -103,6 +103,10 @@ overrides:
   - filename: "**/*.puml"
     dictionaries:
       - plantuml
+  - filename: "**/*.html"
+    dictionaries:
+      - mySoftwares
+      - software
   - filename: "*.md"
     languageId: readme
   - filename: LICENSE
@@ -112,7 +116,7 @@ overrides:
   - filename:
       - .github/**
       - .*
-      - '*.{yaml,yml}'
+      - "*.{yaml,yml}"
       - src/_binaries/ShellBash/conf/home/.Xresources
       - src/_binaries/GitDefaultConfig/conf/home/.config/tig/config
       - src/_binaries/GitDefaultConfig/conf/home/.gitconfig
@@ -123,7 +127,7 @@ overrides:
       - config
       - mySoftwares
       - software
-  - filename: '**/*.awk'
+  - filename: "**/*.awk"
     dictionaries:
       - myAwk
       - mySoftwares

@@ -253,7 +253,7 @@ run() {
     fi
   done < <(
     git ls-files --exclude-standard |
-      xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
+      xargs -n 10 bash -c 'File::detectBashFile "$@"' ||
       true
   )
 
