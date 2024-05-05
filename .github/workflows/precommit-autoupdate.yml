@@ -5,7 +5,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     # https://crontab.cronhub.io/
-    - cron: '30 10 * * *'
+    - cron: "30 10 * * *"
 jobs:
   auto-update:
     runs-on: ubuntu-22.04
@@ -23,7 +23,7 @@ jobs:
       - name: Run pre-commit autoupdate
         run: pre-commit autoupdate
 
-      - uses: crazy-max/ghaction-import-gpg@v5
+      - uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}

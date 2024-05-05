@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# @description Display message using debug color (grey)
+# @description Display message using debug color (gray)
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
 # @env LOG_CONTEXT String allows to contextualize the log

@@ -43,7 +43,6 @@ function File::replaceTokenByInput::TwoTokens { #@test
   cat "${BATS_TEST_DIRNAME}/testsData/replaceTokenByInput2Tokens.toInject.txt" | File::replaceTokenByInput \
     "@token@" \
     "${BATS_TEST_TMPDIR}/replaceTokenByInput2Tokens.txt"
-
   diff "${BATS_TEST_DIRNAME}/testsData/replaceTokenByInput2Tokens.expected.txt" \
     "${BATS_TEST_TMPDIR}/replaceTokenByInput2Tokens.txt" >&3
 }

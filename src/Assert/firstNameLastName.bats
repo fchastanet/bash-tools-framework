@@ -25,13 +25,13 @@ function Assert::firstNameLastName::valid { #@test
 }
 
 function Assert::firstNameLastName::hyphen { #@test
-  run Assert::firstNameLastName "Marie-France Dupont"
+  run Assert::firstNameLastName "Marie-France Software"
   assert_success
   assert_output ""
 }
 
 function Assert::firstNameLastName::spaceAtTheEnd { #@test
-  run Assert::firstNameLastName "Marie-France Dupont "
+  run Assert::firstNameLastName "Marie-France Software "
   assert_failure 1
   assert_output ""
 }

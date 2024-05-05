@@ -5,8 +5,8 @@ module.exports = {
   root: true,
   parserOptions: {
     ecmaVersion: 12,
-    sourceType: 'module',
-    parser: 'babel-eslint',
+    sourceType: "module",
+    parser: "babel-eslint",
     ecmaFeatures: {
       jsx: false,
       modules: true,
@@ -24,20 +24,20 @@ module.exports = {
     commonjs: true,
     node: true,
   },
-  plugins: ['json'],
+  plugins: ["json"],
   extends: [
-    'eslint:recommended',
-    'plugin:json/recommended',
-    'eslint-config-prettier',
+    "eslint:recommended",
+    "plugin:json/recommended",
+    "eslint-config-prettier",
   ],
   rules: {
-    'json/*': ['error', {allowComments: false}],
+    "json/*": ["error", {allowComments: false}],
   },
   overrides: [
     {
-      files: ['**/.vscode/*.json'],
+      files: ["**/.vscode/*.json"],
       rules: {
-        'json/*': ['error', {allowComments: true}],
+        "json/*": ["error", {allowComments: true}],
       },
     },
   ],

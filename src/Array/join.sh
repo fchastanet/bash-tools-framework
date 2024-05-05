@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# @description concat each element of an array with a separator
+# @description concatenate each element of an array with a separator
 #
 # @arg $1 glue:String
 # @arg $@ array:String[]

@@ -30,7 +30,7 @@ if [[ -t 1 || -t 2 ]]; then
   export __TEST_ERROR_COLOR='\e[41m' # white on red
   export __SKIPPED_COLOR='\e[33m'    # Yellow
   export __HELP_COLOR='\e[7;49;33m'  # Black on Gold
-  export __DEBUG_COLOR='\e[37m'      # Grey
+  export __DEBUG_COLOR='\e[37m'      # Gray
   # Internal: reset color
   export __RESET_COLOR='\e[0m' # Reset Color
   # shellcheck disable=SC2155,SC2034
@@ -156,7 +156,7 @@ export __LEVEL_INFO
 export __LEVEL_SUCCESS
 export __LEVEL_DEBUG
 
-# @description Display message using debug color (grey)
+# @description Display message using debug color (gray)
 # @arg $1 message:String the message to display
 Log::displayDebug() {
   echo -e "${__DEBUG_COLOR}DEBUG   - ${1}${__RESET_COLOR}" >&2

@@ -25,7 +25,7 @@ function Assert::ldapLogin::noUppercase { #@test
 }
 
 function Assert::ldapLogin::noSpace { #@test
-  run Assert::ldapLogin "Francois Dupont"
+  run Assert::ldapLogin "Francois Software"
   assert_failure 1
   assert_output ""
 }

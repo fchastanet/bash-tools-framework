@@ -36,6 +36,7 @@
 
 <!-- markdownlint-disable MD013 -->
 
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/dbelyaev/action-checkstyle?logo=github&sort=semver)](https://github.com/dbelyaev/action-checkstyle/releases)
 [![GitHubLicense](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
 [![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
 [![ProjectStatus](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges "Project Status")
@@ -152,7 +153,7 @@ Here an excerpt of the namespaces available in Bash tools framework:
   - Log::displayWarning warning message in yellow
   - Log::displayInfo info message in white on lightBlue
   - Log::displaySuccess success message in green
-  - Log::displayDebug debug message in grey
+  - Log::displayDebug debug message in gray
 - Log::log\* output message in a log file
   - Log::logError
   - Log::logWarning

@@ -44,7 +44,7 @@ UI::theme() {
     __SUCCESS_COLOR='\e[32m'       # Green
     __WARNING_COLOR='\e[33m'       # Yellow
     __SKIPPED_COLOR='\e[33m'       # Yellow
-    __DEBUG_COLOR='\e[37m'         # Grey
+    __DEBUG_COLOR='\e[37m'         # Gray
     __HELP_COLOR='\e[7;49;33m'     # Black on Gold
     __TEST_COLOR='\e[100m'         # Light magenta
     __TEST_ERROR_COLOR='\e[41m'    # white on red

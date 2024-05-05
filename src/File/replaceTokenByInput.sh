@@ -15,6 +15,8 @@ File::replaceTokenByInput() {
     tokenFile="$(Framework::createTempFile "replaceTokenByInput")"
 
     cat - | Filters::removeAnsiCodes >"${tokenFile}"
+    # ensure blank final line
+    echo >>"${tokenFile}"
 
     sed -E -i \
       -e "/${token}/r ${tokenFile}" \

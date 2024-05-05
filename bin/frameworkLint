@@ -145,7 +145,7 @@ Log::displayInfo() {
   Log::logInfo "$1" "${type}"
 }
 
-# @description Display message using debug color (grey)
+# @description Display message using debug color (gray)
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
 # @env LOG_CONTEXT String allows to contextualize the log
@@ -225,7 +225,7 @@ UI::theme() {
     __SUCCESS_COLOR='\e[32m'       # Green
     __WARNING_COLOR='\e[33m'       # Yellow
     __SKIPPED_COLOR='\e[33m'       # Yellow
-    __DEBUG_COLOR='\e[37m'         # Grey
+    __DEBUG_COLOR='\e[37m'         # Gray
     __HELP_COLOR='\e[7;49;33m'     # Black on Gold
     __TEST_COLOR='\e[100m'         # Light magenta
     __TEST_ERROR_COLOR='\e[41m'    # white on red
@@ -366,7 +366,7 @@ Log::requireLoad() {
   fi
 }
 
-# @description concat each element of an array with a separator
+# @description concatenate each element of an array with a separator
 # but wrapping text when line length is more than provided argument
 # The algorithm will try not to cut the array element if it can.
 # - if an arg can be placed on current line it will be,
@@ -601,24 +601,25 @@ missingBashFileList=""
 export missingBashFileList
 
 # @description check if file provided is a bash file
-# @arg $1 file:String
-# @arg $@ args:String[]
+# @arg $@ files:String[]
 # @set missingBashFileList String temp filepath that contains eventual missing files
 # @stdout filepath if Assert::bashFile succeed
 # @see Assert::bashFile
 File::detectBashFile() {
-  local file="$1"
-
-  if [[ ! -f "${file}" ]]; then
-    if [[ -z "${missingBashFileList}" ]]; then
-      missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+  local -a files=("$@")
+  local file
+  for file in "${files[@]}"; do
+    if [[ ! -f "${file}" ]]; then
+      if [[ -z "${missingBashFileList}" ]]; then
+        missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+      fi
+      echo "${file}" >>"${missingBashFileList}"
+      return 0
     fi
-    echo "${file}" >>"${missingBashFileList}"
-    return 0
-  fi
-  if Assert::bashFile "${file}"; then
-    echo "${file}"
-  fi
+    if Assert::bashFile "${file}"; then
+      echo "${file}"
+    fi
+  done
 }
 
 # @description ensure that file begin with a bash shebang
@@ -665,7 +666,7 @@ LOG_LAST_DURATION_STR=""
 
 # @description compute duration since last call to this function
 # the result is set in following env variables.
-# in ss.sss (seconds followed by millliseconds precision 3 decimals)
+# in ss.sss (seconds followed by milliseconds precision 3 decimals)
 # @noargs
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
 # @set LOG_LAST_LOG_DATE_INIT int (default 1) set to 0 at first call, allows to detect reference log
@@ -1807,7 +1808,7 @@ run() {
     fi
   done < <(
     git ls-files --exclude-standard |
-      xargs -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' ||
+      xargs -n 10 bash -c 'File::detectBashFile "$@"' ||
       true
   )
 

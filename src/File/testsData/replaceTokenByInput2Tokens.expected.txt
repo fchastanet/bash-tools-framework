@@ -1,7 +1,9 @@
 stuff before
 replaceTokenByInput injected
 multi lines
+
 stuff after 1
 replaceTokenByInput injected
 multi lines
+
 stuff after 2

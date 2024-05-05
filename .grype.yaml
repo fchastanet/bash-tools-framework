@@ -14,7 +14,7 @@
 # upon scanning, if a severity is found at or above the given severity then the return code will be 1
 # default is unset which will skip this validation (options: negligible, low, medium, high, critical)
 # same as --fail-on ; GRYPE_FAIL_ON_SEVERITY env var
-fail-on-severity: 'high'
+fail-on-severity: "high"
 
 # the output format of the vulnerability report (options: table, json, cyclonedx)
 # same as -o ; GRYPE_OUTPUT env var
@@ -58,7 +58,7 @@ auto-update: true
 
 # location to write the vulnerability database cache
 # same as GRYPE_DB_CACHE_DIR env var
-cache-dir: '/tmp/lint/megalinter-reports/grype-db'
+cache-dir: "/tmp/lint/megalinter-reports/grype-db"
 
 # URL of the vulnerability database
 # same as GRYPE_DB_UPDATE_URL env var
@@ -66,7 +66,7 @@ cache-dir: '/tmp/lint/megalinter-reports/grype-db'
 
 # Timeout for downloading actual vulnerability DB
 # The DB is ~156MB as of 2024-04-17 so slower connections may exceed the default timeout; adjust as needed
-update-download-timeout: '240s'
+update-download-timeout: "240s"
 
 # it ensures db build is no older than the max-allowed-built-age
 # set to false to disable check
@@ -75,7 +75,7 @@ update-download-timeout: '240s'
 # Max allowed age for vulnerability database,
 # age being the time since it was built
 # Default max age is 120h (or five days)
-max-allowed-built-age: '120h'
+max-allowed-built-age: "120h"
 
 # search:
 # the search space to look for packages (options: all-layers, squashed)

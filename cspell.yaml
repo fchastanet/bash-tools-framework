@@ -1,13 +1,13 @@
 ---
 $schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
-version: '0.2'
+version: "0.2"
 language: en
 noConfigSearch: true
 caseSensitive: true
 useGitignore: true
 enableGlobDot: true
 ignorePaths:
-  - "/testsData/**"
+  - "**/testsData/**"
   - package-lock.json
   - "**/*/svg"
   - .vscode
@@ -18,6 +18,7 @@ ignorePaths:
   - "**/node_modules/**"
   - "**/vscode-extension/**"
   - "**/logs/**"
+  - "**/*.svg"
   - megalinter-reports
   - report
   - .jscpd.json
@@ -25,7 +26,7 @@ ignorePaths:
   - "**/*megalinter_file_names_cspell.txt"
   - .shellcheckrc
   - "**/bin/**"
-  - "**/vendor/**"
+  - "vendor/**"
   - "**/backup/**"
   - commit-msg.md
   - ".mega-linter*.yml"
@@ -53,7 +54,7 @@ dictionaryDefinitions:
     path: ".cspell/readme.txt"
     addWords: true
   - name: lintersConfig
-    path: '.cspell/lintersConfig.txt'
+    path: ".cspell/lintersConfig.txt"
     addWords: true
 
 dictionaries:
@@ -72,15 +73,17 @@ languageSettings:
     locale: "*"
     dictionaries:
       - dirColors
+
   - languageId: shellscript
-    locale: '*'
+    locale: "*"
     dictionaries:
       - bash
       - myBash
       - mySoftwares
       - software
+
   - languageId: markdown
-    locale: '*'
+    locale: "*"
     dictionaries:
       - readme
       - mySoftwares
@@ -88,42 +91,46 @@ languageSettings:
 
 # OVERRIDES
 overrides:
-  - filename: '**/*.{bats,tpl}'
-    dictionaries:
-      - bash
-      - myBash
-      - mySoftwares
-      - software
-  - filename: '*.yml'
-    dictionaries:
-      - lintersConfig
-  - filename: "**/testsData/**"
+  - filename:
+      - "**/*.{bats,tpl}"
+      - "src/Array/wrap.sh"
+    languageId: shellscript
     dictionaries:
       - loremIpsum
+
+  - filename: "*.yml"
+    dictionaries:
+      - lintersConfig
+
   - filename: "**/*.puml"
     dictionaries:
       - plantuml
-  - filename: "*.md"
-    languageId: readme
+
+  - filename: "**/*.html"
+    dictionaries:
+      - mySoftwares
+      - software
+
+  - filename: "**/*.md"
+    languageId: markdown
+
   - filename: LICENSE
-    languageId: readme
     dictionaries:
       - readme
+
   - filename:
       - .github/**
       - .*
-      - '*.{yaml,yml}'
+      - "*.{yaml,yml}"
       - src/_binaries/ShellBash/conf/home/.Xresources
       - src/_binaries/GitDefaultConfig/conf/home/.config/tig/config
       - src/_binaries/GitDefaultConfig/conf/home/.gitconfig
       - src/_binaries/GitDefaultConfig/conf/home/.tigrc
+    languageId: shellscript
     dictionaries:
-      - bash
-      - myBash
       - config
-      - mySoftwares
-      - software
-  - filename: '**/*.awk'
+
+  - filename: "**/*.awk"
     dictionaries:
       - myAwk
       - mySoftwares

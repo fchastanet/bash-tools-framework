@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# @description concat each element of an array with a separator
+# @description concatenate each element of an array with a separator
 # but wrapping text when line length is more than provided argument
 # The algorithm will try not to cut the array element if it can.
 # - if an arg can be placed on current line it will be,

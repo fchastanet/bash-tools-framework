@@ -10,7 +10,7 @@
     "backup": true,
     "megalinter-reports": true,
     "vendor": true,
-    "pages/assets/images/compilerEmbedInjection.svg": true,
+    "pages/assets/images/compilerEmbedInjection.svg": true
   },
   "explorer.autoReveal": false,
   "files.exclude": {

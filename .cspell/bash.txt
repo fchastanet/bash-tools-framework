@@ -1,6 +1,8 @@
 ABRT
 ABRT
 addgroup
+ansi
+Ansi
 audbx
 autojump
 autoload
@@ -28,6 +30,7 @@ deps
 Deps
 dhclient
 DISTRO
+distro
 distutils
 DOCKERHUB
 doesn
@@ -44,6 +47,7 @@ Facadesh
 failfast
 fgrep
 fmask
+friday
 frégate
 getopt
 getsys
@@ -56,6 +60,7 @@ HUP
 hétérogénéité
 IBUS
 inlines
+inplace
 INT
 keychain
 KHTML
@@ -93,11 +98,14 @@ realpath
 Referer
 regextype
 SAVEHIST
+sbom
 Scrasnups
 Scriptsh
 setopt
 setupsh
 SHDOC
+Shdoc
+shdoc
 SHELLCHECKLINT
 SIGINT
 signingkey
@@ -128,10 +136,12 @@ USERGROUPID
 USERHOME
 USERID
 USERPROFILE
+uuid
 uuidgen
 virtualenvs
 willywonka
 WORKDIR
+workdir
 wslprofile
 xdebug
 xdebugini

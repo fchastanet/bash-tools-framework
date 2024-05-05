@@ -6,11 +6,12 @@
   - [1.1. bin/compile](#11-bincompile)
   - [1.2. bin/buildBinFiles](#12-binbuildbinfiles)
 - [2. build tools](#2-build-tools)
-  - [2.1. bin/findShebangFiles](#21-binfindshebangfiles)
-  - [2.2. bin/test](#22-bintest)
-  - [2.3. bin/runBuildContainer](#23-binrunbuildcontainer)
-  - [2.4. bin/buildPushDockerImage](#24-binbuildpushdockerimage)
-  - [2.5. bin/doc](#25-bindoc)
+  - [2.1. bin/installRequirements](#21-bininstallrequirements)
+  - [2.2. bin/findShebangFiles](#22-binfindshebangfiles)
+  - [2.3. bin/test](#23-bintest)
+  - [2.4. bin/runBuildContainer](#24-binrunbuildcontainer)
+  - [2.5. bin/buildPushDockerImage](#25-binbuildpushdockerimage)
+  - [2.6. bin/doc](#26-bindoc)
 - [3. Linters](#3-linters)
   - [3.1. bin/frameworkLint](#31-binframeworklint)
   - [3.2. bin/dockerLint](#32-bindockerlint)
@@ -41,31 +42,37 @@ Here the command's help output:
 
 ## 2. build tools
 
-### 2.1. bin/findShebangFiles
+### 2.1. bin/installRequirements
+
+```text
+@@@installRequirements_help@@@
+```
+
+### 2.2. bin/findShebangFiles
 
 ```text
 @@@findShebangFiles_help@@@
 ```
 
-### 2.2. bin/test
+### 2.3. bin/test
 
 ```text
 @@@test_help@@@
 ```
 
-### 2.3. bin/runBuildContainer
+### 2.4. bin/runBuildContainer
 
 ```text
 @@@runBuildContainer_help@@@
 ```
 
-### 2.4. bin/buildPushDockerImage
+### 2.5. bin/buildPushDockerImage
 
 ```text
 @@@buildPushDockerImage_help@@@
 ```
 
-### 2.5. bin/doc
+### 2.6. bin/doc
 
 ```text
 @@@doc_help@@@

@@ -8,7 +8,7 @@ LOG_LAST_DURATION_STR=""
 
 # @description compute duration since last call to this function
 # the result is set in following env variables.
-# in ss.sss (seconds followed by millliseconds precision 3 decimals)
+# in ss.sss (seconds followed by milliseconds precision 3 decimals)
 # @noargs
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
 # @set LOG_LAST_LOG_DATE_INIT int (default 1) set to 0 at first call, allows to detect reference log

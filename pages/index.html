@@ -19,8 +19,8 @@
       href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
     />
     <style>
-      body:not([data-platform^='Mac']) .sidebar::-webkit-scrollbar,
-      body:not([data-platform^='Mac']) * ::-webkit-scrollbar {
+      body:not([data-platform^="Mac"]) .sidebar::-webkit-scrollbar,
+      body:not([data-platform^="Mac"]) * ::-webkit-scrollbar {
         width: 15px;
       }
       :root {
@@ -34,11 +34,11 @@
       a[href^="http"]::after,
       a[href^="https://"]::after
       {
-        content: '';
+        content: "";
         width: 11px;
         height: 11px;
         margin-left: 4px;
-        background-image: url('images/external-link.svg');
+        background-image: url("images/external-link.svg");
         background-position: center;
         background-repeat: no-repeat;
         background-size: contain;
@@ -62,20 +62,20 @@
     <div id="app"></div>
     <script>
       window.$docsify = {
-        name: 'Bash Tools Framework',
-        repo: 'fchastanet/bash-tools-framework/',
-        externalLinkTarget: '_self', // default: '_blank'
+        name: "Bash Tools Framework",
+        repo: "fchastanet/bash-tools-framework/",
+        externalLinkTarget: "_self", // default: '_blank'
         loadSidebar: true,
         loadNavbar: true,
         subMaxLevel: 3,
         auto2top: true,
-        search: 'auto',
+        search: "auto",
         // complete configuration parameters
         search: {
           maxAge: 86400000, // Expiration time, the default one day
-          paths: 'auto',
-          placeholder: 'Type to search',
-          noData: 'No Results!',
+          paths: "auto",
+          placeholder: "Type to search",
+          noData: "No Results!",
           // Headline depth, 1 - 6
           depth: 6,
           hideOtherSidebarContent: false, // whether or not to hide other sidebar content
