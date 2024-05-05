@@ -29,7 +29,6 @@ env:
   COND_APPLY_FIXES_NEEDED: false
 
 jobs:
-
   # -------------------------------------------------------
   # Build docker images
   # -------------------------------------------------------
@@ -87,7 +86,6 @@ jobs:
         with:
           name: build-${{ env.image_tag }}
           status: pending
-
 
       - name: Docker meta
         id: meta
@@ -280,9 +278,8 @@ jobs:
       - name: Create Pull Request
         id: cpr
         if: >
-          env.COND_UPDATED_SOURCES == 'true' &&
-          env.COND_APPLY_FIXES_NEEDED == 'true' &&
-          !contains(github.event.head_commit.message, 'skip fix')
+          env.COND_UPDATED_SOURCES == 'true' && env.COND_APPLY_FIXES_NEEDED ==
+          'true' && !contains(github.event.head_commit.message, 'skip fix')
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.generate-token.outputs.token }}
@@ -315,7 +312,7 @@ jobs:
 
   unit-tests:
     runs-on: ubuntu-22.04
-    needs: [ build-docker-images ]
+    needs: [build-docker-images]
     permissions:
       # needed by ouzi-dev/commit-status-updater@v2
       statuses: write
