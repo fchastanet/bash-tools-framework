@@ -7,6 +7,7 @@
 # @arg $2 releasesUrl:String url on which we can query all available versions (eg: "https://go.dev/dl/?mode=json")
 # @arg $3 downloadReleaseUrl:String url from which the software will be downloaded (eg: https://storage.googleapis.com/golang/go@latestVersion@.linux-amd64.tar.gz)
 # @arg $4 softVersionArg:String parameter to add to existing command to compute current version
+# @arg $5 exactVersion:String if you want to retrieve a specific version instead of the latest
 # @stdout log messages about retry, install, upgrade
 # @env FILTER_LAST_VERSION_CALLBACK a callback to filter the latest version from releasesUrl
 # @env SOFT_VERSION_CALLBACK a callback to execute command version
@@ -18,6 +19,7 @@ Web::upgradeRelease() {
   local releasesUrl="$2"
   local downloadReleaseUrl="$3"
   local softVersionArg="${4:---version}"
+  local exactVersion="${5:-}"
   # options from env variables
   local filterLastVersionCallback="${FILTER_LAST_VERSION_CALLBACK:-Version::parse}"
   local softVersionCallback="${SOFT_VERSION_CALLBACK:-Version::getCommandVersionFromPlainText}"
@@ -33,15 +35,22 @@ Web::upgradeRelease() {
   if [[ -f "${targetFile}" ]]; then
     currentVersion="$(${softVersionCallback} "${targetFile}" "${softVersionArg}" 2>&1 || true)"
   fi
-  if [[ "${currentVersion}" = "${latestVersion}" ]]; then
-    Log::displayInfo "${targetFile} version ${latestVersion} already installed"
+  if [[ -z "${exactVersion}" ]]; then
+    exactVersion="${latestVersion}"
+  fi
+  local url="${downloadReleaseUrl//@latestVersion@/${exactVersion}}"
+  if [[ -n "${exactVersion}" ]] && ! Github::isReleaseVersionExist "${url}"; then
+    Log::displayError "${targetFile} version ${exactVersion} doesn't exist on github"
+    return 2
+  fi
+  if [[ "${currentVersion}" = "${exactVersion}" ]]; then
+    Log::displayInfo "${targetFile} version ${exactVersion} already installed"
   else
     if [[ -z "${currentVersion}" ]]; then
-      Log::displayInfo "Installing ${targetFile} with version ${latestVersion}"
+      Log::displayInfo "Installing ${targetFile} with version ${exactVersion}"
     else
-      Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${latestVersion}"
+      Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${exactVersion}"
     fi
-    local url="${downloadReleaseUrl//@latestVersion@/${latestVersion}}"
     Log::displayInfo "Using url ${url}"
     newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t web.newSoftware.XXXX)
     Retry::default curl \
@@ -51,6 +60,6 @@ Web::upgradeRelease() {
       --fail \
       "${url}"
 
-    Github::defaultInstall "${newSoftware}" "${targetFile}" "${latestVersion}" "${installCallback}"
+    Github::defaultInstall "${newSoftware}" "${targetFile}" "${exactVersion}" "${installCallback}"
   fi
 }

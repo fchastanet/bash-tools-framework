@@ -8,9 +8,17 @@ on: # yamllint disable-line rule:truthy
       - "**"
       # avoid infinite loop for auto created PRs
       - "!update/pre-commit-*"
+      # only rely on tag push for master branch
+      - "!master"
     tags:
       - "*"
   workflow_dispatch:
+
+# cancel previous build if several pushes
+concurrency:
+  group: |
+    ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   # Apply linter fixes configuration
@@ -35,7 +43,7 @@ jobs:
   build-docker-images:
     runs-on: ubuntu-22.04
     permissions:
-      # needed by ouzi-dev/commit-status-updater@v2
+      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write
     strategy:
       fail-fast: true
@@ -61,7 +69,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # overall process
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: build-bash-tools
           status: pending
@@ -81,8 +89,7 @@ jobs:
               echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
             fi
           ) >> "${GITHUB_ENV}"
-
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: build-${{ env.image_tag }}
           status: pending
@@ -103,7 +110,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-
       - uses: docker/build-push-action@v5
         continue-on-error: false
         with:
@@ -117,15 +123,12 @@ jobs:
           build-args: |
             BASH_IMAGE: "${{ env.bashImage }}"
             BASH_TAR_VERSION: "${{ matrix.bashTarVersion }}"
-          cache-from: |
-            type=gha,ref=${{ env.image_name }}:${{ env.image_tag }}
-            type=registry,ref=${{ env.image_name }}:${{ env.image_tag }}
-
+          cache-from: type=gha,scope=${{ env.image_tag }}
+          cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
       - name: Check image
         continue-on-error: false
         run: |
           docker run --rm "${{ env.image_name }}:${{ env.image_tag }}" bash --version
-
       - uses: docker/build-push-action@v5
         continue-on-error: false
         with:
@@ -138,9 +141,9 @@ jobs:
             ${{ env.image_name }}:${{ env.image_tag }}
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: build-${{ env.image_tag }}
           status: ${{ job.status }}
@@ -153,7 +156,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-docker-images]
     permissions:
-      # needed by ouzi-dev/commit-status-updater@v2
+      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write
     steps:
       - name: Checkout
@@ -183,7 +186,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: pre-commit-megalinter
           status: pending
@@ -199,7 +202,7 @@ jobs:
       - name: Cache pre-commit
         uses: actions/cache@v4
         env:
-          cache_name: pre-commit-${{ env.cache_version }}
+          cache_name: pre-commit
           hash: ${{hashFiles('**/.pre-commit-config-github.yaml')}}
         with:
           path: ~/.cache/pre-commit
@@ -235,11 +238,7 @@ jobs:
           # Validates all source when push on master,
           # else just the git diff with master.
           # Override with true if you always want to lint all sources
-          VALIDATE_ALL_CODEBASE: >-
-            ${{
-              github.event_name == 'push' &&
-              github.ref == 'refs/heads/master'
-            }}
+          VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: .mega-linter-githubAction.yml
           CI_MODE: 1
@@ -301,7 +300,7 @@ jobs:
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         if: ${{ always() }}
         with:
           name: pre-commit-megalinter
@@ -315,7 +314,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-docker-images]
     permissions:
-      # needed by ouzi-dev/commit-status-updater@v2
+      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write
       # needed by mikepenz/action-junit-report@v4
       checks: write
@@ -357,7 +356,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: pending
@@ -382,7 +381,6 @@ jobs:
 
       - name: run unit tests
         id: unitTests
-        continue-on-error: true
         run: |
           set -x
           set -o errexit
@@ -428,7 +426,7 @@ jobs:
           path: |
             logs/**
 
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: ${{ job.status }}
@@ -439,7 +437,7 @@ jobs:
     needs: [unit-tests]
     runs-on: ubuntu-22.04
     permissions:
-      # needed by ouzi-dev/commit-status-updater@v2
+      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write
 
     steps:
@@ -447,7 +445,7 @@ jobs:
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
       - uses: technote-space/workflow-conclusion-action@v3
 
-      - uses: ouzi-dev/commit-status-updater@v2
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: build-bash-tools
           # neutral, success, skipped, cancelled, timed_out, action_required, failure

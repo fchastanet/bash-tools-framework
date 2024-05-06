@@ -89,6 +89,7 @@ runContainer() {
     --rm
     -w /bash
     -v "$(pwd):/bash"
+    -v "${FRAMEWORK_ROOT_DIR}:/bash/vendor/bash-tools-framework"
     --entrypoint /usr/local/bin/bash
   )
   # shellcheck disable=SC2154

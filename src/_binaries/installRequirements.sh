@@ -13,6 +13,8 @@ declare optionBashFrameworkConfig="${FRAMEWORK_ROOT_DIR}/.framework-config"
 run() {
   mkdir -p "${FRAMEWORK_ROOT_DIR}/vendor" || true
   Bats::installRequirementsIfNeeded "${FRAMEWORK_ROOT_DIR}"
+  Softwares::installHadolint
+  Softwares::installShellcheck
 }
 
 if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then

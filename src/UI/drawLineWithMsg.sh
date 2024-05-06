@@ -15,10 +15,8 @@ UI::drawLineWithMsg() {
 
   # compute screen width
   local -i width=${COLUMNS:-0}
-  if ((width == 0)); then
-    if [[ -t 0 ]]; then
-      width=$(tput cols)
-    fi
+  if ((width == 0)) && [[ -t 1 ]]; then
+    width=$(tput cols)
   fi
   if ((width == 0)); then
     width=80
@@ -38,4 +36,5 @@ UI::drawLineWithMsg() {
   printf -- "${character}%.0s" $(seq "${leftWidth}")
   echo -n " ${msg} "
   printf -- "${character}%.0s" $(seq "${rightWidth}")
+  echo
 }

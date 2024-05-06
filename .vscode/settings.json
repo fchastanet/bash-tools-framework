@@ -6,6 +6,7 @@
     // all bin except bin/compile
     "bin/*": true,
     "bin/compile": false,
+    "logs": true,
     "node_modules": true,
     "backup": true,
     "megalinter-reports": true,

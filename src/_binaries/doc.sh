@@ -3,8 +3,6 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-ShellDoc::installRequirementsIfNeeded
-
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.doc.tpl)"
 
 docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
@@ -13,6 +11,10 @@ run() {
   PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
 
   if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+    ShellDoc::installRequirementsIfNeeded
+    Softwares::installHadolint
+    Softwares::installShellcheck
+
     # shellcheck disable=SC2034
     local -a dockerRunCmd=(
       "/bash/bin/doc"

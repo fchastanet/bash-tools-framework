@@ -23,11 +23,18 @@ function Web::upgradeRelease::success { #@test
   Retry::default() {
     "$@"
   }
+  Retry::parameterized() {
+    shift 3
+    "$@"
+  }
   filterLatestNonBetaVersion() {
     jq -r '.[].files[].version'
   }
   getGoVersion() {
     echo "1.22.1"
+  }
+  Github::isReleaseVersionExist() {
+    return 0
   }
   Github::defaultInstall() {
     echo "install $2 $3"

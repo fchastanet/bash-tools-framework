@@ -34,5 +34,6 @@ Github::defaultInstall() {
     ${SUDO:-} chmod +x "${targetFile}"
     hash -r
     ${SUDO:-} rm -f "${newSoftware}" || true
+    Log::displaySuccess "Version ${version} installed in ${targetFile}"
   fi
 }

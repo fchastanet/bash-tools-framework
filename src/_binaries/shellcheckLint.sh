@@ -5,22 +5,7 @@
 
 # check if command in PATH is already the minimal version needed
 if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
-  install() {
-    local file="$1"
-    local targetFile="$2"
-    local version="$3"
-    local tempDir
-    tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
-    (
-      cd "${tempDir}" || exit 1
-      tar -xJvf "${file}" >&2
-      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
-      chmod +x "${targetFile}"
-    )
-  }
-  INSTALL_CALLBACK=install Github::upgradeRelease \
-    "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" \
-    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
+  Softwares::installShellcheck
 fi
 
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.shellcheckLint.tpl)"
