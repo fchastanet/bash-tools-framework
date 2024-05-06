@@ -11,10 +11,15 @@ source "${srcDir}/Options/__all.sh"
 source "${srcDir}/Filters/removeAnsiCodes.sh"
 
 function setup() {
-  export TMPDIR="${BATS_TEST_TMPDIR}"
+  BATS_TEST_TMPDIR="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bats-$$-XXXXXX)"
+  export BATS_TEST_TMPDIR
   export _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"
   export INTERACTIVE=1
   UI::theme default
+}
+
+teardown() {
+  rm -Rf "${BATS_TEST_TMPDIR}" || true
 }
 
 function Options::generateCommand::noOption { #@test

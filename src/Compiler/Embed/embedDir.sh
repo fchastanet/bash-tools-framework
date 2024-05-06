@@ -17,7 +17,12 @@ Compiler::Embed::embedDir() {
   (
     base64="$(
       cd "${dir}" || exit 1
-      tar -cz -O . | base64 -w 0
+      tar --sort=name \
+        --mtime="@0" \
+        --owner=0 --group=0 --numeric-owner \
+        --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime,delete=mtime \
+        --no-same-owner \
+        -cz -O . | base64 -w 0
     )" \
     asName="${dirAlias}" \
     targetDir="\${TMPDIR:-/tmp}/${dirAlias}" \

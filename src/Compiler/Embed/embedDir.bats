@@ -7,6 +7,8 @@ source "${BATS_TEST_DIRNAME}/embedDir.sh"
 # shellcheck source=src/Compiler/Embed/extractDirFromBase64.sh
 source "${BATS_TEST_DIRNAME}/extractDirFromBase64.sh"
 
+# bats file_tags=ubuntu_only
+
 setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
   export _COMPILE_ROOT_DIR="${FRAMEWORK_ROOT_DIR}"

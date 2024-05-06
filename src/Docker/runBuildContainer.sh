@@ -19,9 +19,7 @@ Docker::runBuildContainer() {
   local optionContinuousIntegrationMode="$6"
   local -n localDockerRunCmd=$7
   local -n localDockerRunArgs=$8
-  if tty -s; then
-    localDockerRunArgs+=("-it")
-  fi
+
   if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
     localDockerRunArgs+=(
       -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"

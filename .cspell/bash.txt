@@ -43,6 +43,7 @@ every time
 EXIT
 exitcode
 extglob
+exthdr
 Facadesh
 failfast
 fgrep

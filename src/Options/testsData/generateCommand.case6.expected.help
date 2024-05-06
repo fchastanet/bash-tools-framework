@@ -1,5 +1,4 @@
 [1;37mDESCRIPTION:[0m super command
-
 [1;37mUSAGE:[0m test [OPTIONS] [ARGUMENTS]
 [1;37mUSAGE:[0m test [--help|-h] [--src-dirs|-s <String>] [--verbose|-v]
   [--quiet|-q]

@@ -547,9 +547,7 @@ Docker::runBuildContainer() {
   local optionContinuousIntegrationMode="$6"
   local -n localDockerRunCmd=$7
   local -n localDockerRunArgs=$8
-  if tty -s; then
-    localDockerRunArgs+=("-it")
-  fi
+
   if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
     localDockerRunArgs+=(
       -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"
@@ -922,8 +920,7 @@ Assert::tty() {
   if [[ "${INTERACTIVE:-0}" = "1" ]]; then
     return 0
   fi
-  # check if stdout or stderr is connected to terminal
-  [[ -t 1 || -t 2 ]]
+  tty -s
 }
 
 # @description log message to file
@@ -2006,7 +2003,7 @@ docCommand() {
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "Generate markdown documentation.")"
+    Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "Generate markdown documentation."
     echo
 
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"

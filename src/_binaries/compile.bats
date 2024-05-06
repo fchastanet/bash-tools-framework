@@ -53,6 +53,7 @@ function compile::IncludeSimpleFile { #@test
   diff "${BATS_TEST_DIRNAME}/testsData/expectedBin/simpleBinary" "${BATS_TEST_TMPDIR}/simpleBinary"
 }
 
+# bats test_tags=ubuntu_only
 function compile::embed { #@test
   run compile "embed.sh" "${FRAMEWORK_ROOT_DIR}/src" 2>&1
   assert_success

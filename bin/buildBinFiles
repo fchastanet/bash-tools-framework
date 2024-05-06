@@ -523,6 +523,21 @@ Assert::dirExists() {
   fi
 }
 
+# @description check if tty (interactive mode) is active
+# @noargs
+# @exitcode 1 if tty not active
+# @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
+# @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
+Assert::tty() {
+  if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
+    return 1
+  fi
+  if [[ "${INTERACTIVE:-0}" = "1" ]]; then
+    return 0
+  fi
+  tty -s
+}
+
 # @description ensure COMMAND_BIN_DIR env var is set
 # and PATH correctly prepared
 # @noargs
@@ -601,22 +616,6 @@ Log::logError() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_ERROR)); then
     Log::logMessage "${2:-ERROR}" "$1"
   fi
-}
-
-# @description check if tty (interactive mode) is active
-# @noargs
-# @exitcode 1 if tty not active
-# @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
-# @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
-Assert::tty() {
-  if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
-    return 1
-  fi
-  if [[ "${INTERACTIVE:-0}" = "1" ]]; then
-    return 0
-  fi
-  # check if stdout or stderr is connected to terminal
-  [[ -t 1 || -t 2 ]]
 }
 
 # @description log message to file
@@ -1293,10 +1292,10 @@ buildBinFilesCommand() {
     Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
     Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
   elif [[ "${options_parse_cmd}" = "help" ]]; then
-    echo -e "$(Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "build files using compile
+    Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "build files using compile
 and check if bin file has been updated, if yes return exit code > 0
 
-INTERNAL TOOL")"
+INTERNAL TOOL"
     echo
 
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
@@ -1488,7 +1487,7 @@ getFiles() {
   fi
 }
 
-run() {
+buildBinFiles() {
   declare -a files=()
   # shellcheck disable=SC2154
   for arg in "${buildBinFilesArgs[@]}"; do
@@ -1520,6 +1519,49 @@ run() {
     ! md5sum -c "${args[@]}" "${beforeBuild}"; then
     echo >&2 "some bin files need to be committed"
     exit 1
+  fi
+}
+
+runContainer() {
+  local image="scrasnups/build:bash-tools-ubuntu-5.3"
+
+  if ! docker inspect --type=image "${image}" &>/dev/null; then
+    docker pull "${image}"
+  fi
+
+  # run docker image
+  local -a localDockerRunArgs=(
+    --rm
+    -w /bash
+    -v "$(pwd):/bash"
+    --entrypoint /usr/local/bin/bash
+  )
+  # shellcheck disable=SC2154
+  if Assert::tty; then
+    localDockerRunArgs+=(-v "/tmp:/tmp")
+    localDockerRunArgs+=(-it)
+  fi
+  if [[ -n "${USER_ID:-}" ]]; then
+    localDockerRunArgs+=(--user "${USER_ID}:${GROUP_ID}")
+  fi
+  localDockerRunArgs+=(
+    -v "${REAL_SCRIPT_FILE}:/bash/bin/${SCRIPT_NAME}"
+  )
+  localDockerRunArgs+=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}")
+
+  docker run \
+    "${localDockerRunArgs[@]}" \
+    "${image}" \
+    "/bash/bin/${SCRIPT_NAME}" \
+    "${ORIGINAL_BASH_FRAMEWORK_ARGV[@]}"
+
+}
+
+run() {
+  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+    runContainer
+  else
+    buildBinFiles
   fi
 }
 

@@ -12,6 +12,5 @@ Assert::tty() {
   if [[ "${INTERACTIVE:-0}" = "1" ]]; then
     return 0
   fi
-  # check if stdout or stderr is connected to terminal
-  [[ -t 1 || -t 2 ]]
+  tty -s
 }

@@ -33,6 +33,7 @@ function Compiler::Embed::embed::file { #@test
   assert_output "embedFile ${BATS_TEST_DIRNAME}/embed.sh asName"
 }
 
+# bats test_tags=ubuntu_only
 function Compiler::Embed::embed::dir { #@test
   run Compiler::Embed::embed "${BATS_TEST_DIRNAME}" "asName"
   assert_success

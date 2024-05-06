@@ -42,7 +42,7 @@ getFiles() {
   fi
 }
 
-run() {
+buildBinFiles() {
   declare -a files=()
   # shellcheck disable=SC2154
   for arg in "${buildBinFilesArgs[@]}"; do
@@ -74,6 +74,49 @@ run() {
     ! md5sum -c "${args[@]}" "${beforeBuild}"; then
     echo >&2 "some bin files need to be committed"
     exit 1
+  fi
+}
+
+runContainer() {
+  local image="scrasnups/build:bash-tools-ubuntu-5.3"
+
+  if ! docker inspect --type=image "${image}" &>/dev/null; then
+    docker pull "${image}"
+  fi
+
+  # run docker image
+  local -a localDockerRunArgs=(
+    --rm
+    -w /bash
+    -v "$(pwd):/bash"
+    --entrypoint /usr/local/bin/bash
+  )
+  # shellcheck disable=SC2154
+  if Assert::tty; then
+    localDockerRunArgs+=(-v "/tmp:/tmp")
+    localDockerRunArgs+=(-it)
+  fi
+  if [[ -n "${USER_ID:-}" ]]; then
+    localDockerRunArgs+=(--user "${USER_ID}:${GROUP_ID}")
+  fi
+  localDockerRunArgs+=(
+    -v "${REAL_SCRIPT_FILE}:/bash/bin/${SCRIPT_NAME}"
+  )
+  localDockerRunArgs+=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}")
+
+  docker run \
+    "${localDockerRunArgs[@]}" \
+    "${image}" \
+    "/bash/bin/${SCRIPT_NAME}" \
+    "${ORIGINAL_BASH_FRAMEWORK_ARGV[@]}"
+
+}
+
+run() {
+  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+    runContainer
+  else
+    buildBinFiles
   fi
 }
 

@@ -1,10 +1,9 @@
 %
-description='${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}'
 if [[ $(type -t "${help}") = "function" ]]; then
-  echo "    Array::wrap2 ' ' 80 0 \"<% ${description} %>\" \"\$(${help})\""
+  echo "    Array::wrap2 ' ' 80 0 \"\${__HELP_TITLE_COLOR}DESCRIPTION:\${__RESET_COLOR}\" \"\$(${help})\""
 else
 %
-echo -e "$(Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "<% ${help} %>")"
+Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "<% ${help} %>"
 %
 fi
 echo '    echo'
