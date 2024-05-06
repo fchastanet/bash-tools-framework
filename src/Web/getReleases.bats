@@ -17,7 +17,8 @@ function teardown() {
 
 function Web::getReleases::curlFailure { #@test
   stub curl '-L --connect-timeout 5 --fail --silent invalidUrl : exit 1'
-  Retry::default() {
+  Retry::parameterized() {
+    shift 3
     "$@"
   }
   run Web::getReleases "invalidUrl" 2>&1
@@ -27,7 +28,8 @@ function Web::getReleases::curlFailure { #@test
 
 function Web::getReleases::curlSuccess { #@test
   stub curl '-L --connect-timeout 5 --fail --silent validUrl : echo versions'
-  Retry::default() {
+  Retry::parameterized() {
+    shift 3
     "$@"
   }
   run Web::getReleases "validUrl" 2>&1

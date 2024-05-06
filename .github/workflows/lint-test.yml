@@ -81,7 +81,6 @@ jobs:
               echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
             fi
           ) >> "${GITHUB_ENV}"
-
       - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build-${{ env.image_tag }}
@@ -103,7 +102,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-
       - uses: docker/build-push-action@v5
         continue-on-error: false
         with:
@@ -120,12 +118,10 @@ jobs:
           cache-from: |
             type=gha,ref=${{ env.image_name }}:${{ env.image_tag }}
             type=registry,ref=${{ env.image_name }}:${{ env.image_tag }}
-
       - name: Check image
         continue-on-error: false
         run: |
           docker run --rm "${{ env.image_name }}:${{ env.image_tag }}" bash --version
-
       - uses: docker/build-push-action@v5
         continue-on-error: false
         with:
@@ -382,7 +378,6 @@ jobs:
 
       - name: run unit tests
         id: unitTests
-        continue-on-error: true
         run: |
           set -x
           set -o errexit

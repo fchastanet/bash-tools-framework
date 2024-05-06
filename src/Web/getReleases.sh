@@ -7,7 +7,7 @@
 Web::getReleases() {
   local releaseListUrl="$1"
   # Get latest release from GitHub api
-  Retry::default curl \
+  Retry::parameterized "${RETRY_MAX_RETRY:-5}" "${RETRY_DELAY_BETWEEN_RETRIES:-15}" "Retrieving release versions list ..." curl \
     -L \
     --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
     --fail \

@@ -2,7 +2,11 @@ vendor/
 .history/
 *.bak
 commit-msg.md
+
+# node modules
 node_modules/
+package*.json
+yarn.lock
 
 # megalinter
 megalinter-reports/

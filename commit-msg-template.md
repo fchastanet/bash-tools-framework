@@ -4,18 +4,18 @@ Short 3 lines summary
 
 tag: 1.1.5
 
-# Breaking changes
+### Breaking changes
 
-# Bug fixes
+### Bug fixes
 
-# Compiler changes
+### Compiler changes
 
-# Binaries changes
+### Binaries changes
 
-# Updated Bash framework functions
+### Updated Bash framework functions
 
-# New Bash framework functions
+### New Bash framework functions
 
-# Documentation
+### Documentation
 
-# Validation/Tooling
+### Validation/Tooling

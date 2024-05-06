@@ -13,6 +13,7 @@
 # @env SOFT_VERSION_CALLBACK pass softVersionCallback by env variable instead of passing it by arg
 # @env INSTALL_CALLBACK pass installCallback by env variable instead of passing it by arg
 # @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+# @env EXACT_VERSION if provided, retrieve exact version instead of the latest
 Github::upgradeRelease() {
   local targetFile="$1"
   local downloadReleaseUrl="$2"
@@ -36,5 +37,6 @@ Github::upgradeRelease() {
     "${targetFile}" \
     "${releasesUrl}" \
     "${downloadReleaseUrl}" \
-    "${softVersionArg}"
+    "${softVersionArg}" \
+    "${EXACT_VERSION:-}"
 }

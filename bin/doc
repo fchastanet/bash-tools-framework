@@ -171,6 +171,9 @@ BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 # @feature Git::cloneOrPullIfNoChanges
 ShellDoc::installRequirementsIfNeeded() {
   local BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/${BASH_FRAMEWORK_SHDOC_INSTALLED_PATH}"
+  if [[ -d "${FRAMEWORK_ROOT_DIR}/vendor" ]]; then
+    mkdir -p "${FRAMEWORK_ROOT_DIR}/vendor" || return 1
+  fi
   if [[ "$(
     Cache::getFileContentIfNotExpired \
       "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
@@ -295,7 +298,15 @@ UI::theme() {
 # @arg $1 character:String character to use as separator (default value #)
 UI::drawLine() {
   local character="${1:-#}"
-  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo '80')}")
+  local -i width=${COLUMNS:-0}
+  if ((width == 0)) && [[ -t 1 ]]; then
+    width=$(tput cols)
+  fi
+  if ((width == 0)); then
+    width=80
+  fi
+  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 1 ]] && tput cols || echo '80')}")
+  echo
 }
 
 # @description Display message using error color (red) and exit immediately with error status 1

@@ -4,7 +4,7 @@
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
-default_install_hook_types: [pre-commit]
+default_install_hook_types: [pre-commit, pre-push]
 default_stages: [pre-commit, manual]
 minimum_pre_commit_version: 3.5.0
 fail_fast: false
@@ -165,7 +165,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "75",
+            "68",
             --format,
             plain,
             --theme,
@@ -177,7 +177,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "75",
+            "68",
             --format,
             checkstyle,
             --theme,

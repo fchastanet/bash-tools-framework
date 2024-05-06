@@ -212,6 +212,7 @@ Version::checkMinimal() {
 # @env SOFT_VERSION_CALLBACK pass softVersionCallback by env variable instead of passing it by arg
 # @env INSTALL_CALLBACK pass installCallback by env variable instead of passing it by arg
 # @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+# @env EXACT_VERSION if provided, retrieve exact version instead of the latest
 Github::upgradeRelease() {
   local targetFile="$1"
   local downloadReleaseUrl="$2"
@@ -235,7 +236,8 @@ Github::upgradeRelease() {
     "${targetFile}" \
     "${releasesUrl}" \
     "${downloadReleaseUrl}" \
-    "${softVersionArg}"
+    "${softVersionArg}" \
+    "${EXACT_VERSION:-}"
 }
 
 # @description Display message using warning color (yellow)
@@ -346,7 +348,15 @@ UI::theme() {
 # @arg $1 character:String character to use as separator (default value #)
 UI::drawLine() {
   local character="${1:-#}"
-  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 0 ]] && tput cols || echo '80')}")
+  local -i width=${COLUMNS:-0}
+  if ((width == 0)) && [[ -t 1 ]]; then
+    width=$(tput cols)
+  fi
+  if ((width == 0)); then
+    width=80
+  fi
+  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 1 ]] && tput cols || echo '80')}")
+  echo
 }
 
 # @description Display message using error color (red) and exit immediately with error status 1
@@ -822,6 +832,7 @@ Version::githubApiExtractVersion() {
 # @arg $2 releasesUrl:String url on which we can query all available versions (eg: "https://go.dev/dl/?mode=json")
 # @arg $3 downloadReleaseUrl:String url from which the software will be downloaded (eg: https://storage.googleapis.com/golang/go@latestVersion@.linux-amd64.tar.gz)
 # @arg $4 softVersionArg:String parameter to add to existing command to compute current version
+# @arg $5 exactVersion:String if you want to retrieve a specific version instead of the latest
 # @stdout log messages about retry, install, upgrade
 # @env FILTER_LAST_VERSION_CALLBACK a callback to filter the latest version from releasesUrl
 # @env SOFT_VERSION_CALLBACK a callback to execute command version
@@ -833,6 +844,7 @@ Web::upgradeRelease() {
   local releasesUrl="$2"
   local downloadReleaseUrl="$3"
   local softVersionArg="${4:---version}"
+  local exactVersion="${5:-}"
   # options from env variables
   local filterLastVersionCallback="${FILTER_LAST_VERSION_CALLBACK:-Version::parse}"
   local softVersionCallback="${SOFT_VERSION_CALLBACK:-Version::getCommandVersionFromPlainText}"
@@ -848,15 +860,22 @@ Web::upgradeRelease() {
   if [[ -f "${targetFile}" ]]; then
     currentVersion="$(${softVersionCallback} "${targetFile}" "${softVersionArg}" 2>&1 || true)"
   fi
-  if [[ "${currentVersion}" = "${latestVersion}" ]]; then
-    Log::displayInfo "${targetFile} version ${latestVersion} already installed"
+  if [[ -z "${exactVersion}" ]]; then
+    exactVersion="${latestVersion}"
+  fi
+  local url="${downloadReleaseUrl//@latestVersion@/${exactVersion}}"
+  if [[ -n "${exactVersion}" ]] && ! Github::isReleaseVersionExist "${url}"; then
+    Log::displayError "${targetFile} version ${exactVersion} doesn't exist on github"
+    return 2
+  fi
+  if [[ "${currentVersion}" = "${exactVersion}" ]]; then
+    Log::displayInfo "${targetFile} version ${exactVersion} already installed"
   else
     if [[ -z "${currentVersion}" ]]; then
-      Log::displayInfo "Installing ${targetFile} with version ${latestVersion}"
+      Log::displayInfo "Installing ${targetFile} with version ${exactVersion}"
     else
-      Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${latestVersion}"
+      Log::displayInfo "Upgrading ${targetFile} from version ${currentVersion} to ${exactVersion}"
     fi
-    local url="${downloadReleaseUrl//@latestVersion@/${latestVersion}}"
     Log::displayInfo "Using url ${url}"
     newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t web.newSoftware.XXXX)
     Retry::default curl \
@@ -866,7 +885,7 @@ Web::upgradeRelease() {
       --fail \
       "${url}"
 
-    Github::defaultInstall "${newSoftware}" "${targetFile}" "${latestVersion}" "${installCallback}"
+    Github::defaultInstall "${newSoftware}" "${targetFile}" "${exactVersion}" "${installCallback}"
   fi
 }
 
@@ -986,7 +1005,7 @@ UI::requireTheme() {
 Web::getReleases() {
   local releaseListUrl="$1"
   # Get latest release from GitHub api
-  Retry::default curl \
+  Retry::parameterized "${RETRY_MAX_RETRY:-5}" "${RETRY_DELAY_BETWEEN_RETRIES:-15}" "Retrieving release versions list ..." curl \
     -L \
     --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
     --fail \
@@ -994,12 +1013,32 @@ Web::getReleases() {
     "${releaseListUrl}"
 }
 
+# @description check if specified release software version exists in github
+# @arg $1 releaseUrl:String eg: https://github.com/kubernetes-sigs/kind/releases/download/v1.0.0/kind-linux-amd64
+# @exitcode 1 on failure
+# @exitcode 0 if release version exists
+# @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+Github::isReleaseVersionExist() {
+  local releaseUrl="$1"
+
+  curl \
+    -L \
+    --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
+    -o /dev/null \
+    --silent \
+    --head \
+    --fail \
+    "${releaseUrl}"
+}
+
 # @description Retry a command 5 times with a delay of 15 seconds between each attempt
 # @arg $@ command:String[] the command to run
 # @exitcode 0 on success
 # @exitcode 1 if max retries count reached
+# @env RETRY_MAX_RETRY int max retries
+# @env RETRY_DELAY_BETWEEN_RETRIES int delay between attempts
 Retry::default() {
-  Retry::parameterized 5 15 "" "$@"
+  Retry::parameterized "${RETRY_MAX_RETRY:-5}" "${RETRY_DELAY_BETWEEN_RETRIES:-15}" "" "$@"
 }
 
 # @description intermediate callback that is used by Github::upgradeRelease
@@ -1036,6 +1075,7 @@ Github::defaultInstall() {
     ${SUDO:-} chmod +x "${targetFile}"
     hash -r
     ${SUDO:-} rm -f "${newSoftware}" || true
+    Log::displaySuccess "Version ${version} installed in ${targetFile}"
   fi
 }
 
@@ -1083,6 +1123,26 @@ Retry::parameterized() {
     fi
   done
   return 0
+}
+
+# @description Display message using success color (bg green/fg white)
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::displaySuccess() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    Log::computeDuration
+    echo -e "${__SUCCESS_COLOR}SUCCESS - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logSuccess "$1"
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSuccess() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SUCCESS}" "$1"
+  fi
 }
 
 # FUNCTIONS

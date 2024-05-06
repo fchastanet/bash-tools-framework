@@ -14,6 +14,9 @@ BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 # @feature Git::cloneOrPullIfNoChanges
 ShellDoc::installRequirementsIfNeeded() {
   local BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/${BASH_FRAMEWORK_SHDOC_INSTALLED_PATH}"
+  if [[ -d "${FRAMEWORK_ROOT_DIR}/vendor" ]]; then
+    mkdir -p "${FRAMEWORK_ROOT_DIR}/vendor" || return 1
+  fi
   if [[ "$(
     Cache::getFileContentIfNotExpired \
       "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
