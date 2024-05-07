@@ -1,2 +1,3 @@
+adpat -> adapt
 fileTest -> fileTest
 tst -> test

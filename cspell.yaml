@@ -56,16 +56,9 @@ dictionaryDefinitions:
   - name: lintersConfig
     path: ".cspell/lintersConfig.txt"
     addWords: true
-
-dictionaries:
-  - bash
-  - plantuml
-  - myAwk
-  - myBash
-  - loremIpsum
-  - config
-  - softwares
-  - softwareTerms
+  - name: myAwk
+    path: ".cspell/myAwk.txt"
+    addWords: false
 
 # https://github.com/streetsidesoftware/cspell/blob/main/packages/cspell/README.md#languagesettings
 languageSettings:
@@ -93,6 +86,7 @@ languageSettings:
 overrides:
   - filename:
       - "**/*.{bats,tpl}"
+      - "**/*.env"
       - "src/Array/wrap.sh"
     languageId: shellscript
     dictionaries:

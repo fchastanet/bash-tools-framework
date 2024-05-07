@@ -1,5 +1,33 @@
 # bash-tools-framework
 
+<!-- remove -->
+
+> **_NOTE:_** Documentation is best viewed on
+> [github-pages](https://fchastanet.github.io/bash-tools-framework/)
+
+<!-- endRemove -->
+
+> **_TIP:_** Checkout related projects of this suite
+>
+> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
+> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
+> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
+
+<!-- markdownlint-capture -->
+
+<!-- markdownlint-disable MD013 -->
+
+[![GitHub release (latest SemVer)](https://img.shields.io/github/release/fchastanet/bash-tools-framework?logo=github&sort=semver)](https://github.com/fchastanet/bash-tools-framework/releases)
+[![GitHubLicense](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
+[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
+[![ProjectStatus](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges "Project Status")
+[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
+[![AverageTimeToResolveAnIssue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Average time to resolve an issue")
+[![PercentageOfIssuesStillOpen](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Percentage of issues still open")
+
+<!-- markdownlint-restore -->
+
 - [1. Excerpt](#1-excerpt)
   - [1.1. Compile command](#11-compile-command)
   - [1.2. Build tools](#12-build-tools)
@@ -18,34 +46,6 @@
 - [4. Troubleshooting](#4-troubleshooting)
   - [4.1. compile.bats embed not working on alpine investigation](#41-compilebats-embed-not-working-on-alpine-investigation)
 - [5. Acknowledgements](#5-acknowledgements)
-
-<!-- remove -->
-
-> **_NOTE:_** Documentation is best viewed on
-> [github-pages](https://fchastanet.github.io/bash-tools-framework/)
-
-<!-- endRemove -->
-
-> **_TIP:_** Checkout related projects of this suite
->
-> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
-> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
-> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-
-<!-- markdownlint-capture -->
-
-<!-- markdownlint-disable MD013 -->
-
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/dbelyaev/action-checkstyle?logo=github&sort=semver)](https://github.com/dbelyaev/action-checkstyle/releases)
-[![GitHubLicense](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
-[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
-[![ProjectStatus](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges "Project Status")
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![AverageTimeToResolveAnIssue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Average time to resolve an issue")
-[![PercentageOfIssuesStillOpen](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Percentage of issues still open")
-
-<!-- markdownlint-restore -->
 
 ## 1. Excerpt
 

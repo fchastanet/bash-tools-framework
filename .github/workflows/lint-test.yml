@@ -199,25 +199,18 @@ jobs:
             echo "branch_name=${GITHUB_REF##*/}"
           ) >> "${GITHUB_ENV}"
 
-      - name: Cache pre-commit
-        uses: actions/cache@v4
-        env:
-          cache_name: pre-commit
-          hash: ${{hashFiles('**/.pre-commit-config-github.yaml')}}
-        with:
-          path: ~/.cache/pre-commit
-          key: ${{ runner.os }}-${{ env.cache_name }}-${{ env.hash }}
-          restore-keys: ${{ runner.os }}-${{ env.cache_name }}-
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
-      - name: Install pre-commit
-        run: pip install pre-commit
-
       - uses: fchastanet/github-action-setup-shfmt@v4.0.0
+
+      - name: Install requirements
+        run: |
+          set -exo pipefail
+
+          bin/installRequirements
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
@@ -382,13 +375,15 @@ jobs:
       - name: run unit tests
         id: unitTests
         run: |
-          set -x
-          set -o errexit
-          chmod -R 777 logs
+          set -exo pipefail
 
           bin/installRequirements
 
+          chmod 777 logs
+
           docker pull "scrasnups/build:${{env.image_tag}}"
+
+          status=0
           docker run --rm \
             -e KEEP_TEMP_FILES=0 \
             -e BATS_FIX_TEST=0 \
@@ -401,15 +396,15 @@ jobs:
               /bash/vendor/bats/bin/bats \
               ${{env.batsOptions}} \
               --formatter junit -o logs -r src 2>&1 |
-            tee "logs/bats-${{ env.job_tag }}.log" || exit 1
+            tee "logs/bats-${{ env.job_tag }}.log" || status=$?
 
           awk '/xml version="1.0"/{flag=1} flag; /<\/testsuites>/{flag=0}' \
             "logs/bats-${{ env.job_tag }}.log" >"logs/junit-${{ env.job_tag }}.xml"
+          exit "${status}"
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4
-        # https://stackoverflow.com/a/70549615/3045926
-        if: ${{ always() && steps.unitTests.conclusion == 'success' }}
+        if: ${{ always() }}
         with:
           token: ${{ github.token }}
           check_name: JUnit ${{ env.image_tag }}
@@ -419,7 +414,7 @@ jobs:
           report_paths: "logs/**.xml"
 
       - name: Upload Test Results
-        if: ${{ always() && steps.unitTests.conclusion == 'success' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: Test Results ${{ env.image_tag }}

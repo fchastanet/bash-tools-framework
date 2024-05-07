@@ -1,2 +1,2 @@
 eth4: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-inet 192.168.1.1  netmask 255.255.0.0  broadcast 192.168.255.255
+net 192.168.1.1  netmask 255.255.0.0  broadcast 192.168.255.255

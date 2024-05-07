@@ -150,7 +150,7 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 3.2.0
+    rev: 3.2.1
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
