@@ -7,35 +7,48 @@
 
 docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-run() {
-  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+runContainer() {
+  local image="scrasnups/build:bash-tools-ubuntu-5.3"
+  local -a dockerRunCmd=(
+    "/bash/bin/doc"
+    "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
+  )
 
-  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-    ShellDoc::installRequirementsIfNeeded
-    Softwares::installHadolint
-    Softwares::installShellcheck
-
-    # shellcheck disable=SC2034
-    local -a dockerRunCmd=(
-      "/bash/bin/doc"
-      "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
+  if ! docker inspect --type=image "${image}" &>/dev/null; then
+    docker pull "${image}"
+  fi
+  # run docker image
+  local -a localDockerRunArgs=(
+    --rm
+    -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
+    -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
+    -w /bash
+    -v "${FRAMEWORK_ROOT_DIR}:/bash"
+    --entrypoint /usr/local/bin/bash
+  )
+  # shellcheck disable=SC2154
+  if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
+    localDockerRunArgs+=(
+      -e USER_ID="${USER_ID:-1000}"
+      -e GROUP_ID="${GROUP_ID:-1000}"
+      --user "www-data:www-data"
+      -v "/tmp:/tmp"
     )
-    # shellcheck disable=SC2034
-    local -a dockerArgvFiltered=()
-    # shellcheck disable=SC2154
-    Docker::runBuildContainer \
-      "${optionVendor:-ubuntu}" \
-      "${optionBashVersion:-5.1}" \
-      "${optionBashBaseImage:-ubuntu:20.04}" \
-      "${optionSkipDockerBuild}" \
-      "${optionTraceVerbose}" \
-      "${optionContinuousIntegrationMode}" \
-      dockerRunCmd \
-      dockerArgvFiltered
-
-    exit $?
   fi
 
+  # shellcheck disable=SC2154
+  if [[ "${optionTraceVerbose}" = "1" ]]; then
+    set -x
+  fi
+  docker run \
+    "${localDockerRunArgs[@]}" \
+    "${image}" \
+    "${dockerRunCmd[@]}"
+  set +x
+}
+
+generateDoc() {
+  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
   export FRAMEWORK_ROOT_DIR
 
   #-----------------------------
@@ -103,6 +116,21 @@ run() {
 
   if ((TOKEN_NOT_FOUND_COUNT > 0)); then
     exit 1
+  fi
+}
+
+installRequirements() {
+  ShellDoc::installRequirementsIfNeeded
+  Softwares::installHadolint
+  Softwares::installShellcheck
+}
+
+run() {
+  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+    installRequirements
+    runContainer
+  else
+    generateDoc
   fi
 }
 

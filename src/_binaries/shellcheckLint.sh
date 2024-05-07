@@ -3,11 +3,6 @@
 # VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
 # FACADE
 
-# check if command in PATH is already the minimal version needed
-if ! Version::checkMinimal "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" "--version" "${MIN_SHELLCHECK_VERSION}" >/dev/null 2>&1; then
-  Softwares::installShellcheck
-fi
-
 .INCLUDE "$(dynamicTemplateDir _binaries/options/command.shellcheckLint.tpl)"
 
 shellcheckLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
@@ -82,13 +77,31 @@ run() {
       if [[ "${optionTraceVerbose}" = "1" ]]; then
         xargsArgs+=(-t)
       fi
-
+      local tmpDir
+      tmpDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-tools-shellcheck-XXXXXX)"
+      export tmpDir
+      # shellcheck disable=SC2016
       echo "${files[@]}" |
         optionTraceVerbose="${optionTraceVerbose}" \
           shellcheckArgsStr="${shellcheckArgs[*]}" \
           xargs "${xargsArgs[@]}" \
-          bash -c 'shellcheckFunction $@' bash
-
+          bash -c 'echo >&2 "linting $* ..."; file="$(md5sum <<<"$@")"; shellcheckFunction $@ | tee "${tmpDir}/${file%% *}" >&2; echo >&2 "linted $*"' bash
+      if [[ "${optionFormat}" = "checkstyle" ]]; then
+        (
+          echo "<?xml version='1.0' encoding='UTF-8'?>"
+          echo "<checkstyle version='4.3'>"
+          awk '/<checkstyle/{flag=1; next} /<\/checkstyle>/{flag=0} flag' "${tmpDir}/"*
+          echo "</checkstyle>"
+        )
+      elif [[ "${optionFormat}" = "json" ]]; then
+        (
+          jq '.[]' "${tmpDir}/"* | jq -s '.'
+        )
+      elif [[ "${optionFormat}" = "json1" ]]; then
+        jq -s 'map(.comments[])' "${tmpDir}/"* | jq '{"comments": .}'
+      else
+        cat "${tmpDir}/"*
+      fi
     )
   else
     Log::displayWarning "no file provided"

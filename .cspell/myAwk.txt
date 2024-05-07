@@ -1,0 +1,8 @@
+apos
+asort
+gensub
+getline
+gsub
+substr
+tolower
+varchar

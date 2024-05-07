@@ -150,7 +150,7 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 3.2.0
+    rev: 3.2.1
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -209,8 +209,7 @@ repos:
         name: build doc files for github actions
         language: script
         entry: bin/doc
-        args: [--verbose]
+        args: [--verbose, --ci]
         pass_filenames: false
         require_serial: true
-        always_run: true
-        stages: [manual]
+        stages: [] # GITHUB

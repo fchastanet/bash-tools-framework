@@ -10,4 +10,7 @@ awk \
       print "###############################################################################"
     }
   ''' .pre-commit-config.yaml >.pre-commit-config-github.yaml
-sed -i -E '0,/fail_fast: true/s//fail_fast: false/' .pre-commit-config-github.yaml
+sed -i -E \
+  -e '0,/fail_fast: true/s//fail_fast: false/' \
+  -e 's/stages: \[\] # GITHUB/stages: \[manual\] # GITHUB/' \
+  .pre-commit-config-github.yaml
