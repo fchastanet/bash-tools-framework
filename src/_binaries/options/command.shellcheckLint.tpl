@@ -88,12 +88,8 @@ argShellcheckFilesCallback() {
 }
 shellcheckLintParseCallback() {
   if [[ "${optionStaged}" = "1" ]] && ((${#argShellcheckFiles[@]} > 0)); then
-    Log::displayWarning "${SCRIPT_NAME} - --staged option ignored as files as been provided"
+    Log::displayWarning "${SCRIPT_NAME} - --staged option ignored as files have been provided"
     optionStaged="0"
-  fi
-  if [[ "${optionFormat}" != "tty" && "${optionXargs}" = "1" ]]; then
-    Log::displayWarning "--xargs option ignored as only supported with tty format"
-    optionXargs="0"
   fi
   shellcheckArgs=(-f "${optionFormat}")
 }

@@ -502,175 +502,6 @@ Array::wrap2() {
   ) | sed -E -e 's/[[:blank:]]+$//'
 }
 
-BASH_FRAMEWORK_SHDOC_INSTALLED_PATH="vendor/.shDocInstalled"
-BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
-
-# @description install requirements to execute shdoc
-# @warning cloning is skipped if vendor/.shDocInstalled file exists
-# @warning a new check is done everyday
-# @warning repository is not updated if a change is detected
-# @env BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
-# @set BASH_FRAMEWORK_SHDOC_INSTALLED String the file created when git clone succeeded
-# @see https://github.com/fchastanet/shdoc
-# @stderr diagnostics information is displayed
-# @feature Git::cloneOrPullIfNoChanges
-ShellDoc::installRequirementsIfNeeded() {
-  local BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/${BASH_FRAMEWORK_SHDOC_INSTALLED_PATH}"
-  if [[ -d "${FRAMEWORK_ROOT_DIR}/vendor" ]]; then
-    mkdir -p "${FRAMEWORK_ROOT_DIR}/vendor" || return 1
-  fi
-  if [[ "$(
-    Cache::getFileContentIfNotExpired \
-      "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
-      "${BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT}"
-  )" != "1" ]]; then
-    Log::displayInfo "Check if shdoc is up to date"
-    if GIT_CLONE_OPTIONS="--recursive" Git::cloneOrPullIfNoChanges \
-      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/shdoc" \
-      "https://github.com/fchastanet/shdoc.git"; then
-      echo "1" >"${BASH_FRAMEWORK_SHDOC_INSTALLED}"
-    else
-      Log::fatal "unable to install shdoc library"
-    fi
-  fi
-}
-
-# @description install hadolint if necessary
-# @arg $1 targetFile:String
-# @feature Github::upgradeRelease
-Softwares::installHadolint() {
-  local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/hadolint}"
-  Github::upgradeRelease \
-    "${targetFile}" \
-    "https://github.com/hadolint/hadolint/releases/download/v@latestVersion@/hadolint-Linux-x86_64"
-}
-
-# @description install hadolint if necessary
-# @arg $1 targetFile:String
-# @feature Github::upgradeRelease
-Softwares::installShellcheck() {
-  local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck}"
-  # shellcheck disable=SC2317
-  install() {
-    local file="$1"
-    local targetFile="$2"
-    local version="$3"
-    local tempDir
-    tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
-    (
-      cd "${tempDir}" || exit 1
-      tar -xJvf "${file}" >&2
-      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
-      chmod +x "${targetFile}"
-      rm -f "${file}" || true
-    )
-  }
-  INSTALL_CALLBACK=install Github::upgradeRelease \
-    "${targetFile}" \
-    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
-}
-
-# @description checkout usage doc below
-#
-# [DockerNamespace usage](DockerUsage.md ':include')
-
-# @description run the container specified by args provided.
-# build and push the image if needed
-#
-# @env DOCKER_BUILD_OPTIONS
-# @env SKIP_USER
-# @env USER_ID
-# @env GROUP_ID
-# @env FRAMEWORK_ROOT_DIR
-# @env DOCKER_OPTION_IMAGE_TAG
-# @env BASH_FRAMEWORK_ARGV_FILTERED
-Docker::runBuildContainer() {
-  local optionVendor="$1"
-  local optionBashVersion="$2"
-  local optionBashBaseImage="$3"
-  local optionSkipDockerBuild="$4"
-  local optionTraceVerbose="$5"
-  local optionContinuousIntegrationMode="$6"
-  local -n localDockerRunCmd=$7
-  local -n localDockerRunArgs=$8
-
-  if [[ -d "$(pwd)/vendor/bash-tools-framework" ]]; then
-    localDockerRunArgs+=(
-      -v "$(cd "$(pwd)/vendor/bash-tools-framework" && pwd -P):/bash/vendor/bash-tools-framework"
-    )
-  fi
-
-  # shellcheck disable=SC2154
-  if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
-    localDockerRunArgs+=(-v "/tmp:/tmp")
-  fi
-  localDockerRunArgs+=(-e KEEP_TEMP_FILES="${KEEP_TEMP_FILES}")
-  localDockerRunArgs+=(-e BATS_FIX_TEST="${BATS_FIX_TEST:-0}")
-
-  # shellcheck disable=SC2154
-  Log::displayInfo "Using ${optionVendor}:${optionBashVersion}"
-
-  local imageRef="${DOCKER_OPTION_IMAGE_TAG:-build:bash-tools-${optionVendor}-${optionBashVersion}}"
-  if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
-    Log::displayInfo "Build docker image ${imageRef}"
-    # shellcheck disable=SC2154
-    (
-      if [[ "${optionTraceVerbose}" = "1" ]]; then
-        set -x
-      fi
-      Docker::buildPushDockerImage \
-        "${optionVendor}" \
-        "${optionBashVersion}" \
-        "${optionBashBaseImage}" \
-        "${optionPush}" \
-        "${optionTraceVerbose}"
-    )
-  fi
-  if [[ -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" ]]; then
-    local imageRefUser="${imageRef}-user"
-    if [[ "${optionSkipDockerBuild:-0}" != "1" ]]; then
-      Log::displayInfo "build docker image ${imageRefUser} with user configuration"
-      # shellcheck disable=SC2154
-      (
-        if [[ "${optionTraceVerbose}" = "1" ]]; then
-          set -x
-        fi
-        # shellcheck disable=SC2086
-        DOCKER_BUILDKIT=1 docker build \
-          ${DOCKER_BUILD_OPTIONS} \
-          --cache-from "scrasnups/${imageRef}" \
-          --build-arg "BASH_IMAGE=scrasnups/${imageRef}" \
-          --build-arg SKIP_USER="${SKIP_USER:-0}" \
-          --build-arg USER_ID="${USER_ID:-$(id -u)}" \
-          --build-arg GROUP_ID="${GROUP_ID:-$(id -g)}" \
-          -f "${FRAMEWORK_ROOT_DIR}/.docker/DockerfileUser" \
-          -t "${imageRefUser}" \
-          "${FRAMEWORK_ROOT_DIR}/.docker"
-      )
-    fi
-  fi
-
-  Log::displayDebug "Run container with localDockerRunCmd: ${localDockerRunCmd[*]}"
-  Log::displayDebug "Run container with localDockerRunArgs: ${localDockerRunArgs[*]}"
-  Log::displayDebug "Run container with BASH_FRAMEWORK_ARGV_FILTERED: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
-  (
-    # shellcheck disable=SC2154
-    if [[ "${optionTraceVerbose}" = "1" ]]; then
-      set -x
-    fi
-    # shellcheck disable=SC2086
-    docker run \
-      --rm \
-      "${localDockerRunArgs[@]}" \
-      ${DOCKER_RUN_OPTIONS} \
-      -w /bash \
-      -v "$(pwd):/bash" \
-      --user "${USER_ID:-$(id -u)}:${GROUP_ID:-$(id -g)}" \
-      "${imageRefUser}" \
-      "${localDockerRunCmd[@]}"
-  )
-}
-
 # @description generates markdown file from template by
 # replacing @@@command_help@@@ by the help of the command
 # eg: @@@test_help@@@ will be replaced by the output
@@ -803,6 +634,74 @@ EOF
   )"
 
   awk -i inplace "${fixMarkdownToc}" "${file}"
+}
+
+BASH_FRAMEWORK_SHDOC_INSTALLED_PATH="vendor/.shDocInstalled"
+BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
+
+# @description install requirements to execute shdoc
+# @warning cloning is skipped if vendor/.shDocInstalled file exists
+# @warning a new check is done everyday
+# @warning repository is not updated if a change is detected
+# @env BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
+# @set BASH_FRAMEWORK_SHDOC_INSTALLED String the file created when git clone succeeded
+# @see https://github.com/fchastanet/shdoc
+# @stderr diagnostics information is displayed
+# @feature Git::cloneOrPullIfNoChanges
+ShellDoc::installRequirementsIfNeeded() {
+  local BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/${BASH_FRAMEWORK_SHDOC_INSTALLED_PATH}"
+  if [[ -d "${FRAMEWORK_ROOT_DIR}/vendor" ]]; then
+    mkdir -p "${FRAMEWORK_ROOT_DIR}/vendor" || return 1
+  fi
+  if [[ "$(
+    Cache::getFileContentIfNotExpired \
+      "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
+      "${BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT}"
+  )" != "1" ]]; then
+    Log::displayInfo "Check if shdoc is up to date"
+    if GIT_CLONE_OPTIONS="--recursive" Git::cloneOrPullIfNoChanges \
+      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/shdoc" \
+      "https://github.com/fchastanet/shdoc.git"; then
+      echo "1" >"${BASH_FRAMEWORK_SHDOC_INSTALLED}"
+    else
+      Log::fatal "unable to install shdoc library"
+    fi
+  fi
+}
+
+# @description install hadolint if necessary
+# @arg $1 targetFile:String
+# @feature Github::upgradeRelease
+Softwares::installHadolint() {
+  local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/hadolint}"
+  Github::upgradeRelease \
+    "${targetFile}" \
+    "https://github.com/hadolint/hadolint/releases/download/v@latestVersion@/hadolint-Linux-x86_64"
+}
+
+# @description install hadolint if necessary
+# @arg $1 targetFile:String
+# @feature Github::upgradeRelease
+Softwares::installShellcheck() {
+  local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck}"
+  # shellcheck disable=SC2317
+  install() {
+    local file="$1"
+    local targetFile="$2"
+    local version="$3"
+    local tempDir
+    tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
+    (
+      cd "${tempDir}" || exit 1
+      tar -xJvf "${file}" >&2
+      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
+      chmod +x "${targetFile}"
+      rm -f "${file}" || true
+    )
+  }
+  INSTALL_CALLBACK=install Github::upgradeRelease \
+    "${targetFile}" \
+    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
 }
 
 # @description ensure COMMAND_BIN_DIR env var is set
@@ -955,173 +854,6 @@ Log::rotate() {
   fi
 }
 
-# @description get file content if file not expired
-# @arg $1 file:String the file to get content from
-# @arg $2 maxDuration:int number of seconds after which the file is considered expired
-# @stdout {String} the file content if not expired
-# @exitcode 1 if file does not exists
-# @exitcode 2 if file expired
-Cache::getFileContentIfNotExpired() {
-  local file="$1"
-  local maxDuration="$2"
-
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
-    return 2
-  fi
-  cat "${file}"
-}
-
-# @description clone the repository if not done yet, else pull it if no change in it
-# @arg $1 dir:String directory in which repository is installed or will be cloned
-# @arg $2 repo:String repository url
-# @arg $3 cloneCallback:Function callback on successful clone
-# @arg $4 pullCallback:Function callback on successful pull
-# @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
-# @env SUDO String allows to use custom sudo prefix command
-# @exitcode 0 on successful pulling/cloning, 1 on failure
-Git::cloneOrPullIfNoChanges() {
-  local dir="$1"
-  shift || true
-  local repo="$1"
-  shift || true
-  local cloneCallback=${1:-}
-  shift || true
-  local pullCallback=${1:-}
-  shift || true
-
-  if [[ -d "${dir}/.git" ]]; then
-    local exitCode=0
-    Git::pullIfNoChanges "${dir}" || exitCode=$?
-    if Array::contains "${exitCode}" "2" "4"; then
-      # changes detected
-      return 0
-    fi
-    if [[ "${exitCode}" != "0" ]]; then
-      return "${exitCode}"
-    fi
-    # shellcheck disable=SC2086
-    if [[ "$(type -t ${pullCallback})" = "function" ]]; then
-      ${pullCallback} "${dir}"
-    fi
-  else
-    Log::displayInfo "cloning ${repo} ..."
-    if ! ${SUDO:-} test -d "${dir%/*}"; then
-      ${SUDO:-} mkdir -p "${dir%/*}"
-    fi
-    # shellcheck disable=SC2086,SC2248
-    if ${SUDO:-} git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
-      # shellcheck disable=SC2086
-      if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
-        ${cloneCallback} "${dir}"
-      fi
-    else
-      Log::displayError "Cloning '${repo}' on '${dir}' failed"
-      return 1
-    fi
-  fi
-}
-
-# @description upgrade given binary to latest github release using retry
-#
-# downloadReleaseUrl argument : the placeholder @latestVersion@ will be replaced by the latest release version
-# @arg $1 targetFile:String target binary file (eg: /usr/local/bin/kind)
-# @arg $2 downloadReleaseUrl:String github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
-# @arg $3 softVersionArg:String parameter to add to existing command to compute current version
-# @arg $4 softVersionCallback:Function function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
-# @arg $5 installCallback:Function function called to install the file retrieved on github (default copy as is and set execution bit)
-# @arg $6 softVersionCallback:Function function to call to filter the version retrieved from github (Default: Version::parse)
-# @stdout log messages about retry, install, upgrade
-# @env SOFT_VERSION_CALLBACK pass softVersionCallback by env variable instead of passing it by arg
-# @env INSTALL_CALLBACK pass installCallback by env variable instead of passing it by arg
-# @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
-# @env EXACT_VERSION if provided, retrieve exact version instead of the latest
-Github::upgradeRelease() {
-  local targetFile="$1"
-  local downloadReleaseUrl="$2"
-  local softVersionArg="${3:---version}"
-  local softVersionCallback="${4:-${SOFT_VERSION_CALLBACK:-Version::getCommandVersionFromPlainText}}"
-  # shellcheck disable=SC2034
-  local installCallback="${5:-${INSTALL_CALLBACK:-}}"
-  local parseGithubVersionCallback="${6:-${PARSE_VERSION_CALLBACK:-Version::parse}}"
-
-  local repo
-  repo="$(Github::extractRepoFromGithubUrl "${downloadReleaseUrl}")"
-  local releasesUrl="https://api.github.com/repos/${repo}/releases/latest"
-
-  # shellcheck disable=SC2317
-  extractVersion() {
-    Version::githubApiExtractVersion | "${parseGithubVersionCallback}"
-  }
-  FILTER_LAST_VERSION_CALLBACK=${FILTER_LAST_VERSION_CALLBACK:-extractVersion} \
-    SOFT_VERSION_CALLBACK="${softVersionCallback}" \
-    Web::upgradeRelease \
-    "${targetFile}" \
-    "${releasesUrl}" \
-    "${downloadReleaseUrl}" \
-    "${softVersionArg}" \
-    "${EXACT_VERSION:-}"
-}
-
-# @description build image and push it to registry
-# @env DOCKER_OPTION_IMAGE_TAG String computed from optionVendor and optionBashVersion if not provided
-# @env DOCKER_OPTION_IMAGE String default scrasnups/${DOCKER_OPTION_IMAGE_TAG}
-# @env DOCKER_BUILD_OPTIONS String list of docker arguments to pass to docker build command
-# @env FRAMEWORK_ROOT_DIR String path allowing to deduce .docker/Dockerfile.{vendor}
-Docker::buildPushDockerImage() {
-  local optionVendor="$1"
-  local optionBashVersion="$2"
-  local optionBashBaseImage="$3"
-  local optionPush="$4"
-  local optionTraceVerbose="$5"
-  # parameters based on env variables
-  local imageTag="${DOCKER_OPTION_IMAGE_TAG:-build:bash-tools-${optionVendor}-${optionBashVersion}}"
-  local image="${DOCKER_OPTION_IMAGE:-scrasnups/${imageTag}}"
-  local DOCKER_BUILD_OPTIONS="${DOCKER_BUILD_OPTIONS:-}"
-
-  Log::displayInfo "Pull image ${image}"
-  (
-    if [[ "${optionTraceVerbose}" = "1" ]]; then
-      set -x
-    fi
-    docker pull "${image}" || true
-  )
-
-  Log::displayInfo "Build image ${image}"
-  # shellcheck disable=SC2086
-  (
-    if [[ "${optionTraceVerbose}" = "1" ]]; then
-      set -x
-    fi
-    DOCKER_BUILDKIT=1 docker build \
-      ${DOCKER_BUILD_OPTIONS} \
-      -f "${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
-      --cache-from "${image}" \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
-      --build-arg argBashVersion="${optionBashVersion}" \
-      --build-arg BASH_IMAGE="${optionBashBaseImage}" \
-      -t "${imageTag}" \
-      -t "${image}" \
-      "${FRAMEWORK_ROOT_DIR}/.docker"
-  )
-
-  Log::displayInfo "Image ${image} - bash version check"
-  docker run --rm "${imageTag}" bash --version
-
-  # shellcheck disable=SC2154
-  if [[ "${optionPush}" = "1" ]]; then
-    Log::displayInfo "Push image ${image}"
-    (
-      if [[ "${optionTraceVerbose}" = "1" ]]; then
-        set -x
-      fi
-      docker push "scrasnups/${imageTag}"
-    )
-  fi
-}
-
 # @description replace token by input(stdin) in given targetFile
 # @warning special ansi codes will be removed from stdin
 # @arg $1 token:String the token to replace by stdin
@@ -1250,6 +982,116 @@ Log::displaySkipped() {
   Log::logSkipped "$1"
 }
 
+# @description get file content if file not expired
+# @arg $1 file:String the file to get content from
+# @arg $2 maxDuration:int number of seconds after which the file is considered expired
+# @stdout {String} the file content if not expired
+# @exitcode 1 if file does not exists
+# @exitcode 2 if file expired
+Cache::getFileContentIfNotExpired() {
+  local file="$1"
+  local maxDuration="$2"
+
+  if [[ ! -f "${file}" ]]; then
+    return 1
+  fi
+  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
+    return 2
+  fi
+  cat "${file}"
+}
+
+# @description clone the repository if not done yet, else pull it if no change in it
+# @arg $1 dir:String directory in which repository is installed or will be cloned
+# @arg $2 repo:String repository url
+# @arg $3 cloneCallback:Function callback on successful clone
+# @arg $4 pullCallback:Function callback on successful pull
+# @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
+# @env SUDO String allows to use custom sudo prefix command
+# @exitcode 0 on successful pulling/cloning, 1 on failure
+Git::cloneOrPullIfNoChanges() {
+  local dir="$1"
+  shift || true
+  local repo="$1"
+  shift || true
+  local cloneCallback=${1:-}
+  shift || true
+  local pullCallback=${1:-}
+  shift || true
+
+  if [[ -d "${dir}/.git" ]]; then
+    local exitCode=0
+    Git::pullIfNoChanges "${dir}" || exitCode=$?
+    if Array::contains "${exitCode}" "2" "4"; then
+      # changes detected
+      return 0
+    fi
+    if [[ "${exitCode}" != "0" ]]; then
+      return "${exitCode}"
+    fi
+    # shellcheck disable=SC2086
+    if [[ "$(type -t ${pullCallback})" = "function" ]]; then
+      ${pullCallback} "${dir}"
+    fi
+  else
+    Log::displayInfo "cloning ${repo} ..."
+    if ! ${SUDO:-} test -d "${dir%/*}"; then
+      ${SUDO:-} mkdir -p "${dir%/*}"
+    fi
+    # shellcheck disable=SC2086,SC2248
+    if ${SUDO:-} git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
+      # shellcheck disable=SC2086
+      if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
+        ${cloneCallback} "${dir}"
+      fi
+    else
+      Log::displayError "Cloning '${repo}' on '${dir}' failed"
+      return 1
+    fi
+  fi
+}
+
+# @description upgrade given binary to latest github release using retry
+#
+# downloadReleaseUrl argument : the placeholder @latestVersion@ will be replaced by the latest release version
+# @arg $1 targetFile:String target binary file (eg: /usr/local/bin/kind)
+# @arg $2 downloadReleaseUrl:String github release url (eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64)
+# @arg $3 softVersionArg:String parameter to add to existing command to compute current version
+# @arg $4 softVersionCallback:Function function called to get software version (default: Version::getCommandVersionFromPlainText will call software with argument --version)
+# @arg $5 installCallback:Function function called to install the file retrieved on github (default copy as is and set execution bit)
+# @arg $6 softVersionCallback:Function function to call to filter the version retrieved from github (Default: Version::parse)
+# @stdout log messages about retry, install, upgrade
+# @env SOFT_VERSION_CALLBACK pass softVersionCallback by env variable instead of passing it by arg
+# @env INSTALL_CALLBACK pass installCallback by env variable instead of passing it by arg
+# @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+# @env EXACT_VERSION if provided, retrieve exact version instead of the latest
+Github::upgradeRelease() {
+  local targetFile="$1"
+  local downloadReleaseUrl="$2"
+  local softVersionArg="${3:---version}"
+  local softVersionCallback="${4:-${SOFT_VERSION_CALLBACK:-Version::getCommandVersionFromPlainText}}"
+  # shellcheck disable=SC2034
+  local installCallback="${5:-${INSTALL_CALLBACK:-}}"
+  local parseGithubVersionCallback="${6:-${PARSE_VERSION_CALLBACK:-Version::parse}}"
+
+  local repo
+  repo="$(Github::extractRepoFromGithubUrl "${downloadReleaseUrl}")"
+  local releasesUrl="https://api.github.com/repos/${repo}/releases/latest"
+
+  # shellcheck disable=SC2317
+  extractVersion() {
+    Version::githubApiExtractVersion | "${parseGithubVersionCallback}"
+  }
+  FILTER_LAST_VERSION_CALLBACK=${FILTER_LAST_VERSION_CALLBACK:-extractVersion} \
+    SOFT_VERSION_CALLBACK="${softVersionCallback}" \
+    Web::upgradeRelease \
+    "${targetFile}" \
+    "${releasesUrl}" \
+    "${downloadReleaseUrl}" \
+    "${softVersionArg}" \
+    "${EXACT_VERSION:-}"
+}
+
 # @description prepend directories to the PATH environment variable
 # @arg $@ args:String[] list of directories to prepend
 # @set PATH update PATH with the directories prepended
@@ -1270,6 +1112,43 @@ Env::pathPrepend() {
 UI::requireTheme() {
   if [[ "${LOAD_THEME:-1}" = "1" ]]; then
     UI::theme "${BASH_FRAMEWORK_THEME-default}"
+  fi
+}
+
+# @description remove ansi codes from input or files given as argument
+# @arg $@ files:String[] the files to filter
+# @exitcode * if one of the filter command fails
+# @stdin you can use stdin as alternative to files argument
+# @stdout the filtered content
+# @see https://en.wikipedia.org/wiki/ANSI_escape_code
+# shellcheck disable=SC2120
+Filters::removeAnsiCodes() {
+  # cspell:disable
+  sed -E 's/\x1b\[[0-9;]*[mGKHF]//g' "$@"
+  # cspell:enable
+}
+
+# @description extract shDoc from file
+#
+# @arg $1 file:String
+# @stdout the shell documentation in markdown format
+ShellDoc::generateShellDoc() {
+  local file="$1"
+
+  ShellDoc::installRequirementsIfNeeded
+  (
+    "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" <"${file}" || {
+      Log::displayError "parse error of file ${file}"
+      return 0
+    }
+  ) || true
+}
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logSkipped() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-SKIPPED}" "$1"
   fi
 }
 
@@ -1444,43 +1323,6 @@ Web::upgradeRelease() {
       "${url}"
 
     Github::defaultInstall "${newSoftware}" "${targetFile}" "${exactVersion}" "${installCallback}"
-  fi
-}
-
-# @description remove ansi codes from input or files given as argument
-# @arg $@ files:String[] the files to filter
-# @exitcode * if one of the filter command fails
-# @stdin you can use stdin as alternative to files argument
-# @stdout the filtered content
-# @see https://en.wikipedia.org/wiki/ANSI_escape_code
-# shellcheck disable=SC2120
-Filters::removeAnsiCodes() {
-  # cspell:disable
-  sed -E 's/\x1b\[[0-9;]*[mGKHF]//g' "$@"
-  # cspell:enable
-}
-
-# @description extract shDoc from file
-#
-# @arg $1 file:String
-# @stdout the shell documentation in markdown format
-ShellDoc::generateShellDoc() {
-  local file="$1"
-
-  ShellDoc::installRequirementsIfNeeded
-  (
-    "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" <"${file}" || {
-      Log::displayError "parse error of file ${file}"
-      return 0
-    }
-  ) || true
-}
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logSkipped() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-SKIPPED}" "$1"
   fi
 }
 
@@ -1722,7 +1564,7 @@ optionHelpCallback() {
 
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
-  echo "${SCRIPT_NAME} version 1.0"
+  echo "${SCRIPT_NAME} version 1.1"
   exit 0
 }
 
@@ -1919,41 +1761,10 @@ commandOptionParseFinished() {
     displayConfig
   fi
 }
-
-# shellcheck disable=SC2317 # if function is overridden
-updateOptionVendorCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$1" "$2")
-}
-
-# shellcheck disable=SC2317 # if function is overridden
-updateOptionBashVersionCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$1" "$2")
-}
-
-# shellcheck disable=SC2317 # if function is overridden
-updateOptionBashBaseImageCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$1" "$2")
-}
-
-# shellcheck disable=SC2317 # if function is overridden
-updateOptionBranchNameCallback() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$1" "$2")
-}
-
-declare optionVendor="ubuntu"
-declare optionBashVersion="5.1"
-declare optionBashBaseImage="ubuntu:20.04"
 declare optionContinuousIntegrationMode=0
 
 # shellcheck disable=SC2317 # if function is overridden
 updateOptionContinuousIntegrationMode() {
-  BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
-}
-
-declare optionSkipDockerBuild=0
-
-# shellcheck disable=SC2317 # if function is overridden
-updateOptionSkipDockerBuildCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
 }
 
@@ -1962,23 +1773,9 @@ docCommand() {
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
-    optionVendor="ubuntu"
-    local -i options_parse_optionParsedCountOptionVendor
-    ((options_parse_optionParsedCountOptionVendor = 0)) || true
-    optionBashVersion="5.1"
-    local -i options_parse_optionParsedCountOptionBashVersion
-    ((options_parse_optionParsedCountOptionBashVersion = 0)) || true
-    optionBashBaseImage="ubuntu:20.04"
-    local -i options_parse_optionParsedCountOptionBashBaseImage
-    ((options_parse_optionParsedCountOptionBashBaseImage = 0)) || true
-    local -i options_parse_optionParsedCountOptionBranchName
-    ((options_parse_optionParsedCountOptionBranchName = 0)) || true
     optionContinuousIntegrationMode="0"
     local -i options_parse_optionParsedCountOptionContinuousIntegrationMode
     ((options_parse_optionParsedCountOptionContinuousIntegrationMode = 0)) || true
-    optionSkipDockerBuild="0"
-    local -i options_parse_optionParsedCountOptionSkipDockerBuild
-    ((options_parse_optionParsedCountOptionSkipDockerBuild = 0)) || true
     local -i options_parse_optionParsedCountOptionBashFrameworkConfig
     ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
     optionConfig="0"
@@ -2020,79 +1817,7 @@ docCommand() {
       local options_parse_arg="$1"
       local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
-        # Option 1/20
-        # Option optionVendor --vendor variableType String min 0 max 1 authorizedValues 'alpine|ubuntu' regexp ''
-        --vendor)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if [[ ! "$1" =~ alpine|ubuntu ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(alpine|ubuntu)"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionVendor >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionVendor))
-          # shellcheck disable=SC2034
-          optionVendor="$1"
-          updateOptionVendorCallback "${options_parse_arg}" "${optionVendor}"
-          ;;
-        # Option 2/20
-        # Option optionBashVersion --bash-version variableType String min 0 max 1 authorizedValues '' regexp ''
-        --bash-version)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionBashVersion >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionBashVersion))
-          # shellcheck disable=SC2034
-          optionBashVersion="$1"
-          updateOptionBashVersionCallback "${options_parse_arg}" "${optionBashVersion}"
-          ;;
-        # Option 3/20
-        # Option optionBashBaseImage --bash-base-image variableType String min 0 max 1 authorizedValues '' regexp ''
-        --bash-base-image)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionBashBaseImage >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionBashBaseImage))
-          # shellcheck disable=SC2034
-          optionBashBaseImage="$1"
-          updateOptionBashBaseImageCallback "${options_parse_arg}" "${optionBashBaseImage}"
-          ;;
-        # Option 4/20
-        # Option optionBranchName --branch-name variableType String min 0 max 1 authorizedValues '' regexp ''
-        --branch-name)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionBranchName >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionBranchName))
-          # shellcheck disable=SC2034
-          optionBranchName="$1"
-          updateOptionBranchNameCallback "${options_parse_arg}" "${optionBranchName}"
-          ;;
-        # Option 5/20
+        # Option 1/15
         # Option optionContinuousIntegrationMode --ci variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --ci)
           # shellcheck disable=SC2034
@@ -2104,19 +1829,7 @@ docCommand() {
           ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
           updateOptionContinuousIntegrationMode "${options_parse_arg}"
           ;;
-        # Option 6/20
-        # Option optionSkipDockerBuild --skip-docker-build variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --skip-docker-build)
-          # shellcheck disable=SC2034
-          optionSkipDockerBuild="1"
-          if ((options_parse_optionParsedCountOptionSkipDockerBuild >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionSkipDockerBuild))
-          updateOptionSkipDockerBuildCallback "${options_parse_arg}"
-          ;;
-        # Option 7/20
+        # Option 2/15
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -2133,7 +1846,7 @@ docCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 8/20
+        # Option 3/15
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           # shellcheck disable=SC2034
@@ -2144,7 +1857,7 @@ docCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           ;;
-        # Option 9/20
+        # Option 4/15
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           # shellcheck disable=SC2034
@@ -2157,7 +1870,7 @@ docCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 10/20
+        # Option 5/15
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           # shellcheck disable=SC2034
@@ -2170,7 +1883,7 @@ docCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 11/20
+        # Option 6/15
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           # shellcheck disable=SC2034
@@ -2183,7 +1896,7 @@ docCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 12/20
+        # Option 7/15
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -2196,7 +1909,7 @@ docCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 13/20
+        # Option 8/15
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           # shellcheck disable=SC2034
@@ -2209,7 +1922,7 @@ docCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
-        # Option 14/20
+        # Option 9/15
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
         --theme)
           shift
@@ -2231,7 +1944,7 @@ docCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 15/20
+        # Option 10/15
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           # shellcheck disable=SC2034
@@ -2243,7 +1956,7 @@ docCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           ;;
-        # Option 16/20
+        # Option 11/15
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           # shellcheck disable=SC2034
@@ -2255,7 +1968,7 @@ docCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           ;;
-        # Option 17/20
+        # Option 12/15
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           # shellcheck disable=SC2034
@@ -2268,7 +1981,7 @@ docCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
-        # Option 18/20
+        # Option 13/15
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -2290,7 +2003,7 @@ docCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 19/20
+        # Option 14/15
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -2308,7 +2021,7 @@ docCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 20/20
+        # Option 15/15
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -2355,42 +2068,13 @@ docCommand() {
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]")"
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--vendor <String>]" "[--bash-version <String>]" "[--bash-base-image <String>]" "[--branch-name <String>]" "[--ci]" "[--skip-docker-build]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--ci]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -e "  ${__HELP_OPTION_COLOR}--vendor <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(vendor\ image\ to\ use:\ alpine\|ubuntu)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: ubuntu'
-    echo '    Possible values: alpine|ubuntu'
-    echo -e "  ${__HELP_OPTION_COLOR}--bash-version <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(version\ of\ bash\ to\ use:\ 4.4\|5.0\|5.1\|5.2)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: 5.1'
-    echo -e "  ${__HELP_OPTION_COLOR}--bash-base-image <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(bash\ bash\ image\ to\ use\ \(eg:\ ubuntu:20.04\,\ amd64/bash:4.4-alpine3.18\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: ubuntu:20.04'
-    echo -e "  ${__HELP_OPTION_COLOR}--branch-name <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(branch\ name\ being\ built\,\ will\ help\ to\ create\ docker\ image\ tag\ name)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
     helpArray=(activate\ continuous\ integration\ mode\ \(tmp\ folder\ not\ shared\ with\ host\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--skip-docker-build${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(skip\ docker\ image\ build\ if\ option\ provided)
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo
     echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
@@ -2472,7 +2156,7 @@ docCommand() {
 INTERNAL TOOL"""
     echo
     echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-    echo '1.0'
+    echo '1.1'
     echo
     echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
     echo '[François Chastanet](https://github.com/fchastanet)'
@@ -2491,41 +2175,50 @@ INTERNAL TOOL"""
 }
 declare copyrightBeginYear="2022"
 
-readonly defaultVendor="ubuntu"
-readonly defaultBashVersion="5.1"
-readonly defaultBashBaseImage="ubuntu:20.04"
-
 docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
-run() {
-  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+runContainer() {
+  local image="scrasnups/build:bash-tools-ubuntu-5.3"
+  local -a dockerRunCmd=(
+    "/bash/bin/doc"
+    "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
+  )
 
-  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-    ShellDoc::installRequirementsIfNeeded
-    Softwares::installHadolint
-    Softwares::installShellcheck
-
-    # shellcheck disable=SC2034
-    local -a dockerRunCmd=(
-      "/bash/bin/doc"
-      "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
+  if ! docker inspect --type=image "${image}" &>/dev/null; then
+    docker pull "${image}"
+  fi
+  # run docker image
+  local -a localDockerRunArgs=(
+    --rm
+    -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
+    -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
+    -w /bash
+    -v "${FRAMEWORK_ROOT_DIR}:/bash"
+    --entrypoint /usr/local/bin/bash
+  )
+  # shellcheck disable=SC2154
+  if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
+    localDockerRunArgs+=(
+      -e USER_ID="${USER_ID:-1000}"
+      -e GROUP_ID="${GROUP_ID:-1000}"
+      --user "www-data:www-data"
+      -v "/tmp:/tmp"
     )
-    # shellcheck disable=SC2034
-    local -a dockerArgvFiltered=()
-    # shellcheck disable=SC2154
-    Docker::runBuildContainer \
-      "${optionVendor:-ubuntu}" \
-      "${optionBashVersion:-5.1}" \
-      "${optionBashBaseImage:-ubuntu:20.04}" \
-      "${optionSkipDockerBuild}" \
-      "${optionTraceVerbose}" \
-      "${optionContinuousIntegrationMode}" \
-      dockerRunCmd \
-      dockerArgvFiltered
-
-    exit $?
   fi
 
+  # shellcheck disable=SC2154
+  if [[ "${optionTraceVerbose}" = "1" ]]; then
+    set -x
+  fi
+  docker run \
+    "${localDockerRunArgs[@]}" \
+    "${image}" \
+    "${dockerRunCmd[@]}"
+  set +x
+}
+
+generateDoc() {
+  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
   export FRAMEWORK_ROOT_DIR
 
   #-----------------------------
@@ -2593,6 +2286,21 @@ run() {
 
   if ((TOKEN_NOT_FOUND_COUNT > 0)); then
     exit 1
+  fi
+}
+
+installRequirements() {
+  ShellDoc::installRequirementsIfNeeded
+  Softwares::installHadolint
+  Softwares::installShellcheck
+}
+
+run() {
+  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
+    installRequirements
+    runContainer
+  else
+    generateDoc
   fi
 }
 

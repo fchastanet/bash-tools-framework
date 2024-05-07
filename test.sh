@@ -33,7 +33,13 @@ declare -a localDockerRunArgs=(
   -v "${CURRENT_DIR}:/bash"
   --entrypoint /usr/local/bin/bash
 )
-# shellcheck disable=SC2154
+
+if [[ -d "${CURRENT_DIR}/vendor/bash-tools-framework" ]]; then
+  FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/vendor/bash-tools-framework" && pwd -P)"
+  localDockerRunArgs+=(
+    -v "${FRAMEWORK_ROOT_DIR}:/bash/vendor/bash-tools-framework"
+  )
+fi
 if [[ "${CI_MODE:-0}" = "0" ]]; then
   localDockerRunArgs+=(-v "/tmp:/tmp")
   localDockerRunArgs+=(-it)

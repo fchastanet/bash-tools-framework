@@ -1,5 +1,33 @@
 # bash-tools-framework
 
+<!-- remove -->
+
+> **_NOTE:_** Documentation is best viewed on
+> [github-pages](https://fchastanet.github.io/bash-tools-framework/)
+
+<!-- endRemove -->
+
+> **_TIP:_** Checkout related projects of this suite
+>
+> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
+> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
+> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
+
+<!-- markdownlint-capture -->
+
+<!-- markdownlint-disable MD013 -->
+
+[![GitHub release (latest SemVer)](https://img.shields.io/github/release/fchastanet/bash-tools-framework?logo=github&sort=semver)](https://github.com/fchastanet/bash-tools-framework/releases)
+[![GitHubLicense](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
+[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
+[![ProjectStatus](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges "Project Status")
+[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
+[![AverageTimeToResolveAnIssue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Average time to resolve an issue")
+[![PercentageOfIssuesStillOpen](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Percentage of issues still open")
+
+<!-- markdownlint-restore -->
+
 - [1. Excerpt](#1-excerpt)
   - [1.1. Compile command](#11-compile-command)
   - [1.2. Build tools](#12-build-tools)
@@ -18,34 +46,6 @@
 - [4. Troubleshooting](#4-troubleshooting)
   - [4.1. compile.bats embed not working on alpine investigation](#41-compilebats-embed-not-working-on-alpine-investigation)
 - [5. Acknowledgements](#5-acknowledgements)
-
-<!-- remove -->
-
-> **_NOTE:_** Documentation is best viewed on
-> [github-pages](https://fchastanet.github.io/bash-tools-framework/)
-
-<!-- endRemove -->
-
-> **_TIP:_** Checkout related projects of this suite
->
-> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
-> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
-> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-
-<!-- markdownlint-capture -->
-
-<!-- markdownlint-disable MD013 -->
-
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/dbelyaev/action-checkstyle?logo=github&sort=semver)](https://github.com/dbelyaev/action-checkstyle/releases)
-[![GitHubLicense](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
-[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/lint-test.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
-[![ProjectStatus](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges "Project Status")
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![AverageTimeToResolveAnIssue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Average time to resolve an issue")
-[![PercentageOfIssuesStillOpen](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Percentage of issues still open")
-
-<!-- markdownlint-restore -->
 
 ## 1. Excerpt
 
@@ -68,11 +68,9 @@ see related documentation [Compile command](doc/CompileCommand.md).
 
 ### 1.3. Internal tools
 
-- **test** : test this framework by launching bats inside docker container with
-  the needed dependencies
+- **test.sh** : test this framework by launching bats inside docker container
+  with the needed dependencies
 - **doc** : generate markdown documentation for this framework
-- **runBuildContainer** : run docker container with the Dockerfile of this
-  project, allowing to build doc and run tests
 
 ## 2. Framework
 
@@ -241,16 +239,21 @@ see related documentation [Compile command](doc/CompileCommand.md).
 
 Dependencies are automatically installed when used.
 
-`bin/test` script will install the following libraries inside `vendor` folder:
+`bin/installRequirements` script will install the following libraries inside
+`vendor` folder:
 
 - [bats-core/bats-core](https://github.com/bats-core/bats-core.git)
 - [bats-core/bats-support](https://github.com/bats-core/bats-support.git)
 - [bats-core/bats-assert](https://github.com/bats-core/bats-assert.git)
 - [Flamefire/bats-mock](https://github.com/Flamefire/bats-mock.git)
+- hadolint
+- shellcheck
 
 `bin/doc` script will install:
 
 - [reconquest/shdoc](https://github.com/reconquest/shdoc)
+- hadolint
+- shellcheck
 
 To avoid checking for libraries update and have an impact on performance, a file
 is created in vendor dir.
@@ -277,19 +280,18 @@ All the methods of this framework are unit tested, you can run the unit tests
 using the following command
 
 ```bash
-./bin/test -r src
+./test.sh scrasnups/build:bash-tools-ubuntu-5.3 -r src -j 30
 ```
 
 Launch UT on different environments:
 
 ```bash
-VENDOR="alpine" BASH_TAR_VERSION=4.4 BASH_IMAGE=bash SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r src
-VENDOR="alpine" BASH_TAR_VERSION=5.0 BASH_IMAGE=bash SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r src
-VENDOR="alpine" BASH_TAR_VERSION=5.1 BASH_IMAGE=bash SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r src
-
-VENDOR="ubuntu" BASH_TAR_VERSION=4.4 BASH_IMAGE=ubuntu:20.04 SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r src
-VENDOR="ubuntu" BASH_TAR_VERSION=5.0 BASH_IMAGE=ubuntu:20.04 SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r src
-VENDOR="ubuntu" BASH_TAR_VERSION=5.1 BASH_IMAGE=ubuntu:20.04 SKIP_BUILD=0 SKIP_USER=1 ./bin/test -r src
+./test.sh scrasnups/build:bash-tools-ubuntu-4.4 -r src -j 30
+./test.sh scrasnups/build:bash-tools-ubuntu-5.0 -r src -j 30
+./test.sh scrasnups/build:bash-tools-ubuntu-5.3 -r src -j 30
+./test.sh scrasnups/build:bash-tools-alpine-4.4 -r src -j 30
+./test.sh scrasnups/build:bash-tools-alpine-5.0 -r src -j 30
+./test.sh scrasnups/build:bash-tools-alpine-5.3 -r src -j 30
 ```
 
 #### 3.3.1. Debug bats

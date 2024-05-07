@@ -52,6 +52,7 @@ friday
 frégate
 getopt
 getsys
+GKHF
 gpgsign
 gsub
 HISTFILE

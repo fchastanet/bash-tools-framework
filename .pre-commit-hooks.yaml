@@ -72,8 +72,8 @@
   name: Run unit tests
   description: run unit test using bats in docker isolated environment
   language: script
-  entry: bin/test
-  args: [-r, src, -j, "30"]
+  entry: preCommitTest.sh
+  args: ["scrasnups/build:bash-tools-ubuntu-5.3", -r, src, -j, "30"]
   pass_filenames: false
   always_run: true
   require_serial: true

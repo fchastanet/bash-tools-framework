@@ -96,10 +96,13 @@ MAILHOG
 mailserver
 mattrose
 mbstring
+megalinter
 minikube
 Minikube
 mlocate
 Mlocate
+Msys
+MSYS
 MULTIPARTS
 mypy
 mysql
@@ -129,6 +132,8 @@ resolvconf
 runc
 scrasnups
 screenlock
+shellcheck
+shellcheckrc
 SpacesAftertabs
 stylelint
 Sume

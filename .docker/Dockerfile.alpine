@@ -17,7 +17,9 @@ RUN \
     "gettext" \
     "git" \
     "jq" \
-    "parallel"
+    "parallel" \
+    # GNU sed
+    "sed"
 
 # Create a default www-data user
 COPY createUser.alpine.sh /usr/local/bin/createUser.sh

@@ -48,7 +48,7 @@ function Dns::checkHostnameExternalHostLinux { #@test
   assert_line --index 0 --partial "INFO    - try to reach host willywonka.fchastanet.lan"
   assert_line --index 1 --partial "PING willywonka.fchastanet.lan (192.168.1.1) 56(84) bytes of data."
   assert_line --index 2 --partial "INFO    - check if ip(192.168.1.1) associated to host(willywonka.fchastanet.lan) is listed in your network configuration"
-  assert_line --index 3 --partial "inet 192.168.1.1  netmask 255.255.0.0  broadcast 192.168.255.255"
+  assert_line --index 3 --partial "net 192.168.1.1  netmask 255.255.0.0  broadcast 192.168.255.255"
 }
 
 function Dns::checkHostnameExternalHostWindows { #@test
