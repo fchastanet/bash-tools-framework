@@ -1,0 +1,7 @@
+{
+  "require": {
+    "symfony/yaml": "^5.4",
+    "monolog/monolog": "^2.9",
+    "opis/json-schema": "^2.3"
+  }
+}
