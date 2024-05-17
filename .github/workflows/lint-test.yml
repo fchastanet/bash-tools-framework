@@ -8,6 +8,8 @@ on: # yamllint disable-line rule:truthy
       - "**"
       # avoid infinite loop for auto created PRs
       - "!update/pre-commit-*"
+    tags:
+      - "**"
   workflow_dispatch:
 
 # cancel previous build if several pushes
@@ -41,6 +43,8 @@ jobs:
     permissions:
       # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write
+      # needed by ncipollo/release-action
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -88,6 +92,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
+
       - uses: docker/build-push-action@v5
         continue-on-error: false
         with:
@@ -98,30 +103,97 @@ jobs:
           github-token: ${{ github.token }}
           build-args: |
             UPDATE_DATE: "${{ env.updateDate }}"
+          target: base
           tags: |
             ${{ env.image_name }}:${{ env.image_tag }}
           cache-from: |
-            type=registry,ref=${{ env.image_name }}:${{ env.image_tag }}
+            type=registry,ref=${{ env.image_name }}:cache-base-${{ env.image_tag }}
+          cache-to: |
+            type=registry,ref=${{ env.image_name }}:cache-base-${{ env.image_tag }},mode=max
+
       - name: Check image
         continue-on-error: false
         run: |
           docker run --rm "${{ env.image_name }}:${{ env.image_tag }}" php --version
+
       - uses: docker/build-push-action@v5
         continue-on-error: false
         with:
           load: true
           context: command-configurator
           file: command-configurator/Dockerfile
+          target: base
           push: true
           github-token: ${{ github.token }}
           tags: |
             ${{ env.image_name }}:${{ env.image_tag }}
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=registry,ref=${{ env.image_name }}:cache-base-${{ env.image_tag }}
 
       - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
         with:
           name: build-frankenphp-docker-image
+          status: ${{ job.status }}
+
+      # overall process
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+        if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: build-frankenphp-binary-file
+          status: pending
+
+      - name: Ensure vendor dir can be written in the binary
+        continue-on-error: false
+        if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo ".git/" > .dockerignore
+
+      - uses: docker/build-push-action@v5
+        continue-on-error: false
+        if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') }}
+        with:
+          load: true
+          context: command-configurator
+          file: command-configurator/Dockerfile
+          target: build-bin-file
+          pull: true
+          push: false
+          github-token: ${{ github.token }}
+          build-args: |
+            UPDATE_DATE: "${{ env.updateDate }}"
+          cache-from: |
+            type=registry,ref=${{ env.image_name }}:cache-base-${{ env.image_tag }}
+          tags: static-app
+
+      - name: Check and copy binary
+        continue-on-error: false
+        if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          set -exo pipefail
+          storeContainer="$(docker create --name static-app-tmp static-app)"
+          docker cp "${storeContainer}:/go/src/app/dist/frankenphp-linux-x86_64" my-app
+          docker rm static-app-tmp
+          mv my-app/my-app command-configurator/command-configurator
+
+      - name: Special Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: latest-command-configurator
+          omitBody: true
+          allowUpdates: true
+          artifacts: "command-configurator/command-configurator"
+          artifactErrorsFailBuild: true
+          replacesArtifacts: true
+          prerelease: true
+          generateReleaseNotes: true
+          skipIfReleaseExists: false
+
+      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+        if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: build-frankenphp-binary-file
           status: ${{ job.status }}
 
   # -------------------------------------------------------
@@ -308,7 +380,7 @@ jobs:
 
       - name: MegaLinter
         id: ml
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/flavors/
         uses: oxsecurity/megalinter/flavors/terraform@v7
