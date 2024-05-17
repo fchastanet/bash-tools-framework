@@ -59,6 +59,12 @@ function transformConfig(Logger $logger, array &$config): void {
           if (!isset($option['callbacks'])) {
             $option['callbacks'] = [];
           }
+          if (!isset($option['min'])) {
+            $option['min'] = 0;
+          }
+          if (!isset($option['max'])) {
+            $option['max'] = ($option['type'] === 'StringArray') ? -1 : 1;
+          }
         }
         unset($option);
       }

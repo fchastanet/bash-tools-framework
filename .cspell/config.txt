@@ -142,6 +142,7 @@ PRUNEPATHS
 publickey
 rearranger
 refact
+reqs
 Resolv
 riak
 RPAREN
