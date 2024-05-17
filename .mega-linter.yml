@@ -147,17 +147,10 @@ MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
     ^pages/_sidebar.md
   )
 
-ACTION_ACTIONLINT_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    ^\.github/workflows/dependabot\.yml$
-  )
-
 YAML_V8R_FILTER_REGEX_EXCLUDE: |
   (?x)(
-    ^\.vscode/\.checkov\.yml|
-    ^\.github/workflows/dependabot\.yml$|
-    ^\.secretlintrc\.yml|
-    ^\.grype\.yaml
+    ^\.secretlintrc\.yml$|
+    ^\.grype\.yaml$
   )
 
 MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |

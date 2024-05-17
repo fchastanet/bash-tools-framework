@@ -23,6 +23,7 @@ cmdhist
 commandline
 COMPREPLY
 CONCAT
+configurator
 cpes
 Creset
 CWORD

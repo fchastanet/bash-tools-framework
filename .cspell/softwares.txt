@@ -33,6 +33,7 @@ ETAG
 fasd
 Fasd
 fchastanet
+frankenphp
 gdebi
 getent
 gettext
@@ -112,7 +113,9 @@ nbthread
 nojekyll
 nproc
 obconf
+opcache
 openbox
+Opis
 pcmanfm
 phpmd
 phpstorm

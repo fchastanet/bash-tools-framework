@@ -13,6 +13,7 @@ binmysql
 Brzóska
 Chastanet
 cklmurl
+configurator
 elif
 esac
 exitcode
