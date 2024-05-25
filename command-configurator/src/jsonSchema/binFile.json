@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "required": [
+    "targetFile",
+    "relativeRootDirBasedOnTargetDir",
+    "templateFile",
+    "templateName",
+    "templateDirs",
+    "srcDirs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "targetFile": {
+      "type": "string"
+    },
+    "relativeRootDirBasedOnTargetDir": {
+      "type": "string",
+      "default": "."
+    },
+    "templateFile": {
+      "type": "string"
+    },
+    "templateName": {
+      "type": "string"
+    },
+    "templateDirs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "srcDirs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,9 +1,37 @@
 <?php
 
-$defaultCommandConfig = require(__DIR__."/default.php");
+$defaultConfig = require(__DIR__."/default.php");
+
+$options = array_merge(
+  $defaultConfig['defaultCommandOptions'],
+  [
+    [
+      'variableName' => 'optionFormat',
+      'type' => 'String',
+      'help' => 'define output format of this command',
+      'alts' => ['--format', '-f',],
+      "group" => "shellcheckLintOptionsFunction",
+      'defaultValue' => 'tty',
+      'authorizedValues' => ['checkstyle', 'diff', 'gcc', 'json', 'json1', 'quiet', 'tty',],
+    ],
+    [
+      'variableName' => 'optionStaged',
+      'functionName' => 'optionStagedFunction',
+      'help' => 'lint only staged git files(files added to file list to be committed) and which are beginning with a bash shebang.',
+      'alts' => ['--staged',],
+    ],
+    [
+      'variableName' => 'optionXargs',
+      'functionName' => 'optionXargsFunction',
+      'type' => 'Boolean',
+      'help' => 'uses parallelization(using xargs command) only if tty format',
+      'alts' => ['--xargs',],
+    ],
+  ]
+);
 
 $shellcheckLintCommand = array_merge(
-  $defaultCommandConfig,
+  $defaultConfig['defaultCommandConfig'],
   [
     'functionName' => 'shellcheckLintCommand',
     'commandName' => 'shellcheckLint',
@@ -21,30 +49,12 @@ $shellcheckLintCommand = array_merge(
         'title' => 'GLOBAL OPTIONS:',
         'functionName' => 'zzzGroupGlobalOptionsFunction',
       ],
-    ],
-    'options' => [
       [
-        'variableName' => 'optionFormat',
-        'type' => 'String',
-        'help' => 'define output format of this command',
-        'alts' => ['--format', '-f',],
-        'defaultValue' => 'tty',
-        'authorizedValues' => ['checkstyle', 'diff', 'gcc', 'json', 'json1', 'quiet', 'tty',],
-      ],
-      [
-        'variableName' => 'optionStaged',
-        'functionName' => 'optionStagedFunction',
-        'help' => 'lint only staged git files(files added to file list to be committed) and which are beginning with a bash shebang.',
-        'alts' => ['--staged',],
-      ],
-      [
-        'variableName' => 'optionXargs',
-        'functionName' => 'optionXargsFunction',
-        'type' => 'Boolean',
-        'help' => 'uses parallelization(using xargs command) only if tty format',
-        'alts' => ['--xargs',],
+        'title' => 'OPTIONS:',
+        'functionName' => 'shellcheckLintOptionsFunction',
       ],
     ],
+    'options' => $options,
     'args' => [
       [
         'variableName' => 'argShellcheckFiles',
@@ -61,6 +71,18 @@ $shellcheckLintCommand = array_merge(
 
 return [
   'binFile' => [
+    'targetFile' => '${FRAMEWORK_ROOT_DIR}/bin/shellcheckLint',
+    'relativeRootDirBasedOnTargetDir' => '..',
+    'templateFile' => 'binFile.gtpl',
+    'templateName' => 'binFile',
+    'srcDirs' => [
+      '/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework/src',
+    ],
+    'templateDirs' => [
+      "templates-examples",
+    ],
+  ],
+  'binData' => [
     'commands' => [
       $shellcheckLintCommand,
     ],

@@ -5,26 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "bashdb",
-      "request": "launch",
-      "name": "Bash-Debug (generic)",
-      "program": "${file}"
-    },
-    {
-      "type": "bashdb",
-      "request": "launch",
-      "name": "Bash-Debug (runBuildContainer)",
-      "program": "bin/runBuildContainer",
-      "args": ["/bash/bin/doc", "--skip-docker-build", "-vvv"]
-    },
-    {
-      "type": "bashdb",
-      "request": "launch",
-      "name": "manualTests/Array::wrap.sh",
-      "program": "manualTests/Array::wrap.sh",
-      "args": []
-    },
-    {
       "name": "Listen for Xdebug",
       "type": "php",
       "request": "launch",

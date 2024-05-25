@@ -1,0 +1,111 @@
+{
+  "type": "object",
+  "required": [
+    "variableName",
+    "functionName",
+    "min",
+    "max",
+    "callbacks",
+    "help",
+    "defaultValue",
+    "type",
+    "regexp",
+    "authorizedValues",
+    "authorizedValuesList"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "variableName": {
+      "title": "Variable Name",
+      "type": "string",
+      "examples": ["argShellcheckFiles"],
+      "$comment": "https://regex101.com/r/iN050g/1",
+      "pattern": "(^[a-z][A-Za-z_0-9]+$)|(^[A-Z_][A-Z_0-9]+$)"
+    },
+    "type": {
+      "title": "Type",
+      "type": "string",
+      "enum": ["Boolean", "String", "StringArray"],
+      "examples": ["String"]
+    },
+    "help": {
+      "title": "Help",
+      "type": "string",
+      "default": "",
+      "examples": [
+        "files to validate with shellcheck. If not provided,\nall files from git repository which are beginning\nwith a bash shebang, unless --staged option is provided."
+      ]
+    },
+    "functionName": {
+      "$ref": "#/definitions/functionName"
+    },
+    "defaultValue": {
+      "title": "Default Value of the argument (if null default value following the type, eg: [] for StringArray)",
+      "type": ["string", "integer", "null"],
+      "default": "",
+      "examples": ["tty"]
+    },
+    "min": {
+      "title": "Min",
+      "type": "integer",
+      "min": 0,
+      "examples": [0],
+      "default": 0
+    },
+    "max": {
+      "title": "Max",
+      "type": "integer",
+      "min": -1,
+      "examples": [-1],
+      "default": 1
+    },
+    "callbacks": {
+      "$ref": "#/definitions/callbacks"
+    },
+    "regexp": {
+      "title": "Regexp",
+      "type": ["null", "string"],
+      "examples": ["^.*$"],
+      "default": null
+    },
+    "authorizedValues": {
+      "title": "Authorized values (if null ignore)",
+      "type": ["array", "null"],
+      "default": null,
+      "items": {
+        "title": "Items",
+        "type": "object",
+        "required": ["value", "help"],
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1
+          },
+          "help": {
+            "type": "string",
+            "minLength": 0
+          }
+        },
+        "examples": [
+          {
+            "value": "checkstyle",
+            "help": "checkstyle type"
+          }
+        ],
+        "pattern": "^.+$"
+      }
+    },
+    "authorizedValuesList": {
+      "title": "Authorized values (if null ignore)",
+      "type": ["array", "null"],
+      "default": null,
+      "items": {
+        "title": "Items",
+        "type": "string",
+        "examples": ["checkstyle"],
+        "pattern": "^.+$"
+      }
+    }
+  }
+}
