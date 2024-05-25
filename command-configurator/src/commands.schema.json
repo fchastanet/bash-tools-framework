@@ -1,0 +1,479 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/fchastanet/bash-tools-framework/commands-schema.json",
+  "title": "Commands",
+  "definitions": {
+    "functionName": {
+      "title": "Function Name",
+      "type": "string",
+      "default": "",
+      "examples": ["zzzGroupGlobalOptionsFunction"],
+      "$comment": "https://regex101.com/r/3LGpYZ/1",
+      "pattern": "^([A-Za-z0-9_]+(::)?[A-Za-z0-9_]+)$"
+    },
+    "callbacks": {
+      "type": "array",
+      "uniqueItems": true,
+      "title": "callbacks",
+      "default": [],
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/functionName"
+          }
+        ]
+      }
+    }
+  },
+  "type": "object",
+  "required": ["binFile"],
+  "additionalProperties": false,
+  "properties": {
+    "binFile": {
+      "type": "object",
+      "required": [
+        "targetFile",
+        "templateFile",
+        "templateName",
+        "templateDirs",
+        "srcDirs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "targetFile": {
+          "type": "string"
+        },
+        "templateFile": {
+          "type": "string"
+        },
+        "templateName": {
+          "type": "string"
+        },
+        "templateDirs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "srcDirs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "binData": {
+      "required": ["commands"],
+      "additionalProperties": false,
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "author",
+              "sourceFile",
+              "license",
+              "copyright",
+              "optionGroups",
+              "includes",
+              "options",
+              "functionName",
+              "commandName",
+              "version",
+              "help",
+              "longDescription",
+              "callbacks",
+              "unknownOptionCallbacks",
+              "args"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "options": {
+                "title": "Options",
+                "type": "array",
+                "default": [],
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "variableName",
+                    "functionName",
+                    "min",
+                    "max",
+                    "callbacks",
+                    "help",
+                    "defaultValue",
+                    "type",
+                    "regexp",
+                    "authorizedValues",
+                    "authorizedValuesList",
+                    "group",
+                    "alts",
+                    "onValue",
+                    "offValue",
+                    "helpValueName"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "variableName": {
+                      "title": "Variable Name",
+                      "type": "string",
+                      "examples": ["argShellcheckFiles"],
+                      "$comment": "https://regex101.com/r/iN050g/1",
+                      "pattern": "(^[a-z][A-Za-z_0-9]+$)|(^[A-Z_][A-Z_0-9]+$)"
+                    },
+                    "type": {
+                      "title": "Type",
+                      "type": "string",
+                      "enum": ["Boolean", "String", "StringArray"],
+                      "examples": ["String"]
+                    },
+                    "help": {
+                      "title": "Help",
+                      "type": "string",
+                      "default": "",
+                      "examples": [
+                        "files to validate with shellcheck. If not provided,\nall files from git repository which are beginning\nwith a bash shebang, unless --staged option is provided."
+                      ]
+                    },
+                    "functionName": {
+                      "$ref": "#/definitions/functionName"
+                    },
+                    "defaultValue": {
+                      "title": "Default Value of the argument (if null default value following the type, eg: [] for StringArray)",
+                      "type": ["string", "integer", "null"],
+                      "default": "",
+                      "examples": ["tty"]
+                    },
+                    "min": {
+                      "title": "Min",
+                      "type": "integer",
+                      "min": 0,
+                      "examples": [0],
+                      "default": 0
+                    },
+                    "max": {
+                      "title": "Max",
+                      "type": "integer",
+                      "min": -1,
+                      "examples": [-1],
+                      "default": 1
+                    },
+                    "callbacks": {
+                      "$ref": "#/definitions/callbacks"
+                    },
+                    "regexp": {
+                      "title": "Regexp",
+                      "type": ["null", "string"],
+                      "examples": ["^.*$"],
+                      "default": null
+                    },
+                    "authorizedValues": {
+                      "title": "Authorized values (if null ignore)",
+                      "type": ["array", "null"],
+                      "default": null,
+                      "items": {
+                        "title": "Items",
+                        "type": "object",
+                        "required": ["value", "help"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "help": {
+                            "type": "string",
+                            "minLength": 0
+                          }
+                        },
+                        "examples": [
+                          {
+                            "value": "checkstyle",
+                            "help": "checkstyle type"
+                          }
+                        ],
+                        "pattern": "^.+$"
+                      }
+                    },
+                    "authorizedValuesList": {
+                      "title": "Authorized values (if null ignore)",
+                      "type": ["array", "null"],
+                      "default": null,
+                      "items": {
+                        "title": "Items",
+                        "type": "string",
+                        "examples": ["checkstyle"],
+                        "pattern": "^.+$"
+                      }
+                    },
+                    "onValue": {
+                      "title": "OnValue",
+                      "type": ["string", "integer", "null"],
+                      "examples": [1],
+                      "default": 1
+                    },
+                    "offValue": {
+                      "title": "OffValue",
+                      "type": ["string", "integer", "null"],
+                      "examples": [0],
+                      "default": 0
+                    },
+                    "helpValueName": {
+                      "title": "HelpValueName",
+                      "type": ["null", "string"],
+                      "examples": ["optionValue"],
+                      "default": null
+                    },
+                    "group": {
+                      "title": "Group",
+                      "type": "string",
+                      "examples": ["groupFunction"]
+                    },
+                    "alts": {
+                      "title": "Alts",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "default": [],
+                      "items": {
+                        "title": "Alts list",
+                        "type": "string",
+                        "examples": ["--format"],
+                        "pattern": "^.+$"
+                      }
+                    }
+                  },
+                  "title": "Options parameters"
+                }
+              },
+              "args": {
+                "title": "Args",
+                "type": "array",
+                "default": [],
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "variableName",
+                    "functionName",
+                    "min",
+                    "max",
+                    "callbacks",
+                    "help",
+                    "defaultValue",
+                    "type",
+                    "regexp",
+                    "authorizedValues",
+                    "authorizedValuesList",
+                    "name"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "variableName": {
+                      "title": "Variable Name",
+                      "type": "string",
+                      "examples": ["argShellcheckFiles"],
+                      "$comment": "https://regex101.com/r/iN050g/1",
+                      "pattern": "(^[a-z][A-Za-z_0-9]+$)|(^[A-Z_][A-Z_0-9]+$)"
+                    },
+                    "type": {
+                      "title": "Type",
+                      "type": "string",
+                      "enum": ["Boolean", "String", "StringArray"],
+                      "examples": ["String"]
+                    },
+                    "help": {
+                      "title": "Help",
+                      "type": "string",
+                      "default": "",
+                      "examples": [
+                        "files to validate with shellcheck. If not provided,\nall files from git repository which are beginning\nwith a bash shebang, unless --staged option is provided."
+                      ]
+                    },
+                    "functionName": {
+                      "$ref": "#/definitions/functionName"
+                    },
+                    "defaultValue": {
+                      "title": "Default Value of the argument (if null default value following the type, eg: [] for StringArray)",
+                      "type": ["string", "integer", "null"],
+                      "default": "",
+                      "examples": ["tty"]
+                    },
+                    "min": {
+                      "title": "Min",
+                      "type": "integer",
+                      "min": 0,
+                      "examples": [0],
+                      "default": 0
+                    },
+                    "max": {
+                      "title": "Max",
+                      "type": "integer",
+                      "min": -1,
+                      "examples": [-1],
+                      "default": 1
+                    },
+                    "callbacks": {
+                      "$ref": "#/definitions/callbacks"
+                    },
+                    "regexp": {
+                      "title": "Regexp",
+                      "type": ["null", "string"],
+                      "examples": ["^.*$"],
+                      "default": null
+                    },
+                    "authorizedValues": {
+                      "title": "Authorized values (if null ignore)",
+                      "type": ["array", "null"],
+                      "default": null,
+                      "items": {
+                        "title": "Items",
+                        "type": "object",
+                        "required": ["value", "help"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "help": {
+                            "type": "string",
+                            "minLength": 0
+                          }
+                        },
+                        "examples": [
+                          {
+                            "value": "checkstyle",
+                            "help": "checkstyle type"
+                          }
+                        ],
+                        "pattern": "^.+$"
+                      }
+                    },
+                    "authorizedValuesList": {
+                      "title": "Authorized values (if null ignore)",
+                      "type": ["array", "null"],
+                      "default": null,
+                      "items": {
+                        "title": "Items",
+                        "type": "string",
+                        "examples": ["checkstyle"],
+                        "pattern": "^.+$"
+                      }
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string",
+                      "examples": ["shellcheckFiles"],
+                      "pattern": "^.+$"
+                    }
+                  }
+                }
+              },
+              "author": {
+                "title": "Author",
+                "type": "string",
+                "default": "",
+                "examples": [
+                  "[Fran\u00e7ois Chastanet](https://github.com/fchastanet)"
+                ]
+              },
+              "sourceFile": {
+                "title": "Sourcefile",
+                "type": "string",
+                "default": "",
+                "examples": ["${REPOSITORY_URL}/tree/master/${SRC_FILE_PATH}"]
+              },
+              "license": {
+                "title": "License",
+                "type": "string",
+                "default": "",
+                "examples": ["MIT License"]
+              },
+              "copyright": {
+                "title": "Copyright",
+                "type": "string",
+                "default": "",
+                "examples": ["copyrightCallback"]
+              },
+              "optionGroups": {
+                "title": "Option Groups",
+                "type": "array",
+                "default": [],
+                "items": {
+                  "title": "Items",
+                  "type": "object",
+                  "required": ["title", "functionName"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "title": {
+                      "title": "Title",
+                      "type": "string",
+                      "default": "",
+                      "examples": ["GLOBAL OPTIONS:"],
+                      "pattern": "^.*$"
+                    },
+                    "functionName": {
+                      "$ref": "#/definitions/functionName"
+                    }
+                  }
+                }
+              },
+              "includes": {
+                "title": "Include template files",
+                "type": "object",
+                "patternProperties": {
+                  "^.+$": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "examples": {
+                    "default.options.tpl": true
+                  }
+                },
+                "additionalProperties": false
+              },
+              "functionName": {
+                "$ref": "#/definitions/functionName"
+              },
+              "commandName": {
+                "title": "Command Name",
+                "type": "string",
+                "examples": ["shellcheckLint"],
+                "pattern": "^[a-zA-Z0-9_-]+$"
+              },
+              "version": {
+                "title": "Version",
+                "type": "string",
+                "examples": ["1.0"],
+                "pattern": "^.+$"
+              },
+              "help": {
+                "title": "Help",
+                "type": "string",
+                "default": "",
+                "examples": ["Lint bash files using shellcheck."]
+              },
+              "longDescription": {
+                "title": "Long Description",
+                "type": "string",
+                "default": "",
+                "examples": [
+                  "shellcheck wrapper that will:\n- install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically\n- by default, lint all git files of this project which are beginning with a bash shebang\n  except if the option --staged is passed\n\n${__HELP_TITLE}Special configuration .shellcheckrc:${__HELP_NORMAL}\nuse the following line in your .shellcheckrc file to exclude\nsome files from being checked (use grep -E syntax)\nexclude=^bin/bash-tpl$\n\n${__HELP_TITLE_COLOR}SHELLCHECK HELP${__RESET_COLOR}\n\n@@@SHELLCHECK_HELP@@@"
+                ]
+              },
+              "callbacks": {
+                "$ref": "#/definitions/callbacks"
+              },
+              "unknownOptionCallbacks": {
+                "$ref": "#/definitions/callbacks"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
