@@ -76,7 +76,7 @@ repos:
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
-            ^.vscode\/.*\.json$
+            .vscode\/.*\.json$
           )
 
   - repo: https://github.com/rhysd/actionlint
@@ -120,6 +120,7 @@ repos:
         exclude: |
           (?x)(
             \.md$|
+            \.vscode/.*\.json$|
             ^\.vscode/.*\.code-snippets$
           )
 

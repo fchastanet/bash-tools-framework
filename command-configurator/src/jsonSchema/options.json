@@ -1,0 +1,41 @@
+{
+  "title": "Options parameters",
+  "required": ["group", "alts", "onValue", "offValue", "helpValueName"],
+  "properties": {
+    "onValue": {
+      "title": "OnValue",
+      "type": ["string", "integer", "null"],
+      "examples": [1],
+      "default": 1
+    },
+    "offValue": {
+      "title": "OffValue",
+      "type": ["string", "integer", "null"],
+      "examples": [0],
+      "default": 0
+    },
+    "helpValueName": {
+      "title": "HelpValueName",
+      "type": ["null", "string"],
+      "examples": ["optionValue"],
+      "default": null
+    },
+    "group": {
+      "title": "Group",
+      "type": "string",
+      "examples": ["groupFunction"]
+    },
+    "alts": {
+      "title": "Alts",
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "title": "Alts list",
+        "type": "string",
+        "examples": ["--format"],
+        "pattern": "^.+$"
+      }
+    }
+  }
+}

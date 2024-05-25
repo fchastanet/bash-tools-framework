@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/fchastanet/bash-tools-framework/commands-schema.json",
+  "title": "Commands",
+  "definitions": {
+    "functionName": {
+      "title": "Function Name",
+      "type": "string",
+      "default": "",
+      "examples": ["zzzGroupGlobalOptionsFunction"],
+      "$comment": "https://regex101.com/r/3LGpYZ/1",
+      "pattern": "^([A-Za-z0-9_]+(::)?[A-Za-z0-9_]+)$"
+    },
+    "callbacks": {
+      "type": "array",
+      "uniqueItems": true,
+      "title": "callbacks",
+      "default": [],
+      "items": {
+        "allOf": [{"$ref": "#/definitions/functionName"}]
+      }
+    }
+  },
+  "type": "object",
+  "required": ["binFile"],
+  "additionalProperties": false,
+  "properties": {
+    "binFile": "#/src/jsonSchema/binFile.json",
+    "binData": {
+      "required": ["commands"],
+      "additionalProperties": false,
+      "properties": {
+        "commands": "#/src/jsonSchema/commands.json"
+      }
+    }
+  }
+}
