@@ -12,7 +12,7 @@ class TransformConfigDefault {
   const PARAMETER_TYPE_STRING = "String";
   const PARAMETER_TYPE_STRING_ARRAY = "StringArray";
 
-  const CONTEXT_OPTION_GROUP_INDEX = 'optionGroupIndex';
+  const CONTEXT_OPTION_GROUP_NAME = 'optionGroupName';
   const CONTEXT_COMMAND_INDEX = 'commandIndex';
   const CONTEXT_COMMAND_NAME = 'commandName';
   const CONTEXT_PARAMETER_KIND = 'parameterKind';
@@ -57,23 +57,13 @@ class TransformConfigDefault {
     }
   }
 
-  private function transformOptionGroup(array &$optionGroup): void {
-    static $functionNames = [];
-
-    // function name
-    $functionName = $optionGroup['functionName'];
-    if (isset($functionNames[$functionName])) {
-      throw new TransformException("duplicated option group functionName($functionName)");
-    }
-    $functionNames[$functionName] = true;
-
+  private function transformOptionGroup(array &$optionGroup, string $optionGroupName): void {
     // title
     if (empty($optionGroup['title'])) {
-      $this->transformInfo("Option group set default empty title");
+      $this->transformWarning("Option group set default empty title");
       $optionGroup['title'] = '';
     }
-    $this->optionGroups[] = $optionGroup;
-    $this->optionGroupFunctions[$optionGroup['functionName']] = true;
+    $this->optionGroups[$optionGroupName] = $optionGroup;
   }
 
   private function transformCommand(array &$command): void {
@@ -92,12 +82,20 @@ class TransformConfigDefault {
     $this->context[self::CONTEXT_COMMAND_NAME] = $commandName;
 
     if (is_array($command['optionGroups'])) {
-      foreach($command['optionGroups'] as $optionGroupIndex => &$optionGroup) {
-        $this->context[self::CONTEXT_OPTION_GROUP_INDEX] = $optionGroupIndex;
-        $this->transformOptionGroup($optionGroup);
+      foreach($command['optionGroups'] as $optionGroupName => &$optionGroup) {
+        $this->context[self::CONTEXT_OPTION_GROUP_NAME] = $optionGroupName;
+        $this->transformOptionGroup($optionGroup, $optionGroupName);
       }
       $this->context = [];
       unset($optionGroup);
+    } else {
+      $command['optionGroups'] = [];
+    }
+    if (!isset($command['optionGroups']['__default'])) {
+      $this->transformInfo('setting __default option group');
+      $command['optionGroups']['__default'] = [
+        'title' => 'DEFAULT OPTIONS:',
+      ];
     }
 
     // function name
@@ -333,7 +331,7 @@ class TransformConfigDefault {
     foreach($options as $optionIndex => &$option) {
       $this->context[self::CONTEXT_PARAMETER_KIND] = self::PARAMETER_KIND_OPTION;
       $this->context[self::CONTEXT_PARAMETER_INDEX] = $optionIndex;
-      $this->transformParameter($option, self::PARAMETER_KIND_OPTION, $optionIndex);
+      $this->transformParameter($option);
       if (!isset($option['alts'])) {
         throw new TransformException("Option - you must provide alts property");
       }
@@ -347,7 +345,7 @@ class TransformConfigDefault {
         $this->transformInfo("Option - property group set to first group available $defaultGroupFunctionName");
       } else {
         $groupFunction = $option['group'];
-        if (!isset($this->optionGroupFunctions[$groupFunction])) {
+        if (!isset($this->optionGroups[$groupFunction])) {
           throw new TransformException("Option - group function $groupFunction does not exist");
         }
       }
