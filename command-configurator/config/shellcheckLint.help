@@ -1,5 +1,6 @@
 shellcheck wrapper that will:
 - install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically
+$'\r'
 - by default, lint all git files of this project which are beginning with a bash shebang
   except if the option --staged is passed
 
