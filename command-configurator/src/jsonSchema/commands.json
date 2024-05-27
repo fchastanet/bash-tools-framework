@@ -8,7 +8,6 @@
       "license",
       "copyright",
       "optionGroups",
-      "includes",
       "options",
       "functionName",
       "commandName",
@@ -59,37 +58,24 @@
       },
       "optionGroups": {
         "title": "Option Groups",
-        "type": "array",
-        "default": [],
-        "items": {
-          "title": "Items",
-          "type": "object",
-          "required": ["title", "functionName"],
-          "additionalProperties": false,
-          "properties": {
-            "title": {
-              "title": "Title",
-              "type": "string",
-              "default": "",
-              "examples": ["GLOBAL OPTIONS:"],
-              "pattern": "^.*$"
-            },
-            "functionName": {
-              "$ref": "#/definitions/functionName"
-            }
-          }
-        }
-      },
-      "includes": {
-        "title": "Include template files",
         "type": "object",
         "patternProperties": {
-          "^.+$": {
-            "type": "boolean",
-            "default": true
+          "^([A-Za-z0-9_]+(::)?[A-Za-z0-9_]+)$": {
+            "type": "object",
+            "required": ["title"],
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "title": "Title",
+                "type": "string",
+                "default": "",
+                "examples": ["GLOBAL OPTIONS:"],
+                "pattern": "^.*$"
+              }
+            }
           },
           "examples": {
-            "default.options.tpl": true
+            "MAIN_FUNCTION": "main"
           }
         },
         "additionalProperties": false

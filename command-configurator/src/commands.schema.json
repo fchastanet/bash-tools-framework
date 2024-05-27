@@ -26,22 +26,28 @@
     }
   },
   "type": "object",
-  "required": ["binFile"],
+  "required": ["binFile", "binData", "vars"],
   "additionalProperties": false,
   "properties": {
     "binFile": {
       "type": "object",
       "required": [
         "targetFile",
+        "relativeRootDirBasedOnTargetDir",
         "templateFile",
         "templateName",
         "templateDirs",
+        "commandDefinitionFiles",
         "srcDirs"
       ],
       "additionalProperties": false,
       "properties": {
         "targetFile": {
           "type": "string"
+        },
+        "relativeRootDirBasedOnTargetDir": {
+          "type": "string",
+          "default": "."
         },
         "templateFile": {
           "type": "string"
@@ -56,6 +62,15 @@
             "type": "string"
           }
         },
+        "commandDefinitionFiles": {
+          "title": "command definition files to include",
+          "type": "array",
+          "minLength": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
         "srcDirs": {
           "type": "array",
           "uniqueItems": true,
@@ -64,6 +79,18 @@
           }
         }
       }
+    },
+    "vars": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z0-9_]+$": {
+          "type": "string"
+        },
+        "examples": {
+          "MAIN_FUNCTION": "main"
+        }
+      },
+      "additionalProperties": false
     },
     "binData": {
       "required": ["commands"],
@@ -79,7 +106,6 @@
               "license",
               "copyright",
               "optionGroups",
-              "includes",
               "options",
               "functionName",
               "commandName",
@@ -400,37 +426,24 @@
               },
               "optionGroups": {
                 "title": "Option Groups",
-                "type": "array",
-                "default": [],
-                "items": {
-                  "title": "Items",
-                  "type": "object",
-                  "required": ["title", "functionName"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "title": {
-                      "title": "Title",
-                      "type": "string",
-                      "default": "",
-                      "examples": ["GLOBAL OPTIONS:"],
-                      "pattern": "^.*$"
-                    },
-                    "functionName": {
-                      "$ref": "#/definitions/functionName"
-                    }
-                  }
-                }
-              },
-              "includes": {
-                "title": "Include template files",
                 "type": "object",
                 "patternProperties": {
-                  "^.+$": {
-                    "type": "boolean",
-                    "default": true
+                  "^([A-Za-z0-9_]+(::)?[A-Za-z0-9_]+)$": {
+                    "type": "object",
+                    "required": ["title"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "title": {
+                        "title": "Title",
+                        "type": "string",
+                        "default": "",
+                        "examples": ["GLOBAL OPTIONS:"],
+                        "pattern": "^.*$"
+                      }
+                    }
                   },
                   "examples": {
-                    "default.options.tpl": true
+                    "MAIN_FUNCTION": "main"
                   }
                 },
                 "additionalProperties": false

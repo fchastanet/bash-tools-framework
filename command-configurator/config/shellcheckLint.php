@@ -3,20 +3,20 @@
 $defaultConfig = require(__DIR__."/default.php");
 
 $options = array_merge(
-  $defaultConfig['defaultCommandOptions'],
   [
     [
       'variableName' => 'optionFormat',
       'type' => 'String',
       'help' => 'define output format of this command',
       'alts' => ['--format', '-f',],
-      "group" => "shellcheckLintOptionsFunction",
+      "group" => "shellcheckLintOptionGroup",
       'defaultValue' => 'tty',
       'authorizedValues' => ['checkstyle', 'diff', 'gcc', 'json', 'json1', 'quiet', 'tty',],
     ],
     [
       'variableName' => 'optionStaged',
       'functionName' => 'optionStagedFunction',
+      "group" => "shellcheckLintOptionGroup",
       'help' => 'lint only staged git files(files added to file list to be committed) and which are beginning with a bash shebang.',
       'alts' => ['--staged',],
     ],
@@ -24,13 +24,15 @@ $options = array_merge(
       'variableName' => 'optionXargs',
       'functionName' => 'optionXargsFunction',
       'type' => 'Boolean',
+      "group" => "shellcheckLintOptionGroup",
       'help' => 'uses parallelization(using xargs command) only if tty format',
       'alts' => ['--xargs',],
     ],
-  ]
+  ],
+  $defaultConfig['defaultCommandOptions'],
 );
 
-$shellcheckLintCommand = array_merge(
+$shellcheckLintCommand = array_merge_recursive(
   $defaultConfig['defaultCommandConfig'],
   [
     'functionName' => 'shellcheckLintCommand',
@@ -45,13 +47,8 @@ $shellcheckLintCommand = array_merge(
       'unknownOption',
     ],
     'optionGroups' => [
-      [
-        'title' => 'GLOBAL OPTIONS:',
-        'functionName' => 'zzzGroupGlobalOptionsFunction',
-      ],
-      [
+      'shellcheckLintOptionGroup' => [
         'title' => 'OPTIONS:',
-        'functionName' => 'shellcheckLintOptionsFunction',
       ],
     ],
     'options' => $options,
@@ -63,25 +60,35 @@ $shellcheckLintCommand = array_merge(
         'max' => -1,
         'name' => 'shellcheckFiles',
         'callbacks' => ['argShellcheckFilesCallback',],
-        'help' => file_get_contents(__DIR__."/shellcheckLint-argShellcheckFiles.help"),
+        'help' => file_get_contents(__DIR__.'/shellcheckLint-argShellcheckFiles.help'),
       ],
     ],
   ]
 );
 
 return [
-  'binFile' => [
-    'targetFile' => '${FRAMEWORK_ROOT_DIR}/bin/shellcheckLint',
-    'relativeRootDirBasedOnTargetDir' => '..',
-    'templateFile' => 'binFile.gtpl',
-    'templateName' => 'binFile',
-    'srcDirs' => [
-      '/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework/src',
+  'binFile' => array_merge_recursive(
+    $defaultConfig['binFileConfig'],
+    [
+      'targetFile' => '${FRAMEWORK_ROOT_DIR}/bin/shellcheckLint',
+      'relativeRootDirBasedOnTargetDir' => '..',
+      'templateFile' => 'binFile.gtpl',
+      'templateName' => 'binFile',
+      'srcDirs' => [
+        '${FRAMEWORK_ROOT_DIR}/src',
+      ],
+      'commandDefinitionFiles' => [
+        '${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/shellcheckLint.sh'
+      ],
+      'templateDirs' => [
+        "templates-examples",
+      ],
     ],
-    'templateDirs' => [
-      "templates-examples",
-    ],
-  ],
+  ),
+  'vars' => array_merge_recursive(
+    $defaultConfig['vars'],
+    []
+  ),
   'binData' => [
     'commands' => [
       $shellcheckLintCommand,

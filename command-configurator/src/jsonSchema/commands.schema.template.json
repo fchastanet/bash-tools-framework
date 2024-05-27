@@ -22,10 +22,22 @@
     }
   },
   "type": "object",
-  "required": ["binFile"],
+  "required": ["binFile", "binData", "vars"],
   "additionalProperties": false,
   "properties": {
     "binFile": "#/src/jsonSchema/binFile.json",
+    "vars": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z0-9_]+$": {
+          "type": "string"
+        },
+        "examples": {
+          "MAIN_FUNCTION": "main"
+        }
+      },
+      "additionalProperties": false
+    },
     "binData": {
       "required": ["commands"],
       "additionalProperties": false,

@@ -105,8 +105,6 @@ function loadJsonFile(Logger $logger, string $file) {
 $logger = initLogger();
 $configFile = __DIR__ . "/config/shellcheckLint.php";
 $config = getConfig($logger, $configFile);
-print_r(
-  $config);
 $intermediateConfigFile = __DIR__ . "/config-generated/shellcheckLint.beforeTransform.json";
 file_put_contents(
   $intermediateConfigFile,

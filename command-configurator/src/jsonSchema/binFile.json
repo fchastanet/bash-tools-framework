@@ -6,6 +6,7 @@
     "templateFile",
     "templateName",
     "templateDirs",
+    "commandDefinitionFiles",
     "srcDirs"
   ],
   "additionalProperties": false,
@@ -25,6 +26,15 @@
     },
     "templateDirs": {
       "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "commandDefinitionFiles": {
+      "title": "command definition files to include",
+      "type": "array",
+      "minLength": 1,
       "uniqueItems": true,
       "items": {
         "type": "string"
