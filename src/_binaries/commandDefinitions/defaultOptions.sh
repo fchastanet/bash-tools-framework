@@ -184,7 +184,11 @@ optionBashFrameworkConfigCallback() {
 
 defaultFrameworkConfig="$(
   cat <<'EOF'
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/.framework-config.default"
+{{
+  includeFileAsTemplate (
+    dynamicFile "_includes/.framework-config.default" .Data.compilerConfig.SrcDirsExpanded
+  ) .
+}}
 EOF
 )"
 
