@@ -59,9 +59,6 @@ dictionaryDefinitions:
   - name: myAwk
     path: ".cspell/myAwk.txt"
     addWords: false
-  - name: php
-    path: ".cspell/php.txt"
-    addWords: false
 
 # https://github.com/streetsidesoftware/cspell/blob/main/packages/cspell/README.md#languagesettings
 languageSettings:
@@ -85,13 +82,6 @@ languageSettings:
       - mySoftwares
       - softwareTerms
 
-  - languageId: php
-    locale: "*"
-    dictionaries:
-      - php
-      - mySoftwares
-      - softwareTerms
-
 # OVERRIDES
 overrides:
   - filename:
@@ -101,10 +91,6 @@ overrides:
     languageId: shellscript
     dictionaries:
       - loremIpsum
-
-  - filename:
-      - "**/*.php"
-    languageId: php
 
   - filename: "*.yml"
     dictionaries:
@@ -118,13 +104,6 @@ overrides:
     dictionaries:
       - mySoftwares
       - software
-
-  - filename:
-      - "command-configurator/schema/*.json"
-    dictionaries:
-      - mySoftwares
-      - software
-      - lintersConfig
 
   - filename: "**/*.md"
     languageId: markdown
@@ -142,7 +121,7 @@ overrides:
       - src/_binaries/GitDefaultConfig/conf/home/.config/tig/config
       - src/_binaries/GitDefaultConfig/conf/home/.gitconfig
       - src/_binaries/GitDefaultConfig/conf/home/.tigrc
-      - command-configurator/config/**
+
     languageId: shellscript
     dictionaries:
       - config

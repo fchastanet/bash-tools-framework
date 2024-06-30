@@ -33,7 +33,6 @@ ETAG
 fasd
 Fasd
 fchastanet
-frankenphp
 gdebi
 getent
 gettext

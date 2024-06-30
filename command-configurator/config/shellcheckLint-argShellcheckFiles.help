@@ -1,3 +1,0 @@
-files to validate with shellcheck. If not provided,
-all files from git repository which are beginning
-with a bash shebang, unless --staged option is provided.
