@@ -31,6 +31,15 @@ source <(
     --function-name optionFormatsFunction
 
   Options::generateOption \
+    --variable-type String \
+    --help "define PLANTUML_LIMIT_SIZE" \
+    --alt "--limit-size" \
+    --alt "-l" \
+    --callback optionLimitSizeCallback \
+    --variable-name "optionLimitSize" \
+    --function-name optionLimitSizeFunction
+
+  Options::generateOption \
     --variable-type Boolean \
     --help "to write image file in same directory as source file and with the same base name(except extension)" \
     --alt "--same-dir" \
@@ -61,6 +70,7 @@ options+=(
   --callback plantumlCallback
   --unknown-option-callback unknownOption
   optionFormatsFunction
+  optionLimitSizeFunction
   optionOutputDirFunction
   argPlantumlFilesFunction
   sameDirectoryOptionFunction
@@ -103,6 +113,14 @@ optionHelpCallback() {
 plantumlCallback() {
   if ((${#optionFormats[@]} == 0)); then
     optionFormats=("<% ${optionFormatDefault} %>")
+  fi
+}
+
+# shellcheck disable=SC2317 # if function is overridden
+optionLimitSizeCallback() {
+  if [[ -n "${optionLimitSize}" && ! "${optionLimitSize}" =~ ^[0-9]+$ ]]; then
+    Log::displayError "Command ${SCRIPT_NAME} - invalid limit size value '$2'"
+    return 1
   fi
 }
 

@@ -47,9 +47,12 @@ run() {
       targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
     fi
     Log::displayInfo "Generating ${targetFile} from ${file}"
-
+    local -a env=()
+    if [[ -n "${optionLimitSize}" ]]; then
+      env+=(-e "PLANTUML_LIMIT_SIZE=${optionLimitSize}")
+    fi
     # shellcheck disable=SC2154
-    docker run -i --rm plantuml/plantuml \
+    docker run -i --rm "${env[@]}" plantuml/plantuml \
       -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
       >"${targetFile}" \
       <"${file}"
