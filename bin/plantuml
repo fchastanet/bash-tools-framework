@@ -953,6 +953,8 @@ plantumlCommand() {
   shift || true
 
   if [[ "${options_parse_cmd}" = "parse" ]]; then
+    local -i options_parse_optionParsedCountOptionLimitSize
+    ((options_parse_optionParsedCountOptionLimitSize = 0)) || true
     local -i options_parse_optionParsedCountOptionOutputDir
     ((options_parse_optionParsedCountOptionOutputDir = 0)) || true
     sameDirectoryOption="0"
@@ -1001,7 +1003,7 @@ plantumlCommand() {
       local options_parse_arg="$1"
       local argOptDefaultBehavior=0
       case "${options_parse_arg}" in
-        # Option 1/17
+        # Option 1/18
         # Option optionFormats --format|-f variableType StringArray min 0 max -1 authorizedValues 'svg|png' regexp ''
         --format | -f)
           shift
@@ -1016,7 +1018,24 @@ plantumlCommand() {
           ((++options_parse_optionParsedCountOptionFormats))
           optionFormats+=("$1")
           ;;
-        # Option 2/17
+        # Option 2/18
+        # Option optionLimitSize --limit-size|-l variableType String min 0 max 1 authorizedValues '' regexp ''
+        --limit-size | -l)
+          shift
+          if (($# == 0)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+            return 1
+          fi
+          if ((options_parse_optionParsedCountOptionLimitSize >= 1)); then
+            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_optionParsedCountOptionLimitSize))
+          # shellcheck disable=SC2034
+          optionLimitSize="$1"
+          optionLimitSizeCallback "${options_parse_arg}" "${optionLimitSize}"
+          ;;
+        # Option 3/18
         # Option optionOutputDir --output-dir|-o variableType String min 0 max 1 authorizedValues '' regexp ''
         --output-dir | -o)
           shift
@@ -1033,7 +1052,7 @@ plantumlCommand() {
           optionOutputDir="$1"
           plantUmlOutputDirCallback "${options_parse_arg}" "${optionOutputDir}"
           ;;
-        # Option 3/17
+        # Option 4/18
         # Option sameDirectoryOption --same-dir variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --same-dir)
           # shellcheck disable=SC2034
@@ -1044,7 +1063,7 @@ plantumlCommand() {
           fi
           ((++options_parse_optionParsedCountSameDirectoryOption))
           ;;
-        # Option 4/17
+        # Option 5/18
         # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
         --bash-framework-config)
           shift
@@ -1061,7 +1080,7 @@ plantumlCommand() {
           optionBashFrameworkConfig="$1"
           optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
           ;;
-        # Option 5/17
+        # Option 6/18
         # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --config)
           # shellcheck disable=SC2034
@@ -1072,7 +1091,7 @@ plantumlCommand() {
           fi
           ((++options_parse_optionParsedCountOptionConfig))
           ;;
-        # Option 6/17
+        # Option 7/18
         # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --verbose | -v)
           # shellcheck disable=SC2034
@@ -1085,7 +1104,7 @@ plantumlCommand() {
           optionInfoVerboseCallback "${options_parse_arg}"
           updateArgListInfoVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 7/17
+        # Option 8/18
         # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vv)
           # shellcheck disable=SC2034
@@ -1098,7 +1117,7 @@ plantumlCommand() {
           optionDebugVerboseCallback "${options_parse_arg}"
           updateArgListDebugVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 8/17
+        # Option 9/18
         # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         -vvv)
           # shellcheck disable=SC2034
@@ -1111,7 +1130,7 @@ plantumlCommand() {
           optionTraceVerboseCallback "${options_parse_arg}"
           updateArgListTraceVerboseCallback "${options_parse_arg}"
           ;;
-        # Option 9/17
+        # Option 10/18
         # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
         --env-file)
           shift
@@ -1124,7 +1143,7 @@ plantumlCommand() {
           optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
           ;;
-        # Option 10/17
+        # Option 11/18
         # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --no-color)
           # shellcheck disable=SC2034
@@ -1137,7 +1156,7 @@ plantumlCommand() {
           optionNoColorCallback "${options_parse_arg}"
           updateArgListNoColorCallback "${options_parse_arg}"
           ;;
-        # Option 11/17
+        # Option 12/18
         # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
         --theme)
           shift
@@ -1159,7 +1178,7 @@ plantumlCommand() {
           optionThemeCallback "${options_parse_arg}" "${optionTheme}"
           updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
           ;;
-        # Option 12/17
+        # Option 13/18
         # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --help | -h)
           # shellcheck disable=SC2034
@@ -1171,7 +1190,7 @@ plantumlCommand() {
           ((++options_parse_optionParsedCountOptionHelp))
           optionHelpCallback "${options_parse_arg}"
           ;;
-        # Option 13/17
+        # Option 14/18
         # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --version)
           # shellcheck disable=SC2034
@@ -1183,7 +1202,7 @@ plantumlCommand() {
           ((++options_parse_optionParsedCountOptionVersion))
           optionVersionCallback "${options_parse_arg}"
           ;;
-        # Option 14/17
+        # Option 15/18
         # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
         --quiet | -q)
           # shellcheck disable=SC2034
@@ -1196,7 +1215,7 @@ plantumlCommand() {
           optionQuietCallback "${options_parse_arg}"
           updateArgListQuietCallback "${options_parse_arg}"
           ;;
-        # Option 15/17
+        # Option 16/18
         # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --log-level)
           shift
@@ -1218,7 +1237,7 @@ plantumlCommand() {
           optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
           ;;
-        # Option 16/17
+        # Option 17/18
         # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
         --log-file)
           shift
@@ -1236,7 +1255,7 @@ plantumlCommand() {
           optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
           ;;
-        # Option 17/17
+        # Option 18/18
         # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
         --display-level)
           shift
@@ -1294,7 +1313,7 @@ plantumlCommand() {
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
     echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
       "${SCRIPT_NAME}" \
-      "[--format|-f <String>]" "[--output-dir|-o <String>]" "[--same-dir]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
+      "[--format|-f <String>]" "[--limit-size|-l <String>]" "[--output-dir|-o <String>]" "[--same-dir]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
     echo
     echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
     echo -e "  [${__HELP_OPTION_COLOR}plantUmlFile${__HELP_NORMAL} {list} (optional)]"
@@ -1310,6 +1329,11 @@ plantumlCommand() {
     helpArray=(define\ output\ format\ of\ this\ command\(available:\ svg\|png\)\ \(default:\ svg\))
     echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo '    Possible values: svg|png'
+    echo -e "  ${__HELP_OPTION_COLOR}--limit-size${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-l <String>${__HELP_NORMAL} {single}"
+    local -a helpArray
+    # shellcheck disable=SC2054
+    helpArray=(define\ PLANTUML_LIMIT_SIZE)
+    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
     echo -e "  ${__HELP_OPTION_COLOR}--output-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-o <String>${__HELP_NORMAL} {single}"
     local -a helpArray
     # shellcheck disable=SC2054
@@ -1461,6 +1485,14 @@ plantumlCallback() {
 }
 
 # shellcheck disable=SC2317 # if function is overridden
+optionLimitSizeCallback() {
+  if [[ -n "${optionLimitSize}" && ! "${optionLimitSize}" =~ ^[0-9]+$ ]]; then
+    Log::displayError "Command ${SCRIPT_NAME} - invalid limit size value '$2'"
+    return 1
+  fi
+}
+
+# shellcheck disable=SC2317 # if function is overridden
 plantUmlOutputDirCallback() {
   if [[ ! -d "$2" ]]; then
     Log::displayError "Command ${SCRIPT_NAME} - unknown directory '$2'"
@@ -1499,7 +1531,9 @@ run() {
     local sameDirectoryOption="$2"
     local optionOutputDir="$3"
     local format="$4"
-    shift 4 || true
+    local optionLimitSize="$5"
+    local optionTraceVerbose="$6"
+    shift 6 || true
     local -a plantumlOptions=("$@")
 
     local targetFile
@@ -1510,12 +1544,19 @@ run() {
       targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
     fi
     Log::displayInfo "Generating ${targetFile} from ${file}"
-
+    local -a env=()
+    if [[ -n "${optionLimitSize}" ]]; then
+      env+=(-e "PLANTUML_LIMIT_SIZE=${optionLimitSize}")
+    fi
     # shellcheck disable=SC2154
-    docker run -i --rm plantuml/plantuml \
+    if [[ "${optionTraceVerbose}" = "1" ]]; then
+      set -x
+    fi
+    docker run -i --rm "${env[@]}" plantuml/plantuml \
       -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
       >"${targetFile}" \
       <"${file}"
+    set +x
     if [[ "${format}" = "svg" ]]; then
       echo >>"${targetFile}"
     fi
@@ -1529,7 +1570,10 @@ run() {
     for file in "${files[@]}"; do
       # shellcheck disable=SC2154
       for format in "${optionFormats[@]}"; do
-        echo "convertPuml" "${file}" "${sameDirectoryOption}" "${optionOutputDir}" "${format}" "${plantumlOptions[@]}"
+        echo "convertPuml" \
+          "${file}" "${sameDirectoryOption}" "${optionOutputDir}" \
+          "${format}" "${optionLimitSize}" "${optionTraceVerbose}" \
+          "${plantumlOptions[@]}"
       done
     done
   ) | xargs -P0 -r -L 1 bash -c 'convertPuml "$@"'

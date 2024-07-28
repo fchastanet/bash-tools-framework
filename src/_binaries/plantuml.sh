@@ -36,7 +36,9 @@ run() {
     local sameDirectoryOption="$2"
     local optionOutputDir="$3"
     local format="$4"
-    shift 4 || true
+    local optionLimitSize="$5"
+    local optionTraceVerbose="$6"
+    shift 6 || true
     local -a plantumlOptions=("$@")
 
     local targetFile
@@ -47,12 +49,19 @@ run() {
       targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
     fi
     Log::displayInfo "Generating ${targetFile} from ${file}"
-
+    local -a env=()
+    if [[ -n "${optionLimitSize}" ]]; then
+      env+=(-e "PLANTUML_LIMIT_SIZE=${optionLimitSize}")
+    fi
     # shellcheck disable=SC2154
-    docker run -i --rm plantuml/plantuml \
+    if [[ "${optionTraceVerbose}" = "1" ]]; then
+      set -x
+    fi
+    docker run -i --rm "${env[@]}" plantuml/plantuml \
       -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
       >"${targetFile}" \
       <"${file}"
+    set +x
     if [[ "${format}" = "svg" ]]; then
       echo >>"${targetFile}"
     fi
@@ -66,7 +75,10 @@ run() {
     for file in "${files[@]}"; do
       # shellcheck disable=SC2154
       for format in "${optionFormats[@]}"; do
-        echo "convertPuml" "${file}" "${sameDirectoryOption}" "${optionOutputDir}" "${format}" "${plantumlOptions[@]}"
+        echo "convertPuml" \
+          "${file}" "${sameDirectoryOption}" "${optionOutputDir}" \
+          "${format}" "${optionLimitSize}" "${optionTraceVerbose}" \
+          "${plantumlOptions[@]}"
       done
     done
   ) | xargs -P0 -r -L 1 bash -c 'convertPuml "$@"'
