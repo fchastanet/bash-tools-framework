@@ -21,11 +21,10 @@ Git::cloneOrPullIfNoChanges() {
   if [[ -d "${dir}/.git" ]]; then
     local exitCode=0
     Git::pullIfNoChanges "${dir}" || exitCode=$?
-    if Array::contains "${exitCode}" "2" "4"; then
-      # changes detected
+    if [[ "${exitCode}" =~ ^[245]$ ]]; then
+      # changes detected or pull not applicable
       return 0
-    fi
-    if [[ "${exitCode}" != "0" ]]; then
+    elif [[ "${exitCode}" != "0" ]]; then
       return "${exitCode}"
     fi
     # shellcheck disable=SC2086
