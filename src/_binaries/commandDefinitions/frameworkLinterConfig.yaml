@@ -1,0 +1,47 @@
+---
+compileConfig:
+  &defaultFrameworkLinterConfig # describe the files that do not contain function to be imported
+  NON_FRAMEWORK_FILES_REGEXP:
+    - ^bin/
+    - ^hooks/
+    - ^test.sh$
+    - ^preCommitTest.sh$
+    - ^.github/
+    - ^.docker/createUser.
+    - .framework-config
+    - .bats$
+    - /testsData/
+    - ^manualTests/
+    - /_.sh$
+    - /ZZZ.sh$
+    - /__all.sh$
+    - ^src/_binaries
+    - ^src/_includes
+    - ^src/batsHeaders.sh$
+    - ^src/_standalone
+
+  # describe the files that are allowed to not have an associated bats file
+  BATS_FILE_NOT_NEEDED_REGEXP:
+    - ^bin/
+    - .framework-config
+    - ^.docker/
+    - ^.github/
+    - .bats$
+    - /testsData/
+    - ^manualTests/
+    - /_.sh$
+    - /ZZZ.sh$
+    - /__all.sh$
+    - ^src/batsHeaders.sh$
+    - ^src/_includes
+
+  # describe the files that are allowed to not have a function matching the filename
+  FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:
+    - ^bin/
+    - ^.github/
+    - ^\.framework-config$
+    - \.tpl$
+    - /testsData/
+    - ^manualTests/
+    - \.bats$
+    - src/Options/_bats.sh

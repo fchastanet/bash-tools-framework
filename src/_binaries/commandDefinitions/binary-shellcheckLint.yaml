@@ -1,0 +1,88 @@
+extends:
+  - defaultCommand.yaml
+  - frameworkConfig.yaml
+
+vars:
+  SRC_FILE_PATH: src/_binaries/commandDefinitions/shellcheckLint.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/shellcheckLint"
+  relativeRootDirBasedOnTargetDir: ..
+  templateFile: binFile.gtpl
+binData:
+  commands:
+    default:
+      functionName: shellcheckLintCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      commandName: shellcheckLint
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/binary-shellcheckLint.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/binary-shellcheckLint.sh
+      help: Lint bash files using shellcheck.
+      longDescription:
+        "shellcheck wrapper that will:\n- install new shellcheck
+        version(${MIN_SHELLCHECK_VERSION}) automatically\n$'\\r'\n- by default,
+        lint all git files of this project which are beginning with a bash
+        shebang\n  except if the option --staged is
+        passed\n\n${__HELP_TITLE}Special configuration
+        .shellcheckrc:${__HELP_NORMAL}\nuse the following line in your
+        .shellcheckrc file to exclude\nsome files from being checked (use grep
+        -E syntax)\nexclude=^bin/bash-tpl$\n\n${__HELP_TITLE_COLOR}SHELLCHECK
+        HELP${__RESET_COLOR}\n\n@@@SHELLCHECK_HELP@@@\n"
+      callbacks:
+        - shellcheckLintParseCallback
+      args:
+        - callbacks:
+            - argShellcheckFilesCallback
+          help: |
+            files to validate with shellcheck. If not provided,
+            all files from git repository which are beginning
+            with a bash shebang, unless --staged option is provided.
+          type: StringArray
+          max: -1
+          min: 0
+          name: shellcheckFiles
+          variableName: argShellcheckFiles
+      optionGroups:
+        shellcheckLintOptionGroup:
+          title: "OPTIONS:"
+      options:
+        - alts:
+            - --format
+            - -f
+          authorizedValuesList:
+            - checkstyle
+            - diff
+            - gcc
+            - json
+            - json1
+            - quiet
+            - tty
+          defaultValue: tty
+          group: shellcheckLintOptionGroup
+          help: define output format of this command
+          type: String
+          variableName: optionFormat
+
+        - alts:
+            - --staged
+          group: shellcheckLintOptionGroup
+          help:
+            lint only staged git files(files added to file list to be committed)
+            and which are beginning with a bash shebang.
+          variableName: optionStaged
+          type: Boolean
+
+        - alts:
+            - --xargs
+          authorizedValuesList:
+            - checkstyle
+            - diff
+          group: shellcheckLintOptionGroup
+          help: uses parallelization(using xargs command) only if tty format
+          type: Boolean
+          variableName: optionXargs

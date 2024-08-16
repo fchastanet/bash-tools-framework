@@ -56,6 +56,26 @@ documentation, compile bash files, and many more, ...
 
 ### 1.1. Compile command
 
+New compiler (GoLang implementation)
+
+- using generated binary
+
+```bash
+export PATH=$PATH:/home/wsl/fchastanet/bash-compiler/bin
+FRAMEWORK_ROOT_DIR=$(pwd) bash-compiler \
+  src/_binaries/commandDefinitions/binary-shellcheckLint.yaml
+```
+
+- using go interpreter (has to be executed from bash-compiler folder)
+
+```bash
+FRAMEWORK_ROOT_DIR=/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework
+FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}" go run ./cmd/bash-compiler/main.go \
+  "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/binary-shellcheckLint.yaml"
+```
+
+Old compiler version (bash implementation is still available but deprecated)
+
 - **compile** : Inlines all the functions used in the script given in parameter
 
 see related documentation [Compile command](doc/CompileCommand.md).
