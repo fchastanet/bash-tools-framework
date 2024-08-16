@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
 copyrightCallback() {

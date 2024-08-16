@@ -10,10 +10,12 @@ declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
 declare -a shellcheckFiles=()
 
-longDescriptionFunction() {
-  Array::wrap2 ' ' 76 0 "${longDescription[@]}"
+beforeParseCallback() {
+  Env::requireLoad
+  UI::requireTheme
+  Log::requireLoad
+  Compiler::Facade::requireCommandBinDir
 }
-
 unknownOption() {
   shellcheckArgs+=("$1")
 }

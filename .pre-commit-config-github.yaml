@@ -219,3 +219,8 @@ repos:
         pass_filenames: false
         require_serial: true
         stages: [manual] # GITHUB
+
+  - repo: https://github.com/fchastanet/bash-compiler
+    rev: 0.2.3
+    hooks:
+      - id: buildBashBinaries
