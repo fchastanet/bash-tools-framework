@@ -1,6 +1,6 @@
 extends:
-  - defaultCommand.yaml
-  - frameworkConfig.yaml
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
 
 vars:
   SRC_FILE_PATH: src/_binaries/commandDefinitions/shellcheckLint.yaml
@@ -20,8 +20,8 @@ binData:
       version: "1.0"
       commandName: shellcheckLint
       definitionFiles:
-        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/binary-shellcheckLint.sh
-      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/binary-shellcheckLint.sh
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/shellcheckLint/shellcheckLint-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/shellcheckLint/shellcheckLint-main.sh
       help: Lint bash files using shellcheck.
       longDescription:
         "shellcheck wrapper that will:\n- install new shellcheck

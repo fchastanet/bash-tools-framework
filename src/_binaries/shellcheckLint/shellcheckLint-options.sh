@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 declare MIN_SHELLCHECK_VERSION="0.9.0"
+declare copyrightBeginYear="2022"
 declare versionNumber="1.0"
-declare commandFunctionName="shellcheckLintCommand"
-declare help="Lint bash files using shellcheck."
 declare optionFormatDefault="tty"
 
-declare copyrightBeginYear="2022"
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
 declare -a shellcheckFiles=()
