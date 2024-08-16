@@ -7,6 +7,7 @@
 # @exitcode 2 changes detected, pull avoided
 # @exitcode 3 not a git directory
 # @exitcode 4 not able to update index
+# @exitcode 5 not a branch, pull avoided
 # @stderr diagnostics information is displayed
 # @env SUDO String allows to use custom sudo prefix command
 # @require Git::requireGitCommand
@@ -24,6 +25,10 @@ Git::pullIfNoChanges() {
     if ! ${SUDO:-} git diff-index --quiet HEAD --; then
       Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
       return 2
+    fi
+    if ! ${SUDO:-} git symbolic-ref -q HEAD; then
+      Log::displayWarning "Pulling git repository '${dir}' avoided as you are not on a branch"
+      return 5
     fi
     Log::displayInfo "Pull git repository '${dir}' as no changes detected"
     ${SUDO:-} git pull --progress
