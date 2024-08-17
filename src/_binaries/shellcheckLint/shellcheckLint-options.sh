@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
+
+declare optionFormatDefault="tty"
+# shellcheck disable=SC2034
 declare MIN_SHELLCHECK_VERSION="0.9.0"
+# shellcheck disable=SC2034
 declare copyrightBeginYear="2022"
 declare versionNumber="1.0"
-declare optionFormatDefault="tty"
 
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
@@ -19,12 +22,14 @@ unknownOption() {
 }
 argShellcheckFilesCallback() {
   if [[ -f "$1" ]]; then
+    # shellcheck disable=SC2034
     shellcheckFiles=("${@::$#-1}")
   else
     shellcheckArgs+=("$1")
   fi
 }
 shellcheckLintParseCallback() {
+  # shellcheck disable=SC2154
   if [[ "${optionStaged}" = "1" ]] && ((${#argShellcheckFiles[@]} > 0)); then
     Log::displayWarning "${SCRIPT_NAME} - --staged option ignored as files have been provided"
     optionStaged="0"

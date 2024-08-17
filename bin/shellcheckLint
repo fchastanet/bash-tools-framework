@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/commandDefinitions/shellcheckLint.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/shellcheckLint/binary-shellcheckLint.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -789,6 +789,13 @@ UI::theme() {
 
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+
+beforeParseCallback() {
+  Env::requireLoad
+  UI::requireTheme
+  Log::requireLoad
+  Compiler::Facade::requireCommandBinDir
+}
 
 copyrightCallback() {
   if [[ -z "${copyrightBeginYear}" ]]; then
@@ -1928,7 +1935,7 @@ shellcheckLintCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/commandDefinitions/shellcheckLint.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/shellcheckLint/binary-shellcheckLint.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------

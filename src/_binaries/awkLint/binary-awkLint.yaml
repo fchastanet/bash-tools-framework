@@ -1,0 +1,29 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/awkLint/binary-awkLint.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/awkLint"
+  relativeRootDirBasedOnTargetDir: ..
+binData:
+  commands:
+    default:
+      functionName: awkLintCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      commandName: awkLint
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint-main.sh
+      help: lint awk files
+      longDescription: |
+        Lint awk files
+
+        Lint all files with .awk extension in current git folder.
+        Result in checkstyle format.
