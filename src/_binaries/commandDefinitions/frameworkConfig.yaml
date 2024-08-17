@@ -11,6 +11,8 @@ compilerConfig: &defaultFrameworkConfig
   binDir: ${FRAMEWORK_ROOT_DIR}/bin
   templateDirs:
     - ${COMPILER_ROOT_DIR}/examples/templates
+  templateFile: binFile.gtpl
+  relativeRootDirBasedOnTargetDir: ..
 
   # describe the functions that will be skipped from being imported
   functionsIgnoreRegexpList:

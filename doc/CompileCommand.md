@@ -430,9 +430,6 @@ Git::shallowClone() {
 }
 ```
 
-See [compiler - Compiler::Requirement::require](#requirement_require) below for
-more information.
-
 ##### 3.6.2.1. Requires source file naming convention
 
 The following naming convention applies to the source file of a require
@@ -586,10 +583,6 @@ Linux::Apt::update() {
 
 It means that if a binary is compiled with alpine COMPATIBILITY requirement the
 compiler will fail with an error.
-
-See
-[compiler - Compiler::Compatibility::checkCompatibility](#compatibility_directive)
-below for more information.
 
 ### 3.8. `DISABLE` directive (optional)
 
@@ -843,9 +836,6 @@ _`EMBED` directive usage example:_
 sudo "${embed_file_backupFile}" ...
 "${embed_file_otherNeededBinary}"
 ```
-
-See [compiler - Compiler::Embed::embed](#embed_include) below for more
-information.
 
 ### Options management
 

@@ -2,6 +2,13 @@
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
+beforeParseCallback() {
+  Env::requireLoad
+  UI::requireTheme
+  Log::requireLoad
+  Compiler::Facade::requireCommandBinDir
+}
+
 copyrightCallback() {
   if [[ -z "${copyrightBeginYear}" ]]; then
     copyrightBeginYear="$(date +%Y)"
@@ -142,6 +149,7 @@ optionLogLevelCallback() {
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
+  # shellcheck disable=SC2034
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
   echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }

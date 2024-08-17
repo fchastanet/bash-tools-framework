@@ -1,17 +1,5 @@
 #!/usr/bin/env bash
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/awkLint
-# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# FACADE
-
-.INCLUDE "$(dynamicTemplateDir _binaries/options/command.awkLint.tpl)"
-
-awkLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
-
-awkLintScript="$(
-  cat <<'EOF'
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_binaries/awkLint.awk"
-EOF
-)"
+# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint.awk" AS awkLintScript
 
 run() {
   # <?xml version='1.0' encoding='UTF-8'?>
@@ -25,12 +13,22 @@ run() {
   local exitCode="0"
   echo "<?xml version='1.0' encoding='UTF-8'?>"
   echo "<checkstyle>"
+  tempFile="$(Framework::createTempFile)"
   while IFS='' read -r file; do
-    echo "<file name='${file}'>"
-    awk --source "BEGIN { exit(0) } END { exit(0) }" --lint=no-ext -f "${file}" 2>&1 </dev/null |
-      awk --source "${awkLintScript}" - || exitCode="1"
-    echo "</file>"
-  done < <(git ls-files --exclude-standard | grep -E '\.(awk)$' || true)
+    # shellcheck disable=SC2154
+    if [[ ! -f "${file}" ]]; then
+      Log::displayWarning "File ${file} has been deleted from git."
+    else
+      echo "<file name='${file}'>"
+      awk --source "BEGIN { exit(0) } END { exit(0) }" --lint=no-ext \
+        -f "${file}" >"${tempFile}" 2>&1 </dev/null || exitCode="1"
+      awk -f "${embed_file_awkLintScript}" - <"${tempFile}"
+      echo "</file>"
+    fi
+  done < <(
+    git ls-files --exclude-standard |
+      grep -E '\.(awk)$' || true
+  )
   echo "</checkstyle>"
   return "${exitCode}"
 }
