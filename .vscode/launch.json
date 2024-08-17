@@ -20,6 +20,13 @@
     {
       "type": "bashdb",
       "request": "launch",
+      "name": "Bash-Debug (findShebangFiles)",
+      "program": "bin/findShebangFiles",
+      "args": ["ls", "-al", "-vvv"]
+    },
+    {
+      "type": "bashdb",
+      "request": "launch",
       "name": "manualTests/Array::wrap.sh",
       "program": "manualTests/Array::wrap.sh",
       "args": []
