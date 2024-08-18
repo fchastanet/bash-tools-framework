@@ -1,0 +1,41 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/dockerLint/binary-dockerLint.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/dockerLint"
+binData:
+  commands:
+    default:
+      functionName: dockerLintCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      unknownArgumentCallbacks:
+        - unknownArg
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      commandName: dockerLint
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/dockerLint/dockerLint-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/dockerLint/dockerLint-main.sh
+      help: Lint docker files of the given directory using hadolint.
+      longDescription: |
+        - installs new hadolint version(>${MIN_HADOLINT_VERSION}) automatically
+        - lint this project files using default files filter
+
+        ${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
+
+        @@@HADOLINT_HELP@@@
+      args:
+        - callbacks:
+            - unknownArg
+          help: hadolint arguments
+          type: StringArray
+          max: -1
+          min: 0
+          name: hadolintArguments
+          variableName: argHadolintArguments
