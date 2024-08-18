@@ -839,6 +839,7 @@ optionHelpCallback() {
 
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
+  # shellcheck disable=SC2154
   echo "${SCRIPT_NAME} version ${versionNumber}"
   exit 0
 }
@@ -869,6 +870,7 @@ optionDebugVerboseCallback() {
 
 # shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
+  # shellcheck disable=SC2034
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
   echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >>"${overrideEnvFile}"

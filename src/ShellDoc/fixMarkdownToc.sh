@@ -7,13 +7,8 @@
 # @see https://regex101.com/r/DJJf2I/1
 ShellDoc::fixMarkdownToc() {
   local file="$1"
-  local fixMarkdownToc
 
-  fixMarkdownToc="$(
-    cat <<'EOF'
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/ShellDoc/fixMarkdownToc.awk"
-EOF
-  )"
-
-  awk -i inplace "${fixMarkdownToc}" "${file}"
+  # @embed "${FRAMEWORK_ROOT_DIR}/src/ShellDoc/fixMarkdownToc.awk" AS fixMarkdownTocScript
+  # shellcheck disable=SC2154
+  awk -i inplace -f "${embed_file_fixMarkdownTocScript}" "${file}"
 }

@@ -13,6 +13,8 @@ binData:
       definitionFiles:
         10: "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsDefault.sh"
       optionGroups:
+        OptionsGroup:
+          title: "OPTIONS:"
         zzzGroupGlobalOptionsGroup:
           title: "GLOBAL OPTIONS:"
       callbacks:
