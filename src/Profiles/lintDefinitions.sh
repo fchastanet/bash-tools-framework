@@ -111,7 +111,6 @@ ProfilesLintDefinitionFile() {
   local scriptName fullMethodName relativeScriptFile errorCount
   local errorCount
   ((errorCount = 0)) || true
-
   scriptName="$(ProfilesGetScriptNameFromRelativeScriptFile "${relativeScriptFile}")"
 
   "ProfilesLintDefinitionsFileStart_${format}" "${relativeScriptFile}"
@@ -130,7 +129,8 @@ ProfilesLintDefinitionFile() {
     fi
 
     # shellcheck source=src/Profiles/testsData/allDepsRecursive/installScripts/Install1.sh
-    source "${scriptsDir}/${relativeScriptFile}"
+    source "${scriptsDir}/${relativeScriptFile}" &>/dev/null
+    { set +x; } &>/dev/null
 
     # check if other definitions files functions are defined by this definition file
     # it would mean that another file has defined the same methods
