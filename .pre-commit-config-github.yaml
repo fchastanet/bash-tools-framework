@@ -221,6 +221,6 @@ repos:
         stages: [manual] # GITHUB
 
   - repo: https://github.com/fchastanet/bash-compiler
-    rev: 0.2.5
+    rev: 0.2.6
     hooks:
       - id: buildBashBinaries

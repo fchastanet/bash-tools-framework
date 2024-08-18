@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/doc
-# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# FACADE
-
-.INCLUDE "$(dynamicTemplateDir _binaries/options/command.doc.tpl)"
-
-docCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 runContainer() {
   local image="scrasnups/build:bash-tools-ubuntu-5.3"
@@ -120,22 +113,21 @@ generateDoc() {
 }
 
 installRequirements() {
+  Git::requireGitCommand
+}
+
+installContainerRequirements() {
+  Git::requireGitCommand
   ShellDoc::installRequirementsIfNeeded
+  Linux::requireJqCommand
   Softwares::installHadolint
   Softwares::installShellcheck
 }
 
-run() {
-  if [[ "${IN_BASH_DOCKER:-}" != "You're in docker" ]]; then
-    installRequirements
-    runContainer
-  else
-    generateDoc
-  fi
-}
-
-if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
-  run &>/dev/null
+if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
+  installRequirements
+  generateDoc
 else
-  run
+  installContainerRequirements
+  runContainer
 fi
