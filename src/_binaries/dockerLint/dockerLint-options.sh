@@ -1,29 +1,17 @@
-%
-declare MIN_HADOLINT_VERSION="2.12.0"
+#!/usr/bin/env bash
+
 declare versionNumber="1.0"
-declare commandFunctionName="dockerLintCommand"
-declare help="Lint docker files of the given directory using hadolint."
-# shellcheck disable=SC2016
-declare longDescription='''
-- installs new hadolint version(>${MIN_HADOLINT_VERSION}) automatically
-- lint this project files using default files filter
-
-${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
-
-@@@HADOLINT_HELP@@@
-'''
-%
-
-declare MIN_HADOLINT_VERSION="<% ${MIN_HADOLINT_VERSION} %>"
-.INCLUDE "$(dynamicTemplateDir _binaries/options/options.base.tpl)"
-
+# shellcheck disable=SC2034
+declare copyrightBeginYear="2022"
+# shellcheck disable=SC2034
+declare MIN_HADOLINT_VERSION="2.12.0"
 
 optionHelpCallback() {
   local hadolintHelpFile
   hadolintHelpFile="$(Framework::createTempFile "hadolintHelp")"
   "${FRAMEWORK_VENDOR_BIN_DIR}/hadolint" --help >"${hadolintHelpFile}"
 
-  <% ${commandFunctionName} %> help |
+  dockerLintCommandHelp help |
     sed -E \
       -e "/@@@HADOLINT_HELP@@@/r ${hadolintHelpFile}" \
       -e "/@@@HADOLINT_HELP@@@/d"
@@ -40,6 +28,7 @@ optionVersionCallback() {
 unknownOption() {
   BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
 }
+
 declare -a BASH_FRAMEWORK_ARGV_ONLY_ARG=()
 unknownArg() {
   if [[ -f "$1" ]]; then
@@ -48,12 +37,3 @@ unknownArg() {
     BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
   fi
 }
-
-%
-options+=(
-  --unknown-option-callback unknownOption
-  --unknown-argument-callback unknownArg
-)
-Options::generateCommand "${options[@]}"
-%
-declare copyrightBeginYear="2022"
