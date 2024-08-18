@@ -1796,6 +1796,7 @@ shellcheckLintCommandHelp() {
 
 
 
+
   echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
@@ -1811,6 +1812,7 @@ shellcheckLintCommandHelp() {
 
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
+
 
 
 
@@ -1842,6 +1844,8 @@ shellcheckLintCommandHelp() {
 
 
 
+
+  Array::wrap2 ' ' 76 6 "    Default value: " "default"
 
 
 
@@ -1880,6 +1884,8 @@ shellcheckLintCommandHelp() {
 
 
 
+  Array::wrap2 ' ' 76 6 "    Default value: " "tty"
+
 
 
   echo -e "  ${__HELP_OPTION_COLOR}--staged${__HELP_NORMAL} {single}"
@@ -1897,6 +1903,7 @@ shellcheckLintCommandHelp() {
 
   Array::wrap2 ' ' 76 6 "    Possible values: " "checkstyle, "  "diff"
   echo
+
 
 
 

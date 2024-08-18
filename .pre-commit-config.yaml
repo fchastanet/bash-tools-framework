@@ -161,7 +161,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "72",
+            "74",
             --format,
             plain,
             --theme,
@@ -173,7 +173,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "72",
+            "74",
             --format,
             checkstyle,
             --theme,
@@ -216,6 +216,6 @@ repos:
         stages: [] # GITHUB
 
   - repo: https://github.com/fchastanet/bash-compiler
-    rev: 0.2.6
+    rev: 0.2.7
     hooks:
       - id: buildBashBinaries

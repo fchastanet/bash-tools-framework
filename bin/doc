@@ -2532,6 +2532,7 @@ docCommandHelp() {
 
 
 
+
   echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
@@ -2547,6 +2548,7 @@ docCommandHelp() {
 
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
+
 
 
 
@@ -2578,6 +2580,8 @@ docCommandHelp() {
 
 
 
+
+  Array::wrap2 ' ' 76 6 "    Default value: " "default"
 
 
 

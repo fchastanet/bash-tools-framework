@@ -1,0 +1,19 @@
+---
+binData:
+  commands:
+    default:
+      definitionFiles:
+        12: "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsFormat.sh"
+      options:
+        - variableName: optionFormat
+          group: OptionsGroup
+          type: String
+          defaultValue: plain
+          authorizedValuesList:
+            - plain
+            - checkstyle
+          help: Define output format of this command.
+          alts:
+            - "--format"
+          callbacks:
+            - updateOptionFormat
