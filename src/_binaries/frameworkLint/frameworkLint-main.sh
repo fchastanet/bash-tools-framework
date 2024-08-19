@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/frameworkLint
-# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# FACADE
-
-.INCLUDE "$(dynamicTemplateDir _binaries/options/command.frameworkLint.tpl)"
 
 # BASH_FRAMEWORK_CONFIG_FILE default options
 CURRENT_WARNINGS_FILE="${PERSISTENT_TMPDIR}/currentFrameworkWarningFile.log"
 LAST_WARNINGS_FILE="${PERSISTENT_TMPDIR}/lastFrameworkWarningFile.log"
-
-frameworkLintCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
 
 checkEachFunctionHasSrcFile() {
   local file="$1"
@@ -318,8 +311,4 @@ run() {
   return "${exitCode}"
 }
 
-if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
-  run &>/dev/null
-else
-  run
-fi
+run

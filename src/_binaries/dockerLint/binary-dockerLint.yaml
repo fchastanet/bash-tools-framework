@@ -27,7 +27,7 @@ binData:
         - installs new hadolint version(>${MIN_HADOLINT_VERSION}) automatically
         - lint this project files using default files filter
 
-        ${__HELP_TITLE_COLOR}HADOLINT HELP${__RESET_COLOR}
+        ${__HELP_TITLE_COLOR}HADOLINT HELP:${__RESET_COLOR}
 
         @@@HADOLINT_HELP@@@
       args:

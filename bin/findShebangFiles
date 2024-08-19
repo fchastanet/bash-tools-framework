@@ -323,9 +323,6 @@ Env::pathPrepend() {
 }
 
 
-
-
-
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
@@ -539,8 +536,6 @@ Log::logInfo() {
 }
 
 
-
-
 # @description Internal: common log message
 # @example text
 #   [date]|[levelMsg]|message
@@ -585,11 +580,6 @@ Log::logWarning() {
     Log::logMessage "${2:-WARNING}" "$1"
   fi
 }
-
-
-
-
-
 
 
 # @description activate or not Log::display* and Log::log* functions
@@ -687,9 +677,6 @@ UI::drawLine() {
   printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 1 ]] && tput cols || echo '80')}")
   echo
 }
-
-
-
 
 
 # @description load color theme
@@ -1062,8 +1049,6 @@ optionHelpCallback() {
 }
 
 
-
-
 # ------------------------------------------
 # Command findShebangFilesCommand
 # ------------------------------------------
@@ -1140,384 +1125,292 @@ findShebangFilesCommandParse() {
       # optionHelp alts --help|-h
       # type: Boolean min 0 max 1
       --help | -h)
-
         # shellcheck disable=SC2034
         optionHelp="1"
-
 
         if ((options_parse_optionParsedCountOptionHelp >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionHelp))
-
-
         optionHelpCallback "${options_parse_arg}" "${optionHelp}"
 
-
         ;;
+
       # Option 2/14
       # optionConfig alts --config
       # type: Boolean min 0 max 1
       --config)
-
         # shellcheck disable=SC2034
         optionConfig="1"
-
 
         if ((options_parse_optionParsedCountOptionConfig >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionConfig))
-
-
         ;;
+
       # Option 3/14
       # optionBashFrameworkConfig alts --bash-framework-config
       # type: String min 0 max 1
       --bash-framework-config)
-
         shift
         if (($# == 0)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
           return 1
         fi
-
-
 
         if ((options_parse_optionParsedCountOptionBashFrameworkConfig >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionBashFrameworkConfig))
         # shellcheck disable=SC2034
         optionBashFrameworkConfig="$1"
-
-
         optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
 
-
         ;;
+
       # Option 4/14
       # optionInfoVerbose alts --verbose|-v
       # type: Boolean min 0 max 1
       --verbose | -v)
-
         # shellcheck disable=SC2034
         optionInfoVerbose="1"
-
 
         if ((options_parse_optionParsedCountOptionInfoVerbose >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionInfoVerbose))
-
-
         optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
-
 
         updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
 
-
         ;;
+
       # Option 5/14
       # optionDebugVerbose alts -vv
       # type: Boolean min 0 max 1
       -vv)
-
         # shellcheck disable=SC2034
         optionDebugVerbose="1"
-
 
         if ((options_parse_optionParsedCountOptionDebugVerbose >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionDebugVerbose))
-
-
         optionDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
-
 
         updateArgListDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
 
-
         ;;
+
       # Option 6/14
       # optionTraceVerbose alts -vvv
       # type: Boolean min 0 max 1
       -vvv)
-
         # shellcheck disable=SC2034
         optionTraceVerbose="1"
-
 
         if ((options_parse_optionParsedCountOptionTraceVerbose >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionTraceVerbose))
-
-
         optionTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
-
 
         updateArgListTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
 
-
         ;;
+
       # Option 7/14
       # optionEnvFiles alts --env-file
       # type: StringArray min 0 max -1
       --env-file)
-
         shift
         if (($# == 0)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
           return 1
         fi
 
-
-
         ((++options_parse_optionParsedCountOptionEnvFiles))
         optionEnvFiles+=("$1")
-
-
         optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
-
 
         updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
 
-
         ;;
+
       # Option 8/14
       # optionLogLevel alts --log-level
       # type: String min 0 max 1
       # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
       --log-level)
-
         shift
         if (($# == 0)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
           return 1
         fi
-
         if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([OFF ERR ERROR WARN WARNING INFO DEBUG TRACE])"
           return 1
         fi
-
-
 
         if ((options_parse_optionParsedCountOptionLogLevel >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionLogLevel))
         # shellcheck disable=SC2034
         optionLogLevel="$1"
-
-
         optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
-
 
         updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
 
-
         ;;
+
       # Option 9/14
       # optionLogFile alts --log-file
       # type: String min 0 max 1
       --log-file)
-
         shift
         if (($# == 0)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
           return 1
         fi
-
-
 
         if ((options_parse_optionParsedCountOptionLogFile >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionLogFile))
         # shellcheck disable=SC2034
         optionLogFile="$1"
-
-
         optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
-
 
         updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
 
-
         ;;
+
       # Option 10/14
       # optionDisplayLevel alts --display-level
       # type: String min 0 max 1
       # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
       --display-level)
-
         shift
         if (($# == 0)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
           return 1
         fi
-
         if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([OFF ERR ERROR WARN WARNING INFO DEBUG TRACE])"
           return 1
         fi
 
-
-
         if ((options_parse_optionParsedCountOptionDisplayLevel >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionDisplayLevel))
         # shellcheck disable=SC2034
         optionDisplayLevel="$1"
-
-
         optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
-
 
         updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
 
-
         ;;
+
       # Option 11/14
       # optionNoColor alts --no-color
       # type: Boolean min 0 max 1
       --no-color)
-
         # shellcheck disable=SC2034
         optionNoColor="1"
-
 
         if ((options_parse_optionParsedCountOptionNoColor >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionNoColor))
-
-
         optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
-
 
         updateArgListNoColorCallback "${options_parse_arg}" "${optionNoColor}"
 
-
         ;;
+
       # Option 12/14
       # optionTheme alts --theme
       # type: String min 0 max 1
       # authorizedValues: default|default-force|noColor
       --theme)
-
         shift
         if (($# == 0)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
           return 1
         fi
-
         if [[ ! "$1" =~ default|default-force|noColor ]]; then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([default default-force noColor])"
           return 1
         fi
 
-
-
         if ((options_parse_optionParsedCountOptionTheme >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionTheme))
         # shellcheck disable=SC2034
         optionTheme="$1"
-
-
         optionThemeCallback "${options_parse_arg}" "${optionTheme}"
-
 
         updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
 
-
         ;;
+
       # Option 13/14
       # optionVersion alts --version
       # type: Boolean min 0 max 1
       --version)
-
         # shellcheck disable=SC2034
         optionVersion="1"
-
 
         if ((options_parse_optionParsedCountOptionVersion >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionVersion))
-
-
         optionVersionCallback "${options_parse_arg}" "${optionVersion}"
 
-
         ;;
+
       # Option 14/14
       # optionQuiet alts --quiet|-q
       # type: Boolean min 0 max 1
       --quiet | -q)
-
         # shellcheck disable=SC2034
         optionQuiet="1"
-
 
         if ((options_parse_optionParsedCountOptionQuiet >= 1 )); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
-
         ((++options_parse_optionParsedCountOptionQuiet))
-
-
         optionQuietCallback "${options_parse_arg}" "${optionQuiet}"
 
-
         updateArgListQuietCallback "${options_parse_arg}" "${optionQuiet}"
-
 
         ;;
 
       -*)
-
-
         unknownOptionArgFunction "${options_parse_arg}" || argOptDefaultBehavior=$?
-
         ;;
       *)
         # no arg configured, call unknownArgumentCallback
 
         # shellcheck disable=SC2317
         unknownOptionArgFunction "${options_parse_arg}"
-
 
         ((++options_parse_parsedArgIndex))
         ;;
@@ -1530,8 +1423,9 @@ findShebangFilesCommandParse() {
 
 # @description display command options and arguments help for findShebangFilesCommand
 findShebangFilesCommandHelp() {
-  Array::wrap2 ' ' 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" \
+  Array::wrap2 ' ' 80 0 "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}" \
     "find all shebang files of this repository"
+  echo
   echo
 
   # ------------------------------------------
@@ -1548,19 +1442,14 @@ findShebangFilesCommandHelp() {
     "findShebangFiles" "${optionsAltList[@]}"
   echo
 
-
   # ------------------------------------------
   # options section
   # ------------------------------------------
-
-
   echo
   echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
   echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Displays this command help"
   echo
-
-
 
 
 
@@ -1570,13 +1459,9 @@ findShebangFilesCommandHelp() {
 
 
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
-
-
 
 
 
@@ -1586,13 +1471,9 @@ findShebangFilesCommandHelp() {
 
 
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Debug level verbose mode (alias of --display-level DEBUG)"
   echo
-
-
 
 
 
@@ -1602,34 +1483,17 @@ findShebangFilesCommandHelp() {
 
 
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
-
-
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
-
-
-
-
-
-
-
-
-
-
-
 
 
   echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
@@ -1638,26 +1502,11 @@ findShebangFilesCommandHelp() {
 
 
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
-
-
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
-
-
-
-
-
-
-
-
-
-
-
 
 
   echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
@@ -1666,29 +1515,18 @@ findShebangFilesCommandHelp() {
 
 
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
-
-
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
   echo
 
-
-
-
-
   Array::wrap2 ' ' 76 6 "    Default value: " "default"
-
-
+  echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Print version information and quit."
   echo
-
-
 
 
 
@@ -1697,13 +1535,12 @@ findShebangFilesCommandHelp() {
   echo
 
 
-
-
-
   # ------------------------------------------
   # longDescription section
   # ------------------------------------------
   echo
+  echo
+  echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
   declare -a findShebangFilesCommandLongDescription=(
   "Display list of all files having a bash shebang in the current repository."
   ""
@@ -1712,7 +1549,6 @@ findShebangFilesCommandHelp() {
   "${__HELP_TITLE}Example:${__HELP_NORMAL}"
   "Add execution bit to all files with a bash shebang"
   "${SCRIPT_NAME} chmod +x"
-  ""
   )
   Array::wrap2 ' ' 76 0 "${findShebangFilesCommandLongDescription[@]}"
   echo
@@ -1750,11 +1586,8 @@ findShebangFilesCommandHelp() {
 beforeParseCallback
 
 findShebangFilesCommandParse "$@"
-
 MAIN_FUNCTION_NAME="main"
 main() {
-
-
 
 export -f File::detectBashFile
 export -f Assert::bashFile
@@ -1763,7 +1596,6 @@ export -f Assert::bashFile
 git ls-files --exclude-standard -c -o -m |
   xargs -r -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
   xargs -r "${commandToApply[@]}"
-
 
 }
 
