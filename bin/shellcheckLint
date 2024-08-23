@@ -299,30 +299,6 @@ Assert::tty() {
 }
 
 
-# @description ensure COMMAND_BIN_DIR env var is set
-# and PATH correctly prepared
-# @noargs
-# @set COMMAND_BIN_DIR string the directory where to find this command
-# @set PATH string add directory where to find this command binary
-Compiler::Facade::requireCommandBinDir() {
-  COMMAND_BIN_DIR="${CURRENT_DIR}"
-  Env::pathPrepend "${COMMAND_BIN_DIR}"
-}
-
-
-# @description prepend directories to the PATH environment variable
-# @arg $@ args:String[] list of directories to prepend
-# @set PATH update PATH with the directories prepended
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
-}
-
-
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
@@ -781,7 +757,6 @@ beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
-  Compiler::Facade::requireCommandBinDir
 }
 
 copyrightCallback() {
@@ -1048,7 +1023,6 @@ beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
-  Compiler::Facade::requireCommandBinDir
 }
 unknownOption() {
   shellcheckArgs+=("$1")

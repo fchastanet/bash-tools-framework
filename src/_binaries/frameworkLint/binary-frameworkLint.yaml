@@ -8,6 +8,7 @@ vars:
 
 compilerConfig:
   targetFile: "${FRAMEWORK_ROOT_DIR}/bin/frameworkLint"
+  relativeRootDirBasedOnTargetDir: ..
 binData:
   commands:
     default:

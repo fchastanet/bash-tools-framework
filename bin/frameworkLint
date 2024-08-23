@@ -310,17 +310,6 @@ Assert::tty() {
 }
 
 
-# @description ensure COMMAND_BIN_DIR env var is set
-# and PATH correctly prepared
-# @noargs
-# @set COMMAND_BIN_DIR string the directory where to find this command
-# @set PATH string add directory where to find this command binary
-Compiler::Facade::requireCommandBinDir() {
-  COMMAND_BIN_DIR="${CURRENT_DIR}"
-  Env::pathPrepend "${COMMAND_BIN_DIR}"
-}
-
-
 # @description return the path of the function found in srcDirs
 # @arg $1 functionName:String function name (eg: Functions::myFunction)
 # @arg $@ srcDirs:String[] rest of args list of src directories in # which the function will be searched
@@ -352,19 +341,6 @@ Compiler::findFunctionInSrcDirs() {
   done
 
   return 1
-}
-
-
-# @description prepend directories to the PATH environment variable
-# @arg $@ args:String[] list of directories to prepend
-# @set PATH update PATH with the directories prepended
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
 }
 
 
@@ -916,7 +892,6 @@ beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
-  Compiler::Facade::requireCommandBinDir
 }
 
 copyrightCallback() {
@@ -1191,7 +1166,6 @@ beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
-  Compiler::Facade::requireCommandBinDir
 }
 optionExpectedWarningsCountCallback() {
   if [[ ! "$2" =~ ^[0-9]+$ ]] || (($2 < 0)); then
