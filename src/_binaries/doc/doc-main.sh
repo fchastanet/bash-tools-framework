@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+
 runContainer() {
   local image="scrasnups/build:bash-tools-ubuntu-5.3"
   local -a dockerRunCmd=(

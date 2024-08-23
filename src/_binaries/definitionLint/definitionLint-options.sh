@@ -8,10 +8,6 @@ declare optionFormat="plain"
 declare optionFormatDefault="plain"
 declare optionFormatAuthorizedValues="plain|checkstyle"
 
-Env::requireLoad
-UI::requireTheme
-Log::requireLoad
-
 optionHelpCallback() {
   definitionLintCommandHelp
   exit 0

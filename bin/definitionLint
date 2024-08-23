@@ -284,30 +284,6 @@ Assert::tty() {
 }
 
 
-# @description ensure COMMAND_BIN_DIR env var is set
-# and PATH correctly prepared
-# @noargs
-# @set COMMAND_BIN_DIR string the directory where to find this command
-# @set PATH string add directory where to find this command binary
-Compiler::Facade::requireCommandBinDir() {
-  COMMAND_BIN_DIR="${CURRENT_DIR}"
-  Env::pathPrepend "${COMMAND_BIN_DIR}"
-}
-
-
-# @description prepend directories to the PATH environment variable
-# @arg $@ args:String[] list of directories to prepend
-# @set PATH update PATH with the directories prepended
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
-}
-
-
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
@@ -939,7 +915,6 @@ beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
-  Compiler::Facade::requireCommandBinDir
 }
 
 copyrightCallback() {
@@ -1208,10 +1183,6 @@ declare copyrightBeginYear="2022"
 declare optionFormat="plain"
 declare optionFormatDefault="plain"
 declare optionFormatAuthorizedValues="plain|checkstyle"
-
-Env::requireLoad
-UI::requireTheme
-Log::requireLoad
 
 optionHelpCallback() {
   definitionLintCommandHelp
@@ -1818,7 +1789,8 @@ definitionLintCommandHelp() {
   echo
   echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
   declare -a definitionLintCommandLongDescription=(
-  "for each definition file:"
+  "\\nFor each definition file:"
+  ""
   "- check that all mandatory methods are existing"
   "  installScripts_<fileName>_helpDescription"
   "  installScripts_<fileName>_helpVariables"
@@ -1829,12 +1801,13 @@ definitionLintCommandHelp() {
   "  installScripts_<fileName>_dependencies"
   "  installScripts_<fileName>_breakOnConfigFailure"
   "  installScripts_<fileName>_breakOnTestFailure"
-  "  installScripts_<fileName>_install"
-  "  installScripts_<fileName>_configure"
+  "  installScripts_<fileName>_install\\n  installScripts_<fileName>_configure"
   "  installScripts_<fileName>_test"
+  ""
   "- check if other definitions files functions are defined by currently"
   "  linted definition file it would mean that another file has defined"
   "  the same methods"
+  ""
   "- check if each dependency exists"
   ""
   "INTERNAL"
@@ -1871,6 +1844,8 @@ definitionLintCommandHelp() {
   Array::wrap2 ' ' 76 0 "$(copyrightCallback)"
 }
 
+
+beforeParseCallback
 
 definitionLintCommandParse "$@"
 MAIN_FUNCTION_NAME="main"
