@@ -1,2 +1,0 @@
-# EMBED '${dir}/testsData/binaryFile' as 'valid1'
-# EMBED '${dir}/testsData/binaryFile' as 'valid2'

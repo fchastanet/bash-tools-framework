@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-# @require Namespace::François
-Log::displayError() { :; }
-echo "binaryFile $*"

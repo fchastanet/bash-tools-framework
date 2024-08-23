@@ -190,27 +190,6 @@ repos:
 
   - repo: local
     hooks:
-      - &LOCAL_BUILD_SH_FILES
-        id: buildShFiles
-        name: build sh files
-        entry:
-          bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp --ignore-missing --ci'
-        language: system
-        pass_filenames: false
-        always_run: true
-        require_serial: true
-        stages: [pre-commit]
-
-      - <<: *LOCAL_BUILD_SH_FILES
-        id: buildShFilesGithubAction
-        name: build sh files for Github Actions
-        entry:
-          bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp --ci'
-        fail_fast: false
-        stages: [manual]
-
       - id: buildDocFilesForGithubActions
         name: build doc files for github actions
         language: script
