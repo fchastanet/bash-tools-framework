@@ -1,4 +1,0 @@
-help
-options
-install
-configure

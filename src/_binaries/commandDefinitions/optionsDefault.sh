@@ -6,7 +6,6 @@ beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
-  Compiler::Facade::requireCommandBinDir
 }
 
 copyrightCallback() {
