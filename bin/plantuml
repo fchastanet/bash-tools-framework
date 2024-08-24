@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FACADE FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/plantuml.sh
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/plantuml/binary-plantuml.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/plantuml
-# VAR_RELATIVE_FRAMEWORK_DIR_TO_CURRENT_DIR=..
-# FACADE
+
+
 
 # ensure that no user aliases could interfere with
 # commands used in this script
@@ -62,13 +61,6 @@ interruptManagement() {
   kill -s INT "$$"
 }
 trap interruptManagement INT
-SCRIPT_NAME=${0##*/}
-REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
-if [[ -n "${EMBED_CURRENT_DIR}" ]]; then
-  CURRENT_DIR="${EMBED_CURRENT_DIR}"
-else
-  CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
-fi
 
 ################################################
 # Temp dir management
@@ -102,6 +94,20 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
+
+SCRIPT_NAME=${0##*/}
+REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
+if [[ -n "${EMBED_CURRENT_DIR}" ]]; then
+  CURRENT_DIR="${EMBED_CURRENT_DIR}"
+else
+  CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
+fi
+FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
+FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
+FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
+
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
 #   given display level
@@ -132,247 +138,6 @@ export __VERBOSE_LEVEL_DEBUG=2
 # @description verbose level info
 export __VERBOSE_LEVEL_TRACE=3
 
-# @description Display message using info color (bg light blue/fg white)
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::displayInfo() {
-  local type="${2:-INFO}"
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    Log::computeDuration
-    echo -e "${__INFO_COLOR}${type}    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logInfo "$1" "${type}"
-}
-
-# @description Display message using debug color (gray)
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::displayDebug() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_DEBUG)); then
-    Log::computeDuration
-    echo -e "${__DEBUG_COLOR}DEBUG   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logDebug "$1"
-}
-
-# @description Display message using warning color (yellow)
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::displayWarning() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
-    Log::computeDuration
-    echo -e "${__WARNING_COLOR}WARN    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logWarning "$1"
-}
-
-# @description Display message using error color (red)
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::displayError() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
-    Log::computeDuration
-    echo -e "${__ERROR_COLOR}ERROR   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logError "$1"
-}
-
-# @description load colors theme constants
-# @warning if tty not opened, noColor theme will be chosen
-# @arg $1 theme:String the theme to use (default, noColor)
-# @arg $@ args:String[]
-# @set __ERROR_COLOR String indicate error status
-# @set __INFO_COLOR String indicate info status
-# @set __SUCCESS_COLOR String indicate success status
-# @set __WARNING_COLOR String indicate warning status
-# @set __SKIPPED_COLOR String indicate skipped status
-# @set __DEBUG_COLOR String indicate debug status
-# @set __HELP_COLOR String indicate help status
-# @set __TEST_COLOR String not used
-# @set __TEST_ERROR_COLOR String not used
-# @set __HELP_TITLE_COLOR String used to display help title in help strings
-# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
-#
-# @set __RESET_COLOR String reset default color
-#
-# @set __HELP_EXAMPLE String to remove
-# @set __HELP_TITLE String to remove
-# @set __HELP_NORMAL String to remove
-# shellcheck disable=SC2034
-UI::theme() {
-  local theme="${1-default}"
-  if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then
-    theme="noColor"
-  fi
-  case "${theme}" in
-    default | default-force)
-      theme="default"
-      ;;
-    noColor) ;;
-    *)
-      Log::fatal "invalid theme provided"
-      ;;
-  esac
-  if [[ "${theme}" = "default" ]]; then
-    BASH_FRAMEWORK_THEME="default"
-    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-    __ERROR_COLOR='\e[31m'         # Red
-    __INFO_COLOR='\e[44m'          # white on lightBlue
-    __SUCCESS_COLOR='\e[32m'       # Green
-    __WARNING_COLOR='\e[33m'       # Yellow
-    __SKIPPED_COLOR='\e[33m'       # Yellow
-    __DEBUG_COLOR='\e[37m'         # Gray
-    __HELP_COLOR='\e[7;49;33m'     # Black on Gold
-    __TEST_COLOR='\e[100m'         # Light magenta
-    __TEST_ERROR_COLOR='\e[41m'    # white on red
-    __HELP_TITLE_COLOR="\e[1;37m"  # Bold
-    __HELP_OPTION_COLOR="\e[1;34m" # Blue
-    # Internal: reset color
-    __RESET_COLOR='\e[0m' # Reset Color
-    # shellcheck disable=SC2155,SC2034
-    __HELP_EXAMPLE="$(echo -e "\e[2;97m")"
-    # shellcheck disable=SC2155,SC2034
-    __HELP_TITLE="$(echo -e "\e[1;37m")"
-    # shellcheck disable=SC2155,SC2034
-    __HELP_NORMAL="$(echo -e "\033[0m")"
-  else
-    BASH_FRAMEWORK_THEME="noColor"
-    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
-    __ERROR_COLOR=''
-    __INFO_COLOR=''
-    __SUCCESS_COLOR=''
-    __WARNING_COLOR=''
-    __SKIPPED_COLOR=''
-    __DEBUG_COLOR=''
-    __HELP_COLOR=''
-    __TEST_COLOR=''
-    __TEST_ERROR_COLOR=''
-    __HELP_TITLE_COLOR=''
-    __HELP_OPTION_COLOR=''
-    # Internal: reset color
-    __RESET_COLOR=''
-    __HELP_EXAMPLE=''
-    __HELP_TITLE=''
-    __HELP_NORMAL=''
-  fi
-}
-
-# @description draw a line with the character passed in parameter repeated depending on terminal width
-# @arg $1 character:String character to use as separator (default value #)
-UI::drawLine() {
-  local character="${1:-#}"
-  local -i width=${COLUMNS:-0}
-  if ((width == 0)) && [[ -t 1 ]]; then
-    width=$(tput cols)
-  fi
-  if ((width == 0)); then
-    width=80
-  fi
-  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 1 ]] && tput cols || echo '80')}")
-  echo
-}
-
-# @description Display message using error color (red) and exit immediately with error status 1
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::fatal() {
-  Log::computeDuration
-  echo -e "${__ERROR_COLOR}FATAL   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  Log::logFatal "$1"
-  exit 1
-}
-
-# @description create a temp file using default TMPDIR variable
-# initialized in _includes/_commonHeader.sh
-# @env TMPDIR String (default value /tmp)
-# @arg $1 templateName:String template name to use(optional)
-Framework::createTempFile() {
-  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
-}
-
-# @description ensure env files are loaded
-# @arg $@ list of default files to load at the end
-# @exitcode 1 if one of env files fails to load
-# @stderr diagnostics information is displayed
-# shellcheck disable=SC2120
-Env::requireLoad() {
-  local -a defaultFiles=("$@")
-  # get list of possible config files
-  local -a configFiles=()
-  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
-    # BASH_FRAMEWORK_ENV_FILES is an array
-    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
-  fi
-  local localFrameworkConfigFile
-  localFrameworkConfigFile="$(pwd)/.framework-config"
-  if [[ -f "${localFrameworkConfigFile}" ]]; then
-    configFiles+=("${localFrameworkConfigFile}")
-  fi
-  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
-    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
-  fi
-  configFiles+=("${optionEnvFiles[@]}")
-  configFiles+=("${defaultFiles[@]}")
-
-  for file in "${configFiles[@]}"; do
-    # shellcheck source=/.framework-config
-    CURRENT_LOADED_ENV_FILE="${file}" source "${file}" || {
-      Log::displayError "while loading config file: ${file}"
-      return 1
-    }
-  done
-}
-
-# @description activate or not Log::display* and Log::log* functions
-# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
-# environment variables loaded by Env::requireLoad
-# try to create log file and rotate it if necessary
-# @noargs
-# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
-# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
-# @env BASH_FRAMEWORK_LOG_LEVEL int
-# @env BASH_FRAMEWORK_LOG_FILE String
-# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
-# @exitcode 0 always successful
-# @stderr diagnostics information about log file is displayed
-# @require Env::requireLoad
-# @require UI::requireTheme
-Log::requireLoad() {
-  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
-    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-    export BASH_FRAMEWORK_LOG_LEVEL
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      if [[ ! -d "${BASH_FRAMEWORK_LOG_FILE%/*}" ]]; then
-        if ! mkdir -p "${BASH_FRAMEWORK_LOG_FILE%/*}" 2>/dev/null; then
-          BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-          echo -e "${__ERROR_COLOR}ERROR   - directory ${BASH_FRAMEWORK_LOG_FILE%/*} is not writable${__RESET_COLOR}" >&2
-        fi
-      elif ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
-        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
-      fi
-    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
-      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
-      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
-    fi
-  fi
-
-  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    # will always be created even if not in info level
-    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
-    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
-      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
-    fi
-  fi
-}
 
 # @description concatenate each element of an array with a separator
 # but wrapping text when line length is more than provided argument
@@ -502,6 +267,59 @@ Array::wrap2() {
   ) | sed -E -e 's/[[:blank:]]+$//'
 }
 
+
+# @description check if tty (interactive mode) is active
+# @noargs
+# @exitcode 1 if tty not active
+# @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
+# @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
+Assert::tty() {
+  if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
+    return 1
+  fi
+  if [[ "${INTERACTIVE:-0}" = "1" ]]; then
+    return 0
+  fi
+  tty -s
+}
+
+
+# @description ensure env files are loaded
+# @arg $@ list of default files to load at the end
+# @exitcode 1 if one of env files fails to load
+# @stderr diagnostics information is displayed
+# shellcheck disable=SC2120
+Env::requireLoad() {
+  REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED=1
+
+  local -a defaultFiles=("$@")
+  # get list of possible config files
+  local -a configFiles=()
+  if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
+    # BASH_FRAMEWORK_ENV_FILES is an array
+    configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
+  fi
+  local localFrameworkConfigFile
+  localFrameworkConfigFile="$(pwd)/.framework-config"
+  if [[ -f "${localFrameworkConfigFile}" ]]; then
+    configFiles+=("${localFrameworkConfigFile}")
+  fi
+  if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
+    configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
+  fi
+  configFiles+=("${optionEnvFiles[@]}")
+  configFiles+=("${defaultFiles[@]}")
+
+  for file in "${configFiles[@]}"; do
+    # shellcheck source=/.framework-config
+    CURRENT_LOADED_ENV_FILE="${file}" source "${file}" || {
+      Log::displayError "while loading config file: ${file}"
+      return 1
+    }
+  done
+}
+
+
 # @description get number of seconds since last modification of the file
 # @arg $1 file:String file path
 # @exitcode 1 if file does not exist
@@ -517,40 +335,15 @@ File::elapsedTimeSinceLastModification() {
   echo -n "${diff}"
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logInfo() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-INFO}" "$1"
-  fi
+
+# @description create a temp file using default TMPDIR variable
+# initialized in _includes/_commonHeader.sh
+# @env TMPDIR String (default value /tmp)
+# @arg $1 templateName:String template name to use(optional)
+Framework::createTempFile() {
+  mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
 
-# @description Internal: common log message
-# @example text
-#   [date]|[levelMsg]|message
-#
-# @example text
-#   2020-01-19 19:20:21|ERROR  |log error
-#   2020-01-19 19:20:21|SKIPPED|log skipped
-#
-# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
-# @arg $2 msg:String the message to display
-# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
-# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
-# @stderr diagnostics information is displayed
-# @require Env::requireLoad
-# @require Log::requireLoad
-Log::logMessage() {
-  local levelMsg="$1"
-  local msg="$2"
-  local date
-
-  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
-    date="$(date '+%Y-%m-%d %H:%M:%S')"
-    touch "${BASH_FRAMEWORK_LOG_FILE}"
-    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
-  fi
-}
 
 declare -g FIRST_LOG_DATE LOG_LAST_LOG_DATE LOG_LAST_LOG_DATE_INIT LOG_LAST_DURATION_STR
 FIRST_LOG_DATE="${EPOCHREALTIME/[^0-9]/}"
@@ -590,15 +383,71 @@ Log::computeDuration() {
   fi
 }
 
-# @description ensure COMMAND_BIN_DIR env var is set
-# and PATH correctly prepared
-# @noargs
-# @set COMMAND_BIN_DIR string the directory where to find this command
-# @set PATH string add directory where to find this command binary
-Compiler::Facade::requireCommandBinDir() {
-  COMMAND_BIN_DIR="${CURRENT_DIR}"
-  Env::pathPrepend "${COMMAND_BIN_DIR}"
+
+# @description Display message using debug color (gray)
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::displayDebug() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_DEBUG)); then
+    Log::computeDuration
+    echo -e "${__DEBUG_COLOR}DEBUG   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logDebug "$1"
 }
+
+
+# @description Display message using error color (red)
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::displayError() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_ERROR)); then
+    Log::computeDuration
+    echo -e "${__ERROR_COLOR}ERROR   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logError "$1"
+}
+
+
+# @description Display message using info color (bg light blue/fg white)
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::displayInfo() {
+  local type="${2:-INFO}"
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
+    Log::computeDuration
+    echo -e "${__INFO_COLOR}${type}    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logInfo "$1" "${type}"
+}
+
+
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::displayWarning() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
+    Log::computeDuration
+    echo -e "${__WARNING_COLOR}WARN    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logWarning "$1"
+}
+
+
+# @description Display message using error color (red) and exit immediately with error status 1
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::fatal() {
+  Log::computeDuration
+  echo -e "${__ERROR_COLOR}FATAL   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  Log::logFatal "$1"
+  exit 1
+}
+
 
 # @description log message to file
 # @arg $1 message:String the message to display
@@ -608,13 +457,6 @@ Log::logDebug() {
   fi
 }
 
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logWarning() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
-    Log::logMessage "${2:-WARNING}" "$1"
-  fi
-}
 
 # @description log message to file
 # @arg $1 message:String the message to display
@@ -624,26 +466,126 @@ Log::logError() {
   fi
 }
 
-# @description check if tty (interactive mode) is active
-# @noargs
-# @exitcode 1 if tty not active
-# @env NON_INTERACTIVE if 1 consider as not interactive even if environment is interactive
-# @env INTERACTIVE if 1 consider as interactive even if environment is not interactive
-Assert::tty() {
-  if [[ "${NON_INTERACTIVE:-0}" = "1" ]]; then
-    return 1
-  fi
-  if [[ "${INTERACTIVE:-0}" = "1" ]]; then
-    return 0
-  fi
-  tty -s
-}
 
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logFatal() {
   Log::logMessage "${2:-FATAL}" "$1"
 }
+
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logInfo() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
+    Log::logMessage "${2:-INFO}" "$1"
+  fi
+}
+
+
+# @description Internal: common log message
+# @example text
+#   [date]|[levelMsg]|message
+#
+# @example text
+#   2020-01-19 19:20:21|ERROR  |log error
+#   2020-01-19 19:20:21|SKIPPED|log skipped
+#
+# @arg $1 levelMsg:String message's level description (eg: STATUS, ERROR, ...)
+# @arg $2 msg:String the message to display
+# @env BASH_FRAMEWORK_LOG_FILE String log file to use, do nothing if empty
+# @env BASH_FRAMEWORK_LOG_LEVEL int log level log only if > OFF or fatal messages
+# @stderr diagnostics information is displayed
+Log::logMessage() {
+
+  if [[ "${REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED:-0}" != 1 ]]; then
+    echo >&2 "Requirement Env::requireLoad has not been loaded"
+    exit 1
+  fi
+
+  if [[ "${REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED:-0}" != 1 ]]; then
+    echo >&2 "Requirement Log::requireLoad has not been loaded"
+    exit 1
+  fi
+
+  local levelMsg="$1"
+  local msg="$2"
+  local date
+
+  if [[ -n "${BASH_FRAMEWORK_LOG_FILE}" ]] && ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    date="$(date '+%Y-%m-%d %H:%M:%S')"
+    touch "${BASH_FRAMEWORK_LOG_FILE}"
+    printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
+  fi
+}
+
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logWarning() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
+    Log::logMessage "${2:-WARNING}" "$1"
+  fi
+}
+
+
+# @description activate or not Log::display* and Log::log* functions
+# based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
+# environment variables loaded by Env::requireLoad
+# try to create log file and rotate it if necessary
+# @noargs
+# @set BASH_FRAMEWORK_LOG_LEVEL int to OFF level if BASH_FRAMEWORK_LOG_FILE is empty or not writable
+# @env BASH_FRAMEWORK_DISPLAY_LEVEL int
+# @env BASH_FRAMEWORK_LOG_LEVEL int
+# @env BASH_FRAMEWORK_LOG_FILE String
+# @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
+# @exitcode 0 always successful
+# @stderr diagnostics information about log file is displayed
+Log::requireLoad() {
+  REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
+
+
+  if [[ "${REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED:-0}" != 1 ]]; then
+    echo >&2 "Requirement Env::requireLoad has not been loaded"
+    exit 1
+  fi
+
+  if [[ "${REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED:-0}" != 1 ]]; then
+    echo >&2 "Requirement UI::requireTheme has not been loaded"
+    exit 1
+  fi
+
+  if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
+    BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+    export BASH_FRAMEWORK_LOG_LEVEL
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    if [[ ! -f "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      if [[ ! -d "${BASH_FRAMEWORK_LOG_FILE%/*}" ]]; then
+        if ! mkdir -p "${BASH_FRAMEWORK_LOG_FILE%/*}" 2>/dev/null; then
+          BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+          echo -e "${__ERROR_COLOR}ERROR   - directory ${BASH_FRAMEWORK_LOG_FILE%/*} is not writable${__RESET_COLOR}" >&2
+        fi
+      elif ! touch --no-create "${BASH_FRAMEWORK_LOG_FILE}" 2>/dev/null; then
+        BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+        echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+      fi
+    elif [[ ! -w "${BASH_FRAMEWORK_LOG_FILE}" ]]; then
+      BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
+      echo -e "${__ERROR_COLOR}ERROR   - File ${BASH_FRAMEWORK_LOG_FILE} is not writable${__RESET_COLOR}" >&2
+    fi
+  fi
+
+  if ((BASH_FRAMEWORK_LOG_LEVEL > __LEVEL_OFF)); then
+    # will always be created even if not in info level
+    Log::logMessage "INFO" "Logging to file ${BASH_FRAMEWORK_LOG_FILE} - Log level ${BASH_FRAMEWORK_LOG_LEVEL}"
+    if ((BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION > 0)); then
+      Log::rotate "${BASH_FRAMEWORK_LOG_FILE}" "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}"
+    fi
+  fi
+}
+
 
 # @description To be called before logging in the log file
 # @arg $1 file:string log file name
@@ -667,17 +609,22 @@ Log::rotate() {
   fi
 }
 
-# @description prepend directories to the PATH environment variable
-# @arg $@ args:String[] list of directories to prepend
-# @set PATH update PATH with the directories prepended
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
+
+# @description draw a line with the character passed in parameter repeated depending on terminal width
+# @arg $1 character:String character to use as separator (default value #)
+UI::drawLine() {
+  local character="${1:-#}"
+  local -i width=${COLUMNS:-0}
+  if ((width == 0)) && [[ -t 1 ]]; then
+    width=$(tput cols)
+  fi
+  if ((width == 0)); then
+    width=80
+  fi
+  printf -- "${character}%.0s" $(seq "${COLUMNS:-$([[ -t 1 ]] && tput cols || echo '80')}")
+  echo
 }
+
 
 # @description load color theme
 # @noargs
@@ -685,28 +632,103 @@ Env::pathPrepend() {
 # @env LOAD_THEME int 0 to avoid loading theme
 # @exitcode 0 always successful
 UI::requireTheme() {
+  REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED=1
+
   if [[ "${LOAD_THEME:-1}" = "1" ]]; then
     UI::theme "${BASH_FRAMEWORK_THEME-default}"
   fi
 }
 
+
+# @description load colors theme constants
+# @warning if tty not opened, noColor theme will be chosen
+# @arg $1 theme:String the theme to use (default, noColor)
+# @arg $@ args:String[]
+# @set __ERROR_COLOR String indicate error status
+# @set __INFO_COLOR String indicate info status
+# @set __SUCCESS_COLOR String indicate success status
+# @set __WARNING_COLOR String indicate warning status
+# @set __SKIPPED_COLOR String indicate skipped status
+# @set __DEBUG_COLOR String indicate debug status
+# @set __HELP_COLOR String indicate help status
+# @set __TEST_COLOR String not used
+# @set __TEST_ERROR_COLOR String not used
+# @set __HELP_TITLE_COLOR String used to display help title in help strings
+# @set __HELP_OPTION_COLOR String used to display highlight options in help strings
+#
+# @set __RESET_COLOR String reset default color
+#
+# @set __HELP_EXAMPLE String to remove
+# @set __HELP_TITLE String to remove
+# @set __HELP_NORMAL String to remove
+# shellcheck disable=SC2034
+UI::theme() {
+  local theme="${1-default}"
+  if [[ ! "${theme}" =~ -force$ ]] && ! Assert::tty; then
+    theme="noColor"
+  fi
+  case "${theme}" in
+    default | default-force)
+      theme="default"
+      ;;
+    noColor) ;;
+    *)
+      Log::fatal "invalid theme provided"
+      ;;
+  esac
+  if [[ "${theme}" = "default" ]]; then
+    BASH_FRAMEWORK_THEME="default"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    __ERROR_COLOR='\e[31m'         # Red
+    __INFO_COLOR='\e[44m'          # white on lightBlue
+    __SUCCESS_COLOR='\e[32m'       # Green
+    __WARNING_COLOR='\e[33m'       # Yellow
+    __SKIPPED_COLOR='\e[33m'       # Yellow
+    __DEBUG_COLOR='\e[37m'         # Gray
+    __HELP_COLOR='\e[7;49;33m'     # Black on Gold
+    __TEST_COLOR='\e[100m'         # Light magenta
+    __TEST_ERROR_COLOR='\e[41m'    # white on red
+    __HELP_TITLE_COLOR="\e[1;37m"  # Bold
+    __HELP_OPTION_COLOR="\e[1;34m" # Blue
+    # Internal: reset color
+    __RESET_COLOR='\e[0m' # Reset Color
+    # shellcheck disable=SC2155,SC2034
+    __HELP_EXAMPLE="$(echo -e "\e[2;97m")"
+    # shellcheck disable=SC2155,SC2034
+    __HELP_TITLE="$(echo -e "\e[1;37m")"
+    # shellcheck disable=SC2155,SC2034
+    __HELP_NORMAL="$(echo -e "\033[0m")"
+  else
+    BASH_FRAMEWORK_THEME="noColor"
+    # check colors applicable https://misc.flogisoft.com/bash/tip_colors_and_formatting
+    __ERROR_COLOR=''
+    __INFO_COLOR=''
+    __SUCCESS_COLOR=''
+    __WARNING_COLOR=''
+    __SKIPPED_COLOR=''
+    __DEBUG_COLOR=''
+    __HELP_COLOR=''
+    __TEST_COLOR=''
+    __TEST_ERROR_COLOR=''
+    __HELP_TITLE_COLOR=''
+    __HELP_OPTION_COLOR=''
+    # Internal: reset color
+    __RESET_COLOR=''
+    __HELP_EXAMPLE=''
+    __HELP_TITLE=''
+    __HELP_NORMAL=''
+  fi
+}
 # FUNCTIONS
 
-facade_main_plantumlsh() {
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
-FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
-FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
-FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
-# REQUIRES
-Env::requireLoad
-UI::requireTheme
-Log::requireLoad
-Compiler::Facade::requireCommandBinDir
-
-# @require Compiler::Facade::requireCommandBinDir
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
+
+beforeParseCallback() {
+  Env::requireLoad
+  UI::requireTheme
+  Log::requireLoad
+}
 
 copyrightCallback() {
   if [[ -z "${copyrightBeginYear}" ]]; then
@@ -744,13 +766,14 @@ updateArgListQuietCallback() { :; }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionHelpCallback() {
-  plantumlCommand help
+  Log::displayError "optionHelpCallback needs to be overridden"
   exit 0
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
-  echo "${SCRIPT_NAME} version 1.0"
+  # shellcheck disable=SC2154
+  echo "${SCRIPT_NAME} version ${versionNumber}"
   exit 0
 }
 
@@ -768,21 +791,22 @@ optionEnvFileCallback() {
 optionInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
-  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}" >>"${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionDebugVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
-  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >>"${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionTraceVerboseCallback() {
+  # shellcheck disable=SC2034
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_TRACE}
-  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >>"${overrideEnvFile}"
 }
 
 getLevel() {
@@ -806,6 +830,7 @@ getLevel() {
     *)
       Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
+      ;;
   esac
 }
 
@@ -827,6 +852,7 @@ getVerboseLevel() {
     *)
       Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
+      ;;
   esac
 }
 
@@ -837,7 +863,7 @@ optionDisplayLevelCallback() {
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -846,19 +872,20 @@ optionLogLevelCallback() {
   local logLevel verboseLevel
   logLevel="$(getLevel "${level}")"
   verboseLevel="$(getVerboseLevel "${level}")"
+  # shellcheck disable=SC2034
   BASH_FRAMEWORK_ARGS_VERBOSE=${verboseLevel}
-  echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
-  echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >>"${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
 optionQuietCallback() {
-  echo "BASH_FRAMEWORK_QUIET_MODE=1" >> "${overrideEnvFile}"
+  echo "BASH_FRAMEWORK_QUIET_MODE=1" >>"${overrideEnvFile}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -889,6 +916,7 @@ optionBashFrameworkConfigCallback() {
 
 defaultFrameworkConfig="$(
   cat <<'EOF'
+
 # copied from src/_includes/.framework-config.default
 # shellcheck disable=SC2034
 
@@ -922,6 +950,7 @@ BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
 BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
 BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${0##*/}.log}"
 BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+
 EOF
 )"
 
@@ -930,7 +959,7 @@ overrideEnvFile="$(Framework::createTempFile "overrideEnvFile")"
 commandOptionParseFinished() {
   # load default template framework config
   defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
-  echo "${defaultFrameworkConfig}" > "${defaultEnvFile}"
+  echo "${defaultFrameworkConfig}" >"${defaultEnvFile}"
   local -a files=("${defaultEnvFile}")
   if [[ -f "${envFile}" ]]; then
     files+=("${envFile}")
@@ -948,543 +977,39 @@ commandOptionParseFinished() {
   fi
 }
 
-plantumlCommand() {
-  local options_parse_cmd="$1"
-  shift || true
 
-  if [[ "${options_parse_cmd}" = "parse" ]]; then
-    local -i options_parse_optionParsedCountOptionLimitSize
-    ((options_parse_optionParsedCountOptionLimitSize = 0)) || true
-    local -i options_parse_optionParsedCountOptionOutputDir
-    ((options_parse_optionParsedCountOptionOutputDir = 0)) || true
-    sameDirectoryOption="0"
-    local -i options_parse_optionParsedCountSameDirectoryOption
-    ((options_parse_optionParsedCountSameDirectoryOption = 0)) || true
-    local -i options_parse_optionParsedCountOptionBashFrameworkConfig
-    ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
-    optionConfig="0"
-    local -i options_parse_optionParsedCountOptionConfig
-    ((options_parse_optionParsedCountOptionConfig = 0)) || true
-    optionInfoVerbose="0"
-    local -i options_parse_optionParsedCountOptionInfoVerbose
-    ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
-    optionDebugVerbose="0"
-    local -i options_parse_optionParsedCountOptionDebugVerbose
-    ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
-    optionTraceVerbose="0"
-    local -i options_parse_optionParsedCountOptionTraceVerbose
-    ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
-    optionNoColor="0"
-    local -i options_parse_optionParsedCountOptionNoColor
-    ((options_parse_optionParsedCountOptionNoColor = 0)) || true
-    optionTheme="default"
-    local -i options_parse_optionParsedCountOptionTheme
-    ((options_parse_optionParsedCountOptionTheme = 0)) || true
-    optionHelp="0"
-    local -i options_parse_optionParsedCountOptionHelp
-    ((options_parse_optionParsedCountOptionHelp = 0)) || true
-    optionVersion="0"
-    local -i options_parse_optionParsedCountOptionVersion
-    ((options_parse_optionParsedCountOptionVersion = 0)) || true
-    optionQuiet="0"
-    local -i options_parse_optionParsedCountOptionQuiet
-    ((options_parse_optionParsedCountOptionQuiet = 0)) || true
-    local -i options_parse_optionParsedCountOptionLogLevel
-    ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
-    local -i options_parse_optionParsedCountOptionLogFile
-    ((options_parse_optionParsedCountOptionLogFile = 0)) || true
-    local -i options_parse_optionParsedCountOptionDisplayLevel
-    ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
-    local -i options_parse_argParsedCountArgPlantumlFiles
-    ((options_parse_argParsedCountArgPlantumlFiles = 0)) || true
-    # shellcheck disable=SC2034
-    local -i options_parse_parsedArgIndex=0
-    while (($# > 0)); do
-      local options_parse_arg="$1"
-      local argOptDefaultBehavior=0
-      case "${options_parse_arg}" in
-        # Option 1/18
-        # Option optionFormats --format|-f variableType StringArray min 0 max -1 authorizedValues 'svg|png' regexp ''
-        --format | -f)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if [[ ! "$1" =~ svg|png ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(svg|png)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionFormats))
-          optionFormats+=("$1")
-          ;;
-        # Option 2/18
-        # Option optionLimitSize --limit-size|-l variableType String min 0 max 1 authorizedValues '' regexp ''
-        --limit-size | -l)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionLimitSize >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionLimitSize))
-          # shellcheck disable=SC2034
-          optionLimitSize="$1"
-          optionLimitSizeCallback "${options_parse_arg}" "${optionLimitSize}"
-          ;;
-        # Option 3/18
-        # Option optionOutputDir --output-dir|-o variableType String min 0 max 1 authorizedValues '' regexp ''
-        --output-dir | -o)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionOutputDir >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionOutputDir))
-          # shellcheck disable=SC2034
-          optionOutputDir="$1"
-          plantUmlOutputDirCallback "${options_parse_arg}" "${optionOutputDir}"
-          ;;
-        # Option 4/18
-        # Option sameDirectoryOption --same-dir variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --same-dir)
-          # shellcheck disable=SC2034
-          sameDirectoryOption="1"
-          if ((options_parse_optionParsedCountSameDirectoryOption >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountSameDirectoryOption))
-          ;;
-        # Option 5/18
-        # Option optionBashFrameworkConfig --bash-framework-config variableType String min 0 max 1 authorizedValues '' regexp ''
-        --bash-framework-config)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionBashFrameworkConfig >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionBashFrameworkConfig))
-          # shellcheck disable=SC2034
-          optionBashFrameworkConfig="$1"
-          optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
-          ;;
-        # Option 6/18
-        # Option optionConfig --config variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --config)
-          # shellcheck disable=SC2034
-          optionConfig="1"
-          if ((options_parse_optionParsedCountOptionConfig >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionConfig))
-          ;;
-        # Option 7/18
-        # Option optionInfoVerbose --verbose|-v variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --verbose | -v)
-          # shellcheck disable=SC2034
-          optionInfoVerbose="1"
-          if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionInfoVerbose))
-          optionInfoVerboseCallback "${options_parse_arg}"
-          updateArgListInfoVerboseCallback "${options_parse_arg}"
-          ;;
-        # Option 8/18
-        # Option optionDebugVerbose -vv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        -vv)
-          # shellcheck disable=SC2034
-          optionDebugVerbose="1"
-          if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionDebugVerbose))
-          optionDebugVerboseCallback "${options_parse_arg}"
-          updateArgListDebugVerboseCallback "${options_parse_arg}"
-          ;;
-        # Option 9/18
-        # Option optionTraceVerbose -vvv variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        -vvv)
-          # shellcheck disable=SC2034
-          optionTraceVerbose="1"
-          if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionTraceVerbose))
-          optionTraceVerboseCallback "${options_parse_arg}"
-          updateArgListTraceVerboseCallback "${options_parse_arg}"
-          ;;
-        # Option 10/18
-        # Option optionEnvFiles --env-file variableType StringArray min 0 max -1 authorizedValues '' regexp ''
-        --env-file)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionEnvFiles))
-          optionEnvFiles+=("$1")
-          optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
-          updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
-          ;;
-        # Option 11/18
-        # Option optionNoColor --no-color variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --no-color)
-          # shellcheck disable=SC2034
-          optionNoColor="1"
-          if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionNoColor))
-          optionNoColorCallback "${options_parse_arg}"
-          updateArgListNoColorCallback "${options_parse_arg}"
-          ;;
-        # Option 12/18
-        # Option optionTheme --theme variableType String min 0 max 1 authorizedValues 'default|default-force|noColor' regexp ''
-        --theme)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if [[ ! "$1" =~ default|default-force|noColor ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(default|default-force|noColor)"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionTheme >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionTheme))
-          # shellcheck disable=SC2034
-          optionTheme="$1"
-          optionThemeCallback "${options_parse_arg}" "${optionTheme}"
-          updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
-          ;;
-        # Option 13/18
-        # Option optionHelp --help|-h variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --help | -h)
-          # shellcheck disable=SC2034
-          optionHelp="1"
-          if ((options_parse_optionParsedCountOptionHelp >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionHelp))
-          optionHelpCallback "${options_parse_arg}"
-          ;;
-        # Option 14/18
-        # Option optionVersion --version variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --version)
-          # shellcheck disable=SC2034
-          optionVersion="1"
-          if ((options_parse_optionParsedCountOptionVersion >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionVersion))
-          optionVersionCallback "${options_parse_arg}"
-          ;;
-        # Option 15/18
-        # Option optionQuiet --quiet|-q variableType Boolean min 0 max 1 authorizedValues '' regexp ''
-        --quiet | -q)
-          # shellcheck disable=SC2034
-          optionQuiet="1"
-          if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionQuiet))
-          optionQuietCallback "${options_parse_arg}"
-          updateArgListQuietCallback "${options_parse_arg}"
-          ;;
-        # Option 16/18
-        # Option optionLogLevel --log-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
-        --log-level)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE)"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionLogLevel))
-          # shellcheck disable=SC2034
-          optionLogLevel="$1"
-          optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
-          updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
-          ;;
-        # Option 17/18
-        # Option optionLogFile --log-file variableType String min 0 max 1 authorizedValues '' regexp ''
-        --log-file)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionLogFile >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionLogFile))
-          # shellcheck disable=SC2034
-          optionLogFile="$1"
-          optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
-          updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
-          ;;
-        # Option 18/18
-        # Option optionDisplayLevel --display-level variableType String min 0 max 1 authorizedValues 'OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE' regexp ''
-        --display-level)
-          shift
-          if (($# == 0)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-            return 1
-          fi
-          if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE)"
-            return 1
-          fi
-          if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
-            Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-            return 1
-          fi
-          ((++options_parse_optionParsedCountOptionDisplayLevel))
-          # shellcheck disable=SC2034
-          optionDisplayLevel="$1"
-          optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
-          updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
-          ;;
-        -*)
-          unknownOption "${options_parse_arg}"
-          ;;
-        *)
-          if ((0)); then
-            # Technical if - never reached
-            :
-          # Argument 1/1
-          # Argument argPlantumlFiles min 0 max -1 authorizedValues '' regexp ''
-          elif ((options_parse_parsedArgIndex >= 0)); then
-            ((++options_parse_argParsedCountArgPlantumlFiles))
-            # shellcheck disable=SC2034
-            argPlantumlFiles+=("${options_parse_arg}")
-            plantUmlFileCallback "${argPlantumlFiles[@]}" -- "${@:2}"
-          else
-            if [[ "${argOptDefaultBehavior}" = "0" ]]; then
-              Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
-              return 1
-            fi
-          fi
-          ((++options_parse_parsedArgIndex))
-          ;;
-      esac
-      shift || true
-    done
-    commandOptionParseFinished
-    plantumlCallback
-    Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
-    Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
-  elif [[ "${options_parse_cmd}" = "help" ]]; then
-    Array::wrap2 " " 80 0 "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}" "Generates plantuml diagrams from puml files."
-    echo
 
-    echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "${SCRIPT_NAME}" "[OPTIONS]" "[ARGUMENTS]")"
-    echo -e "$(Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
-      "${SCRIPT_NAME}" \
-      "[--format|-f <String>]" "[--limit-size|-l <String>]" "[--output-dir|-o <String>]" "[--same-dir]" "[--bash-framework-config <String>]" "[--config]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <String>]" "[--no-color]" "[--theme <String>]" "[--help|-h]" "[--version]" "[--quiet|-q]" "[--log-level <String>]" "[--log-file <String>]" "[--display-level <String>]")"
-    echo
-    echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
-    echo -e "  [${__HELP_OPTION_COLOR}plantUmlFile${__HELP_NORMAL} {list} (optional)]"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(plantuml\ files\ \(if\ not\ provided\,\ deduce\ files\ from\ git\ repository\ with\ .puml\ extension\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo
-    echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-    echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <String>${__HELP_NORMAL} {list} (optional)"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(define\ output\ format\ of\ this\ command\(available:\ svg\|png\)\ \(default:\ svg\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Possible values: svg|png'
-    echo -e "  ${__HELP_OPTION_COLOR}--limit-size${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-l <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(define\ PLANTUML_LIMIT_SIZE)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--output-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-o <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(define\ output\ directory\ of\ this\ command\ \(default:\ doc/images\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--same-dir${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(to\ write\ image\ file\ in\ same\ directory\ as\ source\ file\ and\ with\ the\ same\ base\ name\(except\ extension\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo
-    echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
-    echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(use\ alternate\ bash\ framework\ configuration.)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Display\ configuration)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(info\ level\ verbose\ mode\ \(alias\ of\ --display-level\ INFO\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(debug\ level\ verbose\ mode\ \(alias\ of\ --display-level\ DEBUG\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(trace\ level\ verbose\ mode\ \(alias\ of\ --display-level\ TRACE\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--env-file <String>${__HELP_NORMAL} {list} (optional)"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Load\ the\ specified\ env\ file\ \(deprecated\,\ please\ use\ --bash-framework-config\ option\ instead\))
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Produce\ monochrome\ output.\ alias\ of\ --theme\ noColor.)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--theme <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(choose\ color\ theme\ -\ default-force\ means\ colors\ will\ be\ produced\ even\ if\ command\ is\ piped)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Default value: default'
-    echo '    Possible values: default|default-force|noColor'
-    echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Display\ this\ command\ help)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Print\ version\ information\ and\ quit)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(quiet\ mode\,\ doesn\'t\ display\ any\ output)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--log-level <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Set\ log\ level)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Possible values: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE'
-    echo -e "  ${__HELP_OPTION_COLOR}--log-file <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(Set\ log\ file)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo -e "  ${__HELP_OPTION_COLOR}--display-level <String>${__HELP_NORMAL} {single}"
-    local -a helpArray
-    # shellcheck disable=SC2054
-    helpArray=(set\ display\ level)
-    echo -e "    $(Array::wrap2 " " 76 4 "${helpArray[@]}")"
-    echo '    Possible values: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE'
-    echo -e """
-Generates plantuml diagrams from puml files in formats provided
-
-${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}
-
-@@@PLANTUML_HELP@@@"""
-    echo
-    echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-    echo '1.0'
-    echo
-    echo -e "${__HELP_TITLE_COLOR}AUTHOR:${__RESET_COLOR}"
-    echo '[François Chastanet](https://github.com/fchastanet)'
-    echo
-    echo -e "${__HELP_TITLE_COLOR}SOURCE FILE:${__RESET_COLOR}"
-    echo 'https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/plantuml.sh'
-    echo
-    echo -e "${__HELP_TITLE_COLOR}LICENSE:${__RESET_COLOR}"
-    echo 'MIT License'
-    echo
-    Array::wrap2 ' ' 76 4 "$(copyrightCallback)"
-  else
-    Log::displayError "Command ${SCRIPT_NAME} - Option command invalid: '${options_parse_cmd}'"
-    return 1
-  fi
-}
-declare copyrightBeginYear="2022"
-declare optionOutputDir="doc/images"
-declare -a plantumlOptions=()
+# shellcheck disable=SC2034
+declare optionContinuousIntegrationMode=0
 
 # shellcheck disable=SC2317 # if function is overridden
+updateOptionContinuousIntegrationMode() {
+  BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
+}
+
+
+
+# shellcheck disable=SC2034
+declare versionNumber="1.0"
+declare copyrightBeginYear="2022"
+declare optionDefaultOutputDir="doc/images"
+declare -a defaultFormatsIfNoneProvided=("png")
+declare -a plantumlOptions=()
+declare -a argPlantumlFiles=()
+readonly PLANTUML_PULL_TIMEOUT=$((30 * 24 * 3600))
+
 unknownOption() {
   plantumlOptions+=("$1")
 }
 
-# shellcheck disable=SC2317 # if function is overridden
-plantUmlFileCallback() {
+plantumlArgFileCallback() {
   if [[ ! -f "$1" ]]; then
     plantumlOptions+=("$1")
-  fi
-}
-
-optionHelpCallback() {
-  local plantumlHelpFile
-  plantumlHelpFile="$(Framework::createTempFile "hadolintHelp")"
-  if command -v docker &>/dev/null; then
-    docker pull plantuml/plantuml >/dev/null
-      docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
   else
-    echo "docker was not available while generating this documentation" >"${plantumlHelpFile}"
-  fi
-  plantumlCommand help |
-    sed -E \
-      -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
-      -e "/@@@PLANTUML_HELP@@@/d"
-  exit 0
-}
-
-# shellcheck disable=SC2317 # if function is overridden
-plantumlCallback() {
-  if ((${#optionFormats[@]} == 0)); then
-    optionFormats=("svg")
+    argPlantumlFiles+=("$1")
   fi
 }
 
-# shellcheck disable=SC2317 # if function is overridden
 optionLimitSizeCallback() {
   if [[ -n "${optionLimitSize}" && ! "${optionLimitSize}" =~ ^[0-9]+$ ]]; then
     Log::displayError "Command ${SCRIPT_NAME} - invalid limit size value '$2'"
@@ -1492,106 +1017,858 @@ optionLimitSizeCallback() {
   fi
 }
 
-# shellcheck disable=SC2317 # if function is overridden
-plantUmlOutputDirCallback() {
-  if [[ ! -d "$2" ]]; then
-    Log::displayError "Command ${SCRIPT_NAME} - unknown directory '$2'"
+plantumlCallback() {
+  if ((${#optionFormats[@]} == 0)); then
+    optionFormats=("${defaultFormatsIfNoneProvided[@]}")
+  fi
+  # shellcheck disable=SC2154
+  if [[ -n "${optionOutputDir}" && "${sameDirectoryOption}" = "1" ]]; then
+    Log::displayError "Command ${SCRIPT_NAME} - option --same-dir and --output-dir are incompatible"
+    return 1
+  fi
+  if [[ -z "${optionOutputDir}" ]]; then
+    optionOutputDir="${optionDefaultOutputDir}"
+  fi
+  if [[ ! -d "${optionOutputDir}" ]]; then
+    Log::displayError \
+      "Command ${SCRIPT_NAME} - output directory '${optionOutputDir}' does not exists"
     return 1
   fi
 }
 
-plantumlCommand parse "${BASH_FRAMEWORK_ARGV[@]}"
-
-run() {
-  detectChangedAddedFiles() {
-    git ls-files --exclude-standard --modified --others
-  }
-
-  declare -a files
-  # shellcheck disable=SC2154
-  if ((${#argPlantumlFiles[@]} > 0)); then
-    files=("${argPlantumlFiles[@]}")
-  else
-    changedFilesBefore=$(detectChangedAddedFiles)
-    readarray -t files < <(find . -name '*.puml')
-  fi
-
-  if ((${#files[@]} == 0)); then
-    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
-  fi
-
-  readonly PLANTUML_PULL_TIMEOUT=$((30 * 24 * 3600))
+pullPlantumlImageIfNeeded() {
   if [[ ! -f "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull" ]] ||
-    (($(File::elapsedTimeSinceLastModification "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull") > PLANTUML_PULL_TIMEOUT)); then
+    (($(File::elapsedTimeSinceLastModification "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull") > PLANTUML_PULL_TIMEOUT)) ||
+    ! docker image ls plantuml/plantuml &>/dev/null; then
     docker pull plantuml/plantuml
     touch "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull"
   fi
-  convertPuml() {
-    local file="$1"
-    local sameDirectoryOption="$2"
-    local optionOutputDir="$3"
-    local format="$4"
-    local optionLimitSize="$5"
-    local optionTraceVerbose="$6"
-    shift 6 || true
-    local -a plantumlOptions=("$@")
-
-    local targetFile
-    if [[ "${sameDirectoryOption}" = "1" ]]; then
-      targetFile="${file%.*}.${format}"
-    else
-      local fileBasename="${file##*/}"
-      targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
-    fi
-    Log::displayInfo "Generating ${targetFile} from ${file}"
-    local -a env=()
-    if [[ -n "${optionLimitSize}" ]]; then
-      env+=(-e "PLANTUML_LIMIT_SIZE=${optionLimitSize}")
-    fi
-    # shellcheck disable=SC2154
-    if [[ "${optionTraceVerbose}" = "1" ]]; then
-      set -x
-    fi
-    docker run -i --rm "${env[@]}" plantuml/plantuml \
-      -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
-      >"${targetFile}" \
-      <"${file}"
-    set +x
-    if [[ "${format}" = "svg" ]]; then
-      echo >>"${targetFile}"
-    fi
-  }
-  # TODO generate convertPuml as binary to avoid all these exports
-  export -f convertPuml Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
-  export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
-
-  (
-    local file format
-    for file in "${files[@]}"; do
-      # shellcheck disable=SC2154
-      for format in "${optionFormats[@]}"; do
-        echo "convertPuml" \
-          "${file}" "${sameDirectoryOption}" "${optionOutputDir}" \
-          "${format}" "${optionLimitSize}" "${optionTraceVerbose}" \
-          "${plantumlOptions[@]}"
-      done
-    done
-  ) | xargs -P0 -r -L 1 bash -c 'convertPuml "$@"'
-
-  if ((${#argPlantumlFiles[@]} == 0)); then
-    changedFilesAfter=$(detectChangedAddedFiles)
-    diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
-      Log::fatal "files have been added"
-    }
-  fi
 }
 
-if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
-  run &>/dev/null
+optionHelpCallback() {
+  local plantumlHelpFile
+  plantumlHelpFile="$(Framework::createTempFile "hadolintHelp")"
+
+  if command -v docker &>/dev/null; then
+    pullPlantumlImageIfNeeded >/dev/null
+    docker run --rm plantuml/plantuml -help >"${plantumlHelpFile}"
+  else
+    echo "docker was not available while generating this documentation" >"${plantumlHelpFile}"
+  fi
+  plantumlCommandHelp |
+    sed -E \
+      -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
+      -e "/@@@PLANTUML_HELP@@@/d"
+  exit 0
+}
+
+
+# ------------------------------------------
+# Command plantumlCommand
+# ------------------------------------------
+
+# options variables initialization
+declare optionHelp="0"
+declare optionConfig="0"
+declare optionBashFrameworkConfig=""
+declare optionInfoVerbose="0"
+declare optionDebugVerbose="0"
+declare optionTraceVerbose="0"
+declare -a optionEnvFiles=()
+declare optionLogLevel=""
+declare optionLogFile=""
+declare optionDisplayLevel=""
+declare optionNoColor="0"
+declare optionTheme="default"
+declare optionVersion="0"
+declare optionQuiet="0"
+declare optionContinuousIntegrationMode="0"
+declare -a optionFormats=()
+declare optionLimitSize=""
+declare sameDirectoryOption="0"
+declare optionOutputDir=""
+# arguments variables initialization
+declare -a argPlantumlFiles=()
+# @description parse command options and arguments for plantumlCommand
+plantumlCommandParse() {
+  Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
+  Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
+  optionHelp="0"
+  local -i options_parse_optionParsedCountOptionHelp
+  ((options_parse_optionParsedCountOptionHelp = 0)) || true
+  optionConfig="0"
+  local -i options_parse_optionParsedCountOptionConfig
+  ((options_parse_optionParsedCountOptionConfig = 0)) || true
+  optionBashFrameworkConfig=""
+  local -i options_parse_optionParsedCountOptionBashFrameworkConfig
+  ((options_parse_optionParsedCountOptionBashFrameworkConfig = 0)) || true
+  optionInfoVerbose="0"
+  local -i options_parse_optionParsedCountOptionInfoVerbose
+  ((options_parse_optionParsedCountOptionInfoVerbose = 0)) || true
+  optionDebugVerbose="0"
+  local -i options_parse_optionParsedCountOptionDebugVerbose
+  ((options_parse_optionParsedCountOptionDebugVerbose = 0)) || true
+  optionTraceVerbose="0"
+  local -i options_parse_optionParsedCountOptionTraceVerbose
+  ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
+
+  optionLogLevel=""
+  local -i options_parse_optionParsedCountOptionLogLevel
+  ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
+  optionLogFile=""
+  local -i options_parse_optionParsedCountOptionLogFile
+  ((options_parse_optionParsedCountOptionLogFile = 0)) || true
+  optionDisplayLevel=""
+  local -i options_parse_optionParsedCountOptionDisplayLevel
+  ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
+  optionNoColor="0"
+  local -i options_parse_optionParsedCountOptionNoColor
+  ((options_parse_optionParsedCountOptionNoColor = 0)) || true
+  optionTheme="default"
+  local -i options_parse_optionParsedCountOptionTheme
+  ((options_parse_optionParsedCountOptionTheme = 0)) || true
+  optionVersion="0"
+  local -i options_parse_optionParsedCountOptionVersion
+  ((options_parse_optionParsedCountOptionVersion = 0)) || true
+  optionQuiet="0"
+  local -i options_parse_optionParsedCountOptionQuiet
+  ((options_parse_optionParsedCountOptionQuiet = 0)) || true
+  optionContinuousIntegrationMode="0"
+  local -i options_parse_optionParsedCountOptionContinuousIntegrationMode
+  ((options_parse_optionParsedCountOptionContinuousIntegrationMode = 0)) || true
+
+  optionLimitSize=""
+  local -i options_parse_optionParsedCountOptionLimitSize
+  ((options_parse_optionParsedCountOptionLimitSize = 0)) || true
+  sameDirectoryOption="0"
+  local -i options_parse_optionParsedCountSameDirectoryOption
+  ((options_parse_optionParsedCountSameDirectoryOption = 0)) || true
+  optionOutputDir=""
+  local -i options_parse_optionParsedCountOptionOutputDir
+  ((options_parse_optionParsedCountOptionOutputDir = 0)) || true
+
+  argPlantumlFiles=()
+
+
+  # shellcheck disable=SC2034
+  local -i options_parse_parsedArgIndex=0
+  while (($# > 0)); do
+    local options_parse_arg="$1"
+    local argOptDefaultBehavior=0
+    case "${options_parse_arg}" in
+      # Option 1/19
+      # optionHelp alts --help|-h
+      # type: Boolean min 0 max 1
+      --help | -h)
+        # shellcheck disable=SC2034
+        optionHelp="1"
+
+        if ((options_parse_optionParsedCountOptionHelp >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionHelp))
+        optionHelpCallback "${options_parse_arg}" "${optionHelp}"
+
+        ;;
+
+      # Option 2/19
+      # optionConfig alts --config
+      # type: Boolean min 0 max 1
+      --config)
+        # shellcheck disable=SC2034
+        optionConfig="1"
+
+        if ((options_parse_optionParsedCountOptionConfig >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionConfig))
+        ;;
+
+      # Option 3/19
+      # optionBashFrameworkConfig alts --bash-framework-config
+      # type: String min 0 max 1
+      --bash-framework-config)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionBashFrameworkConfig >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionBashFrameworkConfig))
+        # shellcheck disable=SC2034
+        optionBashFrameworkConfig="$1"
+        optionBashFrameworkConfigCallback "${options_parse_arg}" "${optionBashFrameworkConfig}"
+
+        ;;
+
+      # Option 4/19
+      # optionInfoVerbose alts --verbose|-v
+      # type: Boolean min 0 max 1
+      --verbose | -v)
+        # shellcheck disable=SC2034
+        optionInfoVerbose="1"
+
+        if ((options_parse_optionParsedCountOptionInfoVerbose >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionInfoVerbose))
+        optionInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
+
+        updateArgListInfoVerboseCallback "${options_parse_arg}" "${optionInfoVerbose}"
+
+        ;;
+
+      # Option 5/19
+      # optionDebugVerbose alts -vv
+      # type: Boolean min 0 max 1
+      -vv)
+        # shellcheck disable=SC2034
+        optionDebugVerbose="1"
+
+        if ((options_parse_optionParsedCountOptionDebugVerbose >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionDebugVerbose))
+        optionDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
+
+        updateArgListDebugVerboseCallback "${options_parse_arg}" "${optionDebugVerbose}"
+
+        ;;
+
+      # Option 6/19
+      # optionTraceVerbose alts -vvv
+      # type: Boolean min 0 max 1
+      -vvv)
+        # shellcheck disable=SC2034
+        optionTraceVerbose="1"
+
+        if ((options_parse_optionParsedCountOptionTraceVerbose >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionTraceVerbose))
+        optionTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
+
+        updateArgListTraceVerboseCallback "${options_parse_arg}" "${optionTraceVerbose}"
+
+        ;;
+
+      # Option 7/19
+      # optionEnvFiles alts --env-file
+      # type: StringArray min 0 max -1
+      --env-file)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+
+        ((++options_parse_optionParsedCountOptionEnvFiles))
+        optionEnvFiles+=("$1")
+        optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
+
+        updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
+
+        ;;
+
+      # Option 8/19
+      # optionLogLevel alts --log-level
+      # type: String min 0 max 1
+      # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
+      --log-level)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+        if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([OFF ERR ERROR WARN WARNING INFO DEBUG TRACE])"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionLogLevel >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionLogLevel))
+        # shellcheck disable=SC2034
+        optionLogLevel="$1"
+        optionLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
+
+        updateArgListLogLevelCallback "${options_parse_arg}" "${optionLogLevel}"
+
+        ;;
+
+      # Option 9/19
+      # optionLogFile alts --log-file
+      # type: String min 0 max 1
+      --log-file)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionLogFile >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionLogFile))
+        # shellcheck disable=SC2034
+        optionLogFile="$1"
+        optionLogFileCallback "${options_parse_arg}" "${optionLogFile}"
+
+        updateArgListLogFileCallback "${options_parse_arg}" "${optionLogFile}"
+
+        ;;
+
+      # Option 10/19
+      # optionDisplayLevel alts --display-level
+      # type: String min 0 max 1
+      # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
+      --display-level)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+        if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([OFF ERR ERROR WARN WARNING INFO DEBUG TRACE])"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionDisplayLevel >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionDisplayLevel))
+        # shellcheck disable=SC2034
+        optionDisplayLevel="$1"
+        optionDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
+
+        updateArgListDisplayLevelCallback "${options_parse_arg}" "${optionDisplayLevel}"
+
+        ;;
+
+      # Option 11/19
+      # optionNoColor alts --no-color
+      # type: Boolean min 0 max 1
+      --no-color)
+        # shellcheck disable=SC2034
+        optionNoColor="1"
+
+        if ((options_parse_optionParsedCountOptionNoColor >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionNoColor))
+        optionNoColorCallback "${options_parse_arg}" "${optionNoColor}"
+
+        updateArgListNoColorCallback "${options_parse_arg}" "${optionNoColor}"
+
+        ;;
+
+      # Option 12/19
+      # optionTheme alts --theme
+      # type: String min 0 max 1
+      # authorizedValues: default|default-force|noColor
+      --theme)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+        if [[ ! "$1" =~ default|default-force|noColor ]]; then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([default default-force noColor])"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionTheme >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionTheme))
+        # shellcheck disable=SC2034
+        optionTheme="$1"
+        optionThemeCallback "${options_parse_arg}" "${optionTheme}"
+
+        updateArgListThemeCallback "${options_parse_arg}" "${optionTheme}"
+
+        ;;
+
+      # Option 13/19
+      # optionVersion alts --version
+      # type: Boolean min 0 max 1
+      --version)
+        # shellcheck disable=SC2034
+        optionVersion="1"
+
+        if ((options_parse_optionParsedCountOptionVersion >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionVersion))
+        optionVersionCallback "${options_parse_arg}" "${optionVersion}"
+
+        ;;
+
+      # Option 14/19
+      # optionQuiet alts --quiet|-q
+      # type: Boolean min 0 max 1
+      --quiet | -q)
+        # shellcheck disable=SC2034
+        optionQuiet="1"
+
+        if ((options_parse_optionParsedCountOptionQuiet >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionQuiet))
+        optionQuietCallback "${options_parse_arg}" "${optionQuiet}"
+
+        updateArgListQuietCallback "${options_parse_arg}" "${optionQuiet}"
+
+        ;;
+
+      # Option 15/19
+      # optionContinuousIntegrationMode alts --ci
+      # type: Boolean min 0 max 1
+      --ci)
+        # shellcheck disable=SC2034
+        optionContinuousIntegrationMode="1"
+
+        if ((options_parse_optionParsedCountOptionContinuousIntegrationMode >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
+        updateOptionContinuousIntegrationMode "${options_parse_arg}" "${optionContinuousIntegrationMode}"
+
+        ;;
+
+      # Option 16/19
+      # optionFormats alts --format|-f
+      # type: StringArray min 0 max -1
+      # authorizedValues: svg|png
+      --format | -f)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+        if [[ ! "$1" =~ svg|png ]]; then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([svg png])"
+          return 1
+        fi
+
+        ((++options_parse_optionParsedCountOptionFormats))
+        optionFormats+=("$1")
+        ;;
+
+      # Option 17/19
+      # optionLimitSize alts --limit-size|-l
+      # type: String min 0 max 1
+      --limit-size | -l)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionLimitSize >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionLimitSize))
+        # shellcheck disable=SC2034
+        optionLimitSize="$1"
+        optionLimitSizeCallback "${options_parse_arg}" "${optionLimitSize}"
+
+        ;;
+
+      # Option 18/19
+      # sameDirectoryOption alts --same-dir
+      # type: Boolean min 0 max 1
+      --same-dir)
+        # shellcheck disable=SC2034
+        sameDirectoryOption="1"
+
+        if ((options_parse_optionParsedCountSameDirectoryOption >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountSameDirectoryOption))
+        ;;
+
+      # Option 19/19
+      # optionOutputDir alts --output-dir|-o
+      # type: String min 0 max 1
+      --output-dir | -o)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionOutputDir >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionOutputDir))
+        # shellcheck disable=SC2034
+        optionOutputDir="$1"
+        plantUmlOutputDirCallback "${options_parse_arg}" "${optionOutputDir}"
+
+        ;;
+
+      -*)
+        unknownOption "${options_parse_arg}" || argOptDefaultBehavior=$?
+        ;;
+      *)
+        if ((0)); then
+          # Technical if - never reached
+          :
+
+        # Argument 1/1
+        # argPlantumlFiles min 0 max -1
+        # authorizedValues:
+        elif (( options_parse_parsedArgIndex >= 0 )); then
+
+          ((++options_parse_argParsedCountArgPlantumlFiles))
+          # shellcheck disable=SC2034
+          # shellcheck disable=SC2034
+          argPlantumlFiles+=("${options_parse_arg}")
+
+        # else too much args
+        else
+
+          # no arg configured, call unknownArgumentCallback
+
+          # shellcheck disable=SC2317
+          plantumlArgFileCallback "${options_parse_arg}"
+
+        fi
+        ;;
+    esac
+    shift || true
+  done || return $?
+  commandOptionParseFinished
+  plantumlCallback
+
+}
+
+# @description display command options and arguments help for plantumlCommand
+plantumlCommandHelp() {
+  Array::wrap2 ' ' 80 0 "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}" \
+    "Generates plantuml diagrams from puml files."
+  echo
+  echo
+
+  # ------------------------------------------
+  # usage section
+  # ------------------------------------------
+  Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "plantuml [OPTIONS] [ARGUMENTS]"
+  echo
+  # ------------------------------------------
+  # usage/options section
+  # ------------------------------------------
+  optionsAltList=("[--help|-h]" "[--config]" "[--bash-framework-config <bash-framework-config>]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <env-file>]" "[--log-level <log-level>]" "[--log-file <log-file>]" "[--display-level <display-level>]" "[--no-color]" "[--theme <theme>]" "[--version]" "[--quiet|-q]" "[--ci]" "[--format|-f <Format>]" "[--limit-size|-l <LimitSize>]" "[--same-dir]" "[--output-dir|-o <OutputDir>]"
+  )
+  Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
+    "plantuml" "${optionsAltList[@]}"
+  echo
+
+  # ------------------------------------------
+  # usage/arguments section
+  # ------------------------------------------
+  echo
+  echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
+
+    Array::wrap2 " " 80 2 "  [${__HELP_OPTION_COLOR}PlantumlFiles${__HELP_NORMAL} {list} (optional)]
+  "
+    Array::wrap2 ' ' 76 4 "    " "Plantuml files (if not provided, deduce files" "from git repository with .puml extension)" ""
+    echo
+  # ------------------------------------------
+  # options section
+  # ------------------------------------------
+  echo
+  echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
+  echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Displays this command help"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Displays configuration"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Info level verbose mode (alias of --display-level INFO)"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Debug level verbose mode (alias of --display-level DEBUG)"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Trace level verbose mode (alias of --display-level TRACE)"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Set log level"
+  echo
+  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
+  echo
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Set log file"
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Set display level"
+  echo
+  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
+  echo
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Produce monochrome output. alias of --theme noColor."
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
+  echo
+  Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
+  echo
+
+  Array::wrap2 ' ' 76 6 "    Default value: " "default"
+  echo
+
+  echo -e "  ${__HELP_OPTION_COLOR}--version${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Print version information and quit."
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Quiet mode, doesn't display any output."
+  echo
+
+
+  echo
+  echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+  echo -e "  ${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Activate continuous integration mode (tmp folder not shared with host)" ""
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f Format${__HELP_NORMAL} {list} (optional)"
+  Array::wrap2 ' ' 76 4 "    " "Defines output format of this command"
+  echo
+  Array::wrap2 ' ' 76 6 "    Possible values: " "svg, "  "png"
+  echo
+
+  Array::wrap2 ' ' 76 6 "    Default value: " "png"
+  echo
+
+  echo -e "  ${__HELP_OPTION_COLOR}--limit-size${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-l LimitSize${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Define PLANTUML_LIMIT_SIZE" "use plantuml software default size if not provided" ""
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--same-dir${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Write image file in same directory as source file" "and with the same base name (except extension)" "Incompatible with the option --output-dir" ""
+  echo
+
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--output-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-o OutputDir${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Define output directory of this command (default: <currentDirectory>)" "Incompatible with the option --same-dir" ""
+  echo
+
+
+  # ------------------------------------------
+  # longDescription section
+  # ------------------------------------------
+  echo
+  echo
+  echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
+  declare -a plantumlCommandLongDescription=(
+  "Generates plantuml diagrams from puml files in formats provided"
+  "\\n"
+  "${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}"
+  "\\n"
+  "@@@PLANTUML_HELP@@@"
+  )
+  Array::wrap2 ' ' 76 0 "${plantumlCommandLongDescription[@]}"
+  echo
+  # ------------------------------------------
+  # version section
+  # ------------------------------------------
+  echo
+  echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
+  echo "1.0"
+  # ------------------------------------------
+  # author section
+  # ------------------------------------------
+  echo
+  echo -n -e "${__HELP_TITLE_COLOR}AUTHOR: ${__RESET_COLOR}"
+  echo "[François Chastanet](https://github.com/fchastanet)"
+  # ------------------------------------------
+  # sourceFile section
+  # ------------------------------------------
+  echo
+  echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/plantuml/binary-plantuml.yaml"
+  # ------------------------------------------
+  # license section
+  # ------------------------------------------
+  echo
+  echo -n -e "${__HELP_TITLE_COLOR}LICENSE: ${__RESET_COLOR}"
+  echo "MIT License"
+  # ------------------------------------------
+  # copyright section
+  # ------------------------------------------
+  Array::wrap2 ' ' 76 0 "$(copyrightCallback)"
+}
+
+
+beforeParseCallback
+
+plantumlCommandParse "$@"
+MAIN_FUNCTION_NAME="main"
+main() {
+
+detectChangedAddedFiles() {
+  git ls-files --exclude-standard --modified --others
+}
+
+declare -a files
+# shellcheck disable=SC2154
+if ((${#argPlantumlFiles[@]} > 0)); then
+  files=("${argPlantumlFiles[@]}")
 else
-  run
+  changedFilesBefore=$(detectChangedAddedFiles)
+  readarray -t files < <(find . -name '*.puml')
+fi
+
+if ((${#files[@]} == 0)); then
+  Log::fatal "Command ${SCRIPT_NAME} - no file provided"
+fi
+Log::displayInfo "Will generate plantuml output files for ${files[*]}"
+
+pullPlantumlImageIfNeeded
+convertPuml() {
+  local file="$1"
+  local sameDirectoryOption="$2"
+  local optionOutputDir="$3"
+  local format="$4"
+  local optionLimitSize="$5"
+  local optionTraceVerbose="$6"
+  shift 6 || true
+  local -a plantumlOptions=("$@")
+
+  local targetFile
+  if [[ "${sameDirectoryOption}" = "1" ]]; then
+    targetFile="${file%.*}.${format}"
+  else
+    local fileBasename="${file##*/}"
+    targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
+  fi
+  Log::displayInfo "Generating ${targetFile} from ${file}"
+  local -a env=()
+  if [[ -n "${optionLimitSize}" ]]; then
+    env+=(-e "PLANTUML_LIMIT_SIZE=${optionLimitSize}")
+  fi
+  # shellcheck disable=SC2154
+  if [[ "${optionTraceVerbose}" = "1" ]]; then
+    set -x
+  fi
+  docker run -i --rm "${env[@]}" plantuml/plantuml \
+    -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
+    >"${targetFile}" \
+    <"${file}"
+  set +x
+  if [[ "${format}" = "svg" ]]; then
+    echo >>"${targetFile}"
+  fi
+  Log::displayInfo "Converted ${targetFile}"
+}
+# TODO generate convertPuml as binary to avoid all these exports
+export -f convertPuml Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
+export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
+
+(
+  declare file format
+  for file in "${files[@]}"; do
+    Log::displayInfo "Converting ${file}"
+    # shellcheck disable=SC2154
+    for format in "${optionFormats[@]}"; do
+      declare -a myCmd=(
+        "convertPuml"
+        "${file}" "${sameDirectoryOption}" "${optionOutputDir}"
+        "${format}" "${optionLimitSize}" "${optionTraceVerbose}"
+        "${plantumlOptions[@]}"
+      )
+      printf "'%s' " "${myCmd[@]}"
+    done
+  done
+) | xargs -P0 -r -L 1 bash -c 'convertPuml "$@"'
+
+# shellcheck disable=SC2154
+if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argPlantumlFiles[@]} == 0)); then
+  changedFilesAfter=$(detectChangedAddedFiles)
+  diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
+    Log::fatal "files have been added"
+  }
 fi
 
 }
 
-facade_main_plantumlsh "$@"
+# if file is sourced avoid calling main function
+# shellcheck disable=SC2178
+BASH_SOURCE=".$0" # cannot be changed in bash
+# shellcheck disable=SC2128
+if test ".$0" == ".${BASH_SOURCE}"; then
+  if [[ "${BASH_FRAMEWORK_QUIET_MODE:-0}" = "1" ]]; then
+    main "$@" &>/dev/null
+  else
+    main "$@"
+  fi
+fi

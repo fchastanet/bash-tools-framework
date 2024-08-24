@@ -1560,7 +1560,7 @@ shellcheckLintCommandHelp() {
 
     Array::wrap2 " " 80 2 "  [${__HELP_OPTION_COLOR}shellcheckFiles${__HELP_NORMAL} {list} (optional)]
   "
-    Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck. If not provided,""all files from git repository which are beginning""with a bash shebang, unless --staged option is provided."""
+    Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck. If not provided," "all files from git repository which are beginning" "with a bash shebang, unless --staged option is provided." ""
     echo
   # ------------------------------------------
   # options section
