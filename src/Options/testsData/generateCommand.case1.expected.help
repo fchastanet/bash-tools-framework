@@ -1,8 +1,0 @@
-[1;37mDESCRIPTION:[0m super command
-[1;37mUSAGE:[0m test [OPTIONS]
-[1;37mUSAGE:[0m test [--file|-f <String>]
-
-[1;37mOPTIONS:[0m
-  [1;34m--file[0m, [1;34m-f <String>[0m {single}
-    file
-very long help

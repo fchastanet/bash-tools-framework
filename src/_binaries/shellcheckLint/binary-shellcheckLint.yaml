@@ -29,7 +29,7 @@ binData:
         passed\n\n${__HELP_TITLE}Special configuration
         .shellcheckrc:${__HELP_NORMAL}\nuse the following line in your
         .shellcheckrc file to exclude\nsome files from being checked (use grep
-        -E syntax)\nexclude=^bin/bash-tpl$\n\n${__HELP_TITLE_COLOR}SHELLCHECK
+        -E syntax)\nexclude=^bin/compile$\n\n${__HELP_TITLE_COLOR}SHELLCHECK
         HELP${__RESET_COLOR}\n\n@@@SHELLCHECK_HELP@@@\n"
       callbacks:
         - shellcheckLintParseCallback

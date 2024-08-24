@@ -74,7 +74,6 @@ EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: |
     ^manualTests/data/|
     ^src/Log/testsData|
     ^Gemfile.lock$|
-    bin/bash-tpl|
     \.md$|
     ^.*-megalinter_file_names_cspell.txt|
     testsData/.*\.result$
@@ -123,7 +122,6 @@ SPELL_CSPELL_FILTER_REGEX_EXCLUDE: |
     ^pages/bashDoc|
     ^pages/tests|
     ^commit-msg.md$|
-    ^bin/bash-tpl|
     /testsData/|
     \.svg$
   )
@@ -132,7 +130,6 @@ SPELL_FILTER_REGEX_EXCLUDE: |
     \.git/|
     \.history/|
     IDE/.*/\.idea|
-    ^bin/bash-tpl|
     \.svg
   )
 
@@ -160,6 +157,5 @@ MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
     ^pages/README.md|
     ^pages/doc|
     ^pages/bashDoc|
-    ^pages/tests|
-    ^doc/guides/Options/generate.*\.md$
+    ^pages/tests
   )

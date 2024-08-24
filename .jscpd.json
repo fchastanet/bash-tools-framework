@@ -31,10 +31,6 @@
     "pages/DockerUsage.md",
     "pages/FrameworkDoc.md",
     "pages/bashDoc/**",
-    "src/Options/templates/command.help.tpl",
-    "src/Options/templates/arg.tpl",
-    "src/Options/templates/option.tpl",
-    "src/_includes/_header.tpl",
     ".docker/createUser.*.sh"
   ]
 }

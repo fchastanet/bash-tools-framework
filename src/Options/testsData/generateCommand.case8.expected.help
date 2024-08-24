@@ -1,6 +1,0 @@
-DESCRIPTION: super command
-USAGE: test [ARGUMENTS]
-
-ARGUMENTS:
-  srcFile {single} (mandatory)
-    No help available
