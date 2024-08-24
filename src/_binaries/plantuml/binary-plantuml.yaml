@@ -1,0 +1,96 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/plantuml/binary-plantuml.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/plantuml"
+binData:
+  commands:
+    default:
+      functionName: plantumlCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      unknownArgumentCallbacks:
+        - plantumlArgFileCallback
+      callbacks:
+        - plantumlCallback
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      commandName: plantuml
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/plantuml/plantuml-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/plantuml/plantuml-main.sh
+      help: Generates plantuml diagrams from puml files.
+      longDescription: |
+        Generates plantuml diagrams from puml files in formats provided
+        \n
+        ${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}
+        \n
+        @@@PLANTUML_HELP@@@
+
+      options:
+        - alts:
+            - --format
+            - -f
+          help: Defines output format of this command
+          group: OptionsGroup
+          type: StringArray
+          authorizedValuesList:
+            - svg
+            - png
+          defaultValue: png
+          max: -1
+          min: 0
+          helpValueName: Format
+          variableName: optionFormats
+
+        - alts:
+            - --limit-size
+            - -l
+          help: |
+            Define PLANTUML_LIMIT_SIZE
+            use plantuml software default size if not provided
+          group: OptionsGroup
+          type: String
+          helpValueName: LimitSize
+          variableName: optionLimitSize
+          callbacks:
+            - optionLimitSizeCallback
+
+        - alts:
+            - --same-dir
+          help: |
+            Write image file in same directory as source file
+            and with the same base name (except extension)
+            Incompatible with the option --output-dir
+          type: Boolean
+          group: OptionsGroup
+          variableName: sameDirectoryOption
+
+        - alts:
+            - --output-dir
+            - -o
+          help: |
+            Define output directory of this command (default: <currentDirectory>)
+            Incompatible with the option --same-dir
+          type: String
+          callbacks:
+            - plantUmlOutputDirCallback
+          group: OptionsGroup
+          helpValueName: OutputDir
+          variableName: optionOutputDir
+
+      args:
+        - help: |
+            Plantuml files (if not provided, deduce files
+            from git repository with .puml extension)
+          type: StringArray
+          min: 0
+          max: -1
+          name: PlantumlFiles
+          variableName: argPlantumlFiles

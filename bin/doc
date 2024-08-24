@@ -2309,7 +2309,7 @@ docCommandHelp() {
   echo
   echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
   echo -e "  ${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} {single}"
-  Array::wrap2 ' ' 76 4 "    " "Activate continuous integration mode (tmp folder not shared with host)\n"
+  Array::wrap2 ' ' 76 4 "    " "Activate continuous integration mode (tmp folder not shared with host)" ""
   echo
 
 
