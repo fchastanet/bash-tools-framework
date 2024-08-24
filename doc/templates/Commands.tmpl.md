@@ -2,9 +2,6 @@
 
 <!-- @generated -->
 
-- [1. Compilation tools](#1-compilation-tools)
-  - [1.1. bin/compile](#11-bincompile)
-  - [1.2. bin/buildBinFiles](#12-binbuildbinfiles)
 - [2. build tools](#2-build-tools)
   - [2.1. bin/installRequirements](#21-bininstallrequirements)
   - [2.2. bin/findShebangFiles](#22-binfindshebangfiles)
@@ -19,24 +16,6 @@
   - [3.6. bin/megalinter](#36-binmegalinter)
 - [4. Converter and Generator tools](#4-converter-and-generator-tools)
   - [4.1. bin/plantuml](#41-binplantuml)
-
-## 1. Compilation tools
-
-### 1.1. bin/compile
-
-You check out the [Full documentation Compile documentation](/#/CompileCommand).
-
-Here the command's help output:
-
-```text
-@@@compile_help@@@
-```
-
-### 1.2. bin/buildBinFiles
-
-```text
-@@@buildBinFiles_help@@@
-```
 
 ## 2. build tools
 

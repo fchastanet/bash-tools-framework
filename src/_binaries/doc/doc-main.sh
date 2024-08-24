@@ -57,7 +57,7 @@ generateDoc() {
     "${PAGES_DIR}/Commands.md" \
     "${COMMAND_BIN_DIR}" \
     TOKEN_NOT_FOUND_COUNT \
-    '(bash-tpl|buildBinFilesTmp|var|simpleBinary|shdoc|installFacadeExample)$'
+    '(var|simpleBinary|shdoc|installFacadeExample)$'
 
   # clean folder before generate
   rm -f "${PAGES_DIR}/Index.md" || true
@@ -73,20 +73,6 @@ generateDoc() {
     '/testsData|/_.*' \
     '(/__all\.sh)$'
   cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
-
-  declare -a optionsDocs=(
-    "generateGroup"
-    "generateOption"
-    "generateArg"
-    "generateCommand"
-  )
-  for file in "${optionsDocs[@]}"; do
-    "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" \
-      <"${FRAMEWORK_SRC_DIR}/Options/${file}.sh" \
-      >"${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
-    # make pre-commit happy
-    sed -i -E -e '${/^$/d;}' "${FRAMEWORK_ROOT_DIR}/doc/guides/Options/${file}.md"
-  done
 
   cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
   sed -i -E \

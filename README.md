@@ -449,9 +449,6 @@ cat file | {
 
 ## 5. Acknowledgements
 
-This project is using [bash-tpl](https://github.com/TekWizely/bash-tpl) in order
-to compile several bash files into one files.
-
 Like so many projects, this effort has roots in many places.
 
 I would like to thank particularly Bazyli Brzóska for his work on the project

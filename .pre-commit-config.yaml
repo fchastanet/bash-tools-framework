@@ -28,10 +28,6 @@ repos:
         language: python
         types: [markdown]
         args: [--wrap, "80", --number]
-        exclude: |
-          (?x)(
-            ^doc/guides/Options/generate.*.md$
-          )
         additional_dependencies:
           - mdformat-toc
           - mdformat-shfmt
@@ -48,7 +44,6 @@ repos:
         exclude: |
           (?x)(
             ^doc/images/.*\.svg$|
-            ^doc/guides/Options/generate.*.md$|
             testsData/.*\.result$
           )
       - id: check-executables-have-shebangs
@@ -146,8 +141,7 @@ repos:
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
-            /testsData/|
-            ^doc/guides/Options/generate.*.md$
+            /testsData/
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
@@ -161,7 +155,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "74",
+            "78",
             --format,
             plain,
             --theme,

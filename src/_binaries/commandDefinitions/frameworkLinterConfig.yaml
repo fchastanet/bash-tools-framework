@@ -44,4 +44,3 @@ compileConfig:
     - /testsData/
     - ^manualTests/
     - \.bats$
-    - src/Options/_bats.sh

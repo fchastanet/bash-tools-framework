@@ -1,9 +1,0 @@
-[1;37mDESCRIPTION:[0m super command
-[1;37mUSAGE:[0m test [OPTIONS]
-[1;37mUSAGE:[0m test [--verbose|-v] [--src-dirs|-s <String>]
-
-[1;37mOPTIONS:[0m
-  [1;34m--verbose[0m, [1;34m-v[0m {single}
-    verbose mode
-  [1;34m--src-dirs[0m, [1;34m-s <String>[0m {list} (optional)
-    provide the directory where to find the functions source code.

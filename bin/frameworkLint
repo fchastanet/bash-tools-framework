@@ -398,7 +398,7 @@ File::detectBashFile() {
   for file in "${files[@]}"; do
     if [[ ! -f "${file}" ]]; then
       if [[ -z "${missingBashFileList}" ]]; then
-        missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-buildBinFiles-before-XXXXXX)"
+        missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-detectBashFile-before-XXXXXX)"
       fi
       echo "${file}" >>"${missingBashFileList}"
       return 0
