@@ -19,7 +19,7 @@ customCatalog:
     - name: megalinter
       description: megalinter
       fileMatch: [".mega-linter*.yml"]
-      location: https://raw.githubusercontent.com/megalinter/megalinter/main/megalinter/descriptors/schemas/megalinter-configuration.jsonschema.json
+      location: https://raw.githubusercontent.com/oxsecurity/megalinter/main/megalinter/descriptors/schemas/megalinter-configuration.jsonschema.json
     - name: pre-commit
       description: pre-commit
       fileMatch: [".pre-commit-config*.yml", ".pre-commit-config*.yaml"]

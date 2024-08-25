@@ -85,7 +85,7 @@ languageSettings:
 # OVERRIDES
 overrides:
   - filename:
-      - "**/*.{bats,tpl}"
+      - "**/*.bats"
       - "**/*.env"
       - "src/Array/wrap.sh"
     languageId: shellscript

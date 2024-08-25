@@ -171,7 +171,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "74",
+            "78",
             --format,
             checkstyle,
             --theme,

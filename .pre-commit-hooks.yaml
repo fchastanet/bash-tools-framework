@@ -96,11 +96,7 @@
   language: script
   entry: bin/megalinter
   args:
-    [
-      --image,
-      "oxsecurity/megalinter-terraform:v7.11.1",
-      --check-megalinter-version,
-    ]
+    [--image, "oxsecurity/megalinter-terraform:v8", --check-megalinter-version]
   pass_filenames: false
   always_run: true
   stages: [pre-commit, manual]
@@ -114,7 +110,7 @@
   args:
     [
       --image,
-      "oxsecurity/megalinter-terraform:v7.11.1",
+      "oxsecurity/megalinter-terraform:v8",
       --config-file,
       ".mega-linter-light.yml",
       --fix,
@@ -132,7 +128,7 @@
   args:
     [
       --image,
-      "oxsecurity/megalinter-terraform:v7.11.1",
+      "oxsecurity/megalinter-terraform:v8",
       --config-file,
       ".mega-linter-githubAction.yml",
       --fix,

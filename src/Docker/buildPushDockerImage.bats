@@ -23,7 +23,7 @@ teardown() {
 function Docker::buildPushDockerImage::successTraceOn { #@test
   stub docker \
     'pull scrasnups/build:bash-tools-vendor-5.1 : echo "pull"' \
-    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
+    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base --build-arg BASH_TAR_VERSION=5.1 -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
     'run --rm build:bash-tools-vendor-5.1 bash --version : echo version'
   run Docker::buildPushDockerImage "vendor" "5.1" "base" "0" "1" 2>&1
 
@@ -37,7 +37,7 @@ function Docker::buildPushDockerImage::successTraceOn { #@test
 function Docker::buildPushDockerImage::successTraceOff { #@test
   stub docker \
     'pull scrasnups/build:bash-tools-vendor-5.1 : echo "pull"' \
-    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
+    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base --build-arg BASH_TAR_VERSION=5.1 -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
     'run --rm build:bash-tools-vendor-5.1 bash --version : echo version'
   run Docker::buildPushDockerImage "vendor" "5.1" "base" "0" "0" 2>&1
 
@@ -51,7 +51,7 @@ function Docker::buildPushDockerImage::successTraceOff { #@test
 function Docker::buildPushDockerImage::successTraceOnPush { #@test
   stub docker \
     'pull scrasnups/build:bash-tools-vendor-5.1 : echo "pull"' \
-    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
+    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base --build-arg BASH_TAR_VERSION=5.1 -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
     'run --rm build:bash-tools-vendor-5.1 bash --version : echo version' \
     'push scrasnups/build:bash-tools-vendor-5.1 : echo "push"'
   run Docker::buildPushDockerImage "vendor" "5.1" "base" "1" "1" 2>&1
@@ -67,7 +67,7 @@ function Docker::buildPushDockerImage::successTraceOnPush { #@test
 function Docker::buildPushDockerImage::successTraceOffPush { #@test
   stub docker \
     'pull scrasnups/build:bash-tools-vendor-5.1 : echo "pull"' \
-    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
+    "build -f ${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.vendor --cache-from scrasnups/build:bash-tools-vendor-5.1 --build-arg argBashVersion=5.1 --build-arg BASH_IMAGE=base --build-arg BASH_TAR_VERSION=5.1 -t build:bash-tools-vendor-5.1 -t scrasnups/build:bash-tools-vendor-5.1 ${FRAMEWORK_ROOT_DIR}/.docker : echo 'build'" \
     'run --rm build:bash-tools-vendor-5.1 bash --version : echo version' \
     'push scrasnups/build:bash-tools-vendor-5.1 : echo "push"'
   run Docker::buildPushDockerImage "vendor" "5.1" "base" "1" "0" 2>&1
