@@ -130,7 +130,6 @@ repos:
             ^vendor/|
             ^bin/|
             ^manualTests/data/|
-            \.tpl$|
             /testsData/
           )
 

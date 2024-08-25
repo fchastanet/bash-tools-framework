@@ -40,7 +40,6 @@ compileConfig:
     - ^bin/
     - ^.github/
     - ^\.framework-config$
-    - \.tpl$
     - /testsData/
     - ^manualTests/
     - \.bats$
