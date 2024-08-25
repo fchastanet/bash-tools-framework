@@ -34,9 +34,9 @@ Docker::buildPushDockerImage() {
       ${DOCKER_BUILD_OPTIONS} \
       -f "${FRAMEWORK_ROOT_DIR}/.docker/Dockerfile.${optionVendor}" \
       --cache-from "${image}" \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
       --build-arg argBashVersion="${optionBashVersion}" \
       --build-arg BASH_IMAGE="${optionBashBaseImage}" \
+      --build-arg BASH_TAR_VERSION="${optionBashVersion}" \
       -t "${imageTag}" \
       -t "${image}" \
       "${FRAMEWORK_ROOT_DIR}/.docker"
