@@ -206,51 +206,6 @@ Here an excerpt of the namespaces available in Bash tools framework:
 
 ### 2.2. Usage
 
-simply add these lines to your script
-
-```bash
-#!/usr/bin/env bash
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myCommand
-
-# shellcheck disable=SC2034
-SCRIPT_NAME=${0##*/}
-REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
-# shellcheck disable=SC2034
-CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
-BIN_DIR="${CURRENT_DIR}"
-# shellcheck disable=SC2034
-FRAMEWORK_SRC_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/src' %>"
-# shellcheck disable=SC2034
-FRAMEWORK_VENDOR_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor' %>"
-# shellcheck disable=SC2034
-FRAMEWORK_VENDOR_BIN_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor/bin' %>"
-export PATH="${BIN_DIR}":"${FRAMEWORK_VENDOR_BIN_DIR}":${PATH}
-
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
-
-# FUNCTIONS
-```
-
-Then add below special `# FUNCTIONS` marker, the rest of your script.
-
-Special comments:
-
-- `# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myCommand` indicates where the resulting
-  file will be generated
-- `# FUNCTIONS` is a placeholder that will be used to inject the functions of
-  the framework that you are using in your script.
-
-Then use the following command to generate your file.
-
-**Eg:**
-
-Let's say your source file is named `src/_binaries/myCommand.sh`, then use the
-following command :
-
-```bash
-bin/compile src/_binaries/myCommand.sh
-```
-
 see related documentation [Compile command](doc/CompileCommand.md).
 
 ## 3. Development Environment

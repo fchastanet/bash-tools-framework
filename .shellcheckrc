@@ -6,4 +6,4 @@ enable=quote-safe-variables
 enable=require-double-brackets
 source-path=SCRIPTDIR
 # special property used by shellcheckLint
-exclude=(^bin/|\.bats$|\.tpl$|src/batsHeaders.sh$|/testsData/)
+exclude=(^bin/|\.bats$|src/batsHeaders.sh$|/testsData/)
