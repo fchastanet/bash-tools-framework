@@ -10,7 +10,7 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_VENDOR_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/vend
 if [[ ! -v COMPILE_PARAMETERS ]]; then
   # compile parameters
   # srcFile     : file that needs to be compiled
-  # templateDir : directory from which bash-tpl templates will be searched
+  # templateDir : directory from which templates will be searched
   # binDir      : fallback bin directory in case BIN_FILE has not been provided
   # rootDir     : directory used to compute src file relative path
   # srcDirs     : additional directories where to find the functions

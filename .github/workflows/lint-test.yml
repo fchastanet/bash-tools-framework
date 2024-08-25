@@ -221,10 +221,10 @@ jobs:
         id: ml
         if: ${{ !cancelled() }}
         # You can override MegaLinter flavor used to have faster performances
-        # More info at https://megalinter.io/flavors/
-        uses: oxsecurity/megalinter/flavors/terraform@v7
+        # More info at https://megalinter.io/latest/flavors/
+        uses: oxsecurity/megalinter/flavors/terraform@v8
         # All available variables are described in documentation
-        # https://megalinter.io/configuration/
+        # https://megalinter.io/latest/config-file/
         env:
           # Validates all source when push on master,
           # else just the git diff with master.
