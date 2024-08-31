@@ -1599,12 +1599,15 @@ frameworkLintCommandParse() {
           Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
           return 1
         fi
-
-        ((++options_parse_parsedArgIndex))
+        ((incrementArg = 0))
+        if ((incrementArg == 1)); then
+          ((++options_parse_parsedArgIndex))
+        fi
         ;;
     esac
     shift || true
   done || return $?
+
   commandOptionParseFinished
 
 }
@@ -1647,7 +1650,7 @@ frameworkLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
@@ -1671,26 +1674,26 @@ frameworkLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
@@ -1703,7 +1706,7 @@ frameworkLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
@@ -1725,7 +1728,7 @@ frameworkLintCommandHelp() {
 
   echo
   echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-  echo -e "  ${__HELP_OPTION_COLOR}--format format${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--format <format>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Define output format of this command."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "plain, "  "checkstyle"
@@ -1734,7 +1737,7 @@ frameworkLintCommandHelp() {
   Array::wrap2 ' ' 76 6 "    Default value: " "plain"
   echo
 
-  echo -e "  ${__HELP_OPTION_COLOR}--expected-warnings-count expected-warnings-count${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--expected-warnings-count <expected-warnings-count>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Specify expected warning count (default: 0)"
   echo
 
@@ -1804,6 +1807,10 @@ checkEachFunctionHasSrcFile() {
   local file="$1"
   if [[ "${file}" =~ .bats$ ]]; then
     Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - bats file"
+    return 0
+  fi
+  if [[ "${file}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
+    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule NON_FRAMEWORK_FILES_REGEXP matches"
     return 0
   fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${file}"; then

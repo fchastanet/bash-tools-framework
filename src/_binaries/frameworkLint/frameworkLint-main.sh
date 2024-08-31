@@ -10,6 +10,10 @@ checkEachFunctionHasSrcFile() {
     Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - bats file"
     return 0
   fi
+  if [[ "${file}" =~ ${NON_FRAMEWORK_FILES_REGEXP} ]]; then
+    Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule NON_FRAMEWORK_FILES_REGEXP matches"
+    return 0
+  fi
   if grep -q -E "${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP}" <<<"${file}"; then
     Log::displaySkipped "checkEachFunctionHasSrcFile - File ${file} - rule FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP matches"
     return 0

@@ -1532,33 +1532,44 @@ plantumlCommandParse() {
         unknownOption "${options_parse_arg}" || argOptDefaultBehavior=$?
         ;;
       *)
+        ((minParsedArgIndex0 = 0)) || true
+        ((maxParsedArgIndex0 = 0)) || true
+        ((minParsedArgIndex1 = minParsedArgIndex0 + 0)) || true
+        ((maxParsedArgIndex1 = maxParsedArgIndex0)) || true
+        ((incrementArg = 1 ))
         if ((0)); then
           # Technical if - never reached
           :
 
-        # Argument 1/1
-        # argPlantumlFiles min 0 max -1
-        # authorizedValues:
-        elif (( options_parse_parsedArgIndex >= 0 )); then
-
+        # Argument 1/1 - argPlantumlFiles
+        # Argument argPlantumlFiles min 0 max -1
+        # Argument argPlantumlFiles authorizedValues:
+        elif (( options_parse_parsedArgIndex >= minParsedArgIndex0 )); then
           ((++options_parse_argParsedCountArgPlantumlFiles))
           # shellcheck disable=SC2034
           # shellcheck disable=SC2034
           argPlantumlFiles+=("${options_parse_arg}")
 
+
         # else too much args
         else
+
 
           # no arg configured, call unknownArgumentCallback
 
           # shellcheck disable=SC2317
-          plantumlArgFileCallback "${options_parse_arg}"
+        plantumlArgFileCallback "${options_parse_arg}"
 
+        fi
+        if ((incrementArg == 1)); then
+          ((++options_parse_parsedArgIndex))
         fi
         ;;
     esac
     shift || true
   done || return $?
+
+
   commandOptionParseFinished
   plantumlCallback
 
@@ -1612,7 +1623,7 @@ plantumlCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
@@ -1636,26 +1647,26 @@ plantumlCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
@@ -1668,7 +1679,7 @@ plantumlCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
@@ -1696,7 +1707,7 @@ plantumlCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f Format${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <Format>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Defines output format of this command"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "svg, "  "png"
@@ -1705,7 +1716,7 @@ plantumlCommandHelp() {
   Array::wrap2 ' ' 76 6 "    Default value: " "png"
   echo
 
-  echo -e "  ${__HELP_OPTION_COLOR}--limit-size${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-l LimitSize${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--limit-size${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-l <LimitSize>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Define PLANTUML_LIMIT_SIZE" "use plantuml software default size if not provided" ""
   echo
 
@@ -1717,7 +1728,7 @@ plantumlCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--output-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-o OutputDir${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--output-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-o <OutputDir>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Define output directory of this command (default: <currentDirectory>)" "Incompatible with the option --same-dir" ""
   echo
 

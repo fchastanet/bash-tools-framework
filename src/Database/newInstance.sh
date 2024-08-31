@@ -52,7 +52,7 @@ Database::newInstance() {
   instanceNewInstance['SKIP_COLUMN_NAMES']="${SKIP_COLUMN_NAMES:-1}"
   instanceNewInstance['SSL_OPTIONS']="${MYSQL_SSL_OPTIONS:---ssl-mode=DISABLED}"
   instanceNewInstance['QUERY_OPTIONS']="${MYSQL_QUERY_OPTIONS:---batch --raw --default-character-set=utf8}"
-  instanceNewInstance['DUMP_OPTIONS']="${MYSQL_DUMP_OPTIONS:---default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 ${instanceNewInstance['SSL_OPTIONS']}}"
+  instanceNewInstance['DUMP_OPTIONS']="${MYSQL_DUMP_OPTIONS:---default-character-set=utf8  --compression-algorithms --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 ${instanceNewInstance['SSL_OPTIONS']}}"
   instanceNewInstance['DB_IMPORT_OPTIONS']="${DB_IMPORT_OPTIONS:---connect-timeout=5 --batch --raw --default-character-set=utf8}"
 
   instanceNewInstance['INITIALIZED']=1
