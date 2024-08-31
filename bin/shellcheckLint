@@ -1495,24 +1495,29 @@ shellcheckLintCommandParse() {
         unknownOption "${options_parse_arg}" || argOptDefaultBehavior=$?
         ;;
       *)
+        ((minParsedArgIndex0 = 0)) || true
+        ((maxParsedArgIndex0 = 0)) || true
+        ((minParsedArgIndex1 = minParsedArgIndex0 + 0)) || true
+        ((maxParsedArgIndex1 = maxParsedArgIndex0)) || true
+        ((incrementArg = 1 ))
         if ((0)); then
           # Technical if - never reached
           :
 
-        # Argument 1/1
-        # argShellcheckFiles min 0 max -1
-        # authorizedValues:
-        elif (( options_parse_parsedArgIndex >= 0 )); then
-
+        # Argument 1/1 - argShellcheckFiles
+        # Argument argShellcheckFiles min 0 max -1
+        # Argument argShellcheckFiles authorizedValues:
+        elif (( options_parse_parsedArgIndex >= minParsedArgIndex0 )); then
           ((++options_parse_argParsedCountArgShellcheckFiles))
           # shellcheck disable=SC2034
           # shellcheck disable=SC2034
           argShellcheckFiles+=("${options_parse_arg}")
-
           argShellcheckFilesCallback "${argShellcheckFiles[@]}" -- "${@:2}"
+
 
         # else too much args
         else
+
 
           if [[ "${argOptDefaultBehavior}" = "0" ]]; then
             # too much args and no unknownArgumentCallbacks configured
@@ -1521,10 +1526,15 @@ shellcheckLintCommandParse() {
           fi
 
         fi
+        if ((incrementArg == 1)); then
+          ((++options_parse_parsedArgIndex))
+        fi
         ;;
     esac
     shift || true
   done || return $?
+
+
   commandOptionParseFinished
   shellcheckLintParseCallback
 
@@ -1578,7 +1588,7 @@ shellcheckLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
@@ -1602,26 +1612,26 @@ shellcheckLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
@@ -1634,7 +1644,7 @@ shellcheckLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
@@ -1656,7 +1666,7 @@ shellcheckLintCommandHelp() {
 
   echo
   echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-  echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f format${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <format>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "define output format of this command"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "checkstyle, "  "diff, "  "gcc, "  "json, "  "json1, "  "quiet, "  "tty"

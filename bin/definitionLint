@@ -1591,16 +1591,20 @@ definitionLintCommandParse() {
         fi
         ;;
       *)
+        ((minParsedArgIndex0 = 0)) || true
+        ((maxParsedArgIndex0 = 0)) || true
+        ((minParsedArgIndex1 = minParsedArgIndex0 + 1)) || true
+        ((maxParsedArgIndex1 = maxParsedArgIndex0 + 1)) || true
+        ((incrementArg = 1 ))
         if ((0)); then
           # Technical if - never reached
           :
 
-        # Argument 1/1
-        # argFolder min 1 max 1
-        # authorizedValues:
-        elif (( options_parse_parsedArgIndex >= 0 &&
-          options_parse_parsedArgIndex < 1 )); then
-
+        # Argument 1/1 - argFolder
+        # Argument argFolder min 1 max 1
+        # Argument argFolder authorizedValues:
+        elif (( options_parse_parsedArgIndex >= minParsedArgIndex0 &&
+          options_parse_parsedArgIndex < maxParsedArgIndex1 )); then
           if ((options_parse_argParsedCountArgFolder >= 1 )); then
             Log::displayError "Command ${SCRIPT_NAME} - Argument folder - Maximum number of argument occurrences reached(1)"
             return 1
@@ -1610,8 +1614,10 @@ definitionLintCommandParse() {
           argFolder="${options_parse_arg}"
           argFolderCallback "${argFolder}" -- "${@:2}"
 
+
         # else too much args
         else
+
 
           if [[ "${argOptDefaultBehavior}" = "0" ]]; then
             # too much args and no unknownArgumentCallbacks configured
@@ -1619,6 +1625,9 @@ definitionLintCommandParse() {
             return 1
           fi
 
+        fi
+        if ((incrementArg == 1)); then
+          ((++options_parse_parsedArgIndex))
         fi
         ;;
     esac
@@ -1643,6 +1652,7 @@ definitionLintCommandParse() {
     Log::displayError "Command ${SCRIPT_NAME} - Argument 'folder' should be provided at least 1 time(s)"
     return 1
   fi || return $?
+
   commandOptionParseFinished
 
 }
@@ -1674,7 +1684,7 @@ definitionLintCommandHelp() {
   echo
   echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
 
-    Array::wrap2 " " 80 2 "  ${__HELP_OPTION_COLOR}folder${__HELP_NORMAL}{single} (mandatory)
+    Array::wrap2 " " 80 2 "  ${__HELP_OPTION_COLOR}folder${__HELP_NORMAL} {single} (mandatory)
   "
     Array::wrap2 ' ' 76 4 "    " "the folder to recursively lint"
     echo
@@ -1683,7 +1693,7 @@ definitionLintCommandHelp() {
   # ------------------------------------------
   echo
   echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-  echo -e "  ${__HELP_OPTION_COLOR}--format format${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--format <format>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Define output format of this command."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "plain, "  "checkstyle"
@@ -1705,7 +1715,7 @@ definitionLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
@@ -1729,26 +1739,26 @@ definitionLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
@@ -1761,7 +1771,7 @@ definitionLintCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"

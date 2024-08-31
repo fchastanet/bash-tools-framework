@@ -1793,11 +1793,16 @@ megalinterCommandParse() {
         # shellcheck disable=SC2317
         unknownArg "${options_parse_arg}"
 
-        ((++options_parse_parsedArgIndex))
+
+        if ((incrementArg == 1)); then
+          ((++options_parse_parsedArgIndex))
+        fi
         ;;
     esac
     shift || true
   done || return $?
+
+
   commandCallback
   commandOptionParseFinished
 
@@ -1841,7 +1846,7 @@ megalinterCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
@@ -1865,26 +1870,26 @@ megalinterCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
@@ -1897,7 +1902,7 @@ megalinterCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
@@ -1919,7 +1924,7 @@ megalinterCommandHelp() {
 
   echo
   echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-  echo -e "  ${__HELP_OPTION_COLOR}--format <Format>${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--format <<Format>>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Define output format of this command."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "plain, "  "json"
@@ -1946,7 +1951,7 @@ megalinterCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--image <ImageName>${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--image <<ImageName>>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Specify docker megalinter image name to use."
   echo
 
@@ -1954,7 +1959,7 @@ megalinterCommandHelp() {
   Array::wrap2 ' ' 76 6 "    Default value: " "oxsecurity/megalinter-terraform:v7.10.0"
   echo
 
-  echo -e "  ${__HELP_OPTION_COLOR}--config-file <ConfigFile>${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--config-file <<ConfigFile>>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Specify megalinter config filename to use."
   echo
 

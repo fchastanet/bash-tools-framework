@@ -1520,12 +1520,15 @@ buildPushDockerImageCommandParse() {
           Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
           return 1
         fi
-
-        ((++options_parse_parsedArgIndex))
+        ((incrementArg = 0))
+        if ((incrementArg == 1)); then
+          ((++options_parse_parsedArgIndex))
+        fi
         ;;
     esac
     shift || true
   done || return $?
+
   commandOptionParseFinished
 
 }
@@ -1568,7 +1571,7 @@ buildPushDockerImageCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
@@ -1592,26 +1595,26 @@ buildPushDockerImageCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file env-file${__HELP_NORMAL} {list} (optional)"
+  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
   Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
   echo
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
@@ -1624,7 +1627,7 @@ buildPushDockerImageCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
@@ -1652,7 +1655,7 @@ buildPushDockerImageCommandHelp() {
 
 
 
-  echo -e "  ${__HELP_OPTION_COLOR}--vendor vendor${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--vendor <vendor>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "vendor image to use"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "alpine, "  "ubuntu"
@@ -1661,7 +1664,7 @@ buildPushDockerImageCommandHelp() {
   Array::wrap2 ' ' 76 6 "    Default value: " "ubuntu"
   echo
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-version bash-version${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-version <bash-version>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "version of bash to use"
   echo
   Array::wrap2 ' ' 76 6 "    Possible values: " "4.4, "  "5.0, "  "5.1, "  "5.2"
@@ -1670,7 +1673,7 @@ buildPushDockerImageCommandHelp() {
   Array::wrap2 ' ' 76 6 "    Default value: " "5.2"
   echo
 
-  echo -e "  ${__HELP_OPTION_COLOR}--bash-base-image bash-base-image${__HELP_NORMAL} {single}"
+  echo -e "  ${__HELP_OPTION_COLOR}--bash-base-image <bash-base-image>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "bash bash image to use (eg: ubuntu:20.04, amd64/bash:4.4-alpine3.18)"
   echo
 
