@@ -1198,7 +1198,7 @@ declare optionTheme="default"
 declare optionVersion="0"
 declare optionQuiet="0"
 declare optionFormat="plain"
-declare optionExpectedWarningsCount="tty"
+declare optionExpectedWarningsCount="0"
 # arguments variables initialization
 # @description parse command options and arguments for frameworkLintCommand
 frameworkLintCommandParse() {
@@ -1247,7 +1247,7 @@ frameworkLintCommandParse() {
   optionFormat="plain"
   local -i options_parse_optionParsedCountOptionFormat
   ((options_parse_optionParsedCountOptionFormat = 0)) || true
-  optionExpectedWarningsCount="tty"
+  optionExpectedWarningsCount="0"
   local -i options_parse_optionParsedCountOptionExpectedWarningsCount
   ((options_parse_optionParsedCountOptionExpectedWarningsCount = 0)) || true
 
@@ -1742,8 +1742,6 @@ frameworkLintCommandHelp() {
   echo
 
 
-  Array::wrap2 ' ' 76 6 "    Default value: " "tty"
-  echo
   # ------------------------------------------
   # longDescription section
   # ------------------------------------------

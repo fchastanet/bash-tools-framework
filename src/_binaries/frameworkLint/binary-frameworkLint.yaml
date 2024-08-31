@@ -33,7 +33,7 @@ binData:
       options:
         - alts:
             - --expected-warnings-count
-          defaultValue: tty
+          defaultValue: 0
           group: OptionsGroup
           help: "Specify expected warning count (default: 0)"
           type: String
