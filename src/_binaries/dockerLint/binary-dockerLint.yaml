@@ -17,7 +17,8 @@ binData:
         - unknownArg
       beforeParseCallbacks:
         - beforeParseCallback
-      version: "1.0"
+      version: "3.0"
+      copyrightBeginYear: 2022
       commandName: dockerLint
       definitionFiles:
         20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/dockerLint/dockerLint-options.sh

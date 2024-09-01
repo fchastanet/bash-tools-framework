@@ -15,7 +15,8 @@ binData:
         - unknownOption
       beforeParseCallbacks:
         - beforeParseCallback
-      version: "1.0"
+      version: "3.0"
+      copyrightBeginYear: 2022
       commandName: shellcheckLint
       definitionFiles:
         20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/shellcheckLint/shellcheckLint-options.sh

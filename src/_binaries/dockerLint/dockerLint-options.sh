@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-declare versionNumber="1.0"
-# shellcheck disable=SC2034
-declare copyrightBeginYear="2022"
 # shellcheck disable=SC2034
 declare MIN_HADOLINT_VERSION="2.12.0"
 

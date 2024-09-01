@@ -4,11 +4,6 @@ declare optionFormatDefault="tty"
 # shellcheck disable=SC2034
 declare optionFormat="${optionFormatDefault}"
 
-# shellcheck disable=SC2034
-declare copyrightBeginYear="2022"
-# shellcheck disable=SC2034
-declare versionNumber="{{ .Data.binData.commands.default.version }}"
-
 beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme

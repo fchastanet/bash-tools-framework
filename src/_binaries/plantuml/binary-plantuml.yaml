@@ -20,7 +20,8 @@ binData:
         - plantumlCallback
       beforeParseCallbacks:
         - beforeParseCallback
-      version: "1.0"
+      version: "3.0"
+      copyrightBeginYear: 2023
       commandName: plantuml
       definitionFiles:
         20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/plantuml/plantuml-options.sh

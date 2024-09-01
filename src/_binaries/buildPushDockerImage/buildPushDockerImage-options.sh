@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=SC2034
-declare versionNumber="1.0"
-declare copyrightBeginYear="2023"
-
 optionHelpCallback() {
   buildPushDockerImageCommandHelp
   exit 0

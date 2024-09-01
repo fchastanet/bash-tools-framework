@@ -3,9 +3,6 @@
 declare optionFormatDefault="tty"
 # shellcheck disable=SC2034
 declare MIN_SHELLCHECK_VERSION="0.9.0"
-# shellcheck disable=SC2034
-declare copyrightBeginYear="2022"
-declare versionNumber="1.0"
 
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
