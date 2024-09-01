@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2034
-declare versionNumber="1.0"
-declare copyrightBeginYear="2022"
 declare optionDefaultOutputDir="doc/images"
 declare -a defaultFormatsIfNoneProvided=("png")
 declare -a plantumlOptions=()

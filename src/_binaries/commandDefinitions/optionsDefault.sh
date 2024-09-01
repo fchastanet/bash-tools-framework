@@ -9,10 +9,8 @@ beforeParseCallback() {
 }
 
 copyrightCallback() {
-  if [[ -z "${copyrightBeginYear}" ]]; then
-    copyrightBeginYear="$(date +%Y)"
-  fi
-  echo "Copyright (c) ${copyrightBeginYear}-now François Chastanet"
+  #{{- $copyrightBeginYear := .RootData.binData.commands.default.copyrightBeginYear | default "$(date +%Y)" }}
+  echo "Copyright (c) {{ $copyrightBeginYear }}-now François Chastanet"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -51,7 +49,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version ${versionNumber}"
+  echo "${SCRIPT_NAME} version {{ .RootData.binData.commands.default.version }}"
   exit 0
 }
 

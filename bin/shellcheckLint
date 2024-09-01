@@ -305,7 +305,7 @@ Assert::tty() {
 # @stderr diagnostics information is displayed
 # shellcheck disable=SC2120
 Env::requireLoad() {
-  REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED=1
+  export REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED=1
 
   local -a defaultFiles=("$@")
   # get list of possible config files
@@ -570,7 +570,7 @@ Log::logWarning() {
 # @exitcode 0 always successful
 # @stderr diagnostics information about log file is displayed
 Log::requireLoad() {
-  REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
+  export REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
 
 
   if [[ "${REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED:-0}" != 1 ]]; then
@@ -660,7 +660,7 @@ UI::drawLine() {
 # @env LOAD_THEME int 0 to avoid loading theme
 # @exitcode 0 always successful
 UI::requireTheme() {
-  REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED=1
+  export REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED=1
 
   if [[ "${LOAD_THEME:-1}" = "1" ]]; then
     UI::theme "${BASH_FRAMEWORK_THEME-default}"
@@ -759,10 +759,8 @@ beforeParseCallback() {
 }
 
 copyrightCallback() {
-  if [[ -z "${copyrightBeginYear}" ]]; then
-    copyrightBeginYear="$(date +%Y)"
-  fi
-  echo "Copyright (c) ${copyrightBeginYear}-now François Chastanet"
+  #
+  echo "Copyright (c) 2022-now François Chastanet"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -801,7 +799,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version ${versionNumber}"
+  echo "${SCRIPT_NAME} version 3.0"
   exit 0
 }
 
@@ -1010,9 +1008,6 @@ commandOptionParseFinished() {
 declare optionFormatDefault="tty"
 # shellcheck disable=SC2034
 declare MIN_SHELLCHECK_VERSION="0.9.0"
-# shellcheck disable=SC2034
-declare copyrightBeginYear="2022"
-declare versionNumber="1.0"
 
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
@@ -1542,8 +1537,9 @@ shellcheckLintCommandParse() {
 
 # @description display command options and arguments help for shellcheckLintCommand
 shellcheckLintCommandHelp() {
-  Array::wrap2 ' ' 80 0 "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}" \
-    "Lint bash files using shellcheck."
+  echo -e "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}"
+  Array::wrap2 ' ' 76 4 "    " "Lint bash files using shellcheck."
+
   echo
   echo
 
@@ -1569,7 +1565,7 @@ shellcheckLintCommandHelp() {
 
     Array::wrap2 " " 80 2 "  [${__HELP_OPTION_COLOR}shellcheckFiles${__HELP_NORMAL} {list} (optional)]
   "
-    Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck. If not provided," "all files from git repository which are beginning" "with a bash shebang, unless --staged option is provided." ""
+  Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck. If not provided," "all files from git repository which are beginning" "with a bash shebang, unless --staged option is provided." ""
     echo
   # ------------------------------------------
   # options section
@@ -1716,7 +1712,7 @@ shellcheckLintCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "1.0"
+  echo "3.0"
   # ------------------------------------------
   # author section
   # ------------------------------------------

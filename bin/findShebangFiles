@@ -305,7 +305,7 @@ Assert::tty() {
 # @stderr diagnostics information is displayed
 # shellcheck disable=SC2120
 Env::requireLoad() {
-  REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED=1
+  export REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED=1
 
   local -a defaultFiles=("$@")
   # get list of possible config files
@@ -570,7 +570,7 @@ Log::logWarning() {
 # @exitcode 0 always successful
 # @stderr diagnostics information about log file is displayed
 Log::requireLoad() {
-  REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
+  export REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
 
 
   if [[ "${REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED:-0}" != 1 ]]; then
@@ -660,7 +660,7 @@ UI::drawLine() {
 # @env LOAD_THEME int 0 to avoid loading theme
 # @exitcode 0 always successful
 UI::requireTheme() {
-  REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED=1
+  export REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED=1
 
   if [[ "${LOAD_THEME:-1}" = "1" ]]; then
     UI::theme "${BASH_FRAMEWORK_THEME-default}"
@@ -759,10 +759,8 @@ beforeParseCallback() {
 }
 
 copyrightCallback() {
-  if [[ -z "${copyrightBeginYear}" ]]; then
-    copyrightBeginYear="$(date +%Y)"
-  fi
-  echo "Copyright (c) ${copyrightBeginYear}-now François Chastanet"
+  #
+  echo "Copyright (c) 2023-now François Chastanet"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -801,7 +799,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version ${versionNumber}"
+  echo "${SCRIPT_NAME} version 3.0"
   exit 0
 }
 
@@ -1006,11 +1004,6 @@ commandOptionParseFinished() {
 }
 
 
-
-# shellcheck disable=SC2034
-declare copyrightBeginYear="2023"
-# shellcheck disable=SC2034
-declare versionNumber="1.0"
 
 declare -a commandToApply=()
 unknownOptionArgFunction() {
@@ -1401,8 +1394,9 @@ findShebangFilesCommandParse() {
 
 # @description display command options and arguments help for findShebangFilesCommand
 findShebangFilesCommandHelp() {
-  Array::wrap2 ' ' 80 0 "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}" \
-    "find all shebang files of this repository"
+  echo -e "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}"
+  Array::wrap2 ' ' 76 4 "    " "find all shebang files of this repository"
+
   echo
   echo
 
@@ -1535,7 +1529,7 @@ findShebangFilesCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "1.0"
+  echo "3.0"
   # ------------------------------------------
   # author section
   # ------------------------------------------

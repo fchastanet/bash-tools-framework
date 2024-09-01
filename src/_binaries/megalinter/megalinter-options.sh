@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2034
-declare copyrightBeginYear="2022"
-declare versionNumber="1.0"
 declare -a megalinterArgs=()
 
 optionHelpCallback() {
