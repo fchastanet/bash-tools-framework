@@ -4,7 +4,7 @@ extends:
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
 
 vars:
-  SRC_FILE_PATH: src/_binaries/plantuml/binary-plantuml.yaml
+  SRC_FILE_PATH: src/_binaries/plantuml/plantuml-binary.yaml
 
 compilerConfig:
   targetFile: "${FRAMEWORK_ROOT_DIR}/bin/plantuml"

@@ -4,7 +4,7 @@ extends:
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsFormat.yaml"
 
 vars:
-  SRC_FILE_PATH: src/_binaries/frameworkLint/binary-frameworkLint.yaml
+  SRC_FILE_PATH: src/_binaries/frameworkLint/frameworkLint-binary.yaml
 
 compilerConfig:
   targetFile: "${FRAMEWORK_ROOT_DIR}/bin/frameworkLint"

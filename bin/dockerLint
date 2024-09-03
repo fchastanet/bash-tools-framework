@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/dockerLint/binary-dockerLint.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/dockerLint/dockerLint-binary.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -2009,7 +2009,7 @@ dockerLintCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/dockerLint/binary-dockerLint.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/dockerLint/dockerLint-binary.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------

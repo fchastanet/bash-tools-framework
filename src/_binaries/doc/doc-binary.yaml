@@ -4,7 +4,7 @@ extends:
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
 
 vars:
-  SRC_FILE_PATH: src/_binaries/doc/binary-doc.yaml
+  SRC_FILE_PATH: src/_binaries/doc/doc-binary.yaml
 
 compilerConfig:
   targetFile: "${FRAMEWORK_ROOT_DIR}/bin/doc"

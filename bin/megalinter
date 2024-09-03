@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter/binary-megalinter.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter/megalinter-binary.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -1999,7 +1999,7 @@ megalinterCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter/binary-megalinter.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/megalinter/megalinter-binary.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------

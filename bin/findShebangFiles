@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/findShebangFiles/binary-findShebangFiles.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/findShebangFiles/findShebangFiles-binary.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -1541,7 +1541,7 @@ findShebangFilesCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/findShebangFiles/binary-findShebangFiles.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/findShebangFiles/findShebangFiles-binary.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------

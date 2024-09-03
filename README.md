@@ -63,20 +63,22 @@ New compiler (GoLang implementation)
 ```bash
 export PATH=$PATH:/home/wsl/fchastanet/bash-compiler/bin
 FRAMEWORK_ROOT_DIR=$(pwd) bash-compiler \
-  src/_binaries/commandDefinitions/binary-shellcheckLint.yaml
+  src/_binaries/commandDefinitions/shellcheckLint-binary.yaml
 ```
 
 - using go interpreter (has to be executed from bash-compiler folder)
 
 ```bash
-FRAMEWORK_ROOT_DIR=/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework
-FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR}" go run ./cmd/bash-compiler/main.go \
-  "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/binary-shellcheckLint.yaml"
+export FRAMEWORK_ROOT_DIR=/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework
+go run ./cmd/bash-compiler "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/shellcheckLint-binary.yaml"
 ```
 
-Old compiler version (bash implementation is still available but deprecated)
+- compile every `*-binary.yaml` files at once
 
-- **compile** : Inlines all the functions used in the script given in parameter
+```bash
+export FRAMEWORK_ROOT_DIR=/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework
+go run ./cmd/bash-compiler $(find "${BASH_TOOLS_ROOT_DIR}/src/_binaries" -name '*-binary.yaml' -print)
+```
 
 see related documentation [Compile command](doc/CompileCommand.md).
 
