@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint/binary-frameworkLint.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint/frameworkLint-binary.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -1771,7 +1771,7 @@ frameworkLintCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint/binary-frameworkLint.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/frameworkLint/frameworkLint-binary.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------

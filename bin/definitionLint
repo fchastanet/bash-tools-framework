@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint/binary-definitionLint.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint/definitionLint-binary.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -1836,7 +1836,7 @@ definitionLintCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint/binary-definitionLint.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/definitionLint/definitionLint-binary.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------

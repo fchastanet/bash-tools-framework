@@ -3,7 +3,7 @@ extends:
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
 
 vars:
-  SRC_FILE_PATH: src/_binaries/dockerLint/binary-dockerLint.yaml
+  SRC_FILE_PATH: src/_binaries/dockerLint/dockerLint-binary.yaml
 
 compilerConfig:
   targetFile: "${FRAMEWORK_ROOT_DIR}/bin/dockerLint"
