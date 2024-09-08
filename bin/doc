@@ -1618,6 +1618,7 @@ beforeParseCallback() {
 
 copyrightCallback() {
   #
+  # shellcheck disable=SC2155,SC2154,SC2250
   echo "Copyright (c) 2022-now François Chastanet"
 }
 
@@ -1659,16 +1660,6 @@ optionVersionCallback() {
   # shellcheck disable=SC2154
   echo "${SCRIPT_NAME} version 3.0"
   exit 0
-}
-
-# shellcheck disable=SC2317 # if function is overridden
-optionEnvFileCallback() {
-  local envFile="$2"
-  Log::displayWarning "Command ${SCRIPT_NAME} - Option --env-file is deprecated and will be removed in the future"
-  if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
-    Log::displayError "Command ${SCRIPT_NAME} - Option --env-file - File '${envFile}' doesn't exist"
-    exit 1
-  fi
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -1845,9 +1836,6 @@ commandOptionParseFinished() {
   defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
   echo "${defaultFrameworkConfig}" >"${defaultEnvFile}"
   local -a files=("${defaultEnvFile}")
-  if [[ -f "${envFile}" ]]; then
-    files+=("${envFile}")
-  fi
   # shellcheck disable=SC2154
   if [[ -f "${optionBashFrameworkConfig}" ]]; then
     files+=("${optionBashFrameworkConfig}")
@@ -1894,7 +1882,6 @@ declare optionBashFrameworkConfig=""
 declare optionInfoVerbose="0"
 declare optionDebugVerbose="0"
 declare optionTraceVerbose="0"
-declare -a optionEnvFiles=()
 declare optionLogLevel=""
 declare optionLogFile=""
 declare optionDisplayLevel=""
@@ -1928,7 +1915,6 @@ docCommandParse() {
   optionTraceVerbose="0"
   local -i options_parse_optionParsedCountOptionTraceVerbose
   ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
-
   optionLogLevel=""
   local -i options_parse_optionParsedCountOptionLogLevel
   ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
@@ -1958,7 +1944,7 @@ docCommandParse() {
     local options_parse_arg="$1"
     local argOptDefaultBehavior=0
     case "${options_parse_arg}" in
-      # Option 1/15
+      # Option 1/14
       # optionContinuousIntegrationMode alts --ci
       # type: Boolean min 0 max 1
       --ci)
@@ -1974,7 +1960,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 2/15
+      # Option 2/14
       # optionHelp alts --help|-h
       # type: Boolean min 0 max 1
       --help | -h)
@@ -1990,7 +1976,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 3/15
+      # Option 3/14
       # optionConfig alts --config
       # type: Boolean min 0 max 1
       --config)
@@ -2004,7 +1990,7 @@ docCommandParse() {
         ((++options_parse_optionParsedCountOptionConfig))
         ;;
 
-      # Option 4/15
+      # Option 4/14
       # optionBashFrameworkConfig alts --bash-framework-config
       # type: String min 0 max 1
       --bash-framework-config)
@@ -2025,7 +2011,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 5/15
+      # Option 5/14
       # optionInfoVerbose alts --verbose|-v
       # type: Boolean min 0 max 1
       --verbose | -v)
@@ -2043,7 +2029,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 6/15
+      # Option 6/14
       # optionDebugVerbose alts -vv
       # type: Boolean min 0 max 1
       -vv)
@@ -2061,7 +2047,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 7/15
+      # Option 7/14
       # optionTraceVerbose alts -vvv
       # type: Boolean min 0 max 1
       -vvv)
@@ -2079,25 +2065,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 8/15
-      # optionEnvFiles alts --env-file
-      # type: StringArray min 0 max -1
-      --env-file)
-        shift
-        if (($# == 0)); then
-          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
-          return 1
-        fi
-
-        ((++options_parse_optionParsedCountOptionEnvFiles))
-        optionEnvFiles+=("$1")
-        optionEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
-
-        updateArgListEnvFileCallback "${options_parse_arg}" "${optionEnvFiles[@]}"
-
-        ;;
-
-      # Option 9/15
+      # Option 8/14
       # optionLogLevel alts --log-level
       # type: String min 0 max 1
       # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
@@ -2125,7 +2093,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 10/15
+      # Option 9/14
       # optionLogFile alts --log-file
       # type: String min 0 max 1
       --log-file)
@@ -2148,7 +2116,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 11/15
+      # Option 10/14
       # optionDisplayLevel alts --display-level
       # type: String min 0 max 1
       # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
@@ -2176,7 +2144,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 12/15
+      # Option 11/14
       # optionNoColor alts --no-color
       # type: Boolean min 0 max 1
       --no-color)
@@ -2194,7 +2162,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 13/15
+      # Option 12/14
       # optionTheme alts --theme
       # type: String min 0 max 1
       # authorizedValues: default|default-force|noColor
@@ -2222,7 +2190,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 14/15
+      # Option 13/14
       # optionVersion alts --version
       # type: Boolean min 0 max 1
       --version)
@@ -2238,7 +2206,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 15/15
+      # Option 14/14
       # optionQuiet alts --quiet|-q
       # type: Boolean min 0 max 1
       --quiet | -q)
@@ -2294,7 +2262,7 @@ docCommandHelp() {
   # ------------------------------------------
   # usage/options section
   # ------------------------------------------
-  optionsAltList=("[--ci]" "[--help|-h]" "[--config]" "[--bash-framework-config <bash-framework-config>]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--env-file <env-file>]" "[--log-level <log-level>]" "[--log-file <log-file>]" "[--display-level <display-level>]" "[--no-color]" "[--theme <theme>]" "[--version]" "[--quiet|-q]"
+  optionsAltList=("[--ci]" "[--help|-h]" "[--config]" "[--bash-framework-config <bash-framework-config>]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--log-level <log-level>]" "[--log-file <log-file>]" "[--display-level <display-level>]" "[--no-color]" "[--theme <theme>]" "[--version]" "[--quiet|-q]"
   )
   Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
     "doc" "${optionsAltList[@]}"
@@ -2344,12 +2312,6 @@ docCommandHelp() {
 
   echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Trace level verbose mode (alias of --display-level TRACE)"
-  echo
-
-
-
-  echo -e "  ${__HELP_OPTION_COLOR}--env-file <env-file>${__HELP_NORMAL} {list} (optional)"
-  Array::wrap2 ' ' 76 4 "    " "Load the specified env file (deprecated, please use --bash-framework-config option instead)"
   echo
 
 

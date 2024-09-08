@@ -16,7 +16,7 @@ optionHelpCallback() {
 }
 
 optionVersionCallback() {
-  echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version: ${__RESET_COLOR} <% ${versionNumber} %>"
+  echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version: ${__RESET_COLOR}{{ .RootData.binData.commands.default.version }}"
   echo -e -n "${__HELP_TITLE_COLOR}hadolint Version: ${__RESET_COLOR}"
   "${FRAMEWORK_VENDOR_BIN_DIR}/hadolint" --version
   exit 0

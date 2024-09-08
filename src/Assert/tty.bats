@@ -11,6 +11,7 @@ teardown() {
 }
 
 function Assert::tty_non_interactive { #@test
+  stub tty '-s : exit 1'
   run Assert::tty
   assert_failure
   assert_output ""
