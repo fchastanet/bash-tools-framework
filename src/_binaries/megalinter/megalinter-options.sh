@@ -68,7 +68,7 @@ optionFixCallback() {
 }
 
 optionVersionCallback() {
-  echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version:${__RESET_COLOR} ${versionNumber}"
+  echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version:${__RESET_COLOR} {{ .RootData.binData.commands.default.version }}"
   echo -e "${__HELP_TITLE_COLOR}megalinter image Version:${__RESET_COLOR} ${optionMegalinterImage}"
   exit 0
 }

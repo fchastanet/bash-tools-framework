@@ -73,18 +73,6 @@ binData:
           callbacks:
             - optionTraceVerboseCallback
             - updateArgListTraceVerboseCallback
-        - variableName: optionEnvFiles
-          group: zzzGroupGlobalOptionsGroup
-          type: StringArray
-          help:
-            Load the specified env file (deprecated, please use
-            --bash-framework-config option instead)
-          alts:
-            - "--env-file"
-          max: -1
-          callbacks:
-            - optionEnvFileCallback
-            - updateArgListEnvFileCallback
         - variableName: optionLogLevel
           group: zzzGroupGlobalOptionsGroup
           type: String

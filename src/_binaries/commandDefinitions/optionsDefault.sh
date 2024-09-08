@@ -10,6 +10,7 @@ beforeParseCallback() {
 
 copyrightCallback() {
   #{{- $copyrightBeginYear := .RootData.binData.commands.default.copyrightBeginYear | default "$(date +%Y)" }}
+  # shellcheck disable=SC2155,SC2154,SC2250
   echo "Copyright (c) {{ $copyrightBeginYear }}-now François Chastanet"
 }
 
@@ -51,16 +52,6 @@ optionVersionCallback() {
   # shellcheck disable=SC2154
   echo "${SCRIPT_NAME} version {{ .RootData.binData.commands.default.version }}"
   exit 0
-}
-
-# shellcheck disable=SC2317 # if function is overridden
-optionEnvFileCallback() {
-  local envFile="$2"
-  Log::displayWarning "Command ${SCRIPT_NAME} - Option --env-file is deprecated and will be removed in the future"
-  if [[ ! -f "${envFile}" || ! -r "${envFile}" ]]; then
-    Log::displayError "Command ${SCRIPT_NAME} - Option --env-file - File '${envFile}' doesn't exist"
-    exit 1
-  fi
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -207,9 +198,6 @@ commandOptionParseFinished() {
   defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
   echo "${defaultFrameworkConfig}" >"${defaultEnvFile}"
   local -a files=("${defaultEnvFile}")
-  if [[ -f "${envFile}" ]]; then
-    files+=("${envFile}")
-  fi
   # shellcheck disable=SC2154
   if [[ -f "${optionBashFrameworkConfig}" ]]; then
     files+=("${optionBashFrameworkConfig}")
