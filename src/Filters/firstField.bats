@@ -34,6 +34,6 @@ function Filters::firstField::bigFile { #@test
   tail -1209 "${BATS_TEST_DIRNAME}/testsData/binary" | {
     run Filters::firstField
     assert_success
-    assert_output 'UI::drawLine()'
+    assert_output 'Github::upgradeRelease'
   }
 }
