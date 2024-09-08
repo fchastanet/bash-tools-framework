@@ -36,6 +36,7 @@ convertPuml() {
     local fileBasename="${file##*/}"
     targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
   fi
+  pullPlantumlImageIfNeeded
   Log::displayInfo "Generating ${targetFile} from ${file}"
   local -a env=()
   if [[ -n "${optionLimitSize}" ]]; then

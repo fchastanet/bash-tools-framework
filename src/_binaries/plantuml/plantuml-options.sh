@@ -5,7 +5,7 @@ declare optionDefaultOutputDir="doc/images"
 declare -a defaultFormatsIfNoneProvided=("png")
 declare -a plantumlOptions=()
 declare -a argPlantumlFiles=()
-readonly PLANTUML_PULL_TIMEOUT=$((30 * 24 * 3600))
+readonly PLANTUML_PULL_TIMEOUT=$((7 * 24 * 3600))
 
 unknownOption() {
   plantumlOptions+=("$1")

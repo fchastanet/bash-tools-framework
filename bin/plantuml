@@ -957,7 +957,7 @@ declare optionDefaultOutputDir="doc/images"
 declare -a defaultFormatsIfNoneProvided=("png")
 declare -a plantumlOptions=()
 declare -a argPlantumlFiles=()
-readonly PLANTUML_PULL_TIMEOUT=$((30 * 24 * 3600))
+readonly PLANTUML_PULL_TIMEOUT=$((7 * 24 * 3600))
 
 unknownOption() {
   plantumlOptions+=("$1")
@@ -1758,6 +1758,7 @@ convertPuml() {
     local fileBasename="${file##*/}"
     targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
   fi
+  pullPlantumlImageIfNeeded
   Log::displayInfo "Generating ${targetFile} from ${file}"
   local -a env=()
   if [[ -n "${optionLimitSize}" ]]; then
