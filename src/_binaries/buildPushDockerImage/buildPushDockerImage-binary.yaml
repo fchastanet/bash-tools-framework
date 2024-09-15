@@ -44,9 +44,11 @@ binData:
 
         - alts:
             - --vendor
-          authorizedValuesList:
-            - alpine
-            - ubuntu
+          authorizedValues:
+            - help: alpine based docker image
+              value: alpine
+            - help: ubuntu based docker image
+              value: ubuntu
           defaultValue: ubuntu
           group: OptionsGroup
           help: vendor image to use
@@ -57,11 +59,11 @@ binData:
 
         - alts:
             - --bash-version
-          authorizedValuesList:
-            - "4.4"
-            - "5.0"
-            - "5.1"
-            - "5.2"
+          authorizedValues:
+            - value: "4.4"
+            - value: "5.0"
+            - value: "5.1"
+            - value: "5.2"
           defaultValue: "5.2"
           group: OptionsGroup
           help: version of bash to use

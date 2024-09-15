@@ -41,9 +41,9 @@ binData:
           help: Defines output format of this command
           group: OptionsGroup
           type: StringArray
-          authorizedValuesList:
-            - svg
-            - png
+          authorizedValues:
+            - value: svg
+            - value: png
           defaultValue: png
           max: -1
           min: 0

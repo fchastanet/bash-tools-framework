@@ -37,9 +37,9 @@ binData:
           group: OptionsGroup
           type: String
           defaultValue: plain
-          authorizedValuesList:
-            - plain
-            - json
+          authorizedValues:
+            - value: plain
+            - value: json
           help: Define output format of this command.
           helpValueName: <Format>
           callbacks:

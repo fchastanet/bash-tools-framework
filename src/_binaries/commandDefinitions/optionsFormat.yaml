@@ -9,9 +9,9 @@ binData:
           group: OptionsGroup
           type: String
           defaultValue: plain
-          authorizedValuesList:
-            - plain
-            - checkstyle
+          authorizedValues:
+            - value: plain
+            - value: checkstyle
           help: Define output format of this command.
           alts:
             - "--format"
