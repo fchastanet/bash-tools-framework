@@ -24,3 +24,7 @@ customCatalog:
       description: pre-commit
       fileMatch: [".pre-commit-config*.yml", ".pre-commit-config*.yaml"]
       location: https://json.schemastore.org/pre-commit-config.json
+    - name: eslint-json
+      description: eslint-json
+      fileMatch: [".eslintrc-json.json"]
+      location: https://json.schemastore.org/eslintrc.json
