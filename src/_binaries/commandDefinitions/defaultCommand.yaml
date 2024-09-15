@@ -79,15 +79,15 @@ binData:
           help: Set log level
           alts:
             - "--log-level"
-          authorizedValuesList:
-            - "OFF"
-            - ERR
-            - ERROR
-            - WARN
-            - WARNING
-            - INFO
-            - DEBUG
-            - TRACE
+          authorizedValues:
+            - value: OFF
+            - value: ERR
+            - value: ERROR
+            - value: WARN
+            - value: WARNING
+            - value: INFO
+            - value: DEBUG
+            - value: TRACE
           callbacks:
             - optionLogLevelCallback
             - updateArgListLogLevelCallback
@@ -106,15 +106,15 @@ binData:
           help: Set display level
           alts:
             - "--display-level"
-          authorizedValuesList:
-            - "OFF"
-            - ERR
-            - ERROR
-            - WARN
-            - WARNING
-            - INFO
-            - DEBUG
-            - TRACE
+          authorizedValues:
+            - value: OFF
+            - value: ERR
+            - value: ERROR
+            - value: WARN
+            - value: WARNING
+            - value: INFO
+            - value: DEBUG
+            - value: TRACE
           callbacks:
             - optionDisplayLevelCallback
             - updateArgListDisplayLevelCallback
@@ -136,10 +136,10 @@ binData:
           alts:
             - "--theme"
           defaultValue: default
-          authorizedValuesList:
-            - default
-            - default-force
-            - noColor
+          authorizedValues:
+            - value: default
+            - value: default-force
+            - value: noColor
           callbacks:
             - optionThemeCallback
             - updateArgListThemeCallback

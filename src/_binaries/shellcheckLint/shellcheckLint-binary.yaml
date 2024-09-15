@@ -53,14 +53,14 @@ binData:
         - alts:
             - --format
             - -f
-          authorizedValuesList:
-            - checkstyle
-            - diff
-            - gcc
-            - json
-            - json1
-            - quiet
-            - tty
+          authorizedValues:
+            - value: checkstyle
+            - value: diff
+            - value: gcc
+            - value: json
+            - value: json1
+            - value: quiet
+            - value: tty
           defaultValue: tty
           group: shellcheckLintOptionGroup
           help: define output format of this command
@@ -78,9 +78,9 @@ binData:
 
         - alts:
             - --xargs
-          authorizedValuesList:
-            - checkstyle
-            - diff
+          authorizedValues:
+            - value: checkstyle
+            - value: diff
           group: shellcheckLintOptionGroup
           help: uses parallelization(using xargs command) only if tty format
           type: Boolean

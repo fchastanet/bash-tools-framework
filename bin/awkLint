@@ -1214,7 +1214,7 @@ awkLintCommandParse() {
           return 1
         fi
         if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
-          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([OFF ERR ERROR WARN WARNING INFO DEBUG TRACE])"
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF, ERR, ERROR, WARN, WARNING, INFO, DEBUG, TRACE)"
           return 1
         fi
 
@@ -1265,7 +1265,7 @@ awkLintCommandParse() {
           return 1
         fi
         if [[ ! "$1" =~ OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE ]]; then
-          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([OFF ERR ERROR WARN WARNING INFO DEBUG TRACE])"
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(OFF, ERR, ERROR, WARN, WARNING, INFO, DEBUG, TRACE)"
           return 1
         fi
 
@@ -1311,7 +1311,7 @@ awkLintCommandParse() {
           return 1
         fi
         if [[ ! "$1" =~ default|default-force|noColor ]]; then
-          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values([default default-force noColor])"
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - value '$1' is not part of authorized values(default, default-force, noColor)"
           return 1
         fi
 
@@ -1416,11 +1416,9 @@ awkLintCommandHelp() {
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Displays configuration"
   echo
-
 
 
   echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config <bash-framework-config>${__HELP_NORMAL} {single}"
@@ -1428,11 +1426,9 @@ awkLintCommandHelp() {
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Info level verbose mode (alias of --display-level INFO)"
   echo
-
 
 
   echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
@@ -1440,45 +1436,57 @@ awkLintCommandHelp() {
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Trace level verbose mode (alias of --display-level TRACE)"
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}--log-level <log-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
-  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
-  echo
 
+  echo "    Possible values: "
+  echo -e "      - ${__OPTION_COLOR}OFF${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}ERR${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}ERROR${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}WARN${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}WARNING${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}INFO${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
 
   echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
-  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
-  echo
 
+  echo "    Possible values: "
+  echo -e "      - ${__OPTION_COLOR}OFF${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}ERR${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}ERROR${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}WARN${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}WARNING${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}INFO${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
 
   echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Produce monochrome output. alias of --theme noColor."
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}--theme <theme>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
-  Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
-  echo
 
+  echo "    Possible values: "
+  echo -e "      - ${__OPTION_COLOR}default${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}default-force${__RESET_COLOR}"
+  echo -e "      - ${__OPTION_COLOR}noColor${__RESET_COLOR}"
   Array::wrap2 ' ' 76 6 "    Default value: " "default"
   echo
 
@@ -1487,11 +1495,9 @@ awkLintCommandHelp() {
   echo
 
 
-
   echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Quiet mode, doesn't display any output."
   echo
-
 
   # ------------------------------------------
   # longDescription section
