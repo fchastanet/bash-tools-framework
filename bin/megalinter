@@ -1284,7 +1284,7 @@ declare optionFormat="plain"
 declare optionFix="0"
 declare optionFilesOnly="0"
 declare optionIncremental="0"
-declare optionMegalinterImage="oxsecurity/megalinter-terraform:v7.10.0"
+declare optionMegalinterImage="megalinter/megalinter-terraform:v8.0.0"
 declare optionMegalinterConfigFile=".mega-linter.yml"
 declare optionCheckMegalinterVersion="0"
 # arguments variables initialization
@@ -1343,7 +1343,7 @@ megalinterCommandParse() {
   optionIncremental="0"
   local -i options_parse_optionParsedCountOptionIncremental
   ((options_parse_optionParsedCountOptionIncremental = 0)) || true
-  optionMegalinterImage="oxsecurity/megalinter-terraform:v7.10.0"
+  optionMegalinterImage="megalinter/megalinter-terraform:v8.0.0"
   local -i options_parse_optionParsedCountOptionMegalinterImage
   ((options_parse_optionParsedCountOptionMegalinterImage = 0)) || true
   optionMegalinterConfigFile=".mega-linter.yml"
@@ -1918,7 +1918,7 @@ megalinterCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "Specify docker megalinter image name to use."
   echo
 
-  Array::wrap2 ' ' 76 6 "    Default value: " "oxsecurity/megalinter-terraform:v7.10.0"
+  Array::wrap2 ' ' 76 6 "    Default value: " "megalinter/megalinter-terraform:v8.0.0"
   echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--config-file <<ConfigFile>>${__HELP_NORMAL} {single}"
