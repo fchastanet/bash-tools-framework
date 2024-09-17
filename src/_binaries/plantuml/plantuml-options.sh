@@ -38,9 +38,11 @@ plantumlCallback() {
   if [[ -z "${optionOutputDir}" ]]; then
     optionOutputDir="${optionDefaultOutputDir}"
   fi
-  if [[ ! -d "${optionOutputDir}" ]]; then
-    Log::displayError \
-      "Command ${SCRIPT_NAME} - output directory '${optionOutputDir}' does not exists"
+  if [[ ! -d "${optionOutputDir}" && "${sameDirectoryOption}" = "0" ]]; then
+    if ! mkdir -p "${optionOutputDir}"; then
+      Log::displayError \
+        "Command ${SCRIPT_NAME} - failed to create output directory '${optionOutputDir}'"
+    fi
     return 1
   fi
 }
