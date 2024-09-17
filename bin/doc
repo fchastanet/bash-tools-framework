@@ -1090,11 +1090,11 @@ ShellDoc::fixMarkdownToc() {
 
 Linux::requireTarCommand
 Compiler::Embed::extractFileFromBase64 \
-  "${PERSISTENT_TMPDIR:-/tmp}/647e7865a1d35cf1435bb0aa74a5cdbe/fixMarkdownTocScript" \
+  "${PERSISTENT_TMPDIR:-/tmp}/0b6e60db87bd75970a68b765368a17462e0b2c2a402df35f1598f3a6f3f42f40/fixMarkdownTocScript" \
   "ewogIGxpbmU9JDAKICBpZiAobWF0Y2gobGluZSwgL14oXHMqLSBcWyhbMC05XStcLikrIFteXV0rXF1cKCMpKFteKV0rKVwpLywgYXJyKSkgewogICAgcHJpbnQgYXJyWzFdICJfIiByZXdyaXRlKGFyclszXSkgIikiCiAgfSBlbHNlIHsKICAgIHByaW50IGxpbmUKICB9Cn0KZnVuY3Rpb24gcmV3cml0ZShzdHIpCnsKICAgIGdzdWIoLy0oLSkrLywgIi0iLCBzdHIpCiAgICByZXR1cm4gc3RyCn0K" \
   "644"
 
-declare -gx embed_file_fixMarkdownTocScript="${PERSISTENT_TMPDIR:-/tmp}/647e7865a1d35cf1435bb0aa74a5cdbe/fixMarkdownTocScript"
+declare -gx embed_file_fixMarkdownTocScript="${PERSISTENT_TMPDIR:-/tmp}/0b6e60db87bd75970a68b765368a17462e0b2c2a402df35f1598f3a6f3f42f40/fixMarkdownTocScript"
 
   # shellcheck disable=SC2154
   awk -i inplace -f "${embed_file_fixMarkdownTocScript}" "${file}"
