@@ -744,7 +744,6 @@ UI::theme() {
 }
 # FUNCTIONS
 
-
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
 beforeParseCallback() {
@@ -1477,7 +1476,6 @@ buildPushDockerImageCommandParse() {
 buildPushDockerImageCommandHelp() {
   echo -e "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}"
   Array::wrap2 ' ' 76 4 "    " "Lint bash files using shellcheck."
-
   echo
   echo
 
