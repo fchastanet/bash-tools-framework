@@ -31,9 +31,9 @@ function Filters::firstField::bash { #@test
 }
 
 function Filters::firstField::bigFile { #@test
-  tail -1210 "${FRAMEWORK_ROOT_DIR}/bin/bash-tpl" | {
+  tail -1209 "${BATS_TEST_DIRNAME}/testsData/binary" | {
     run Filters::firstField
     assert_success
-    assert_output 'BASH_TPL_DIR_DELIM'
+    assert_output 'Github::upgradeRelease'
   }
 }

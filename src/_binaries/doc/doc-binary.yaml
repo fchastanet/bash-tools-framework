@@ -1,0 +1,28 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/doc/doc-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/doc"
+  relativeRootDirBasedOnTargetDir: ..
+binData:
+  commands:
+    default:
+      functionName: docCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "3.0"
+      copyrightBeginYear: 2022
+      commandName: doc
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/doc/doc-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/doc/doc-main.sh
+      help: Generate markdown documentation.
+      longDescription: |
+        INTERNAL TOOL

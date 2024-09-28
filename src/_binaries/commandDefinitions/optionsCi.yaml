@@ -1,0 +1,16 @@
+---
+binData:
+  commands:
+    default:
+      definitionFiles:
+        11: "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.sh"
+      options:
+        - variableName: optionContinuousIntegrationMode
+          group: OptionsGroup
+          type: Boolean
+          help: |
+            Activate continuous integration mode (tmp folder not shared with host)
+          alts:
+            - "--ci"
+          callbacks:
+            - updateOptionContinuousIntegrationMode

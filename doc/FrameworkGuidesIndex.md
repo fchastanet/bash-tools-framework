@@ -9,5 +9,3 @@ general framework documentation explaining some main framework features like:
 [Docker](guides/Docker.md ":include")
 
 [Config files](guides/ConfigFiles.md ":include")
-
-[Options](guides/Options.md ":include")

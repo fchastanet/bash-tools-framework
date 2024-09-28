@@ -56,7 +56,29 @@ documentation, compile bash files, and many more, ...
 
 ### 1.1. Compile command
 
-- **compile** : Inlines all the functions used in the script given in parameter
+New compiler (GoLang implementation)
+
+- using generated binary
+
+```bash
+export PATH=$PATH:/home/wsl/fchastanet/bash-compiler/bin
+FRAMEWORK_ROOT_DIR=$(pwd) bash-compiler \
+  src/_binaries/commandDefinitions/shellcheckLint-binary.yaml
+```
+
+- using go interpreter (has to be executed from bash-compiler folder)
+
+```bash
+export FRAMEWORK_ROOT_DIR=/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework
+go run ./cmd/bash-compiler "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/shellcheckLint-binary.yaml"
+```
+
+- compile every `*-binary.yaml` files at once
+
+```bash
+export FRAMEWORK_ROOT_DIR=/home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-framework
+go run ./cmd/bash-compiler $(find "${BASH_TOOLS_ROOT_DIR}/src/_binaries" -name '*-binary.yaml' -print)
+```
 
 see related documentation [Compile command](doc/CompileCommand.md).
 
@@ -185,51 +207,6 @@ Here an excerpt of the namespaces available in Bash tools framework:
   of output in bats tests
 
 ### 2.2. Usage
-
-simply add these lines to your script
-
-```bash
-#!/usr/bin/env bash
-# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myCommand
-
-# shellcheck disable=SC2034
-SCRIPT_NAME=${0##*/}
-REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
-# shellcheck disable=SC2034
-CURRENT_DIR="${REAL_SCRIPT_FILE%/*}"
-BIN_DIR="${CURRENT_DIR}"
-# shellcheck disable=SC2034
-FRAMEWORK_SRC_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/src' %>"
-# shellcheck disable=SC2034
-FRAMEWORK_VENDOR_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor' %>"
-# shellcheck disable=SC2034
-FRAMEWORK_VENDOR_BIN_DIR="<%% echo '${FRAMEWORK_ROOT_DIR}/vendor/bin' %>"
-export PATH="${BIN_DIR}":"${FRAMEWORK_VENDOR_BIN_DIR}":${PATH}
-
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_commonHeader.sh"
-
-# FUNCTIONS
-```
-
-Then add below special `# FUNCTIONS` marker, the rest of your script.
-
-Special comments:
-
-- `# BIN_FILE=${FRAMEWORK_ROOT_DIR}/bin/myCommand` indicates where the resulting
-  file will be generated
-- `# FUNCTIONS` is a placeholder that will be used to inject the functions of
-  the framework that you are using in your script.
-
-Then use the following command to generate your file.
-
-**Eg:**
-
-Let's say your source file is named `src/_binaries/myCommand.sh`, then use the
-following command :
-
-```bash
-bin/compile src/_binaries/myCommand.sh
-```
 
 see related documentation [Compile command](doc/CompileCommand.md).
 
@@ -428,9 +405,6 @@ cat file | {
 ```
 
 ## 5. Acknowledgements
-
-This project is using [bash-tpl](https://github.com/TekWizely/bash-tpl) in order
-to compile several bash files into one files.
 
 Like so many projects, this effort has roots in many places.
 

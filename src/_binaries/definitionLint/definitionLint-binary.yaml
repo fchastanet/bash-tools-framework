@@ -1,0 +1,56 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsFormat.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/definitionLint/definitionLint-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/definitionLint"
+binData:
+  commands:
+    default:
+      functionName: definitionLintCommand
+      version: "3.0"
+      copyrightBeginYear: 2023
+      commandName: definitionLint
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/definitionLint/definitionLint-options.sh
+      beforeParseCallbacks:
+        - beforeParseCallback
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/definitionLint/definitionLint-main.sh
+      help: Lint files of the given directory.
+      longDescription: |
+        \nFor each definition file:
+
+        - check that all mandatory methods are existing
+          installScripts_<fileName>_helpDescription
+          installScripts_<fileName>_helpVariables
+          installScripts_<fileName>_listVariables
+          installScripts_<fileName>_defaultVariables
+          installScripts_<fileName>_checkVariables
+          installScripts_<fileName>_fortunes
+          installScripts_<fileName>_dependencies
+          installScripts_<fileName>_breakOnConfigFailure
+          installScripts_<fileName>_breakOnTestFailure
+          installScripts_<fileName>_install\n  installScripts_<fileName>_configure
+          installScripts_<fileName>_test
+
+        - check if other definitions files functions are defined by currently
+          linted definition file it would mean that another file has defined
+          the same methods
+
+        - check if each dependency exists
+
+        INTERNAL
+
+      args:
+        - callbacks:
+            - argFolderCallback
+          help: the folder to recursively lint
+          type: String
+          max: 1
+          min: 1
+          name: folder
+          variableName: argFolder

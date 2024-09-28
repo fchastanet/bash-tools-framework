@@ -1,0 +1,23 @@
+---
+compilerConfig: &defaultFrameworkConfig
+  # compile parameters
+  # rootDir     : directory used to compute src file relative path
+  # srcDirs     : additional directories where to find the functions
+  # templateDir : directory from which gtpl templates will be searched
+  # binDir      : fallback bin directory in case BIN_FILE has not been provided
+  rootDir: ${FRAMEWORK_ROOT_DIR}
+  srcDirs:
+    - ${FRAMEWORK_ROOT_DIR}/src
+  binDir: ${FRAMEWORK_ROOT_DIR}/bin
+  templateDirs:
+    - ${COMPILER_ROOT_DIR}/examples/templates
+  templateFile: binFile.gtpl
+  relativeRootDirBasedOnTargetDir: ..
+
+  # describe the functions that will be skipped from being imported
+  functionsIgnoreRegexpList:
+    - Namespace::functions
+    - Functions::myFunction
+    - Namespace::requireSomething
+    - IMPORT::dir::file
+    - Acquire::ForceIPv4

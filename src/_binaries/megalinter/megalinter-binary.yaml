@@ -1,0 +1,100 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/megalinter/megalinter-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/megalinter"
+binData:
+  commands:
+    default:
+      functionName: megalinterCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      unknownArgumentCallbacks:
+        - unknownArg
+      beforeParseCallbacks:
+        - beforeParseCallback
+      callbacks:
+        - commandCallback
+      version: "3.0"
+      copyrightBeginYear: 2023
+      commandName: megalinter
+      definitionFiles:
+        12: "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsFormat.sh"
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/megalinter/megalinter-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/megalinter/megalinter-main.sh
+      help: Run megalinter over this repository.
+      longDescription: |
+        megalinter image ${defaultMegalinterImage} will be used.
+        <files> optionally you can provide a list of files to run megalinter on
+        this mode is incompatible with --incremental option.
+      options:
+        - alts:
+            - "--format"
+          group: OptionsGroup
+          type: String
+          defaultValue: plain
+          authorizedValues:
+            - value: plain
+            - value: json
+          help: Define output format of this command.
+          helpValueName: <Format>
+          callbacks:
+            - updateOptionFormat
+          variableName: optionFormat
+
+        - alts:
+            - --fix
+          group: OptionsGroup
+          help: Apply linters fixes automatically.
+          type: Boolean
+          callbacks:
+            - optionFixCallback
+          variableName: optionFix
+
+        - alts:
+            - --filesOnly
+          group: OptionsGroup
+          help: Skip linters that run in project mode.
+          callbacks:
+            - filesOnlyCallback
+          type: Boolean
+          variableName: optionFilesOnly
+
+        - alts:
+            - --incremental
+            - -i
+          group: OptionsGroup
+          help: Run megalinter only on files that are git staged.
+          type: Boolean
+          variableName: optionIncremental
+
+        - alts:
+            - --image
+          group: OptionsGroup
+          help: Specify docker megalinter image name to use.
+          defaultValue: "megalinter/megalinter-terraform:v8.0.0"
+          type: String
+          helpValueName: <ImageName>
+          variableName: optionMegalinterImage
+
+        - alts:
+            - --config-file
+          group: OptionsGroup
+          help: Specify megalinter config filename to use.
+          defaultValue: ".mega-linter.yml"
+          type: String
+          helpValueName: <ConfigFile>
+          variableName: optionMegalinterConfigFile
+
+        - alts:
+            - --check-megalinter-version
+          group: OptionsGroup
+          help: |
+            Check if new version of megalinter is available (compared to default image).
+            Exits 1 if yes and displays new version number.
+          type: Boolean
+          variableName: optionCheckMegalinterVersion

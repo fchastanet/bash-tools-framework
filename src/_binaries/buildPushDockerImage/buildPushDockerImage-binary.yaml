@@ -1,0 +1,83 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/buildPushDockerImage/buildPushDockerImage-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/buildPushDockerImage"
+binData:
+  commands:
+    default:
+      functionName: buildPushDockerImageCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "3.0"
+      copyrightBeginYear: 2023
+      commandName: buildPushDockerImage
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/buildPushDockerImage/buildPushDockerImage-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/buildPushDockerImage/buildPushDockerImage-main.sh
+      help: Lint bash files using shellcheck.
+      longDescription: |
+        Pull, build and push docker image:
+        - pull previous docker image from docker hub if exists
+        - build new image using previous image as cache\n- tag built image
+        - push it to docker registry
+
+        additional docker build options can be passed
+          via ${__HELP_OPTION_COLOR}DOCKER_BUILD_OPTIONS${__HELP_NORMAL} env variable
+
+        INTERNAL
+      options:
+        - alts:
+            - --push
+          group: OptionsGroup
+          help: if provided, push the image to the registry
+          callbacks:
+            - updateOptionVendorCallback
+          type: Boolean
+          variableName: optionPush
+
+        - alts:
+            - --vendor
+          authorizedValues:
+            - help: alpine based docker image
+              value: alpine
+            - help: ubuntu based docker image
+              value: ubuntu
+          defaultValue: ubuntu
+          group: OptionsGroup
+          help: vendor image to use
+          callbacks:
+            - updateOptionVendorCallback
+          type: String
+          variableName: optionVendor
+
+        - alts:
+            - --bash-version
+          authorizedValues:
+            - value: "4.4"
+            - value: "5.0"
+            - value: "5.1"
+            - value: "5.2"
+          defaultValue: "5.2"
+          group: OptionsGroup
+          help: version of bash to use
+          type: String
+          variableName: optionBashVersion
+
+        - alts:
+            - --bash-base-image
+          group: OptionsGroup
+          help:
+            "bash bash image to use (eg: ubuntu:20.04,
+            amd64/bash:4.4-alpine3.18)"
+          variableName: optionBashBaseImage
+          defaultValue: ubuntu:20.04
+          callbacks:
+            - updateOptionBashBaseImageCallback
+          type: String

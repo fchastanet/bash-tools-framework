@@ -9,7 +9,7 @@
 # @arg $2 targetFile:String the target file
 # @arg $3 fromDir:String the directory from which commands will be searched
 # @arg $4 tokenNotFoundCount:&int (passed by reference) number of tokens @@@command_help@@@ not found in the template file
-# @arg $5 excludeFilesPattern:String grep exclude pattern (eg: '^(bash-tpl)$') (default value: "")
+# @arg $5 excludeFilesPattern:String grep exclude pattern (eg: '^(compile)$') (default value: "")
 # @stderr diagnostics logs
 # @stdout the generated markdown with help of the matching command
 ShellDoc::generateMdFileFromTemplate() {

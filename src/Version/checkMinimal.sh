@@ -29,15 +29,18 @@ Version::checkMinimal() {
 
   Log::displayDebug "check ${commandName} version ${version} against minimal ${minimalVersion}"
 
-  Version::compare "${version}" "${minimalVersion}" || {
-    local result=$?
-    if [[ "${result}" = "1" ]]; then
+  local result=0
+  Version::compare "${version}" "${minimalVersion}" || result=$?
+  case "${result}" in
+    1)
       Log::displayInfo "${commandName} version is ${version} greater than ${minimalVersion}"
-    elif [[ "${result}" = "2" ]]; then
+      ;;
+    2)
       Log::displayError "${commandName} minimal version is ${minimalVersion}, your version is ${version}"
       return 1
-    fi
-    return 0
-  }
-
+      ;;
+    *)
+      Log::displaySuccess "${commandName} version is matching exactly the expected minimal version ${version}"
+      ;;
+  esac
 }

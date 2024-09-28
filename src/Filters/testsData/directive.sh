@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # BIN_FILE=<% ${FRAMEWORK_ROOT_DIR} %>/bin/awkLint
 
-.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.tpl"
+.INCLUDE "${ORIGINAL_TEMPLATE_DIR}/_includes/_header.sh"
 
 test # comment after command
 

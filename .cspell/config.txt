@@ -23,6 +23,7 @@ cmdhist
 commandline
 COMPREPLY
 CONCAT
+configurator
 cpes
 Creset
 CWORD
@@ -141,6 +142,7 @@ PRUNEPATHS
 publickey
 rearranger
 refact
+reqs
 Resolv
 riak
 RPAREN

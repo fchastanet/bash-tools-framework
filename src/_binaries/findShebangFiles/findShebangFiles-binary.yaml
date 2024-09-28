@@ -1,0 +1,34 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/findShebangFiles/findShebangFiles-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles"
+binData:
+  commands:
+    default:
+      functionName: findShebangFilesCommand
+      unknownOptionCallbacks:
+        - unknownOptionArgFunction
+      unknownArgumentCallbacks:
+        - unknownOptionArgFunction
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "3.0"
+      copyrightBeginYear: 2023
+      commandName: findShebangFiles
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/findShebangFiles/findShebangFiles-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/findShebangFiles/findShebangFiles-main.sh
+      longDescription: |
+        Display list of all files having a bash shebang in the current repository.
+
+        You can apply a command to all these files by providing arguments
+
+        ${__HELP_TITLE}Example:${__HELP_NORMAL}
+        Add execution bit to all files with a bash shebang
+        ${SCRIPT_NAME} chmod +x
+      help: find all shebang files of this repository

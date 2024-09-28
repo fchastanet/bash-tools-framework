@@ -28,10 +28,6 @@ repos:
         language: python
         types: [markdown]
         args: [--wrap, "80", --number]
-        exclude: |
-          (?x)(
-            ^doc/guides/Options/generate.*.md$
-          )
         additional_dependencies:
           - mdformat-toc
           - mdformat-shfmt
@@ -48,7 +44,6 @@ repos:
         exclude: |
           (?x)(
             ^doc/images/.*\.svg$|
-            ^doc/guides/Options/generate.*.md$|
             testsData/.*\.result$
           )
       - id: check-executables-have-shebangs
@@ -76,17 +71,17 @@ repos:
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
-            ^.vscode\/.*\.json$
+            .vscode\/.*\.json$
           )
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.27
+    rev: v1.7.2
     hooks:
       - id: actionlint
         stages: [pre-commit, pre-push, manual]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         args:
@@ -120,6 +115,7 @@ repos:
         exclude: |
           (?x)(
             \.md$|
+            \.vscode/.*\.json$|
             ^\.vscode/.*\.code-snippets$
           )
 
@@ -134,7 +130,6 @@ repos:
             ^vendor/|
             ^bin/|
             ^manualTests/data/|
-            \.tpl$|
             /testsData/
           )
 
@@ -145,12 +140,11 @@ repos:
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
           (?x)(
-            /testsData/|
-            ^doc/guides/Options/generate.*.md$
+            /testsData/
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 3.2.1
+    rev: 6.0.0
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -160,7 +154,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "72",
+            "78",
             --format,
             plain,
             --theme,
@@ -172,7 +166,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "72",
+            "78",
             --format,
             checkstyle,
             --theme,
@@ -181,30 +175,10 @@ repos:
             WARNING,
           ]
       - id: plantuml
+        args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
 
   - repo: local
     hooks:
-      - &LOCAL_BUILD_SH_FILES
-        id: buildShFiles
-        name: build sh files
-        entry:
-          bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp --ignore-missing --ci'
-        language: system
-        pass_filenames: false
-        always_run: true
-        require_serial: true
-        stages: [pre-commit]
-
-      - <<: *LOCAL_BUILD_SH_FILES
-        id: buildShFilesGithubAction
-        name: build sh files for Github Actions
-        entry:
-          bash -c 'cp bin/buildBinFiles bin/buildBinFilesTmp &&
-          bin/buildBinFilesTmp --ci'
-        fail_fast: false
-        stages: [manual]
-
       - id: buildDocFilesForGithubActions
         name: build doc files for github actions
         language: script
@@ -213,3 +187,8 @@ repos:
         pass_filenames: false
         require_serial: true
         stages: [] # GITHUB
+
+  - repo: https://github.com/fchastanet/bash-compiler
+    rev: v1.1.0
+    hooks:
+      - id: buildBashBinaries

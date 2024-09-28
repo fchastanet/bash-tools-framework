@@ -54,6 +54,7 @@ function Bash::handlePipelineFailure::shouldWork { #@test
   local -a originalPipeStatus=()
   "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help | grep -q DESCRIPTION || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "0" ]]
+  echo "${originalPipeStatus[*]}" >&3
   [[ "${originalPipeStatus[*]}" = "141 0" ]]
 }
 

@@ -85,7 +85,7 @@ languageSettings:
 # OVERRIDES
 overrides:
   - filename:
-      - "**/*.{bats,tpl}"
+      - "**/*.bats"
       - "**/*.env"
       - "src/Array/wrap.sh"
     languageId: shellscript
@@ -116,10 +116,12 @@ overrides:
       - .github/**
       - .*
       - "*.{yaml,yml}"
+      - "**/Dockerfile"
       - src/_binaries/ShellBash/conf/home/.Xresources
       - src/_binaries/GitDefaultConfig/conf/home/.config/tig/config
       - src/_binaries/GitDefaultConfig/conf/home/.gitconfig
       - src/_binaries/GitDefaultConfig/conf/home/.tigrc
+
     languageId: shellscript
     dictionaries:
       - config

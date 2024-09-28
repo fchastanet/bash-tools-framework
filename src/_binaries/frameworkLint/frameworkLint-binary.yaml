@@ -1,0 +1,43 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsFormat.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/frameworkLint/frameworkLint-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/frameworkLint"
+  relativeRootDirBasedOnTargetDir: ..
+binData:
+  commands:
+    default:
+      functionName: frameworkLintCommand
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "3.0"
+      copyrightBeginYear: 2023
+      commandName: frameworkLint
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/frameworkLint/frameworkLint-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/frameworkLint/frameworkLint-main.sh
+      help: This framework linter.
+      longDescription: |
+        Lint files of the current repository
+          - check if all Namespace::functions are existing in the framework
+          - check that function defined in a .sh is correctly named
+          - check each function has a bats file associated
+          - shdoc
+            - check that shdoc valid annotations are used
+            - check that @require function matches naming convention and exists
+            - check that at least @description is provided
+      options:
+        - alts:
+            - --expected-warnings-count
+          defaultValue: 0
+          group: OptionsGroup
+          help: "Specify expected warning count (default: 0)"
+          type: String
+          variableName: optionExpectedWarningsCount
+          callbacks:
+            - optionExpectedWarningsCountCallback

@@ -1,0 +1,27 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/installRequirements/installRequirements-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/installRequirements"
+  relativeRootDirBasedOnTargetDir: ..
+binData:
+  commands:
+    default:
+      functionName: installRequirementsCommand
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "3.0"
+      copyrightBeginYear: 2024
+      commandName: installRequirements
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/installRequirements/installRequirements-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/installRequirements/installRequirements-main.sh
+      help: Installs requirements.
+      longDescription: |
+        Installs requirements:
+
+        - bats\n- hadolint\n- shellcheck

@@ -56,7 +56,7 @@ function Database::newInstance::defaultOptions { #@test
   [[ "${dbFromInstance['SKIP_COLUMN_NAMES']}" = "1" ]]
   [[ "${dbFromInstance['SSL_OPTIONS']}" = "--ssl-mode=DISABLED" ]]
   [[ "${dbFromInstance['QUERY_OPTIONS']}" = "--batch --raw --default-character-set=utf8" ]]
-  [[ "${dbFromInstance['DUMP_OPTIONS']}" = "--default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED" ]]
+  [[ "${dbFromInstance['DUMP_OPTIONS']}" = "--default-character-set=utf8  --compression-algorithms --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED" ]]
   [[ "${dbFromInstance['DSN_FILE']}" = "${BATS_TEST_DIRNAME}/testsData/dsn_valid.env" ]]
   [[ "${dbFromInstance['DB_IMPORT_OPTIONS']}" = "--connect-timeout=5 --batch --raw --default-character-set=utf8" ]]
   [[ "$(grep 'user = ' "${dbFromInstance['AUTH_FILE']}")" = "user = root" ]]
@@ -114,7 +114,7 @@ function Database::newInstance::valid_dsnFile_from_home { #@test
   [[ "${dbFromInstance['SKIP_COLUMN_NAMES']}" = "1" ]]
   [[ "${dbFromInstance['SSL_OPTIONS']}" = "--ssl-mode=DISABLED" ]]
   [[ "${dbFromInstance['QUERY_OPTIONS']}" = "--batch --raw --default-character-set=utf8" ]]
-  [[ "${dbFromInstance['DUMP_OPTIONS']}" = "--default-character-set=utf8 --compress --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED" ]]
+  [[ "${dbFromInstance['DUMP_OPTIONS']}" = "--default-character-set=utf8  --compression-algorithms --hex-blob --routines --triggers --single-transaction --set-gtid-purged=OFF --column-statistics=0 --ssl-mode=DISABLED" ]]
   [[ "${dbFromInstance['DSN_FILE']}" = "${BATS_TEST_TMPDIR}/home/.bash-tools/dsn/dsn_valid.env" ]]
   [[ "${dbFromInstance['DB_IMPORT_OPTIONS']}" = "--connect-timeout=5 --batch --raw --default-character-set=utf8" ]]
 

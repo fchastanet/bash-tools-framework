@@ -8,6 +8,8 @@ on: # yamllint disable-line rule:truthy
       - "**"
       # avoid infinite loop for auto created PRs
       - "!update/pre-commit-*"
+    tags:
+      - "**"
   workflow_dispatch:
 
 # cancel previous build if several pushes
@@ -34,9 +36,9 @@ env:
 
 jobs:
   # -------------------------------------------------------
-  # Build docker images
+  # Build bash docker images
   # -------------------------------------------------------
-  build-docker-images:
+  build-bash-docker-images:
     runs-on: ubuntu-22.04
     permissions:
       # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
@@ -150,7 +152,7 @@ jobs:
 
   pre-commit:
     runs-on: ubuntu-22.04
-    needs: [build-docker-images]
+    needs: [build-bash-docker-images]
     permissions:
       # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write
@@ -217,12 +219,12 @@ jobs:
 
       - name: MegaLinter
         id: ml
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         # You can override MegaLinter flavor used to have faster performances
-        # More info at https://megalinter.io/flavors/
-        uses: oxsecurity/megalinter/flavors/terraform@v7
+        # More info at https://megalinter.io/latest/flavors/
+        uses: oxsecurity/megalinter/flavors/terraform@v8
         # All available variables are described in documentation
-        # https://megalinter.io/configuration/
+        # https://megalinter.io/latest/config-file/
         env:
           # Validates all source when push on master,
           # else just the git diff with master.
@@ -301,7 +303,7 @@ jobs:
 
   unit-tests:
     runs-on: ubuntu-22.04
-    needs: [build-docker-images]
+    needs: [build-bash-docker-images]
     permissions:
       # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
       statuses: write

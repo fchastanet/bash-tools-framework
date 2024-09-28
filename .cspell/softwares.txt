@@ -44,6 +44,7 @@ golxdebindings
 goserver
 graphviz
 gtid
+gtpl
 gzipped
 hadolint
 hjson
@@ -112,7 +113,9 @@ nbthread
 nojekyll
 nproc
 obconf
+opcache
 openbox
+Opis
 pcmanfm
 phpmd
 phpstorm
