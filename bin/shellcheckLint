@@ -1532,6 +1532,7 @@ shellcheckLintCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck. If not provided," "all files from git repository which are beginning" "with a bash shebang, unless --staged option is provided." ""
   echo
 
+
   # ------------------------------------------
   # options section
   # ------------------------------------------

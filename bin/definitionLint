@@ -1224,6 +1224,7 @@ definitionLintCommandParse() {
   ((options_parse_optionParsedCountOptionQuiet = 0)) || true
 
   argFolder=""
+
   local -i options_parse_argParsedCountArgFolder
   ((options_parse_argParsedCountArgFolder = 0)) || true
 
@@ -1625,6 +1626,7 @@ definitionLintCommandHelp() {
   Array::wrap2 " " 80 2 "  ${__HELP_OPTION_COLOR}folder${__HELP_NORMAL} {single} (mandatory)"
   Array::wrap2 ' ' 76 4 "    " "the folder to recursively lint"
   echo
+
 
   # ------------------------------------------
   # options section
