@@ -1829,6 +1829,7 @@ dockerLintCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "hadolint arguments"
   echo
 
+
   # ------------------------------------------
   # options section
   # ------------------------------------------
