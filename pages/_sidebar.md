@@ -7,5 +7,7 @@
 - [Framework Full Documentation](FrameworkIndex.md "Bash Tools Framework documentation")
 - [Bash Best Practices & Recipes](doc/BestPractices.md)
 - Other projects
+  - [My documents](https://fchastanet.github.io/my-documents/)
   - [Bash Tools](https://fchastanet.github.io/bash-tools/)
   - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
+  - [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
