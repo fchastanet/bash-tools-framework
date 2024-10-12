@@ -44,7 +44,6 @@ binData:
           authorizedValues:
             - value: svg
             - value: png
-          defaultValue: png
           max: -1
           min: 0
           helpValueName: Format
