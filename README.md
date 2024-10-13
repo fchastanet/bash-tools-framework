@@ -138,9 +138,6 @@ Here an excerpt of the namespaces available in Bash tools framework:
   management
 - Command::captureOutputAndExitCode calls a command capturing output and exit
   code and displaying it also to error output to follow command's progress
-- Compiler : various function used by `bin/compiler` script allowing to generate
-  binaries using the functions of this framework (see
-  [Compile command](doc/CompileCommand.md)).
 - Conf : allows to manage the loading of .env file that contains configuration
   used by some functions of this framework.
 - Database : abstraction of several mysql queries, like:
@@ -156,8 +153,6 @@ Here an excerpt of the namespaces available in Bash tools framework:
 - Dns : various methods like Dns::pingHost or allowing etc/hosts manipulation.
 - Docker : various docker cli abstractions that allowed to construct
   `bin/buildPushDockerImage` command.
-- Embed : functions that allows `bin/compiler` to manage `EMBED directives` (see
-  [Compile command](doc/CompileCommand.md)).
 - Env : functions allowing to load env variables or to alter them like
   Env::pathAppend allowing to add a bin path to `PATH` variable
 - File : files and file paths manipulations.

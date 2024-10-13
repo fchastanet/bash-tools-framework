@@ -26,7 +26,6 @@
     "manualTests/**",
     "pages/doc/**",
     "pages/BestPractices.md",
-    "pages/CompileCommand.md",
     "pages/Commands.md",
     "pages/DockerUsage.md",
     "pages/FrameworkDoc.md",

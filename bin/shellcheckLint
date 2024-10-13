@@ -1441,7 +1441,6 @@ shellcheckLintCommandParse() {
       # Option 16/16
       # optionXargs alts --xargs
       # type: Boolean min 0 max 1
-      # authorizedValues: checkstyle|diff
       --xargs)
         # shellcheck disable=SC2034
         optionXargs="1"
@@ -1627,7 +1626,7 @@ shellcheckLintCommandHelp() {
   echo
 
   echo
-  echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+  echo -e "${__HELP_TITLE_COLOR}SPECIFIC OPTIONS:${__RESET_COLOR}"
   echo -e "  ${__HELP_OPTION_COLOR}--format${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-f <format>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "define output format of this command"
   echo
@@ -1652,9 +1651,6 @@ shellcheckLintCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "uses parallelization(using xargs command) only if tty format"
   echo
 
-  echo "    Possible values: "
-  echo -e "      - ${__OPTION_COLOR}checkstyle${__RESET_COLOR}"
-  echo -e "      - ${__OPTION_COLOR}diff${__RESET_COLOR}"
   # ------------------------------------------
   # longDescription section
   # ------------------------------------------

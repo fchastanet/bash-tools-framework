@@ -48,7 +48,7 @@ binData:
           variableName: argShellcheckFiles
       optionGroups:
         shellcheckLintOptionGroup:
-          title: "OPTIONS:"
+          title: "SPECIFIC OPTIONS:"
       options:
         - alts:
             - --format
@@ -78,9 +78,6 @@ binData:
 
         - alts:
             - --xargs
-          authorizedValues:
-            - value: checkstyle
-            - value: diff
           group: shellcheckLintOptionGroup
           help: uses parallelization(using xargs command) only if tty format
           type: Boolean

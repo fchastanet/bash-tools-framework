@@ -1656,8 +1656,6 @@ plantumlCommandHelp() {
   echo "    Possible values: "
   echo -e "      - ${__OPTION_COLOR}svg${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}png${__RESET_COLOR}"
-  Array::wrap2 ' ' 76 6 "    Default value: " "png"
-  echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--limit-size${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-l <LimitSize>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Define PLANTUML_LIMIT_SIZE" "use plantuml software default size if not provided" ""
