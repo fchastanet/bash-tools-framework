@@ -20,7 +20,7 @@ repos:
 
   - repo: https://github.com/executablebooks/mdformat
     # Do this before other tools "fixing" the line endings
-    rev: 0.7.17
+    rev: 0.7.19
     hooks:
       - id: mdformat
         name: Format Markdown
@@ -75,7 +75,7 @@ repos:
           )
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.3
+    rev: v1.7.4
     hooks:
       - id: actionlint
         stages: [pre-commit, pre-push, manual]
@@ -189,6 +189,6 @@ repos:
         stages: [] # GITHUB
 
   - repo: https://github.com/fchastanet/bash-compiler
-    rev: v2.0.0
+    rev: v3.0.0
     hooks:
       - id: buildBashBinaries
