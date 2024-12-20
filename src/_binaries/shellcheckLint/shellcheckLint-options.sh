@@ -6,7 +6,6 @@ declare MIN_SHELLCHECK_VERSION="0.9.0"
 
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
-declare -a shellcheckFiles=()
 
 beforeParseCallback() {
   Env::requireLoad
@@ -15,14 +14,6 @@ beforeParseCallback() {
 }
 unknownOption() {
   shellcheckArgs+=("$1")
-}
-argShellcheckFilesCallback() {
-  if [[ -f "$1" ]]; then
-    # shellcheck disable=SC2034
-    shellcheckFiles=("${@::$#-1}")
-  else
-    shellcheckArgs+=("$1")
-  fi
 }
 shellcheckLintParseCallback() {
   # shellcheck disable=SC2154

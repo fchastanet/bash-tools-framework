@@ -998,7 +998,6 @@ declare MIN_SHELLCHECK_VERSION="0.9.0"
 
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
-declare -a shellcheckFiles=()
 
 beforeParseCallback() {
   Env::requireLoad
@@ -1007,14 +1006,6 @@ beforeParseCallback() {
 }
 unknownOption() {
   shellcheckArgs+=("$1")
-}
-argShellcheckFilesCallback() {
-  if [[ -f "$1" ]]; then
-    # shellcheck disable=SC2034
-    shellcheckFiles=("${@::$#-1}")
-  else
-    shellcheckArgs+=("$1")
-  fi
 }
 shellcheckLintParseCallback() {
   # shellcheck disable=SC2154
@@ -1472,7 +1463,6 @@ shellcheckLintCommandParse() {
           # shellcheck disable=SC2034
           # shellcheck disable=SC2034
           argShellcheckFiles+=("${options_parse_arg}")
-          argShellcheckFilesCallback "${argShellcheckFiles[@]}" -- "${@:2}"
 
 
         # else too much args
@@ -1745,8 +1735,8 @@ getFiles() {
 shellcheckFiles() {
   declare -a files
   # shellcheck disable=SC2154
-  if ((${#shellcheckFiles[@]} > 0)); then
-    files=("${shellcheckFiles[@]}")
+  if ((${#argShellcheckFiles[@]} > 0)); then
+    files=("${argShellcheckFiles[@]}")
   else
     readarray -t files < <(getFiles | sort | uniq)
   fi
