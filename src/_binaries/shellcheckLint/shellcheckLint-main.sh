@@ -33,8 +33,8 @@ getFiles() {
 shellcheckFiles() {
   declare -a files
   # shellcheck disable=SC2154
-  if ((${#shellcheckFiles[@]} > 0)); then
-    files=("${shellcheckFiles[@]}")
+  if ((${#argShellcheckFiles[@]} > 0)); then
+    files=("${argShellcheckFiles[@]}")
   else
     readarray -t files < <(getFiles | sort | uniq)
   fi

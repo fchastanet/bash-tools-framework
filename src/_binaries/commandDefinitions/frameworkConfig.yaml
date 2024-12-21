@@ -10,7 +10,7 @@ compilerConfig: &defaultFrameworkConfig
     - ${FRAMEWORK_ROOT_DIR}/src
   binDir: ${FRAMEWORK_ROOT_DIR}/bin
   templateDirs:
-    - ${COMPILER_ROOT_DIR}/examples/templates
+    - ${TEMPLATES_ROOT_DIR}
   templateFile: binFile.gtpl
   relativeRootDirBasedOnTargetDir: ..
 

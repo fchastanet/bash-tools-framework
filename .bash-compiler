@@ -1,1 +1,2 @@
 FRAMEWORK_ROOT_DIR=${ROOT_DIR}
+TEMPLATES_ROOT_DIR=${HOME}/fchastanet/bash-compiler/examples/templates
