@@ -55,6 +55,16 @@ function Assert::dirEmpty::emptyWithPattern { #@test
   assert_line --index 0 --partial "INFO    - Checking directory ${BATS_TEST_TMPDIR}/myDir is empty"
 }
 
+function Assert::dirEmpty::empty2Patterns { #@test
+  mkdir "${BATS_TEST_TMPDIR}/myDir"
+  touch "${BATS_TEST_TMPDIR}/myDir/.gitkeep"
+  touch "${BATS_TEST_TMPDIR}/myDir/README.md"
+  run Assert::dirEmpty "${BATS_TEST_TMPDIR}/myDir" ".gitkeep|README.md"
+  assert_success
+  assert_lines_count 1
+  assert_line --index 0 --partial "INFO    - Checking directory ${BATS_TEST_TMPDIR}/myDir is empty"
+}
+
 function Assert::dirEmpty::emptyWithPatternButFileMatchingPatternNotThere { #@test
   mkdir "${BATS_TEST_TMPDIR}/myDir"
   run Assert::dirEmpty "${BATS_TEST_TMPDIR}/myDir" ".gitkeep"

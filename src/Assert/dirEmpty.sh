@@ -17,7 +17,7 @@ Assert::dirEmpty() {
   local pattern="${2:-}"
   local -a filter=(cat)
   if [[ -n "${pattern}" ]]; then
-    filter=(grep -v "${pattern}")
+    filter=(grep -v -E "${pattern}")
   fi
   Log::displayInfo "Checking directory ${directory} is empty"
   if ${SUDO:-} test -f "${directory}"; then
