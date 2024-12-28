@@ -5,7 +5,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     # https://crontab.cronhub.io/
-    - cron: "30 10 * * *"
+    - cron: "30 22 1-7 */3 FRI"
 jobs:
   auto-update:
     runs-on: ubuntu-22.04

@@ -120,6 +120,7 @@ pcmanfm
 phpmd
 phpstorm
 Phpstorm
+pipx
 pixbuf
 plantuml
 Plantuml
@@ -167,3 +168,4 @@ xsession
 Xsrv
 xvfb
 Xvfb
+yapf

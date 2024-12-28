@@ -41,7 +41,7 @@ jobs:
   build-bash-docker-images:
     runs-on: ubuntu-22.04
     permissions:
-      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      # needed by ouzi-dev/commit-status-updater@v2
       statuses: write
     strategy:
       fail-fast: true
@@ -67,7 +67,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # overall process
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build-bash-tools
           status: pending
@@ -87,7 +87,7 @@ jobs:
               echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
             fi
           ) >> "${GITHUB_ENV}"
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build-${{ env.image_tag }}
           status: pending
@@ -141,7 +141,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build-${{ env.image_tag }}
           status: ${{ job.status }}
@@ -154,7 +154,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-bash-docker-images]
     permissions:
-      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      # needed by ouzi-dev/commit-status-updater@v2
       statuses: write
     steps:
       - name: Checkout
@@ -184,7 +184,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: pre-commit-megalinter
           status: pending
@@ -291,7 +291,7 @@ jobs:
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         if: ${{ always() }}
         with:
           name: pre-commit-megalinter
@@ -305,7 +305,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-bash-docker-images]
     permissions:
-      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      # needed by ouzi-dev/commit-status-updater@v2
       statuses: write
       # needed by mikepenz/action-junit-report@v4
       checks: write
@@ -347,7 +347,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: pending
@@ -419,7 +419,7 @@ jobs:
           path: |
             logs/**
 
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: ${{ job.status }}
@@ -430,7 +430,7 @@ jobs:
     needs: [unit-tests]
     runs-on: ubuntu-22.04
     permissions:
-      # needed by akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      # needed by ouzi-dev/commit-status-updater@v2
       statuses: write
 
     steps:
@@ -438,7 +438,7 @@ jobs:
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
       - uses: AbsoLouie/workflow-conclusion-status@v1.0.2
 
-      - uses: akatov/commit-status-updater@a9e988ec5454692ff7745a509452422a35172ad6
+      - uses: ouzi-dev/commit-status-updater@v2
         with:
           name: build-bash-tools
           # neutral, success, skipped, cancelled, timed_out, action_required, failure
