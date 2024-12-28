@@ -5,7 +5,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
-      interval: "weekly"
+      # Check for updates to GitHub Actions every month
+      interval: "monthly"
       day: "friday"
+      time: "22:00"
+      timezone: "Europe/Paris"
     open-pull-requests-limit: 1
