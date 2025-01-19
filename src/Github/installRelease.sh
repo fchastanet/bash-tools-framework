@@ -11,6 +11,7 @@
 # @arg $6 installCallback:Function called to install the file retrieved on github (default copy as is and set execution bit)
 # @stdout log messages about retry, install, upgrade
 # @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+# @env VERSION_PLACEHOLDER a placeholder to replace in downloadReleaseUrl (default: @latestVersion@)
 Github::installRelease() {
   local targetFile="$1"
   local releaseUrl="$2"
@@ -26,7 +27,10 @@ Github::installRelease() {
   fi
   if [[ "${currentVersion}" != "${exactVersion}" ]]; then
     Log::displayInfo "Installing ${targetFile} from version ${currentVersion} to ${exactVersion}"
-    url="$(echo "${releaseUrl}" | sed -E "s/@latestVersion@/${exactVersion}/g")"
+    url="$(
+      echo "${releaseUrl}" |
+        sed -E "s/${VERSION_PLACEHOLDER:-@latestVersion@}/${exactVersion}/g"
+    )"
     Log::displayInfo "Using url ${url}"
     newSoftware=$(mktemp -p "${TMPDIR:-/tmp}" -t github.newSoftware.XXXX)
     Retry::default curl \

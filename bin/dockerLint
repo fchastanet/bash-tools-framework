@@ -488,6 +488,7 @@ Github::upgradeRelease() {
   }
   FILTER_LAST_VERSION_CALLBACK=${FILTER_LAST_VERSION_CALLBACK:-extractVersion} \
     SOFT_VERSION_CALLBACK="${softVersionCallback}" \
+    INSTALL_CALLBACK="${installCallback}" \
     Web::upgradeRelease \
     "${targetFile}" \
     "${releasesUrl}" \
@@ -612,6 +613,19 @@ Log::displaySuccess() {
 }
 
 
+# @description Display message using warning color (yellow)
+# @arg $1 message:String the message to display
+# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
+# @env LOG_CONTEXT String allows to contextualize the log
+Log::displayWarning() {
+  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
+    Log::computeDuration
+    echo -e "${__WARNING_COLOR}WARN    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
+  fi
+  Log::logWarning "$1"
+}
+
+
 # @description Display message using error color (red) and exit immediately with error status 1
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -700,6 +714,15 @@ Log::logMessage() {
 Log::logSuccess() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
     Log::logMessage "${2:-SUCCESS}" "$1"
+  fi
+}
+
+
+# @description log message to file
+# @arg $1 message:String the message to display
+Log::logWarning() {
+  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
+    Log::logMessage "${2:-WARNING}" "$1"
   fi
 }
 
@@ -1074,12 +1097,27 @@ Version::parse() {
 Web::getReleases() {
   local releaseListUrl="$1"
   # Get latest release from GitHub api
-  Retry::parameterized "${RETRY_MAX_RETRY:-5}" "${RETRY_DELAY_BETWEEN_RETRIES:-15}" "Retrieving release versions list ..." curl \
-    -L \
-    --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
-    --fail \
-    --silent \
-    "${releaseListUrl}"
+  if command -v gh &>/dev/null && [[ -n "${GH_TOKEN}" ]]; then
+    Log::displayDebug "Using gh to retrieve release versions list"
+    Retry::parameterized "${RETRY_MAX_RETRY:-5}" \
+      "${RETRY_DELAY_BETWEEN_RETRIES:-15}" \
+      "Retrieving release versions list ..." \
+      gh api "${releaseListUrl#https://github.com}"
+  else
+    if command -v gh &>/dev/null && [[ "${GH_WARNING_DISPLAYED:-0}" = "0" ]]; then
+      Log::displayWarning "GH_TOKEN is not set, cannot use gh, using curl to retrieve release versions list"
+      GH_WARNING_DISPLAYED=1
+    fi
+    Retry::parameterized "${RETRY_MAX_RETRY:-5}" \
+      "${RETRY_DELAY_BETWEEN_RETRIES:-15}" \
+      "Retrieving release versions list ..." \
+      curl \
+      -L \
+      --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
+      --fail \
+      --silent \
+      "${releaseListUrl}"
+  fi
 }
 
 
@@ -1097,6 +1135,7 @@ Web::getReleases() {
 # @env PARSE_VERSION_CALLBACK a callback to parse the version of the existing command
 # @env INSTALL_CALLBACK a callback to install the software downloaded
 # @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+# @env VERSION_PLACEHOLDER a placeholder to replace in downloadReleaseUrl (default: @latestVersion@)
 Web::upgradeRelease() {
   local targetFile="$1"
   local releasesUrl="$2"
@@ -1107,25 +1146,28 @@ Web::upgradeRelease() {
   local filterLastVersionCallback="${FILTER_LAST_VERSION_CALLBACK:-Version::parse}"
   local softVersionCallback="${SOFT_VERSION_CALLBACK:-Version::getCommandVersionFromPlainText}"
   local installCallback="${INSTALL_CALLBACK:-}"
-  local latestVersion
-  latestVersion="$(Web::getReleases "${releasesUrl}" | ${filterLastVersionCallback})" || {
-    Log::displayError "latest version not found on ${releasesUrl}"
-    return 1
-  }
-  Log::displayInfo "Latest version found is ${latestVersion}"
 
   local currentVersion="not existing"
   if [[ -f "${targetFile}" ]]; then
     currentVersion="$(${softVersionCallback} "${targetFile}" "${softVersionArg}" 2>&1 || true)"
   fi
   if [[ -z "${exactVersion}" ]]; then
+    local latestVersion
+    latestVersion="$(Web::getReleases "${releasesUrl}" | ${filterLastVersionCallback})" || {
+      Log::displayError "latest version not found on ${releasesUrl}"
+      return 1
+    }
+    Log::displayInfo "Latest version found is ${latestVersion}"
+
     exactVersion="${latestVersion}"
   fi
-  local url="${downloadReleaseUrl//@latestVersion@/${exactVersion}}"
+  local url="${downloadReleaseUrl//${VERSION_PLACEHOLDER:-@latestVersion@}/${exactVersion}}"
   if [[ -n "${exactVersion}" ]] && ! Github::isReleaseVersionExist "${url}"; then
     Log::displayError "${targetFile} version ${exactVersion} doesn't exist on github"
     return 2
   fi
+  Log::displayDebug "currentVersion: '${currentVersion}'"
+  Log::displayDebug "exactVersion: '${exactVersion}'"
   if [[ "${currentVersion}" = "${exactVersion}" ]]; then
     Log::displayInfo "${targetFile} version ${exactVersion} already installed"
   else

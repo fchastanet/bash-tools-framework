@@ -382,17 +382,31 @@ Github::getLatestRelease() {
   resultRef=""
   local resultFile
   resultFile="$(mktemp -p "${TMPDIR:-/tmp}" -t githubLatestRelease.XXXX)"
-  # Get latest release from GitHub api
-  if Retry::default curl \
-    -L \
-    --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
-    -o "${resultFile}" \
-    --fail \
-    --silent \
-    "https://api.github.com/repos/${repo}/releases/latest"; then
-    # shellcheck disable=SC2034
-    resultRef="$(Version::githubApiExtractVersion <"${resultFile}")"
-    return 0
+  local query="repos/${repo}/releases/latest"
+
+  if command -v gh &>/dev/null && [[ -n "${GH_TOKEN}" ]]; then
+    Log::displayDebug "Using gh to retrieve release versions list"
+    Retry::parameterized "${RETRY_MAX_RETRY:-5}" \
+      "${RETRY_DELAY_BETWEEN_RETRIES:-15}" \
+      "Retrieving release versions list ..." \
+      gh api "${query}" >"${resultFile}"
+  else
+    if command -v gh &>/dev/null && [[ "${GH_WARNING_DISPLAYED:-0}" = "0" ]]; then
+      Log::displayWarning "GH_TOKEN is not set, cannot use gh, using curl to retrieve release versions list"
+      GH_WARNING_DISPLAYED=1
+    fi
+    # Get latest release from GitHub api
+    if Retry::default curl \
+      -L \
+      --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
+      -o "${resultFile}" \
+      --fail \
+      --silent \
+      "https://api.github.com/${query}"; then
+      # shellcheck disable=SC2034
+      resultRef="$(Version::githubApiExtractVersion <"${resultFile}")"
+      return 0
+    fi
   fi
   # display curl result in case of failure
   cat >&2 "${resultFile}"

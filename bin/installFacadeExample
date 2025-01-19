@@ -516,39 +516,39 @@ Log::logFatal() {
 # FUNCTIONS
 
 facade_main_installFacadeExamplesh() {
-FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
-FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
-FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
-FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
-FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
-# REQUIRES
-Env::requireLoad
-Log::requireLoad
-UI::requireTheme
-Compiler::Facade::requireCommandBinDir
+  FRAMEWORK_ROOT_DIR="$(cd "${CURRENT_DIR}/.." && pwd -P)"
+  FRAMEWORK_SRC_DIR="${FRAMEWORK_ROOT_DIR}/src"
+  FRAMEWORK_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+  FRAMEWORK_VENDOR_DIR="${FRAMEWORK_ROOT_DIR}/vendor"
+  FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
+  # REQUIRES
+  Env::requireLoad
+  Log::requireLoad
+  UI::requireTheme
+  Compiler::Facade::requireCommandBinDir
 
-# @require Compiler::Facade::requireCommandBinDir
+  # @require Compiler::Facade::requireCommandBinDir
 
-install() {
-  echo "installation in progress"
-}
+  install() {
+    echo "installation in progress"
+  }
 
-local action=$1
-shift || true
-case ${action} in
-  install)
-    install "$@"
-    ;;
-  *)
-    if Assert::functionExists defaultFacadeAction; then
-      defaultFacadeAction "$1" "$@"
-    else
-      Log::displayError "invalid action requested: ${action}"
-      exit 1
-    fi
-    ;;
-esac
-exit 0
+  local action=$1
+  shift || true
+  case ${action} in
+    install)
+      install "$@"
+      ;;
+    *)
+      if Assert::functionExists defaultFacadeAction; then
+        defaultFacadeAction "$1" "$@"
+      else
+        Log::displayError "invalid action requested: ${action}"
+        exit 1
+      fi
+      ;;
+  esac
+  exit 0
 }
 
 # if file is sourced avoid calling main function

@@ -33,6 +33,7 @@ Github::upgradeRelease() {
   }
   FILTER_LAST_VERSION_CALLBACK=${FILTER_LAST_VERSION_CALLBACK:-extractVersion} \
     SOFT_VERSION_CALLBACK="${softVersionCallback}" \
+    INSTALL_CALLBACK="${installCallback}" \
     Web::upgradeRelease \
     "${targetFile}" \
     "${releasesUrl}" \

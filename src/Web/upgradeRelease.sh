@@ -14,6 +14,7 @@
 # @env PARSE_VERSION_CALLBACK a callback to parse the version of the existing command
 # @env INSTALL_CALLBACK a callback to install the software downloaded
 # @env CURL_CONNECT_TIMEOUT number of seconds before giving up host connection
+# @env VERSION_PLACEHOLDER a placeholder to replace in downloadReleaseUrl (default: @latestVersion@)
 Web::upgradeRelease() {
   local targetFile="$1"
   local releasesUrl="$2"
@@ -24,25 +25,28 @@ Web::upgradeRelease() {
   local filterLastVersionCallback="${FILTER_LAST_VERSION_CALLBACK:-Version::parse}"
   local softVersionCallback="${SOFT_VERSION_CALLBACK:-Version::getCommandVersionFromPlainText}"
   local installCallback="${INSTALL_CALLBACK:-}"
-  local latestVersion
-  latestVersion="$(Web::getReleases "${releasesUrl}" | ${filterLastVersionCallback})" || {
-    Log::displayError "latest version not found on ${releasesUrl}"
-    return 1
-  }
-  Log::displayInfo "Latest version found is ${latestVersion}"
 
   local currentVersion="not existing"
   if [[ -f "${targetFile}" ]]; then
     currentVersion="$(${softVersionCallback} "${targetFile}" "${softVersionArg}" 2>&1 || true)"
   fi
   if [[ -z "${exactVersion}" ]]; then
+    local latestVersion
+    latestVersion="$(Web::getReleases "${releasesUrl}" | ${filterLastVersionCallback})" || {
+      Log::displayError "latest version not found on ${releasesUrl}"
+      return 1
+    }
+    Log::displayInfo "Latest version found is ${latestVersion}"
+
     exactVersion="${latestVersion}"
   fi
-  local url="${downloadReleaseUrl//@latestVersion@/${exactVersion}}"
+  local url="${downloadReleaseUrl//${VERSION_PLACEHOLDER:-@latestVersion@}/${exactVersion}}"
   if [[ -n "${exactVersion}" ]] && ! Github::isReleaseVersionExist "${url}"; then
     Log::displayError "${targetFile} version ${exactVersion} doesn't exist on github"
     return 2
   fi
+  Log::displayDebug "currentVersion: '${currentVersion}'"
+  Log::displayDebug "exactVersion: '${exactVersion}'"
   if [[ "${currentVersion}" = "${exactVersion}" ]]; then
     Log::displayInfo "${targetFile} version ${exactVersion} already installed"
   else

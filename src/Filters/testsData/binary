@@ -6,8 +6,6 @@
 ###############################################################################
 # shellcheck disable=SC2288,SC2034
 
-
-
 # ensure that no user aliases could interfere with
 # commands used in this script
 unalias -a || true
@@ -94,7 +92,6 @@ cleanOnExit() {
 }
 trap cleanOnExit EXIT HUP QUIT ABRT TERM
 
-
 SCRIPT_NAME=${0##*/}
 REAL_SCRIPT_FILE="$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")"
 if [[ -n "${EMBED_CURRENT_DIR}" ]]; then
@@ -137,7 +134,6 @@ export __VERBOSE_LEVEL_INFO=1
 export __VERBOSE_LEVEL_DEBUG=2
 # @description verbose level info
 export __VERBOSE_LEVEL_TRACE=3
-
 
 # @description concatenate each element of an array with a separator
 # but wrapping text when line length is more than provided argument
@@ -267,7 +263,6 @@ Array::wrap2() {
   ) | sed -E -e 's/[[:blank:]]+$//'
 }
 
-
 # @description check if command specified exists or return 1
 # with error and message if not
 #
@@ -290,7 +285,6 @@ Assert::commandExists() {
   return 0
 }
 
-
 # @description check if tty (interactive mode) is active
 # @noargs
 # @exitcode 1 if tty not active
@@ -305,7 +299,6 @@ Assert::tty() {
   fi
   tty -s
 }
-
 
 # @description get file content if file not expired
 # @arg $1 file:String the file to get content from
@@ -325,7 +318,6 @@ Cache::getFileContentIfNotExpired() {
   fi
   cat "${file}"
 }
-
 
 # @description convert base64 encoded back to target file
 # if target file is executable prepend dir of target
@@ -356,7 +348,6 @@ Compiler::Embed::extractFileFromBase64() {
   fi
 }
 
-
 # @description prepend directories to the PATH environment variable
 # @arg $@ args:String[] list of directories to prepend
 # @set PATH update PATH with the directories prepended
@@ -368,7 +359,6 @@ Env::pathPrepend() {
     fi
   done
 }
-
 
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
@@ -405,7 +395,6 @@ Env::requireLoad() {
   done
 }
 
-
 # @description get number of seconds since last modification of the file
 # @arg $1 file:String file path
 # @exitcode 1 if file does not exist
@@ -420,7 +409,6 @@ File::elapsedTimeSinceLastModification() {
   ((diff = $(date +%s) - lastModificationTimeSeconds))
   echo -n "${diff}"
 }
-
 
 # @description replace token by input(stdin) in given targetFile
 # @warning special ansi codes will be removed from stdin
@@ -447,7 +435,6 @@ File::replaceTokenByInput() {
   )
 }
 
-
 # @description remove ansi codes from input or files given as argument
 # @arg $@ files:String[] the files to filter
 # @exitcode * if one of the filter command fails
@@ -461,7 +448,6 @@ Filters::removeAnsiCodes() {
   # cspell:enable
 }
 
-
 # @description create a temp file using default TMPDIR variable
 # initialized in _includes/_commonHeader.sh
 # @env TMPDIR String (default value /tmp)
@@ -469,7 +455,6 @@ Filters::removeAnsiCodes() {
 Framework::createTempFile() {
   mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
 }
-
 
 # @description clone the repository if not done yet, else pull it if no change in it
 # @arg $1 dir:String directory in which repository is installed or will be cloned
@@ -520,7 +505,6 @@ Git::cloneOrPullIfNoChanges() {
   fi
 }
 
-
 # @description pull git directory only if no change has been detected
 # @arg $1 dir:String the git directory to pull
 # @exitcode 0 on successful pulling
@@ -561,7 +545,6 @@ Git::pullIfNoChanges() {
   )
 }
 
-
 # @description ensure command git is available
 # @exitcode 1 if git command not available
 # @stderr diagnostics information is displayed
@@ -570,7 +553,6 @@ Git::requireGitCommand() {
 
   Assert::commandExists git
 }
-
 
 # @description intermediate callback that is used by Github::upgradeRelease
 # or Github::installRelease
@@ -610,7 +592,6 @@ Github::defaultInstall() {
   fi
 }
 
-
 # @description github repository eg: kubernetes-sigs/kind
 # @arg $1 githubUrl:String eg: https://github.com/kubernetes-sigs/kind/releases/download/@latestVersion@/kind-linux-amd64
 # @exitcode 1 if no matching repo found in provided url, 0 otherwise
@@ -624,7 +605,6 @@ Github::extractRepoFromGithubUrl() {
   fi
   echo "${result}"
 }
-
 
 # @description check if specified release software version exists in github
 # @arg $1 releaseUrl:String eg: https://github.com/kubernetes-sigs/kind/releases/download/v1.0.0/kind-linux-amd64
@@ -643,7 +623,6 @@ Github::isReleaseVersionExist() {
     --fail \
     "${releaseUrl}"
 }
-
 
 # @description upgrade given binary to latest github release using retry
 #
@@ -686,7 +665,6 @@ Github::upgradeRelease() {
     "${EXACT_VERSION:-}"
 }
 
-
 # @description ensure command jq is available
 # @exitcode 1 if jq command not available
 # @stderr diagnostics information is displayed
@@ -698,14 +676,12 @@ Linux::requireJqCommand() {
   fi
 }
 
-
 # @description ensure command tar is available
 # @exitcode 1 if tar command not available
 # @stderr diagnostics information is displayed
 Linux::requireTarCommand() {
   Assert::commandExists tar
 }
-
 
 declare -g FIRST_LOG_DATE LOG_LAST_LOG_DATE LOG_LAST_LOG_DATE_INIT LOG_LAST_DURATION_STR
 FIRST_LOG_DATE="${EPOCHREALTIME/[^0-9]/}"
@@ -745,7 +721,6 @@ Log::computeDuration() {
   fi
 }
 
-
 # @description Display message using debug color (gray)
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -758,7 +733,6 @@ Log::displayDebug() {
   Log::logDebug "$1"
 }
 
-
 # @description Display message using error color (red)
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -770,7 +744,6 @@ Log::displayError() {
   fi
   Log::logError "$1"
 }
-
 
 # @description Display message using info color (bg light blue/fg white)
 # @arg $1 message:String the message to display
@@ -785,7 +758,6 @@ Log::displayInfo() {
   Log::logInfo "$1" "${type}"
 }
 
-
 # @description Display message using skip color (yellow)
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -797,7 +769,6 @@ Log::displaySkipped() {
   fi
   Log::logSkipped "$1"
 }
-
 
 # @description Display message using success color (bg green/fg white)
 # @arg $1 message:String the message to display
@@ -811,7 +782,6 @@ Log::displaySuccess() {
   Log::logSuccess "$1"
 }
 
-
 # @description Display message using warning color (yellow)
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -824,7 +794,6 @@ Log::displayWarning() {
   Log::logWarning "$1"
 }
 
-
 # @description Display message using error color (red) and exit immediately with error status 1
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -836,7 +805,6 @@ Log::fatal() {
   exit 1
 }
 
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logDebug() {
@@ -844,7 +812,6 @@ Log::logDebug() {
     Log::logMessage "${2:-DEBUG}" "$1"
   fi
 }
-
 
 # @description log message to file
 # @arg $1 message:String the message to display
@@ -854,13 +821,11 @@ Log::logError() {
   fi
 }
 
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logFatal() {
   Log::logMessage "${2:-FATAL}" "$1"
 }
-
 
 # @description log message to file
 # @arg $1 message:String the message to display
@@ -869,7 +834,6 @@ Log::logInfo() {
     Log::logMessage "${2:-INFO}" "$1"
   fi
 }
-
 
 # @description Internal: common log message
 # @example text
@@ -907,7 +871,6 @@ Log::logMessage() {
   fi
 }
 
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logSkipped() {
@@ -915,7 +878,6 @@ Log::logSkipped() {
     Log::logMessage "${2:-SKIPPED}" "$1"
   fi
 }
-
 
 # @description log message to file
 # @arg $1 message:String the message to display
@@ -925,7 +887,6 @@ Log::logSuccess() {
   fi
 }
 
-
 # @description log message to file
 # @arg $1 message:String the message to display
 Log::logWarning() {
@@ -933,7 +894,6 @@ Log::logWarning() {
     Log::logMessage "${2:-WARNING}" "$1"
   fi
 }
-
 
 # @description activate or not Log::display* and Log::log* functions
 # based on BASH_FRAMEWORK_DISPLAY_LEVEL and BASH_FRAMEWORK_LOG_LEVEL
@@ -949,7 +909,6 @@ Log::logWarning() {
 # @stderr diagnostics information about log file is displayed
 Log::requireLoad() {
   REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
-
 
   if [[ "${REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED:-0}" != 1 ]]; then
     echo >&2 "Requirement Env::requireLoad has not been loaded"
@@ -992,7 +951,6 @@ Log::requireLoad() {
   fi
 }
 
-
 # @description To be called before logging in the log file
 # @arg $1 file:string log file name
 # @arg $2 maxLogFilesCount:int maximum number of log files
@@ -1015,7 +973,6 @@ Log::rotate() {
   fi
 }
 
-
 # @description Retry a command 5 times with a delay of 15 seconds between each attempt
 # @arg $@ command:String[] the command to run
 # @exitcode 0 on success
@@ -1025,7 +982,6 @@ Log::rotate() {
 Retry::default() {
   Retry::parameterized "${RETRY_MAX_RETRY:-5}" "${RETRY_DELAY_BETWEEN_RETRIES:-15}" "" "$@"
 }
-
 
 # @description Retry a command several times depending on parameters
 # @arg $1 maxRetries:int    $1 max retries
@@ -1064,7 +1020,6 @@ Retry::parameterized() {
   return 0
 }
 
-
 # @description add reference to index file (using docsify embed feature)
 # @arg $1 indexFile:String
 # @arg $2 mdRelativeFile:String
@@ -1080,7 +1035,6 @@ ShellDoc::appendDocToIndex() {
   ) >>"${indexFile}"
 }
 
-
 # @description fix markdown TOC generated by Markdown all in one vscode extension
 # to make TOC compatible with docsify
 # @arg $1 file:String file to fix
@@ -1089,18 +1043,17 @@ ShellDoc::appendDocToIndex() {
 ShellDoc::fixMarkdownToc() {
   local file="$1"
 
-Linux::requireTarCommand
-Compiler::Embed::extractFileFromBase64 \
-  "${PERSISTENT_TMPDIR:-/tmp}/647e7865a1d35cf1435bb0aa74a5cdbe/fixMarkdownTocScript" \
-  "ewogIGxpbmU9JDAKICBpZiAobWF0Y2gobGluZSwgL14oXHMqLSBcWyhbMC05XStcLikrIFteXV0rXF1cKCMpKFteKV0rKVwpLywgYXJyKSkgewogICAgcHJpbnQgYXJyWzFdICJfIiByZXdyaXRlKGFyclszXSkgIikiCiAgfSBlbHNlIHsKICAgIHByaW50IGxpbmUKICB9Cn0KZnVuY3Rpb24gcmV3cml0ZShzdHIpCnsKICAgIGdzdWIoLy0oLSkrLywgIi0iLCBzdHIpCiAgICByZXR1cm4gc3RyCn0K" \
-  "644"
+  Linux::requireTarCommand
+  Compiler::Embed::extractFileFromBase64 \
+    "${PERSISTENT_TMPDIR:-/tmp}/647e7865a1d35cf1435bb0aa74a5cdbe/fixMarkdownTocScript" \
+    "ewogIGxpbmU9JDAKICBpZiAobWF0Y2gobGluZSwgL14oXHMqLSBcWyhbMC05XStcLikrIFteXV0rXF1cKCMpKFteKV0rKVwpLywgYXJyKSkgewogICAgcHJpbnQgYXJyWzFdICJfIiByZXdyaXRlKGFyclszXSkgIikiCiAgfSBlbHNlIHsKICAgIHByaW50IGxpbmUKICB9Cn0KZnVuY3Rpb24gcmV3cml0ZShzdHIpCnsKICAgIGdzdWIoLy0oLSkrLywgIi0iLCBzdHIpCiAgICByZXR1cm4gc3RyCn0K" \
+    "644"
 
-declare -gx embed_file_fixMarkdownTocScript="${PERSISTENT_TMPDIR:-/tmp}/647e7865a1d35cf1435bb0aa74a5cdbe/fixMarkdownTocScript"
+  declare -gx embed_file_fixMarkdownTocScript="${PERSISTENT_TMPDIR:-/tmp}/647e7865a1d35cf1435bb0aa74a5cdbe/fixMarkdownTocScript"
 
   # shellcheck disable=SC2154
   awk -i inplace -f "${embed_file_fixMarkdownTocScript}" "${file}"
 }
-
 
 # @description generates markdown file from template by
 # replacing @@@command_help@@@ by the help of the command
@@ -1153,7 +1106,6 @@ ShellDoc::generateMdFileFromTemplate() {
   Log::displayInfo "${nbTokensGenerated} commands' help replaced in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
 }
 
-
 # @description extract shDoc from file
 #
 # @arg $1 file:String
@@ -1169,7 +1121,6 @@ ShellDoc::generateShellDoc() {
     }
   ) || true
 }
-
 
 # @description generate shell doc file from given directory
 #
@@ -1247,7 +1198,6 @@ ShellDoc::generateShellDocDir() {
   )
 }
 
-
 # @description generate doc + index
 # @arg $1 fromDir:String
 # @arg $2 fromDirRelative:String
@@ -1301,7 +1251,6 @@ ShellDoc::generateShellDocsFromDir() {
   done < <(cd "${fromDir}" && find . -type d -name '[^.]*' | "${grepExclude[@]}" | LC_ALL=C sort)
 }
 
-
 BASH_FRAMEWORK_SHDOC_INSTALLED_PATH="vendor/.shDocInstalled"
 BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
 
@@ -1335,7 +1284,6 @@ ShellDoc::installRequirementsIfNeeded() {
   fi
 }
 
-
 # @description install hadolint if necessary
 # @arg $1 targetFile:String
 # @feature Github::upgradeRelease
@@ -1345,7 +1293,6 @@ Softwares::installHadolint() {
     "${targetFile}" \
     "https://github.com/hadolint/hadolint/releases/download/v@latestVersion@/hadolint-Linux-x86_64"
 }
-
 
 # @description install hadolint if necessary
 # @arg $1 targetFile:String
@@ -1372,7 +1319,6 @@ Softwares::installShellcheck() {
     "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
 }
 
-
 # @description draw a line with the character passed in parameter repeated depending on terminal width
 # @arg $1 character:String character to use as separator (default value #)
 UI::drawLine() {
@@ -1388,7 +1334,6 @@ UI::drawLine() {
   echo
 }
 
-
 # @description load color theme
 # @noargs
 # @env BASH_FRAMEWORK_THEME String theme to use
@@ -1401,7 +1346,6 @@ UI::requireTheme() {
     UI::theme "${BASH_FRAMEWORK_THEME-default}"
   fi
 }
-
 
 # @description load colors theme constants
 # @warning if tty not opened, noColor theme will be chosen
@@ -1483,7 +1427,6 @@ UI::theme() {
   fi
 }
 
-
 # @description extract software version number
 # @arg $1 command:String the command that will be called with --version parameter
 # @arg $2 argVersion:String  allows to override default --version parameter
@@ -1493,7 +1436,6 @@ Version::getCommandVersionFromPlainText() {
   "${command}" "${argVersion}" 2>&1 |
     Version::parse # keep only version numbers
 }
-
 
 # @description extract version number from github api
 # @noargs
@@ -1510,7 +1452,6 @@ Version::githubApiExtractVersion() {
   jq -r ".tag_name"
 }
 
-
 # @description filter to keep only version number from a string
 # @arg $@ files:String[] the files to filter
 # @exitcode * if one of the filter command fails
@@ -1526,7 +1467,6 @@ Version::parse() {
     "$@"
 }
 
-
 # @description Retrieve the latest version number of a web release
 # @arg $1 releaseListUrl:String the url from which version list can be retrieved
 # @stdout log messages about retry
@@ -1541,7 +1481,6 @@ Web::getReleases() {
     --silent \
     "${releaseListUrl}"
 }
-
 
 # @description upgrade given binary to latest release using retry
 #
@@ -1607,7 +1546,6 @@ Web::upgradeRelease() {
   fi
 }
 # FUNCTIONS
-
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
@@ -1854,8 +1792,6 @@ commandOptionParseFinished() {
   fi
 }
 
-
-
 # shellcheck disable=SC2034
 declare optionContinuousIntegrationMode=0
 
@@ -1863,8 +1799,6 @@ declare optionContinuousIntegrationMode=0
 updateOptionContinuousIntegrationMode() {
   BASH_FRAMEWORK_ARGV_FILTERED+=("$1")
 }
-
-
 
 # shellcheck disable=SC2034
 declare copyrightBeginYear="2022"
@@ -1877,7 +1811,6 @@ optionHelpCallback() {
   docCommandHelp
   exit 0
 }
-
 
 # ------------------------------------------
 # Command docCommand
@@ -1948,7 +1881,6 @@ docCommandParse() {
   local -i options_parse_optionParsedCountOptionQuiet
   ((options_parse_optionParsedCountOptionQuiet = 0)) || true
 
-
   # shellcheck disable=SC2034
   local -i options_parse_parsedArgIndex=0
   while (($# > 0)); do
@@ -1962,7 +1894,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionContinuousIntegrationMode="1"
 
-        if ((options_parse_optionParsedCountOptionContinuousIntegrationMode >= 1 )); then
+        if ((options_parse_optionParsedCountOptionContinuousIntegrationMode >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -1978,7 +1910,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionHelp="1"
 
-        if ((options_parse_optionParsedCountOptionHelp >= 1 )); then
+        if ((options_parse_optionParsedCountOptionHelp >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -1994,7 +1926,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionConfig="1"
 
-        if ((options_parse_optionParsedCountOptionConfig >= 1 )); then
+        if ((options_parse_optionParsedCountOptionConfig >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2011,7 +1943,7 @@ docCommandParse() {
           return 1
         fi
 
-        if ((options_parse_optionParsedCountOptionBashFrameworkConfig >= 1 )); then
+        if ((options_parse_optionParsedCountOptionBashFrameworkConfig >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2029,7 +1961,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionInfoVerbose="1"
 
-        if ((options_parse_optionParsedCountOptionInfoVerbose >= 1 )); then
+        if ((options_parse_optionParsedCountOptionInfoVerbose >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2047,7 +1979,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionDebugVerbose="1"
 
-        if ((options_parse_optionParsedCountOptionDebugVerbose >= 1 )); then
+        if ((options_parse_optionParsedCountOptionDebugVerbose >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2065,7 +1997,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionTraceVerbose="1"
 
-        if ((options_parse_optionParsedCountOptionTraceVerbose >= 1 )); then
+        if ((options_parse_optionParsedCountOptionTraceVerbose >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2091,7 +2023,7 @@ docCommandParse() {
           return 1
         fi
 
-        if ((options_parse_optionParsedCountOptionLogLevel >= 1 )); then
+        if ((options_parse_optionParsedCountOptionLogLevel >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2114,7 +2046,7 @@ docCommandParse() {
           return 1
         fi
 
-        if ((options_parse_optionParsedCountOptionLogFile >= 1 )); then
+        if ((options_parse_optionParsedCountOptionLogFile >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2142,7 +2074,7 @@ docCommandParse() {
           return 1
         fi
 
-        if ((options_parse_optionParsedCountOptionDisplayLevel >= 1 )); then
+        if ((options_parse_optionParsedCountOptionDisplayLevel >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2162,7 +2094,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionNoColor="1"
 
-        if ((options_parse_optionParsedCountOptionNoColor >= 1 )); then
+        if ((options_parse_optionParsedCountOptionNoColor >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2188,7 +2120,7 @@ docCommandParse() {
           return 1
         fi
 
-        if ((options_parse_optionParsedCountOptionTheme >= 1 )); then
+        if ((options_parse_optionParsedCountOptionTheme >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2208,7 +2140,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionVersion="1"
 
-        if ((options_parse_optionParsedCountOptionVersion >= 1 )); then
+        if ((options_parse_optionParsedCountOptionVersion >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2224,7 +2156,7 @@ docCommandParse() {
         # shellcheck disable=SC2034
         optionQuiet="1"
 
-        if ((options_parse_optionParsedCountOptionQuiet >= 1 )); then
+        if ((options_parse_optionParsedCountOptionQuiet >= 1)); then
           Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
           return 1
         fi
@@ -2284,75 +2216,56 @@ docCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "Activate continuous integration mode (tmp folder not shared with host)" ""
   echo
 
-
   echo
   echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
   echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Displays this command help"
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--config${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Displays configuration"
   echo
-
-
 
   echo -e "  ${__HELP_OPTION_COLOR}--bash-framework-config bash-framework-config${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Use alternate bash framework configuration."
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--verbose${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-v${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Info level verbose mode (alias of --display-level INFO)"
   echo
-
-
 
   echo -e "  ${__HELP_OPTION_COLOR}-vv${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Debug level verbose mode (alias of --display-level DEBUG)"
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}-vvv${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Trace level verbose mode (alias of --display-level TRACE)"
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--log-level log-level${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log level"
   echo
-  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
+  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, " "ERR, " "ERROR, " "WARN, " "WARNING, " "INFO, " "DEBUG, " "TRACE"
   echo
-
 
   echo -e "  ${__HELP_OPTION_COLOR}--log-file log-file${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--display-level display-level${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
   echo
-  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, "  "ERR, "  "ERROR, "  "WARN, "  "WARNING, "  "INFO, "  "DEBUG, "  "TRACE"
+  Array::wrap2 ' ' 76 6 "    Possible values: " "OFF, " "ERR, " "ERROR, " "WARN, " "WARNING, " "INFO, " "DEBUG, " "TRACE"
   echo
-
 
   echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Produce monochrome output. alias of --theme noColor."
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--theme theme${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Choose color theme - default-force means colors will be produced even if command is piped."
   echo
-  Array::wrap2 ' ' 76 6 "    Possible values: " "default, "  "default-force, "  "noColor"
+  Array::wrap2 ' ' 76 6 "    Possible values: " "default, " "default-force, " "noColor"
   echo
 
   Array::wrap2 ' ' 76 6 "    Default value: " "default"
@@ -2362,12 +2275,9 @@ docCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "Print version information and quit."
   echo
 
-
-
   echo -e "  ${__HELP_OPTION_COLOR}--quiet${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-q${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Quiet mode, doesn't display any output."
   echo
-
 
   # ------------------------------------------
   # longDescription section
@@ -2376,7 +2286,7 @@ docCommandHelp() {
   echo
   echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
   declare -a docCommandLongDescription=(
-  "INTERNAL TOOL"
+    "INTERNAL TOOL"
   )
   Array::wrap2 ' ' 76 0 "${docCommandLongDescription[@]}"
   echo
@@ -2410,132 +2320,131 @@ docCommandHelp() {
   Array::wrap2 ' ' 76 0 "$(copyrightCallback)"
 }
 
-
 beforeParseCallback
 
 docCommandParse "$@"
 MAIN_FUNCTION_NAME="main"
 main() {
 
-COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
+  COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
-runContainer() {
-  local image="scrasnups/build:bash-tools-ubuntu-5.3"
-  local -a dockerRunCmd=(
-    "/bash/bin/doc"
-    "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
-  )
-
-  if ! docker inspect --type=image "${image}" &>/dev/null; then
-    docker pull "${image}"
-  fi
-  # run docker image
-  local -a localDockerRunArgs=(
-    --rm
-    -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
-    -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
-    -w /bash
-    -v "${FRAMEWORK_ROOT_DIR}:/bash"
-    --entrypoint /usr/local/bin/bash
-  )
-  # shellcheck disable=SC2154
-  if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
-    localDockerRunArgs+=(
-      -e USER_ID="${USER_ID:-1000}"
-      -e GROUP_ID="${GROUP_ID:-1000}"
-      --user "www-data:www-data"
-      -v "/tmp:/tmp"
+  runContainer() {
+    local image="scrasnups/build:bash-tools-ubuntu-5.3"
+    local -a dockerRunCmd=(
+      "/bash/bin/doc"
+      "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
     )
+
+    if ! docker inspect --type=image "${image}" &>/dev/null; then
+      docker pull "${image}"
+    fi
+    # run docker image
+    local -a localDockerRunArgs=(
+      --rm
+      -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
+      -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
+      -w /bash
+      -v "${FRAMEWORK_ROOT_DIR}:/bash"
+      --entrypoint /usr/local/bin/bash
+    )
+    # shellcheck disable=SC2154
+    if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
+      localDockerRunArgs+=(
+        -e USER_ID="${USER_ID:-1000}"
+        -e GROUP_ID="${GROUP_ID:-1000}"
+        --user "www-data:www-data"
+        -v "/tmp:/tmp"
+      )
+    fi
+
+    # shellcheck disable=SC2154
+    if [[ "${optionTraceVerbose}" = "1" ]]; then
+      set -x
+    fi
+    docker run \
+      "${localDockerRunArgs[@]}" \
+      "${image}" \
+      "${dockerRunCmd[@]}"
+    set +x
+  }
+
+  generateDoc() {
+    PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+    export FRAMEWORK_ROOT_DIR
+
+    #-----------------------------
+    # doc generation
+    #-----------------------------
+
+    Log::displayInfo 'generate Commands.md'
+    ((TOKEN_NOT_FOUND_COUNT = 0)) || true
+    ShellDoc::generateMdFileFromTemplate \
+      "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
+      "${PAGES_DIR}/Commands.md" \
+      "${COMMAND_BIN_DIR}" \
+      TOKEN_NOT_FOUND_COUNT \
+      '(var|simpleBinary|shdoc|installFacadeExample)$'
+
+    # clean folder before generate
+    rm -f "${PAGES_DIR}/Index.md" || true
+    rm -Rf "${PAGES_DIR}/bashDoc" || true
+    rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
+
+    ShellDoc::generateShellDocsFromDir \
+      "${FRAMEWORK_SRC_DIR}" \
+      "src" \
+      "${PAGES_DIR}/bashDoc" \
+      "${PAGES_DIR}/FrameworkIndex.md" \
+      "<% ${REPOSITORY_URL} %>" \
+      '/testsData|/_.*' \
+      '(/__all\.sh)$'
+    cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
+
+    cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
+    sed -i -E \
+      -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
+      -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
+      -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
+      "${PAGES_DIR}/README.md"
+
+    cp -R "${FRAMEWORK_ROOT_DIR}/doc" "${PAGES_DIR}"
+    rm -Rf "${PAGES_DIR}/doc/guides/templates"
+
+    Log::displayInfo 'generate FrameworkFullDoc.md'
+    cp "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkFullDoc.tmpl.md" "${PAGES_DIR}/FrameworkFullDoc.md"
+    (
+      echo
+      find "${PAGES_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
+    ) >>"${PAGES_DIR}/FrameworkFullDoc.md"
+
+    while read -r path; do
+      ShellDoc::fixMarkdownToc "${path}"
+    done < <(find "${PAGES_DIR}" -type f -name '*.md')
+
+    if ((TOKEN_NOT_FOUND_COUNT > 0)); then
+      exit 1
+    fi
+  }
+
+  installRequirements() {
+    Git::requireGitCommand
+  }
+
+  installContainerRequirements() {
+    Git::requireGitCommand
+    ShellDoc::installRequirementsIfNeeded
+    Linux::requireJqCommand
+    Softwares::installHadolint
+    Softwares::installShellcheck
+  }
+
+  if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
+    installRequirements
+    generateDoc
+  else
+    installContainerRequirements
+    runContainer
   fi
-
-  # shellcheck disable=SC2154
-  if [[ "${optionTraceVerbose}" = "1" ]]; then
-    set -x
-  fi
-  docker run \
-    "${localDockerRunArgs[@]}" \
-    "${image}" \
-    "${dockerRunCmd[@]}"
-  set +x
-}
-
-generateDoc() {
-  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
-  export FRAMEWORK_ROOT_DIR
-
-  #-----------------------------
-  # doc generation
-  #-----------------------------
-
-  Log::displayInfo 'generate Commands.md'
-  ((TOKEN_NOT_FOUND_COUNT = 0)) || true
-  ShellDoc::generateMdFileFromTemplate \
-    "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
-    "${PAGES_DIR}/Commands.md" \
-    "${COMMAND_BIN_DIR}" \
-    TOKEN_NOT_FOUND_COUNT \
-    '(var|simpleBinary|shdoc|installFacadeExample)$'
-
-  # clean folder before generate
-  rm -f "${PAGES_DIR}/Index.md" || true
-  rm -Rf "${PAGES_DIR}/bashDoc" || true
-  rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
-
-  ShellDoc::generateShellDocsFromDir \
-    "${FRAMEWORK_SRC_DIR}" \
-    "src" \
-    "${PAGES_DIR}/bashDoc" \
-    "${PAGES_DIR}/FrameworkIndex.md" \
-    "<% ${REPOSITORY_URL} %>" \
-    '/testsData|/_.*' \
-    '(/__all\.sh)$'
-  cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
-
-  cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
-  sed -i -E \
-    -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
-    -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
-    -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
-    "${PAGES_DIR}/README.md"
-
-  cp -R "${FRAMEWORK_ROOT_DIR}/doc" "${PAGES_DIR}"
-  rm -Rf "${PAGES_DIR}/doc/guides/templates"
-
-  Log::displayInfo 'generate FrameworkFullDoc.md'
-  cp "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkFullDoc.tmpl.md" "${PAGES_DIR}/FrameworkFullDoc.md"
-  (
-    echo
-    find "${PAGES_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
-  ) >>"${PAGES_DIR}/FrameworkFullDoc.md"
-
-  while read -r path; do
-    ShellDoc::fixMarkdownToc "${path}"
-  done < <(find "${PAGES_DIR}" -type f -name '*.md')
-
-  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
-    exit 1
-  fi
-}
-
-installRequirements() {
-  Git::requireGitCommand
-}
-
-installContainerRequirements() {
-  Git::requireGitCommand
-  ShellDoc::installRequirementsIfNeeded
-  Linux::requireJqCommand
-  Softwares::installHadolint
-  Softwares::installShellcheck
-}
-
-if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
-  installRequirements
-  generateDoc
-else
-  installContainerRequirements
-  runContainer
-fi
 
 }
 
