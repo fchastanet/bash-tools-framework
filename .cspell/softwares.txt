@@ -33,6 +33,7 @@ ETAG
 fasd
 Fasd
 fchastanet
+François
 gdebi
 getent
 gettext

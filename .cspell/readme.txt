@@ -19,6 +19,7 @@ esac
 exitcode
 fchastanet
 fplain
+François
 Inlines
 inlines
 installfile
