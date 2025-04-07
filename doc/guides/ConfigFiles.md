@@ -70,10 +70,6 @@ order if they are existing and are readable:
 - ${FRAMEWORK_ROOT_DIR}/.framework-config if exists
 - .framework-config from current directory if exists
 - file from option --bash-framework-config
-- default files passed as argument to this function. _Eg:_
-  `src/_includes/.framework-config.default`
-  - this file contains all the mandatory default properties values that will be
-    set if any previous files set the variable
 
 Options can override values provided by these env files:
 

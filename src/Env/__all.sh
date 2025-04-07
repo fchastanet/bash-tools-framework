@@ -2,10 +2,10 @@
 
 # shellcheck source=src/Env/createDefaultEnvFile.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Env/createDefaultEnvFile.sh"
-# shellcheck source=src/Env/getOrderedConfFiles.sh
-source "${FRAMEWORK_ROOT_DIR}/src/Env/getOrderedConfFiles.sh"
-# shellcheck source=src/Env/mergeConfFiles.sh
-source "${FRAMEWORK_ROOT_DIR}/src/Env/mergeConfFiles.sh"
+# shellcheck source=src/Conf/loadNearestFile.sh
+source "${FRAMEWORK_ROOT_DIR}/src/Conf/loadNearestFile.sh"
+# shellcheck source=src/File/upFind.sh
+source "${FRAMEWORK_ROOT_DIR}/src/File/upFind.sh"
 # shellcheck source=src/Env/pathAppend.sh
 source "${FRAMEWORK_ROOT_DIR}/src/Env/pathAppend.sh"
 # shellcheck source=src/Env/pathPrepend.sh

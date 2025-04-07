@@ -1,26 +1,10 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034
 
 FRAMEWORK_ROOT_DIR="$(cd -- "${CURRENT_LOADED_ENV_FILE%/*}" &>/dev/null && pwd -P)"
 FRAMEWORK_SRC_DIR="${FRAMEWORK_SRC_DIR:-${FRAMEWORK_ROOT_DIR}/src}"
 FRAMEWORK_BIN_DIR="${FRAMEWORK_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/bin}"
 FRAMEWORK_VENDOR_DIR="${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}"
 FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_VENDOR_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/vendor/bin}"
-
-if [[ ! -v COMPILE_PARAMETERS ]]; then
-  # compile parameters
-  # srcFile     : file that needs to be compiled
-  # templateDir : directory from which templates will be searched
-  # binDir      : fallback bin directory in case BIN_FILE has not been provided
-  # rootDir     : directory used to compute src file relative path
-  # srcDirs     : additional directories where to find the functions
-  COMPILE_PARAMETERS=(
-    --src-dir "${FRAMEWORK_SRC_DIR}"
-    --bin-dir "${FRAMEWORK_BIN_DIR}"
-    --root-dir "${FRAMEWORK_ROOT_DIR}"
-    --template-dir "${FRAMEWORK_SRC_DIR}"
-  )
-fi
 
 # describe the functions that will be skipped from being imported
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP="${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP:-^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|IMPORT::dir::file|Acquire::ForceIPv4)$}"
@@ -36,15 +20,3 @@ if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
     "${FRAMEWORK_ROOT_DIR}/src"
   )
 fi
-
-# export here all the variables that will be used in your templates
-export REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/fchastanet/bash-tools-framework}"
-
-BASH_FRAMEWORK_THEME="${BASH_FRAMEWORK_THEME:-default}"
-BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
-BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
-BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${0##*/}.log}"
-BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-
-# display elapsed time since last log
-DISPLAY_DURATION=${DISPLAY_DURATION:-1}

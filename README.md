@@ -160,8 +160,6 @@ Here an excerpt of the namespaces available in Bash tools framework:
 - Filters : various functions to filter files using grep, awk or sed eg:
   Filters::bashFrameworkFunctions allows to find all the bash framework
   functions used in a file
-- Framework : Framework::loadConfig loads `.framework-config` configuration
-  file.
 - Git : provides git abstractions like Git::cloneOrPullIfNoChange,
   Git::pullIfNoChanges or Git::shallowClone
 - Install : copy directory or file, backup them before if needed.
