@@ -26,7 +26,7 @@ function Env::createDefaultEnvFile:unset { #@test
   assert_lines_count 5
   assert_line --index 0 "BASH_FRAMEWORK_THEME=default"
   assert_line --index 1 "BASH_FRAMEWORK_LOG_LEVEL=0"
-  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=2"
+  assert_line --index 2 "BASH_FRAMEWORK_DISPLAY_LEVEL=3"
   assert_line --index 3 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
   assert_line --index 4 'BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=5'
 }

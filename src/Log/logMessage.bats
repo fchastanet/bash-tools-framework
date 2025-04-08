@@ -72,7 +72,6 @@ function Log::logMessage::offLevel { #@test
   export BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}
 
   Log::logMessage "LEVEL" "message"
-  cat "${logFile}" >&3
   [[ "$(cat "${logFile}")" = "" ]]
 }
 

@@ -95,6 +95,31 @@ getLevel() {
       echo "${__LEVEL_DEBUG}"
       ;;
     *)
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${levelName}"
+      return 1
+      ;;
+  esac
+}
+
+getLevelText() {
+  local level="$1"
+  case "${level}" in
+    "${__LEVEL_OFF}")
+      echo OFF
+      ;;
+    "${__LEVEL_ERROR}")
+      echo ERROR
+      ;;
+    "${__LEVEL_WARNING}")
+      echo WARNING
+      ;;
+    "${__LEVEL_INFO}")
+      echo INFO
+      ;;
+    "${__LEVEL_DEBUG}")
+      echo DEBUG
+      ;;
+    *)
       Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
       return 1
       ;;
@@ -133,6 +158,10 @@ optionDisplayLevelCallback() {
   echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
+optionDisplayLevelDefaultValueFunction() {
+  getLevelText "${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 optionLogLevelCallback() {
   local level="$2"
@@ -144,10 +173,19 @@ optionLogLevelCallback() {
   echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
+optionLogLevelDefaultValueFunction() {
+  getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
   echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >>"${overrideEnvFile}"
+}
+
+optionLogFileDefaultValueFunction() {
+  # shellcheck disable=SC2016
+  echo "${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -181,23 +219,9 @@ optionBashFrameworkConfigCallback() {
   fi
 }
 
-defaultFrameworkConfig="$(
-  cat <<'EOF'
-{{
-  includeFileAsTemplate (
-    dynamicFile "_includes/.framework-config.default" .Data.compilerConfig.SrcDirsExpanded
-  ) .
-}}
-EOF
-)"
-
 overrideEnvFile="$(Framework::createTempFile "overrideEnvFile")"
 
 commandOptionParseFinished() {
-  # load default template framework config
-  defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
-  echo "${defaultFrameworkConfig}" >"${defaultEnvFile}"
-  local -a files=("${defaultEnvFile}")
   # shellcheck disable=SC2154
   if [[ -f "${optionBashFrameworkConfig}" ]]; then
     files+=("${optionBashFrameworkConfig}")
