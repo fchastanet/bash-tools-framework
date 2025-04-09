@@ -7,12 +7,15 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 # shellcheck source=src/Bash/handlePipelineFailure.sh
 source "${srcDir}/Bash/handlePipelineFailure.sh"
 
+# bats file_tags=ubuntu_only
+
 function Bash::handlePipelineFailure::withHead { #@test
   local resultingStatus=0
   local -a originalPipeStatus=()
   yes | head -n 1 || Bash::handlePipelineFailure resultingStatus originalPipeStatus
   [[ "${resultingStatus}" = "0" ]]
-  [[ "${originalPipeStatus[*]}" = "141 0" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "141 0"
 }
 
 function Bash::handlePipelineFailure::withHeadWithoutStatusArg { #@test
@@ -26,7 +29,8 @@ function Bash::handlePipelineFailure::unknownCommand { #@test
   local -a originalPipeStatus=()
   unknownCommand | head -n 1 || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "127" ]]
-  [[ "${originalPipeStatus[*]}" = "127 0" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "127 0"
 }
 
 function Bash::handlePipelineFailure::unknownCommandWithoutStatusArg { #@test
@@ -40,7 +44,8 @@ function Bash::handlePipelineFailure::shouldFail { #@test
   local -a originalPipeStatus=()
   echo "test" | grep -q "hello" || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "1" ]]
-  [[ "${originalPipeStatus[*]}" = "0 1" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "0 1"
 }
 
 function Bash::handlePipelineFailure::shouldFailWithoutStatusArg { #@test
@@ -54,8 +59,8 @@ function Bash::handlePipelineFailure::shouldWork { #@test
   local -a originalPipeStatus=()
   "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help | grep -q DESCRIPTION || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "0" ]]
-  echo "${originalPipeStatus[*]}" >&3
-  [[ "${originalPipeStatus[*]}" = "141 0" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "141 0"
 }
 
 function Bash::handlePipelineFailure::shouldWorkWithoutStatusArg { #@test
@@ -69,7 +74,8 @@ function Bash::handlePipelineFailure::shouldWorkWith2Pipes { #@test
   local -a originalPipeStatus=()
   "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help | grep -q DESCRIPTION | cat || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "0" ]]
-  [[ "${originalPipeStatus[*]}" = "141 0 0" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "141 0 0"
 }
 
 function Bash::handlePipelineFailure::shouldWorkWith2PipesBis { #@test
@@ -77,7 +83,8 @@ function Bash::handlePipelineFailure::shouldWorkWith2PipesBis { #@test
   local -a originalPipeStatus=()
   echo "world" | "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help | grep -q DESCRIPTION || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "0" ]]
-  [[ "${originalPipeStatus[*]}" = "0 141 0" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "0 141 0"
 }
 
 function Bash::handlePipelineFailure::shouldFailWith2Pipes { #@test
@@ -85,7 +92,8 @@ function Bash::handlePipelineFailure::shouldFailWith2Pipes { #@test
   local -a originalPipeStatus=()
   echo "test" | grep t | grep -q "hello" || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "1" ]]
-  [[ "${originalPipeStatus[*]}" = "0 0 1" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "0 0 1"
 }
 
 function Bash::handlePipelineFailure::shouldFailWith2PipesBis { #@test
@@ -93,5 +101,6 @@ function Bash::handlePipelineFailure::shouldFailWith2PipesBis { #@test
   local -a originalPipeStatus=()
   echo "test" | grep -q "hello" | grep t || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "1" ]]
-  [[ "${originalPipeStatus[*]}" = "0 1 1" ]]
+  run echo "${originalPipeStatus[*]}"
+  assert_output "0 1 1"
 }

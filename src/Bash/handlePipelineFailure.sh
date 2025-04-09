@@ -10,6 +10,9 @@
 # @arg $2 originalStatus:int[] (passed by reference) (optional) copy of original PIPESTATUS array
 # @env PIPESTATUS assuming that this function is called like in the example provided
 # @see https://unix.stackexchange.com/a/709880/582856
+# @see https://gitlab.alpinelinux.org/alpine/aports/-/issues/11152
+# @warning alpine does not support PIPESTATUS very well as execution order of piped process is
+# not guaranteed
 Bash::handlePipelineFailure() {
   local -a pipeStatusBackup=("${PIPESTATUS[@]}")
   local -n handlePipelineFailure_resultingStatusCode=$1
