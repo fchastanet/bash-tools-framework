@@ -28,7 +28,7 @@ Web::upgradeRelease() {
 
   local currentVersion="not existing"
   if [[ -f "${targetFile}" ]]; then
-    currentVersion="$(${softVersionCallback} "${targetFile}" "${softVersionArg}" 2>&1 || true)"
+    currentVersion="$(${softVersionCallback} "${targetFile}" "${softVersionArg}" || true)"
   fi
   if [[ -z "${exactVersion}" ]]; then
     local latestVersion
@@ -64,6 +64,6 @@ Web::upgradeRelease() {
       --fail \
       "${url}"
 
-    Github::defaultInstall "${newSoftware}" "${targetFile}" "${exactVersion}" "${installCallback}"
+    CURRENT_VERSION="${currentVersion}" Github::defaultInstall "${newSoftware}" "${targetFile}" "${exactVersion}" "${installCallback}"
   fi
 }

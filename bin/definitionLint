@@ -332,7 +332,7 @@ Conf::loadNearestFile() {
     fi
   done
 
-  Log::displayWarning "Config file '${configFileName}' not found in any source directories provided"
+  Log::displayDebug "Config file '${configFileName}' not found in any source directories provided"
   return 1
 }
 
@@ -540,19 +540,6 @@ Log::displaySuccess() {
 }
 
 
-# @description Display message using warning color (yellow)
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::displayWarning() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_WARNING)); then
-    Log::computeDuration
-    echo -e "${__WARNING_COLOR}WARN    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logWarning "$1"
-}
-
-
 # @description Display message using error color (red) and exit immediately with error status 1
 # @arg $1 message:String the message to display
 # @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
@@ -562,6 +549,35 @@ Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
   exit 1
+}
+
+
+# @description Get the text representation of a log level
+# @arg $1 level:String the log level to convert
+# @exitcode 1 if the level is invalid
+Log::getLevelText() {
+  local level="$1"
+  case "${level}" in
+    "${__LEVEL_OFF}")
+      echo OFF
+      ;;
+    "${__LEVEL_ERROR}")
+      echo ERROR
+      ;;
+    "${__LEVEL_WARNING}")
+      echo WARNING
+      ;;
+    "${__LEVEL_INFO}")
+      echo INFO
+      ;;
+    "${__LEVEL_DEBUG}")
+      echo DEBUG
+      ;;
+    *)
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
+      return 1
+      ;;
+  esac
 }
 
 
@@ -641,15 +657,6 @@ Log::logMessage() {
 Log::logSuccess() {
   if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
     Log::logMessage "${2:-SUCCESS}" "$1"
-  fi
-}
-
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logWarning() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_WARNING)); then
-    Log::logMessage "${2:-WARNING}" "$1"
   fi
 }
 
@@ -1128,31 +1135,6 @@ getLevel() {
   esac
 }
 
-getLevelText() {
-  local level="$1"
-  case "${level}" in
-    "${__LEVEL_OFF}")
-      echo OFF
-      ;;
-    "${__LEVEL_ERROR}")
-      echo ERROR
-      ;;
-    "${__LEVEL_WARNING}")
-      echo WARNING
-      ;;
-    "${__LEVEL_INFO}")
-      echo INFO
-      ;;
-    "${__LEVEL_DEBUG}")
-      echo DEBUG
-      ;;
-    *)
-      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
-      return 1
-      ;;
-  esac
-}
-
 getVerboseLevel() {
   local levelName="$1"
   case "${levelName^^}" in
@@ -1186,7 +1168,7 @@ optionDisplayLevelCallback() {
 }
 
 optionDisplayLevelDefaultValueFunction() {
-  getLevelText "${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
+  Log::getLevelText "${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -1201,7 +1183,7 @@ optionLogLevelCallback() {
 }
 
 optionLogLevelDefaultValueFunction() {
-  getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
+  Log::getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -1776,6 +1758,7 @@ definitionLintCommandHelp() {
   echo "    Possible values: "
   echo -e "      - ${__OPTION_COLOR}plain${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}checkstyle${__RESET_COLOR}"
+
   Array::wrap2 ' ' 76 6 "    Default value: " "plain"
   echo
   echo
@@ -1823,12 +1806,14 @@ definitionLintCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}INFO${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
+
   Array::wrap2 ' ' 76 6 "    Default value: " "$(optionLogLevelDefaultValueFunction)"
   echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
+
 
   Array::wrap2 ' ' 76 6 "    Default value: " "$(optionLogFileDefaultValueFunction)"
   echo
@@ -1846,6 +1831,7 @@ definitionLintCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}INFO${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
+
   Array::wrap2 ' ' 76 6 "    Default value: " "$(optionDisplayLevelDefaultValueFunction)"
   echo
 
@@ -1862,6 +1848,7 @@ definitionLintCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}default${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}default-force${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}noColor${__RESET_COLOR}"
+
   Array::wrap2 ' ' 76 6 "    Default value: " "default"
   echo
 

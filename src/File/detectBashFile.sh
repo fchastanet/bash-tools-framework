@@ -21,7 +21,7 @@ File::detectBashFile() {
         missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-detectBashFile-before-XXXXXX)"
       fi
       echo "${file}" >>"${missingBashFileList}"
-      return 0
+      continue
     fi
     if Assert::bashFile "${file}"; then
       echo "${file}"

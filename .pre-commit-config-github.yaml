@@ -160,7 +160,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "73",
+            "62",
             --format,
             plain,
             --theme,
@@ -172,7 +172,7 @@ repos:
         args:
           [
             --expected-warnings-count,
-            "73",
+            "62",
             --format,
             checkstyle,
             --theme,
