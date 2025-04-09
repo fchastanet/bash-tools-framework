@@ -30,10 +30,20 @@ Github::defaultInstall() {
   if [[ "$(type -t "${installCallback}")" = "function" ]]; then
     ${installCallback} "${newSoftware}" "${targetFile}" "${version}"
   else
-    ${SUDO:-} mv "${newSoftware}" "${targetFile}"
-    ${SUDO:-} chmod +x "${targetFile}"
+    ${SUDO:-} mv "${newSoftware}" "${targetFile}" || {
+      Log::displayError "Failed to move ${newSoftware} to ${targetFile}"
+      return 1
+    }
+    ${SUDO:-} chmod +x "${targetFile}" || {
+      Log::displayError "Failed to set execution bit on ${targetFile}"
+      return 1
+    }
     hash -r
     ${SUDO:-} rm -f "${newSoftware}" || true
-    Log::displaySuccess "Version ${version} installed in ${targetFile}"
+    if [[ -z "${CURRENT_VERSION}" ]]; then
+      Log::displaySuccess "Version ${version} installed in ${targetFile}"
+    else
+      Log::displaySuccess "Version ${CURRENT_VERSION} upgraded to ${version} in ${targetFile}"
+    fi
   fi
 }

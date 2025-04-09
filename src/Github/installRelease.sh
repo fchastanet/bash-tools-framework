@@ -23,7 +23,7 @@ Github::installRelease() {
 
   local currentVersion="not existing"
   if [[ -f "${targetFile}" ]]; then
-    currentVersion="$(${versionCallback} "${targetFile}" "${argVersion}" 2>&1 || true)"
+    currentVersion="$(${versionCallback} "${targetFile}" "${argVersion}" || true)"
   fi
   if [[ "${currentVersion}" != "${exactVersion}" ]]; then
     Log::displayInfo "Installing ${targetFile} from version ${currentVersion} to ${exactVersion}"

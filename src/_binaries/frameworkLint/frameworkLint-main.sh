@@ -250,7 +250,8 @@ run() {
     fi
   done < <(
     git ls-files --exclude-standard |
-      xargs -n 10 bash -c 'File::detectBashFile "$@"' ||
+      xargs -n 10 bash -c 'File::detectBashFile "$@" || true' _ |
+      sort ||
       true
   )
 

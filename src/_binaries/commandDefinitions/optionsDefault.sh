@@ -101,31 +101,6 @@ getLevel() {
   esac
 }
 
-getLevelText() {
-  local level="$1"
-  case "${level}" in
-    "${__LEVEL_OFF}")
-      echo OFF
-      ;;
-    "${__LEVEL_ERROR}")
-      echo ERROR
-      ;;
-    "${__LEVEL_WARNING}")
-      echo WARNING
-      ;;
-    "${__LEVEL_INFO}")
-      echo INFO
-      ;;
-    "${__LEVEL_DEBUG}")
-      echo DEBUG
-      ;;
-    *)
-      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
-      return 1
-      ;;
-  esac
-}
-
 getVerboseLevel() {
   local levelName="$1"
   case "${levelName^^}" in
@@ -159,7 +134,7 @@ optionDisplayLevelCallback() {
 }
 
 optionDisplayLevelDefaultValueFunction() {
-  getLevelText "${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
+  Log::getLevelText "${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -174,7 +149,7 @@ optionLogLevelCallback() {
 }
 
 optionLogLevelDefaultValueFunction() {
-  getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
+  Log::getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden

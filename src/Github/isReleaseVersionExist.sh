@@ -8,6 +8,7 @@
 Github::isReleaseVersionExist() {
   local releaseUrl="$1"
 
+  Log::displayDebug "Checking if release version exists on github: ${releaseUrl}"
   curl \
     -L \
     --connect-timeout "${CURL_CONNECT_TIMEOUT:-5}" \
