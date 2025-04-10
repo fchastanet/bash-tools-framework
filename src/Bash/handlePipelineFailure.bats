@@ -9,7 +9,7 @@ source "${srcDir}/Bash/handlePipelineFailure.sh"
 
 function Bash::handlePipelineFailure::withHead { #@test
   local resultingStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   yes | head -n 1 || Bash::handlePipelineFailure resultingStatus originalPipeStatus
   [[ "${resultingStatus}" = "0" ]]
   run echo "${originalPipeStatus[*]}"
@@ -24,7 +24,7 @@ function Bash::handlePipelineFailure::withHeadWithoutStatusArg { #@test
 
 function Bash::handlePipelineFailure::unknownCommand { #@test
   local resultingStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   unknownCommand | head -n 1 || Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   [[ "${resultingStatus}" = "127" ]]
   run echo "${originalPipeStatus[*]}"
@@ -39,7 +39,7 @@ function Bash::handlePipelineFailure::unknownCommandWithoutStatusArg { #@test
 
 function Bash::handlePipelineFailure::shouldFail { #@test
   local resultingStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   local standardStatus=0
   echo "test" | grep -q "hello" ||
     Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
@@ -59,7 +59,7 @@ function Bash::handlePipelineFailure::shouldFailWithoutStatusArg { #@test
 function Bash::handlePipelineFailure::shouldWork { #@test
   local resultingStatus=1
   local standardStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help |
     grep -q DESCRIPTION || Bash::handlePipelineFailure resultingStatus originalPipeStatus ||
     standardStatus="$?"
@@ -81,7 +81,7 @@ function Bash::handlePipelineFailure::shouldWorkWithoutStatusArg { #@test
 function Bash::handlePipelineFailure::shouldWorkWith2Pipes { #@test
   local resultingStatus=0
   local standardStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help | grep -q DESCRIPTION | cat ||
     Bash::handlePipelineFailure resultingStatus originalPipeStatus ||
     standardStatus="$?"
@@ -95,7 +95,7 @@ function Bash::handlePipelineFailure::shouldWorkWith2Pipes { #@test
 
 function Bash::handlePipelineFailure::shouldWorkWith2PipesBis { #@test
   local resultingStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   echo "world" | "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help |
     grep -q DESCRIPTION ||
     Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
@@ -107,7 +107,7 @@ function Bash::handlePipelineFailure::shouldWorkWith2PipesBis { #@test
 
 function Bash::handlePipelineFailure::shouldFailWith2Pipes { #@test
   local resultingStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   echo "test" | grep t | grep -q "hello" ||
     Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   run echo "${resultingStatus}"
@@ -118,7 +118,7 @@ function Bash::handlePipelineFailure::shouldFailWith2Pipes { #@test
 
 function Bash::handlePipelineFailure::shouldFailWith2PipesBis { #@test
   local resultingStatus=0
-  local -a originalPipeStatus=("notset")
+  local -a originalPipeStatus=("unset")
   echo "test" | grep -q "hello" | grep t ||
     Bash::handlePipelineFailure resultingStatus originalPipeStatus || true
   run echo "${resultingStatus}"
