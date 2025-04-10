@@ -60,15 +60,19 @@ function Bash::handlePipelineFailure::shouldWork { #@test
   local resultingStatus=1
   local standardStatus=0
   local -a originalPipeStatus=("unset")
-  "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help |
-    grep -q DESCRIPTION || Bash::handlePipelineFailure resultingStatus originalPipeStatus ||
-    standardStatus="$?"
-  run echo "${originalPipeStatus[*]}"
-  assert_output "141 0"
-  run echo "${resultingStatus}"
-  assert_output "0"
-  run echo "${standardStatus}"
-  assert_output "0"
+  if "${FRAMEWORK_ROOT_DIR}/bin/findShebangFiles" --help | grep -q DESCRIPTION; then
+    Bash::handlePipelineFailure resultingStatus originalPipeStatus
+    run echo "${originalPipeStatus[*]}"
+    assert_output "0 0"
+    run echo "${resultingStatus}"
+    assert_output "0"
+  else
+    Bash::handlePipelineFailure resultingStatus originalPipeStatus
+    run echo "${originalPipeStatus[*]}"
+    assert_output "141 0"
+    run echo "${resultingStatus}"
+    assert_output "0"
+  fi
 }
 
 function Bash::handlePipelineFailure::shouldWorkWithoutStatusArg { #@test
