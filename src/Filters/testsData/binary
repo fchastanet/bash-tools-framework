@@ -1732,7 +1732,6 @@ optionBashFrameworkConfigCallback() {
 defaultFrameworkConfig="$(
   cat <<'EOF'
 
-# copied from src/_includes/.framework-config.default
 # shellcheck disable=SC2034
 
 REAL_SCRIPT_FILE="${REAL_SCRIPT_FILE:-$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")}"

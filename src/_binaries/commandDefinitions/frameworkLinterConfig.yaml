@@ -8,7 +8,6 @@ compileConfig:
     - ^preCommitTest.sh$
     - ^.github/
     - ^.docker/createUser.
-    - .framework-config
     - .bats$
     - /testsData/
     - ^manualTests/
@@ -23,7 +22,6 @@ compileConfig:
   # describe the files that are allowed to not have an associated bats file
   BATS_FILE_NOT_NEEDED_REGEXP:
     - ^bin/
-    - .framework-config
     - ^.docker/
     - ^.github/
     - .bats$
@@ -39,7 +37,6 @@ compileConfig:
   FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:
     - ^bin/
     - ^.github/
-    - ^\.framework-config$
     - /testsData/
     - ^manualTests/
     - \.bats$

@@ -21,13 +21,14 @@ function Env::requireLoad::testMerge { #@test
   unset BASH_FRAMEWORK_DISPLAY_LEVEL
   unset BASH_FRAMEWORK_LOG_FILE
   unset BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION
+  SCRIPT_NAME="myScript"
   Env::requireLoad >"${BATS_TEST_TMPDIR}/result" 2>&1 || status=$?
   [[ "${status}" = "0" ]]
   run cat "${BATS_TEST_TMPDIR}/result"
   assert_output ""
   [[ "${BASH_FRAMEWORK_LOG_LEVEL}" = "0" ]]
   [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "3" ]]
-  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${FRAMEWORK_ROOT_DIR}/logs/bats-exec-test.log" ]]
+  [[ "${BASH_FRAMEWORK_LOG_FILE}" = "${FRAMEWORK_ROOT_DIR}/logs/myScript.log" ]]
   [[ "${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION}" = "5" ]]
 }
 

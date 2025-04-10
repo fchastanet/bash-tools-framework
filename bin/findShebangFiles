@@ -139,6 +139,23 @@ export __VERBOSE_LEVEL_DEBUG=2
 export __VERBOSE_LEVEL_TRACE=3
 
 
+# @description check if an element is contained in an array
+#
+# @arg $1 needle:String
+# @arg $@ array:String[]
+# @exitcode 0 if found
+# @exitcode 1 otherwise
+# @example
+#   Array::contains "${libPath}" "${__BASH_FRAMEWORK_IMPORTED_FILES[@]}"
+Array::contains() {
+  local element
+  for element in "${@:2}"; do
+    [[ "${element}" = "$1" ]] && return 0
+  done
+  return 1
+}
+
+
 # @description concatenate each element of an array with a separator
 # but wrapping text when line length is more than provided argument
 # The algorithm will try not to cut the array element if it can.
@@ -299,6 +316,60 @@ Assert::tty() {
 }
 
 
+# @description Load the nearest config file
+# in next example will search first .framework-config file in "srcDir1"
+# then if not found will go in up directories until /
+# then will search in "srcDir2"
+# then if not found will go in up directories until /
+# source the file if found
+# @example
+#   Conf::loadNearestFile ".framework-config" "srcDir1" "srcDir2"
+#
+# @arg $1 configFileName:String config file name to search
+# @arg $2 loadedFile:String (passed by reference) will return the loaded config file name
+# @arg $@ srcDirs:String[] source directories in which the config file will be searched
+# @exitcode 0 if file found
+# @exitcode 1 if file not found
+Conf::loadNearestFile() {
+  local configFileName="$1"
+  local -n loadedFile="$2"
+  shift 2 || true
+  local -a srcDirs=("$@")
+  for srcDir in "${srcDirs[@]}"; do
+    configFile="$(File::upFind "${srcDir}" "${configFileName}" || true)"
+    if [[ -n "${configFile}" ]]; then
+      # shellcheck source=/.framework-config
+      source "${configFile}" || Log::fatal "error while loading config file '${configFile}'"
+      Log::displayDebug "Config file ${configFile} is loaded"
+      # shellcheck disable=SC2034
+      loadedFile="${configFile}"
+      return 0
+    fi
+  done
+
+  Log::displayDebug "Config file '${configFileName}' not found in any source directories provided"
+  return 1
+}
+
+
+# @description default env file with all default values
+# @stdout the default env filepath
+Env::createDefaultEnvFile() {
+  local envFile
+  envFile="$(Framework::createTempFile "createDefaultEnvFileEnvFile")" || return 2
+
+  (
+    echo "BASH_FRAMEWORK_THEME=${BASH_FRAMEWORK_THEME:-default}"
+    echo "BASH_FRAMEWORK_LOG_LEVEL=${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
+    echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
+    # shellcheck disable=SC2016
+    echo 'BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"'
+    echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
+  ) >"${envFile}"
+  echo "${envFile}"
+}
+
+
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
@@ -310,28 +381,33 @@ Env::requireLoad() {
   local -a defaultFiles=("$@")
   # get list of possible config files
   local -a configFiles=()
+  local defaultEnvFile
+  defaultEnvFile="$(Env::createDefaultEnvFile)" || return 1
+  configFiles+=("${defaultEnvFile}")
   if [[ -n "${BASH_FRAMEWORK_ENV_FILES[0]+1}" ]]; then
     # BASH_FRAMEWORK_ENV_FILES is an array
     configFiles+=("${BASH_FRAMEWORK_ENV_FILES[@]}")
   fi
-  local localFrameworkConfigFile
-  localFrameworkConfigFile="$(pwd)/.framework-config"
-  if [[ -f "${localFrameworkConfigFile}" ]]; then
-    configFiles+=("${localFrameworkConfigFile}")
-  fi
   if [[ -f "${FRAMEWORK_ROOT_DIR}/.framework-config" ]]; then
     configFiles+=("${FRAMEWORK_ROOT_DIR}/.framework-config")
+  fi
+  local localFrameworkConfigFile
+  BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_INFO}" \
+    BASH_FRAMEWORK_LOG_LEVEL="${__LEVEL_OFF}" \
+    Conf::loadNearestFile ".framework-config" localFrameworkConfigFile "$(pwd)" || true
+  if [[ -f "${localFrameworkConfigFile}" ]]; then
+    configFiles+=("${localFrameworkConfigFile}")
   fi
   configFiles+=("${optionEnvFiles[@]}")
   configFiles+=("${defaultFiles[@]}")
 
-  for file in "${configFiles[@]}"; do
-    # shellcheck source=/.framework-config
+  while IFS='' read -r file; do
+    # shellcheck source=/src/Env/createDefaultEnvFile.sh
     CURRENT_LOADED_ENV_FILE="${file}" source "${file}" || {
       Log::displayError "while loading config file: ${file}"
       return 1
     }
-  done
+  done < <(printf '%s\n' "${configFiles[@]}" | awk '!x[$0]++')
 }
 
 
@@ -356,12 +432,45 @@ File::detectBashFile() {
         missingBashFileList="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-detectBashFile-before-XXXXXX)"
       fi
       echo "${file}" >>"${missingBashFileList}"
-      return 0
+      continue
     fi
     if Assert::bashFile "${file}"; then
       echo "${file}"
     fi
   done
+}
+
+
+# @description search a file in parent directories
+#
+# @arg $1 fromPath:String path
+# @arg $2 fileName:String
+# @arg $3 untilInclusivePath:String (optional) find for given file until reaching this folder (default value: /)
+# @arg $@ untilInclusivePaths:String[] list of untilInclusivePath
+# @stdout The filename if found
+# @exitcode 1 if the command failed or file not found
+File::upFind() {
+  local fromPath="$1"
+  shift || true
+  local fileName="$1"
+  shift || true
+  local untilInclusivePath="${1:-/}"
+  shift || true
+
+  if [[ -f "${fromPath}" ]]; then
+    fromPath="${fromPath%/*}"
+  fi
+  while true; do
+    if [[ -f "${fromPath}/${fileName}" ]]; then
+      echo "${fromPath}/${fileName}"
+      return 0
+    fi
+    if Array::contains "${fromPath}" "${untilInclusivePath}" "$@" "/"; then
+      return 1
+    fi
+    fromPath="$(readlink -f "${fromPath}"/..)"
+  done
+  return 1
 }
 
 
@@ -472,6 +581,35 @@ Log::fatal() {
   echo -e "${__ERROR_COLOR}FATAL   - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
   Log::logFatal "$1"
   exit 1
+}
+
+
+# @description Get the text representation of a log level
+# @arg $1 level:String the log level to convert
+# @exitcode 1 if the level is invalid
+Log::getLevelText() {
+  local level="$1"
+  case "${level}" in
+    "${__LEVEL_OFF}")
+      echo OFF
+      ;;
+    "${__LEVEL_ERROR}")
+      echo ERROR
+      ;;
+    "${__LEVEL_WARNING}")
+      echo WARNING
+      ;;
+    "${__LEVEL_INFO}")
+      echo INFO
+      ;;
+    "${__LEVEL_DEBUG}")
+      echo DEBUG
+      ;;
+    *)
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
+      return 1
+      ;;
+  esac
 }
 
 
@@ -833,7 +971,7 @@ getLevel() {
       echo "${__LEVEL_DEBUG}"
       ;;
     *)
-      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${level}"
+      Log::displayError "Command ${SCRIPT_NAME} - Invalid level ${levelName}"
       return 1
       ;;
   esac
@@ -871,6 +1009,10 @@ optionDisplayLevelCallback() {
   echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
+optionDisplayLevelDefaultValueFunction() {
+  Log::getLevelText "${BASH_FRAMEWORK_DISPLAY_LEVEL:-${__LEVEL_INFO}}"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 optionLogLevelCallback() {
   local level="$2"
@@ -882,10 +1024,19 @@ optionLogLevelCallback() {
   echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
+optionLogLevelDefaultValueFunction() {
+  Log::getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
+}
+
 # shellcheck disable=SC2317 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
   echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >>"${overrideEnvFile}"
+}
+
+optionLogFileDefaultValueFunction() {
+  # shellcheck disable=SC2016
+  echo "${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -919,53 +1070,9 @@ optionBashFrameworkConfigCallback() {
   fi
 }
 
-defaultFrameworkConfig="$(
-  cat <<'EOF'
-
-# copied from src/_includes/.framework-config.default
-# shellcheck disable=SC2034
-
-REAL_SCRIPT_FILE="${REAL_SCRIPT_FILE:-$(readlink -e "$(realpath "${BASH_SOURCE[0]}")")}"
-FRAMEWORK_ROOT_DIR="${FRAMEWORK_ROOT_DIR:-${REAL_SCRIPT_FILE%/*/*}}"
-FRAMEWORK_SRC_DIR="${FRAMEWORK_SRC_DIR:-${FRAMEWORK_ROOT_DIR}/src}"
-FRAMEWORK_BIN_DIR="${FRAMEWORK_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/bin}"
-FRAMEWORK_VENDOR_DIR="${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}"
-FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_VENDOR_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/vendor/bin}"
-
-# describe the functions that will be skipped from being imported
-FRAMEWORK_FUNCTIONS_IGNORE_REGEXP="${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP:-^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|Acquire::ForceIPv4)$}"
-# describe the files that do not contain function to be imported
-NON_FRAMEWORK_FILES_REGEXP="${NON_FRAMEWORK_FILES_REGEXP:-(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)}"
-# describe the files that are allowed to not have an associated bats file
-BATS_FILE_NOT_NEEDED_REGEXP="${BATS_FILE_NOT_NEEDED_REGEXP:-(^bin/|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes)}"
-# describe the files that are allowed to not have a function matching the filename
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^\.framework-config$|/testsData/|^manualTests/|\.bats$}"
-# Source directories
-if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
-  FRAMEWORK_SRC_DIRS=(
-    "${FRAMEWORK_ROOT_DIR}/src"
-  )
-fi
-
-# export here all the variables that will be used in your templates
-export REPOSITORY_URL="${REPOSITORY_URL:-https://github.com/fchastanet/bash-tools-framework}"
-
-BASH_FRAMEWORK_THEME="${BASH_FRAMEWORK_THEME:-default}"
-BASH_FRAMEWORK_LOG_LEVEL="${BASH_FRAMEWORK_LOG_LEVEL:-0}"
-BASH_FRAMEWORK_DISPLAY_LEVEL="${BASH_FRAMEWORK_DISPLAY_LEVEL:-3}"
-BASH_FRAMEWORK_LOG_FILE="${BASH_FRAMEWORK_LOG_FILE:-${FRAMEWORK_ROOT_DIR}/logs/${0##*/}.log}"
-BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
-
-EOF
-)"
-
 overrideEnvFile="$(Framework::createTempFile "overrideEnvFile")"
 
 commandOptionParseFinished() {
-  # load default template framework config
-  defaultEnvFile="${PERSISTENT_TMPDIR}/.framework-config"
-  echo "${defaultFrameworkConfig}" >"${defaultEnvFile}"
-  local -a files=("${defaultEnvFile}")
   # shellcheck disable=SC2154
   if [[ -f "${optionBashFrameworkConfig}" ]]; then
     files+=("${optionBashFrameworkConfig}")
@@ -1003,9 +1110,9 @@ declare optionBashFrameworkConfig=""
 declare optionInfoVerbose="0"
 declare optionDebugVerbose="0"
 declare optionTraceVerbose="0"
-declare optionLogLevel=""
-declare optionLogFile=""
-declare optionDisplayLevel=""
+declare optionLogLevel="optionLogLevelDefaultValueFunction"
+declare optionLogFile="optionLogFileDefaultValueFunction"
+declare optionDisplayLevel="optionDisplayLevelDefaultValueFunction"
 declare optionNoColor="0"
 declare optionTheme="default"
 declare optionVersion="0"
@@ -1033,13 +1140,13 @@ findShebangFilesCommandParse() {
   optionTraceVerbose="0"
   local -i options_parse_optionParsedCountOptionTraceVerbose
   ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
-  optionLogLevel=""
+  optionLogLevel="optionLogLevelDefaultValueFunction"
   local -i options_parse_optionParsedCountOptionLogLevel
   ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
-  optionLogFile=""
+  optionLogFile="optionLogFileDefaultValueFunction"
   local -i options_parse_optionParsedCountOptionLogFile
   ((options_parse_optionParsedCountOptionLogFile = 0)) || true
-  optionDisplayLevel=""
+  optionDisplayLevel="optionDisplayLevelDefaultValueFunction"
   local -i options_parse_optionParsedCountOptionDisplayLevel
   ((options_parse_optionParsedCountOptionDisplayLevel = 0)) || true
   optionNoColor="0"
@@ -1418,10 +1525,16 @@ findShebangFilesCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
 
+  Array::wrap2 ' ' 76 6 "    Default value: " "$(optionLogLevelDefaultValueFunction)"
+  echo
+
   echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set log file"
   echo
 
+
+  Array::wrap2 ' ' 76 6 "    Default value: " "$(optionLogFileDefaultValueFunction)"
+  echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--display-level <display-level>${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Set display level"
@@ -1437,6 +1550,9 @@ findShebangFilesCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
 
+  Array::wrap2 ' ' 76 6 "    Default value: " "$(optionDisplayLevelDefaultValueFunction)"
+  echo
+
   echo -e "  ${__HELP_OPTION_COLOR}--no-color${__HELP_NORMAL} {single}"
   Array::wrap2 ' ' 76 4 "    " "Produce monochrome output. alias of --theme noColor."
   echo
@@ -1450,6 +1566,7 @@ findShebangFilesCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}default${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}default-force${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}noColor${__RESET_COLOR}"
+
   Array::wrap2 ' ' 76 6 "    Default value: " "default"
   echo
 

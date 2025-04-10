@@ -79,6 +79,7 @@ binData:
           help: Set log level
           alts:
             - "--log-level"
+          defaultValue: optionLogLevelDefaultValueFunction
           authorizedValues:
             - value: OFF
             - value: ERR
@@ -95,6 +96,7 @@ binData:
           group: zzzGroupGlobalOptionsGroup
           type: String
           help: Set log file
+          defaultValue: optionLogFileDefaultValueFunction
           alts:
             - "--log-file"
           callbacks:
@@ -106,6 +108,7 @@ binData:
           help: Set display level
           alts:
             - "--display-level"
+          defaultValue: optionDisplayLevelDefaultValueFunction
           authorizedValues:
             - value: OFF
             - value: ERR

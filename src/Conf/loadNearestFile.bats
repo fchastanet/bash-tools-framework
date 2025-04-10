@@ -14,6 +14,7 @@ setup() {
   export TMPDIR="${BATS_TEST_TMPDIR}"
   mkdir -p "${BATS_TEST_TMPDIR}/dir/dir/dir1"
   mkdir -p "${BATS_TEST_TMPDIR}/dir/dir/dir2"
+  export BASH_FRAMEWORK_DISPLAY_LEVEL="${__LEVEL_DEBUG}"
   echo "echo '.framework-config1 loaded'" >"${BATS_TEST_TMPDIR}/dir/dir/dir1/.framework-config1"
   echo "echo '.framework-config2 loaded'" >"${BATS_TEST_TMPDIR}/dir/dir/.framework-config2"
   echo "echo '.framework-config3 loaded'" >"${BATS_TEST_TMPDIR}/dir/dir/dir2/.framework-config3"

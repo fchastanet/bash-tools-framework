@@ -31,6 +31,6 @@ Conf::loadNearestFile() {
     fi
   done
 
-  Log::displayWarning "Config file '${configFileName}' not found in any source directories provided"
+  Log::displayDebug "Config file '${configFileName}' not found in any source directories provided"
   return 1
 }
