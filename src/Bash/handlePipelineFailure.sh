@@ -23,7 +23,7 @@ Bash::handlePipelineFailure() {
   local statusCode
   for statusCode in "${pipeStatusBackup[@]}"; do
     if ((statusCode == 141)); then
-      return 0
+      continue
     elif ((statusCode > 0)); then
       # shellcheck disable=SC2034
       handlePipelineFailure_resultingStatusCode="${statusCode}"

@@ -11,17 +11,15 @@ teardown() {
 }
 
 function Crypto::uuidV4::randomFileExists { #@test
-  local status=0
   Crypto_random_file_exists() {
     return 0
   }
-  Crypto::uuidV4 >"${BATS_RUN_TMPDIR}/result" 2>&1 || status=$?
-  [[ "${status}" = "0" ]]
-  [[ "$(cat "${BATS_RUN_TMPDIR}/result")" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]]
+  run Crypto::uuidV4 >"${BATS_RUN_TMPDIR}/result" 2>&1
+  assert_success
+  assert_output --regexp "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
 }
 
 function Crypto::uuidV4::randomFileNotExistsButUuidGenExists { #@test
-  local status=0
   Crypto_random_file_exists() {
     return 1
   }
@@ -29,16 +27,12 @@ function Crypto::uuidV4::randomFileNotExistsButUuidGenExists { #@test
     return 0
   }
   stub uuidgen '-r : echo "3a8b2202-d904-4cb0-bdbc-a296c938fedc"'
-  Crypto::uuidV4 >"${BATS_RUN_TMPDIR}/result" 2>&1 || status=$?
-  [[ "${status}" = "0" ]]
-  [[ "$(cat "${BATS_RUN_TMPDIR}/result")" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]] || {
-    cat "${BATS_RUN_TMPDIR}/result" >&3
-    exit 1
-  }
+  run Crypto::uuidV4 2>&1
+  assert_success
+  assert_output --regexp "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
 }
 
 function Crypto::uuidV4::randomFileNotExistsAndUUidGenNeither { #@test
-  local status=0
   Crypto_random_file_exists() {
     return 1
   }
@@ -46,10 +40,7 @@ function Crypto::uuidV4::randomFileNotExistsAndUUidGenNeither { #@test
     return 1
   }
 
-  Crypto::uuidV4 >"${BATS_RUN_TMPDIR}/result" 2>&1 || status=$?
-  [[ "${status}" = "1" ]]
-  [[ "$(cat "${BATS_RUN_TMPDIR}/result")" =~ ERROR\ \ \ -\ unable\ to\ generate\ uuid\ on\ that\ system ]] || {
-    cat "${BATS_RUN_TMPDIR}/result" >&3
-    exit 1
-  }
+  run Crypto::uuidV4 >"${BATS_RUN_TMPDIR}/result" 2>&1
+  assert_failure 1
+  assert_output --partial "ERROR   - unable to generate uuid on that system"
 }
