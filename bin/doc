@@ -364,7 +364,7 @@ Compiler::Embed::extractFileFromBase64() {
     if [[ ! -d "${targetDir}" ]]; then
       mkdir -p "${targetDir}"
     fi
-    base64 -d >"${targetFile}" <<<"${binFileBase64}"
+    tr -d '\n ' <<<"${binFileBase64}" | base64 -d >"${targetFile}"
     chmod "${fileMode}" "${targetFile}"
   fi
 
@@ -1252,7 +1252,10 @@ ShellDoc::fixMarkdownToc() {
 Linux::requireTarCommand
 Compiler::Embed::extractFileFromBase64 \
   "${PERSISTENT_TMPDIR:-/tmp}/0b6e60db87bd75970a68b765368a17462e0b2c2a402df35f1598f3a6f3f42f40/fixMarkdownTocScript" \
-  "ewogIGxpbmU9JDAKICBpZiAobWF0Y2gobGluZSwgL14oXHMqLSBcWyhbMC05XStcLikrIFteXV0rXF1cKCMpKFteKV0rKVwpLywgYXJyKSkgewogICAgcHJpbnQgYXJyWzFdICJfIiByZXdyaXRlKGFyclszXSkgIikiCiAgfSBlbHNlIHsKICAgIHByaW50IGxpbmUKICB9Cn0KZnVuY3Rpb24gcmV3cml0ZShzdHIpCnsKICAgIGdzdWIoLy0oLSkrLywgIi0iLCBzdHIpCiAgICByZXR1cm4gc3RyCn0K" \
+  "ewogIGxpbmU9JDAKICBpZiAobWF0Y2gobGluZSwgL14oXHMqLSBcWyhbMC05XStcLikrIFteXV0r \
+XF1cKCMpKFteKV0rKVwpLywgYXJyKSkgewogICAgcHJpbnQgYXJyWzFdICJfIiByZXdyaXRlKGFy \
+clszXSkgIikiCiAgfSBlbHNlIHsKICAgIHByaW50IGxpbmUKICB9Cn0KZnVuY3Rpb24gcmV3cml0 \
+ZShzdHIpCnsKICAgIGdzdWIoLy0oLSkrLywgIi0iLCBzdHIpCiAgICByZXR1cm4gc3RyCn0K" \
   "644"
 
 declare -gx embed_file_fixMarkdownTocScript="${PERSISTENT_TMPDIR:-/tmp}/0b6e60db87bd75970a68b765368a17462e0b2c2a402df35f1598f3a6f3f42f40/fixMarkdownTocScript"

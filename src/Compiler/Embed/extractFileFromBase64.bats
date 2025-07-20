@@ -28,7 +28,7 @@ function Compiler::Embed::extractFileFromBase64::binaryFile { #@test
 }
 
 function Compiler::Embed::extractFileFromBase64::createTargetDirectory { #@test
-  run Compiler::Embed::extractFileFromBase64 "${BATS_TEST_TMPDIR}/targetDir/base64" "$(base64 -w 0 "${BATS_TEST_DIRNAME}/testsData/binaryFile")"
+  run Compiler::Embed::extractFileFromBase64 "${BATS_TEST_TMPDIR}/targetDir/base64" "$(base64 -w 76 "${BATS_TEST_DIRNAME}/testsData/binaryFile")"
   assert_success
   assert_output ""
   [[ -x "${BATS_TEST_TMPDIR}/targetDir/base64" ]]

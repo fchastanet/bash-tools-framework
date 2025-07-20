@@ -30,7 +30,7 @@ function Compiler::Embed::extractDirFromBase64::createTargetDirectory { #@test
   run Compiler::Embed::extractDirFromBase64 "${BATS_TEST_TMPDIR}/targetDir/base64" \
     "$(
       cd "${BATS_TEST_DIRNAME}/testsData"
-      tar -cz -O . | base64 -w 0
+      tar -cz -O . | base64 -w 76
     )"
   assert_success
   assert_output ""

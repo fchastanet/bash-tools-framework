@@ -20,7 +20,7 @@ Compiler::Embed::extractFileFromBase64() {
     if [[ ! -d "${targetDir}" ]]; then
       mkdir -p "${targetDir}"
     fi
-    base64 -d >"${targetFile}" <<<"${binFileBase64}"
+    tr -d '\n ' <<<"${binFileBase64}" | base64 -d >"${targetFile}"
     chmod "${fileMode}" "${targetFile}"
   fi
 
