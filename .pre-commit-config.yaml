@@ -37,7 +37,7 @@ repos:
           - mdformat-gfm
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: mixed-line-ending
       - id: end-of-file-fixer
@@ -145,7 +145,7 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 6.2.1
+    rev: 6.2.3
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -175,8 +175,8 @@ repos:
             --display-level,
             WARNING,
           ]
-      - id: plantuml
-        args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
+      #- id: plantuml
+      #  args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
 
   - repo: local
     hooks:
@@ -190,6 +190,6 @@ repos:
         stages: [] # GITHUB
 
   - repo: https://github.com/fchastanet/bash-compiler
-    rev: 3.1.4
+    rev: 3.2.0
     hooks:
       - id: buildBashBinaries

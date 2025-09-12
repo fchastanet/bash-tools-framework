@@ -10,7 +10,7 @@ if ((${#argPlantumlFiles[@]} > 0)); then
   files=("${argPlantumlFiles[@]}")
 else
   changedFilesBefore=$(detectChangedAddedFiles)
-  readarray -t files < <(find . -name '*.puml')
+  readarray -t files < <(git ls-files --exclude-standard -c -o -m | grep -E -e '\.puml$' -e '\.plantuml$' | sort | uniq)
 fi
 
 if ((${#files[@]} == 0)); then
@@ -36,7 +36,6 @@ convertPuml() {
     local fileBasename="${file##*/}"
     targetFile="${optionOutputDir}/${fileBasename%.*}.${format}"
   fi
-  pullPlantumlImageIfNeeded
   Log::displayInfo "Generating ${targetFile} from ${file}"
   local -a env=()
   if [[ -n "${optionLimitSize}" ]]; then
@@ -57,7 +56,7 @@ convertPuml() {
   Log::displayInfo "Converted ${targetFile}"
 }
 # TODO generate convertPuml as binary to avoid all these exports
-export -f convertPuml Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
+export -f convertPuml File::elapsedTimeSinceLastModification Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
 export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
 
 (
@@ -66,16 +65,15 @@ export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
     Log::displayInfo "Converting ${file}"
     # shellcheck disable=SC2154
     for format in "${optionFormats[@]}"; do
-      declare -a myCmd=(
-        "convertPuml"
+      declare -a myArgs=(
         "${file}" "${sameDirectoryOption}" "${optionOutputDir}"
         "${format}" "${optionLimitSize}" "${optionTraceVerbose}"
         "${plantumlOptions[@]}"
       )
-      printf "'%s' " "${myCmd[@]}"
+      printf "%s\0" "${myArgs[@]}"
     done
   done
-) | xargs -P0 -r -L 1 bash -c 'convertPuml "$@"'
+) | xargs -0 -P0 -r -n $((6 + ${#plantumlOptions[@]})) bash -c 'convertPuml $@' _
 
 # shellcheck disable=SC2154
 if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argPlantumlFiles[@]} == 0)); then
