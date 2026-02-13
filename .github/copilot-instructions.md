@@ -22,8 +22,8 @@
 **Directory Structure**:
 ```
 src/
-├── Namespace/               # Top-level namespace
-│   ├── _.sh                # Namespace initialization (variables, constants)
+├── Namespace/             # Top-level namespace
+│   ├── _.sh               # Namespace initialization (variables, constants)
 │   ├── __all.sh           # Batch import file (sources multiple functions)
 │   ├── functionName.sh    # Individual function implementation
 │   ├── functionName.bats  # Unit test for the function
@@ -158,6 +158,7 @@ bash-compiler $(find src/_binaries -name '*-binary.yaml')
 ```
 
 **Note**: Compiled binaries in `bin/` are committed to the repository. Re-compile after changing source files referenced in YAML definitions.
+**Note2**: **Never** edit compiled binaries directly - always modify source files and re-compile.
 
 ## Development Workflow
 
@@ -180,23 +181,25 @@ bash-compiler $(find src/_binaries -name '*-binary.yaml')
    - Create/edit `src/Namespace/functionName.bats` test file
    - Run function-specific tests: `./test.sh scrasnups/build:bash-tools-ubuntu-5.3 src/Namespace/functionName.bats`
 
-2. **Update compiled binaries**:
-   - If you modified functions used by a binary, recompile:
-     ```bash
-     bash-compiler src/_binaries/commandName/commandName-binary.yaml
-     ```
+2. **Update compiled binaries**: If you modified functions used by a binary, recompile:
+
+```bash
+bash-compiler src/_binaries/commandName/commandName-binary.yaml
+```
 
 3. **Run linters**:
-   ```bash
-   bin/frameworkLint          # Check framework conventions
-   bin/shellcheckLint         # ShellCheck linting
-   bin/awkLint               # AWK file linting
-   ```
+
+```bash
+bin/frameworkLint          # Check framework conventions
+bin/shellcheckLint         # ShellCheck linting
+bin/awkLint               # AWK file linting
+```
 
 4. **Generate documentation**:
-   ```bash
-   bin/doc                   # Generates markdown docs from shdoc annotations
-   ```
+
+```bash
+bin/doc                   # Generates markdown docs from shdoc annotations
+```
 
 ### Common Errors and Solutions
 
@@ -228,7 +231,7 @@ bash-compiler $(find src/_binaries -name '*-binary.yaml')
 - **Framework-specific**: `bin/frameworkLint` checks naming conventions and documentation
 
 ### MegaLinter
-- **Configuration**: `.mega-linter.yml` (comprehensive), `.mega-linter-githubAction.yml` (CI)
+- **Configuration**: `.mega-linter.yml` (local), `.mega-linter-githubAction.yml` (CI)
 - **Runs in CI**: Terraform flavor with extensive linters for Bash, YAML, JSON, Markdown, Docker
 - **Auto-fixes**: Can create PRs with automatic fixes when `APPLY_FIXES_MODE=pull_request`
 
