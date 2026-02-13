@@ -92,6 +92,11 @@ overrides:
     dictionaries:
       - loremIpsum
 
+  - filename: "bash-tools-framework-schema.json"
+    dictionaries:
+      - software
+      - mySoftwares
+
   - filename: "*.yml"
     dictionaries:
       - lintersConfig

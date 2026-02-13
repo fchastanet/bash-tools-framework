@@ -226,7 +226,7 @@ bin/doc # Generates markdown docs from shdoc annotations
 #### Alpine Test Failures
 
 - **Cause**: Some tests are Ubuntu-specific
-- **Solution**: Tag Ubuntu-only tests with `# bats test_tags=ubuntu_only` and
+- **Solution**: Tag ubuntu_only tests with `# bats test_tags=ubuntu_only` and
   they'll be excluded on Alpine
 
 ## Linting and Quality Tools
