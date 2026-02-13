@@ -28,3 +28,7 @@ customCatalog:
       description: eslint-json
       fileMatch: [".eslintrc-json.json"]
       location: https://json.schemastore.org/eslintrc.json
+    - name: bash-tools-framework
+      description: "bash-tools-framework command definition"
+      fileMatch: ["src/_binaries/**/*.yaml"]
+      location: ./bash-tools-framework-schema.json
