@@ -132,6 +132,10 @@ embed all required functions.
 
 **Binary Definition Structure** (`src/_binaries/*/name-binary.yaml`):
 
+**Binary Definition Validation**: `npx v8r src/_binaries/doc/doc-binary.yaml`
+The file `src/_binaries/doc/doc-binary.yaml` will be validated
+against `bash-tools-framework-schema.json` json schema
+
 **Template**: see `.github/framework-command-template.yaml`
 
 **Compiling binaries** (requires external
@@ -186,9 +190,10 @@ bash-compiler src/_binaries/commandName/commandName-binary.yaml
 3. **Run linters**:
 
 ```bash
-bin/frameworkLint  # Check framework conventions
-bin/shellcheckLint # ShellCheck linting
-bin/awkLint        # AWK file linting
+bin/frameworkLint         # Check framework conventions
+bin/shellcheckLint        # ShellCheck linting
+bin/awkLint               # AWK file linting
+npx v8r ./**/*.{yaml,yml} # JSON Schema validation (validate as well command definition structure)
 ```
 
 4. **Generate documentation**:
@@ -261,6 +266,7 @@ bin/doc # Generates markdown docs from shdoc annotations
 - **YAML**: `.yamllint.yml`
 - **Markdown**: `.markdownlint.json` + `.markdown-link-check.json`
 - **Spelling**: `cspell.yaml` + `.cspell/` dictionary files
+- **JSON Schema validation**: `npx v8r ./**/*.{yaml,yml}`
 
 ## CI/CD Pipeline
 
