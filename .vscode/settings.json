@@ -13,6 +13,11 @@
     "vendor": true,
     "pages/assets/images/compilerEmbedInjection.svg": true
   },
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/commit-message.instructions.md"
+    }
+  ],
   "explorer.autoReveal": false,
   "files.exclude": {
     "**/.git": true,

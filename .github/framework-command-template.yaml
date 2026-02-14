@@ -1,0 +1,29 @@
+extends:
+  - ${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml
+
+compilerConfig:
+  targetFile: ${FRAMEWORK_ROOT_DIR}/bin/commandName
+  relativeRootDirBasedOnTargetDir: ..
+
+binData:
+  commands:
+    default:
+      functionName: commandNameFunction
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/commandName/commandName-main.sh
+      definitionFiles:
+        10: ${FRAMEWORK_ROOT_DIR}/src/_binaries/commandName/commandName-config.sh
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/commandName/commandName-options.sh
+      version: 1.0.0
+      copyrightBeginYear: 2024
+      commandName: commandName
+      author: Author Name
+      license: MIT
+      options:
+        - variableName: OPTION_VAR
+          type: String
+          callbacks:
+            - optionCallback
+          help: Description of option
+          alts:
+            - --option
+            - -o

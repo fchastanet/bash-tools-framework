@@ -1,0 +1,438 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bash Tools Framework Binary Definition Schema",
+  "description": "Schema for validating bash-tools-framework binary definition YAML files",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "extends": {
+      "description": "List of base configuration files to inherit from",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+      ]
+    },
+    "vars": {
+      "description": "Variables that can be used in templates and references",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "SRC_FILE_PATH": "src/_binaries/awkLint/awkLint-binary.yaml",
+          "MAIN_FUNCTION_NAME": "main"
+        }
+      ]
+    },
+    "compilerConfig": {
+      "description": "Configuration for the bash compiler",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "targetFile": {
+          "description": "Target output file path for the compiled binary",
+          "type": "string",
+          "examples": ["${FRAMEWORK_ROOT_DIR}/bin/awkLint"]
+        },
+        "relativeRootDirBasedOnTargetDir": {
+          "description": "Relative path from target directory to project root",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "examples": ["..", 1]
+        },
+        "rootDir": {
+          "description": "Root directory for the project",
+          "type": "string",
+          "examples": ["${FRAMEWORK_ROOT_DIR}"]
+        },
+        "srcDirs": {
+          "description": "Additional directories to search for source functions",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["${FRAMEWORK_ROOT_DIR}/src"]
+        },
+        "binDir": {
+          "description": "Default binary directory for compiled files",
+          "type": "string",
+          "examples": ["${FRAMEWORK_ROOT_DIR}/bin"]
+        },
+        "templateDirs": {
+          "description": "Directories containing template files",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["${TEMPLATES_ROOT_DIR}"]
+        },
+        "templateFile": {
+          "description": "Template file to use for generation",
+          "type": "string",
+          "examples": ["binFile.gtpl"]
+        },
+        "functionsIgnoreRegexpList": {
+          "description": "Regular expressions for functions to exclude from import",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["Namespace::functions", "IMPORT::dir::file"]
+        }
+      }
+    },
+    "compileConfig": {
+      "description": "Additional compile configuration (alternative naming)",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "NON_FRAMEWORK_FILES_REGEXP": {
+          "description": "Regular expressions for files not containing framework functions",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["^bin/", ".bats$"]
+        },
+        "BATS_FILE_NOT_NEEDED_REGEXP": {
+          "description": "Regular expressions for files allowed to have no bats tests",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["^bin/", "/_.sh$"]
+        },
+        "FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP": {
+          "description": "Regular expressions for files exempt from function name matching rules",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["^bin/", "/testsData/"]
+        }
+      }
+    },
+    "binData": {
+      "description": "Binary definition data",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands"],
+      "properties": {
+        "commands": {
+          "description": "Command definitions",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/command"
+          },
+          "examples": [
+            {
+              "default": {
+                "functionName": "awkLintCommand",
+                "commandName": "awkLint"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "definitions": {
+    "command": {
+      "description": "Command definition object",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "functionName": {
+          "description": "Name of the main function for this command",
+          "type": "string",
+          "examples": ["awkLintCommand", "buildPushDockerImageCommand"]
+        },
+        "commandName": {
+          "description": "Name of the command as invoked on CLI",
+          "type": "string",
+          "examples": ["awkLint", "frameworkLint"]
+        },
+        "version": {
+          "description": "Version of the command",
+          "type": "string",
+          "examples": ["3.0", "1.0.0"]
+        },
+        "copyrightBeginYear": {
+          "description": "Year when copyright began",
+          "type": "integer",
+          "examples": [2022, 2023]
+        },
+        "author": {
+          "description": "Author or authors of the command",
+          "type": "string",
+          "examples": ["[François Chastanet](https://github.com/fchastanet)"]
+        },
+        "license": {
+          "description": "License of the command",
+          "type": "string",
+          "examples": ["MIT License", "MIT"]
+        },
+        "copyright": {
+          "description": "Copyright callback function or text",
+          "type": "string",
+          "examples": ["copyrightCallback"]
+        },
+        "sourceFile": {
+          "description": "URL to the source file in repository",
+          "type": "string",
+          "examples": [
+            "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/awkLint/awkLint-binary.yaml"
+          ]
+        },
+        "help": {
+          "description": "Short help text for the command",
+          "type": "string",
+          "examples": ["lint awk files", "Lint bash files using shellcheck."]
+        },
+        "longDescription": {
+          "description": "Long description of what the command does",
+          "type": "string",
+          "examples": [
+            "Lint awk files\n\nLint all files with .awk extension in current git folder.\nResult in checkstyle format.\n"
+          ]
+        },
+        "mainFile": {
+          "description": "Path to the main implementation file",
+          "type": "string",
+          "examples": [
+            "${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint-main.sh"
+          ]
+        },
+        "definitionFiles": {
+          "description": "Definition files indexed by execution order",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "examples": [
+            {
+              "10": "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsDefault.sh",
+              "20": "${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint-options.sh"
+            }
+          ]
+        },
+        "options": {
+          "description": "Command-line options",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/option"
+          }
+        },
+        "optionGroups": {
+          "description": "Grouping of options for help display",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "examples": ["OPTIONS:", "GLOBAL OPTIONS:"]
+              }
+            }
+          },
+          "examples": [
+            {
+              "OptionsGroup": {
+                "title": "OPTIONS:"
+              },
+              "zzzGroupGlobalOptionsGroup": {
+                "title": "GLOBAL OPTIONS:"
+              }
+            }
+          ]
+        },
+        "args": {
+          "description": "Command arguments (positional parameters)",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/argument"
+          }
+        },
+        "callbacks": {
+          "description": "Callback functions to execute at various points",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["commandOptionParseFinished"]
+        },
+        "unknownOptionCallbacks": {
+          "description": "Callbacks to handle unknown options",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["unknownOption"]
+        },
+        "beforeParseCallbacks": {
+          "description": "Callbacks executed before parsing options",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["beforeParseCallback"]
+        }
+      }
+    },
+    "option": {
+      "description": "Command-line option definition",
+      "type": "object",
+      "properties": {
+        "variableName": {
+          "description": "Name of the variable to store the option value",
+          "type": "string",
+          "examples": ["optionHelp", "optionFormat"]
+        },
+        "type": {
+          "description": "Data type of the option",
+          "type": "string",
+          "enum": ["Boolean", "String", "Integer", "Array", "StringArray"],
+          "examples": ["Boolean", "String"]
+        },
+        "help": {
+          "description": "Help text for the option",
+          "type": "string",
+          "examples": [
+            "Displays this command help",
+            "Define output format of this command."
+          ]
+        },
+        "alts": {
+          "description": "Alternative names/aliases for the option",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["--help", "-h", "--format"]
+        },
+        "defaultValue": {
+          "description": "Default value for the option",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "plain",
+            "ubuntu:20.04",
+            true,
+            "optionLogLevelDefaultValueFunction"
+          ]
+        },
+        "authorizedValues": {
+          "description": "List of allowed values for this option",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "description": "The allowed value",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "help": {
+                "description": "Help text for this specific value",
+                "type": "string"
+              }
+            },
+            "examples": [
+              {
+                "value": "plain"
+              },
+              {
+                "value": "checkstyle",
+                "help": "Checkstyle XML format output"
+              }
+            ]
+          }
+        },
+        "group": {
+          "description": "Option group name for help display organization",
+          "type": "string",
+          "examples": ["OptionsGroup", "zzzGroupGlobalOptionsGroup"]
+        },
+        "callbacks": {
+          "description": "Functions to call when option is processed",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": ["optionHelpCallback", "updateOptionVendorCallback"]
+        },
+        "required": {
+          "description": "Whether this option is required",
+          "type": "boolean",
+          "examples": [true, false]
+        }
+      }
+    },
+    "argument": {
+      "description": "Positional argument definition",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the argument",
+          "type": "string"
+        },
+        "type": {
+          "description": "Data type of the argument",
+          "type": "string"
+        },
+        "help": {
+          "description": "Help text for the argument",
+          "type": "string"
+        },
+        "required": {
+          "description": "Whether this argument is required",
+          "type": "boolean"
+        },
+        "defaultValue": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

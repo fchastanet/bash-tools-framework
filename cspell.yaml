@@ -8,6 +8,8 @@ useGitignore: true
 enableGlobDot: true
 ignorePaths:
   - "**/testsData/**"
+  - ".github/*.md"
+  - ".github/**/*.md"
   - package-lock.json
   - "**/*/svg"
   - .vscode
@@ -91,6 +93,11 @@ overrides:
     languageId: shellscript
     dictionaries:
       - loremIpsum
+
+  - filename: "bash-tools-framework-schema.json"
+    dictionaries:
+      - software
+      - mySoftwares
 
   - filename: "*.yml"
     dictionaries:

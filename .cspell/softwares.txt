@@ -14,6 +14,8 @@ Bashtools
 buildkit
 Buildx
 byobu
+Chastanet
+checkov
 checkstyle
 chsh
 codesniffer
@@ -145,6 +147,7 @@ Sume
 timeago
 tmpl
 tmuxinator
+trivy
 TRUFFLEHOG
 tzdata
 updatedb

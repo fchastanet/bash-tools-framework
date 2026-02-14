@@ -23,6 +23,39 @@ repos:
         require_serial: true
         stages: [pre-commit, pre-push, manual]
 
+  - repo: local
+    hooks:
+      - id: v8r
+        name: v8r
+        entry: npx -y v8r --ci
+        language: system
+        pass_filenames: true
+        stages: [pre-commit, pre-push, manual]
+        files: |
+          (?x)(
+            \.(yaml|yml|json)$
+          )
+        exclude: |
+          (?x)(
+            ^bash-tools-framework-schema\.json$|
+            ^\.?secretlintrc\.yml$|
+            ^\.vscode/|
+            ^\.?checkov\.yml$|
+            ^\.?secretlintrc\.json$|
+            ^\.?grype\.yaml$|
+            ^\.?trivy\.yaml$|
+            /testsData/
+          )
+
+  - repo: local
+    hooks:
+      - id: cspell
+        name: cspell
+        entry: npx -y cspell .
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, pre-push, manual]
+
   - repo: https://github.com/executablebooks/mdformat
     # Do this before other tools "fixing" the line endings
     rev: 0.7.22
@@ -40,6 +73,10 @@ repos:
           - mdformat-config
           - mdformat-web
           - mdformat-gfm
+        exclude: |
+          (?x)(
+            ^\.github/
+          )
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

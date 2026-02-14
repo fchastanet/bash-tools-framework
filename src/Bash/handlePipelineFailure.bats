@@ -7,6 +7,8 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 # shellcheck source=src/Bash/handlePipelineFailure.sh
 source "${srcDir}/Bash/handlePipelineFailure.sh"
 
+# bats file_tags=ubuntu_only
+
 function Bash::handlePipelineFailure::withHead { #@test
   local resultingStatus=0
   local -a originalPipeStatus=("unset")

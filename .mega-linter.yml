@@ -147,7 +147,8 @@ MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
 YAML_V8R_FILTER_REGEX_EXCLUDE: |
   (?x)(
     ^\.secretlintrc\.yml$|
-    ^\.grype\.yaml$
+    ^\.grype\.yaml$|
+    ^\.trivy\.yaml$
   )
 
 MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
