@@ -349,7 +349,7 @@ bin/doc # Generates markdown docs from shdoc annotations
 3. GitHub Pages served from `pages/` directory using Docsify
 4. View locally: `docsify serve pages` (requires `npm i docsify-cli -g`)
 5. CI workflow `.github/workflows/docsify-gh-pages.yml`
-6. Published at: https://fchastanet.github.io/bash-tools-framework/
+6. Published at: <https://fchastanet.github.io/bash-tools-framework/>
 
 ## Related Projects
 
