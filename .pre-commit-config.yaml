@@ -18,6 +18,30 @@ repos:
         require_serial: true
         stages: [pre-commit, pre-push, manual]
 
+  - repo: local
+    hooks:
+      - id: v8r
+        name: v8r
+        entry: npx -y v8r --ci
+        language: system
+        pass_filenames: true
+        stages: [pre-commit, pre-push, manual]
+        files: |
+          (?x)(
+            \.(yaml|yml|json)$
+          )
+        exclude: |
+          (?x)(
+            ^bash-tools-framework-schema\.json$|
+            ^\.?secretlintrc\.yml$|
+            ^\.vscode/|
+            ^\.?checkov\.yml$|
+            ^\.?secretlintrc\.json$|
+            ^\.?grype\.yaml$|
+            ^\.?trivy\.yaml$|
+            /testsData/
+          )
+
   - repo: https://github.com/executablebooks/mdformat
     # Do this before other tools "fixing" the line endings
     rev: 0.7.22
