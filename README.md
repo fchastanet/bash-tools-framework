@@ -326,19 +326,17 @@ bin/doc
 
 ### 3.6. github page
 
-The web page uses [Docsify](https://docsify.js.org/) to generate a static web
-site.
+The web page uses [Hugo](https://gohugo.io/) with the
+[Docsy](https://www.docsy.dev/) theme to generate a static documentation site.
 
-It is recommended to install docsify-cli globally, which helps initializing and
-previewing the website locally.
+To preview the website locally, you need Hugo installed. Then run:
 
-`npm i docsify-cli -g`
+```bash
+hugo mod get -u
+hugo server -D
+```
 
-Run the local server with docsify serve.
-
-`docsify serve pages`
-
-Navigate to <http://localhost:3000/>
+Navigate to <http://localhost:1313/bash-tools-framework/>
 
 ## 4. Troubleshooting
 
