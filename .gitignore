@@ -19,3 +19,11 @@ pages/bashDoc/
 pages/tests/
 !**/_sidebar.md
 !**/_navbar.md
+
+# Hugo
+build/
+public/
+sites/
+resources/
+.hugo_build.lock
+hugo.yaml

@@ -1,0 +1,43 @@
+# Site-specific configuration for bash-tools-framework
+title: Bash Tools Framework Documentation
+baseURL: https://fchastanet.github.io/bash-tools-framework/
+
+params:
+  description: 'Bash Tools Framework - Collection of bash functions and commands for linting, documentation generation, and compilation'
+  keywords: 'bash,tools,framework,ubuntu,alpine,shell,scripting,linting,documentation'
+
+  # Repository configuration
+  github_repo: https://github.com/fchastanet/bash-tools-framework
+  github_project_repo: https://github.com/fchastanet/bash-tools-framework
+
+  # UI Configuration - Blue theme
+  ui:
+    navbar_bg_color: '#007bff'
+
+  # Links
+  links:
+    user:
+      - name: GitHub
+        url: https://github.com/fchastanet/bash-tools-framework
+        icon: fab fa-github
+        desc: bash-tools-framework repository
+      - name: Issues
+        url: https://github.com/fchastanet/bash-tools-framework/issues
+        icon: fas fa-bug
+        desc: Report issues
+
+  # SEO
+  meta:
+    description: 'Bash Tools Framework documentation - Comprehensive bash library with functions for linting, documentation, and compilation'
+    keywords: 'bash,tools,framework,shell,scripting,testing,bats,documentation,linting,shellcheck'
+
+menu:
+  site:
+    - name: GitHub
+      url: https://github.com/fchastanet/bash-tools-framework
+      weight: 10
+      post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs" aria-hidden="true"></i></sup>
+    - name: Release Notes
+      url: https://github.com/fchastanet/bash-tools-framework/releases
+      weight: 20
+      post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs" aria-hidden="true"></i></sup>
