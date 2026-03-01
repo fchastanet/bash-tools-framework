@@ -224,9 +224,9 @@ This linter is used in precommit hooks, see
 **DISCLAIMER:** Some of the best practices mentioned in this document are not
 applied in this project because I wrote some of them while writing this project.
 
-[General Bash best practices](https://github.com/fchastanet/my-documents/blob/master/HowTo/HowTo-Write-Bash-Scripts/00-Basic-BestPractices.md)
-[Linux Best practices](https://github.com/fchastanet/my-documents/blob/master/HowTo/HowTo-Write-Bash-Scripts/10-LinuxCommands-BestPractices.md)
-[Bats Best practices](https://github.com/fchastanet/my-documents/blob/master/HowTo/HowTo-Write-Bash-Scripts/20-Bats-BestPractices.md)
+[General Bash best practices](https://fchastanet.github.io/my-documents/docs/bash-scripts/basic-best-practices/)
+[Linux Best practices](https://fchastanet.github.io/my-documents/docs/bash-scripts/linux-commands-best-practices/)
+[Bats Best practices](https://fchastanet.github.io/my-documents/docs/bash-scripts/bats-best-practices/)
 
 `@embed` keyword is really useful to inline configuration files. However to run
 framework function using sudo, it is recommended to call the same binary but

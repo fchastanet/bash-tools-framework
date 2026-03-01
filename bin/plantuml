@@ -1897,11 +1897,12 @@ convertPuml() {
     set -x
   fi
   docker run -i --rm "${env[@]}" plantuml/plantuml \
-    -t"${format}" -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
+    -t"${format}" --disable-metadata -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
     >"${targetFile}" \
     <"${file}"
   set +x
   if [[ "${format}" = "svg" ]]; then
+    sed -E -i 's/^<\?plantuml [0-9.]+\?>(.*)/\1/' "${targetFile}"
     echo >>"${targetFile}"
   fi
   Log::displayInfo "Converted ${targetFile}"

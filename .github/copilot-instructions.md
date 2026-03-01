@@ -183,24 +183,24 @@ files and re-compile.
 2. **Update compiled binaries**: If you modified functions used by a binary,
    recompile:
 
-```bash
-bash-compiler src/_binaries/commandName/commandName-binary.yaml
-```
+    ```bash
+    bash-compiler src/_binaries/commandName/commandName-binary.yaml
+    ```
 
 3. **Run linters**:
 
-```bash
-bin/frameworkLint         # Check framework conventions
-bin/shellcheckLint        # ShellCheck linting
-bin/awkLint               # AWK file linting
-npx v8r ./**/*.{yaml,yml} # JSON Schema validation (validate as well command definition structure)
-```
+    ```bash
+    bin/frameworkLint         # Check framework conventions
+    bin/shellcheckLint        # ShellCheck linting
+    bin/awkLint               # AWK file linting
+    npx v8r ./**/*.{yaml,yml} # JSON Schema validation (validate as well command definition structure)
+    ```
 
 4. **Generate documentation**:
 
-```bash
-bin/doc # Generates markdown docs from shdoc annotations
-```
+    ```bash
+    bin/doc # Generates markdown docs from shdoc annotations
+    ```
 
 ### Common Errors and Solutions
 
