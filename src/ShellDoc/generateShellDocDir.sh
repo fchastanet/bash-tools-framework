@@ -13,8 +13,9 @@ ShellDoc::generateShellDocDir() {
   local dir="$1"
   local relativeDir="$2"
   local targetDocFile="$3"
-  local repositoryUrl="${4:-}"
-  local excludeFilesPattern="${5:-}"
+  local weight="$4"
+  local repositoryUrl="${5:-}"
+  local excludeFilesPattern="${6:-}"
   local namespaceFile
   local relativeFile
 
@@ -63,12 +64,26 @@ ShellDoc::generateShellDocDir() {
     local doc
     doc="$(ShellDoc::generateShellDoc "${namespaceFile}")"
     if (("$(grep -c . <<<"${doc}")" > 1)); then
-      # remove index that is auto managed by docsify
+      # remove index that is auto managed by docsy
       # increment title level by one (#)
       sed -E \
         -e '/^## Index/,/## /d' \
         -e 's/^(##*) (.*)$/#\1 \2/' \
         <<<"${doc}" >"${targetDocFile}"
+      # add front matter for docsy
+      (
+        echo "---"
+        echo "title: Namespace ${relativeDir}"
+        echo "description: Documentation for ${relativeDir} directory"
+        echo "linkTitle: '${relativeDir##*/}::'"
+        echo "type: docs"
+        echo "weight: ${weight}"
+        echo "creationDate: 2026-03-01"
+        echo "lastUpdated: $(date '+%Y-%m-%d')"
+        echo "---"
+        echo
+      ) | cat - "${targetDocFile}" >"${targetDocFile}.tmp"
+      mv "${targetDocFile}.tmp" "${targetDocFile}"
       return 0
     else
       return 1

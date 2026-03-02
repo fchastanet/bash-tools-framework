@@ -21,12 +21,15 @@ binData:
       definitionFiles:
         20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/frameworkLint/frameworkLint-options.sh
       mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/frameworkLint/frameworkLint-main.sh
-      help: This framework linter.
+      help: |
+        Lint files of the current repository to ensure framework conventions
+        are followed.
       longDescription: |
         Lint files of the current repository
           - check if all Namespace::functions are existing in the framework
           - check that function defined in a .sh is correctly named
           - check each function has a bats file associated
+
           - shdoc
             - check that shdoc valid annotations are used
             - check that @require function matches naming convention and exists

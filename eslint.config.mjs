@@ -14,11 +14,7 @@ const compat = new FlatCompat({
 });
 
 export default [
-  ...compat.extends(
-    "eslint:recommended",
-    "plugin:json/recommended-legacy",
-    "eslint-config-prettier"
-  ),
+  ...compat.extends("eslint:recommended", "plugin:json/recommended-legacy", "eslint-config-prettier"),
   {
     plugins: {
       json,

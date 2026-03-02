@@ -1,6 +1,5 @@
 ---
-compileConfig:
-  &defaultFrameworkLinterConfig # describe the files that do not contain function to be imported
+compileConfig: &defaultFrameworkLinterConfig # describe the files that do not contain function to be imported
   NON_FRAMEWORK_FILES_REGEXP:
     - ^bin/
     - ^hooks/

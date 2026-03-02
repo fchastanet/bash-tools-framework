@@ -20,3 +20,5 @@ if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
     "${FRAMEWORK_ROOT_DIR}/src"
   )
 fi
+
+REPOSITORY_URL=https://github.com/fchastanet/bash-tools-framework

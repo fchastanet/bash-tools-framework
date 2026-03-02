@@ -30,8 +30,7 @@ customCatalog:
       location: https://json.schemastore.org/eslintrc.json
     - name: bash-tools-framework
       description: "bash-tools-framework command definition"
-      fileMatch:
-        ["src/_binaries/**/*.yaml", ".github/framework-command-template.yaml"]
+      fileMatch: ["src/_binaries/**/*.yaml", ".github/framework-command-template.yaml"]
       location: ./bash-tools-framework-schema.json
     - name: dependabot
       description: dependabot

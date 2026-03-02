@@ -28,6 +28,8 @@ debian
 deepsource
 devcert
 docsify
+docsy
+Docsy
 dotnet
 dpkg
 ecma
@@ -51,6 +53,7 @@ gtpl
 gzipped
 hadolint
 hjson
+hugo
 Hyperv
 hyphens
 iconify
@@ -139,6 +142,7 @@ resolvconf
 runc
 scrasnups
 screenlock
+shdoc
 shellcheck
 shellcheckrc
 SpacesAftertabs

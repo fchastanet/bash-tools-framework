@@ -15,7 +15,6 @@ megalinter-reports/
 pages/*.md
 pages/_site/
 pages/doc/
-pages/bashDoc/
 pages/tests/
 !**/_sidebar.md
 !**/_navbar.md
@@ -24,6 +23,12 @@ pages/tests/
 build/
 public/
 sites/
+content/docs/bashDoc/
+content/docs/FrameworkFullDoc.md
+content/docs/Commands.md
 resources/
 .hugo_build.lock
 hugo.yaml
+
+# Hugo pages auto generated files
+content/docs/guides/assets/requireLoad-activityDiagram.png

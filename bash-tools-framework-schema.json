@@ -11,9 +11,7 @@
       "items": {
         "type": "string"
       },
-      "examples": [
-        "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
-      ]
+      "examples": ["${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"]
     },
     "vars": {
       "description": "Variables that can be used in templates and references",
@@ -209,9 +207,7 @@
         "mainFile": {
           "description": "Path to the main implementation file",
           "type": "string",
-          "examples": [
-            "${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint-main.sh"
-          ]
+          "examples": ["${FRAMEWORK_ROOT_DIR}/src/_binaries/awkLint/awkLint-main.sh"]
         },
         "definitionFiles": {
           "description": "Definition files indexed by execution order",
@@ -307,10 +303,7 @@
         "help": {
           "description": "Help text for the option",
           "type": "string",
-          "examples": [
-            "Displays this command help",
-            "Define output format of this command."
-          ]
+          "examples": ["Displays this command help", "Define output format of this command."]
         },
         "alts": {
           "description": "Alternative names/aliases for the option",
@@ -336,12 +329,7 @@
               "type": "null"
             }
           ],
-          "examples": [
-            "plain",
-            "ubuntu:20.04",
-            true,
-            "optionLogLevelDefaultValueFunction"
-          ]
+          "examples": ["plain", "ubuntu:20.04", true, "optionLogLevelDefaultValueFunction"]
         },
         "authorizedValues": {
           "description": "List of allowed values for this option",

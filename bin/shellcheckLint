@@ -1636,7 +1636,7 @@ shellcheckLintCommandHelp() {
   echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
 
   Array::wrap2 " " 80 2 "  [${__HELP_OPTION_COLOR}shellcheckFiles${__HELP_NORMAL} {list} (optional)]"
-  Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck. If not provided," "all files from git repository which are beginning" "with a bash shebang, unless --staged option is provided." ""
+  Array::wrap2 ' ' 76 4 "    " "files to validate with shellcheck." "If not provided, all files from git repository which are beginning" "with a bash shebang, unless --staged option is provided." ""
   echo
 
 
@@ -1762,7 +1762,7 @@ shellcheckLintCommandHelp() {
   echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--staged${__HELP_NORMAL} {single}"
-  Array::wrap2 ' ' 76 4 "    " "lint only staged git files(files added to file list to be committed) and which are beginning with a bash shebang."
+  Array::wrap2 ' ' 76 4 "    " "lint only staged git files(files added to file list to be committed)" "and which are beginning with a bash shebang." ""
   echo
 
 
@@ -1777,19 +1777,18 @@ shellcheckLintCommandHelp() {
   echo
   echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
   declare -a shellcheckLintCommandLongDescription=(
-  "shellcheck wrapper that will:"
-  "- install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically"
-  $'\r'
-  "- by default, lint all git files of this project which are beginning with a bash shebang"
-  "  except if the option --staged is passed"
+  "shellcheck wrapper that will:\\n"
+  "- install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically\\n"
+  "- by default, lint all git files of this project"
+  "    which are beginning with a bash shebang"
+  "    except if the option --staged is passed"
   ""
   "${__HELP_TITLE}Special configuration .shellcheckrc:${__HELP_NORMAL}"
-  "use the following line in your .shellcheckrc file to exclude"
-  "some files from being checked (use grep -E syntax)"
-  "exclude=^bin/compile$"
+  "  use the following line in your .shellcheckrc file to exclude"
+  "  some files from being checked (use grep -E syntax)"
+  "  exclude=^bin/compile$"
   ""
-  "${__HELP_TITLE_COLOR}SHELLCHECK HELP${__RESET_COLOR}"
-  ""
+  "${__HELP_TITLE_COLOR}SHELLCHECK HELP${__RESET_COLOR}\\n"
   "@@@SHELLCHECK_HELP@@@"
   )
   Array::wrap2 ' ' 76 0 "${shellcheckLintCommandLongDescription[@]}"
