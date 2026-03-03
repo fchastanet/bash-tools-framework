@@ -21,4 +21,5 @@ if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
   )
 fi
 
+# shellcheck disable=SC2034
 REPOSITORY_URL=https://github.com/fchastanet/bash-tools-framework

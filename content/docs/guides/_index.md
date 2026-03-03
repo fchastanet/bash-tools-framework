@@ -18,4 +18,4 @@ General framework documentation explaining main framework features:
 - Best practices and recipes
 
 For creating your first binary file, see the
-[Commands documentation](https://fchastanet.github.io/bash-tools-framework/commands/).
+[Commands documentation](https://fchastanet.github.io/bash-tools-framework/docs/commands/).

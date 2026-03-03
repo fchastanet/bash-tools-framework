@@ -12,8 +12,8 @@ jobs:
     uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
     with:
       site-name: "bash-tools-framework"
-      baseURL: "https://fchastanet.github.io/bash-tools-framework"
       checkout-repo: "fchastanet/bash-tools-framework"
+      site-dir: "_site-content"
     permissions:
       contents: read
       pages: write

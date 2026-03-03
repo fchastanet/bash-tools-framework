@@ -12,6 +12,9 @@
       "pattern": "^https://tinyurl.com/"
     },
     {
+      "pattern": "^http://localhost:1313/bash-tools-framework/$"
+    },
+    {
       "pattern": "^#.*"
     }
   ]

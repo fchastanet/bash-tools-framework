@@ -12,22 +12,16 @@ lastUpdated: 2026-03-01
 of bash functions and commands that help you lint files, generate shell documentation, compile bash files, and much
 more. {{% /pageinfo %}}
 
-## 1. Key Features
+## 1. Quick Links
 
-- **150+ Unit-Tested Functions**: Organized by namespace (Array, File, Git, Docker, Database, etc.)
-- **Custom Bash Compiler**: Generate standalone executables from YAML definitions
-- **Extensive Testing**: Multi-version Bash testing (4.4, 5.0, 5.3 on Ubuntu and Alpine)
-- **Build Tools**: Linting and testing infrastructure with pre-commit hooks
+- [Framework Guides](https://fchastanet.github.io/bash-tools-framework/docs/guides/) - Learn about framework features
+- [Commands](https://fchastanet.github.io/bash-tools-framework/docs/commands/) - Available command-line tools
+- [Framework Documentation](https://fchastanet.github.io/bash-tools-framework/docs/framework-overview/) -
+  [Complete function reference](https://fchastanet.github.io/bash-tools-framework/docs/bashdoc/)
+- [Best Practices](https://fchastanet.github.io/bash-tools-framework/docs/guides/best-practices/) - Bash development
+  best practices
 
-## 2. Quick Links
-
-- [Framework Guides](/bash-tools-framework/docs/guides/) - Learn about framework features
-- [Commands](/bash-tools-framework/docs/commands/) - Available command-line tools
-- [Framework Documentation](/bash-tools-framework/docs/frameworkoverview/) -
-  [Complete function reference](/bash-tools-framework/docs/bashdoc/)
-- [Best Practices](/bash-tools-framework/docs/guides/best-practices/) - Bash development best practices
-
-## 3. Related Projects
+## 2. Related Projects
 
 This framework is part of a suite of projects:
 

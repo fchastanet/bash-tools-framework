@@ -5,8 +5,9 @@
 # @arg $1 dir:String
 # @arg $2 relativeDir:String
 # @arg $3 targetDocFile:String the markdown file generated using shdoc
-# @arg $4 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
-# @arg $5 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
+# @arg $4 weight:Int weight for docsy index. Eg: 10 for top level, 20 for second level, etc.
+# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $6 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
 # @exitcode 0 if file has been generated
 # @exitcode 1 if file is empty or error
 ShellDoc::generateShellDocDir() {

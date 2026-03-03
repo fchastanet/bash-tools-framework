@@ -27,7 +27,7 @@ repos:
     hooks:
       - id: v8r
         name: v8r
-        entry: npx -y v8r --ci
+        entry: npx -y v8r --ci .v8rrc.yaml
         language: system
         pass_filenames: true
         stages: [pre-commit, pre-push, manual]

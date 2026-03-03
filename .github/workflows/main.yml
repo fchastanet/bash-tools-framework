@@ -443,3 +443,21 @@ jobs:
           name: build-bash-tools
           # neutral, success, skipped, cancelled, timed_out, action_required, failure
           status: ${{ env.WORKFLOW_CONCLUSION }}
+
+  build-deploy:
+    needs:
+      - unit-tests
+      - pre-commit
+    # Only run if the test and pre-commit jobs succeeded, and if the push is on master branch or if it's a workflow dispatch event
+    if:
+      ${{ needs.unit-tests.result == 'success' && needs.pre-commit.result == 'success' && (github.ref ==
+      'refs/heads/master') }}
+    uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
+    with:
+      site-name: "bash-tools-framework"
+      checkout-repo: "fchastanet/bash-tools-framework"
+      site-dir: "_site-content"
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

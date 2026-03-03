@@ -14,10 +14,10 @@ ShellDoc::generateShellDocsFromDir() {
   local fromDirRelative="$2"
   local docDir="$3"
   local indexFile="$4"
-  local repositoryUrl="${5:-}"
-  local excludeDirectoriesPattern="${6:-}"
-  local excludeFilesPattern="${7:-}"
-  local indexFileTemplate="${8:-}"
+  local repositoryUrl="$5"
+  local excludeDirectoriesPattern="$6"
+  local excludeFilesPattern="$7"
+  local indexFileTemplate="$8"
 
   # exclude dir pattern
   local -a grepExclude
@@ -32,7 +32,9 @@ ShellDoc::generateShellDocsFromDir() {
   local directory
   local targetDocFile
   local targetDocFileRelative
-  ((weight = 1)) || true
+  local indexFileRelative
+  local -i weight=1
+
   while IFS= read -r relativeDir; do
     relativeDir="${relativeDir#./}"
     targetDocFile="${docDir}/${relativeDir}.md"

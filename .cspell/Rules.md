@@ -5,7 +5,7 @@
 - `bash.txt` - contains words related to bash scripting and command line usage.
 - `readme.txt` - contains words commonly used in documentation writing, such as "markdown", and files in `content/`
   directory.
-- `software.txt` - contains words related to software development, such as "docker", "kubernetes", "aws", "jenkins",
+- `softwares.txt` - contains words related to software development, such as "docker", "kubernetes", "aws", "jenkins",
   command names, etc.
 - `lintersConfig.txt` - contains mostly words that are used in all the other kind of files. Shell script and
   documentation files don't use this dictionary.

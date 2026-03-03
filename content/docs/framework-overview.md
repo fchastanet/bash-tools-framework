@@ -38,7 +38,7 @@ bin/doc
 
 Here an excerpt of the namespaces available in Bash tools framework:
 
-- `Apt`: several functions to abstract the use of ubuntu apt-get function. these functions ar using some default
+- `Apt`: several functions to abstract the use of ubuntu apt-get function. these functions are using some default
   arguments and manage retry automatically.
   - `Linux::Apt::addRepository`
   - `Linux::Apt::install`

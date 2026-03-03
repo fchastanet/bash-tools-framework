@@ -2,14 +2,6 @@
 
 > **_NOTE:_** Documentation is best viewed on [github-pages](https://fchastanet.github.io/bash-tools-framework/)
 
-> **_TIP:_** Checkout related projects of this suite
->
-> - [My documents](https://fchastanet.github.io/my-documents/)
-> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
-> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
-> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-> - [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
-
 <!-- markdownlint-capture -->
 
 <!-- markdownlint-disable MD013 -->
@@ -38,6 +30,14 @@
 Welcome to the Bash Tools Framework documentation. This framework provides a comprehensive collection of bash functions
 and commands that help you lint files, generate shell documentation, compile bash files, and much more.
 
+> **_TIP:_** Checkout related projects of this suite
+>
+> - [My documents](https://fchastanet.github.io/my-documents/)
+> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
+> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
+> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
+> - [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
+
 ## 1. Key Features
 
 - **150+ Unit-Tested Functions**: Organized by namespace (Array, File, Git, Docker, Database, etc.)
@@ -47,11 +47,12 @@ and commands that help you lint files, generate shell documentation, compile bas
 
 ## 2. Quick Links
 
-- [Framework Guides](https://fchastanet.github.io/bash-tools-framework/guides/) - Learn about framework features
-- [Commands](https://fchastanet.github.io/bash-tools-framework/commands/) - Available command-line tools
-- [Framework Documentation](https://fchastanet.github.io/bash-tools-framework/framework/) - Complete function reference
-- [Best Practices](https://fchastanet.github.io/bash-tools-framework/guides/best-practices/) - Bash development best
-  practices
+- [Framework Guides](https://fchastanet.github.io/bash-tools-framework/docs/guides/) - Learn about framework features
+- [Commands](https://fchastanet.github.io/bash-tools-framework/docs/commands/) - Available command-line tools
+- [Framework Documentation](https://fchastanet.github.io/bash-tools-framework/docs/framework-overview/) - Complete
+  function reference
+- [Best Practices](https://fchastanet.github.io/bash-tools-framework/docs/guides/best-practices/) - Bash development
+  best practices
 
 ## 3. Related Projects
 
