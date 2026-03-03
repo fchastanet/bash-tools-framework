@@ -27,7 +27,7 @@ Github::upgradeRelease() {
   repo="$(Github::extractRepoFromGithubUrl "${downloadReleaseUrl}")"
   local releasesUrl="https://api.github.com/repos/${repo}/releases/latest"
 
-  # shellcheck disable=SC2317
+  # shellcheck disable=SC2329
   extractVersion() {
     Version::githubApiExtractVersion | "${parseGithubVersionCallback}"
   }

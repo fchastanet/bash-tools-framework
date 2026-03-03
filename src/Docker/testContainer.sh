@@ -26,7 +26,7 @@ Docker::testContainer() {
     return 4
   fi
   (
-    # shellcheck disable=SC2317  # Don't warn about unreachable commands
+    # shellcheck disable=SC2329  # Don't warn about unreachable commands
     cleanOnExit() {
       Log::displayInfo "Shutting down ${title} ..."
       docker-compose down

@@ -10,6 +10,8 @@ DISABLE:
 DISABLE_LINTERS:
   - JAVASCRIPT_ES
   - JAVASCRIPT_PRETTIER
+  - SPELL_CSPELL # already included in pre-commit
+  - YAML_V8R # already included in pre-commit
   - RUBY_RUBOCOP
   - REPOSITORY_CHECKOV
   - REPOSITORY_TRIVY
@@ -79,7 +81,7 @@ EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: |
     testsData/.*\.result$
   )
 
-GIT_GIT_DIFF_PRE_COMMANDS:
+REPOSITORY_GIT_DIFF_PRE_COMMANDS:
   - command: git config --global core.autocrlf false
     continue_if_failed: false
   - command: git config --global core.eol lf
@@ -100,37 +102,11 @@ JAVASCRIPT_DEFAULT_STYLE: prettier
 JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
 JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (report/)
 
-JSON_ESLINT_PLUGIN_JSONC_FILE_NAME: .eslintrc.js
+JSON_ESLINT_PLUGIN_JSONC_CONFIG_FILE: .eslintrc.js
 
 JSON_JSONLINT_FILTER_REGEX_EXCLUDE: |
   (?x)(
     \.vscode/.*\.json$
-  )
-
-SPELL_CSPELL_CONFIG_FILE: cspell.yaml
-SPELL_CSPELL_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    \.git/|
-    ^\.history/|
-    IDE/.*/\.idea|
-    ^.*-megalinter_file_names_cspell.txt|
-    ^megalinter-reports/|
-    ^pages/Commands.md|
-    ^pages/FrameworkFullDoc.md|
-    ^pages/README.md|
-    ^pages/doc|
-    ^pages/bashDoc|
-    ^pages/tests|
-    ^commit-msg.md$|
-    /testsData/|
-    \.svg$
-  )
-SPELL_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    \.git/|
-    \.history/|
-    IDE/.*/\.idea|
-    \.svg
   )
 
 MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
@@ -142,13 +118,6 @@ MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
     ^pages/bashDoc|
     ^pages/tests|
     ^pages/_sidebar.md
-  )
-
-YAML_V8R_FILTER_REGEX_EXCLUDE: |
-  (?x)(
-    ^\.secretlintrc\.yml$|
-    ^\.grype\.yaml$|
-    ^\.trivy\.yaml$
   )
 
 MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |

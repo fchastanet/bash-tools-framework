@@ -45,6 +45,7 @@ if [[ -d "vendor/bash-tools-framework" ]]; then
   )
 fi
 
+# shellcheck disable=SC2154
 declare cmd=(
   docker run --rm --name=megalinter
   -e HOST_USER_ID="${HOST_USER_ID:-$(id -u)}"

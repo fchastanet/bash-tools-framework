@@ -43,7 +43,7 @@ shellcheckFiles() {
   if ((${#files[@]} > 0)); then
     (
       export FRAMEWORK_VENDOR_BIN_DIR
-      # shellcheck disable=SC2317
+      # shellcheck disable=SC2329
       shellcheckFunction() {
         if (($# == 0)); then
           return 0

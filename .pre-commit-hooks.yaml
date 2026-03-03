@@ -94,7 +94,7 @@
   description: Megalinter Check if new version is available
   language: script
   entry: bin/megalinter
-  args: [--image, "oxsecurity/megalinter-terraform:v8.8.0", --check-megalinter-version]
+  args: [--image, "oxsecurity/megalinter-terraform:v9", --check-megalinter-version]
   pass_filenames: false
   always_run: true
   stages: [pre-commit, manual]
@@ -105,7 +105,7 @@
   description: use megalinter to check your project
   language: script
   entry: bin/megalinter
-  args: [--image, "oxsecurity/megalinter-terraform:v8.8.0", --config-file, ".mega-linter-light.yml", --fix]
+  args: [--image, "oxsecurity/megalinter-terraform:v9", --config-file, ".mega-linter-light.yml", --fix]
   pass_filenames: false
   require_serial: true
   always_run: true
@@ -116,5 +116,5 @@
 - <<: *MEGALINTER
   id: megalinterGithubAction
   name: Megalinter for Github Actions
-  args: [--image, "oxsecurity/megalinter-terraform:v8.8.0", --config-file, ".mega-linter-githubAction.yml", --fix]
+  args: [--image, "oxsecurity/megalinter-terraform:v9", --config-file, ".mega-linter-githubAction.yml", --fix]
   stages: [manual]
