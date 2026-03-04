@@ -443,7 +443,6 @@ Env::requireLoad() {
   if [[ -f "${localFrameworkConfigFile}" ]]; then
     configFiles+=("${localFrameworkConfigFile}")
   fi
-  configFiles+=("${optionEnvFiles[@]}")
   configFiles+=("${defaultFiles[@]}")
 
   while IFS='' read -r file; do
@@ -1693,7 +1692,7 @@ frameworkLintCommandParse() {
 # @description display command options and arguments help for frameworkLintCommand
 frameworkLintCommandHelp() {
   echo -e "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}"
-  Array::wrap2 ' ' 76 4 "    " "This framework linter."
+  Array::wrap2 ' ' 76 4 "    " "Lint files of the current repository to ensure framework conventions" "are followed." ""
   echo
   echo
 
@@ -1842,6 +1841,7 @@ frameworkLintCommandHelp() {
   "  - check if all Namespace::functions are existing in the framework"
   "  - check that function defined in a .sh is correctly named"
   "  - check each function has a bats file associated"
+  ""
   "  - shdoc"
   "    - check that shdoc valid annotations are used"
   "    - check that @require function matches naming convention and exists"

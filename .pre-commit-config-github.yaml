@@ -27,7 +27,7 @@ repos:
     hooks:
       - id: v8r
         name: v8r
-        entry: npx -y v8r --ci
+        entry: npx -y v8r --ci .v8rrc.yaml
         language: system
         pass_filenames: true
         stages: [pre-commit, pre-push, manual]
@@ -37,6 +37,7 @@ repos:
           )
         exclude: |
           (?x)(
+            ^configs/site-config\.yaml$|
             ^bash-tools-framework-schema\.json$|
             ^\.?secretlintrc\.yml$|
             ^\.vscode/|
@@ -65,8 +66,9 @@ repos:
         entry: mdformat # Executable to run, with fixed options
         language: python
         types: [markdown]
-        args: [--wrap, "80", --number]
+        args: [--wrap, "120", --number]
         additional_dependencies:
+          - mdformat-frontmatter
           - mdformat-toc
           - mdformat-shfmt
           - mdformat-tables
@@ -76,6 +78,38 @@ repos:
         exclude: |
           (?x)(
             ^\.github/
+          )
+
+  - repo: https://github.com/jsh9/markdown-heading-numbering
+    rev: 0.1.0
+    hooks:
+      - id: markdown-heading-numbering
+        args:
+          - --start-from-level=2
+          - --initial-numbering=1
+        exclude: |
+          (?x)(
+            ^\.github/|
+            ^doc/ai/|
+            AGENTS\.md|
+            commit-msg-template\.md
+          )
+
+  - repo: https://github.com/jsh9/markdown-toc-creator
+    rev: 0.1.3
+    hooks:
+      - id: markdown-toc-creator
+        args:
+          - --proactive=False
+          - --style=github
+          - --quiet
+          - --add-toc-title=False
+          - --add-horizontal-rules=False
+        exclude: |
+          (?x)(
+            ^\.github/|
+            ^doc/ai/|
+            AGENTS\.md
           )
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -117,7 +151,7 @@ repos:
           )
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
+    rev: v1.7.11
     hooks:
       - id: actionlint
         stages: [pre-commit, pre-push, manual]
@@ -151,7 +185,7 @@ repos:
           )
 
   - repo: https://github.com/ComPWA/prettier-pre-commit
-    rev: v3.4.2
+    rev: v3.8.1
     hooks:
       - id: prettier
         args: [--cache]
@@ -187,38 +221,18 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 6.2.3
+    rev: 6.2.5
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
       - id: shellcheckLint
       - id: shellcheckLintGithubAction
       - id: frameworkLint
-        args:
-          [
-            --expected-warnings-count,
-            "62",
-            --format,
-            plain,
-            --theme,
-            default-force,
-            --display-level,
-            WARNING,
-          ]
+        args: [--expected-warnings-count, "61", --format, plain, --theme, default-force, --display-level, WARNING]
       - id: frameworkLintGithubAction
-        args:
-          [
-            --expected-warnings-count,
-            "62",
-            --format,
-            checkstyle,
-            --theme,
-            default-force,
-            --display-level,
-            WARNING,
-          ]
-      #- id: plantuml
-      #  args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
+        args: [--expected-warnings-count, "61", --format, checkstyle, --theme, default-force, --display-level, WARNING]
+      - id: plantuml
+        args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
 
   - repo: local
     hooks:
@@ -232,6 +246,6 @@ repos:
         stages: [manual] # GITHUB
 
   - repo: https://github.com/fchastanet/bash-compiler
-    rev: 3.2.0
+    rev: 3.2.1
     hooks:
       - id: buildBashBinaries

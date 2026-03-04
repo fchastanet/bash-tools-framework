@@ -11,7 +11,7 @@ start
 partition "Env::requireLoad" #LightSkyBlue {
 
   partition "Env::getOrderedConfigFiles" #LightSkyBlue {
-    #DeepSkyBlue:add eventual BASH_FRAMEWORK_ENV_FILES;
+    :add eventual BASH_FRAMEWORK_ENV_FILES;<<#DeepSkyBlue>>
     note right
     //Example://
     <code>
@@ -22,10 +22,10 @@ partition "Env::requireLoad" #LightSkyBlue {
     </code>
     endnote
 
-    #DeepSkyBlue:default variables file;
+    :default variables file;<<#DeepSkyBlue>>
   }
 
-  #DeepSkyBlue:Env::mergeConfFiles $orderedConfigFiles;
+  :Env::mergeConfFiles $orderedConfigFiles;<<#DeepSkyBlue>>
 }
 
 stop

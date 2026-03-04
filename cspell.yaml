@@ -99,7 +99,9 @@ overrides:
       - software
       - mySoftwares
 
-  - filename: "*.yml"
+  - filename:
+      - "*.yml"
+      - "*.yaml"
     dictionaries:
       - lintersConfig
 

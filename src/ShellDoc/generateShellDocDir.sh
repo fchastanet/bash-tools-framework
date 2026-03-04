@@ -5,16 +5,18 @@
 # @arg $1 dir:String
 # @arg $2 relativeDir:String
 # @arg $3 targetDocFile:String the markdown file generated using shdoc
-# @arg $4 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
-# @arg $5 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
+# @arg $4 weight:Int weight for docsy index. Eg: 10 for top level, 20 for second level, etc.
+# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
+# @arg $6 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
 # @exitcode 0 if file has been generated
 # @exitcode 1 if file is empty or error
 ShellDoc::generateShellDocDir() {
   local dir="$1"
   local relativeDir="$2"
   local targetDocFile="$3"
-  local repositoryUrl="${4:-}"
-  local excludeFilesPattern="${5:-}"
+  local weight="$4"
+  local repositoryUrl="${5:-}"
+  local excludeFilesPattern="${6:-}"
   local namespaceFile
   local relativeFile
 
@@ -63,12 +65,26 @@ ShellDoc::generateShellDocDir() {
     local doc
     doc="$(ShellDoc::generateShellDoc "${namespaceFile}")"
     if (("$(grep -c . <<<"${doc}")" > 1)); then
-      # remove index that is auto managed by docsify
+      # remove index that is auto managed by docsy
       # increment title level by one (#)
       sed -E \
         -e '/^## Index/,/## /d' \
         -e 's/^(##*) (.*)$/#\1 \2/' \
         <<<"${doc}" >"${targetDocFile}"
+      # add front matter for docsy
+      (
+        echo "---"
+        echo "title: Namespace ${relativeDir}"
+        echo "description: Documentation for ${relativeDir} directory"
+        echo "linkTitle: '${relativeDir##*/}::'"
+        echo "type: docs"
+        echo "weight: ${weight}"
+        echo "creationDate: 2026-03-01"
+        echo "lastUpdated: $(date '+%Y-%m-%d')"
+        echo "---"
+        echo
+      ) | cat - "${targetDocFile}" >"${targetDocFile}.tmp"
+      mv "${targetDocFile}.tmp" "${targetDocFile}"
       return 0
     else
       return 1

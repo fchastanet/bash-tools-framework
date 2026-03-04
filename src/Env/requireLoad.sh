@@ -26,7 +26,6 @@ Env::requireLoad() {
   if [[ -f "${localFrameworkConfigFile}" ]]; then
     configFiles+=("${localFrameworkConfigFile}")
   fi
-  configFiles+=("${optionEnvFiles[@]}")
   configFiles+=("${defaultFiles[@]}")
 
   while IFS='' read -r file; do

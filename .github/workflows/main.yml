@@ -1,6 +1,6 @@
 ---
 # Lint the code base and launch unit test at each push or pull request
-name: Lint and test
+name: Test, Build and Deploy
 on: # yamllint disable-line rule:truthy
   push:
     # execute when pushing only branches, not tags
@@ -55,7 +55,7 @@ jobs:
           - "5.3"
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -158,7 +158,7 @@ jobs:
       statuses: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -200,7 +200,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.12
 
       - uses: fchastanet/github-action-setup-shfmt@v4.0.0
 
@@ -222,7 +222,7 @@ jobs:
         if: ${{ !cancelled() }}
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/latest/flavors/
-        uses: oxsecurity/megalinter/flavors/terraform@v8
+        uses: oxsecurity/megalinter/flavors/terraform@v9
         # All available variables are described in documentation
         # https://megalinter.io/latest/config-file/
         env:
@@ -321,7 +321,7 @@ jobs:
           - "5.3"
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -443,3 +443,21 @@ jobs:
           name: build-bash-tools
           # neutral, success, skipped, cancelled, timed_out, action_required, failure
           status: ${{ env.WORKFLOW_CONCLUSION }}
+
+  build-deploy:
+    needs:
+      - unit-tests
+      - pre-commit
+    # Only run if the test and pre-commit jobs succeeded, and if the push is on master branch or if it's a workflow dispatch event
+    if:
+      ${{ needs.unit-tests.result == 'success' && needs.pre-commit.result == 'success' && (github.ref ==
+      'refs/heads/master') }}
+    uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
+    with:
+      site-name: "bash-tools-framework"
+      checkout-repo: "fchastanet/bash-tools-framework"
+      site-dir: "_site-content"
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

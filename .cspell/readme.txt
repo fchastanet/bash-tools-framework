@@ -34,6 +34,7 @@ markdownlint
 Michał
 noargs
 openapi
+pageinfo
 posix
 Powerlevel
 powerlevel

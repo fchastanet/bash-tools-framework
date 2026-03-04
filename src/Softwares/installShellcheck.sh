@@ -5,7 +5,7 @@
 # @feature Github::upgradeRelease
 Softwares::installShellcheck() {
   local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck}"
-  # shellcheck disable=SC2317
+  # shellcheck disable=SC2329
   install() {
     local file="$1"
     local targetFile="$2"

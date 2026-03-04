@@ -133,9 +133,7 @@ binData:
         - variableName: optionTheme
           group: zzzGroupGlobalOptionsGroup
           type: String
-          help:
-            Choose color theme - default-force means colors will be produced
-            even if command is piped.
+          help: Choose color theme - default-force means colors will be produced even if command is piped.
           alts:
             - "--theme"
           defaultValue: default

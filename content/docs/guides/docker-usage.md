@@ -1,7 +1,15 @@
-# Docker namespace
+---
+title: Docker Namespace
+description: Using Docker functions in Bash Tools Framework
+weight: 20
+categories: [documentation, guides]
+tags: [docker, containers, build, deployment]
+creationDate: 2026-03-01
+lastUpdated: 2026-03-01
+version: '1.0'
+---
 
-**Usage example**: try to pull image from 3 tags in order (from more specific or
-recent to the less one)
+**Usage example**: try to pull image from 3 tags in order (from more specific or recent to the less one)
 
 ```bash
 # try to pull image from 3 tags in order (from more specific or recent to the less one)

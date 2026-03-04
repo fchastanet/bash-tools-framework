@@ -43,13 +43,12 @@ runContainer() {
 }
 
 generateDoc() {
-  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/pages"
+  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/content/docs"
   export FRAMEWORK_ROOT_DIR
 
   #-----------------------------
   # doc generation
   #-----------------------------
-
   Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
   ShellDoc::generateMdFileFromTemplate \
@@ -58,46 +57,28 @@ generateDoc() {
     "${COMMAND_BIN_DIR}" \
     TOKEN_NOT_FOUND_COUNT \
     '(var|simpleBinary|shdoc|installFacadeExample)$'
+  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
+    exit 1
+  fi
 
   # clean folder before generate
   rm -f "${PAGES_DIR}/Index.md" || true
   rm -Rf "${PAGES_DIR}/bashDoc" || true
-  rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
 
   ShellDoc::generateShellDocsFromDir \
     "${FRAMEWORK_SRC_DIR}" \
     "src" \
     "${PAGES_DIR}/bashDoc" \
-    "${PAGES_DIR}/FrameworkIndex.md" \
-    "<% ${REPOSITORY_URL} %>" \
+    "${PAGES_DIR}/_index.md" \
+    "${REPOSITORY_URL}" \
     '/testsData|/_.*' \
-    '(/__all\.sh)$'
-  cp "${FRAMEWORK_ROOT_DIR}/doc/guides/Docker.md" "${PAGES_DIR}/bashDoc/DockerUsage.md"
+    '(/__all\.sh)$' \
+    "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkDirectoryIndex.tmpl.md"
 
-  cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
-  sed -i -E \
-    -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
-    -e 's#https://fchastanet.github.io/bash-tools-framework/#/#' \
-    -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
-    "${PAGES_DIR}/README.md"
-
-  cp -R "${FRAMEWORK_ROOT_DIR}/doc" "${PAGES_DIR}"
-  rm -Rf "${PAGES_DIR}/doc/guides/templates"
-
-  Log::displayInfo 'generate FrameworkFullDoc.md'
-  cp "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkFullDoc.tmpl.md" "${PAGES_DIR}/FrameworkFullDoc.md"
-  (
-    echo
-    find "${PAGES_DIR}/bashDoc" -type f -name '*.md' -print0 | LC_ALL=C sort -z | xargs -0 cat
-  ) >>"${PAGES_DIR}/FrameworkFullDoc.md"
-
-  while read -r path; do
-    ShellDoc::fixMarkdownToc "${path}"
-  done < <(find "${PAGES_DIR}" -type f -name '*.md')
-
-  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
-    exit 1
-  fi
+  mkdir -p "${PAGES_DIR}/assets"
+  cp -v \
+    "${FRAMEWORK_ROOT_DIR}/src/Env/requireLoad-activityDiagram.png" \
+    "${PAGES_DIR}/assets"
 }
 
 installRequirements() {

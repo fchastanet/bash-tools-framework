@@ -2387,7 +2387,7 @@ main() {
     # clean folder before generate
     rm -f "${PAGES_DIR}/Index.md" || true
     rm -Rf "${PAGES_DIR}/bashDoc" || true
-    rm -Rf "${PAGES_DIR}/FrameworkIndex.md" || true
+    rm -f "${PAGES_DIR}/FrameworkIndex.md" || true
 
     ShellDoc::generateShellDocsFromDir \
       "${FRAMEWORK_SRC_DIR}" \

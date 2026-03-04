@@ -22,22 +22,26 @@ binData:
         20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/shellcheckLint/shellcheckLint-options.sh
       mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/shellcheckLint/shellcheckLint-main.sh
       help: Lint bash files using shellcheck.
-      longDescription:
-        "shellcheck wrapper that will:\n- install new shellcheck
-        version(${MIN_SHELLCHECK_VERSION}) automatically\n$'\\r'\n- by default,
-        lint all git files of this project which are beginning with a bash
-        shebang\n  except if the option --staged is
-        passed\n\n${__HELP_TITLE}Special configuration
-        .shellcheckrc:${__HELP_NORMAL}\nuse the following line in your
-        .shellcheckrc file to exclude\nsome files from being checked (use grep
-        -E syntax)\nexclude=^bin/compile$\n\n${__HELP_TITLE_COLOR}SHELLCHECK
-        HELP${__RESET_COLOR}\n\n@@@SHELLCHECK_HELP@@@\n"
+      longDescription: |
+        shellcheck wrapper that will:\n
+        - install new shellcheck version(${MIN_SHELLCHECK_VERSION}) automatically\n
+        - by default, lint all git files of this project
+            which are beginning with a bash shebang
+            except if the option --staged is passed
+
+        ${__HELP_TITLE}Special configuration .shellcheckrc:${__HELP_NORMAL}
+          use the following line in your .shellcheckrc file to exclude
+          some files from being checked (use grep -E syntax)
+          exclude=^bin/compile$
+
+        ${__HELP_TITLE_COLOR}SHELLCHECK HELP${__RESET_COLOR}\n
+        @@@SHELLCHECK_HELP@@@
       callbacks:
         - shellcheckLintParseCallback
       args:
         - help: |
-            files to validate with shellcheck. If not provided,
-            all files from git repository which are beginning
+            files to validate with shellcheck.
+            If not provided, all files from git repository which are beginning
             with a bash shebang, unless --staged option is provided.
           type: StringArray
           max: -1
@@ -68,7 +72,7 @@ binData:
         - alts:
             - --staged
           group: shellcheckLintOptionGroup
-          help:
+          help: |
             lint only staged git files(files added to file list to be committed)
             and which are beginning with a bash shebang.
           variableName: optionStaged
