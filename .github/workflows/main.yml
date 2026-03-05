@@ -68,6 +68,7 @@ jobs:
 
       # overall process
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: build-bash-tools
           status: pending
@@ -88,6 +89,7 @@ jobs:
             fi
           ) >> "${GITHUB_ENV}"
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: build-${{ env.image_tag }}
           status: pending
@@ -142,6 +144,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: build-${{ env.image_tag }}
           status: ${{ job.status }}
@@ -185,6 +188,7 @@ jobs:
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: pre-commit-megalinter
           status: pending
@@ -292,7 +296,7 @@ jobs:
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
-        if: ${{ always() }}
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: pre-commit-megalinter
           status: ${{ job.status }}
@@ -348,6 +352,7 @@ jobs:
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: pending
@@ -420,6 +425,7 @@ jobs:
             logs/**
 
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
           status: ${{ job.status }}
@@ -439,6 +445,7 @@ jobs:
       - uses: AbsoLouie/workflow-conclusion-status@v1.0.2
 
       - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
           name: build-bash-tools
           # neutral, success, skipped, cancelled, timed_out, action_required, failure
