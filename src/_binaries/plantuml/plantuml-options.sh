@@ -26,9 +26,25 @@ optionLimitSizeCallback() {
   fi
 }
 
+includePathOptionCallback() {
+  if [[ -z "${includePathOption}" ]]; then
+    includePathOption="-"
+  fi
+  if [[ "${includePathOption}" != "-" ]]; then
+    if [[ ! -d "${includePathOption}" ]]; then
+      Log::displayError "Command ${SCRIPT_NAME} - invalid include path '${includePathOption}'"
+      return 1
+    fi
+    includePathOption="$(realpath "${includePathOption}")"
+  fi
+}
+
 plantumlCallback() {
   if ((${#optionFormats[@]} == 0)); then
     optionFormats=("${defaultFormatsIfNoneProvided[@]}")
+  fi
+  if [[ "${includePathOption}" = "-" ]]; then
+    includePathOption="$(pwd)"
   fi
   # shellcheck disable=SC2154
   if [[ -n "${optionOutputDir}" && "${sameDirectoryOption}" = "1" ]]; then

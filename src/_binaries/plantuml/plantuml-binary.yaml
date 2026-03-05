@@ -57,6 +57,7 @@ binData:
             use plantuml software default size if not provided
           group: OptionsGroup
           type: String
+          defaultValue: "0"
           helpValueName: LimitSize
           variableName: optionLimitSize
           callbacks:
@@ -84,6 +85,23 @@ binData:
           group: OptionsGroup
           helpValueName: OutputDir
           variableName: optionOutputDir
+
+        - alts:
+            - --include-path
+          help: |
+            Make the path specified shared inside docker container
+            so that !include directives in plantuml files can work
+            relative to this path.
+
+            If not provided, the current directory will be used as
+            include path.
+          type: String
+          defaultValue: "-"
+          callbacks:
+            - includePathOptionCallback
+          helpValueName: IncludePath
+          group: OptionsGroup
+          variableName: includePathOption
 
       args:
         - help: |

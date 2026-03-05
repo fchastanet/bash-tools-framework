@@ -26,7 +26,8 @@ convertPuml() {
   local format="$4"
   local optionLimitSize="$5"
   local optionTraceVerbose="$6"
-  shift 6 || true
+  local includePathOption="$7"
+  shift 7 || true
   local -a plantumlOptions=("$@")
 
   local targetFile
@@ -38,14 +39,21 @@ convertPuml() {
   fi
   Log::displayInfo "Generating ${targetFile} from ${file}"
   local -a env=()
-  if [[ -n "${optionLimitSize}" ]]; then
+  if [[ "${optionLimitSize}" != "0" ]]; then
     env+=(-e "PLANTUML_LIMIT_SIZE=${optionLimitSize}")
   fi
   # shellcheck disable=SC2154
   if [[ "${optionTraceVerbose}" = "1" ]]; then
     set -x
   fi
-  docker run -i --rm "${env[@]}" plantuml/plantuml \
+  if [[ "${includePathOption}" != "-" ]]; then
+    env+=(
+      -v "${includePathOption}:/data/src:ro"
+    )
+    javaArgs+=("-Dplantuml.include.path=/data/src")
+  fi
+  docker run -i --rm "${env[@]}" --entrypoint java plantuml/plantuml \
+    "${javaArgs[@]}" -jar /opt/plantuml.jar \
     -t"${format}" --disable-metadata -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
     >"${targetFile}" \
     <"${file}"
@@ -69,12 +77,13 @@ export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
       declare -a myArgs=(
         "${file}" "${sameDirectoryOption}" "${optionOutputDir}"
         "${format}" "${optionLimitSize}" "${optionTraceVerbose}"
+        "${includePathOption}"
         "${plantumlOptions[@]}"
       )
       printf "%s\0" "${myArgs[@]}"
     done
   done
-) | xargs -0 -P0 -r -n $((6 + ${#plantumlOptions[@]})) bash -c 'convertPuml $@' _
+) | xargs -0 -P0 -r -n $((7 + ${#plantumlOptions[@]})) bash -c 'convertPuml $@' _
 
 # shellcheck disable=SC2154
 if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argPlantumlFiles[@]} == 0)); then
