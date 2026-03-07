@@ -1,6 +1,6 @@
 # bash-tools-framework
 
-> **_NOTE:_** Documentation is best viewed on [github-pages](https://fchastanet.github.io/bash-tools-framework/)
+> **_NOTE:_** Documentation is best viewed on [github-pages](https://devlab.top/bash-tools-framework/)
 
 <!-- markdownlint-capture -->
 
@@ -32,11 +32,11 @@ and commands that help you lint files, generate shell documentation, compile bas
 
 > **_TIP:_** Checkout related projects of this suite
 >
-> - [My documents](https://fchastanet.github.io/my-documents/)
-> - **[Bash Tools Framework](https://fchastanet.github.io/bash-tools-framework/)**
-> - [Bash Tools](https://fchastanet.github.io/bash-tools/)
-> - [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-> - [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
+> - [My documents](https://devlab.top/my-documents/)
+> - **[Bash Tools Framework](https://devlab.top/bash-tools-framework/)**
+> - [Bash Tools](https://devlab.top/bash-tools/)
+> - [Bash Dev Env](https://devlab.top/bash-dev-env/)
+> - [Bash Compiler](https://devlab.top/bash-compiler/)
 
 ## 1. Key Features
 
@@ -47,21 +47,21 @@ and commands that help you lint files, generate shell documentation, compile bas
 
 ## 2. Quick Links
 
-- [Framework Guides](https://fchastanet.github.io/bash-tools-framework/docs/guides/) - Learn about framework features
-- [Commands](https://fchastanet.github.io/bash-tools-framework/docs/commands/) - Available command-line tools
-- [Framework Documentation](https://fchastanet.github.io/bash-tools-framework/docs/framework-overview/) - Complete
-  function reference
-- [Best Practices](https://fchastanet.github.io/bash-tools-framework/docs/guides/best-practices/) - Bash development
-  best practices
+- [Framework Guides](https://devlab.top/bash-tools-framework/docs/guides/) - Learn about framework features
+- [Commands](https://devlab.top/bash-tools-framework/docs/commands/) - Available command-line tools
+- [Framework Documentation](https://devlab.top/bash-tools-framework/docs/framework-overview/) - Complete function
+  reference
+- [Best Practices](https://devlab.top/bash-tools-framework/docs/guides/best-practices/) - Bash development best
+  practices
 
 ## 3. Related Projects
 
 This framework is part of a suite of projects:
 
-- [My Documents](https://fchastanet.github.io/my-documents/)
-- [Bash Tools](https://fchastanet.github.io/bash-tools/)
-- [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-- [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
+- [My Documents](https://devlab.top/my-documents/)
+- [Bash Tools](https://devlab.top/bash-tools/)
+- [Bash Dev Env](https://devlab.top/bash-dev-env/)
+- [Bash Compiler](https://devlab.top/bash-compiler/)
 
 ## 4. Acknowledgements
 

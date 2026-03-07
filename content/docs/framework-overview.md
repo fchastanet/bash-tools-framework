@@ -100,8 +100,8 @@ Here an excerpt of the namespaces available in Bash tools framework:
   - `Log::logDebug`
 - `Log::rotate` automatically rotates the log file, this function is used internally by `Log::log\*` functions.
 - `OS`: ubuntu related functions
-- `Profiles`: methods mainly used by [Bash-dev-env project](https://fchastanet.github.io/bash-dev-env/#/) that allows to
-  indicate scripts list to install with the ability to include all the dependencies recursively. This file
+- `Profiles`: methods mainly used by [Bash-dev-env project](https://devlab.top/bash-dev-env/#/) that allows to indicate
+  scripts list to install with the ability to include all the dependencies recursively. This file
   `src/Profiles/lintDefinitions.sh` is the precursor of a first bash interface implementation.
 - `Retry`: retry a command on failure easily
 - `ShellDoc`: this framework shell documentation generation
@@ -288,18 +288,18 @@ cat file | {
 
 For comprehensive guides on Bash best practices, please refer to these documents:
 
-- [General Bash Best Practices](https://fchastanet.github.io/my-documents/docs/bash-scripts/basic-best-practices/) -
-  Core Bash scripting practices
-- [Linux Commands Best Practices](https://fchastanet.github.io/my-documents/docs/bash-scripts/linux-commands-best-practices/)
-  \- Effective Linux command usage
-- [Bats Best Practices](https://fchastanet.github.io/my-documents/docs/bash-scripts/bats-best-practices/) - Testing best
-  practices with Bats
+- [General Bash Best Practices](https://devlab.top/my-documents/docs/bash-scripts/basic-best-practices/) - Core Bash
+  scripting practices
+- [Linux Commands Best Practices](https://devlab.top/my-documents/docs/bash-scripts/linux-commands-best-practices/) -
+  Effective Linux command usage
+- [Bats Best Practices](https://devlab.top/my-documents/docs/bash-scripts/bats-best-practices/) - Testing best practices
+  with Bats
 
 ## 6. Related Projects
 
 This framework is part of a suite of projects:
 
-- [My Documents](https://fchastanet.github.io/my-documents/)
-- [Bash Tools](https://fchastanet.github.io/bash-tools/)
-- [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-- [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
+- [My Documents](https://devlab.top/my-documents/)
+- [Bash Tools](https://devlab.top/bash-tools/)
+- [Bash Dev Env](https://devlab.top/bash-dev-env/)
+- [Bash Compiler](https://devlab.top/bash-compiler/)

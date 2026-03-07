@@ -1,6 +1,6 @@
 # Site-specific configuration for bash-tools-framework
 title: Bash Tools Framework Documentation
-baseURL: https://fchastanet.github.io/bash-tools-framework/
+baseURL: https://devlab.top/bash-tools-framework/
 
 params:
   description: |

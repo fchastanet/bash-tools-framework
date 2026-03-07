@@ -14,18 +14,18 @@ more. {{% /pageinfo %}}
 
 ## 1. Quick Links
 
-- [Framework Guides](https://fchastanet.github.io/bash-tools-framework/docs/guides/) - Learn about framework features
-- [Commands](https://fchastanet.github.io/bash-tools-framework/docs/commands/) - Available command-line tools
-- [Framework Documentation](https://fchastanet.github.io/bash-tools-framework/docs/framework-overview/) -
-  [Complete function reference](https://fchastanet.github.io/bash-tools-framework/docs/bashdoc/)
-- [Best Practices](https://fchastanet.github.io/bash-tools-framework/docs/guides/best-practices/) - Bash development
-  best practices
+- [Framework Guides](https://devlab.top/bash-tools-framework/docs/guides/) - Learn about framework features
+- [Commands](https://devlab.top/bash-tools-framework/docs/commands/) - Available command-line tools
+- [Framework Documentation](https://devlab.top/bash-tools-framework/docs/framework-overview/) -
+  [Complete function reference](https://devlab.top/bash-tools-framework/docs/bashdoc/)
+- [Best Practices](https://devlab.top/bash-tools-framework/docs/guides/best-practices/) - Bash development best
+  practices
 
 ## 2. Related Projects
 
 This framework is part of a suite of projects:
 
-- [My Documents](https://fchastanet.github.io/my-documents/)
-- [Bash Tools](https://fchastanet.github.io/bash-tools/)
-- [Bash Dev Env](https://fchastanet.github.io/bash-dev-env/)
-- [Bash Compiler](https://fchastanet.github.io/bash-compiler/)
+- [My Documents](https://devlab.top/my-documents/)
+- [Bash Tools](https://devlab.top/bash-tools/)
+- [Bash Dev Env](https://devlab.top/bash-dev-env/)
+- [Bash Compiler](https://devlab.top/bash-compiler/)

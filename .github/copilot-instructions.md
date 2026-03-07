@@ -349,7 +349,7 @@ files and re-compile.
 3. GitHub Pages uses Hugo with Docsy theme to generate static documentation
 4. View locally: `SITE=bash-tools-framework make start-site` (from my-documents folder)
 5. CI workflow `.github/workflows/build-site.yml`
-6. Published at: <https://fchastanet.github.io/bash-tools-framework/>
+6. Published at: <https://devlab.top/bash-tools-framework/>
 
 ## Related Projects
 
