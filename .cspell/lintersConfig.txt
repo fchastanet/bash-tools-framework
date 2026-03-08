@@ -10,6 +10,7 @@ distro
 DOCKERHUB
 fasd
 fchastanet
+fchastanetl
 frontmatter
 GRYPE
 hjson
