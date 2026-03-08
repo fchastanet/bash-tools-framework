@@ -14,18 +14,18 @@ more. {{% /pageinfo %}}
 
 ## 1. Quick Links
 
-- [Framework Guides](https://devlab.top/bash-tools-framework/docs/guides/) - Learn about framework features
-- [Commands](https://devlab.top/bash-tools-framework/docs/commands/) - Available command-line tools
-- [Framework Documentation](https://devlab.top/bash-tools-framework/docs/framework-overview/) -
-  [Complete function reference](https://devlab.top/bash-tools-framework/docs/bashdoc/)
-- [Best Practices](https://devlab.top/bash-tools-framework/docs/guides/best-practices/) - Bash development best
+- [Framework Guides](https://bash-tools-framework.devlab.top/docs/guides/) - Learn about framework features
+- [Commands](https://bash-tools-framework.devlab.top/docs/commands/) - Available command-line tools
+- [Framework Documentation](https://bash-tools-framework.devlab.top/docs/framework-overview/) -
+  [Complete function reference](https://bash-tools-framework.devlab.top/docs/bashdoc/)
+- [Best Practices](https://bash-tools-framework.devlab.top/docs/guides/best-practices/) - Bash development best
   practices
 
 ## 2. Related Projects
 
 This framework is part of a suite of projects:
 
-- [My Documents](https://devlab.top/my-documents/)
-- [Bash Tools](https://devlab.top/bash-tools/)
-- [Bash Dev Env](https://devlab.top/bash-dev-env/)
-- [Bash Compiler](https://devlab.top/bash-compiler/)
+- [My Documents](https://devlab.top/)
+- [Bash Tools](https://bash-tools.devlab.top/)
+- [Bash Dev Env](https://bash-dev-env.devlab.top/)
+- [Bash Compiler](https://bash-compiler.devlab.top/)

@@ -2402,7 +2402,7 @@ main() {
     cp "${FRAMEWORK_ROOT_DIR}/README.md" "${PAGES_DIR}"
     sed -i -E \
       -e '/<!-- remove -->/,/<!-- endRemove -->/d' \
-      -e 's#https://devlab.top/bash-tools-framework/#/#' \
+      -e 's#https://bash-tools-framework.devlab.top/#/#' \
       -e 's#^> \*\*_TIP:_\*\* (.*)$#> [!TIP|label:\1]#' \
       "${PAGES_DIR}/README.md"
 

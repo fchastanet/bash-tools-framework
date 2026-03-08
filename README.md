@@ -1,6 +1,6 @@
 # bash-tools-framework
 
-> **_NOTE:_** Documentation is best viewed on [github-pages](https://devlab.top/bash-tools-framework/)
+> **_NOTE:_** Documentation is best viewed on [github-pages](https://bash-tools-framework.devlab.top/)
 
 <!-- markdownlint-capture -->
 
@@ -32,11 +32,11 @@ and commands that help you lint files, generate shell documentation, compile bas
 
 > **_TIP:_** Checkout related projects of this suite
 >
-> - [My documents](https://devlab.top/my-documents/)
-> - **[Bash Tools Framework](https://devlab.top/bash-tools-framework/)**
-> - [Bash Tools](https://devlab.top/bash-tools/)
-> - [Bash Dev Env](https://devlab.top/bash-dev-env/)
-> - [Bash Compiler](https://devlab.top/bash-compiler/)
+> - [My documents](https://devlab.top/)
+> - **[Bash Tools Framework](https://bash-tools-framework.devlab.top/)**
+> - [Bash Tools](https://bash-tools.devlab.top/)
+> - [Bash Dev Env](https://bash-dev-env.devlab.top/)
+> - [Bash Compiler](https://bash-compiler.devlab.top/)
 
 ## 1. Key Features
 
@@ -47,21 +47,21 @@ and commands that help you lint files, generate shell documentation, compile bas
 
 ## 2. Quick Links
 
-- [Framework Guides](https://devlab.top/bash-tools-framework/docs/guides/) - Learn about framework features
-- [Commands](https://devlab.top/bash-tools-framework/docs/commands/) - Available command-line tools
-- [Framework Documentation](https://devlab.top/bash-tools-framework/docs/framework-overview/) - Complete function
+- [Framework Guides](https://bash-tools-framework.devlab.top/docs/guides/) - Learn about framework features
+- [Commands](https://bash-tools-framework.devlab.top/docs/commands/) - Available command-line tools
+- [Framework Documentation](https://bash-tools-framework.devlab.top/docs/framework-overview/) - Complete function
   reference
-- [Best Practices](https://devlab.top/bash-tools-framework/docs/guides/best-practices/) - Bash development best
+- [Best Practices](https://bash-tools-framework.devlab.top/docs/guides/best-practices/) - Bash development best
   practices
 
 ## 3. Related Projects
 
 This framework is part of a suite of projects:
 
-- [My Documents](https://devlab.top/my-documents/)
-- [Bash Tools](https://devlab.top/bash-tools/)
-- [Bash Dev Env](https://devlab.top/bash-dev-env/)
-- [Bash Compiler](https://devlab.top/bash-compiler/)
+- [My Documents](https://devlab.top/)
+- [Bash Tools](https://bash-tools.devlab.top/)
+- [Bash Dev Env](https://bash-dev-env.devlab.top/)
+- [Bash Compiler](https://bash-compiler.devlab.top/)
 
 ## 4. Acknowledgements
 

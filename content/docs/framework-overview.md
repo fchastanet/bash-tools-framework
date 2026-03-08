@@ -100,7 +100,7 @@ Here an excerpt of the namespaces available in Bash tools framework:
   - `Log::logDebug`
 - `Log::rotate` automatically rotates the log file, this function is used internally by `Log::log\*` functions.
 - `OS`: ubuntu related functions
-- `Profiles`: methods mainly used by [Bash-dev-env project](https://devlab.top/bash-dev-env/#/) that allows to indicate
+- `Profiles`: methods mainly used by [Bash-dev-env project](https://bash-dev-env.devlab.top/#/) that allows to indicate
   scripts list to install with the ability to include all the dependencies recursively. This file
   `src/Profiles/lintDefinitions.sh` is the precursor of a first bash interface implementation.
 - `Retry`: retry a command on failure easily
@@ -288,18 +288,17 @@ cat file | {
 
 For comprehensive guides on Bash best practices, please refer to these documents:
 
-- [General Bash Best Practices](https://devlab.top/my-documents/docs/bash-scripts/basic-best-practices/) - Core Bash
-  scripting practices
-- [Linux Commands Best Practices](https://devlab.top/my-documents/docs/bash-scripts/linux-commands-best-practices/) -
-  Effective Linux command usage
-- [Bats Best Practices](https://devlab.top/my-documents/docs/bash-scripts/bats-best-practices/) - Testing best practices
-  with Bats
+- [General Bash Best Practices](https://devlab.top/docs/bash-scripts/basic-best-practices/) - Core Bash scripting
+  practices
+- [Linux Commands Best Practices](https://devlab.top/docs/bash-scripts/linux-commands-best-practices/) - Effective Linux
+  command usage
+- [Bats Best Practices](https://devlab.top/docs/bash-scripts/bats-best-practices/) - Testing best practices with Bats
 
 ## 6. Related Projects
 
 This framework is part of a suite of projects:
 
-- [My Documents](https://devlab.top/my-documents/)
-- [Bash Tools](https://devlab.top/bash-tools/)
-- [Bash Dev Env](https://devlab.top/bash-dev-env/)
-- [Bash Compiler](https://devlab.top/bash-compiler/)
+- [My Documents](https://devlab.top/)
+- [Bash Tools](https://bash-tools.devlab.top/)
+- [Bash Dev Env](https://bash-dev-env.devlab.top/)
+- [Bash Compiler](https://bash-compiler.devlab.top/)

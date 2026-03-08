@@ -1,6 +1,6 @@
 # Site-specific configuration for bash-tools-framework
 title: Bash Tools Framework Documentation
-baseURL: https://devlab.top/bash-tools-framework/
+baseURL: https://bash-tools-framework.devlab.top/
 
 params:
   description: |
@@ -29,7 +29,6 @@ params:
       - name: Release Notes
         url: https://github.com/fchastanet/bash-tools-framework/releases
         weight: 20
-        post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs" aria-hidden="true"></i></sup>
 
   # SEO
   meta:
@@ -41,8 +40,6 @@ menu:
     - name: GitHub
       url: https://github.com/fchastanet/bash-tools-framework
       weight: 10
-      post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs" aria-hidden="true"></i></sup>
     - name: Release Notes
       url: https://github.com/fchastanet/bash-tools-framework/releases
       weight: 20
-      post: <sup><i class="ps-1 fa-solid fa-up-right-from-square fa-xs" aria-hidden="true"></i></sup>
