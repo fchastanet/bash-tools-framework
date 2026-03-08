@@ -1,20 +1,21 @@
 # bash-tools-framework
 
-> **_NOTE:_** Documentation is best viewed on [github-pages](https://bash-tools-framework.devlab.top/)
+> **_NOTE:_** **Documentation is best viewed on
+> [https://bash-tools-framework.devlab.top](https://bash-tools-framework.devlab.top/)**
 
 <!-- markdownlint-capture -->
 
 <!-- markdownlint-disable MD013 -->
 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/release/fchastanet/bash-tools-framework?logo=github&sort=semver)](https://github.com/fchastanet/bash-tools-framework/releases)
-[![GitHubLicense](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/fchastanet/bash-tools-framework/blob/master/LICENSE)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/main.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster)
-[![ProjectStatus](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges "Project Status")
+[![CI/CD](https://github.com/fchastanet/bash-tools-framework/actions/workflows/main.yml/badge.svg)](https://github.com/fchastanet/bash-tools-framework/actions/workflows/main.yml?query=branch%3Amaster)
+[![Project status](https://opensource.box.com/badges/active.svg)](https://opensource.box.com/badges "Project status")
 [![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=active+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
 [![DeepSource](https://deepsource.io/gh/fchastanet/bash-tools-framework.svg/?label=resolved+issues&show_trend=true)](https://deepsource.io/gh/fchastanet/bash-tools-framework/?ref=repository-badge)
-[![AverageTimeToResolveAnIssue](http://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Average time to resolve an issue")
-[![PercentageOfIssuesStillOpen](http://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](http://isitmaintained.com/project/fchastanet/bash-tools-framework "Percentage of issues still open")
+[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/fchastanet/bash-tools-framework.svg)](https://isitmaintained.com/project/fchastanet/bash-tools-framework "Average time to resolve an issue")
+[![Percentage of issues still open](https://isitmaintained.com/badge/open/fchastanet/bash-tools-framework.svg)](https://isitmaintained.com/project/fchastanet/bash-tools-framework "Percentage of issues still open")
 
 <!-- markdownlint-restore -->
 
