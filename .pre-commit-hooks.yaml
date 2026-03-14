@@ -95,7 +95,7 @@
   language: script
   entry: bin/mermaid
   args: [--ci, --same-dir, --outputFormat, svg]
-  types: ["file", "non-executable", "mermaid", "text"]
+  types: ["file", "non-executable", "text"]
   always_run: false
   pass_filenames: true
   files: \.mmd$
