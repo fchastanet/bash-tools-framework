@@ -344,6 +344,36 @@ Cache::getFileContentIfNotExpired() {
 }
 
 
+# @description convert base64 encoded back to target file
+# if target file is executable prepend dir of target
+# file to PATH to make binary available everywhere
+# it is advised to include in the path of the target file
+# the md5sum of the binFile
+#
+# @arg $1 targetFile:String the file to write
+# @arg $2 binFileBase64:String the base64 encoded file
+# @arg $3 fileMode:String the chmod to set on the file
+# @set PATH String prepend target embedded file binary directory to PATH variable if binary executable
+Compiler::Embed::extractFileFromBase64() {
+  local targetFile="$1"
+  local binFileBase64="$2"
+  local fileMode="${3:-+x}"
+  local targetDir="${targetFile%/*}"
+
+  if [[ ! -f "${targetFile}" ]]; then
+    if [[ ! -d "${targetDir}" ]]; then
+      mkdir -p "${targetDir}"
+    fi
+    tr -d '\n ' <<<"${binFileBase64}" | base64 -d >"${targetFile}"
+    chmod "${fileMode}" "${targetFile}"
+  fi
+
+  if [[ -x "${targetFile}" ]]; then
+    Env::pathPrepend "${targetDir}"
+  fi
+}
+
+
 # @description Load the nearest config file
 # in next example will search first .framework-config file in "srcDir1"
 # then if not found will go in up directories until /
@@ -395,6 +425,19 @@ Env::createDefaultEnvFile() {
     echo "BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION=${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}"
   ) >"${envFile}"
   echo "${envFile}"
+}
+
+
+# @description prepend directories to the PATH environment variable
+# @arg $@ args:String[] list of directories to prepend
+# @set PATH update PATH with the directories prepended
+Env::pathPrepend() {
+  local arg
+  for arg in "$@"; do
+    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
+      PATH="$(realpath "${arg}"):${PATH}"
+    fi
+  done
 }
 
 
@@ -772,6 +815,14 @@ Linux::requireJqCommand() {
   if [[ "${SKIP_REQUIRE_JQ:-0}" = "0" && "${SKIP_REQUIRES:-0}" = "0" ]]; then
     Assert::commandExists jq
   fi
+}
+
+
+# @description ensure command tar is available
+# @exitcode 1 if tar command not available
+# @stderr diagnostics information is displayed
+Linux::requireTarCommand() {
+  Assert::commandExists tar
 }
 
 
@@ -2521,6 +2572,60 @@ docCommandParse "$@"
 MAIN_FUNCTION_NAME="main"
 main() {
 
+Linux::requireTarCommand
+Compiler::Embed::extractFileFromBase64 \
+  "${PERSISTENT_TMPDIR:-/tmp}/c7be9842c678b2221ef893463b394966bc78bb0d3ef06871d5097f3735aca616/mermaidCommandHelp" \
+  "VXNhZ2U6IG1tZGMgW29wdGlvbnNdCgpPcHRpb25zOgogIC1WLCAtLXZlcnNpb24gICAgICAgICAg \
+ICAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dCB0aGUgdmVyc2lvbiBudW1iZXIKICAtdCwg \
+LS10aGVtZSBbdGhlbWVdICAgICAgICAgICAgICAgICAgICAgICAgICAgICBUaGVtZSBvZiB0aGUg \
+Y2hhcnQgKGNob2ljZXM6ICJkZWZhdWx0IiwgImZvcmVzdCIsICJkYXJrIiwgIm5ldXRyYWwiLCBk \
+ZWZhdWx0OiAiZGVmYXVsdCIpCiAgLXcsIC0td2lkdGggW3dpZHRoXSAgICAgICAgICAgICAgICAg \
+ICAgICAgICAgICAgV2lkdGggb2YgdGhlIHBhZ2UgKGRlZmF1bHQ6IDgwMCkKICAtSCwgLS1oZWln \
+aHQgW2hlaWdodF0gICAgICAgICAgICAgICAgICAgICAgICAgICBIZWlnaHQgb2YgdGhlIHBhZ2Ug \
+KGRlZmF1bHQ6IDYwMCkKICAtaSwgLS1pbnB1dCA8aW5wdXQ+ICAgICAgICAgICAgICAgICAgICAg \
+ICAgICAgICBJbnB1dCBtZXJtYWlkIGZpbGUuIEZpbGVzIGVuZGluZyBpbiAubWQgd2lsbCBiZSB0 \
+cmVhdGVkIGFzIE1hcmtkb3duIGFuZCBhbGwgY2hhcnRzIChlLmcuIGBgYG1lcm1haWQgKC4uLilg \
+YGAgb3IgOjo6bWVybWFpZCAoLi4uKTo6Oikgd2lsbCBiZSBleHRyYWN0ZWQgYW5kIGdlbmVyYXRl \
+ZC4gVXNlIGAtYCB0byByZWFkIGZyb20gc3RkaW4uCiAgLW8sIC0tb3V0cHV0IFtvdXRwdXRdICAg \
+ICAgICAgICAgICAgICAgICAgICAgICAgT3V0cHV0IGZpbGUuIEl0IHNob3VsZCBiZSBlaXRoZXIg \
+bWQsIHN2ZywgcG5nLCBwZGYgb3IgdXNlIGAtYCB0byBvdXRwdXQgdG8gc3Rkb3V0LiBPcHRpb25h \
+bC4gRGVmYXVsdDogaW5wdXQgKyAiLnN2ZyIKICAtYSwgLS1hcnRlZmFjdHMgW2FydGVmYWN0c10g \
+ICAgICAgICAgICAgICAgICAgICBPdXRwdXQgYXJ0ZWZhY3RzIHBhdGguIE9ubHkgdXNlZCB3aXRo \
+IE1hcmtkb3duIGlucHV0IGZpbGUuIE9wdGlvbmFsLiBEZWZhdWx0OiBvdXRwdXQgZGlyZWN0b3J5 \
+CiAgLWUsIC0tb3V0cHV0Rm9ybWF0IFtmb3JtYXRdICAgICAgICAgICAgICAgICAgICAgT3V0cHV0 \
+IGZvcm1hdCBmb3IgdGhlIGdlbmVyYXRlZCBpbWFnZS4gKGNob2ljZXM6ICJzdmciLCAicG5nIiwg \
+InBkZiIsIGRlZmF1bHQ6IExvYWRlZCBmcm9tIHRoZSBvdXRwdXQgZmlsZSBleHRlbnNpb24pCiAg \
+LWIsIC0tYmFja2dyb3VuZENvbG9yIFtiYWNrZ3JvdW5kQ29sb3JdICAgICAgICAgQmFja2dyb3Vu \
+ZCBjb2xvciBmb3IgcG5ncy9zdmdzIChub3QgcGRmcykuIEV4YW1wbGU6IHRyYW5zcGFyZW50LCBy \
+ZWQsICcjRjBGMEYwJy4gKGRlZmF1bHQ6ICJ3aGl0ZSIpCiAgLWMsIC0tY29uZmlnRmlsZSBbY29u \
+ZmlnRmlsZV0gICAgICAgICAgICAgICAgICAgSlNPTiBjb25maWd1cmF0aW9uIGZpbGUgZm9yIG1l \
+cm1haWQuCiAgLUMsIC0tY3NzRmlsZSBbY3NzRmlsZV0gICAgICAgICAgICAgICAgICAgICAgICAg \
+Q1NTIGZpbGUgZm9yIHRoZSBwYWdlLgogIC1JLCAtLXN2Z0lkIFtzdmdJZF0gICAgICAgICAgICAg \
+ICAgICAgICAgICAgICAgIFRoZSBpZCBhdHRyaWJ1dGUgZm9yIHRoZSBTVkcgZWxlbWVudCB0byBi \
+ZSByZW5kZXJlZC4KICAtcywgLS1zY2FsZSBbc2NhbGVdICAgICAgICAgICAgICAgICAgICAgICAg \
+ICAgICBQdXBwZXRlZXIgc2NhbGUgZmFjdG9yIChkZWZhdWx0OiAxKQogIC1mLCAtLXBkZkZpdCAg \
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNjYWxlIFBERiB0byBmaXQgY2hhcnQK \
+ICAtcSwgLS1xdWlldCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTdXBwcmVz \
+cyBsb2cgb3V0cHV0CiAgLXAgLS1wdXBwZXRlZXJDb25maWdGaWxlIFtwdXBwZXRlZXJDb25maWdG \
+aWxlXSAgSlNPTiBjb25maWd1cmF0aW9uIGZpbGUgZm9yIHB1cHBldGVlci4KICAtLWljb25QYWNr \
+cyA8aWNvbnMuLi4+ICAgICAgICAgICAgICAgICAgICAgICAgICBJY29uIHBhY2tzIHRvIHVzZSwg \
+ZS5nLiBAaWNvbmlmeS1qc29uL2xvZ29zLiBUaGVzZSBzaG91bGQgYmUgSWNvbmlmeSBOUE0gcGFj \
+a2FnZXMgdGhhdCBleHBvc2UgYSBpY29ucy5qc29uIGZpbGUsIHNlZSBodHRwczovL2ljb25pZnku \
+ZGVzaWduL2RvY3MvaWNvbnMvanNvbi5odG1sLiBUaGVzZSB3aWxsIGJlIGRvd25sb2FkZWQgZnJv \
+bSBodHRwczovL3Vua3BnLmNvbSB3aGVuIG5lZWRlZC4gKGRlZmF1bHQ6IFtdKQogIC0taWNvblBh \
+Y2tzTmFtZXNBbmRVcmxzIDxwcmVmaXgjaWNvbnN1cmwuLi4+ICAgIEljb24gcGFja3MgdG8gdXNl \
+LCBlLmcuIGF6dXJlI2h0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9OYWtheWFtYUtl \
+bnRvL0F6dXJlSWNvbnMvcmVmcy9oZWFkcy9tYWluL2ljb25zLmpzb24gd2hlcmUgdGhlIG5hbWUg \
+KHByZWZpeCkgb2YgdGhlIGljb24gcGFjayBpcyBkZWZpbmVkIGJlZm9yZSB0aGUgIiMiIGFuZCB0 \
+aGUgdXJsIG9mIHRoZSBqc29uIGRlZmluaXRpb24gYWZ0ZXIgdGhlICIjIi4gVGhlc2Ugc2hvdWxk \
+IGJlIEljb25pZnkganNvbiBmaWxlIGZvcm1hdHRlZCBhcyBJY29uaWZ5SnNvbiwgc2VlIGh0dHBz \
+Oi8vaWNvbmlmeS5kZXNpZ24vZG9jcy9pY29ucy9qc29uLmh0bWwuIFRoZXNlIHdpbGwgYmUgZG93 \
+bmxvYWRlZCB3aGVuIG5lZWRlZC4gKGRlZmF1bHQ6IFtdKQogIC1oLCAtLWhlbHAgICAgICAgICAg \
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRpc3BsYXkgaGVscCBmb3IgY29tbWFuZAo=" \
+  "644"
+
+declare -gx embed_file_mermaidCommandHelp="${PERSISTENT_TMPDIR:-/tmp}/c7be9842c678b2221ef893463b394966bc78bb0d3ef06871d5097f3735aca616/mermaidCommandHelp"
+
 COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
@@ -2572,6 +2677,12 @@ generateDoc() {
   #-----------------------------
   Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
+  (
+    echo "#!/usr/bin/env bash"
+    # shellcheck disable=SC2154
+    echo "cat '${embed_file_mermaidCommandHelp}'"
+  ) >"/usr/local/bin/npx"
+  chmod +x "/usr/local/bin/npx"
   ShellDoc::generateMdFileFromTemplate \
     "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
     "${PAGES_DIR}/Commands.md" \

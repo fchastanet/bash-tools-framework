@@ -1,0 +1,84 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/mermaid/mermaid-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/mermaid"
+binData:
+  commands:
+    default:
+      functionName: mermaidCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      unknownArgumentCallbacks:
+        - mermaidArgFileCallback
+      callbacks:
+        - mermaidCallback
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      copyrightBeginYear: 2026
+      commandName: mermaid
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-main.sh
+      help: Generates mermaid diagrams from mermaid files.
+      longDescription: |
+        Generates mermaid diagrams from mermaid files in formats provided
+        \n
+        ${__HELP_TITLE_COLOR}MERMAID HELP${__RESET_COLOR}
+        \n
+        @@@MERMAID_HELP@@@
+
+      options:
+        - alts:
+            - --format
+            - -f
+          help: "Defines output format of this command (default: svg if not provided)"
+          group: OptionsGroup
+          type: StringArray
+          authorizedValues:
+            - value: svg
+            - value: png
+            - value: pdf
+          max: -1
+          min: 0
+          helpValueName: Format
+          variableName: optionFormats
+
+        - alts:
+            - --same-dir
+          help: |
+            Write output file in same directory as source file
+            and with the same base name (except extension)
+            Incompatible with the option --output-dir
+          type: Boolean
+          group: OptionsGroup
+          variableName: sameDirectoryOption
+
+        - alts:
+            - --output-dir
+            - -o
+          help: |
+            Define output directory of this command (default: <currentDirectory>)
+            Incompatible with the option --same-dir
+          type: String
+          callbacks:
+            - mermaidOutputDirCallback
+          group: OptionsGroup
+          helpValueName: OutputDir
+          variableName: optionOutputDir
+
+      args:
+        - help: |
+            Mermaid files (if not provided, deduce files
+            from git repository with .mmd extension)
+          type: StringArray
+          min: 0
+          max: -1
+          name: MermaidFiles
+          variableName: argMermaidFiles

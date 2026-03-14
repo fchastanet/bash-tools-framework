@@ -199,3 +199,11 @@ Generate PlantUML diagrams.
 ```text
 @@@plantuml_help@@@
 ```
+
+### 4.2. bin/mermaid
+
+Generate Mermaid diagrams.
+
+```text
+@@@mermaid_help@@@
+```

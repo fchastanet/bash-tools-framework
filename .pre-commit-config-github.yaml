@@ -52,10 +52,22 @@ repos:
     hooks:
       - id: cspell
         name: cspell
-        entry: npx -y cspell .
+        entry: npx -y cspell --quiet .
         language: system
         pass_filenames: false
         stages: [pre-commit, pre-push, manual]
+
+  - repo: local
+    hooks:
+      # generate mermaid help with npx and save it in a file to be used in doc generation
+      # mermaid binary will still use npx to get the help content at runtime,
+      # This avoids having to install node and mermaid in docker image
+      - id: generate-mermaid-help
+        name: generate mermaid help
+        entry: bash -c -o pipefail 'exec npx -y @mermaid-js/mermaid-cli --help > src/_binaries/mermaid/mermaid-help.txt'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
 
   - repo: https://github.com/executablebooks/mdformat
     # Do this before other tools "fixing" the line endings

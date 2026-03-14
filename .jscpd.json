@@ -30,6 +30,8 @@
     "pages/DockerUsage.md",
     "pages/FrameworkDoc.md",
     "pages/bashDoc/**",
-    ".docker/createUser.*.sh"
+    ".docker/createUser.*.sh",
+    "src/_binaries/mermaid/mermaid-options.sh",
+    "src/_binaries/mermaid/mermaid-main.sh"
   ]
 }

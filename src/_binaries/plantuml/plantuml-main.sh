@@ -89,6 +89,6 @@ export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
 if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argPlantumlFiles[@]} == 0)); then
   changedFilesAfter=$(detectChangedAddedFiles)
   diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
-    Log::fatal "files have been added"
+    Log::fatal "CI mode - files have been added"
   }
 fi

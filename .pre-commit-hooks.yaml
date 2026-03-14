@@ -89,6 +89,18 @@
   always_run: false
   stages: [pre-commit, manual]
 
+- id: mermaid
+  name: Mermaid Converter
+  description: Convert mermaid files to images
+  language: script
+  entry: bin/mermaid
+  args: [--ci, --same-dir, --outputFormat, svg]
+  types: ["file", "non-executable", "mermaid", "text"]
+  always_run: false
+  pass_filenames: true
+  files: \.mmd$
+  stages: [pre-commit, manual]
+
 - id: megalinterCheckVersion
   name: Megalinter Check Version
   description: Megalinter Check if new version is available

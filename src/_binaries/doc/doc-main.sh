@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-help.txt" AS mermaidCommandHelp
 COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
@@ -51,6 +51,12 @@ generateDoc() {
   #-----------------------------
   Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
+  (
+    echo "#!/usr/bin/env bash"
+    # shellcheck disable=SC2154
+    echo "cat '${embed_file_mermaidCommandHelp}'"
+  ) >"/usr/local/bin/npx"
+  chmod +x "/usr/local/bin/npx"
   ShellDoc::generateMdFileFromTemplate \
     "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
     "${PAGES_DIR}/Commands.md" \
