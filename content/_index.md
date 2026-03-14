@@ -20,6 +20,7 @@ more. {{% /pageinfo %}}
   [Complete function reference](https://bash-tools-framework.devlab.top/docs/bashdoc/)
 - [Best Practices](https://bash-tools-framework.devlab.top/docs/guides/best-practices/) - Bash development best
   practices
+- [Pre-commit Hooks](https://bash-tools-framework.devlab.top/docs/pre-commit-hooks/) - Available pre-commit hooks
 
 ## 2. Related Projects
 

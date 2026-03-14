@@ -54,6 +54,7 @@ and commands that help you lint files, generate shell documentation, compile bas
   reference
 - [Best Practices](https://bash-tools-framework.devlab.top/docs/guides/best-practices/) - Bash development best
   practices
+- [Pre-commit Hooks](https://bash-tools-framework.devlab.top/docs/pre-commit-hooks/) - Available pre-commit hooks
 
 ## 3. Related Projects
 
