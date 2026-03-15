@@ -8,15 +8,19 @@ declare -a files
 # shellcheck disable=SC2154
 if ((${#argMermaidFiles[@]} > 0)); then
   files=("${argMermaidFiles[@]}")
+  if ((${#files[@]} == 0)); then
+    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
+  fi
 else
   changedFilesBefore=$(detectChangedAddedFiles)
   readarray -t files < <(git ls-files --exclude-standard -c -o -m | grep -E -e '\.mmd$' -e '\.mermaid$' | sort | uniq)
+  if ((${#files[@]} == 0)); then
+    Log::displayInfo "Command ${SCRIPT_NAME} - no file to process detected in git repository"
+    exit 0
+  fi
 fi
 
-if ((${#files[@]} == 0)); then
-  Log::fatal "Command ${SCRIPT_NAME} - no file provided"
-fi
-Log::displayInfo "Will generate mermaid output files for ${files[*]}"
+Log::displayInfo "Will generate mermaid output files for these files: ${files[*]}"
 
 convertMmd() {
   local file="$1"
@@ -73,7 +77,7 @@ export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
       printf "%s\0" "${myArgs[@]}"
     done
   done
-) | xargs -0 -P0 -r -n $((7 + ${#mermaidOptions[@]})) bash -c 'convertMmd $@' _
+) | xargs -0 -P0 -r -n $((6 + ${#mermaidOptions[@]})) bash -c 'convertMmd $@' _
 
 # shellcheck disable=SC2154
 if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argMermaidFiles[@]} == 0)); then

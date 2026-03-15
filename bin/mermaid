@@ -896,7 +896,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version 1.0"
+  echo "${SCRIPT_NAME} version 1.1"
   exit 0
 }
 
@@ -1079,20 +1079,70 @@ unknownOption() {
   mermaidOptions+=("$1")
 }
 
-mermaidArgFileCallback() {
-  if [[ ! -f "$1" ]]; then
-    mermaidOptions+=("$1")
-  else
-    argMermaidFiles+=("$1")
-  fi
+unknownArgument() {
+  mermaidOptions+=("$1")
 }
 
 mermaidCallback() {
+  local -i optionIdx=0
+  local -a newMermaidOptions=()
+  # parse mermaid options
+  while (("${optionIdx}" < "${#mermaidOptions[@]}")); do
+    local option="${mermaidOptions[optionIdx]}"
+    case "${option}" in
+      --theme | -t | \
+        --width | -w | \
+        --height | -H | \
+        --backgroundColor | -b | \
+        --configFile | -c | \
+        --cssFile | -C | \
+        --svgId | -I | \
+        --scale | -s | \
+        --pdfFit | -f | \
+        --quiet | -q | \
+        -p | --puppeteerConfigFile)
+        newMermaidOptions+=("${option}")
+        ((++optionIdx))
+        newMermaidOptions+=("${mermaidOptions[optionIdx]}")
+        ;;
+      --iconPacks | --iconPacksNamesAndUrls)
+        newMermaidOptions+=("${option}")
+        ((++optionIdx))
+        while ((optionIdx < ${#mermaidOptions[@]})) && [[ ! "${mermaidOptions[optionIdx]}" =~ ^- ]]; do
+          newMermaidOptions+=("${mermaidOptions[optionIdx]}")
+          ((++optionIdx))
+        done
+        ((optionIdx--)) # step back to reprocess the next option in the next loop iteration
+        ;;
+      --input | -i)
+        ((++optionIdx))
+        if [[ ! -f "${mermaidOptions[optionIdx]}" ]]; then
+          Log::displayError "Command ${SCRIPT_NAME} - file '${mermaidOptions[optionIdx]}' does not exist for option ${option}"
+          exit 1
+        fi
+        argMermaidFiles+=("${mermaidOptions[optionIdx]}")
+        ;;
+      --output | -o)
+        Log::displayError "Command ${SCRIPT_NAME} - option ${option} is not supported, output file is automatically determined based on the input file and --same-dir and --output-dir options"
+        return 1
+        ;;
+      --outputFormat | -e)
+        ((++optionIdx))
+        optionFormats+=("${mermaidOptions[optionIdx]}")
+        ;;
+      *)
+        if [[ -f "${option}" ]]; then
+          argMermaidFiles+=("${option}")
+        else
+          newMermaidOptions+=("${option}")
+        fi
+        ;;
+    esac
+    ((++optionIdx))
+  done
+  mermaidOptions=("${newMermaidOptions[@]}")
   if ((${#optionFormats[@]} == 0)); then
     optionFormats=("${defaultFormatsIfNoneProvided[@]}")
-  fi
-  if [[ "${includePathOption}" = "-" ]]; then
-    includePathOption="$(pwd)"
   fi
   # shellcheck disable=SC2154
   if [[ -n "${optionOutputDir}" && "${sameDirectoryOption}" = "1" ]]; then
@@ -1123,6 +1173,12 @@ optionHelpCallback() {
   exit 0
 }
 
+optionVersionCallback() {
+  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}1.1"
+  echo -e "${__HELP_TITLE_COLOR}@mermaid-js/mermaid-cli version: ${__RESET_COLOR}$(npx -y @mermaid-js/mermaid-cli --version)"
+  exit 0
+}
+
 
 # ------------------------------------------
 # Command mermaidCommand
@@ -1147,7 +1203,6 @@ declare -a optionFormats=()
 declare sameDirectoryOption="0"
 declare optionOutputDir=""
 # arguments variables initialization
-declare -a argMermaidFiles=()
 # @description parse command options and arguments for mermaidCommand
 mermaidCommandParse() {
   Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
@@ -1201,8 +1256,6 @@ mermaidCommandParse() {
   optionOutputDir=""
   local -i options_parse_optionParsedCountOptionOutputDir
   ((options_parse_optionParsedCountOptionOutputDir = 0)) || true
-
-  argMermaidFiles=()
 
 
   # shellcheck disable=SC2034
@@ -1549,34 +1602,12 @@ mermaidCommandParse() {
         unknownOption "${options_parse_arg}" || argOptDefaultBehavior=$?
         ;;
       *)
-        ((minParsedArgIndex0 = 0)) || true
-        ((maxParsedArgIndex0 = 0)) || true
-        ((minParsedArgIndex1 = minParsedArgIndex0 + 0)) || true
-        ((maxParsedArgIndex1 = maxParsedArgIndex0)) || true
-        ((incrementArg = 1 ))
-        if ((0)); then
-          # Technical if - never reached
-          :
+        # no arg configured, call unknownArgumentCallback
 
-        # Argument 1/1 - argMermaidFiles
-        # Argument argMermaidFiles min 0 max -1
-        elif (( options_parse_parsedArgIndex >= minParsedArgIndex0 )); then
-          ((++options_parse_argParsedCountArgMermaidFiles))
-          # shellcheck disable=SC2034
-          # shellcheck disable=SC2034
-          argMermaidFiles+=("${options_parse_arg}")
+        # shellcheck disable=SC2317
+        unknownArgument "${options_parse_arg}"
 
 
-        # else too much args
-        else
-
-
-          # no arg configured, call unknownArgumentCallback
-
-          # shellcheck disable=SC2317
-        mermaidArgFileCallback "${options_parse_arg}"
-
-        fi
         if ((incrementArg == 1)); then
           ((++options_parse_parsedArgIndex))
         fi
@@ -1601,7 +1632,7 @@ mermaidCommandHelp() {
   # ------------------------------------------
   # usage section
   # ------------------------------------------
-  Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "mermaid [OPTIONS] [ARGUMENTS]"
+  Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "mermaid [OPTIONS] "
   echo
   # ------------------------------------------
   # usage/options section
@@ -1611,17 +1642,6 @@ mermaidCommandHelp() {
   Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
     "mermaid" "${optionsAltList[@]}"
   echo
-
-  # ------------------------------------------
-  # usage/arguments section
-  # ------------------------------------------
-  echo
-  echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
-
-  Array::wrap2 " " 80 2 "  [${__HELP_OPTION_COLOR}MermaidFiles${__HELP_NORMAL} {list} (optional)]"
-  Array::wrap2 ' ' 76 4 "    " "Mermaid files (if not provided, deduce files" "from git repository with .mmd extension)" ""
-  echo
-
 
   # ------------------------------------------
   # options section
@@ -1771,7 +1791,7 @@ mermaidCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "1.0"
+  echo "1.1"
   # ------------------------------------------
   # author section
   # ------------------------------------------
@@ -1811,15 +1831,19 @@ declare -a files
 # shellcheck disable=SC2154
 if ((${#argMermaidFiles[@]} > 0)); then
   files=("${argMermaidFiles[@]}")
+  if ((${#files[@]} == 0)); then
+    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
+  fi
 else
   changedFilesBefore=$(detectChangedAddedFiles)
   readarray -t files < <(git ls-files --exclude-standard -c -o -m | grep -E -e '\.mmd$' -e '\.mermaid$' | sort | uniq)
+  if ((${#files[@]} == 0)); then
+    Log::displayInfo "Command ${SCRIPT_NAME} - no file to process detected in git repository"
+    exit 0
+  fi
 fi
 
-if ((${#files[@]} == 0)); then
-  Log::fatal "Command ${SCRIPT_NAME} - no file provided"
-fi
-Log::displayInfo "Will generate mermaid output files for ${files[*]}"
+Log::displayInfo "Will generate mermaid output files for these files: ${files[*]}"
 
 convertMmd() {
   local file="$1"
@@ -1876,7 +1900,7 @@ export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR
       printf "%s\0" "${myArgs[@]}"
     done
   done
-) | xargs -0 -P0 -r -n $((7 + ${#mermaidOptions[@]})) bash -c 'convertMmd $@' _
+) | xargs -0 -P0 -r -n $((6 + ${#mermaidOptions[@]})) bash -c 'convertMmd $@' _
 
 # shellcheck disable=SC2154
 if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argMermaidFiles[@]} == 0)); then

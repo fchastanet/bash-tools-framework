@@ -94,7 +94,7 @@
   description: Convert mermaid files to images
   language: script
   entry: bin/mermaid
-  args: [--ci, --same-dir, --outputFormat, svg]
+  args: [--ci, --same-dir, --format, svg]
   types: ["file", "non-executable", "text"]
   always_run: false
   pass_filenames: true
