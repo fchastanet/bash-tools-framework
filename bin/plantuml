@@ -896,7 +896,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version 3.0"
+  echo "${SCRIPT_NAME} version 3.1"
   exit 0
 }
 
@@ -1135,6 +1135,7 @@ pullPlantumlImageIfNeeded() {
   if [[ ! -f "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull" ]] ||
     (($(File::elapsedTimeSinceLastModification "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull") > PLANTUML_PULL_TIMEOUT)) ||
     ! docker image ls plantuml/plantuml &>/dev/null; then
+    Log::displayInfo "Pulling latest plantuml/plantuml docker image ..."
     docker pull plantuml/plantuml
     touch "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull"
   fi
@@ -1154,6 +1155,13 @@ optionHelpCallback() {
     sed -E \
       -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
       -e "/@@@PLANTUML_HELP@@@/d"
+  exit 0
+}
+
+optionVersionCallback() {
+  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}3.1"
+  pullPlantumlImageIfNeeded >/dev/null
+  docker run --rm plantuml/plantuml -version
   exit 0
 }
 
@@ -1870,7 +1878,7 @@ plantumlCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "3.0"
+  echo "3.1"
   # ------------------------------------------
   # author section
   # ------------------------------------------
@@ -1910,14 +1918,18 @@ declare -a files
 # shellcheck disable=SC2154
 if ((${#argPlantumlFiles[@]} > 0)); then
   files=("${argPlantumlFiles[@]}")
+  if ((${#files[@]} == 0)); then
+    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
+  fi
 else
   changedFilesBefore=$(detectChangedAddedFiles)
   readarray -t files < <(git ls-files --exclude-standard -c -o -m | grep -E -e '\.puml$' -e '\.plantuml$' | sort | uniq)
+  if ((${#files[@]} == 0)); then
+    Log::displayInfo "Command ${SCRIPT_NAME} - no file to process detected in git repository"
+    exit 0
+  fi
 fi
 
-if ((${#files[@]} == 0)); then
-  Log::fatal "Command ${SCRIPT_NAME} - no file provided"
-fi
 Log::displayInfo "Will generate plantuml output files for ${files[*]}"
 
 pullPlantumlImageIfNeeded

@@ -8,14 +8,18 @@ declare -a files
 # shellcheck disable=SC2154
 if ((${#argPlantumlFiles[@]} > 0)); then
   files=("${argPlantumlFiles[@]}")
+  if ((${#files[@]} == 0)); then
+    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
+  fi
 else
   changedFilesBefore=$(detectChangedAddedFiles)
   readarray -t files < <(git ls-files --exclude-standard -c -o -m | grep -E -e '\.puml$' -e '\.plantuml$' | sort | uniq)
+  if ((${#files[@]} == 0)); then
+    Log::displayInfo "Command ${SCRIPT_NAME} - no file to process detected in git repository"
+    exit 0
+  fi
 fi
 
-if ((${#files[@]} == 0)); then
-  Log::fatal "Command ${SCRIPT_NAME} - no file provided"
-fi
 Log::displayInfo "Will generate plantuml output files for ${files[*]}"
 
 pullPlantumlImageIfNeeded

@@ -67,6 +67,7 @@ pullPlantumlImageIfNeeded() {
   if [[ ! -f "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull" ]] ||
     (($(File::elapsedTimeSinceLastModification "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull") > PLANTUML_PULL_TIMEOUT)) ||
     ! docker image ls plantuml/plantuml &>/dev/null; then
+    Log::displayInfo "Pulling latest plantuml/plantuml docker image ..."
     docker pull plantuml/plantuml
     touch "${PERSISTENT_TMPDIR}/plantUmlLastDockerPull"
   fi
@@ -86,5 +87,12 @@ optionHelpCallback() {
     sed -E \
       -e "/@@@PLANTUML_HELP@@@/r ${plantumlHelpFile}" \
       -e "/@@@PLANTUML_HELP@@@/d"
+  exit 0
+}
+
+optionVersionCallback() {
+  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}{{ .RootData.binData.commands.default.version }}"
+  pullPlantumlImageIfNeeded >/dev/null
+  docker run --rm plantuml/plantuml -version
   exit 0
 }
