@@ -4,9 +4,9 @@ description: Bash development best practices and recipes
 weight: 30
 categories: [documentation, guides]
 tags: [best-practices, bash, testing, development]
-creationDate: 2026-03-01
-lastUpdated: 2026-03-01
 version: '1.0'
+date: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-03-01T08:00:00+01:00'
 ---
 
 **DISCLAIMER:** Some of the best practices mentioned are not fully applied in this project as they were written during

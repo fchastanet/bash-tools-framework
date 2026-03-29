@@ -4,9 +4,9 @@ linkTitle: Framework Overview
 description: Overview of the Bash Tools Framework functions and namespaces
 type: docs
 weight: 1001
-creationDate: 2026-03-01
-lastUpdated: 2026-03-01
 version: 1.0
+date: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-03-01T08:00:00+01:00'
 ---
 
 {{< articles-list >}}

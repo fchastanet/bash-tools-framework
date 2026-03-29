@@ -4,9 +4,9 @@ linkTitle: Framework Guides
 description: Framework guides explaining main features and best practices
 type: docs
 weight: 1
-creationDate: 2026-03-01
-lastUpdated: 2026-03-01
 version: 1.0
+date: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-03-01T08:00:00+01:00'
 ---
 
 {{< articles-list >}}

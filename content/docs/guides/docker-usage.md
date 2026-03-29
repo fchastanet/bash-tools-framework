@@ -4,9 +4,9 @@ description: Using Docker functions in Bash Tools Framework
 weight: 20
 categories: [documentation, guides]
 tags: [docker, containers, build, deployment]
-creationDate: 2026-03-01
-lastUpdated: 2026-03-01
 version: '1.0'
+date: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-03-01T08:00:00+01:00'
 ---
 
 **Usage example**: try to pull image from 3 tags in order (from more specific or recent to the less one)

@@ -4,9 +4,9 @@ description: Understanding configuration file management in Bash Tools Framework
 weight: 10
 categories: [documentation, guides]
 tags: [configuration, env-files, environment]
-creationDate: 2026-03-01
-lastUpdated: 2026-03-01
 version: '1.0'
+date: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-03-01T08:00:00+01:00'
 ---
 
 [Inspired by Evan "Hippy" Slatis work](https://opensource.com/article/21/5/processing-configuration-files-shell)
