@@ -34,6 +34,7 @@ ignorePaths:
   - ".mega-linter*.yml"
   - ".env"
   - "src/_binaries/mermaid/mermaid-help.txt"
+  - "TODO.md"
 dictionaryDefinitions:
   - name: myBash
     path: ".cspell/bash.txt"

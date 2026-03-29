@@ -101,6 +101,16 @@
   files: \.mmd$
   stages: [pre-commit, manual]
 
+- id: hugoUpdateLastmod
+  name: Hugo Update Lastmod
+  description: Update lastmod field in Hugo frontmatter based on git modification date or current date.
+  language: script
+  entry: bin/hugoUpdateLastmod
+  args: [--commit]
+  pass_filenames: false
+  always_run: true
+  stages: [pre-commit]
+
 - id: megalinterCheckVersion
   name: Megalinter Check Version
   description: Megalinter Check if new version is available

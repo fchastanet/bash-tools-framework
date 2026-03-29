@@ -51,6 +51,8 @@ failfast
 fgrep
 fmask
 friday
+Frontmatter
+frontmatter
 frégate
 getopt
 getsys
@@ -69,6 +71,8 @@ INT
 keychain
 KHTML
 killall
+Lastmod
+lastmod
 lastpipe
 libkrb
 loadprofile
@@ -81,6 +85,7 @@ mkdir
 mktemp
 MYPRUNEPATHS
 newuser
+nlastmod
 noargs
 nodoc
 nohup
@@ -129,6 +134,7 @@ textmate
 TMPDIR
 udbx
 undelete
+unmatch
 unsetopt
 unsetting
 unstub

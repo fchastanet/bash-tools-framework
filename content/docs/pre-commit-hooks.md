@@ -25,6 +25,7 @@ development workflow using the [pre-commit](https://pre-commit.com/) tool.
   - [1.7. mermaid](#17-mermaid)
   - [1.8. megalinterCheckVersion](#18-megalintercheckversion)
   - [1.9. megalinter](#19-megalinter)
+  - [1.10. hugoUpdateLastmod](#110-hugoupdatelastmod)
 - [2. Usage](#2-usage)
 
 <!--TOC-->
@@ -77,6 +78,11 @@ This hook checks if a new version of megalinter is available. It uses the `bin/m
 This hook runs megalinter for comprehensive code quality checks. It uses the `bin/megalinter` script, which can be
 configured to specify the megalinter image, configuration file, and whether to automatically fix issues.
 
+### 1.10. hugoUpdateLastmod
+
+This hook updates the `lastmod` and `version` fields in Hugo frontmatter based on git modification dates or the current
+date.
+
 ## 2. Usage
 
 To use these hooks, simply add the desired hooks to your `.pre-commit-config.yaml` file. For example:
@@ -94,5 +100,6 @@ repos:
       - id: shellcheckLint
       - id: plantuml
         args: [--same-dir, -f, png, -f, svg, --limit-size, '1200']
-      - id: mermaid
+      - id: hugoUpdateLastmod
+
 ```

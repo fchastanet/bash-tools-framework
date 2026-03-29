@@ -137,6 +137,18 @@ Run unit tests using bats inside Docker container with needed dependencies.
 ./test.sh scrasnups/build:bash-tools-alpine-5.3 -r src -j 30
 ```
 
+### 2.6. bin/hugoUpdateLastmod
+
+Update `lastmod` field in Hugo frontmatter based on git modification dates or the current date. It can be run in two
+modes: migration mode (using `--init`) to update all git-tracked markdown files in the `content/` directory, and commit
+mode (using `--commit`) to update only staged files. The hook includes smart update detection to prevent unnecessary
+changes, making it ideal for use in pre-commit hooks to ensure that your Hugo content is always up-to-date with the
+latest modification dates.
+
+```text
+@@@hugoUpdateLastmod_help@@@
+```
+
 ## 3. Linters
 
 ### 3.1. bin/frameworkLint

@@ -1,0 +1,89 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/hugoUpdateLastmod/hugoUpdateLastmod-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/hugoUpdateLastmod"
+binData:
+  commands:
+    default:
+      functionName: hugoUpdateLastmodCommand
+      version: "1.0"
+      copyrightBeginYear: 2026
+      commandName: hugoUpdateLastmod
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/hugoUpdateLastmod/hugoUpdateLastmod-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/hugoUpdateLastmod/hugoUpdateLastmod-main.sh
+      beforeParseCallbacks:
+        - beforeParseCallback
+      callbacks:
+        - hugoUpdateLastmodCallback
+      help: |
+        Updates lastmod field in Hugo frontmatter
+        based on git modification date or current date.
+      longDescription: |
+        Update "date", "lastmod", and "version" frontmatter fields in
+        markdown files.
+        Integrates with pre-commit hooks to automatically manage Hugo
+        frontmatter metadata.
+
+        ${__HELP_TITLE_COLOR}Two explicit modes:${__RESET_COLOR}
+
+        1. ${__HELP_OPTION_COLOR}Migration mode ("--init")${__HELP_NORMAL}
+
+        2. ${__HELP_OPTION_COLOR}Commit mode ("--commit")${__HELP_NORMAL}
+
+        ${__HELP_TITLE_COLOR}Smart update detection in commit mode (two complementary checks):${__RESET_COLOR}
+
+        1. ${__HELP_OPTION_COLOR}Date check${__HELP_NORMAL}: Skip if "lastmod" already has today's date
+          - Prevents repeated updates on multiple commits the same day
+
+          - Use case: You commit → stage changes → commit again → no update
+
+        2. ${__HELP_OPTION_COLOR}Git check${__HELP_NORMAL}: Skip if file has no actual content changes
+          - Prevents updates when running "pre-commit run -a" on unchanged files
+
+          - Checks git diff to detect real changes vs. reformatting
+
+      options:
+        - alts:
+            - --init
+          help: |
+            Run in migration mode to update all git-tracked markdown files
+            in content/ directory
+
+            Incompatible with the option --commit
+
+            Updates all ${__HELP_OPTION_COLOR}git-tracked${__RESET_COLOR} ".md" files in "content/" directory
+            - Migrates "creationDate" → "date"
+            - Migrates "lastUpdated" → "lastmod"
+            - Removes old field names
+            - Adds "version: "1.0"" if version field doesn't exist
+            - Uses git history for dates if old fields don't exist
+            - Places "date", "lastmod", and "version" at the ${__HELP_OPTION_COLOR}end${__RESET_COLOR} of frontmatter
+          group: OptionsGroup
+          type: Boolean
+          variableName: optionInit
+
+        - alts:
+            - --commit
+          group: OptionsGroup
+          type: Boolean
+          variableName: optionCommit
+          help: |
+            Run in commit mode to update staged markdown files in git.
+            Automatically detects staged "content/**/*.md" files and updates
+            their frontmatter metadata.
+
+            Incompatible with the option --init
+
+            Updates specific files that are ${__HELP_OPTION_COLOR}staged${__RESET_COLOR} in git (for pre-commit hooks)
+            - Automatically detects staged "content/**/*.md" files
+            - Adds "date" if missing (current timestamp)
+            - Updates "lastmod" (current timestamp) ${__HELP_OPTION_COLOR}with smart detection${__HELP_NORMAL}
+              to prevent unnecessary updates
+            - Increments "version" ${__HELP_OPTION_COLOR}with smart detection${__HELP_NORMAL}
+            - Places "date", "lastmod", and "version" at the ${__HELP_OPTION_COLOR}end${__RESET_COLOR} of frontmatter

@@ -20,10 +20,13 @@ exitcode
 fchastanet
 fplain
 François
+frontmatter
 Inlines
 inlines
 installfile
 Jetbrains
+Lastmod
+lastmod
 lastpipe
 libassertsh
 libutilssh
