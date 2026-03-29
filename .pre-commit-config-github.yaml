@@ -233,7 +233,7 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 6.2.5
+    rev: 6.2.9
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -245,6 +245,8 @@ repos:
         args: [--expected-warnings-count, "61", --format, checkstyle, --theme, default-force, --display-level, WARNING]
       - id: plantuml
         args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
+      - id: hugoUpdateLastmod
+        stages: [pre-commit]
 
   - repo: local
     hooks:
