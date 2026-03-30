@@ -59,7 +59,15 @@ repos:
       # This avoids having to install node and mermaid in docker image
       - id: generate-mermaid-help
         name: generate mermaid help
-        entry: bash -c -o pipefail 'exec npx -y @mermaid-js/mermaid-cli --help > src/_binaries/mermaid/mermaid-help.txt'
+        entry: bash -o pipefail -c 'exec npx -y @mermaid-js/mermaid-cli --help > src/_binaries/mermaid/mermaid-help.txt'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: generate-rimageWrapper-help
+        name: generate rimageWrapper help
+        entry: |
+          bash -o pipefail -c '(bin/rimageWrapper --help && echo) | sed -E -e "s/[[:space:]]+$//" \
+          >src/_binaries/rimageWrapper/rimage-help.txt'
         language: system
         pass_filenames: false
         stages: [pre-commit]

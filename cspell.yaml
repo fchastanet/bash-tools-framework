@@ -35,6 +35,7 @@ ignorePaths:
   - ".env"
   - "src/_binaries/mermaid/mermaid-help.txt"
   - "TODO.md"
+  - src/_binaries/rimageWrapper/rimage-help.txt
 dictionaryDefinitions:
   - name: myBash
     path: ".cspell/bash.txt"

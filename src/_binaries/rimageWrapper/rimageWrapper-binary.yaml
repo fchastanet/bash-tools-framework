@@ -1,0 +1,138 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/rimageWrapper/rimageWrapper-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/rimageWrapper"
+binData:
+  commands:
+    default:
+      functionName: rimageWrapperCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      unknownArgumentCallbacks:
+        - unknownArgument
+      callbacks:
+        - rimageWrapperCallback
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      copyrightBeginYear: 2026
+      commandName: rimageWrapper
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimageWrapper-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimageWrapper-main.sh
+      help: |
+        Compression and conversion of images using Rimage.
+        https://github.com/vlad-salone/rimage
+      longDescription: |
+        Compression and conversion of images using Rimage.
+        https://github.com/vlad-salone/rimageWrapper
+
+        ${__HELP_TITLE_COLOR}RIMAGE HELP${__RESET_COLOR}
+
+        @@@RIMAGE_HELP@@@
+
+        For more info use rimageWrapper help <command>
+        E.g.: rimageWrapper help mozjpeg
+
+        ${__HELP_TITLE_COLOR}RIMAGE ADVANCED OPTIONS${__RESET_COLOR}
+
+        Options:
+        --quality <NUM>
+            Quality, values 60-80 are recommended.
+            [default: 75]
+
+        --chroma_quality <NUM>
+            Separate chrome quality.
+
+        --baseline
+            Set to use baseline encoding (by default is progressive).
+
+        --no_optimize_coding
+            Set to make files larger for no reason.
+
+        --smoothing <NUM>
+            Use MozJPEG's smoothing.
+
+        --colorspace <COLOR>
+            Set color space of JPEG being written.
+            [default: ycbcr]
+            [possible values: ycbcr, grayscale, rgb]
+
+        --multipass
+            Specifies whether multiple scans should be considered during trellis quantization.
+
+        --subsample <PIX>
+            Sets chroma subsampling.
+
+        --qtable <TABLE>
+            Use a specific quantization table.
+            [default: NRobidoux]
+
+            [possible values: AhumadaWatsonPeterson, AnnexK, Flat,
+             KleinSilversteinCarney, MSSSIM, NRobidoux,
+             PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]
+
+      options:
+        - alts:
+            - --same-dir
+          help: |
+            Write output file in same directory as source file
+            and with the same base name (except extension)
+            Incompatible with the option --output-dir
+          type: Boolean
+          group: OptionsGroup
+          variableName: sameDirectoryOption
+
+        - alts:
+            - --output-dir
+            - -o
+          help: |
+            Define output directory of this command (default: <currentDirectory>)
+            Incompatible with the option --same-dir
+          type: String
+          callbacks:
+            - rimageWrapperOutputDirCallback
+          group: OptionsGroup
+          helpValueName: OutputDir
+          variableName: optionOutputDir
+      args:
+        - help: |
+            command to run with rimageWrapper, e.g. mozjpeg, oxipng, etc.
+          type: String
+          max: 1
+          min: 1
+          authorizedValues:
+            - value: avif
+              help: Encode images into AVIF format. (Small and Efficient)
+            - value: farbfeld
+              help: Encode images into Farbfeld format. (Bitmapped)
+            - value: jpeg
+              help: Encode images into JPEG format. (Progressive-able)
+            - value: jpeg_xl
+              help: Encode images into JpegXL format. (Big but Lossless)
+            - value: mozjpeg
+              help: |
+                Encode images into JPEG format using MozJpeg codec.
+                (RECOMMENDED and Small)
+            - value: oxipng
+              help: |
+                Encode images into PNG format using OxiPNG codec.
+                (Progressive-able)
+            - value: png
+              help: Encode images into PNG format.
+            - value: ppm
+              help: Encode images into PPM format. (Bitmapped)
+            - value: qoi
+              help: Encode images into QOI format. (Trendy and Small)
+            - value: webp
+              help: Encode images into WebP format. (Lossless-able)
+            - value: help
+              help: Print this message or the help of the given subcommand(s)
+          name: command
+          variableName: argRimageCommand

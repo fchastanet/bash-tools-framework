@@ -219,3 +219,11 @@ Generate Mermaid diagrams.
 ```text
 @@@mermaid_help@@@
 ```
+
+### 4.3. bin/rimageWrapper
+
+Generate images from source image files using the rimage tool.
+
+```text
+@@@rimageWrapper_help@@@
+```

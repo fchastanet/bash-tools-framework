@@ -78,6 +78,17 @@
   require_serial: true
   stages: [pre-commit]
 
+- id: rimage
+  name: Rimage Converter
+  description: Convert and compress images using rimage
+  language: system
+  entry: bin/rimageWrapper
+  args: [--ci, webp]
+  pass_filenames: true
+  types: ["file", "non-executable", "image"]
+  always_run: false
+  stages: [pre-commit]
+
 - id: plantuml
   name: Plantuml Converter
   description: Convert plantuml files to images

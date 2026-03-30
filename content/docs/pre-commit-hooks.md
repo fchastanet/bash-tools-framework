@@ -4,9 +4,9 @@ linkTitle: Pre-commit Hooks
 description: Overview of the Bash Tools Framework pre-commit hooks
 type: docs
 weight: 2001
-version: 1.0
 date: '2026-03-15T08:00:00+01:00'
-lastmod: '2026-03-15T08:00:00+01:00'
+lastmod: '2026-03-31T00:42:40+02:00'
+version: '1.1'
 ---
 
 The Bash Tools Framework provides pre-commit hooks to ensure code quality and consistency before changes are committed
@@ -23,9 +23,10 @@ development workflow using the [pre-commit](https://pre-commit.com/) tool.
   - [1.5. runUnitTests](#15-rununittests)
   - [1.6. plantuml](#16-plantuml)
   - [1.7. mermaid](#17-mermaid)
-  - [1.8. megalinterCheckVersion](#18-megalintercheckversion)
-  - [1.9. megalinter](#19-megalinter)
-  - [1.10. hugoUpdateLastmod](#110-hugoupdatelastmod)
+  - [1.8. rimage](#18-rimage)
+  - [1.9. megalinterCheckVersion](#19-megalintercheckversion)
+  - [1.10. megalinter](#110-megalinter)
+  - [1.11. hugoUpdateLastmod](#111-hugoupdatelastmod)
 - [2. Usage](#2-usage)
 
 <!--TOC-->
@@ -68,17 +69,24 @@ in CI mode, generate images in the same directory as the source files, and speci
 mermaid binary using npx and uses it to generate diagrams. It also detects added files in CI mode to only generate
 diagrams for new files.
 
-### 1.8. megalinterCheckVersion
+### 1.8. rimage
+
+This hook generates images from source image files using the [rimage tool](https://github.com/vlad-salone/rimage). It
+uses the `bin/rimageWrapper` script, which can be configured to run in CI mode, generate images in the same directory as
+the source files, and specify output formats. It uses the latest rimage binary and uses it to generate images. It also
+detects added files in CI mode to only generate images for new files.
+
+### 1.9. megalinterCheckVersion
 
 This hook checks if a new version of megalinter is available. It uses the `bin/megalinter` script with the
 `--check-megalinter-version` option to check for updates.
 
-### 1.9. megalinter
+### 1.10. megalinter
 
 This hook runs megalinter for comprehensive code quality checks. It uses the `bin/megalinter` script, which can be
 configured to specify the megalinter image, configuration file, and whether to automatically fix issues.
 
-### 1.10. hugoUpdateLastmod
+### 1.11. hugoUpdateLastmod
 
 This hook updates the `lastmod` and `version` fields in Hugo frontmatter based on git modification dates or the current
 date.

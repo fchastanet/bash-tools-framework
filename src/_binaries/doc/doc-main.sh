@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-help.txt" AS mermaidCommandHelp
+# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimage-help.txt" AS rimageCommandHelp
 COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
@@ -51,12 +52,28 @@ generateDoc() {
   #-----------------------------
   Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
+  mkdir -p "${PERSISTENT_TMPDIR}/npx"
   (
-    echo "#!/usr/bin/env bash"
+    echo "#!/usr/bin/env sh"
+    if [[ "$1" == "@mermaid-js/mermaid-cli" ]]; then
+      # shellcheck disable=SC2154
+      echo "cat '${embed_file_mermaidCommandHelp}'"
+    fi
+  ) >"${PERSISTENT_TMPDIR}/npx/npx"
+  chmod +x "${PERSISTENT_TMPDIR}/npx/npx"
+  export PATH="${PERSISTENT_TMPDIR}/npx:$PATH"
+
+  mkdir -p "${TMPDIR}/rimage"
+  (
+    echo "#!/usr/bin/env sh"
     # shellcheck disable=SC2154
-    echo "cat '${embed_file_mermaidCommandHelp}'"
-  ) >"/usr/local/bin/npx"
-  chmod +x "/usr/local/bin/npx"
+    echo "cat '${embed_file_rimageCommandHelp}'"
+  ) >"${TMPDIR}/rimage/rimage"
+  chmod +x "${TMPDIR}/rimage/rimage"
+  export PATH="${TMPDIR}/rimage:$PATH"
+  export RIMAGE_DIR="${TMPDIR}/rimage"
+  export SKIP_RIMAGE_PULL=1
+
   ShellDoc::generateMdFileFromTemplate \
     "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
     "${PAGES_DIR}/Commands.md" \

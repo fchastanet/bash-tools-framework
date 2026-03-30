@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/doc/doc-binary.yaml
+# GENERATED FROM https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/rimageWrapper/rimageWrapper-binary.yaml
 # DO NOT EDIT IT
 # @generated
 ###############################################################################
@@ -324,56 +324,6 @@ Assert::tty() {
 }
 
 
-# @description get file content if file not expired
-# @arg $1 file:String the file to get content from
-# @arg $2 maxDuration:int number of seconds after which the file is considered expired
-# @stdout {String} the file content if not expired
-# @exitcode 1 if file does not exists
-# @exitcode 2 if file expired
-Cache::getFileContentIfNotExpired() {
-  local file="$1"
-  local maxDuration="$2"
-
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  if (($(File::elapsedTimeSinceLastModification "${file}") > maxDuration)); then
-    return 2
-  fi
-  cat "${file}"
-}
-
-
-# @description convert base64 encoded back to target file
-# if target file is executable prepend dir of target
-# file to PATH to make binary available everywhere
-# it is advised to include in the path of the target file
-# the md5sum of the binFile
-#
-# @arg $1 targetFile:String the file to write
-# @arg $2 binFileBase64:String the base64 encoded file
-# @arg $3 fileMode:String the chmod to set on the file
-# @set PATH String prepend target embedded file binary directory to PATH variable if binary executable
-Compiler::Embed::extractFileFromBase64() {
-  local targetFile="$1"
-  local binFileBase64="$2"
-  local fileMode="${3:-+x}"
-  local targetDir="${targetFile%/*}"
-
-  if [[ ! -f "${targetFile}" ]]; then
-    if [[ ! -d "${targetDir}" ]]; then
-      mkdir -p "${targetDir}"
-    fi
-    tr -d '\n ' <<<"${binFileBase64}" | base64 -d >"${targetFile}"
-    chmod "${fileMode}" "${targetFile}"
-  fi
-
-  if [[ -x "${targetFile}" ]]; then
-    Env::pathPrepend "${targetDir}"
-  fi
-}
-
-
 # @description Load the nearest config file
 # in next example will search first .framework-config file in "srcDir1"
 # then if not found will go in up directories until /
@@ -428,19 +378,6 @@ Env::createDefaultEnvFile() {
 }
 
 
-# @description prepend directories to the PATH environment variable
-# @arg $@ args:String[] list of directories to prepend
-# @set PATH update PATH with the directories prepended
-Env::pathPrepend() {
-  local arg
-  for arg in "$@"; do
-    if [[ -d "${arg}" && ":${PATH}:" != *":${arg}:"* ]]; then
-      PATH="$(realpath "${arg}"):${PATH}"
-    fi
-  done
-}
-
-
 # @description ensure env files are loaded
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
@@ -481,48 +418,6 @@ Env::requireLoad() {
 }
 
 
-# @description get number of seconds since last modification of the file
-# @arg $1 file:String file path
-# @exitcode 1 if file does not exist
-# @stdout number of seconds since last modification of the file
-File::elapsedTimeSinceLastModification() {
-  local file="$1"
-  if [[ ! -f "${file}" ]]; then
-    return 1
-  fi
-  local lastModificationTimeSeconds diff
-  lastModificationTimeSeconds="$(stat -c %Y "${file}")"
-  ((diff = $(date +%s) - lastModificationTimeSeconds))
-  echo -n "${diff}"
-}
-
-
-# @description replace token by input(stdin) in given targetFile
-# @warning special ansi codes will be removed from stdin
-# @arg $1 token:String the token to replace by stdin
-# @arg $2 targetFile:String the file in which token will be replaced by stdin
-# @exitcode 1 if error
-# @stdin the file content that will be injected in targetFile
-File::replaceTokenByInput() {
-  local token="$1"
-  local targetFile="$2"
-
-  (
-    local tokenFile
-    tokenFile="$(Framework::createTempFile "replaceTokenByInput")"
-
-    cat - | Filters::removeAnsiCodes >"${tokenFile}"
-    # ensure blank final line
-    echo >>"${tokenFile}"
-
-    sed -E -i \
-      -e "/${token}/r ${tokenFile}" \
-      -e "/${token}/d" \
-      "${targetFile}"
-  )
-}
-
-
 # @description search a file in parent directories
 #
 # @arg $1 fromPath:String path
@@ -556,126 +451,11 @@ File::upFind() {
 }
 
 
-# @description remove ansi codes from input or files given as argument
-# @arg $@ files:String[] the files to filter
-# @exitcode * if one of the filter command fails
-# @stdin you can use stdin as alternative to files argument
-# @stdout the filtered content
-# @see https://en.wikipedia.org/wiki/ANSI_escape_code
-# shellcheck disable=SC2120
-Filters::removeAnsiCodes() {
-  # cspell:disable
-  sed -E 's/\x1b\[[0-9;]*[mGKHF]//g' "$@"
-  # cspell:enable
-}
-
-
 # @description create a temp file using default TMPDIR variable
 # @env TMPDIR String (default value /tmp)
 # @arg $1 templateName:String template name to use(optional)
 Framework::createTempFile() {
   mktemp -p "${TMPDIR:-/tmp}" -t "${1:-}.XXXXXXXXXXXX"
-}
-
-
-# @description clone the repository if not done yet, else pull it if no change in it
-# @arg $1 dir:String directory in which repository is installed or will be cloned
-# @arg $2 repo:String repository url
-# @arg $3 cloneCallback:Function callback on successful clone
-# @arg $4 pullCallback:Function callback on successful pull
-# @env GIT_CLONE_OPTIONS:String additional options to pass to git clone command
-# @env SUDO String allows to use custom sudo prefix command
-# @exitcode 0 on successful pulling/cloning, 1 on failure
-Git::cloneOrPullIfNoChanges() {
-  local dir="$1"
-  shift || true
-  local repo="$1"
-  shift || true
-  local cloneCallback=${1:-}
-  shift || true
-  local pullCallback=${1:-}
-  shift || true
-
-  if [[ -d "${dir}/.git" ]]; then
-    local exitCode=0
-    Git::pullIfNoChanges "${dir}" || exitCode=$?
-    if [[ "${exitCode}" =~ ^[245]$ ]]; then
-      # changes detected or pull not applicable
-      return 0
-    elif [[ "${exitCode}" != "0" ]]; then
-      return "${exitCode}"
-    fi
-    # shellcheck disable=SC2086
-    if [[ "$(type -t ${pullCallback})" = "function" ]]; then
-      ${pullCallback} "${dir}"
-    fi
-  else
-    Log::displayInfo "cloning ${repo} ..."
-    if ! ${SUDO:-} test -d "${dir%/*}"; then
-      ${SUDO:-} mkdir -p "${dir%/*}"
-    fi
-    # shellcheck disable=SC2086,SC2248
-    if ${SUDO:-} git clone ${GIT_CLONE_OPTIONS} --progress "$@" "${repo}" "${dir}"; then
-      # shellcheck disable=SC2086
-      if [[ "$(type -t ${cloneCallback})" = "function" ]]; then
-        ${cloneCallback} "${dir}"
-      fi
-    else
-      Log::displayError "Cloning '${repo}' on '${dir}' failed"
-      return 1
-    fi
-  fi
-}
-
-
-# @description pull git directory only if no change has been detected
-# @arg $1 dir:String the git directory to pull
-# @exitcode 0 on successful pulling
-# @exitcode 1 on any other failure
-# @exitcode 2 changes detected, pull avoided
-# @exitcode 3 not a git directory
-# @exitcode 4 not able to update index
-# @exitcode 5 not a branch, pull avoided
-# @stderr diagnostics information is displayed
-# @env SUDO String allows to use custom sudo prefix command
-Git::pullIfNoChanges() {
-
-  if [[ "${REQUIRE_FUNCTION_GIT_REQUIRE_GIT_COMMAND_LOADED:-0}" != 1 ]]; then
-    echo >&2 "Requirement Git::requireGitCommand has not been loaded"
-    exit 1
-  fi
-
-  local dir="$1"
-  if [[ ! -d "${dir}/.git" ]]; then
-    return 3
-  fi
-  (
-    cd "${dir}" || return 3
-    if ! ${SUDO:-} git update-index --refresh &>/dev/null; then
-      Log::displayWarning "Impossible to update git index of '${dir}' - check if you have modified file"
-      return 4
-    fi
-    if ! ${SUDO:-} git diff-index --quiet HEAD --; then
-      Log::displayWarning "Pulling git repository '${dir}' avoided as changes detected"
-      return 2
-    fi
-    if ! ${SUDO:-} git symbolic-ref -q HEAD; then
-      Log::displayWarning "Pulling git repository '${dir}' avoided as you are not on a branch"
-      return 5
-    fi
-    Log::displayInfo "Pull git repository '${dir}' as no changes detected"
-    ${SUDO:-} git pull --progress
-  )
-}
-
-
-# @description ensure command git is available
-# @exitcode 1 if git command not available
-# @stderr diagnostics information is displayed
-Git::requireGitCommand() {
-  export REQUIRE_FUNCTION_GIT_REQUIRE_GIT_COMMAND_LOADED=1
-
-  Assert::commandExists git
 }
 
 
@@ -818,14 +598,6 @@ Linux::requireJqCommand() {
 }
 
 
-# @description ensure command tar is available
-# @exitcode 1 if tar command not available
-# @stderr diagnostics information is displayed
-Linux::requireTarCommand() {
-  Assert::commandExists tar
-}
-
-
 declare -g FIRST_LOG_DATE LOG_LAST_LOG_DATE LOG_LAST_LOG_DATE_INIT LOG_LAST_DURATION_STR
 FIRST_LOG_DATE="${EPOCHREALTIME/[^0-9]/}"
 LOG_LAST_LOG_DATE="${FIRST_LOG_DATE}"
@@ -913,19 +685,6 @@ Log::displayInfo() {
     echo -e "${__INFO_COLOR}${type}    - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
   fi
   Log::logInfo "$1" "${type}"
-}
-
-
-# @description Display message using skip color (yellow)
-# @arg $1 message:String the message to display
-# @env DISPLAY_DURATION int (default 0) if 1 display elapsed time information between 2 info logs
-# @env LOG_CONTEXT String allows to contextualize the log
-Log::displaySkipped() {
-  if ((BASH_FRAMEWORK_DISPLAY_LEVEL >= __LEVEL_INFO)); then
-    Log::computeDuration
-    echo -e "${__SKIPPED_COLOR}SKIPPED - ${LOG_CONTEXT:-}${LOG_LAST_DURATION_STR:-}${1}${__RESET_COLOR}" >&2
-  fi
-  Log::logSkipped "$1"
 }
 
 
@@ -1063,15 +822,6 @@ Log::logMessage() {
     date="$(date '+%Y-%m-%d %H:%M:%S')"
     touch "${BASH_FRAMEWORK_LOG_FILE}"
     printf "%s|%7s|%s\n" "${date}" "${levelMsg}" "${msg}" >>"${BASH_FRAMEWORK_LOG_FILE}"
-  fi
-}
-
-
-# @description log message to file
-# @arg $1 message:String the message to display
-Log::logSkipped() {
-  if ((BASH_FRAMEWORK_LOG_LEVEL >= __LEVEL_INFO)); then
-    Log::logMessage "${2:-SKIPPED}" "$1"
   fi
 }
 
@@ -1221,315 +971,6 @@ Retry::parameterized() {
     fi
   done
   return 0
-}
-
-
-# @description generates markdown file from template by
-# replacing @@@command_help@@@ by the help of the command
-# eg: @@@test_help@@@ will be replaced by the output
-# of the command `test --help` in the directory provided
-#
-# @arg $1 templateFile:String the file to use as template
-# @arg $2 targetFile:String the target file
-# @arg $3 fromDir:String the directory from which commands will be searched
-# @arg $4 tokenNotFoundCount:&int (passed by reference) number of tokens @@@command_help@@@ not found in the template file
-# @arg $5 excludeFilesPattern:String grep exclude pattern (eg: '^(compile)$') (default value: "")
-# @stderr diagnostics logs
-# @stdout the generated markdown with help of the matching command
-ShellDoc::generateMdFileFromTemplate() {
-  local templateFile="$1"
-  local targetFile="$2"
-  local fromDir="$3"
-  local -n tokenNotFoundCount=$4
-  local excludeFilesPattern="${5:-}"
-
-  local -a grepExclude
-  local startTime endTime
-
-  if [[ -z "${excludeFilesPattern}" ]]; then
-    grepExclude=(cat)
-  else
-    grepExclude=(grep -E -v "${excludeFilesPattern}")
-  fi
-
-  cp "${templateFile}" "${targetFile}"
-
-  startTime=$(date +%s.%3N)
-  ((nbTokensGenerated = 0)) || true
-  while IFS= read -r relativeFile; do
-    local token="${relativeFile#./}"
-    token="${token////_}"
-    if grep -q "@@@${token}_help@@@" "${targetFile}"; then
-      Log::displayInfo "generate help for ${token}"
-      ( #
-        (cd "${fromDir}" && "${relativeFile}" --help) |
-          File::replaceTokenByInput "@@@${token}_help@@@" "${targetFile}"
-      ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${FRAMEWORK_ROOT_DIR}") --help error caught"
-    else
-      ((++tokenNotFoundCount))
-      Log::displayError "token ${token} not found in ${targetFile}"
-    fi
-    ((nbTokensGenerated++)) || true
-  done < <(cd "${fromDir}" && find . -type f -executable | "${grepExclude[@]}")
-  endTime=$(date +%s.%3N)
-  Log::displayInfo "${nbTokensGenerated} commands' help replaced in $(echo "scale=3; ${endTime} - ${startTime}" | bc)seconds"
-}
-
-
-# @description extract shDoc from file
-#
-# @arg $1 file:String
-# @stdout the shell documentation in markdown format
-ShellDoc::generateShellDoc() {
-  local file="$1"
-
-  ShellDoc::installRequirementsIfNeeded
-  (
-    "${FRAMEWORK_VENDOR_DIR}/shdoc/shdoc" <"${file}" || {
-      Log::displayError "parse error of file ${file}"
-      return 0
-    }
-  ) || true
-}
-
-
-# @description generate shell doc file from given directory
-#
-# @arg $1 dir:String
-# @arg $2 relativeDir:String
-# @arg $3 targetDocFile:String the markdown file generated using shdoc
-# @arg $4 weight:Int weight for docsy index. Eg: 10 for top level, 20 for second level, etc.
-# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
-# @arg $6 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
-# @exitcode 0 if file has been generated
-# @exitcode 1 if file is empty or error
-ShellDoc::generateShellDocDir() {
-  local dir="$1"
-  local relativeDir="$2"
-  local targetDocFile="$3"
-  local weight="$4"
-  local repositoryUrl="${5:-}"
-  local excludeFilesPattern="${6:-}"
-  local namespaceFile
-  local relativeFile
-
-  local -a grepExclude
-  if [[ -z "${excludeFilesPattern}" ]]; then
-    grepExclude=(cat)
-  else
-    grepExclude=(grep -E -v "${excludeFilesPattern}")
-  fi
-
-  namespaceFile="$(mktemp -p "${TMPDIR:-/tmp}" -t bash-tools-shdoc-namespace-XXXXXX)"
-  Log::displayInfo "Generating ${targetDocFile} based on ${namespaceFile}"
-
-  (
-    local firstFile=1
-    # generate one big sh file with all sh files of the directory
-    echo '#!/usr/bin/env bash' >"${namespaceFile}"
-    echo "# @name ${relativeDir}" >>"${namespaceFile}"
-    while IFS= read -r relativeFile; do
-      relativeFile="${relativeFile#./}"
-      (
-        if [[ "${firstFile}" = "1" && "${relativeFile}" != "_.sh" ]]; then
-          (
-            echo "# @description Directory ${relativeDir}"
-            echo
-          ) >>"${namespaceFile}"
-        fi
-
-        echo "# @section ${relativeDir}/${relativeFile}"
-        if [[ -n "${repositoryUrl}" ]]; then
-          echo "# @description [file source ${relativeDir}/${relativeFile}](${repositoryUrl}/tree/master/${relativeDir}/${relativeFile})"
-        else
-          echo "# @description file source ${relativeDir}/${relativeFile}"
-        fi
-        # remove shebang/unwanted strings
-        sed -E \
-          -e '1d' \
-          -e '/^[ \t]*# cspell:/d' \
-          -e '/^[ \t]*# jscpd:/d' \
-          -e '/^[ \t]*# shellcheck /d' \
-          "${dir}/${relativeFile}"
-      ) >>"${namespaceFile}"
-      firstFile=0
-    done < <(cd "${dir}" && find . -maxdepth 1 -name "*.sh" | "${grepExclude[@]}" | LC_ALL=C sort)
-
-    local doc
-    doc="$(ShellDoc::generateShellDoc "${namespaceFile}")"
-    if (("$(grep -c . <<<"${doc}")" > 1)); then
-      # remove index that is auto managed by docsy
-      # increment title level by one (#)
-      sed -E \
-        -e '/^## Index/,/## /d' \
-        -e 's/^(##*) (.*)$/#\1 \2/' \
-        <<<"${doc}" >"${targetDocFile}"
-      # add front matter for docsy
-      (
-        echo "---"
-        echo "title: Namespace ${relativeDir}"
-        echo "description: Documentation for ${relativeDir} directory"
-        echo "linkTitle: '${relativeDir##*/}::'"
-        echo "type: docs"
-        echo "weight: ${weight}"
-        echo "creationDate: 2026-03-01"
-        echo "lastUpdated: $(date '+%Y-%m-%d')"
-        echo "---"
-        echo
-      ) | cat - "${targetDocFile}" >"${targetDocFile}.tmp"
-      mv "${targetDocFile}.tmp" "${targetDocFile}"
-      return 0
-    else
-      return 1
-    fi
-  )
-}
-
-
-# @description generate doc + index
-# @arg $1 fromDir:String
-# @arg $2 fromDirRelative:String
-# @arg $3 docDir:String
-# @arg $4 indexFile:String
-# @arg $5 repositoryUrl:String base url for src file (eg:https://github.com/fchastanet/bash-tools-framework)
-# @arg $6 excludeDirectoriesPattern:String grep exclude pattern. Eg: '/testsData|/_.*'
-# @arg $7 excludeFilesPattern:String grep exclude pattern. Eg: '(/_\.sh|/ZZZ\.sh|/__all\.sh)$'
-# @arg $8 indexFileTemplate:String template file for index.
-ShellDoc::generateShellDocsFromDir() {
-  local fromDir="$1"
-  local fromDirRelative="$2"
-  local docDir="$3"
-  local indexFile="$4"
-  local repositoryUrl="$5"
-  local excludeDirectoriesPattern="$6"
-  local excludeFilesPattern="$7"
-  local indexFileTemplate="$8"
-
-  # exclude dir pattern
-  local -a grepExclude
-  if [[ -z "${excludeDirectoriesPattern}" ]]; then
-    grepExclude=(cat)
-  else
-    grepExclude=(grep -E -v "${excludeDirectoriesPattern}")
-  fi
-
-  # generate one .md per directory
-  local relativeDir
-  local directory
-  local targetDocFile
-  local targetDocFileRelative
-  local indexFileRelative
-  local -i weight=1
-
-  while IFS= read -r relativeDir; do
-    relativeDir="${relativeDir#./}"
-    targetDocFile="${docDir}/${relativeDir}.md"
-    targetDocFileRelative="$(realpath --canonicalize-missing --relative-to "${indexFile%/*}" "${targetDocFile}")"
-    ((weight = weight + 2)) || true
-    if [[ "${relativeDir}" =~ / ]]; then
-      directory="${relativeDir%/*}"
-      indexFileRelative="${docDir}/${directory}/_index.md"
-    else
-      directory=""
-      indexFileRelative="${docDir}/_index.md"
-    fi
-    local targetDocFileDir="${targetDocFile%/*}"
-    if [[ ! -d "${targetDocFileDir}" ]]; then
-      mkdir -p "${targetDocFileDir}" || true
-    fi
-    if ShellDoc::generateShellDocDir \
-      "${fromDir}/${relativeDir}" \
-      "${fromDirRelative}/${relativeDir}" \
-      "${targetDocFile}" \
-      "${weight}" \
-      "${repositoryUrl}" \
-      "${excludeFilesPattern}" && [[ -n "$(tail -n +6 "${targetDocFile}")" ]]; then
-      Log::displayInfo "Generated doc for ${fromDirRelative}/${relativeDir} at ${targetDocFileRelative}"
-      if [[ ! -f "${indexFileRelative}" ]]; then
-        cp "${indexFileTemplate}" "${indexFileRelative}"
-        sed -i -E \
-          -e "s|%WEIGHT%|$((weight - 1))|g" \
-          -e "s|%DIRECTORY_NAME%|${directory}|g" \
-          -e "s|%DIRECTORY%|${fromDirRelative}/${directory}|g" \
-          -e "s|%DATE%|$(date '+%Y-%m-%d')|g" \
-          "${indexFileRelative}"
-      fi
-    else
-      rm -f "${targetDocFile}" || true
-      Log::displaySkipped "${fromDir}/${relativeDir} does not contain any documentation"
-    fi
-  done < <(cd "${fromDir}" && find . -type d -name '[^.]*' | "${grepExclude[@]}" | LC_ALL=C sort)
-}
-
-
-BASH_FRAMEWORK_SHDOC_INSTALLED_PATH="vendor/.shDocInstalled"
-BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT=86400 # 1 day
-
-# @description install requirements to execute shdoc
-# @warning cloning is skipped if vendor/.shDocInstalled file exists
-# @warning a new check is done everyday
-# @warning repository is not updated if a change is detected
-# @env BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT int default value 86400 (86400 seconds = 1 day)
-# @set BASH_FRAMEWORK_SHDOC_INSTALLED String the file created when git clone succeeded
-# @see https://github.com/fchastanet/shdoc
-# @stderr diagnostics information is displayed
-# @feature Git::cloneOrPullIfNoChanges
-ShellDoc::installRequirementsIfNeeded() {
-  local BASH_FRAMEWORK_SHDOC_INSTALLED="${FRAMEWORK_ROOT_DIR}/${BASH_FRAMEWORK_SHDOC_INSTALLED_PATH}"
-  if [[ -d "${FRAMEWORK_ROOT_DIR}/vendor" ]]; then
-    mkdir -p "${FRAMEWORK_ROOT_DIR}/vendor" || return 1
-  fi
-  if [[ "$(
-    Cache::getFileContentIfNotExpired \
-      "${BASH_FRAMEWORK_SHDOC_INSTALLED}" \
-      "${BASH_FRAMEWORK_SHDOC_CHECK_TIMEOUT}"
-  )" != "1" ]]; then
-    Log::displayInfo "Check if shdoc is up to date"
-    if GIT_CLONE_OPTIONS="--recursive" Git::cloneOrPullIfNoChanges \
-      "${FRAMEWORK_VENDOR_DIR:-${FRAMEWORK_ROOT_DIR}/vendor}/shdoc" \
-      "https://github.com/fchastanet/shdoc.git"; then
-      echo "1" >"${BASH_FRAMEWORK_SHDOC_INSTALLED}"
-    else
-      Log::fatal "unable to install shdoc library"
-    fi
-  fi
-}
-
-
-# @description install hadolint if necessary
-# @arg $1 targetFile:String
-# @feature Github::upgradeRelease
-Softwares::installHadolint() {
-  local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/hadolint}"
-  Github::upgradeRelease \
-    "${targetFile}" \
-    "https://github.com/hadolint/hadolint/releases/download/v@latestVersion@/hadolint-Linux-x86_64"
-}
-
-
-# @description install hadolint if necessary
-# @arg $1 targetFile:String
-# @feature Github::upgradeRelease
-Softwares::installShellcheck() {
-  local targetFile="${1:-${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck}"
-  # shellcheck disable=SC2329
-  install() {
-    local file="$1"
-    local targetFile="$2"
-    local version="$3"
-    local tempDir
-    tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-shellcheck-$$-XXXXXX)"
-    (
-      cd "${tempDir}" || exit 1
-      tar -xJvf "${file}" >&2
-      mv "shellcheck-v${version}/shellcheck" "${targetFile}"
-      chmod +x "${targetFile}"
-      rm -f "${file}" || true
-    )
-  }
-  INSTALL_CALLBACK=install Github::upgradeRelease \
-    "${targetFile}" \
-    "https://github.com/koalaman/shellcheck/releases/download/v@latestVersion@/shellcheck-v@latestVersion@.linux.x86_64.tar.xz"
 }
 
 
@@ -1798,7 +1239,7 @@ beforeParseCallback() {
 copyrightCallback() {
   #
   # shellcheck disable=SC2155,SC2154,SC2250
-  echo "Copyright (c) 2022-now François Chastanet"
+  echo "Copyright (c) 2026-now François Chastanet"
 }
 
 # shellcheck disable=SC2317 # if function is overridden
@@ -1837,7 +1278,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version 3.0"
+  echo "${SCRIPT_NAME} version 1.0"
   exit 0
 }
 
@@ -2010,20 +1451,92 @@ updateOptionContinuousIntegrationMode() {
 
 
 # shellcheck disable=SC2034
-declare generateSkipDockerBuildOption=1
+declare optionDefaultOutputDir="."
+declare -a rimageOptions=()
+declare -a argRimageWrapperFiles=()
+readonly RIMAGE_PULL_TIMEOUT=$((7 * 24 * 3600))
+
+rimageInstallCallback() {
+  local file="$1"
+  local targetFile="$2"
+  local version="$3"
+  local tempDir
+  tempDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-framework-rimage-$$-XXXXXX)"
+  (
+    cd "${tempDir}" || exit 1
+    tar -xzf "${file}" --strip-components=1 >&2
+    mv "rimage" "${targetFile}"
+    chmod +x "${targetFile}"
+    rm -f "${file}" || true
+  )
+}
+
+beforeParseCallback() {
+  Linux::requireJqCommand
+  UI::requireTheme
+  if [[ "${SKIP_RIMAGE_PULL:-0}" = "1" ]]; then
+    Log::displayInfo "SKIP_RIMAGE_PULL is set to 1, skipping rimage pull"
+    return
+  fi
+  # ensure rimage is available
+  local rimageDir="${RIMAGE_DIR:-${PERSISTENT_TMPDIR}/rimage}"
+  mkdir -p "${rimageDir}"
+  INSTALL_CALLBACK=rimageInstallCallback Github::upgradeRelease \
+    "${rimageDir}/rimage" \
+    "https://github.com/vlad-salone/rimage/releases/download/v@latestVersion@/rimage-@latestVersion@-x86_64-unknown-linux-gnu.tar.gz"
+  export PATH="${rimageDir}:$PATH"
+}
+
+unknownOption() {
+  rimageOptions+=("$1")
+}
+
+unknownArgument() {
+  if [[ -f "$1" ]]; then
+    argRimageWrapperFiles+=("$1")
+  else
+    rimageOptions+=("$1")
+  fi
+}
+
+rimageWrapperCallback() {
+  # shellcheck disable=SC2154
+  if [[ -z "${optionOutputDir}" ]]; then
+    optionOutputDir="${optionDefaultOutputDir}"
+  fi
+  if [[ ! -d "${optionOutputDir}" ]]; then
+    if ! mkdir -p "${optionOutputDir}"; then
+      Log::displayError \
+        "Command ${SCRIPT_NAME} - failed to create output directory '${optionOutputDir}'"
+      return 1
+    fi
+  fi
+}
 
 optionHelpCallback() {
-  docCommandHelp
+  local rimageHelpFile
+  rimageHelpFile="$(Framework::createTempFile "rimageHelp")"
+
+  "${RIMAGE_DIR:-${PERSISTENT_TMPDIR}/rimage}/rimage" --help >"${rimageHelpFile}"
+  rimageWrapperCommandHelp |
+    sed -E \
+      -e "/@@@RIMAGE_HELP@@@/r ${rimageHelpFile}" \
+      -e "/@@@RIMAGE_HELP@@@/d"
+  exit 0
+}
+
+optionVersionCallback() {
+  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}1.0"
+  echo -e "${__HELP_TITLE_COLOR}rimage version: ${__RESET_COLOR}$("${RIMAGE_DIR:-${PERSISTENT_TMPDIR}/rimage}/rimage" --version)"
   exit 0
 }
 
 
 # ------------------------------------------
-# Command docCommand
+# Command rimageWrapperCommand
 # ------------------------------------------
 
 # options variables initialization
-declare optionContinuousIntegrationMode="0"
 declare optionHelp="0"
 declare optionConfig="0"
 declare optionBashFrameworkConfig=""
@@ -2037,14 +1550,15 @@ declare optionNoColor="0"
 declare optionTheme="default"
 declare optionVersion="0"
 declare optionQuiet="0"
+declare optionContinuousIntegrationMode="0"
+declare sameDirectoryOption="0"
+declare optionOutputDir=""
 # arguments variables initialization
-# @description parse command options and arguments for docCommand
-docCommandParse() {
+declare argRimageCommand=""
+# @description parse command options and arguments for rimageWrapperCommand
+rimageWrapperCommandParse() {
   Log::displayDebug "Command ${SCRIPT_NAME} - parse arguments: ${BASH_FRAMEWORK_ARGV[*]}"
   Log::displayDebug "Command ${SCRIPT_NAME} - parse filtered arguments: ${BASH_FRAMEWORK_ARGV_FILTERED[*]}"
-  optionContinuousIntegrationMode="0"
-  local -i options_parse_optionParsedCountOptionContinuousIntegrationMode
-  ((options_parse_optionParsedCountOptionContinuousIntegrationMode = 0)) || true
   optionHelp="0"
   local -i options_parse_optionParsedCountOptionHelp
   ((options_parse_optionParsedCountOptionHelp = 0)) || true
@@ -2084,6 +1598,20 @@ docCommandParse() {
   optionQuiet="0"
   local -i options_parse_optionParsedCountOptionQuiet
   ((options_parse_optionParsedCountOptionQuiet = 0)) || true
+  optionContinuousIntegrationMode="0"
+  local -i options_parse_optionParsedCountOptionContinuousIntegrationMode
+  ((options_parse_optionParsedCountOptionContinuousIntegrationMode = 0)) || true
+  sameDirectoryOption="0"
+  local -i options_parse_optionParsedCountSameDirectoryOption
+  ((options_parse_optionParsedCountSameDirectoryOption = 0)) || true
+  optionOutputDir=""
+  local -i options_parse_optionParsedCountOptionOutputDir
+  ((options_parse_optionParsedCountOptionOutputDir = 0)) || true
+
+  argRimageCommand=""
+
+  local -i options_parse_argParsedCountArgRimageCommand
+  ((options_parse_argParsedCountArgRimageCommand = 0)) || true
 
 
   # shellcheck disable=SC2034
@@ -2092,23 +1620,7 @@ docCommandParse() {
     local options_parse_arg="$1"
     local argOptDefaultBehavior=0
     case "${options_parse_arg}" in
-      # Option 1/14
-      # optionContinuousIntegrationMode alts --ci
-      # type: Boolean min 0 max 1
-      --ci)
-        # shellcheck disable=SC2034
-        optionContinuousIntegrationMode="1"
-
-        if ((options_parse_optionParsedCountOptionContinuousIntegrationMode >= 1 )); then
-          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
-          return 1
-        fi
-        ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
-        updateOptionContinuousIntegrationMode "${options_parse_arg}" "${optionContinuousIntegrationMode}"
-
-        ;;
-
-      # Option 2/14
+      # Option 1/16
       # optionHelp alts --help|-h
       # type: Boolean min 0 max 1
       --help | -h)
@@ -2124,7 +1636,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 3/14
+      # Option 2/16
       # optionConfig alts --config
       # type: Boolean min 0 max 1
       --config)
@@ -2138,7 +1650,7 @@ docCommandParse() {
         ((++options_parse_optionParsedCountOptionConfig))
         ;;
 
-      # Option 4/14
+      # Option 3/16
       # optionBashFrameworkConfig alts --bash-framework-config
       # type: String min 0 max 1
       --bash-framework-config)
@@ -2159,7 +1671,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 5/14
+      # Option 4/16
       # optionInfoVerbose alts --verbose|-v
       # type: Boolean min 0 max 1
       --verbose | -v)
@@ -2177,7 +1689,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 6/14
+      # Option 5/16
       # optionDebugVerbose alts -vv
       # type: Boolean min 0 max 1
       -vv)
@@ -2195,7 +1707,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 7/14
+      # Option 6/16
       # optionTraceVerbose alts -vvv
       # type: Boolean min 0 max 1
       -vvv)
@@ -2213,7 +1725,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 8/14
+      # Option 7/16
       # optionLogLevel alts --log-level
       # type: String min 0 max 1
       # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
@@ -2241,7 +1753,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 9/14
+      # Option 8/16
       # optionLogFile alts --log-file
       # type: String min 0 max 1
       --log-file)
@@ -2264,7 +1776,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 10/14
+      # Option 9/16
       # optionDisplayLevel alts --display-level
       # type: String min 0 max 1
       # authorizedValues: OFF|ERR|ERROR|WARN|WARNING|INFO|DEBUG|TRACE
@@ -2292,7 +1804,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 11/14
+      # Option 10/16
       # optionNoColor alts --no-color
       # type: Boolean min 0 max 1
       --no-color)
@@ -2310,7 +1822,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 12/14
+      # Option 11/16
       # optionTheme alts --theme
       # type: String min 0 max 1
       # authorizedValues: default|default-force|noColor
@@ -2338,7 +1850,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 13/14
+      # Option 12/16
       # optionVersion alts --version
       # type: Boolean min 0 max 1
       --version)
@@ -2354,7 +1866,7 @@ docCommandParse() {
 
         ;;
 
-      # Option 14/14
+      # Option 13/16
       # optionQuiet alts --quiet|-q
       # type: Boolean min 0 max 1
       --quiet | -q)
@@ -2372,58 +1884,195 @@ docCommandParse() {
 
         ;;
 
+      # Option 14/16
+      # optionContinuousIntegrationMode alts --ci
+      # type: Boolean min 0 max 1
+      --ci)
+        # shellcheck disable=SC2034
+        optionContinuousIntegrationMode="1"
+
+        if ((options_parse_optionParsedCountOptionContinuousIntegrationMode >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionContinuousIntegrationMode))
+        updateOptionContinuousIntegrationMode "${options_parse_arg}" "${optionContinuousIntegrationMode}"
+
+        ;;
+
+      # Option 15/16
+      # sameDirectoryOption alts --same-dir
+      # type: Boolean min 0 max 1
+      --same-dir)
+        # shellcheck disable=SC2034
+        sameDirectoryOption="1"
+
+        if ((options_parse_optionParsedCountSameDirectoryOption >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountSameDirectoryOption))
+        ;;
+
+      # Option 16/16
+      # optionOutputDir alts --output-dir|-o
+      # type: String min 0 max 1
+      --output-dir | -o)
+        shift
+        if (($# == 0)); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - a value needs to be specified"
+          return 1
+        fi
+
+        if ((options_parse_optionParsedCountOptionOutputDir >= 1 )); then
+          Log::displayError "Command ${SCRIPT_NAME} - Option ${options_parse_arg} - Maximum number of option occurrences reached(1)"
+          return 1
+        fi
+        ((++options_parse_optionParsedCountOptionOutputDir))
+        # shellcheck disable=SC2034
+        optionOutputDir="$1"
+        rimageWrapperOutputDirCallback "${options_parse_arg}" "${optionOutputDir}"
+
+        ;;
+
       -*)
         unknownOption "${options_parse_arg}" || argOptDefaultBehavior=$?
         ;;
       *)
-        if [[ "${argOptDefaultBehavior}" = "0" ]]; then
-          # too much args and no unknownArgumentCallbacks configured
-          Log::displayError "Command ${SCRIPT_NAME} - Argument - too much arguments provided: $*"
-          return 1
+        ((minParsedArgIndex0 = 0)) || true
+        ((maxParsedArgIndex0 = 0)) || true
+        ((minParsedArgIndex1 = minParsedArgIndex0 + 1)) || true
+        ((maxParsedArgIndex1 = maxParsedArgIndex0 + 1)) || true
+        ((incrementArg = 1 ))
+        if ((0)); then
+          # Technical if - never reached
+          :
+
+        # Argument 1/1 - argRimageCommand
+        # Argument argRimageCommand min 1 max 1
+        # Argument argRimageCommand authorizedValues: avif|farbfeld|jpeg|jpeg_xl|mozjpeg|oxipng|png|ppm|qoi|webp|help
+        elif (( options_parse_parsedArgIndex >= minParsedArgIndex0 &&
+          options_parse_parsedArgIndex < maxParsedArgIndex1 )); then
+          if [[ ! "${options_parse_arg}" =~ avif|farbfeld|jpeg|jpeg_xl|mozjpeg|oxipng|png|ppm|qoi|webp|help ]]; then
+            Log::displayError "Command ${SCRIPT_NAME} - Argument command - value '${options_parse_arg}' is not part of authorized values(avif, farbfeld, jpeg, jpeg_xl, mozjpeg, oxipng, png, ppm, qoi, webp, help)"
+            return 1
+          fi
+          if ((options_parse_argParsedCountArgRimageCommand >= 1 )); then
+            Log::displayError "Command ${SCRIPT_NAME} - Argument command - Maximum number of argument occurrences reached(1)"
+            return 1
+          fi
+          ((++options_parse_argParsedCountArgRimageCommand))
+          # shellcheck disable=SC2034
+          argRimageCommand="${options_parse_arg}"
+
+
+        # else too much args
+        else
+
+
+          # no arg configured, call unknownArgumentCallback
+
+          # shellcheck disable=SC2317
+        unknownArgument "${options_parse_arg}"
+
         fi
-        ((incrementArg = 0))
         if ((incrementArg == 1)); then
           ((++options_parse_parsedArgIndex))
         fi
         ;;
     esac
     shift || true
-  done || return $?
+  done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  if ((options_parse_argParsedCountArgRimageCommand < 1 )); then
+    Log::displayError "Command ${SCRIPT_NAME} - Argument 'command' should be provided at least 1 time(s)"
+    return 1
+  fi || return $?
+
 
   commandOptionParseFinished
+  rimageWrapperCallback
 
 }
 
-# @description display command options and arguments help for docCommand
-docCommandHelp() {
+# @description display command options and arguments help for rimageWrapperCommand
+rimageWrapperCommandHelp() {
   echo -e "${__HELP_TITLE_COLOR}SYNOPSIS:${__RESET_COLOR}"
-  Array::wrap2 ' ' 76 4 "    " "Generate markdown documentation."
+  Array::wrap2 ' ' 76 4 "    " "Compression and conversion of images using Rimage." "https://github.com/vlad-salone/rimage" ""
   echo
   echo
 
   # ------------------------------------------
   # usage section
   # ------------------------------------------
-  Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "doc [OPTIONS] "
+  Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" "rimageWrapper [OPTIONS] [ARGUMENTS]"
   echo
   # ------------------------------------------
   # usage/options section
   # ------------------------------------------
-  optionsAltList=("[--ci]" "[--help|-h]" "[--config]" "[--bash-framework-config <bash-framework-config>]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--log-level <log-level>]" "[--log-file <log-file>]" "[--display-level <display-level>]" "[--no-color]" "[--theme <theme>]" "[--version]" "[--quiet|-q]"
+  optionsAltList=("[--help|-h]" "[--config]" "[--bash-framework-config <bash-framework-config>]" "[--verbose|-v]" "[-vv]" "[-vvv]" "[--log-level <log-level>]" "[--log-file <log-file>]" "[--display-level <display-level>]" "[--no-color]" "[--theme <theme>]" "[--version]" "[--quiet|-q]" "[--ci]" "[--same-dir]" "[--output-dir|-o <OutputDir>]"
   )
   Array::wrap2 " " 80 2 "${__HELP_TITLE_COLOR}USAGE:${__RESET_COLOR}" \
-    "doc" "${optionsAltList[@]}"
+    "rimageWrapper" "${optionsAltList[@]}"
   echo
+
+  # ------------------------------------------
+  # usage/arguments section
+  # ------------------------------------------
+  echo
+  echo -e "${__HELP_TITLE_COLOR}ARGUMENTS:${__RESET_COLOR}"
+
+  Array::wrap2 " " 80 2 "  ${__HELP_OPTION_COLOR}command${__HELP_NORMAL} {single} (mandatory)"
+  Array::wrap2 ' ' 76 4 "    " "command to run with rimageWrapper, e.g. mozjpeg, oxipng, etc." ""
+  echo
+
+  echo "    Possible values:"
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}avif:${__RESET_COLOR} Encode images into AVIF format. (Small and Efficient)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}farbfeld:${__RESET_COLOR} Encode images into Farbfeld format. (Bitmapped)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}jpeg:${__RESET_COLOR} Encode images into JPEG format. (Progressive-able)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}jpeg_xl:${__RESET_COLOR} Encode images into JpegXL format. (Big but Lossless)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}mozjpeg:${__RESET_COLOR} Encode images into JPEG format using MozJpeg codec.
+  (RECOMMENDED and Small)
+  "
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}oxipng:${__RESET_COLOR} Encode images into PNG format using OxiPNG codec.
+  (Progressive-able)
+  "
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}png:${__RESET_COLOR} Encode images into PNG format."
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}ppm:${__RESET_COLOR} Encode images into PPM format. (Bitmapped)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}qoi:${__RESET_COLOR} Encode images into QOI format. (Trendy and Small)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}webp:${__RESET_COLOR} Encode images into WebP format. (Lossless-able)"
+  echo
+  Array::wrap2 ' ' 76 8 "      - ${__OPTION_COLOR}help:${__RESET_COLOR} Print this message or the help of the given subcommand(s)"
+  echo
+
 
   # ------------------------------------------
   # options section
   # ------------------------------------------
-  echo
-  echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
-  echo -e "  ${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} {single}"
-  Array::wrap2 ' ' 76 4 "    " "Activate continuous integration mode (tmp folder not shared with host)" ""
-  echo
-
   echo
   echo -e "${__HELP_TITLE_COLOR}GLOBAL OPTIONS:${__RESET_COLOR}"
   echo -e "  ${__HELP_OPTION_COLOR}--help${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-h${__HELP_NORMAL} {single}"
@@ -2524,23 +2173,85 @@ docCommandHelp() {
   Array::wrap2 ' ' 76 4 "    " "Quiet mode, doesn't display any output."
   echo
 
+  echo
+  echo -e "${__HELP_TITLE_COLOR}OPTIONS:${__RESET_COLOR}"
+  echo -e "  ${__HELP_OPTION_COLOR}--ci${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Activate continuous integration mode (tmp folder not shared with host)" ""
+  echo
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--same-dir${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Write output file in same directory as source file" "and with the same base name (except extension)" "Incompatible with the option --output-dir" ""
+  echo
+
+
+  echo -e "  ${__HELP_OPTION_COLOR}--output-dir${__HELP_NORMAL}, ${__HELP_OPTION_COLOR}-o <OutputDir>${__HELP_NORMAL} {single}"
+  Array::wrap2 ' ' 76 4 "    " "Define output directory of this command (default: <currentDirectory>)" "Incompatible with the option --same-dir" ""
+  echo
+
   # ------------------------------------------
   # longDescription section
   # ------------------------------------------
   echo
   echo
   echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
-  declare -a docCommandLongDescription=(
-  "INTERNAL TOOL"
+  declare -a rimageWrapperCommandLongDescription=(
+  "Compression and conversion of images using Rimage."
+  "https://github.com/vlad-salone/rimageWrapper"
+  ""
+  "${__HELP_TITLE_COLOR}RIMAGE HELP${__RESET_COLOR}"
+  ""
+  "@@@RIMAGE_HELP@@@"
+  ""
+  "For more info use rimageWrapper help <command>"
+  "E.g.: rimageWrapper help mozjpeg"
+  ""
+  "${__HELP_TITLE_COLOR}RIMAGE ADVANCED OPTIONS${__RESET_COLOR}"
+  ""
+  "Options:"
+  "--quality <NUM>"
+  "    Quality, values 60-80 are recommended."
+  "    [default: 75]"
+  ""
+  "--chroma_quality <NUM>"
+  "    Separate chrome quality."
+  ""
+  "--baseline"
+  "    Set to use baseline encoding (by default is progressive)."
+  ""
+  "--no_optimize_coding"
+  "    Set to make files larger for no reason."
+  ""
+  "--smoothing <NUM>"
+  "    Use MozJPEG's smoothing."
+  ""
+  "--colorspace <COLOR>"
+  "    Set color space of JPEG being written."
+  "    [default: ycbcr]"
+  "    [possible values: ycbcr, grayscale, rgb]"
+  ""
+  "--multipass"
+  "    Specifies whether multiple scans should be considered during trellis quantization."
+  ""
+  "--subsample <PIX>"
+  "    Sets chroma subsampling."
+  ""
+  "--qtable <TABLE>"
+  "    Use a specific quantization table."
+  "    [default: NRobidoux]"
+  ""
+  "    [possible values: AhumadaWatsonPeterson, AnnexK, Flat,"
+  "     KleinSilversteinCarney, MSSSIM, NRobidoux,"
+  "     PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]"
   )
-  Array::wrap2 ' ' 76 0 "${docCommandLongDescription[@]}"
+  Array::wrap2 ' ' 76 0 "${rimageWrapperCommandLongDescription[@]}"
   echo
   # ------------------------------------------
   # version section
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "3.0"
+  echo "1.0"
   # ------------------------------------------
   # author section
   # ------------------------------------------
@@ -2552,7 +2263,7 @@ docCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}SOURCE FILE: ${__RESET_COLOR}"
-  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/doc/doc-binary.yaml"
+  echo "https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/rimageWrapper/rimageWrapper-binary.yaml"
   # ------------------------------------------
   # license section
   # ------------------------------------------
@@ -2568,308 +2279,49 @@ docCommandHelp() {
 
 beforeParseCallback
 
-docCommandParse "$@"
+rimageWrapperCommandParse "$@"
 MAIN_FUNCTION_NAME="main"
 main() {
 
-Linux::requireTarCommand
-Compiler::Embed::extractFileFromBase64 \
-  "${PERSISTENT_TMPDIR:-/tmp}/c7be9842c678b2221ef893463b394966bc78bb0d3ef06871d5097f3735aca616/mermaidCommandHelp" \
-  "VXNhZ2U6IG1tZGMgW29wdGlvbnNdCgpPcHRpb25zOgogIC1WLCAtLXZlcnNpb24gICAgICAgICAg \
-ICAgICAgICAgICAgICAgICAgICAgICAgIG91dHB1dCB0aGUgdmVyc2lvbiBudW1iZXIKICAtdCwg \
-LS10aGVtZSBbdGhlbWVdICAgICAgICAgICAgICAgICAgICAgICAgICAgICBUaGVtZSBvZiB0aGUg \
-Y2hhcnQgKGNob2ljZXM6ICJkZWZhdWx0IiwgImZvcmVzdCIsICJkYXJrIiwgIm5ldXRyYWwiLCBk \
-ZWZhdWx0OiAiZGVmYXVsdCIpCiAgLXcsIC0td2lkdGggW3dpZHRoXSAgICAgICAgICAgICAgICAg \
-ICAgICAgICAgICAgV2lkdGggb2YgdGhlIHBhZ2UgKGRlZmF1bHQ6IDgwMCkKICAtSCwgLS1oZWln \
-aHQgW2hlaWdodF0gICAgICAgICAgICAgICAgICAgICAgICAgICBIZWlnaHQgb2YgdGhlIHBhZ2Ug \
-KGRlZmF1bHQ6IDYwMCkKICAtaSwgLS1pbnB1dCA8aW5wdXQ+ICAgICAgICAgICAgICAgICAgICAg \
-ICAgICAgICBJbnB1dCBtZXJtYWlkIGZpbGUuIEZpbGVzIGVuZGluZyBpbiAubWQgd2lsbCBiZSB0 \
-cmVhdGVkIGFzIE1hcmtkb3duIGFuZCBhbGwgY2hhcnRzIChlLmcuIGBgYG1lcm1haWQgKC4uLilg \
-YGAgb3IgOjo6bWVybWFpZCAoLi4uKTo6Oikgd2lsbCBiZSBleHRyYWN0ZWQgYW5kIGdlbmVyYXRl \
-ZC4gVXNlIGAtYCB0byByZWFkIGZyb20gc3RkaW4uCiAgLW8sIC0tb3V0cHV0IFtvdXRwdXRdICAg \
-ICAgICAgICAgICAgICAgICAgICAgICAgT3V0cHV0IGZpbGUuIEl0IHNob3VsZCBiZSBlaXRoZXIg \
-bWQsIHN2ZywgcG5nLCBwZGYgb3IgdXNlIGAtYCB0byBvdXRwdXQgdG8gc3Rkb3V0LiBPcHRpb25h \
-bC4gRGVmYXVsdDogaW5wdXQgKyAiLnN2ZyIKICAtYSwgLS1hcnRlZmFjdHMgW2FydGVmYWN0c10g \
-ICAgICAgICAgICAgICAgICAgICBPdXRwdXQgYXJ0ZWZhY3RzIHBhdGguIE9ubHkgdXNlZCB3aXRo \
-IE1hcmtkb3duIGlucHV0IGZpbGUuIE9wdGlvbmFsLiBEZWZhdWx0OiBvdXRwdXQgZGlyZWN0b3J5 \
-CiAgLWUsIC0tb3V0cHV0Rm9ybWF0IFtmb3JtYXRdICAgICAgICAgICAgICAgICAgICAgT3V0cHV0 \
-IGZvcm1hdCBmb3IgdGhlIGdlbmVyYXRlZCBpbWFnZS4gKGNob2ljZXM6ICJzdmciLCAicG5nIiwg \
-InBkZiIsIGRlZmF1bHQ6IExvYWRlZCBmcm9tIHRoZSBvdXRwdXQgZmlsZSBleHRlbnNpb24pCiAg \
-LWIsIC0tYmFja2dyb3VuZENvbG9yIFtiYWNrZ3JvdW5kQ29sb3JdICAgICAgICAgQmFja2dyb3Vu \
-ZCBjb2xvciBmb3IgcG5ncy9zdmdzIChub3QgcGRmcykuIEV4YW1wbGU6IHRyYW5zcGFyZW50LCBy \
-ZWQsICcjRjBGMEYwJy4gKGRlZmF1bHQ6ICJ3aGl0ZSIpCiAgLWMsIC0tY29uZmlnRmlsZSBbY29u \
-ZmlnRmlsZV0gICAgICAgICAgICAgICAgICAgSlNPTiBjb25maWd1cmF0aW9uIGZpbGUgZm9yIG1l \
-cm1haWQuCiAgLUMsIC0tY3NzRmlsZSBbY3NzRmlsZV0gICAgICAgICAgICAgICAgICAgICAgICAg \
-Q1NTIGZpbGUgZm9yIHRoZSBwYWdlLgogIC1JLCAtLXN2Z0lkIFtzdmdJZF0gICAgICAgICAgICAg \
-ICAgICAgICAgICAgICAgIFRoZSBpZCBhdHRyaWJ1dGUgZm9yIHRoZSBTVkcgZWxlbWVudCB0byBi \
-ZSByZW5kZXJlZC4KICAtcywgLS1zY2FsZSBbc2NhbGVdICAgICAgICAgICAgICAgICAgICAgICAg \
-ICAgICBQdXBwZXRlZXIgc2NhbGUgZmFjdG9yIChkZWZhdWx0OiAxKQogIC1mLCAtLXBkZkZpdCAg \
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNjYWxlIFBERiB0byBmaXQgY2hhcnQK \
-ICAtcSwgLS1xdWlldCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTdXBwcmVz \
-cyBsb2cgb3V0cHV0CiAgLXAgLS1wdXBwZXRlZXJDb25maWdGaWxlIFtwdXBwZXRlZXJDb25maWdG \
-aWxlXSAgSlNPTiBjb25maWd1cmF0aW9uIGZpbGUgZm9yIHB1cHBldGVlci4KICAtLWljb25QYWNr \
-cyA8aWNvbnMuLi4+ICAgICAgICAgICAgICAgICAgICAgICAgICBJY29uIHBhY2tzIHRvIHVzZSwg \
-ZS5nLiBAaWNvbmlmeS1qc29uL2xvZ29zLiBUaGVzZSBzaG91bGQgYmUgSWNvbmlmeSBOUE0gcGFj \
-a2FnZXMgdGhhdCBleHBvc2UgYSBpY29ucy5qc29uIGZpbGUsIHNlZSBodHRwczovL2ljb25pZnku \
-ZGVzaWduL2RvY3MvaWNvbnMvanNvbi5odG1sLiBUaGVzZSB3aWxsIGJlIGRvd25sb2FkZWQgZnJv \
-bSBodHRwczovL3Vua3BnLmNvbSB3aGVuIG5lZWRlZC4gKGRlZmF1bHQ6IFtdKQogIC0taWNvblBh \
-Y2tzTmFtZXNBbmRVcmxzIDxwcmVmaXgjaWNvbnN1cmwuLi4+ICAgIEljb24gcGFja3MgdG8gdXNl \
-LCBlLmcuIGF6dXJlI2h0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9OYWtheWFtYUtl \
-bnRvL0F6dXJlSWNvbnMvcmVmcy9oZWFkcy9tYWluL2ljb25zLmpzb24gd2hlcmUgdGhlIG5hbWUg \
-KHByZWZpeCkgb2YgdGhlIGljb24gcGFjayBpcyBkZWZpbmVkIGJlZm9yZSB0aGUgIiMiIGFuZCB0 \
-aGUgdXJsIG9mIHRoZSBqc29uIGRlZmluaXRpb24gYWZ0ZXIgdGhlICIjIi4gVGhlc2Ugc2hvdWxk \
-IGJlIEljb25pZnkganNvbiBmaWxlIGZvcm1hdHRlZCBhcyBJY29uaWZ5SnNvbiwgc2VlIGh0dHBz \
-Oi8vaWNvbmlmeS5kZXNpZ24vZG9jcy9pY29ucy9qc29uLmh0bWwuIFRoZXNlIHdpbGwgYmUgZG93 \
-bmxvYWRlZCB3aGVuIG5lZWRlZC4gKGRlZmF1bHQ6IFtdKQogIC1oLCAtLWhlbHAgICAgICAgICAg \
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRpc3BsYXkgaGVscCBmb3IgY29tbWFuZAo=" \
-  "644"
+if [[ "${argRimageCommand}" = "help" ]]; then
+  "${PERSISTENT_TMPDIR}/rimage/rimage" help "${rimageOptions[@]}"
+  exit 0
+fi
 
-declare -gx embed_file_mermaidCommandHelp="${PERSISTENT_TMPDIR:-/tmp}/c7be9842c678b2221ef893463b394966bc78bb0d3ef06871d5097f3735aca616/mermaidCommandHelp"
-
-Linux::requireTarCommand
-Compiler::Embed::extractFileFromBase64 \
-  "${PERSISTENT_TMPDIR:-/tmp}/5f6881d68479e771e68edb254c537b443d92e97ecfa1c46d2b024983b3e78a0e/rimageCommandHelp" \
-  "U1lOT1BTSVM6CiAgICBDb21wcmVzc2lvbiBhbmQgY29udmVyc2lvbiBvZiBpbWFnZXMgdXNpbmcg \
-UmltYWdlLgogICAgaHR0cHM6Ly9naXRodWIuY29tL3ZsYWQtc2Fsb25lL3JpbWFnZQoKClVTQUdF \
-OiByaW1hZ2VXcmFwcGVyIFtPUFRJT05TXSBbQVJHVU1FTlRTXQpVU0FHRTogcmltYWdlV3JhcHBl \
-ciBbLS1oZWxwfC1oXSBbLS1jb25maWddCiAgWy0tYmFzaC1mcmFtZXdvcmstY29uZmlnIDxiYXNo \
-LWZyYW1ld29yay1jb25maWc+XSBbLS12ZXJib3NlfC12XSBbLXZ2XSBbLXZ2dl0KICBbLS1sb2ct \
-bGV2ZWwgPGxvZy1sZXZlbD5dIFstLWxvZy1maWxlIDxsb2ctZmlsZT5dCiAgWy0tZGlzcGxheS1s \
-ZXZlbCA8ZGlzcGxheS1sZXZlbD5dIFstLW5vLWNvbG9yXSBbLS10aGVtZSA8dGhlbWU+XSBbLS12 \
-ZXJzaW9uXQogIFstLXF1aWV0fC1xXSBbLS1jaV0gWy0tc2FtZS1kaXJdIFstLW91dHB1dC1kaXJ8 \
-LW8gPE91dHB1dERpcj5dCgpBUkdVTUVOVFM6CiAgY29tbWFuZCB7c2luZ2xlfSAobWFuZGF0b3J5 \
-KSAgICBjb21tYW5kIHRvIHJ1biB3aXRoIHJpbWFnZVdyYXBwZXIsIGUuZy4gbW96anBlZywgb3hp \
-cG5nLCBldGMuCgogICAgUG9zc2libGUgdmFsdWVzOgogICAgICAtIGF2aWY6IEVuY29kZSBpbWFn \
-ZXMgaW50byBBVklGIGZvcm1hdC4gKFNtYWxsIGFuZCBFZmZpY2llbnQpCiAgICAgIC0gZmFyYmZl \
-bGQ6IEVuY29kZSBpbWFnZXMgaW50byBGYXJiZmVsZCBmb3JtYXQuIChCaXRtYXBwZWQpCiAgICAg \
-IC0ganBlZzogRW5jb2RlIGltYWdlcyBpbnRvIEpQRUcgZm9ybWF0LiAoUHJvZ3Jlc3NpdmUtYWJs \
-ZSkKICAgICAgLSBqcGVnX3hsOiBFbmNvZGUgaW1hZ2VzIGludG8gSnBlZ1hMIGZvcm1hdC4gKEJp \
-ZyBidXQgTG9zc2xlc3MpCiAgICAgIC0gbW96anBlZzogRW5jb2RlIGltYWdlcyBpbnRvIEpQRUcg \
-Zm9ybWF0IHVzaW5nIE1vekpwZWcgY29kZWMuCiAgICAgICAgICAoUkVDT01NRU5ERUQgYW5kIFNt \
-YWxsKQoKICAgICAgLSBveGlwbmc6IEVuY29kZSBpbWFnZXMgaW50byBQTkcgZm9ybWF0IHVzaW5n \
-IE94aVBORyBjb2RlYy4KICAgICAgICAgIChQcm9ncmVzc2l2ZS1hYmxlKQoKICAgICAgLSBwbmc6 \
-IEVuY29kZSBpbWFnZXMgaW50byBQTkcgZm9ybWF0LgogICAgICAtIHBwbTogRW5jb2RlIGltYWdl \
-cyBpbnRvIFBQTSBmb3JtYXQuIChCaXRtYXBwZWQpCiAgICAgIC0gcW9pOiBFbmNvZGUgaW1hZ2Vz \
-IGludG8gUU9JIGZvcm1hdC4gKFRyZW5keSBhbmQgU21hbGwpCiAgICAgIC0gd2VicDogRW5jb2Rl \
-IGltYWdlcyBpbnRvIFdlYlAgZm9ybWF0LiAoTG9zc2xlc3MtYWJsZSkKICAgICAgLSBoZWxwOiBQ \
-cmludCB0aGlzIG1lc3NhZ2Ugb3IgdGhlIGhlbHAgb2YgdGhlIGdpdmVuIHN1YmNvbW1hbmQocykK \
-CkdMT0JBTCBPUFRJT05TOgogIC0taGVscCwgLWgge3NpbmdsZX0KICAgIERpc3BsYXlzIHRoaXMg \
-Y29tbWFuZCBoZWxwCiAgLS1jb25maWcge3NpbmdsZX0KICAgIERpc3BsYXlzIGNvbmZpZ3VyYXRp \
-b24KICAtLWJhc2gtZnJhbWV3b3JrLWNvbmZpZyA8YmFzaC1mcmFtZXdvcmstY29uZmlnPiB7c2lu \
-Z2xlfQogICAgVXNlIGFsdGVybmF0ZSBiYXNoIGZyYW1ld29yayBjb25maWd1cmF0aW9uLgogIC0t \
-dmVyYm9zZSwgLXYge3NpbmdsZX0KICAgIEluZm8gbGV2ZWwgdmVyYm9zZSBtb2RlIChhbGlhcyBv \
-ZiAtLWRpc3BsYXktbGV2ZWwgSU5GTykKICAtdnYge3NpbmdsZX0KICAgIERlYnVnIGxldmVsIHZl \
-cmJvc2UgbW9kZSAoYWxpYXMgb2YgLS1kaXNwbGF5LWxldmVsIERFQlVHKQogIC12dnYge3Npbmds \
-ZX0KICAgIFRyYWNlIGxldmVsIHZlcmJvc2UgbW9kZSAoYWxpYXMgb2YgLS1kaXNwbGF5LWxldmVs \
-IFRSQUNFKQogIC0tbG9nLWxldmVsIDxsb2ctbGV2ZWw+IHtzaW5nbGV9CiAgICBTZXQgbG9nIGxl \
-dmVsCiAgICBQb3NzaWJsZSB2YWx1ZXM6CiAgICAgIC0gT0ZGCiAgICAgIC0gRVJSCiAgICAgIC0g \
-RVJST1IKICAgICAgLSBXQVJOCiAgICAgIC0gV0FSTklORwogICAgICAtIElORk8KICAgICAgLSBE \
-RUJVRwogICAgICAtIFRSQUNFCiAgICBEZWZhdWx0IHZhbHVlOiBPRkYKICAtLWxvZy1maWxlIDxs \
-b2ctZmlsZT4ge3NpbmdsZX0KICAgIFNldCBsb2cgZmlsZQogICAgRGVmYXVsdCB2YWx1ZTogL2hv \
-bWUvd3NsL2ZjaGFzdGFuZXQvYmFzaC1kZXYtZW52L3ZlbmRvci9iYXNoLXRvb2xzLWZyYW1lCiAg \
-ICAgIHdvcmsvbG9ncy9yaW1hZ2VXcmFwcGVyLmxvZwogIC0tZGlzcGxheS1sZXZlbCA8ZGlzcGxh \
-eS1sZXZlbD4ge3NpbmdsZX0KICAgIFNldCBkaXNwbGF5IGxldmVsCiAgICBQb3NzaWJsZSB2YWx1 \
-ZXM6CiAgICAgIC0gT0ZGCiAgICAgIC0gRVJSCiAgICAgIC0gRVJST1IKICAgICAgLSBXQVJOCiAg \
-ICAgIC0gV0FSTklORwogICAgICAtIElORk8KICAgICAgLSBERUJVRwogICAgICAtIFRSQUNFCiAg \
-ICBEZWZhdWx0IHZhbHVlOiBJTkZPCiAgLS1uby1jb2xvciB7c2luZ2xlfQogICAgUHJvZHVjZSBt \
-b25vY2hyb21lIG91dHB1dC4gYWxpYXMgb2YgLS10aGVtZSBub0NvbG9yLgogIC0tdGhlbWUgPHRo \
-ZW1lPiB7c2luZ2xlfQogICAgQ2hvb3NlIGNvbG9yIHRoZW1lIC0gZGVmYXVsdC1mb3JjZSBtZWFu \
-cyBjb2xvcnMgd2lsbCBiZSBwcm9kdWNlZCBldmVuIGlmCiAgICBjb21tYW5kIGlzIHBpcGVkLgog \
-ICAgUG9zc2libGUgdmFsdWVzOgogICAgICAtIGRlZmF1bHQKICAgICAgLSBkZWZhdWx0LWZvcmNl \
-CiAgICAgIC0gbm9Db2xvcgogICAgRGVmYXVsdCB2YWx1ZTogZGVmYXVsdAogIC0tdmVyc2lvbiB7 \
-c2luZ2xlfQogICAgUHJpbnQgdmVyc2lvbiBpbmZvcm1hdGlvbiBhbmQgcXVpdC4KICAtLXF1aWV0 \
-LCAtcSB7c2luZ2xlfQogICAgUXVpZXQgbW9kZSwgZG9lc24ndCBkaXNwbGF5IGFueSBvdXRwdXQu \
-CgpPUFRJT05TOgogIC0tY2kge3NpbmdsZX0KICAgIEFjdGl2YXRlIGNvbnRpbnVvdXMgaW50ZWdy \
-YXRpb24gbW9kZSAodG1wIGZvbGRlciBub3Qgc2hhcmVkIHdpdGggaG9zdCkKCiAgLS1zYW1lLWRp \
-ciB7c2luZ2xlfQogICAgV3JpdGUgb3V0cHV0IGZpbGUgaW4gc2FtZSBkaXJlY3RvcnkgYXMgc291 \
-cmNlIGZpbGUKICAgIGFuZCB3aXRoIHRoZSBzYW1lIGJhc2UgbmFtZSAoZXhjZXB0IGV4dGVuc2lv \
-bikKICAgIEluY29tcGF0aWJsZSB3aXRoIHRoZSBvcHRpb24gLS1vdXRwdXQtZGlyCgogIC0tb3V0 \
-cHV0LWRpciwgLW8gPE91dHB1dERpcj4ge3NpbmdsZX0KICAgIERlZmluZSBvdXRwdXQgZGlyZWN0 \
-b3J5IG9mIHRoaXMgY29tbWFuZCAoZGVmYXVsdDogPGN1cnJlbnREaXJlY3Rvcnk+KQogICAgSW5j \
-b21wYXRpYmxlIHdpdGggdGhlIG9wdGlvbiAtLXNhbWUtZGlyCgoKCkRFU0NSSVBUSU9OOgpDb21w \
-cmVzc2lvbiBhbmQgY29udmVyc2lvbiBvZiBpbWFnZXMgdXNpbmcgUmltYWdlLgpodHRwczovL2dp \
-dGh1Yi5jb20vdmxhZC1zYWxvbmUvcmltYWdlV3JhcHBlcgoKUklNQUdFIEhFTFAKCk9wdGltaXpl \
-IGltYWdlcyBuYXRpdmVseSB3aXRoIGJlc3QtaW4tY2xhc3MgY29kZWNzCgpVc2FnZTogcmltYWdl \
-IFtDT01NQU5EXQoKQ29tbWFuZHM6CiAgYXZpZiAgICAgIEVuY29kZSBpbWFnZXMgaW50byBBVklG \
-IGZvcm1hdC4gKFNtYWxsIGFuZCBFZmZpY2llbnQpCiAgZmFyYmZlbGQgIEVuY29kZSBpbWFnZXMg \
-aW50byBGYXJiZmVsZCBmb3JtYXQuIChCaXRtYXBwZWQpCiAganBlZyAgICAgIEVuY29kZSBpbWFn \
-ZXMgaW50byBKUEVHIGZvcm1hdC4gKFByb2dyZXNzaXZlLWFibGUpCiAganBlZ194bCAgIEVuY29k \
-ZSBpbWFnZXMgaW50byBKcGVnWEwgZm9ybWF0LiAoQmlnIGJ1dCBMb3NzbGVzcykKICBtb3pqcGVn \
-ICAgRW5jb2RlIGltYWdlcyBpbnRvIEpQRUcgZm9ybWF0IHVzaW5nIE1vekpwZWcgY29kZWMuIChS \
-RUNPTU1FTkRFRCBhbmQgU21hbGwpCiAgb3hpcG5nICAgIEVuY29kZSBpbWFnZXMgaW50byBQTkcg \
-Zm9ybWF0IHVzaW5nIE94aVBORyBjb2RlYy4gKFByb2dyZXNzaXZlLWFibGUpCiAgcG5nICAgICAg \
-IEVuY29kZSBpbWFnZXMgaW50byBQTkcgZm9ybWF0LgogIHBwbSAgICAgICBFbmNvZGUgaW1hZ2Vz \
-IGludG8gUFBNIGZvcm1hdC4gKEJpdG1hcHBlZCkKICBxb2kgICAgICAgRW5jb2RlIGltYWdlcyBp \
-bnRvIFFPSSBmb3JtYXQuIChUcmVuZHkgYW5kIFNtYWxsKQogIHdlYnAgICAgICBFbmNvZGUgaW1h \
-Z2VzIGludG8gV2ViUCBmb3JtYXQuIChMb3NzbGVzcy1hYmxlKQogIGhlbHAgICAgICBQcmludCB0 \
-aGlzIG1lc3NhZ2Ugb3IgdGhlIGhlbHAgb2YgdGhlIGdpdmVuIHN1YmNvbW1hbmQocykKCk9wdGlv \
-bnM6CiAgLWgsIC0taGVscCAgICAgUHJpbnQgaGVscAogIC1WLCAtLXZlcnNpb24gIFByaW50IHZl \
-cnNpb24KCkxpc3Qgb2Ygc3VwcG9ydGVkIGNvZGVjcwp8IEltYWdlIEZvcm1hdCAgfCBJbnB1dCB8 \
-IE91dHB1dCB8IE5vdGUgICAgICAgICAgICB8CnwgLS0tLS0tLS0tLS0tLSB8IC0tLS0tIHwgLS0t \
-LS0tIHwgLS0tLS0tLS0tLS0tLS0tIHwKfCBhdmlmICAgICAgICAgIHwgTyAgICAgfCBPICAgICAg \
-fCBTdGF0aWMgb25seSAgICAgfAp8IGJtcCAgICAgICAgICAgfCBPICAgICB8IFggICAgICB8ICAg \
-ICAgICAgICAgICAgICB8CnwgZmFyYmZlbGQgICAgICB8IE8gICAgIHwgTyAgICAgIHwgICAgICAg \
-ICAgICAgICAgIHwKfCBoZHIgICAgICAgICAgIHwgTyAgICAgfCBPICAgICAgfCAgICAgICAgICAg \
-ICAgICAgfAp8IGpwZWcgICAgICAgICAgfCBPICAgICB8IE8gICAgICB8ICAgICAgICAgICAgICAg \
-ICB8CnwganBlZ194bChqeGwpICB8IE8gICAgIHwgTyAgICAgIHwgICAgICAgICAgICAgICAgIHwK \
-fCBtb3pqcGVnKG1veikgIHwgTyAgICAgfCBPICAgICAgfCAgICAgICAgICAgICAgICAgfAp8IG94 \
-aXBuZyhveGkpICAgfCBPICAgICB8IE8gICAgICB8IFN0YXRpYyBvbmx5ICAgICB8CnwgcG5nICAg \
-ICAgICAgICB8IE8gICAgIHwgTyAgICAgIHwgU3RhdGljIG9ubHkgICAgIHwKfCBwcG0gICAgICAg \
-ICAgIHwgTyAgICAgfCBPICAgICAgfCAgICAgICAgICAgICAgICAgfAp8IHBzZCAgICAgICAgICAg \
-fCBPICAgICB8IFggICAgICB8ICAgICAgICAgICAgICAgICB8CnwgcW9pICAgICAgICAgICB8IE8g \
-ICAgIHwgTyAgICAgIHwgICAgICAgICAgICAgICAgIHwKfCB0aWZmICAgICAgICAgIHwgTyAgICAg \
-fCBYICAgICAgfCAgICAgICAgICAgICAgICAgfAp8IHdlYnAgICAgICAgICAgfCBPICAgICB8IE8g \
-ICAgICB8IFN0YXRpYyBvbmx5ICAgICB8CgpMaXN0IG9mIHN1cHBvcnRlZCBwcmVwcm9jZXNzaW5n \
-IG9wdGlvbnMKLSBSZXNpemUKLSBRdWFudGl6YXRpb24KLSBBbHBoYSBwcmVtdWx0aXBseQoKTGlz \
-dCBvZiBzdXBwb3J0ZWQgbW9kZSBmb3Igb3V0cHV0IGluZm8gcHJlc2VudGluZwotIE5vLXByb2dy \
-ZXNzIChTaG93biBvbiBEZWZhdWx0KQotIFF1aWV0IChTaG93IGFsbCBtc2dzIG9uIERlZmF1bHQp \
-CgpGb3IgbW9yZSBpbmZvIHVzZSByaW1hZ2VXcmFwcGVyIGhlbHAgPGNvbW1hbmQ+CkUuZy46IHJp \
-bWFnZVdyYXBwZXIgaGVscCBtb3pqcGVnCgpSSU1BR0UgQURWQU5DRUQgT1BUSU9OUwoKT3B0aW9u \
-czogLS1xdWFsaXR5IDxOVU0+ICAgICBRdWFsaXR5LCB2YWx1ZXMgNjAtODAgYXJlIHJlY29tbWVu \
-ZGVkLgogICAgW2RlZmF1bHQ6IDc1XQoKLS1jaHJvbWFfcXVhbGl0eSA8TlVNPiAgICAgU2VwYXJh \
-dGUgY2hyb21lIHF1YWxpdHkuCgotLWJhc2VsaW5lICAgICBTZXQgdG8gdXNlIGJhc2VsaW5lIGVu \
-Y29kaW5nIChieSBkZWZhdWx0IGlzIHByb2dyZXNzaXZlKS4KCi0tbm9fb3B0aW1pemVfY29kaW5n \
-ICAgICBTZXQgdG8gbWFrZSBmaWxlcyBsYXJnZXIgZm9yIG5vIHJlYXNvbi4KCi0tc21vb3RoaW5n \
-IDxOVU0+ICAgICBVc2UgTW96SlBFRydzIHNtb290aGluZy4KCi0tY29sb3JzcGFjZSA8Q09MT1I+ \
-ICAgICBTZXQgY29sb3Igc3BhY2Ugb2YgSlBFRyBiZWluZyB3cml0dGVuLgogICAgW2RlZmF1bHQ6 \
-IHljYmNyXSAgICAgW3Bvc3NpYmxlIHZhbHVlczogeWNiY3IsIGdyYXlzY2FsZSwgcmdiXQoKLS1t \
-dWx0aXBhc3MgICAgIFNwZWNpZmllcyB3aGV0aGVyIG11bHRpcGxlIHNjYW5zIHNob3VsZCBiZSBj \
-b25zaWRlcmVkIGR1cmluZwp0cmVsbGlzIHF1YW50aXphdGlvbi4KCi0tc3Vic2FtcGxlIDxQSVg+ \
-ICAgICBTZXRzIGNocm9tYSBzdWJzYW1wbGluZy4KCi0tcXRhYmxlIDxUQUJMRT4gICAgIFVzZSBh \
-IHNwZWNpZmljIHF1YW50aXphdGlvbiB0YWJsZS4KICAgIFtkZWZhdWx0OiBOUm9iaWRvdXhdCgog \
-ICAgW3Bvc3NpYmxlIHZhbHVlczogQWh1bWFkYVdhdHNvblBldGVyc29uLCBBbm5leEssIEZsYXQs \
-CiAgICAgS2xlaW5TaWx2ZXJzdGVpbkNhcm5leSwgTVNTU0lNLCBOUm9iaWRvdXgsCiAgICAgUFNO \
-UkhWUywgUGV0ZXJzb25BaHVtYWRhV2F0c29uLCBXYXRzb25UYXlsb3JCb3J0aHdpY2tdCgpWRVJT \
-SU9OOiAxLjAKCkFVVEhPUjogW0ZyYW7Dp29pcyBDaGFzdGFuZXRdKGh0dHBzOi8vZ2l0aHViLmNv \
-bS9mY2hhc3RhbmV0KQoKU09VUkNFIEZJTEU6IGh0dHBzOi8vZ2l0aHViLmNvbS9mY2hhc3RhbmV0 \
-L2Jhc2gtdG9vbHMtZnJhbWV3b3JrL3RyZWUvbWFzdGVyL3NyYy9fYmluYXJpZXMvcmltYWdlV3Jh \
-cHBlci9yaW1hZ2VXcmFwcGVyLWJpbmFyeS55YW1sCgpMSUNFTlNFOiBNSVQgTGljZW5zZQpDb3B5 \
-cmlnaHQgKGMpIDIwMjYtbm93IEZyYW7Dp29pcyBDaGFzdGFuZXQK" \
-  "644"
-
-declare -gx embed_file_rimageCommandHelp="${PERSISTENT_TMPDIR:-/tmp}/5f6881d68479e771e68edb254c537b443d92e97ecfa1c46d2b024983b3e78a0e/rimageCommandHelp"
-
-COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
-
-runContainer() {
-  local image="scrasnups/build:bash-tools-ubuntu-5.3"
-  local -a dockerRunCmd=(
-    "/bash/bin/doc"
-    "${BASH_FRAMEWORK_ARGV_FILTERED[@]}"
-  )
-
-  if ! docker inspect --type=image "${image}" &>/dev/null; then
-    docker pull "${image}"
-  fi
-  # run docker image
-  local -a localDockerRunArgs=(
-    --rm
-    -e KEEP_TEMP_FILES="${KEEP_TEMP_FILES:-0}"
-    -e BATS_FIX_TEST="${BATS_FIX_TEST:-0}"
-    -w /bash
-    -v "${FRAMEWORK_ROOT_DIR}:/bash"
-    --entrypoint /usr/local/bin/bash
-  )
-  # shellcheck disable=SC2154
-  if [[ "${optionContinuousIntegrationMode}" = "0" ]]; then
-    localDockerRunArgs+=(
-      -e USER_ID="${USER_ID:-1000}"
-      -e GROUP_ID="${GROUP_ID:-1000}"
-      --user "www-data:www-data"
-      -v "/tmp:/tmp"
-    )
-  fi
-
-  # shellcheck disable=SC2154
-  if [[ "${optionTraceVerbose}" = "1" ]]; then
-    set -x
-  fi
-  docker run \
-    "${localDockerRunArgs[@]}" \
-    "${image}" \
-    "${dockerRunCmd[@]}"
-  set +x
+detectChangedAddedFiles() {
+  git ls-files --exclude-standard --modified --others
 }
 
-generateDoc() {
-  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/content/docs"
-  export FRAMEWORK_ROOT_DIR
-
-  #-----------------------------
-  # doc generation
-  #-----------------------------
-  Log::displayInfo 'generate Commands.md'
-  ((TOKEN_NOT_FOUND_COUNT = 0)) || true
-  mkdir -p "${PERSISTENT_TMPDIR}/npx"
-  (
-    echo "#!/usr/bin/env sh"
-    if [[ "$1" == "@mermaid-js/mermaid-cli" ]]; then
-      # shellcheck disable=SC2154
-      echo "cat '${embed_file_mermaidCommandHelp}'"
-    fi
-  ) >"${PERSISTENT_TMPDIR}/npx/npx"
-  chmod +x "${PERSISTENT_TMPDIR}/npx/npx"
-  export PATH="${PERSISTENT_TMPDIR}/npx:$PATH"
-
-  mkdir -p "${TMPDIR}/rimage"
-  (
-    echo "#!/usr/bin/env sh"
-    # shellcheck disable=SC2154
-    echo "cat '${embed_file_rimageCommandHelp}'"
-  ) >"${TMPDIR}/rimage/rimage"
-  chmod +x "${TMPDIR}/rimage/rimage"
-  export PATH="${TMPDIR}/rimage:$PATH"
-  export RIMAGE_DIR="${TMPDIR}/rimage"
-  export SKIP_RIMAGE_PULL=1
-
-  ShellDoc::generateMdFileFromTemplate \
-    "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
-    "${PAGES_DIR}/Commands.md" \
-    "${COMMAND_BIN_DIR}" \
-    TOKEN_NOT_FOUND_COUNT \
-    '(var|simpleBinary|shdoc|installFacadeExample)$'
-  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
-    exit 1
+declare -a files
+# shellcheck disable=SC2154
+if ((${#argRimageWrapperFiles[@]} > 0)); then
+  files=("${argRimageWrapperFiles[@]}")
+  if ((${#files[@]} == 0)); then
+    Log::fatal "Command ${SCRIPT_NAME} - no file provided"
   fi
-
-  # clean folder before generate
-  rm -f "${PAGES_DIR}/Index.md" || true
-  rm -Rf "${PAGES_DIR}/bashDoc" || true
-
-  ShellDoc::generateShellDocsFromDir \
-    "${FRAMEWORK_SRC_DIR}" \
-    "src" \
-    "${PAGES_DIR}/bashDoc" \
-    "${PAGES_DIR}/_index.md" \
-    "${REPOSITORY_URL}" \
-    '/testsData|/_.*' \
-    '(/__all\.sh)$' \
-    "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkDirectoryIndex.tmpl.md"
-
-  mkdir -p "${PAGES_DIR}/assets"
-  cp -v \
-    "${FRAMEWORK_ROOT_DIR}/src/Env/requireLoad-activityDiagram.png" \
-    "${PAGES_DIR}/assets"
-}
-
-installRequirements() {
-  Git::requireGitCommand
-}
-
-installContainerRequirements() {
-  Git::requireGitCommand
-  ShellDoc::installRequirementsIfNeeded
-  Linux::requireJqCommand
-  Softwares::installHadolint
-  Softwares::installShellcheck
-}
-
-if [[ "${IN_BASH_DOCKER:-}" = "You're in docker" ]]; then
-  installRequirements
-  generateDoc
 else
-  installContainerRequirements
-  runContainer
+  changedFilesBefore=$(detectChangedAddedFiles)
+  readarray -t files < <(git ls-files --exclude-standard -c -o -m | grep -E -e '\.(jpe?g|png|webp|apng|gif)$' | sort | uniq)
+  if ((${#files[@]} == 0)); then
+    Log::displayInfo "Command ${SCRIPT_NAME} - no file to process detected in git repository"
+    exit 0
+  fi
+fi
+
+Log::displayInfo "Will generate rimage output files for these files: ${files[*]}"
+Log::displayInfo "with command: ${argRimageCommand}"
+Log::displayInfo "with options: ${rimageOptions[*]}"
+
+"${RIMAGE_DIR:-${PERSISTENT_TMPDIR}/rimage}/rimage" "${argRimageCommand}" \
+  "${rimageOptions[@]}" \
+  "${files[@]}"
+
+# shellcheck disable=SC2154
+if [[ "${optionContinuousIntegrationMode}" = "1" ]] && ((${#argRimageWrapperFiles[@]} == 0)); then
+  changedFilesAfter=$(detectChangedAddedFiles)
+  diff <(echo "${changedFilesBefore}") <(echo "${changedFilesAfter}") >&2 || {
+    Log::fatal "CI mode - files have been added"
+  }
 fi
 
 }
