@@ -27,24 +27,74 @@ optionLimitSizeCallback() {
 }
 
 includePathOptionCallback() {
-  if [[ -z "${includePathOption}" ]]; then
-    includePathOption="-"
+  if [[ -z "${plantumlIncludePathsOption}" ]]; then
+    return 0
   fi
-  if [[ "${includePathOption}" != "-" ]]; then
-    if [[ ! -d "${includePathOption}" ]]; then
-      Log::displayError "Command ${SCRIPT_NAME} - invalid include path '${includePathOption}'"
+
+  # Parse comma-separated paths
+  IFS=',' read -ra paths <<<"${plantumlIncludePathsOption}"
+  declare -a validatedPaths=()
+
+  local path
+  for path in "${paths[@]}"; do
+    # Trim leading/trailing whitespace
+    path="$(echo "${path}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+    if [[ ! -d "${path}" ]]; then
+      Log::displayError "Command ${SCRIPT_NAME} - include path does not exist: '${path}'"
       return 1
     fi
-    includePathOption="$(realpath "${includePathOption}")"
+
+    validatedPaths+=("$(realpath "${path}")")
+  done
+
+  # Store validated paths back (now absolute paths)
+  plantumlIncludePathsOption="$(
+    IFS=','
+    echo "${validatedPaths[*]}"
+  )"
+}
+
+downloadElkJarIfNeeded() {
+  local elkJarPath="${PERSISTENT_TMPDIR}/elk-full.jar"
+  local elkJarUrl="http://beta.plantuml.net/elk-full.jar"
+  local maxAge=$((30 * 24 * 3600)) # 1 month in seconds
+  local hadOldVersion=0
+
+  # Check if file exists and is recent enough
+  if [[ -f "${elkJarPath}" ]]; then
+    local fileAge
+    fileAge=$(File::elapsedTimeSinceLastModification "${elkJarPath}")
+    if ((fileAge < maxAge)); then
+      Log::displayInfo "Using cached ELK jar (age: $(Log::computeDuration "${fileAge}"))"
+      return 0
+    fi
+    Log::displayInfo "ELK jar is older than 1 month, re-downloading..."
+    hadOldVersion=1
+  else
+    Log::displayInfo "ELK jar not found, downloading..."
+  fi
+
+  # Download the jar with retry
+  if Retry::parameterized 3 2 "Downloading ELK jar from ${elkJarUrl}" \
+    File::downloadFile "${elkJarUrl}" "${elkJarPath}"; then
+    Log::displayInfo "ELK jar downloaded successfully"
+    return 0
+  else
+    # Download failed after retries
+    if ((hadOldVersion == 1)); then
+      Log::displayWarning "Failed to download ELK jar after 3 attempts, using old version"
+      return 0
+    else
+      Log::displayWarning "Failed to download ELK jar after 3 attempts, proceeding without ELK support"
+      return 0
+    fi
   fi
 }
 
 plantumlCallback() {
   if ((${#optionFormats[@]} == 0)); then
     optionFormats=("${defaultFormatsIfNoneProvided[@]}")
-  fi
-  if [[ "${includePathOption}" = "-" ]]; then
-    includePathOption="$(pwd)"
   fi
   # shellcheck disable=SC2154
   if [[ -n "${optionOutputDir}" && "${sameDirectoryOption}" = "1" ]]; then
@@ -58,8 +108,14 @@ plantumlCallback() {
     if ! mkdir -p "${optionOutputDir}"; then
       Log::displayError \
         "Command ${SCRIPT_NAME} - failed to create output directory '${optionOutputDir}'"
+      return 1
     fi
-    return 1
+  fi
+
+  # Download ELK jar if --elk option is set
+  # shellcheck disable=SC2154
+  if [[ "${optionElk}" = "1" ]]; then
+    downloadElkJarIfNeeded
   fi
 }
 

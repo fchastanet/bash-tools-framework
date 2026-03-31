@@ -16,6 +16,7 @@ canonicalize
 CDPATH
 Chastanet
 chgrp
+classpath
 cntrl
 codespell
 compinit

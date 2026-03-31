@@ -20,7 +20,7 @@ binData:
         - plantumlCallback
       beforeParseCallbacks:
         - beforeParseCallback
-      version: "3.1"
+      version: "3.2"
       copyrightBeginYear: 2023
       commandName: plantuml
       definitionFiles:
@@ -87,21 +87,35 @@ binData:
           variableName: optionOutputDir
 
         - alts:
-            - --include-path
+            - --include-paths
           help: |
-            Make the path specified shared inside docker container
+            Comma-separated list of paths to make shared inside docker container
             so that !include directives in plantuml files can work
-            relative to this path.
+            relative to these paths.
 
+            Example: --include-paths "dir1,dir2,dir3"
+
+            Each path will be validated for existence and mounted separately.
             If not provided, the current directory will be used as
             include path.
           type: String
-          defaultValue: "-"
           callbacks:
             - includePathOptionCallback
-          helpValueName: IncludePath
+          helpValueName: IncludePaths
           group: OptionsGroup
-          variableName: includePathOption
+          variableName: plantumlIncludePathsOption
+
+        - alts:
+            - --elk
+          help: |
+            Enable ELK (Eclipse Layout Kernel) support by downloading and
+            mounting elk-full.jar. The jar is downloaded from
+            http://beta.plantuml.net/elk-full.jar and cached in
+            ${PERSISTENT_TMPDIR}/elk-full.jar. It will be re-downloaded
+            if older than 1 month.
+          type: Boolean
+          group: OptionsGroup
+          variableName: optionElk
 
       args:
         - help: |
