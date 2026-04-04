@@ -169,12 +169,17 @@ qtable
 rackdiag
 resolvconf
 rimage
+RIMAGE
+Rimage
+rimage
 Robidoux
 runc
 scrasnups
 screenlock
 seqdiag
 shdoc
+shellcheck
+SHELLCHECK
 shellcheck
 shellcheckrc
 Silverstein

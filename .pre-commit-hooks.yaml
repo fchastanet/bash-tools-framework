@@ -163,3 +163,13 @@
   name: Megalinter for Github Actions
   args: [--image, "oxsecurity/megalinter-terraform:v9", --config-file, ".mega-linter-githubAction.yml", --fix]
   stages: [manual]
+
+- id: cspell-forbidden
+  name: cspell with support to Forbidden Words
+  description: ensure .cspell/forbidden.txt exists and is used by cspell
+  language: script
+  entry: bin/cspell-forbidden
+  args: []
+  pass_filenames: false
+  always_run: true
+  stages: [pre-commit, pre-push]

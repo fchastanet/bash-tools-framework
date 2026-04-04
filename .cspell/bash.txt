@@ -133,6 +133,7 @@ TERM
 testsuites
 textmate
 TMPDIR
+TMPDIR
 udbx
 undelete
 unmatch

@@ -1,0 +1,29 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/cspellForbidden/cspellForbidden-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/cspellForbidden"
+  relativeRootDirBasedOnTargetDir: ..
+binData:
+  commands:
+    default:
+      functionName: cspellForbiddenCommand
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      copyrightBeginYear: 2026
+      commandName: cspellForbidden
+      unknownOptionCallbacks:
+        - unknownOption
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/cspellForbidden/cspellForbidden-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/cspellForbidden/cspellForbidden-main.sh
+      help: Lint all git (staged or not) files with cspell using the forbidden.txt file
+      longDescription: |
+        Lint all git (staged or not) files with cspell using the forbidden.txt file
+        Ensure .cspell/forbidden.txt exists and is used by cspell
+        Ensure this dictionary is configured in cspell.json

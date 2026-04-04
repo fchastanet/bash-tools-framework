@@ -32,3 +32,4 @@ hugo.yaml
 
 # Hugo pages auto generated files
 content/docs/guides/assets/requireLoad-activityDiagram.png
+.cspell/forbidden.txt

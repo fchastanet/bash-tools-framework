@@ -202,6 +202,14 @@ Run MegaLinter for comprehensive code quality checks.
 @@@megalinter_help@@@
 ```
 
+### 3.7. bin/cspell-forbidden
+
+Ensure .cspell/forbidden.txt exists and is used by cspell and launch cspell only on git files.
+
+```text
+@@@cspellForbidden_help@@@
+```
+
 ## 4. Converter and Generator tools
 
 ### 4.1. bin/plantuml
