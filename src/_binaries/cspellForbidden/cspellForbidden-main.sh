@@ -54,7 +54,6 @@ else
   yq -o json "${cspellConfigFile}" | jq "${JQ_SCRIPT}" | yq -P >"${TMPDIR}/tmp.$$.yaml" || {
     Log::fatal "Failed to update ${cspellConfigFile} with forbidden dictionary configuration using jq/yq script"
   }
-  cat "${TMPDIR}/tmp.$$.yaml"
   mv "${TMPDIR}/tmp.$$.yaml" "${cspellConfigFile}"
 fi
 
