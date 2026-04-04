@@ -50,15 +50,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: cspell
-        name: cspell
-        entry: npx -y cspell --quiet .
-        language: system
-        pass_filenames: false
-        stages: [pre-commit, pre-push, manual]
-
-  - repo: local
-    hooks:
       # generate mermaid help with npx and save it in a file to be used in doc generation
       # mermaid binary will still use npx to get the help content at runtime,
       # This avoids having to install node and mermaid in docker image
@@ -210,18 +201,6 @@ repos:
               ^distro$|
               ^srcAlt|
               ^.cspell/codespellrc-.*.txt$
-          )
-
-  - repo: https://github.com/ComPWA/prettier-pre-commit
-    rev: v3.8.1
-    hooks:
-      - id: prettier
-        args: [--cache]
-        exclude: |
-          (?x)(
-            \.md$|
-            \.vscode/.*\.json$|
-            ^\.vscode/.*\.code-snippets$
           )
 
   - repo: https://github.com/fchastanet/jumanjihouse-pre-commit-hooks

@@ -213,6 +213,9 @@ jobs:
           set -exo pipefail
 
           bin/installRequirements
+          # ensure forbidden dictionary exists
+          mkdir -p .cspell
+          touch .cspell/forbidden.txt
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
@@ -433,7 +436,7 @@ jobs:
   overallTestResults:
     name: "Overall Tests Results"
     if: ${{ always() }}
-    needs: [unit-tests]
+    needs: [unit-tests, pre-commit]
     runs-on: ubuntu-22.04
     permissions:
       # needed by akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35

@@ -16,6 +16,7 @@ DISABLE_LINTERS:
   - REPOSITORY_CHECKOV
   - REPOSITORY_TRIVY
   - REPOSITORY_KICS
+  - JSON_PRETTIER
   - SPELL_VALE
   - SPELL_LYCHEE
   - SPELL_PROSELINT
@@ -40,7 +41,7 @@ FILEIO_REPORTER: false
 PRE_COMMANDS:
   - command: env
     cwd: "workspace"
-  - command: yarn add --dev eslint-plugin-json eslint-config-prettier
+  - command: yarn add --dev eslint-plugin-json
     cwd: "workspace"
 POST_COMMANDS:
   # FIX files set as root user
