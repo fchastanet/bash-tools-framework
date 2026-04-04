@@ -54,10 +54,8 @@
   language: script
   entry: bin/shellcheckLint
   args: [-f, tty, --xargs]
-  pass_filenames: true
-  files: \.sh$
-  types: ["executable", "file", "shell", "text"]
-  always_run: false
+  pass_filenames: false
+  always_run: true
   stages: [pre-commit]
 
 - <<: *SHELLCHECK_LINT

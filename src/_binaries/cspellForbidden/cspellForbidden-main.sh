@@ -71,8 +71,9 @@ if grep -E '^[^#!]' .cspell/forbidden.txt >/dev/null; then
 fi
 
 # run cspell on git tracked files
+# shellcheck disable=SC2154
 (
   git ls-files
   git ls-tree --full-tree -r --name-only HEAD
-  # shellcheck disable=SC2154
-) | sort | uniq | npx cspell --quiet --no-must-find-files --file-list stdin "${cspellOptions[@]}"
+) | sort | uniq |
+  npx cspell --quiet --no-must-find-files --file-list stdin "${cspellOptions[@]}"
