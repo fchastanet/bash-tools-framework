@@ -34,7 +34,7 @@ beforeParseCallback() {
   INSTALL_CALLBACK=rimageInstallCallback Github::upgradeRelease \
     "${rimageDir}/rimage" \
     "https://github.com/vlad-salone/rimage/releases/download/v@latestVersion@/rimage-@latestVersion@-x86_64-unknown-linux-gnu.tar.gz"
-  export PATH="${rimageDir}:$PATH"
+  export PATH="${rimageDir}:${PATH}"
 }
 
 unknownOption() {
@@ -51,16 +51,7 @@ unknownArgument() {
 
 rimageWrapperCallback() {
   # shellcheck disable=SC2154
-  if [[ -z "${optionOutputDir}" ]]; then
-    optionOutputDir="${optionDefaultOutputDir}"
-  fi
-  if [[ ! -d "${optionOutputDir}" ]]; then
-    if ! mkdir -p "${optionOutputDir}"; then
-      Log::displayError \
-        "Command ${SCRIPT_NAME} - failed to create output directory '${optionOutputDir}'"
-      return 1
-    fi
-  fi
+  optionOutputDir=$(File::createOutputDir "${optionOutputDir}" "${optionDefaultOutputDir}") || return 1
 }
 
 optionHelpCallback() {

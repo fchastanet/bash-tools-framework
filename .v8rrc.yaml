@@ -36,3 +36,7 @@ customCatalog:
       description: dependabot
       fileMatch: [".github/workflows/dependabot.yml"]
       location: https://www.schemastore.org/dependabot-2.0.json
+    - name: docker-compose
+      description: docker-compose
+      fileMatch: ["**/docker-compose.yml", "**/docker-compose.yaml"]
+      location: https://raw.githubusercontent.com/fchastanet/compose-go/refs/heads/main/schema/compose-spec.json

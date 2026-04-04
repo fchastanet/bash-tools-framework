@@ -227,3 +227,12 @@ Generate images from source image files using the rimage tool.
 ```text
 @@@rimageWrapper_help@@@
 ```
+
+### 4.4. bin/krokiWrapper
+
+Convert diagram files to images using Kroki CLI. Supports multiple diagram formats including PlantUML, Mermaid,
+Graphviz, and many more.
+
+```text
+@@@krokiWrapper_help@@@
+```

@@ -1,0 +1,19 @@
+Convert text diagram to image.
+By default, the output is written to a file with the basename of the source file and the appropriate extension.
+Example: kroki convert hello.dot
+
+Usage:
+  kroki [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  convert     Convert text diagram to image
+  decode      Decode an encoded (deflate + base64) diagram
+  encode      Encode text diagram in deflate + base64 format
+  help        Help about any command
+  version     Print the version of kroki
+
+Flags:
+  -h, --help   help for kroki
+
+Use "kroki [command] --help" for more information about a command.

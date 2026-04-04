@@ -112,6 +112,18 @@
   files: \.mmd$
   stages: [pre-commit, manual]
 
+- id: kroki
+  name: Kroki Converter
+  description: Convert diagram files to images using Kroki
+  language: script
+  entry: bin/krokiWrapper
+  args: [--ci, --same-dir, --format, svg]
+  types: ["file", "non-executable", "text"]
+  always_run: false
+  pass_filenames: true
+  files: \.(plantuml|puml|iuml|mmd|dot|gv|ditaa|erd|nomnoml|pikchr|svgbob|bob|umlet|uxf|vega|vegalite|vl|wavedrom|excalidraw|blockdiag|seqdiag|actdiag|nwdiag|packetdiag|rackdiag|bpmn|dmn|d2)$
+  stages: [pre-commit, manual]
+
 - id: hugoUpdateLastmod
   name: Hugo Update Lastmod
   description: Update lastmod field in Hugo frontmatter based on git modification date or current date.

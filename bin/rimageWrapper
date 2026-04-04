@@ -418,6 +418,38 @@ Env::requireLoad() {
 }
 
 
+# @description Create an output directory, using a default if the provided path is empty
+# @arg $1 outputDir:String the output directory path (can be empty)
+# @arg $2 defaultOutputDir:String the default directory to use if outputDir is empty
+# @set outputDir the resolved output directory path
+# @exitcode 0 success - directory created or already exists
+# @exitcode 1 failure - failed to create directory
+# @stdout none
+# @example
+#   File::createOutputDir "${optionOutputDir}" "${optionDefaultOutputDir}" || return 1
+File::createOutputDir() {
+  local outputDir="$1"
+  local defaultOutputDir="$2"
+
+  # Use default if output directory is empty
+  if [[ -z "${outputDir}" ]]; then
+    outputDir="${defaultOutputDir}"
+  fi
+
+  # Create directory if it doesn't exist
+  if [[ ! -d "${outputDir}" ]]; then
+    if ! mkdir -p "${outputDir}"; then
+      Log::displayError "Failed to create output directory '${outputDir}'"
+      return 1
+    fi
+  fi
+
+  # Export the resolved directory for use by caller
+  printf '%s\n' "${outputDir}"
+  return 0
+}
+
+
 # @description search a file in parent directories
 #
 # @arg $1 fromPath:String path
@@ -1484,7 +1516,7 @@ beforeParseCallback() {
   INSTALL_CALLBACK=rimageInstallCallback Github::upgradeRelease \
     "${rimageDir}/rimage" \
     "https://github.com/vlad-salone/rimage/releases/download/v@latestVersion@/rimage-@latestVersion@-x86_64-unknown-linux-gnu.tar.gz"
-  export PATH="${rimageDir}:$PATH"
+  export PATH="${rimageDir}:${PATH}"
 }
 
 unknownOption() {
@@ -1501,16 +1533,7 @@ unknownArgument() {
 
 rimageWrapperCallback() {
   # shellcheck disable=SC2154
-  if [[ -z "${optionOutputDir}" ]]; then
-    optionOutputDir="${optionDefaultOutputDir}"
-  fi
-  if [[ ! -d "${optionOutputDir}" ]]; then
-    if ! mkdir -p "${optionOutputDir}"; then
-      Log::displayError \
-        "Command ${SCRIPT_NAME} - failed to create output directory '${optionOutputDir}'"
-      return 1
-    fi
-  fi
+  optionOutputDir=$(File::createOutputDir "${optionOutputDir}" "${optionDefaultOutputDir}") || return 1
 }
 
 optionHelpCallback() {
@@ -2241,8 +2264,8 @@ rimageWrapperCommandHelp() {
   "    [default: NRobidoux]"
   ""
   "    [possible values: AhumadaWatsonPeterson, AnnexK, Flat,"
-  "     KleinSilversteinCarney, MSSSIM, NRobidoux,"
-  "     PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]"
+  "    KleinSilversteinCarney, MSSSIM, NRobidoux,"
+  "    PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]"
   )
   Array::wrap2 ' ' 76 0 "${rimageWrapperCommandLongDescription[@]}"
   echo
@@ -2283,7 +2306,9 @@ rimageWrapperCommandParse "$@"
 MAIN_FUNCTION_NAME="main"
 main() {
 
+# shellcheck disable=SC2154
 if [[ "${argRimageCommand}" = "help" ]]; then
+  # shellcheck disable=SC2154
   "${PERSISTENT_TMPDIR}/rimage/rimage" help "${rimageOptions[@]}"
   exit 0
 fi

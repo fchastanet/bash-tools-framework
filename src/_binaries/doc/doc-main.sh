@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-help.txt" AS mermaidCommandHelp
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimage-help.txt" AS rimageCommandHelp
+# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/krokiWrapper/kroki-help.txt" AS krokiCommandHelp
 COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
@@ -43,6 +44,25 @@ runContainer() {
   set +x
 }
 
+generateBinary() {
+  local binaryName="$1"
+  local commandName="$2"
+  local binaryDir="${PERSISTENT_TMPDIR}/${binaryName}"
+  local binaryPath="${binaryDir}/${binaryName}"
+  local embedFileVarName="embed_file_${commandName}CommandHelp"
+  mkdir -p "${binaryDir}"
+  (
+    echo '#!/usr/bin/env bash'
+    # shellcheck disable=SC2016
+    echo 'echo <<<EOF'
+    # shellcheck disable=SC2154
+    cat "${!embedFileVarName}"
+    echo 'EOF'
+  ) >"${binaryPath}"
+  chmod +x "${binaryPath}"
+  export PATH="${binaryDir}:${PATH}"
+}
+
 generateDoc() {
   PAGES_DIR="${FRAMEWORK_ROOT_DIR}/content/docs"
   export FRAMEWORK_ROOT_DIR
@@ -52,27 +72,12 @@ generateDoc() {
   #-----------------------------
   Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
-  mkdir -p "${PERSISTENT_TMPDIR}/npx"
-  (
-    echo "#!/usr/bin/env sh"
-    if [[ "$1" == "@mermaid-js/mermaid-cli" ]]; then
-      # shellcheck disable=SC2154
-      echo "cat '${embed_file_mermaidCommandHelp}'"
-    fi
-  ) >"${PERSISTENT_TMPDIR}/npx/npx"
-  chmod +x "${PERSISTENT_TMPDIR}/npx/npx"
-  export PATH="${PERSISTENT_TMPDIR}/npx:$PATH"
+  generateBinary "npx" "mermaid"
+  generateBinary "rimage" "rimage"
+  generateBinary "kroki" "kroki"
 
-  mkdir -p "${TMPDIR}/rimage"
-  (
-    echo "#!/usr/bin/env sh"
-    # shellcheck disable=SC2154
-    echo "cat '${embed_file_rimageCommandHelp}'"
-  ) >"${TMPDIR}/rimage/rimage"
-  chmod +x "${TMPDIR}/rimage/rimage"
-  export PATH="${TMPDIR}/rimage:$PATH"
-  export RIMAGE_DIR="${TMPDIR}/rimage"
-  export SKIP_RIMAGE_PULL=1
+  export KROKI_DIR="${TMPDIR}/kroki"
+  export SKIP_KROKI_PULL=1
 
   ShellDoc::generateMdFileFromTemplate \
     "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
