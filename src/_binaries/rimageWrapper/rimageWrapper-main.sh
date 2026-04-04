@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=SC2154
 if [[ "${argRimageCommand}" = "help" ]]; then
+  # shellcheck disable=SC2154
   "${PERSISTENT_TMPDIR}/rimage/rimage" help "${rimageOptions[@]}"
   exit 0
 fi

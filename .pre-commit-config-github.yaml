@@ -68,11 +68,19 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-commit]
-      - id: generate-rimageWrapper-help
-        name: generate rimageWrapper help
+      - id: generate-rimage-help
+        name: generate rimage help
         entry: |
-          bash -o pipefail -c '(bin/rimageWrapper --help && echo) | sed -E -e "s/[[:space:]]+$//" \
+          bash -o pipefail -c 'rimage --help | sed -E -e "s/[[:space:]]+$//" \
           >src/_binaries/rimageWrapper/rimage-help.txt'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: generate-kroki-help
+        name: generate kroki help
+        entry: |
+          bash -o pipefail -c 'kroki --help | sed -E -e "s/[[:space:]]+$//" \
+          >src/_binaries/krokiWrapper/kroki-help.txt'
         language: system
         pass_filenames: false
         stages: [pre-commit]
@@ -171,13 +179,13 @@ repos:
           )
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.11
+    rev: v1.7.12
     hooks:
       - id: actionlint
         stages: [pre-commit, pre-push, manual]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
         args:

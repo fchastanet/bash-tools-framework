@@ -75,8 +75,8 @@ binData:
             [default: NRobidoux]
 
             [possible values: AhumadaWatsonPeterson, AnnexK, Flat,
-             KleinSilversteinCarney, MSSSIM, NRobidoux,
-             PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]
+            KleinSilversteinCarney, MSSSIM, NRobidoux,
+            PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]
 
       options:
         - alts:

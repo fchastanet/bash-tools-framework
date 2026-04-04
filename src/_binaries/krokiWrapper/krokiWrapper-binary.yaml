@@ -1,0 +1,134 @@
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/krokiWrapper/krokiWrapper-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/krokiWrapper"
+binData:
+  commands:
+    default:
+      functionName: krokiWrapperCommand
+      unknownOptionCallbacks:
+        - unknownOption
+      unknownArgumentCallbacks:
+        - unknownArgument
+      callbacks:
+        - krokiWrapperCallback
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      copyrightBeginYear: 2026
+      commandName: krokiWrapper
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/krokiWrapper/krokiWrapper-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/krokiWrapper/krokiWrapper-main.sh
+      help: |
+        Convert diagrams to images using Kroki CLI or run Kroki server.
+        https://docs.kroki.io/kroki/setup/kroki-cli/
+      longDescription: |
+        Convert diagrams to images using Kroki CLI or run a local Kroki server.
+        https://docs.kroki.io/kroki/setup/kroki-cli/
+
+        Kroki CLI allows you to convert various diagram formats (PlantUML, Mermaid,
+        Graphviz, BlockDiag, SeqDiag, ActDiag, NwDiag, PacketDiag, RackDiag, Bytefield,
+        Ditaa, Erd, GraphViz, Nomnoml, Pikchr, Structurizr, SvgBob, UMLet, Vega, Vegalite,
+        WaveDrom, Excalidraw, and more) to images (SVG, PNG, PDF, etc.).
+
+        ${__HELP_TITLE_COLOR}KROKI HELP${__RESET_COLOR}
+
+        @@@KROKI_HELP@@@
+
+        ${__HELP_TITLE_COLOR}SERVER MODE${__RESET_COLOR}
+
+        Use --server to manage a local Kroki server using Docker:
+
+          --server start [--server-port 8000]
+            Start Kroki server with all companion services
+
+          --server stop\n
+            Stop Kroki server and remove containers
+
+          --server status\n
+            Show server status and URL
+
+        The server includes: Gateway, Mermaid, BPMN, and Excalidraw services.
+
+      optionGroups:
+        ServerOptionsGroup:
+          title: "SERVER OPTIONS:"
+      options:
+        - alts:
+            - --same-dir
+          help: |
+            Write output file in same directory as source file
+            and with the same base name (except extension)
+            Incompatible with the option --output-dir
+          type: Boolean
+          group: OptionsGroup
+          variableName: sameDirectoryOption
+
+        - alts:
+            - --output-dir
+          help: |
+            Define output directory of this command (default: <currentDirectory>)
+            Incompatible with the option --same-dir
+          type: String
+          callbacks:
+            - krokiWrapperOutputDirCallback
+          group: OptionsGroup
+          helpValueName: OutputDir
+          variableName: optionOutputDir
+
+        - alts:
+            - --format
+          help: |
+            Output format for wrapper mode: svg, png, pdf (default: svg)
+            Note: When using 'convert' subcommand, use kroki's native -f flag
+          type: String
+          group: OptionsGroup
+          authorizedValues:
+            - value: svg
+              help: SVG vector format (recommended for web)
+            - value: png
+              help: PNG raster format
+            - value: pdf
+              help: PDF document format
+          helpValueName: Format
+          variableName: optionOutputFormat
+
+        - alts:
+            - --force-update
+          help: |
+            Force download of kroki binary even if already cached
+          type: Boolean
+          group: OptionsGroup
+          variableName: optionForceUpdate
+
+        - alts:
+            - --server
+          help: |
+            Server management action: start, stop, status
+          type: String
+          group: ServerOptionsGroup
+          authorizedValues:
+            - value: start
+              help: Start Kroki server using Docker Compose
+            - value: stop
+              help: Stop Kroki server containers
+            - value: status
+              help: Show Kroki server status
+          helpValueName: Action
+          variableName: optionServer
+
+        - alts:
+            - --server-port
+          help: |
+            Port for Kroki server (default: 8000)
+          type: String
+          group: ServerOptionsGroup
+          helpValueName: Port
+          variableName: optionServerPort
