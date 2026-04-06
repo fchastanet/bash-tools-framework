@@ -41,61 +41,82 @@ shellcheckFiles() {
   Log::displayInfo "${#files[@]} files to check using ${optionFormat} format"
 
   if ((${#files[@]} > 0)); then
-    (
-      export FRAMEWORK_VENDOR_BIN_DIR
-      # shellcheck disable=SC2329
-      shellcheckFunction() {
-        if (($# == 0)); then
-          return 0
-        fi
-        if [[ "${optionTraceVerbose}" = "1" ]]; then
-          set -x
-        fi
-        # shellcheck disable=SC2086
-        "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" ${shellcheckArgsStr} "$@"
-      }
-      export -f shellcheckFunction
+    local tmpDir
+    tmpDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-tools-shellcheck-XXXXXX)"
+    export tmpDir
+    local failuresFile
+    failuresFile="${tmpDir}/.failures"
+    export failuresFile
+    export FRAMEWORK_VENDOR_BIN_DIR
 
-      local -a xargsArgs=(
-        --no-run-if-empty
-        --process-slot-var=slot
-      )
-      if [[ "${optionXargs}" = "1" ]]; then
-        xargsArgs+=(
-          -P "$(nproc --ignore=1)"
-          -n 10
-        )
+    # shellcheck disable=SC2329
+    shellcheckFunction() {
+      if (($# == 0)); then
+        return 0
       fi
-
       if [[ "${optionTraceVerbose}" = "1" ]]; then
-        xargsArgs+=(-t)
+        set -x
       fi
-      local tmpDir
-      tmpDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-tools-shellcheck-XXXXXX)"
-      export tmpDir
-      # shellcheck disable=SC2016
-      echo "${files[@]}" |
-        optionTraceVerbose="${optionTraceVerbose}" \
-          shellcheckArgsStr="${shellcheckArgs[*]}" \
-          xargs "${xargsArgs[@]}" \
-          bash -c 'echo >&2 "linting $* ..."; file="$(md5sum <<<"$@")"; shellcheckFunction $@ | tee "${tmpDir}/${file%% *}" >&2; echo >&2 "linted $*"' bash
-      if [[ "${optionFormat}" = "checkstyle" ]]; then
-        (
-          echo "<?xml version='1.0' encoding='UTF-8'?>"
-          echo "<checkstyle version='4.3'>"
-          awk '/<checkstyle/{flag=1; next} /<\/checkstyle>/{flag=0} flag' "${tmpDir}/"*
-          echo "</checkstyle>"
-        )
-      elif [[ "${optionFormat}" = "json" ]]; then
-        (
-          jq '.[]' "${tmpDir}/"* | jq -s '.'
-        )
-      elif [[ "${optionFormat}" = "json1" ]]; then
-        jq -s 'map(.comments[])' "${tmpDir}/"* | jq '{"comments": .}'
-      else
-        cat "${tmpDir}/"*
+      echo >&2 "Linting $* ..."
+      # shellcheck disable=SC2086
+      "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" ${shellcheckArgsStr} "$@"
+    }
+    export -f shellcheckFunction
+
+    shellcheckScript() {
+      set -o errexit -o pipefail
+      file="$(md5sum <<<"$@")"
+      declare shellcheckExit=0
+      shellcheckFunction "$@" >"${tmpDir}/${file%% *}" >&2 || shellcheckExit=$?
+      if ((shellcheckExit != 0)); then
+        echo "$@" >>"${failuresFile}"
       fi
+    }
+    export -f shellcheckScript
+
+    local -a xargsArgs=(
+      --no-run-if-empty
+      --process-slot-var=slot
     )
+    if [[ "${optionXargs}" = "1" ]]; then
+      xargsArgs+=(
+        -P "$(nproc --ignore=1)"
+        -n 10
+      )
+    fi
+
+    if [[ "${optionTraceVerbose}" = "1" ]]; then
+      xargsArgs+=(-t)
+    fi
+
+    # shellcheck disable=SC2016
+    echo "${files[@]}" |
+      optionTraceVerbose="${optionTraceVerbose}" \
+        shellcheckArgsStr="${shellcheckArgs[*]}" \
+        tmpDir="${tmpDir}" \
+        failuresFile="${failuresFile}" \
+        xargs "${xargsArgs[@]}" \
+        bash -c 'shellcheckScript "$@"' bash || true
+
+    if [[ "${optionFormat}" = "checkstyle" ]]; then
+      (
+        echo "<?xml version='1.0' encoding='UTF-8'?>"
+        echo "<checkstyle version='4.3'>"
+        awk '/<checkstyle/{flag=1; next} /<\/checkstyle>/{flag=0} flag' "${tmpDir}/"*
+        echo "</checkstyle>"
+      )
+    elif [[ "${optionFormat}" = "json" ]]; then
+      (
+        jq '.[]' "${tmpDir}/"* | jq -s '.'
+      )
+    elif [[ "${optionFormat}" = "json1" ]]; then
+      jq -s 'map(.comments[])' "${tmpDir}/"* | jq '{"comments": .}'
+    fi
+
+    # Check if any shellcheck calls failed
+    if [[ -f "${failuresFile}" ]]; then
+      return 1
+    fi
   else
     Log::displayWarning "no file provided"
   fi

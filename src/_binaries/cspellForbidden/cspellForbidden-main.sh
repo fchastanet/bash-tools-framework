@@ -59,13 +59,13 @@ fi
 
 # ensure all the .txt files in .cspell directory are sorted and unique (case-sensitive)
 for file in .cspell/*.txt; do
-  if [[ -f "$file" && "$file" != ".cspell/forbidden.txt" ]]; then
+  if [[ -f "${file}" && "${file}" != ".cspell/forbidden.txt" ]]; then
     declare tmpFile="${TMPDIR}/tmp.$$.txt"
-    Log::displayInfo "Sorting and uniquing the file $file"
-    LC_COLLATE=C sort --ignore-case "$file" | uniq >"$tmpFile" || {
-      Log::fatal "Failed to sort and unique the file $file"
+    Log::displayInfo "Sorting and uniquing the file ${file}"
+    LC_COLLATE=C sort --ignore-case "${file}" | uniq >"${tmpFile}" || {
+      Log::fatal "Failed to sort and unique the file ${file}"
     }
-    mv "$tmpFile" "$file"
+    mv "${tmpFile}" "${file}"
   fi
 done
 
