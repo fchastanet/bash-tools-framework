@@ -51,7 +51,7 @@ convertPuml() {
   # Handle multiple include paths
   local -a includePaths=()
   local -a containerPaths=()
-  if [[ -n "${plantumlIncludePathsOption}" ]]; then
+  if [[ -n "${plantumlIncludePathsOption}" && "${plantumlIncludePathsOption}" != "0" ]]; then
     IFS=',' read -ra includePaths <<<"${plantumlIncludePathsOption}"
     local i=0
     local path

@@ -1165,7 +1165,7 @@ updateOptionContinuousIntegrationMode() {
 
 # shellcheck disable=SC2034
 declare optionDefaultOutputDir="doc/images"
-declare -a defaultFormatsIfNoneProvided=("png")
+declare -a defaultFormatsIfNoneProvided=("svg")
 declare -a plantumlOptions=()
 declare -a argPlantumlFiles=()
 readonly PLANTUML_PULL_TIMEOUT=$((7 * 24 * 3600))
@@ -1191,7 +1191,7 @@ optionLimitSizeCallback() {
 
 includePathOptionCallback() {
   if [[ -z "${plantumlIncludePathsOption}" ]]; then
-    return 0
+    plantumlIncludePathsOption="${PWD}"
   fi
 
   # Parse comma-separated paths
@@ -1216,6 +1216,10 @@ includePathOptionCallback() {
     IFS=','
     echo "${validatedPaths[*]}"
   )"
+
+  if [[ -z "${plantumlIncludePathsOption}" ]]; then
+    plantumlIncludePathsOption="0"
+  fi
 }
 
 downloadElkJarIfNeeded() {
@@ -2132,7 +2136,7 @@ convertPuml() {
   # Handle multiple include paths
   local -a includePaths=()
   local -a containerPaths=()
-  if [[ -n "${plantumlIncludePathsOption}" ]]; then
+  if [[ -n "${plantumlIncludePathsOption}" && "${plantumlIncludePathsOption}" != "0" ]]; then
     IFS=',' read -ra includePaths <<<"${plantumlIncludePathsOption}"
     local i=0
     local path

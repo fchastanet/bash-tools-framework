@@ -104,6 +104,7 @@ binData:
           helpValueName: IncludePaths
           group: OptionsGroup
           variableName: plantumlIncludePathsOption
+          defaultValue: ""
 
         - alts:
             - --elk

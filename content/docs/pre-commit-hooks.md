@@ -5,8 +5,8 @@ description: Overview of the Bash Tools Framework pre-commit hooks
 type: docs
 weight: 2001
 date: '2026-03-15T08:00:00+01:00'
-lastmod: '2026-03-31T00:42:40+02:00'
-version: '1.1'
+lastmod: '2026-04-06T14:40:17+02:00'
+version: '1.2'
 ---
 
 The Bash Tools Framework provides pre-commit hooks to ensure code quality and consistency before changes are committed
@@ -107,7 +107,7 @@ repos:
       - id: awkLint
       - id: shellcheckLint
       - id: plantuml
-        args: [--same-dir, -f, png, -f, svg, --limit-size, '1200']
+        args: [--same-dir, -f, svg, --limit-size, '1200']
       - id: hugoUpdateLastmod
 
 ```

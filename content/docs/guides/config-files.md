@@ -4,9 +4,9 @@ description: Understanding configuration file management in Bash Tools Framework
 weight: 10
 categories: [documentation, guides]
 tags: [configuration, env-files, environment]
-version: '1.0'
 date: '2026-03-01T08:00:00+01:00'
-lastmod: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-04-06T14:40:17+02:00'
+version: '1.1'
 ---
 
 [Inspired by Evan "Hippy" Slatis work](https://opensource.com/article/21/5/processing-configuration-files-shell)
@@ -79,6 +79,6 @@ BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION="${BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION:-5}
 
 Activity diagram to explain how Env::requireLoad is working:
 
-{{< img src="assets/requireLoad-activityDiagram.png" alt="how Env::requireLoad is working" >}}
+{{< img src="assets/requireLoad-activityDiagram.svg" alt="how Env::requireLoad is working" >}}
 
 [activity diagram source code](https://github.com/fchastanet/bash-tools-framework/blob/master/src/Env/requireLoad-activityDiagram.puml).

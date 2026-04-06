@@ -105,7 +105,7 @@ generateDoc() {
 
   mkdir -p "${PAGES_DIR}/assets"
   cp -v \
-    "${FRAMEWORK_ROOT_DIR}/src/Env/requireLoad-activityDiagram.png" \
+    "${FRAMEWORK_ROOT_DIR}/src/Env/requireLoad-activityDiagram.svg" \
     "${PAGES_DIR}/assets"
 }
 

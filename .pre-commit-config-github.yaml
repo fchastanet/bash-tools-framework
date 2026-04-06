@@ -234,8 +234,6 @@ repos:
         args: [--expected-warnings-count, "61", --format, plain, --theme, default-force, --display-level, WARNING]
       - id: frameworkLintGithubAction
         args: [--expected-warnings-count, "61", --format, checkstyle, --theme, default-force, --display-level, WARNING]
-      - id: plantuml
-        args: [--same-dir, -f, png, -f, svg, --limit-size, "900"]
       - id: hugoUpdateLastmod
         stages: [pre-commit]
 
@@ -258,6 +256,16 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit, pre-push]
+      - id: plantuml
+        name: Plantuml Converter
+        description: Convert plantuml files to images
+        language: script
+        entry: bin/plantuml
+        args: [--ci, --same-dir, -f, svg]
+        pass_filenames: true
+        types: ["file", "non-executable", "plantuml", "text"]
+        always_run: false
+        stages: [pre-commit, manual]
 
   - repo: https://github.com/fchastanet/bash-compiler
     rev: 3.2.1

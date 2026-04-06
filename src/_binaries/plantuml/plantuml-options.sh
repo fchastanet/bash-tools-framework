@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC2034
 declare optionDefaultOutputDir="doc/images"
-declare -a defaultFormatsIfNoneProvided=("png")
+declare -a defaultFormatsIfNoneProvided=("svg")
 declare -a plantumlOptions=()
 declare -a argPlantumlFiles=()
 readonly PLANTUML_PULL_TIMEOUT=$((7 * 24 * 3600))
@@ -28,7 +28,7 @@ optionLimitSizeCallback() {
 
 includePathOptionCallback() {
   if [[ -z "${plantumlIncludePathsOption}" ]]; then
-    return 0
+    plantumlIncludePathsOption="${PWD}"
   fi
 
   # Parse comma-separated paths
@@ -53,6 +53,10 @@ includePathOptionCallback() {
     IFS=','
     echo "${validatedPaths[*]}"
   )"
+
+  if [[ -z "${plantumlIncludePathsOption}" ]]; then
+    plantumlIncludePathsOption="0"
+  fi
 }
 
 downloadElkJarIfNeeded() {

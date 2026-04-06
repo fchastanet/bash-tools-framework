@@ -13,7 +13,5 @@ useDefault = true
     '''megalinter-reports''',
     '''.github/linters''',
     '''node_modules''',
-    '''.mypy_cache''',
-    '''(.*?)gitleaks\.toml$''',
-    '''(.*?)(png|jpg|gif|doc|docx|pdf|bin|xls|pyc|zip)$''',
-    '''(go.mod|go.sum)$''']
+    '''(.*?)gitleaks\.toml$'''
+    ]
