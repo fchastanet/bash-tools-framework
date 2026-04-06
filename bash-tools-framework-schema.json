@@ -329,7 +329,7 @@
               "type": "null"
             }
           ],
-          "examples": ["plain", "ubuntu:20.04", true, "optionLogLevelDefaultValueFunction"]
+          "examples": ["plain", "ubuntu:20.04", true, "INFO"]
         },
         "authorizedValues": {
           "description": "List of allowed values for this option",

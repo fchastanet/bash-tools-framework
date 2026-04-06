@@ -7,24 +7,20 @@ source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 # shellcheck source=src/Linux/getDistributorId.sh
 source "${srcDir}/Linux/getDistributorId.sh"
 
-function Linux::getDistributorId::failure { #@test
-  source() {
-    exit 1
-  }
+tearDown() {
+  unstub_all
+}
 
+function Linux::getDistributorId::failure { #@test
+  stub awk '-F= * /etc/os-release : exit 1'
   run Linux::getDistributorId
 
-  assert_failure 1
+  assert_failure 2
   assert_output ""
 }
 
 function Linux::getDistributorId::success { #@test
-  source() {
-    if [[ "$1" != "/etc/os-release" ]]; then
-      exit 1
-    fi
-    echo "Ubuntu"
-  }
+  stub awk '-F= * /etc/os-release : echo Ubuntu'
 
   run Linux::getDistributorId
 

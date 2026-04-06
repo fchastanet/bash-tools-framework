@@ -421,7 +421,7 @@ Env::createDefaultEnvFile() {
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
 # @stderr diagnostics information is displayed
-# shellcheck disable=SC2120
+# shellcheck disable=SC2120,SC2329
 Env::requireLoad() {
   export REQUIRE_FUNCTION_ENV_REQUIRE_LOAD_LOADED=1
 
@@ -712,6 +712,7 @@ Log::logMessage() {
 # @env BASH_FRAMEWORK_LOG_FILE_MAX_ROTATION int do log rotation if > 0
 # @exitcode 0 always successful
 # @stderr diagnostics information about log file is displayed
+# shellcheck disable=SC2329
 Log::requireLoad() {
   export REQUIRE_FUNCTION_LOG_REQUIRE_LOAD_LOADED=1
 
@@ -802,6 +803,7 @@ UI::drawLine() {
 # @env BASH_FRAMEWORK_THEME String theme to use
 # @env LOAD_THEME int 0 to avoid loading theme
 # @exitcode 0 always successful
+# shellcheck disable=SC2329
 UI::requireTheme() {
   export REQUIRE_FUNCTION_UI_REQUIRE_THEME_LOADED=1
 
@@ -894,73 +896,75 @@ UI::theme() {
 
 declare -a BASH_FRAMEWORK_ARGV_FILTERED=()
 
+# shellcheck disable=SC2329
 beforeParseCallback() {
   Env::requireLoad
   UI::requireTheme
   Log::requireLoad
 }
 
+# shellcheck disable=SC2329
 copyrightCallback() {
   #
   # shellcheck disable=SC2155,SC2154,SC2250
   echo "Copyright (c) 2023-now François Chastanet"
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(--verbose)
 }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListDebugVerboseCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(-vv)
 }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListTraceVerboseCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(-vvv)
 }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListEnvFileCallback() { :; }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListLogLevelCallback() { :; }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListDisplayLevelCallback() { :; }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListNoColorCallback() {
   BASH_FRAMEWORK_ARGV_FILTERED+=(--no-color)
 }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListThemeCallback() { :; }
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 updateArgListQuietCallback() { :; }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionHelpCallback() {
   Log::displayError "optionHelpCallback needs to be overridden"
   exit 0
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
   echo "${SCRIPT_NAME} version 3.0"
   exit 0
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionInfoVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='--verbose'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_INFO}
   echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_INFO}" >>"${overrideEnvFile}"
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionDebugVerboseCallback() {
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vv'
   BASH_FRAMEWORK_ARGS_VERBOSE=${__VERBOSE_LEVEL_DEBUG}
   echo "BASH_FRAMEWORK_DISPLAY_LEVEL=${__LEVEL_DEBUG}" >>"${overrideEnvFile}"
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionTraceVerboseCallback() {
   # shellcheck disable=SC2034
   BASH_FRAMEWORK_ARGS_VERBOSE_OPTION='-vvv'
@@ -1040,11 +1044,7 @@ optionLogLevelCallback() {
   echo "BASH_FRAMEWORK_LOG_LEVEL=${logLevel}" >>"${overrideEnvFile}"
 }
 
-optionLogLevelDefaultValueFunction() {
-  Log::getLevelText "${BASH_FRAMEWORK_LOG_LEVEL:-${__LEVEL_OFF}}"
-}
-
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionLogFileCallback() {
   local logFile="$2"
   echo "BASH_FRAMEWORK_LOG_FILE='${logFile}'" >>"${overrideEnvFile}"
@@ -1055,17 +1055,17 @@ optionLogFileDefaultValueFunction() {
   echo "${BASH_FRAMEWORK_LOG_FILE:-"${FRAMEWORK_ROOT_DIR}/logs/${SCRIPT_NAME}.log"}"
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionQuietCallback() {
   echo "BASH_FRAMEWORK_QUIET_MODE=1" >>"${overrideEnvFile}"
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionNoColorCallback() {
   UI::theme "noColor"
 }
 
-# shellcheck disable=SC2317 # if function is overridden
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionThemeCallback() {
   UI::theme "$2"
 }
@@ -1080,6 +1080,7 @@ displayConfig() {
   exit 0
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionBashFrameworkConfigCallback() {
   if [[ ! -f "$2" ]]; then
     Log::fatal "Command ${SCRIPT_NAME} - Bash framework config file '$2' does not exists"
@@ -1141,7 +1142,7 @@ declare optionBashFrameworkConfig=""
 declare optionInfoVerbose="0"
 declare optionDebugVerbose="0"
 declare optionTraceVerbose="0"
-declare optionLogLevel="optionLogLevelDefaultValueFunction"
+declare optionLogLevel="INFO"
 declare optionLogFile="optionLogFileDefaultValueFunction"
 declare optionDisplayLevel="optionDisplayLevelDefaultValueFunction"
 declare optionNoColor="0"
@@ -1175,7 +1176,7 @@ buildPushDockerImageCommandParse() {
   optionTraceVerbose="0"
   local -i options_parse_optionParsedCountOptionTraceVerbose
   ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
-  optionLogLevel="optionLogLevelDefaultValueFunction"
+  optionLogLevel="INFO"
   local -i options_parse_optionParsedCountOptionLogLevel
   ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
   optionLogFile="optionLogFileDefaultValueFunction"
@@ -1659,7 +1660,7 @@ buildPushDockerImageCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
 
-  Array::wrap2 ' ' 76 6 "    Default value: " "$(optionLogLevelDefaultValueFunction)"
+  Array::wrap2 ' ' 76 6 "    Default value: " "INFO"
   echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"

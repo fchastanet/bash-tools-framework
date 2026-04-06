@@ -2,11 +2,12 @@
 
 # @description retrieve linux distributor id
 # @noargs
-# @exitcode 1 if lsb_release fails or not found
+# @exitcode 1 if /etc/os-release not found
+# @exitcode 2 if ID field not found in /etc/os-release
 # @stdout the linux distributor id
 Linux::getDistributorId() {
-  (
-    source /etc/os-release
-    echo "${ID}"
-  )
+  if [[ ! -f /etc/os-release ]]; then
+    return 1
+  fi
+  awk -F= '/^ID=/ { gsub(/"/, "", $2); print $2; exit }' /etc/os-release || return 2
 }

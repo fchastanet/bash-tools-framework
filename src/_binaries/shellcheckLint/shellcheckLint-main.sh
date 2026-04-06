@@ -4,7 +4,11 @@ Softwares::installShellcheck "${PERSISTENT_TMPDIR}/shellcheck"
 
 # shellcheck disable=SC2154
 getFiles() {
-  exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${FRAMEWORK_ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
+  shellcheckrcFile="${FRAMEWORK_ROOT_DIR}/.shellcheckrc"
+  if [[ -f "${PWD}/.shellcheckrc" ]]; then
+    shellcheckrcFile="${PWD}/.shellcheckrc"
+  fi
+  exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${shellcheckrcFile}" 2>/dev/null || true)"
   if [[ -z "${exclude}" ]]; then
     exclude='^$'
   fi
@@ -29,7 +33,7 @@ getFiles() {
     fi
   ) |
     (grep -E -v "${exclude}" || true) |
-    LC_ALL=C.UTF-8 xargs -r -L 1 -n 1 -I@ bash -c "File::detectBashFile '@'"
+    LC_ALL=C.UTF-8 xargs -r -n 10 bash -c 'File::detectBashFile "$@"' arg0
 }
 
 shellcheckFiles() {
@@ -44,37 +48,28 @@ shellcheckFiles() {
   Log::displayInfo "${#files[@]} files to check using ${optionFormat} format"
 
   if ((${#files[@]} > 0)); then
-    local tmpDir
-    tmpDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-tools-shellcheck-XXXXXX)"
-    export tmpDir
-    local failuresFile
-    failuresFile="${tmpDir}/.failures"
-    export failuresFile
-    export FRAMEWORK_VENDOR_BIN_DIR
-
-    # shellcheck disable=SC2329
-    shellcheckFunction() {
+    shellcheckScript() {
+      set -o errexit -o pipefail
       if (($# == 0)); then
         return 0
       fi
       if [[ "${optionTraceVerbose}" = "1" ]]; then
         set -x
       fi
-      echo >&2 "Linting $* ..."
-      # shellcheck disable=SC2086,SC2154
-      "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" ${shellcheckArgsStr} "$@"
-    }
-    export -f shellcheckFunction
+      if [[ "${debug}" = "1" ]]; then
+        echo 2>&1 "Running shellcheck on the following files: $*"
+      fi
 
-    shellcheckScript() {
-      set -o errexit -o pipefail
       file="$(md5sum <<<"$@")"
       declare shellcheckExit=0
-      shellcheckFunction "$@" >"${tmpDir}/${file%% *}" >&2 || shellcheckExit=$?
+      # shellcheck disable=SC2086,SC2154
+      "${PERSISTENT_TMPDIR}/shellcheck" ${shellcheckArgsStr} "$@" >"${tmpDir}/${file%% *}" >&2 || shellcheckExit=$?
       if ((shellcheckExit != 0)); then
         echo "$@" >>"${failuresFile}"
       fi
     }
+    export FRAMEWORK_VENDOR_BIN_DIR
+    export -f Log::displayDebug Log::computeDuration Log::logDebug Log::logMessage
     export -f shellcheckScript
 
     local -a xargsArgs=(
@@ -92,15 +87,19 @@ shellcheckFiles() {
     if [[ "${optionTraceVerbose}" = "1" ]]; then
       xargsArgs+=(-t)
     fi
-
+    local debug=0
+    if [[ "${BASH_FRAMEWORK_DISPLAY_LEVEL}" = "${__LEVEL_DEBUG}" ]]; then
+      debug=1
+    fi
     # shellcheck disable=SC2016,SC2154
     echo "${files[@]}" |
       optionTraceVerbose="${optionTraceVerbose}" \
         shellcheckArgsStr="${shellcheckArgs[*]}" \
         tmpDir="${tmpDir}" \
+        debug="${debug}" \
         failuresFile="${failuresFile}" \
         xargs "${xargsArgs[@]}" \
-        bash -c 'shellcheckScript "$@"' bash || true
+        bash -c 'shellcheckScript "$@" || true' bash || true
 
     if [[ "${optionFormat}" = "checkstyle" ]]; then
       (
@@ -116,14 +115,24 @@ shellcheckFiles() {
     elif [[ "${optionFormat}" = "json1" ]]; then
       jq -s 'map(.comments[])' "${tmpDir}/"* | jq '{"comments": .}'
     fi
-
-    # Check if any shellcheck calls failed
-    if [[ -f "${failuresFile}" ]]; then
-      return 1
-    fi
   else
     Log::displayWarning "no file provided"
   fi
 }
 
+declare tmpDir
+tmpDir="$(mktemp -d -p "${TMPDIR:-/tmp}" -t bash-tools-shellcheck-XXXXXX)"
+export tmpDir
+declare failuresFile
+failuresFile="${tmpDir}/.failures"
+export failuresFile
+
 shellcheckFiles
+
+# Check if any shellcheck calls failed
+if [[ -f "${failuresFile}" ]]; then
+  cat "${failuresFile}" >&2
+  return 1
+else
+  Log::displaySuccess "All files passed shellcheck with ${optionFormat} format"
+fi

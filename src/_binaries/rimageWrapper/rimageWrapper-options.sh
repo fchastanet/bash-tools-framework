@@ -6,6 +6,7 @@ declare -a rimageOptions=()
 declare -a argRimageWrapperFiles=()
 readonly RIMAGE_PULL_TIMEOUT=$((7 * 24 * 3600))
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 rimageInstallCallback() {
   local file="$1"
   local targetFile="$2"
@@ -21,6 +22,7 @@ rimageInstallCallback() {
   )
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 beforeParseCallback() {
   Linux::requireJqCommand
   UI::requireTheme
@@ -49,11 +51,13 @@ unknownArgument() {
   fi
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 rimageWrapperCallback() {
   # shellcheck disable=SC2154
   optionOutputDir=$(File::createOutputDir "${optionOutputDir}" "${optionDefaultOutputDir}") || return 1
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionHelpCallback() {
   local rimageHelpFile
   rimageHelpFile="$(Framework::createTempFile "rimageHelp")"
@@ -66,6 +70,7 @@ optionHelpCallback() {
   exit 0
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionVersionCallback() {
   echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}{{ .RootData.binData.commands.default.version }}"
   echo -e "${__HELP_TITLE_COLOR}rimage version: ${__RESET_COLOR}$("${RIMAGE_DIR:-${PERSISTENT_TMPDIR}/rimage}/rimage" --version)"

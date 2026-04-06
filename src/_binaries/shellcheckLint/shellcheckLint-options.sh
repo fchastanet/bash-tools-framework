@@ -7,6 +7,7 @@ declare MIN_SHELLCHECK_VERSION="0.9.0"
 declare optionFormat="${optionFormatDefault}"
 declare -a shellcheckArgs=()
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 beforeParseCallback() {
   Env::requireLoad
   Linux::requireJqCommand
@@ -16,6 +17,8 @@ beforeParseCallback() {
 unknownOption() {
   shellcheckArgs+=("$1")
 }
+
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 shellcheckLintParseCallback() {
   # shellcheck disable=SC2154
   if [[ "${optionStaged}" = "1" ]] && ((${#argShellcheckFiles[@]} > 0)); then
@@ -25,6 +28,7 @@ shellcheckLintParseCallback() {
   shellcheckArgs=(-f "${optionFormat}")
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionHelpCallback() {
   local shellcheckHelpFile
   shellcheckHelpFile="$(Framework::createTempFile "shellcheckHelp")"
@@ -43,6 +47,7 @@ optionHelpCallback() {
   exit 0
 }
 
+# shellcheck disable=SC2317,SC2329 # if function is overridden
 optionVersionCallback() {
   echo -e "${__HELP_TITLE_COLOR}${SCRIPT_NAME} version: ${__RESET_COLOR} {{ .RootData.binData.commands.default.version }}"
   echo -e -n "${__HELP_TITLE_COLOR}shellcheck Version: ${__RESET_COLOR}"

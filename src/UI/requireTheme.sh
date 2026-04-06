@@ -5,6 +5,7 @@
 # @env BASH_FRAMEWORK_THEME String theme to use
 # @env LOAD_THEME int 0 to avoid loading theme
 # @exitcode 0 always successful
+# shellcheck disable=SC2329
 UI::requireTheme() {
   if [[ "${LOAD_THEME:-1}" = "1" ]]; then
     UI::theme "${BASH_FRAMEWORK_THEME-default}"

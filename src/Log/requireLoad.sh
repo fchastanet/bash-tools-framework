@@ -14,6 +14,7 @@
 # @stderr diagnostics information about log file is displayed
 # @require Env::requireLoad
 # @require UI::requireTheme
+# shellcheck disable=SC2329
 Log::requireLoad() {
   if [[ -z "${BASH_FRAMEWORK_LOG_FILE:-}" ]]; then
     BASH_FRAMEWORK_LOG_LEVEL=${__LEVEL_OFF}

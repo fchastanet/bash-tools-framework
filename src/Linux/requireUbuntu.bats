@@ -6,21 +6,12 @@
 source "$(cd "${BATS_TEST_DIRNAME}/.." && pwd)/batsHeaders.sh"
 # shellcheck source=src/Linux/requireUbuntu.sh
 source "${srcDir}/Linux/requireUbuntu.sh"
-# shellcheck source=src/Linux/getDistributorId.sh
-source "${srcDir}/Linux/getDistributorId.sh"
 # shellcheck source=src/Array/contains.sh
 source "${srcDir}/Array/contains.sh"
 
-teardown() {
-  unstub_all
-}
-
 function Linux::requireUbuntu::failure { #@test
-  source() {
-    if [[ "$1" != "/etc/os-release" ]]; then
-      exit 1
-    fi
-    echo "Alpine"
+  Linux::getDistributorId() {
+    exit 1
   }
   run Linux::requireUbuntu
 
@@ -29,10 +20,7 @@ function Linux::requireUbuntu::failure { #@test
 }
 
 function Linux::requireUbuntu::success { #@test
-  source() {
-    if [[ "$1" != "/etc/os-release" ]]; then
-      exit 1
-    fi
+  Linux::getDistributorId() {
     echo "ubuntu"
   }
   run Linux::requireUbuntu
@@ -42,10 +30,7 @@ function Linux::requireUbuntu::success { #@test
 }
 
 function Linux::requireUbuntu::success2 { #@test
-  source() {
-    if [[ "$1" != "/etc/os-release" ]]; then
-      exit 1
-    fi
+  Linux::getDistributorId() {
     echo "debian"
   }
   run Linux::requireUbuntu

@@ -79,7 +79,7 @@ binData:
           help: Set log level
           alts:
             - "--log-level"
-          defaultValue: optionLogLevelDefaultValueFunction
+          defaultValue: INFO
           authorizedValues:
             - value: 'OFF'
             - value: 'ERR'

@@ -4,7 +4,7 @@
 # @arg $@ list of default files to load at the end
 # @exitcode 1 if one of env files fails to load
 # @stderr diagnostics information is displayed
-# shellcheck disable=SC2120
+# shellcheck disable=SC2120,SC2329
 Env::requireLoad() {
   local -a defaultFiles=("$@")
   # get list of possible config files
