@@ -1,8 +1,7 @@
 ABRT
-ABRT
 addgroup
-ansi
 Ansi
+ansi
 audbx
 autoclean
 autojump
@@ -28,8 +27,8 @@ delgroup
 DELIM
 DELIMS
 deluser
-deps
 Deps
+deps
 dhclient
 DISTRO
 distro
@@ -90,8 +89,8 @@ nlastmod
 noargs
 nodoc
 nohup
-noninteractive
 NONINTERACTIVE
+noninteractive
 nonportable
 nullglob
 onbuild
@@ -133,9 +132,9 @@ TERM
 testsuites
 textmate
 TMPDIR
-TMPDIR
 udbx
 undelete
+uniquing
 unmatch
 unsetopt
 unsetting

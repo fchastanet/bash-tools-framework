@@ -90,8 +90,8 @@ markdownlint
 maximised
 mcrypt
 megalinter
-meslo
 Meslo
+meslo
 Msys
 mthis
 multifile

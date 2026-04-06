@@ -115,6 +115,3 @@ Array::wrap() {
     echo
   fi
 }
-
-#set -x
-#Array::wrap ":" 40 0 "Lorem ipsum dolor sit amet," "consectetur adipiscing elit." "Curabitur ac elit id massa" "condimentum finibus."

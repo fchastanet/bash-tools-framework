@@ -8,66 +8,66 @@ fi
 
 # ensure .cspell/forbidden.txt is used by cspell
 # Determine which config file to use (prefer yaml over json)
-cspellConfigFile="cspell.json"
-if [[ -f "cspell.yaml" ]]; then
-  cspellConfigFile="cspell.yaml"
+cspellConfigFile="cspell.yaml"
+if [[ ! -f "cspell.yaml" && ! -f "cspell.yml" ]]; then
+  Log::fatal "Only cspell.yaml or cspell.yml configuration files are supported. Please create one of these files."
 elif [[ -f "cspell.yml" ]]; then
   cspellConfigFile="cspell.yml"
-elif [[ ! -f "cspell.json" ]]; then
-  # If no config file exists, create cspell.json
-  echo '{}' >cspell.json
-  cspellConfigFile="cspell.json"
 fi
 
-# Update the config file with forbidden dictionary configuration
-# Use jq for processing, converting YAML to JSON if needed
-read -r -d '' JQ_SCRIPT <<'EOF' || true
-.ignorePaths //= [] |
-.ignorePaths |= if index(".cspell/forbidden.txt") then . else . + [".cspell/forbidden.txt"] end |
-.dictionaryDefinitions //= [] |
-.dictionaryDefinitions |= if any(.name == "forbidden") then
-  map(if .name == "forbidden" then . + {addWords: false, path: ".cspell/forbidden.txt"} else . end)
-else
-  . + [{name: "forbidden", addWords: false, path: ".cspell/forbidden.txt"}]
-end |
-.dictionaries //= [] |
-.dictionaries |= if index("forbidden") then . else . + ["forbidden"] end |
-.dictionaries |= unique |
-.version //= "0.2" |
-.language //= "en" |
-.noConfigSearch //= true |
-.caseSensitive //= true |
-.useGitignore //= true |
-.enableGlobDot //= true |
-.enableFiletypes //= [] |
-.enableFiletypes |= if index("shellscript") then . else . + ["shellscript"] end
+EXPECTED_FORBIDDEN_DICT_ENTRY=$(
+  cat <<EOF
+dictionaryDefinitions:
+  - name: forbidden
+    addWords: false
+    path: .cspell/forbidden.txt
 EOF
+)
 
-if [[ "${cspellConfigFile}" == *.json ]]; then
-  # JSON format: update directly
-  jq "${JQ_SCRIPT}" "${cspellConfigFile}" >"${TMPDIR}/tmp.$$.json" || {
-    Log::fatal "Failed to update ${cspellConfigFile} with forbidden dictionary configuration using jq script"
-  }
-  mv "${TMPDIR}/tmp.$$.json" "${cspellConfigFile}"
-else
-  # YAML format: convert to JSON, update, convert back to YAML
-  yq -o json "${cspellConfigFile}" | jq "${JQ_SCRIPT}" | yq -P >"${TMPDIR}/tmp.$$.yaml" || {
-    Log::fatal "Failed to update ${cspellConfigFile} with forbidden dictionary configuration using jq/yq script"
-  }
-  mv "${TMPDIR}/tmp.$$.yaml" "${cspellConfigFile}"
+confError() {
+  Log::displayError "The forbidden dictionary is not properly defined in the dictionaryDefinitions section of ${cspellConfigFile}."
+  if [[ -n "$1" ]]; then
+    Log::displayError "$1"
+  fi
+  Log::displayInfo "Please add the following entry in ${cspellConfigFile}:"
+  echo -e "${EXPECTED_FORBIDDEN_DICT_ENTRY}\n"
+  exit 1
+}
+
+# check if expected forbidden dictionary entry exists in the dictionaryDefinitions section
+if ! yq -e '.dictionaryDefinitions[]? | select(.name == "forbidden")' "${cspellConfigFile}" >/dev/null; then
+  confError
+fi
+if ! yq -e '.dictionaryDefinitions[]? | select(.name == "forbidden") | .addWords == false' "${cspellConfigFile}" >/dev/null; then
+  confError "The 'addWords' property for the forbidden dictionary must be set to false."
+fi
+if ! yq -e '.dictionaryDefinitions[]? | select(.name == "forbidden") | .path == ".cspell/forbidden.txt"' "${cspellConfigFile}" >/dev/null; then
+  confError "The 'path' property for the forbidden dictionary must be set to .cspell/forbidden.txt."
 fi
 
-# ensure .cspell/forbidden.txt is ignored by git
-if ! git check-ignore -q .cspell/forbidden.txt; then
-  if ! grep -q "^.cspell/forbidden.txt$" .gitignore 2>/dev/null; then
-    echo ".cspell/forbidden.txt" >>.gitignore
-  fi
+# check if forbidden dictionary is listed in the dictionaries
+if ! yq '.dictionaries[]?' "${cspellConfigFile}" | grep -q "^forbidden$"; then
+  Log::displayError "The forbidden dictionary is not listed in the dictionaries section of ${cspellConfigFile}."
+  Log::displayInfo "Please add 'forbidden' to the list of dictionaries in ${cspellConfigFile}."
+  exit 1
 fi
 
 # check that all words from .cspell/forbidden.txt are beginning with "!" (except for empty lines and comments)
 if grep -E '^[^#!]' .cspell/forbidden.txt >/dev/null; then
   Log::fatal "All words in .cspell/forbidden.txt must start with '!' (except for empty lines and comments). Please update the file accordingly."
 fi
+
+# ensure all the .txt files in .cspell directory are sorted and unique (case-sensitive)
+for file in .cspell/*.txt; do
+  if [[ -f "$file" && "$file" != ".cspell/forbidden.txt" ]]; then
+    declare tmpFile="${TMPDIR}/tmp.$$.txt"
+    Log::displayInfo "Sorting and uniquing the file $file"
+    LC_COLLATE=C sort --ignore-case "$file" | uniq >"$tmpFile" || {
+      Log::fatal "Failed to sort and unique the file $file"
+    }
+    mv "$tmpFile" "$file"
+  fi
+done
 
 # run cspell on git tracked files
 # shellcheck disable=SC2154

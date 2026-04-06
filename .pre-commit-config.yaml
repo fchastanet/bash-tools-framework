@@ -153,10 +153,6 @@ repos:
       - id: forbid-new-submodules
       - id: mixed-line-ending
         args: [--fix=lf]
-      - id: file-contents-sorter
-        files: .cspell/.*\.txt
-        args: [--ignore-case]
-        stages: [pre-commit, pre-push, manual]
       - id: check-json
         # x modifier: extended. Spaces and text after a # in the pattern are ignored
         exclude: |
@@ -223,7 +219,7 @@ repos:
           )
 
   - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 6.2.9
+    rev: 6.3.0
     hooks:
       - id: fixShebangExecutionBit
       - id: awkLint
@@ -248,6 +244,15 @@ repos:
         pass_filenames: false
         require_serial: true
         stages: [] # GITHUB
+      - id: cspellForbidden
+        name: cspell with support to Forbidden Words
+        description: ensure .cspell/forbidden.txt exists and is used by cspell
+        language: script
+        entry: bin/cspellForbidden
+        args: []
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit, pre-push]
 
   - repo: https://github.com/fchastanet/bash-compiler
     rev: 3.2.1

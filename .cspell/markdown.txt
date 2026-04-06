@@ -1,4 +1,6 @@
+artefacts
 asciidoctor
+backquotes
 Bazyli
 bbwe
 bincli
@@ -21,6 +23,7 @@ fchastanet
 fplain
 François
 frontmatter
+iconsurl
 Inlines
 inlines
 installfile
@@ -35,12 +38,15 @@ mandatorysoftware
 manpages
 markdownlint
 Michał
+mmdc
 noargs
 openapi
 pageinfo
+pdfs
 posix
 Powerlevel
 powerlevel
+premultiply
 readlink
 realpath
 Scrasnups

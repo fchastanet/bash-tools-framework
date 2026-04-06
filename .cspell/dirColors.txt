@@ -4,8 +4,8 @@ dircolors
 divx
 dtterm
 dvtm
-eterm
 Eterm
+eterm
 fbterm
 flac
 jfbterm
@@ -16,10 +16,10 @@ objc
 Rakefile
 rmvb
 rxvt
-setgid
 SETGID
-setuid
+setgid
 SETUID
+setuid
 svgz
 webm
 webp
