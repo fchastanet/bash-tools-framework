@@ -8,26 +8,26 @@ useGitignore: true
 enableGlobDot: true
 ignorePaths:
   - .git/**
-  - '**/.git/**'
-  - '**/node_modules/**'
+  - "**/.git/**"
+  - "**/node_modules/**"
   - .history/**
   - logs/**
-  - '**/logs/**'
+  - "**/logs/**"
   - bin/**
-  - '**/bin/**'
-  - '**/testsData/**'
+  - "**/bin/**"
+  - "**/testsData/**"
   - package-lock.json
-  - '**/*.svg'
+  - "**/*.svg"
   - .vscode
   - .cspell/**
   - report
   - .jscpd.json
   - megalinter-reports
-  - '*-megalinter_file_names_cspell.txt'
-  - '**/*megalinter_file_names_cspell.txt'
+  - "*-megalinter_file_names_cspell.txt"
+  - "**/*megalinter_file_names_cspell.txt"
   - .shellcheckrc
   - vendor/**
-  - '**/backup/**'
+  - "**/backup/**"
   - commit-msg.md
   - .mega-linter*.yml
   - TODO.md
@@ -70,7 +70,7 @@ dictionaryDefinitions:
 
 languageSettings:
   - languageId: githubWorkflow
-    locale: '*'
+    locale: "*"
     dictionaries:
       - githubWorkflow
       - bash
@@ -79,14 +79,14 @@ languageSettings:
       - mySoftwares
       - software
   - languageId: config
-    locale: '*'
+    locale: "*"
     caseSensitive: true
     dictionaries:
       - config
       - mySoftwares
       - software
   - languageId: shellscript
-    locale: '*'
+    locale: "*"
     dictionaries:
       - bash
       - myBash
@@ -94,7 +94,7 @@ languageSettings:
       - software
 
   - languageId: markdown
-    locale: '*'
+    locale: "*"
     dictionaries:
       - markdown
       - mySoftwares
@@ -102,18 +102,18 @@ languageSettings:
 
   # Specific language settings for this repo
   - languageId: dirColors
-    locale: '*'
+    locale: "*"
     dictionaries:
       - dirColors
 # ----------
 overrides:
   - filename:
-      - '.*'
-      - '*.yml'
-      - '*.yaml'
-      - 'configs/site-config.yaml'
-      - '*.toml'
-      - 'package.json'
+      - ".*"
+      - "*.yml"
+      - "*.yaml"
+      - "configs/site-config.yaml"
+      - "*.toml"
+      - "package.json"
     languageId: config
   - filename:
       - .github/**/*.yml
@@ -121,21 +121,21 @@ overrides:
       - templates-examples/**
     languageId: githubWorkflow
   - filename:
-      - '*.yml'
-      - '*.yaml'
-      - '*.toml'
+      - "*.yml"
+      - "*.yaml"
+      - "*.toml"
     dictionaries:
       - lintersConfig
   - filename:
       - LICENSE
-      - '**/*.md'
-      - '**/*-help.txt'
+      - "**/*.md"
+      - "**/*-help.txt"
     languageId: markdown
   - filename:
-    - '**/*.puml'
+      - "**/*.puml"
     dictionaries:
       - plantuml
-  - filename: '**/*.html'
+  - filename: "**/*.html"
     dictionaries:
       - mySoftwares
       - software
@@ -143,14 +143,14 @@ overrides:
   # Specific overrides for this repo
   - languageId: shellscript
     filename:
-      - '**/*.sh'
-      - '*.bash'
+      - "**/*.sh"
+      - "*.bash"
       - .github/copilot-instructions.md
-      - '*.{yaml,yml}'
-      - '**/*.bats'
-      - '**/*.env'
-      - '.env.*'
-      - '.docker/**'
+      - "*.{yaml,yml}"
+      - "**/*.bats"
+      - "**/*.env"
+      - ".env.*"
+      - ".docker/**"
       - src/Array/wrap.sh
       - src/_binaries/ShellBash/conf/home/.Xresources
       - src/_binaries/GitDefaultConfig/conf/home/.config/tig/config
@@ -159,14 +159,14 @@ overrides:
     dictionaries:
       - config
   - filename:
-      - 'src/Array/wrap*.bats'
+      - "src/Array/wrap*.bats"
     dictionaries:
       - loremIpsum
   - filename: bash-tools-framework-schema.json
     dictionaries:
       - mySoftwares
       - software
-  - filename: '**/*.awk'
+  - filename: "**/*.awk"
     dictionaries:
       - myAwk
       - mySoftwares
