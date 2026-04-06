@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+Softwares::installShellcheck "${PERSISTENT_TMPDIR}/shellcheck"
+
 # shellcheck disable=SC2154
 getFiles() {
   exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${FRAMEWORK_ROOT_DIR}/.shellcheckrc" 2>/dev/null || true)"
@@ -38,6 +40,7 @@ shellcheckFiles() {
   else
     readarray -t files < <(getFiles | sort | uniq)
   fi
+  # shellcheck disable=SC2154
   Log::displayInfo "${#files[@]} files to check using ${optionFormat} format"
 
   if ((${#files[@]} > 0)); then
@@ -58,7 +61,7 @@ shellcheckFiles() {
         set -x
       fi
       echo >&2 "Linting $* ..."
-      # shellcheck disable=SC2086
+      # shellcheck disable=SC2086,SC2154
       "${FRAMEWORK_VENDOR_BIN_DIR}/shellcheck" ${shellcheckArgsStr} "$@"
     }
     export -f shellcheckFunction
@@ -78,6 +81,7 @@ shellcheckFiles() {
       --no-run-if-empty
       --process-slot-var=slot
     )
+    # shellcheck disable=SC2154
     if [[ "${optionXargs}" = "1" ]]; then
       xargsArgs+=(
         -P "$(nproc --ignore=1)"
@@ -89,7 +93,7 @@ shellcheckFiles() {
       xargsArgs+=(-t)
     fi
 
-    # shellcheck disable=SC2016
+    # shellcheck disable=SC2016,SC2154
     echo "${files[@]}" |
       optionTraceVerbose="${optionTraceVerbose}" \
         shellcheckArgsStr="${shellcheckArgs[*]}" \

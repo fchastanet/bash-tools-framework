@@ -9,6 +9,7 @@ declare -a shellcheckArgs=()
 
 beforeParseCallback() {
   Env::requireLoad
+  Linux::requireJqCommand
   UI::requireTheme
   Log::requireLoad
 }
