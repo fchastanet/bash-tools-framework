@@ -81,14 +81,14 @@ binData:
             - "--log-level"
           defaultValue: optionLogLevelDefaultValueFunction
           authorizedValues:
-            - value: OFF
-            - value: ERR
-            - value: ERROR
-            - value: WARN
-            - value: WARNING
-            - value: INFO
-            - value: DEBUG
-            - value: TRACE
+            - value: 'OFF'
+            - value: 'ERR'
+            - value: 'ERROR'
+            - value: 'WARN'
+            - value: 'WARNING'
+            - value: 'INFO'
+            - value: 'DEBUG'
+            - value: 'TRACE'
           callbacks:
             - optionLogLevelCallback
             - updateArgListLogLevelCallback
@@ -110,14 +110,14 @@ binData:
             - "--display-level"
           defaultValue: optionDisplayLevelDefaultValueFunction
           authorizedValues:
-            - value: OFF
-            - value: ERR
-            - value: ERROR
-            - value: WARN
-            - value: WARNING
-            - value: INFO
-            - value: DEBUG
-            - value: TRACE
+            - value: 'OFF'
+            - value: 'ERR'
+            - value: 'ERROR'
+            - value: 'WARN'
+            - value: 'WARNING'
+            - value: 'INFO'
+            - value: 'DEBUG'
+            - value: 'TRACE'
           callbacks:
             - optionDisplayLevelCallback
             - updateArgListDisplayLevelCallback

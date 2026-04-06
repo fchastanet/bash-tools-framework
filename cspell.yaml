@@ -132,7 +132,7 @@ overrides:
       - '**/*-help.txt'
     languageId: markdown
   - filename:
-    - '**/*.puml'
+      - '**/*.puml'
     dictionaries:
       - plantuml
   - filename: '**/*.html'

@@ -12,6 +12,9 @@ DISABLE_LINTERS:
   - JAVASCRIPT_PRETTIER
   - SPELL_CSPELL # already included in pre-commit
   - YAML_V8R # already included in pre-commit
+  - BASH_SHFMT # already included in pre-commit
+  - BASH_SHELLCHECK # already included in pre-commit
+  - YAML_PRETTIER # cause some incompatibility issues
   - RUBY_RUBOCOP
   - REPOSITORY_CHECKOV
   - REPOSITORY_TRIVY
