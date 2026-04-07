@@ -210,16 +210,23 @@ repos:
       - id: fixShebangExecutionBit
       - id: awkLint
       - id: shellcheckLint
-      - id: shellcheckLintGithubAction
-      - id: frameworkLint
-        args: [--expected-warnings-count, "61", --format, plain, --theme, default-force, --display-level, WARNING]
-      - id: frameworkLintGithubAction
-        args: [--expected-warnings-count, "61", --format, checkstyle, --theme, default-force, --display-level, WARNING]
       - id: hugoUpdateLastmod
         stages: [pre-commit]
 
   - repo: local
     hooks:
+      - id: frameworkLint
+        name: Bash Framework Lint
+        description: |
+          Check if your files uses the right syntax
+          for using bash-tools-framework
+        language: script
+        entry: bin/frameworkLint
+        args: [--expected-warnings-count, "61", --format, plain, --theme, default-force]
+        pass_filenames: false
+        types: ["executable", "file", "shell", "text"]
+        always_run: false
+        stages: [pre-commit]
       - id: buildDocFilesForGithubActions
         name: build doc files for github actions
         language: script

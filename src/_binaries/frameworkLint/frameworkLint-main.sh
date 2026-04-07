@@ -149,7 +149,7 @@ checkEachSrcFileHasCorrectShdoc() {
   # @see https://regex101.com/r/5oMFQi/1
   # shellcheck disable=SC2120
   function filterInvalidAnnotationNames() {
-    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal|generated)$' "$@"
+    grep -v -E '^(name|file|brief|description|section|example|option|arg|noargs|set|env|exitcode|stdin|stdout|stderr|see|warning|require|feature|trap|deprecated|internal|generated|prerequisite)$' "$@"
   }
 
   function checkValidAnnotationsAreUsed() {
@@ -230,9 +230,9 @@ run() {
     echo "<?xml version='1.0' encoding='UTF-8'?>"
     echo "<checkstyle>"
   fi
-  export -f File::detectBashFile
-  export -f Assert::bashFile
   echo >"${CURRENT_WARNINGS_FILE}"
+
+  File::detectBashFileInit
 
   # shellcheck disable=SC2016
   while IFS='' read -r file; do
@@ -250,7 +250,7 @@ run() {
     fi
   done < <(
     git ls-files --exclude-standard |
-      xargs -n 10 bash -c 'File::detectBashFile "$@" || true' _ |
+      xargs -r -P0 -n 10 bash -c 'File::detectBashFile "$@" || true' arg0 |
       sort ||
       true
   )

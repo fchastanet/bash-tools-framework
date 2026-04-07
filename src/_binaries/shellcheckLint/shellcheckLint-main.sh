@@ -8,12 +8,10 @@ getFiles() {
   if [[ -f "${PWD}/.shellcheckrc" ]]; then
     shellcheckrcFile="${PWD}/.shellcheckrc"
   fi
+  File::detectBashFileInit
+  # Use grep with LC_ALL to safely handle the exclude pattern
+  #exclude="$(grep -E '^exclude=' "${shellcheckrcFile}" 2>/dev/null | head -1 | cut -d= -f2- || true)"
   exclude="$(sed -n -E 's/^exclude=(.+)$/\1/p' "${shellcheckrcFile}" 2>/dev/null || true)"
-  if [[ -z "${exclude}" ]]; then
-    exclude='^$'
-  fi
-  export -f File::detectBashFile
-  export -f Assert::bashFile
 
   (
     if [[ "${optionStaged}" = "1" ]]; then
@@ -32,8 +30,8 @@ getFiles() {
       )
     fi
   ) |
-    (grep -E -v "${exclude}" || true) |
-    LC_ALL=C.UTF-8 xargs -r -n 10 bash -c 'File::detectBashFile "$@"' arg0
+    (if [[ -n "${exclude}" ]]; then grep -E -v "${exclude}"; else cat; fi) |
+    LC_ALL=C.UTF-8 xargs -r -P0 -n 10 bash -c 'File::detectBashFile "$@"' arg0
 }
 
 shellcheckFiles() {
@@ -79,7 +77,8 @@ shellcheckFiles() {
     # shellcheck disable=SC2154
     if [[ "${optionXargs}" = "1" ]]; then
       xargsArgs+=(
-        -P "$(nproc --ignore=1)"
+        -r
+        -P0
         -n 10
       )
     fi

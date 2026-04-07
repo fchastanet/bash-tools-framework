@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-export -f File::detectBashFile
-export -f Assert::bashFile
-
+File::detectBashFileInit
 # shellcheck disable=SC2154
 git ls-files --exclude-standard -c -o -m |
-  xargs -r -L 1 -n 1 -I@ bash -c 'File::detectBashFile "@"' |
+  LC_ALL=C.UTF-8 xargs -r -P0 -n 10 bash -c 'File::detectBashFile "$@"' 'arg0' |
   xargs -r "${commandToApply[@]}"

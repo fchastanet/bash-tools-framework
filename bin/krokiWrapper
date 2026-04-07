@@ -2661,10 +2661,10 @@ convert() {
 
   for ((i = 1; i < ${#krokiOptions[@]}; i++)); do
     if [[ "${krokiOptions[i]}" =~ ^(-o|--out-file)$ ]] && ((i + 1 < ${#krokiOptions[@]})); then
-      outputFile="${krokiOptions[i+1]}"
+      outputFile="${krokiOptions[i + 1]}"
       foundOutput=1
     elif [[ "${krokiOptions[i]}" =~ ^(-f|--format)$ ]] && ((i + 1 < ${#krokiOptions[@]})); then
-      format="${krokiOptions[i+1]}"
+      format="${krokiOptions[i + 1]}"
       foundFormat=1
     fi
   done
