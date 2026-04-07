@@ -35,3 +35,5 @@ content/docs/guides/assets/requireLoad-activityDiagram.svg
 content/docs/assets/requireLoad-activityDiagram.svg
 doc/images/requireLoad-activityDiagram.svg
 .cspell/forbidden.txt
+
+.pre-commit-config-github.yaml
