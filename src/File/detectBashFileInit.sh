@@ -4,8 +4,6 @@
 # @set missingBashFileList String temp filepath that contains eventual missing files
 # @noargs
 File::detectBashFileInit() {
-  local -a files=("$@")
-  local file
   if [[ -n "${missingBashFileList}" ]]; then
     rm -f "${missingBashFileList}" || true
   fi

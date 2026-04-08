@@ -59,15 +59,19 @@ shellcheckFiles() {
       fi
 
       file="$(md5sum <<<"$@")"
+      echo >&2 -n "."
       declare shellcheckExit=0
       # shellcheck disable=SC2086,SC2154
-      "${PERSISTENT_TMPDIR}/shellcheck" ${shellcheckArgsStr} "$@" >"${tmpDir}/${file%% *}" >&2 || shellcheckExit=$?
+      "${PERSISTENT_TMPDIR}/shellcheck" ${shellcheckArgsStr} "$@" \
+        >&2 >"${tmpDir}/${file%% *}" || shellcheckExit=$?
       if ((shellcheckExit != 0)); then
         echo "$@" >>"${failuresFile}"
       fi
+      echo >&2 -n "."
     }
     export FRAMEWORK_VENDOR_BIN_DIR
-    export -f Log::displayDebug Log::computeDuration Log::logDebug Log::logMessage
+    export -f Log::displayDebug Log::displayInfo Log::computeDuration \
+      Log::logInfo Log::logDebug Log::logMessage
     export -f shellcheckScript
 
     local -a xargsArgs=(
@@ -100,19 +104,38 @@ shellcheckFiles() {
         xargs "${xargsArgs[@]}" \
         bash -c 'shellcheckScript "$@" || true' bash || true
 
+    echo >&2
+    ((errorCount = 0)) || true
     if [[ "${optionFormat}" = "checkstyle" ]]; then
       (
         echo "<?xml version='1.0' encoding='UTF-8'?>"
         echo "<checkstyle version='4.3'>"
-        awk '/<checkstyle/{flag=1; next} /<\/checkstyle>/{flag=0} flag' "${tmpDir}/"*
+        awk '/<checkstyle/{flag=1; next} /<\/checkstyle>/{flag=0; next} flag' "${tmpDir}/"*
         echo "</checkstyle>"
       )
+      errorCount=$(awk -F 'errors="' '/<file/{if ($2 > 0) {count += $2}} END{print count}' "${tmpDir}/"*)
     elif [[ "${optionFormat}" = "json" ]]; then
-      (
-        jq '.[]' "${tmpDir}/"* | jq -s '.'
-      )
+      # format: [
+      # {"file":"file.sh","line":129,"endLine":129,"column":20,"endColumn":78,
+      #  "level":"style","code":2126,"message":"...","fix":null}
+      # ...]
+      jq -s '.[] | select(length > 0) | add' "${tmpDir}/"* | jq -s '.'
+      errorCount=$(jq -s 'map(length) | add' "${tmpDir}/"*)
     elif [[ "${optionFormat}" = "json1" ]]; then
+      # format: {"comments":[
+      # {"file":"file.sh","line":125,"endLine":125,"column":20,"endColumn":78,
+      #  "level":"style","code":2126,"message":"...","fix":null}
+      # ...]}
       jq -s 'map(.comments[])' "${tmpDir}/"* | jq '{"comments": .}'
+      errorCount=$(jq -s 'map(length) | add' "${tmpDir}/"*)
+    else
+      cat "${tmpDir}/"*
+      # shellcheck disable=SC2126 # grep -c not possible - we want to count the number of lines across all files
+      errorCount=$(grep -E "^In " "${failuresFile}" "${tmpDir}/"* 2>/dev/null | wc -l || true)
+    fi
+    if ((errorCount > 0)); then
+      Log::displayError "${errorCount} error(s) found by shellcheck"
+      return 1
     fi
   else
     Log::displayWarning "no file provided"
@@ -130,7 +153,7 @@ shellcheckFiles
 
 # Check if any shellcheck calls failed
 if [[ -f "${failuresFile}" ]]; then
-  cat "${failuresFile}" >&2
+  Log::fatal "Some files failed shellcheck"
   return 1
 else
   Log::displaySuccess "All files passed shellcheck with ${optionFormat} format"

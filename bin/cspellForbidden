@@ -1104,7 +1104,7 @@ declare optionBashFrameworkConfig=""
 declare optionInfoVerbose="0"
 declare optionDebugVerbose="0"
 declare optionTraceVerbose="0"
-declare optionLogLevel="INFO"
+declare optionLogLevel="OFF"
 declare optionLogFile="optionLogFileDefaultValueFunction"
 declare optionDisplayLevel="optionDisplayLevelDefaultValueFunction"
 declare optionNoColor="0"
@@ -1134,7 +1134,7 @@ cspellForbiddenCommandParse() {
   optionTraceVerbose="0"
   local -i options_parse_optionParsedCountOptionTraceVerbose
   ((options_parse_optionParsedCountOptionTraceVerbose = 0)) || true
-  optionLogLevel="INFO"
+  optionLogLevel="OFF"
   local -i options_parse_optionParsedCountOptionLogLevel
   ((options_parse_optionParsedCountOptionLogLevel = 0)) || true
   optionLogFile="optionLogFileDefaultValueFunction"
@@ -1519,7 +1519,7 @@ cspellForbiddenCommandHelp() {
   echo -e "      - ${__OPTION_COLOR}DEBUG${__RESET_COLOR}"
   echo -e "      - ${__OPTION_COLOR}TRACE${__RESET_COLOR}"
 
-  Array::wrap2 ' ' 76 6 "    Default value: " "INFO"
+  Array::wrap2 ' ' 76 6 "    Default value: " "OFF"
   echo
 
   echo -e "  ${__HELP_OPTION_COLOR}--log-file <log-file>${__HELP_NORMAL} {single}"
