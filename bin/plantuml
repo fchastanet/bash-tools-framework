@@ -995,7 +995,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317,SC2329 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version 3.2"
+  echo "${SCRIPT_NAME} version 3.3"
   exit 0
 }
 
@@ -1315,7 +1315,7 @@ optionHelpCallback() {
 }
 
 optionVersionCallback() {
-  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}3.2"
+  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}3.3"
   pullPlantumlImageIfNeeded >/dev/null
   docker run --rm plantuml/plantuml -version
   exit 0
@@ -2042,9 +2042,17 @@ plantumlCommandHelp() {
   echo -e "${__HELP_TITLE_COLOR}DESCRIPTION:${__RESET_COLOR}"
   declare -a plantumlCommandLongDescription=(
   "Generates plantuml diagrams from puml files in formats provided"
-  "\\n"
+  ""
+  "${__HELP_TITLE_COLOR}CHANGELOG${__RESET_COLOR}"
+  ""
+  "Version 3.3 (2026-04-09):"
+  ""
+  "  - Fail if syntax error in plantuml file\\n"
+  "  - restored metadata so files are not regenerated if plantuml"
+  "    file is not changed"
+  ""
   "${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}"
-  "\\n"
+  ""
   "@@@PLANTUML_HELP@@@"
   )
   Array::wrap2 ' ' 76 0 "${plantumlCommandLongDescription[@]}"
@@ -2054,7 +2062,7 @@ plantumlCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "3.2"
+  echo "3.3"
   # ------------------------------------------
   # author section
   # ------------------------------------------
@@ -2121,6 +2129,7 @@ convertPuml() {
   shift 8 || true
   local -a plantumlOptions=("$@")
 
+  set -o pipefail -o errexit
   local targetFile
   if [[ "${sameDirectoryOption}" = "1" ]]; then
     targetFile="${file%.*}.${format}"
@@ -2168,15 +2177,22 @@ convertPuml() {
     fi
   fi
 
+  local -a dockerCmd=(
+    docker run -i --rm "${env[@]}" --entrypoint java plantuml/plantuml
+    "${includePaths[@]}" -jar /opt/plantuml.jar
+    -t"${format}"
+    --skip-fresh -v -pipe
+    --no-error-image --progress-bar
+    --check-before-run
+    --stop-on-error
+    --threads auto "${plantumlOptions[@]}"
+  )
   # shellcheck disable=SC2154
   if [[ "${optionTraceVerbose}" = "1" ]]; then
     set -x
   fi
-  docker run -i --rm "${env[@]}" --entrypoint java plantuml/plantuml \
-    "${includePaths[@]}" -jar /opt/plantuml.jar \
-    -t"${format}" --disable-metadata -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
-    >"${targetFile}" \
-    <"${file}"
+  # Generate the diagram
+  "${dockerCmd[@]}" >"${targetFile}" <"${file}"
   set +x
   if [[ "${format}" = "svg" ]]; then
     sed -E -i 's/^<\?plantuml [0-9.]+\?>(.*)/\1/' "${targetFile}"
@@ -2185,7 +2201,8 @@ convertPuml() {
   Log::displayInfo "Converted ${targetFile}"
 }
 # TODO generate convertPuml as binary to avoid all these exports
-export -f convertPuml File::elapsedTimeSinceLastModification Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
+export -f convertPuml File::elapsedTimeSinceLastModification \
+  Log::displayInfo Log::displayError Log::logInfo Log::logMessage Log::computeDuration
 export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR PERSISTENT_TMPDIR
 
 (

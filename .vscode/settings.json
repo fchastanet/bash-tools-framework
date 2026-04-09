@@ -33,7 +33,8 @@
   "editor.tabSize": 2,
   "files.trimTrailingWhitespace": true,
   "workbench.editorAssociations": {
-    "*.md": "default"
+    "*.md": "default",
+    // "*.svg": "default",
   },
   "markdown.extension.toc.levels": "2..6",
   "plantuml.server": "http://localhost:8080/",

@@ -35,6 +35,7 @@ convertPuml() {
   shift 8 || true
   local -a plantumlOptions=("$@")
 
+  set -o pipefail -o errexit
   local targetFile
   if [[ "${sameDirectoryOption}" = "1" ]]; then
     targetFile="${file%.*}.${format}"
@@ -82,15 +83,22 @@ convertPuml() {
     fi
   fi
 
+  local -a dockerCmd=(
+    docker run -i --rm "${env[@]}" --entrypoint java plantuml/plantuml
+    "${includePaths[@]}" -jar /opt/plantuml.jar
+    -t"${format}"
+    --skip-fresh -v -pipe
+    --no-error-image --progress-bar
+    --check-before-run
+    --stop-on-error
+    --threads auto "${plantumlOptions[@]}"
+  )
   # shellcheck disable=SC2154
   if [[ "${optionTraceVerbose}" = "1" ]]; then
     set -x
   fi
-  docker run -i --rm "${env[@]}" --entrypoint java plantuml/plantuml \
-    "${includePaths[@]}" -jar /opt/plantuml.jar \
-    -t"${format}" --disable-metadata -v -pipe -failfast2 -nbthread auto "${plantumlOptions[@]}" \
-    >"${targetFile}" \
-    <"${file}"
+  # Generate the diagram
+  "${dockerCmd[@]}" >"${targetFile}" <"${file}"
   set +x
   if [[ "${format}" = "svg" ]]; then
     sed -E -i 's/^<\?plantuml [0-9.]+\?>(.*)/\1/' "${targetFile}"
@@ -99,7 +107,8 @@ convertPuml() {
   Log::displayInfo "Converted ${targetFile}"
 }
 # TODO generate convertPuml as binary to avoid all these exports
-export -f convertPuml File::elapsedTimeSinceLastModification Log::displayInfo Log::logInfo Log::logMessage Log::computeDuration
+export -f convertPuml File::elapsedTimeSinceLastModification \
+  Log::displayInfo Log::displayError Log::logInfo Log::logMessage Log::computeDuration
 export BASH_FRAMEWORK_DISPLAY_LEVEL __LEVEL_INFO __INFO_COLOR __RESET_COLOR PERSISTENT_TMPDIR
 
 (

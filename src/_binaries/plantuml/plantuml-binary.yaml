@@ -21,7 +21,7 @@ binData:
         - plantumlCallback
       beforeParseCallbacks:
         - beforeParseCallback
-      version: "3.2"
+      version: "3.3"
       copyrightBeginYear: 2023
       commandName: plantuml
       definitionFiles:
@@ -30,9 +30,17 @@ binData:
       help: Generates plantuml diagrams from puml files.
       longDescription: |
         Generates plantuml diagrams from puml files in formats provided
-        \n
+
+        ${__HELP_TITLE_COLOR}CHANGELOG${__RESET_COLOR}
+
+        Version 3.3 (2026-04-09):
+
+          - Fail if syntax error in plantuml file\n
+          - restored metadata so files are not regenerated if plantuml
+            file is not changed
+
         ${__HELP_TITLE_COLOR}PLANTUML HELP${__RESET_COLOR}
-        \n
+
         @@@PLANTUML_HELP@@@
 
       options:
