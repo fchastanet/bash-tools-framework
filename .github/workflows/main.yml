@@ -39,9 +39,11 @@ jobs:
   # Build bash docker images
   # -------------------------------------------------------
   build-bash-docker-images:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      # needed by guibranco/github-status-action-v2@v1
       statuses: write
     strategy:
       fail-fast: true
@@ -58,20 +60,21 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # overall process
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: build-bash-tools
-          status: pending
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: build-bash-tools
+          state: pending
 
       - name: Set env vars
         id: vars
@@ -88,15 +91,16 @@ jobs:
               echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
             fi
           ) >> "${GITHUB_ENV}"
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: build-${{ env.image_tag }}
-          status: pending
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: build-${{ env.image_tag }}
+          state: pending
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -110,7 +114,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         continue-on-error: false
         with:
           load: true
@@ -129,7 +133,7 @@ jobs:
         continue-on-error: false
         run: |
           docker run --rm "${{ env.image_name }}:${{ env.image_tag }}" bash --version
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         continue-on-error: false
         with:
           load: true
@@ -143,36 +147,39 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: build-${{ env.image_tag }}
-          status: ${{ job.status }}
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: build-${{ env.image_tag }}
+          state: ${{ job.status }}
 
   # -------------------------------------------------------
   # Pre-commit
   # -------------------------------------------------------
 
   pre-commit:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-bash-docker-images]
     permissions:
-      # needed by akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      # needed by guibranco/github-status-action-v2@v1
       statuses: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: crazy-max/ghaction-import-gpg@v6
+      - uses: crazy-max/ghaction-import-gpg@v7
         if: ${{ success() }}
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -180,18 +187,19 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - uses: tibdex/github-app-token@v2
+      - uses: actions/create-github-app-token@v3.1.1
         if: ${{ success() }}
         id: generate-token
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: pre-commit-megalinter
-          status: pending
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          context: pre-commit-megalinter
+          state: pending
 
       - name: Set env vars
         id: vars
@@ -202,7 +210,7 @@ jobs:
           ) >> "${GITHUB_ENV}"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.12
 
@@ -222,10 +230,10 @@ jobs:
         run: .github/preCommitGeneration.sh
 
       - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+        uses: j178/prek-action@v2
         id: preCommit
         with:
-          extra_args: >-
+          extra-args: >-
             -c .pre-commit-config-github.yaml -a --hook-stage manual
 
       - name: MegaLinter
@@ -247,9 +255,11 @@ jobs:
 
       - name: Upload MegaLinter artifacts
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: MegaLinter reports
+          retention-days: 2
+          overwrite: true
           path: |
             megalinter-reports
             mega-linter.log
@@ -282,7 +292,7 @@ jobs:
           env.COND_UPDATED_SOURCES == 'true' &&
           env.COND_APPLY_FIXES_NEEDED == 'true' &&
           !contains(github.event.head_commit.message, 'skip fix')
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.generate-token.outputs.token }}
           committer: fchastanet <fchastanet@gmail.com>
@@ -302,21 +312,24 @@ jobs:
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: pre-commit-megalinter
-          status: ${{ job.status }}
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          context: pre-commit-megalinter
+          state: ${{ job.status }}
 
   # -------------------------------------------------------
   # Unit tests
   # -------------------------------------------------------
 
   unit-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-bash-docker-images]
     permissions:
-      # needed by akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      # needed by guibranco/github-status-action-v2@v1
       statuses: write
       # needed by mikepenz/action-junit-report@v4
       checks: write
@@ -335,15 +348,15 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: crazy-max/ghaction-import-gpg@v6
+      - uses: crazy-max/ghaction-import-gpg@v7
         if: ${{ success() }}
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -351,18 +364,19 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - uses: tibdex/github-app-token@v2
+      - uses: actions/create-github-app-token@v3.1.1
         if: ${{ success() }}
         id: generate-token
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
-          status: pending
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          state: pending
+          context: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
 
       - name: Set env vars
         id: vars
@@ -413,7 +427,7 @@ jobs:
           exit "${status}"
 
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         if: ${{ always() }}
         with:
           token: ${{ github.token }}
@@ -425,25 +439,30 @@ jobs:
 
       - name: Upload Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Test Results ${{ env.image_tag }}
           path: |
             logs/**
+          retention-days: 2
+          overwrite: true
 
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
-          status: ${{ job.status }}
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          context: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
+          state: ${{ job.status }}
 
   overallTestResults:
     name: "Overall Tests Results"
     if: ${{ always() }}
     needs: [unit-tests, pre-commit]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      # needed by guibranco/github-status-action-v2@v1
       statuses: write
 
     steps:
@@ -451,12 +470,13 @@ jobs:
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
       - uses: AbsoLouie/workflow-conclusion-status@v1.0.2
 
-      - uses: akatov/commit-status-updater@219d3f932547cad092e384c7a36bf4d963739c35
+      - uses: guibranco/github-status-action-v2@v1
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
         with:
-          name: build-bash-tools
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          context: build-bash-tools
           # neutral, success, skipped, cancelled, timed_out, action_required, failure
-          status: ${{ env.WORKFLOW_CONCLUSION }}
+          state: ${{ env.WORKFLOW_CONCLUSION }}
 
   build-deploy:
     needs:
@@ -471,6 +491,7 @@ jobs:
       site-name: "bash-tools-framework"
       checkout-repo: "fchastanet/bash-tools-framework"
       site-dir: "_site-content"
+    secrets: inherit
     permissions:
       contents: read
       pages: write
