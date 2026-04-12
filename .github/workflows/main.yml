@@ -1,6 +1,6 @@
 ---
 # Lint the code base and launch unit test at each push or pull request
-name: Test, Build and Deploy
+name: Lint, Test, Build and Deploy
 on: # yamllint disable-line rule:truthy
   push:
     # execute when pushing only branches, not tags
@@ -157,7 +157,6 @@ jobs:
   # -------------------------------------------------------
   # Pre-commit
   # -------------------------------------------------------
-
   pre-commit:
     runs-on: ubuntu-latest
     env:
@@ -221,9 +220,6 @@ jobs:
           set -exo pipefail
 
           bin/installRequirements
-          # ensure forbidden dictionary exists
-          mkdir -p .cspell
-          touch .cspell/forbidden.txt
 
       - name: Transform pre-commit config for GitHub
         if: ${{ success() }}
@@ -396,14 +392,15 @@ jobs:
             fi
           ) >> "${GITHUB_ENV}"
 
+      - name: install requirements
+        run: |
+          set -exo pipefail
+          chmod 777 logs
+          bin/installRequirements
       - name: run unit tests
         id: unitTests
         run: |
           set -exo pipefail
-
-          bin/installRequirements
-
-          chmod 777 logs
 
           docker pull "scrasnups/build:${{env.image_tag}}"
 
@@ -436,6 +433,11 @@ jobs:
           require_tests: true
           require_passed_tests: true
           report_paths: "logs/**.xml"
+
+      - name: Checkstyle aggregation
+        uses: lcollins/checkstyle-github-action@v3.2.0
+        with:
+          path: "logs/*.xml"
 
       - name: Upload Test Results
         if: ${{ always() }}
@@ -478,14 +480,17 @@ jobs:
           # neutral, success, skipped, cancelled, timed_out, action_required, failure
           state: ${{ env.WORKFLOW_CONCLUSION }}
 
+  # -------------------------------------------------------
+  # Build and deploy documentation
+  # -------------------------------------------------------
   build-deploy:
     needs:
       - unit-tests
       - pre-commit
     # Only run if the test and pre-commit jobs succeeded, and if the push is on master branch or if it's a workflow dispatch event
     if:
-      ${{ needs.unit-tests.result == 'success' && needs.pre-commit.result == 'success' && (github.ref ==
-      'refs/heads/master') }}
+      ${{ needs.unit-tests.result == 'success' && needs.pre-commit.result == 'success'
+      && (github.ref == 'refs/heads/master') }}
     uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
     with:
       site-name: "bash-tools-framework"
