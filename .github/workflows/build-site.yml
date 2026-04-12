@@ -4,6 +4,8 @@ name: Build and Deploy Documentation
 on:
   workflow_dispatch:
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, cancel in-progress runs to ensure only the latest commit is deployed, and avoid multiple deployments in case of several commits in a short time.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

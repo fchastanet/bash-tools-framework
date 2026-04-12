@@ -1,9 +1,9 @@
 ---
 # Lint the code base and launch unit test at each push or pull request
 name: Lint, Test, Build and Deploy
-on: # yamllint disable-line rule:truthy
+"on":
   push:
-    # execute when pushing only branches, not tags
+    # execute when pushing only branches and tags
     branches:
       - "**"
       # avoid infinite loop for auto created PRs
@@ -33,12 +33,13 @@ env:
   # variables to compute complex conditions
   COND_UPDATED_SOURCES: false
   COND_APPLY_FIXES_NEEDED: false
+  COND_PUSH_OR_PR: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
 
 jobs:
   # -------------------------------------------------------
-  # Build bash docker images
+  # Build docker images
   # -------------------------------------------------------
-  build-bash-docker-images:
+  build-docker-images:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
@@ -70,7 +71,7 @@ jobs:
 
       # overall process
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: build-bash-tools
@@ -91,11 +92,12 @@ jobs:
               echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
             fi
           ) >> "${GITHUB_ENV}"
+
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
-          context: build-${{ env.image_tag }}
+          context: build-docker-${{ env.image_tag }}
           state: pending
 
       - name: Docker meta
@@ -114,6 +116,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
+
       - uses: docker/build-push-action@v7
         continue-on-error: false
         with:
@@ -129,10 +132,12 @@ jobs:
             BASH_TAR_VERSION: "${{ matrix.bashTarVersion }}"
           cache-from: type=gha,scope=${{ env.image_tag }}
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
+
       - name: Check image
         continue-on-error: false
         run: |
           docker run --rm "${{ env.image_name }}:${{ env.image_tag }}" bash --version
+
       - uses: docker/build-push-action@v7
         continue-on-error: false
         with:
@@ -148,10 +153,10 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
-          context: build-${{ env.image_tag }}
+          context: build-docker-${{ env.image_tag }}
           state: ${{ job.status }}
 
   # -------------------------------------------------------
@@ -161,7 +166,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
-    needs: [build-bash-docker-images]
+    needs: [build-docker-images]
     permissions:
       # needed by guibranco/github-status-action-v2@v1
       statuses: write
@@ -194,7 +199,7 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
           context: pre-commit-megalinter
@@ -218,7 +223,6 @@ jobs:
       - name: Install requirements
         run: |
           set -exo pipefail
-
           bin/installRequirements
 
       - name: Transform pre-commit config for GitHub
@@ -291,7 +295,7 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          committer: fchastanet <fchastanet@gmail.com>
+          committer: fchastanet <237869+fchastanet@users.noreply.github.com>
           branch: update/pre-commit-fixes-${{ env.branch_name }}
           delete-branch: true
           title: lint fixes
@@ -301,15 +305,17 @@ jobs:
           labels: pre-commit-fixes
 
       - name: Print Pull request created
-        if: |
-          steps.cpr.outputs.pull-request-number &&
-          steps.cpr.outcome == 'success'
+        if: |-
+          ${{
+            steps.cpr.outputs.pull-request-number &&
+            steps.cpr.conclusion == 'success'
+          }}
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
           context: pre-commit-megalinter
@@ -318,12 +324,11 @@ jobs:
   # -------------------------------------------------------
   # Unit tests
   # -------------------------------------------------------
-
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
-    needs: [build-bash-docker-images]
+    needs: [build-docker-images]
     permissions:
       # needed by guibranco/github-status-action-v2@v1
       statuses: write
@@ -339,6 +344,7 @@ jobs:
           - "4.4"
           - "5.0"
           - "5.3"
+        os: [ubuntu-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -368,18 +374,18 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
           state: pending
-          context: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
+          context: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}-${{matrix.os}}
 
       - name: Set env vars
         id: vars
         # shellcheck disable=SC2129
         run: |
           (
-            echo "job_tag=${{github.run_id}}-${{matrix.vendor}}-${{matrix.bashTarVersion}}"
+            echo "job_tag=${{github.run_id}}-${{matrix.vendor}}-${{matrix.bashTarVersion}}-${{matrix.os}}"
             echo "image_tag=bash-tools-${{matrix.vendor}}-${{matrix.bashTarVersion}}"
             echo "image_name=scrasnups/build"
             echo "branch_name=${GITHUB_REF##*/}"
@@ -397,6 +403,7 @@ jobs:
           set -exo pipefail
           chmod 777 logs
           bin/installRequirements
+
       - name: run unit tests
         id: unitTests
         run: |
@@ -444,16 +451,16 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Test Results ${{ env.image_tag }}
-          path: |
-            logs/**
           retention-days: 2
           overwrite: true
+          path: |
+            logs/**
 
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
-          context: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}
+          context: unit-tests-${{matrix.vendor}}-${{matrix.bashTarVersion}}-${{matrix.os}}
           state: ${{ job.status }}
 
   overallTestResults:
@@ -470,10 +477,10 @@ jobs:
     steps:
       # run this action to get the workflow conclusion
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
-      - uses: AbsoLouie/workflow-conclusion-status@v1.0.2
+      - uses: fchastanet/workflow-conclusion-status@v2
 
       - uses: guibranco/github-status-action-v2@v1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+        if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
           context: build-bash-tools
@@ -488,9 +495,12 @@ jobs:
       - unit-tests
       - pre-commit
     # Only run if the test and pre-commit jobs succeeded, and if the push is on master branch or if it's a workflow dispatch event
-    if:
-      ${{ needs.unit-tests.result == 'success' && needs.pre-commit.result == 'success'
-      && (github.ref == 'refs/heads/master') }}
+    if: |-
+      ${{
+        needs.unit-tests.result == 'success' &&
+        needs.pre-commit.result == 'success' &&
+        github.ref == 'refs/heads/master'
+      }}
     uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
     with:
       site-name: "bash-tools-framework"
