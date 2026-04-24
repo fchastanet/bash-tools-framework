@@ -1,0 +1,268 @@
+---
+extends:
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+
+vars:
+  SRC_FILE_PATH: src/_binaries/html2image/html2image-binary.yaml
+
+compilerConfig:
+  targetFile: "${FRAMEWORK_ROOT_DIR}/bin/html2image"
+binData:
+  commands:
+    default:
+      functionName: html2imageCommand
+      callbacks:
+        - html2imageCallback
+      beforeParseCallbacks:
+        - beforeParseCallback
+      version: "1.0"
+      copyrightBeginYear: 2026
+      commandName: html2image
+      definitionFiles:
+        20: ${FRAMEWORK_ROOT_DIR}/src/_binaries/html2image/html2image-options.sh
+      mainFile: ${FRAMEWORK_ROOT_DIR}/src/_binaries/html2image/html2image-main.sh
+      help: Converts HTML files to images using Puppeteer.
+      longDescription: |
+
+        Converts HTML files to images (PNG, JPEG, WEBP) using Puppeteer.
+        Supports transform commands to generate HTML from other formats (e.g., Markwhen).
+        Can process files from git repository, specified files, or stdin.
+
+        ${__HELP_TITLE_COLOR}USAGE EXAMPLES:${__RESET_COLOR}
+
+        # Convert HTML files from git repository
+
+        ${__HELP_EXAMPLE}
+        html2image --format webp --same-dir
+        ${__RESET_COLOR}
+
+        # Convert specific HTML file
+
+        ${__HELP_EXAMPLE}
+        html2image --format webp --same-dir file.html
+        ${__RESET_COLOR}
+
+        # Convert Markwhen file with transform
+
+        ${__HELP_EXAMPLE}
+        html2image --format webp --same-dir \
+          --transform-cmd 'npx -y @markwhen/mw -o timeline -d %tempFile%' \
+          file.mwh
+        ${__RESET_COLOR}
+
+        # Convert from stdin
+
+        ${__HELP_EXAMPLE}
+        echo "<html><body>Hello</body></html>" | \
+          ${__HELP_EXAMPLE}html2image --format png --output output.png
+        ${__RESET_COLOR}
+
+        # Convert with custom css injection
+
+        ${__HELP_EXAMPLE}
+        html2image --format webp --same-dir \
+          --transform-cmd 'npx -y @markwhen/mw -o timeline -d %tempFile%' \
+          --inject-css src/_binaries/html2image/tests/test-markwhen.css \
+          src/_binaries/html2image/tests/test-markwhen.mwh
+        ${__RESET_COLOR}
+
+        ${__HELP_TITLE_COLOR}CHANGELOG:${__RESET_COLOR}
+
+        Version 1.0 (2026-04-24):
+
+          - Initial version
+          - Support for PNG, JPEG, WEBP formats
+          - Transform command support with %tempFile% placeholder
+          - Stdin input support
+          - Configurable viewport size
+          - CI mode with extension checking
+      options:
+        - alts:
+            - --format
+            - -f
+          help: "Output image format (default: webp if not provided)"
+          group: OptionsGroup
+          type: StringArray
+          authorizedValues:
+            - value: png
+              help: PNG raster format
+            - value: jpg
+              help: JPEG raster format
+            - value: jpeg
+              help: JPEG raster format (alias)
+            - value: webp
+              help: WebP format (recommended)
+          max: -1
+          min: 0
+          helpValueName: Format
+          variableName: optionFormats
+
+        - alts:
+            - --same-dir
+          help: |
+            Write output file in same directory as source file
+            with the same base name (except extension).
+            Incompatible with --output-dir and --output.
+          type: Boolean
+          group: OptionsGroup
+          variableName: sameDirectoryOption
+
+        - alts:
+            - --output-dir
+            - -d
+          help: |
+            Output directory for generated images (default: doc/images).
+            Incompatible with --same-dir and --output.
+          type: String
+          callbacks:
+            - html2imageOutputDirCallback
+          group: OptionsGroup
+          helpValueName: OutputDir
+          variableName: optionOutputDir
+
+        - alts:
+            - --output
+            - -o
+          help: |
+            Output file path. Required when using stdin input.
+            Incompatible with --same-dir and --output-dir.
+          type: String
+          group: OptionsGroup
+          helpValueName: OutputFile
+          variableName: optionOutput
+
+        - alts:
+            - --transform-cmd
+            - -t
+          help: |
+            Transform command to apply before generating image.
+            Use ${__HELP_OPTION_COLOR}%tempFile%${__RESET_COLOR} placeholder for temporary HTML output file.
+            Example: 'npx -y @markwhen/mw -o timeline -d ${__HELP_OPTION_COLOR}%tempFile%${__RESET_COLOR}'
+          type: String
+          group: OptionsGroup
+          defaultValue: ""
+          helpValueName: TransformCmd
+          variableName: optionTransformCmd
+
+        - alts:
+            - --viewport
+          help: |
+            Browser viewport size in WIDTHxHEIGHT format (e.g., 1920x1080).
+            If not specified, the viewport is automatically sized to fit the page content.
+          type: String
+          group: OptionsGroup
+          defaultValue: ""
+          helpValueName: Viewport
+          variableName: optionViewport
+
+        - alts:
+            - --quality
+          help: |
+            Image quality for JPEG/WEBP formats, 0-100 (default: 90).
+          type: String
+          group: OptionsGroup
+          defaultValue: "90"
+          helpValueName: Quality
+          variableName: optionQuality
+
+        - alts:
+            - --full-page
+          help: |
+            Capture full scrollable page height instead of viewport height.
+          type: Boolean
+          group: OptionsGroup
+          variableName: optionFullPage
+
+        - alts:
+            - --wait-for-render
+          help: |
+            Extra wait time in milliseconds after page load, for JS-rendered
+            content such as SPAs or web components (default: 0).
+            Example: --wait-for-render 2000
+          type: String
+          group: OptionsGroup
+          defaultValue: "0"
+          helpValueName: Milliseconds
+          variableName: optionWaitForRender
+
+        - alts:
+            - --wait-for-selector
+          help: |
+            CSS selector to wait for before taking the screenshot.
+            Useful when the target element is rendered asynchronously.
+            Example: --wait-for-selector '#app'
+          type: String
+          group: OptionsGroup
+          defaultValue: ""
+          helpValueName: Selector
+          variableName: optionWaitForSelector
+
+        - alts:
+            - --inject-css
+          help: |
+            Path to a CSS file to inject into the page before screenshot.
+            Useful to override styles, hide elements, or apply custom theme.
+            Example: --inject-css custom.css
+          type: String
+          group: OptionsGroup
+          defaultValue: ""
+          helpValueName: CssFile
+          variableName: optionInjectCss
+
+        - alts:
+            - --hide-selector
+          help: |
+            CSS selector: the last matching element will be hidden before screenshot.
+            Useful to remove floating toolbars or overlays from the captured image.
+            Example: --hide-selector '#timeline > div.fixed'
+          type: String
+          group: OptionsGroup
+          defaultValue: ""
+          helpValueName: Selector
+          variableName: optionHideSelector
+
+        - alts:
+            - --file-filter
+          help: |
+            Only process files matching the regular expression
+
+            Example: ${__HELP_EXAMPLE}--file-filter '(\.html|\.htm)$'${__RESET_COLOR}
+          type: String
+          group: OptionsGroup
+          defaultValue: '(\.html|\.htm)$'
+          helpValueName: Regex
+          variableName: optionFileFilter
+
+      args:
+        - help: |
+
+            HTML files to convert.
+
+            ${__HELP_TITLE_COLOR}NO FILES:${__RESET_COLOR}
+
+            If not provided, all HTML files from git repository will be converted.
+
+            ${__HELP_TITLE_COLOR}STDIN:${__RESET_COLOR}
+
+            If ${__HELP_OPTION_COLOR}'-'${__RESET_COLOR} is provided,
+            HTML content will be read from stdin.
+            Incompatible with ${__HELP_OPTION_COLOR}--output${__RESET_COLOR} unless
+            stdin is used.
+
+            If using stdin, the option ${__HELP_OPTION_COLOR}--output${__RESET_COLOR}
+            is required to specify the output file path.
+
+            If using stdin, the option ${__HELP_OPTION_COLOR}--same-dir${__RESET_COLOR}
+            and ${__HELP_OPTION_COLOR}--output-dir${__RESET_COLOR} cannot be used.
+
+            If using stdin, the option ${__HELP_OPTION_COLOR}--transform-cmd${__RESET_COLOR}
+            can be used to apply a transform command to the HTML content before
+            conversion (the HTML content will be passed to the transform command
+            via stdin).
+          type: StringArray
+          min: 0
+          max: -1
+          name: HTMLFiles
+          variableName: argHtml2imageFiles

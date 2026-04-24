@@ -133,3 +133,8 @@ MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
     ^pages/bashDoc|
     ^pages/tests
   )
+
+HTML_DJLINT_FILTER_REGEX_EXCLUDE: |
+  (?x)(
+    ^src/_binaries/html2image/tests/test-html2image.html$
+  )
