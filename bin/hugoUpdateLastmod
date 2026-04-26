@@ -928,7 +928,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317,SC2329 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version 1.0"
+  echo "${SCRIPT_NAME} version 1.1"
   exit 0
 }
 
@@ -1662,6 +1662,12 @@ hugoUpdateLastmodCommandHelp() {
   "  - Prevents updates when running \"pre-commit run -a\" on unchanged files"
   ""
   "  - Checks git diff to detect real changes vs. reformatting"
+  ""
+  "${__HELP_TITLE_COLOR}CHANGELOG:${__RESET_COLOR}"
+  ""
+  "${__HELP_OPTION_COLOR}1.0:${__RESET_COLOR} Initial version"
+  ""
+  "${__HELP_OPTION_COLOR}1.1:${__RESET_COLOR} make md files at content/ root directory to be updated as well"
   )
   Array::wrap2 ' ' 76 0 "${hugoUpdateLastmodCommandLongDescription[@]}"
   echo
@@ -1670,7 +1676,7 @@ hugoUpdateLastmodCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "1.0"
+  echo "1.1"
   # ------------------------------------------
   # author section
   # ------------------------------------------
@@ -2137,7 +2143,7 @@ main() {
       if [[ "${file}" =~ ^${CONTENT_DIR}/.*\.md$ ]]; then
         files+=("${file}")
       fi
-    done < <(git ls-files "${CONTENT_DIR}/**/*.md" 2>/dev/null)
+    done < <(git ls-files "${CONTENT_DIR}/**.md" 2>/dev/null)
 
     if [[ ${#files[@]} -eq 0 ]]; then
       Log::displayWarning "⊘ No git-tracked markdown files found in ${CONTENT_DIR}/"

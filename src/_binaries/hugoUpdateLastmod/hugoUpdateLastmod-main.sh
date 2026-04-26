@@ -434,7 +434,7 @@ main() {
       if [[ "${file}" =~ ^${CONTENT_DIR}/.*\.md$ ]]; then
         files+=("${file}")
       fi
-    done < <(git ls-files "${CONTENT_DIR}/**/*.md" 2>/dev/null)
+    done < <(git ls-files "${CONTENT_DIR}/**.md" 2>/dev/null)
 
     if [[ ${#files[@]} -eq 0 ]]; then
       Log::displayWarning "⊘ No git-tracked markdown files found in ${CONTENT_DIR}/"

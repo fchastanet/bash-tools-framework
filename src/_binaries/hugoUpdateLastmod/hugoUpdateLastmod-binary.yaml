@@ -12,7 +12,7 @@ binData:
   commands:
     default:
       functionName: hugoUpdateLastmodCommand
-      version: "1.0"
+      version: "1.1"
       copyrightBeginYear: 2026
       commandName: hugoUpdateLastmod
       definitionFiles:
@@ -49,6 +49,11 @@ binData:
 
           - Checks git diff to detect real changes vs. reformatting
 
+        ${__HELP_TITLE_COLOR}CHANGELOG:${__RESET_COLOR}
+
+        ${__HELP_OPTION_COLOR}1.0:${__RESET_COLOR} Initial version
+
+        ${__HELP_OPTION_COLOR}1.1:${__RESET_COLOR} make md files at content/ root directory to be updated as well
       options:
         - alts:
             - --init
