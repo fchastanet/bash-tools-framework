@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-help.txt" AS mermaidCommandHelp
-# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimage-help.txt" AS rimageCommandHelp
-# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/krokiWrapper/kroki-help.txt" AS krokiCommandHelp
+# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimageWrapper-help.txt" AS rimageWrapperCommandHelp
+# @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/krokiWrapper/krokiWrapper-help.txt" AS krokiWrapperCommandHelp
 COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
@@ -64,7 +64,7 @@ generateBinary() {
 }
 
 generateDoc() {
-  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/content/docs"
+  PAGES_DIR="${FRAMEWORK_ROOT_DIR}/content"
   export FRAMEWORK_ROOT_DIR
 
   #-----------------------------
@@ -73,8 +73,8 @@ generateDoc() {
   Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
   generateBinary "npx" "mermaid"
-  generateBinary "rimage" "rimage"
-  generateBinary "kroki" "kroki"
+  generateBinary "rimageWrapper" "rimageWrapper"
+  generateBinary "krokiWrapper" "krokiWrapper"
 
   export KROKI_DIR="${TMPDIR}/kroki"
   export SKIP_KROKI_PULL=1

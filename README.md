@@ -48,13 +48,11 @@ and commands that help you lint files, generate shell documentation, compile bas
 
 ## 2. Quick Links
 
-- [Framework Guides](https://bash-tools-framework.devlab.top/docs/guides/) - Learn about framework features
-- [Commands](https://bash-tools-framework.devlab.top/docs/commands/) - Available command-line tools
-- [Framework Documentation](https://bash-tools-framework.devlab.top/docs/framework-overview/) - Complete function
-  reference
-- [Best Practices](https://bash-tools-framework.devlab.top/docs/guides/best-practices/) - Bash development best
-  practices
-- [Pre-commit Hooks](https://bash-tools-framework.devlab.top/docs/pre-commit-hooks/) - Available pre-commit hooks
+- [Framework Guides](https://bash-tools-framework.devlab.top/guides/) - Learn about framework features
+- [Commands](https://bash-tools-framework.devlab.top/commands/) - Available command-line tools
+- [Framework Documentation](https://bash-tools-framework.devlab.top/framework-overview/) - Complete function reference
+- [Best Practices](https://bash-tools-framework.devlab.top/guides/best-practices/) - Bash development best practices
+- [Pre-commit Hooks](https://bash-tools-framework.devlab.top/pre-commit-hooks/) - Available pre-commit hooks
 
 ## 3. Related Projects
 

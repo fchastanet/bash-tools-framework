@@ -1,0 +1,162 @@
+SYNOPSIS:
+    Convert diagrams to images using Kroki CLI or run Kroki server.
+    https://docs.kroki.io/kroki/setup/kroki-cli/
+
+
+USAGE: krokiWrapper [OPTIONS]
+USAGE: krokiWrapper [--help|-h] [--config]
+  [--bash-framework-config <bash-framework-config>] [--verbose|-v] [-vv] [-vvv]
+  [--log-level <log-level>] [--log-file <log-file>]
+  [--display-level <display-level>] [--no-color] [--theme <theme>] [--version]
+  [--quiet|-q] [--ci] [--same-dir] [--output-dir <OutputDir>]
+  [--format <Format>] [--force-update] [--server <Action>]
+  [--server-port <Port>]
+
+GLOBAL OPTIONS:
+  --help, -h {single}
+    Displays this command help
+  --config {single}
+    Displays configuration
+  --bash-framework-config <bash-framework-config> {single}
+    Use alternate bash framework configuration.
+  --verbose, -v {single}
+    Info level verbose mode (alias of --display-level INFO)
+  -vv {single}
+    Debug level verbose mode (alias of --display-level DEBUG)
+  -vvv {single}
+    Trace level verbose mode (alias of --display-level TRACE)
+  --log-level <log-level> {single}
+    Set log level
+    Possible values:
+      - OFF
+      - ERR
+      - ERROR
+      - WARN
+      - WARNING
+      - INFO
+      - DEBUG
+      - TRACE
+    Default value: OFF
+  --log-file <log-file> {single}
+    Set log file
+    Default value: /home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-frame
+      work/logs/krokiWrapper.log
+  --display-level <display-level> {single}
+    Set display level
+    Possible values:
+      - OFF
+      - ERR
+      - ERROR
+      - WARN
+      - WARNING
+      - INFO
+      - DEBUG
+      - TRACE
+    Default value: INFO
+  --no-color {single}
+    Produce monochrome output. alias of --theme noColor.
+  --theme <theme> {single}
+    Choose color theme - default-force means colors will be produced even if
+    command is piped.
+    Possible values:
+      - default
+      - default-force
+      - noColor
+    Default value: default
+  --version {single}
+    Print version information and quit.
+  --quiet, -q {single}
+    Quiet mode, doesn't display any output.
+
+OPTIONS:
+  --ci {single}
+    Activate continuous integration mode (tmp folder not shared with host)
+
+  --same-dir {single}
+    Write output file in same directory as source file
+    and with the same base name (except extension)
+    Incompatible with the option --output-dir
+
+  --output-dir <OutputDir> {single}
+    Define output directory of this command (default: <currentDirectory>)
+    Incompatible with the option --same-dir
+
+  --format <Format> {single}
+    Output format for wrapper mode: svg, png, pdf (default: svg)
+    Note: When using 'convert' subcommand, use kroki's native -f flag
+
+    Possible values:
+      - svg: SVG vector format (recommended for web)
+      - png: PNG raster format
+      - pdf: PDF document format
+  --force-update {single}
+    Force download of kroki binary even if already cached
+
+
+SERVER OPTIONS:
+  --server <Action> {single}
+    Server management action: start, stop, status
+
+    Possible values:
+      - start: Start Kroki server using Docker Compose
+      - stop: Stop Kroki server containers
+      - status: Show Kroki server status
+  --server-port <Port> {single}
+    Port for Kroki server (default: 8000)
+
+
+
+DESCRIPTION:
+Convert diagrams to images using Kroki CLI or run a local Kroki server.
+https://docs.kroki.io/kroki/setup/kroki-cli/
+
+Kroki CLI allows you to convert various diagram formats (PlantUML, Mermaid,
+Graphviz, BlockDiag, SeqDiag, ActDiag, NwDiag, PacketDiag, RackDiag, Bytefie
+ld, Ditaa, Erd, GraphViz, Nomnoml, Pikchr, Structurizr, SvgBob, UMLet, Vega,
+Vegalite, WaveDrom, Excalidraw, and more) to images (SVG, PNG, PDF, etc.).
+
+KROKI HELP
+
+Convert text diagram to image.
+By default, the output is written to a file with the basename of the source file and the appropriate extension.
+Example: kroki convert hello.dot
+
+Usage:
+  kroki [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  convert     Convert text diagram to image
+  decode      Decode an encoded (deflate + base64) diagram
+  encode      Encode text diagram in deflate + base64 format
+  help        Help about any command
+  version     Print the version of kroki
+
+Flags:
+  -h, --help   help for kroki
+
+Use "kroki [command] --help" for more information about a command.
+
+SERVER MODE
+
+Use --server to manage a local Kroki server using Docker:
+
+  --server start [--server-port 8000]
+    Start Kroki server with all companion services
+
+  --server stop
+     Stop Kroki server and remove containers
+
+  --server status
+     Show server status and URL
+
+The server includes: Gateway, Mermaid, BPMN, and Excalidraw services.
+
+VERSION: 1.0
+
+AUTHOR: [François Chastanet](https://github.com/fchastanet)
+
+SOURCE FILE: https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/krokiWrapper/krokiWrapper-binary.yaml
+
+LICENSE: MIT License
+Copyright (c) 2026-now François Chastanet

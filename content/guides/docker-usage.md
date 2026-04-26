@@ -2,6 +2,7 @@
 title: Docker Namespace
 description: Using Docker functions in Bash Tools Framework
 weight: 20
+type: docs
 categories: [documentation, guides]
 tags: [docker, containers, build, deployment]
 version: '1.0'

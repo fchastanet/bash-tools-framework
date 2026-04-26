@@ -37,9 +37,15 @@ ShellDoc::generateMdFileFromTemplate() {
     token="${token////_}"
     if grep -q "@@@${token}_help@@@" "${targetFile}"; then
       Log::displayInfo "generate help for ${token}"
+      local tokenCommandHelpVariable="embed_file_${token}CommandHelp"
       ( #
-        (cd "${fromDir}" && "${relativeFile}" --help) |
-          File::replaceTokenByInput "@@@${token}_help@@@" "${targetFile}"
+        (
+          if [[ -n "${!tokenCommandHelpVariable}" ]]; then
+            cat "${!tokenCommandHelpVariable}"
+          else
+            cd "${fromDir}" && "${relativeFile}" --help
+          fi
+        ) | File::replaceTokenByInput "@@@${token}_help@@@" "${targetFile}"
       ) || Log::displayError "$(realpath "${fromDir}/${relativeFile}" --relative-to="${FRAMEWORK_ROOT_DIR}") --help error caught"
     else
       ((++tokenNotFoundCount))

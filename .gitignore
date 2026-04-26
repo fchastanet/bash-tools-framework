@@ -23,16 +23,15 @@ pages/tests/
 build/
 public/
 sites/
-content/docs/bashDoc/
-content/docs/FrameworkFullDoc.md
-content/docs/Commands.md
+content/bashDoc/
+content/Commands.md
 resources/
 .hugo_build.lock
 hugo.yaml
 
 # Hugo pages auto generated files
-content/docs/guides/assets/requireLoad-activityDiagram.svg
-content/docs/assets/requireLoad-activityDiagram.svg
+content/guides/assets/requireLoad-activityDiagram.svg
+content/assets/requireLoad-activityDiagram.svg
 doc/images/requireLoad-activityDiagram.svg
 .cspell/forbidden.txt
 

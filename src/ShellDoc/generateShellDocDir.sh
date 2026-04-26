@@ -79,8 +79,8 @@ ShellDoc::generateShellDocDir() {
         echo "linkTitle: '${relativeDir##*/}::'"
         echo "type: docs"
         echo "weight: ${weight}"
-        echo "creationDate: 2026-03-01"
-        echo "lastUpdated: $(date '+%Y-%m-%d')"
+        echo "date: 2026-03-01"
+        echo "lastmod: $(date '+%Y-%m-%d')"
         echo "---"
         echo
       ) | cat - "${targetDocFile}" >"${targetDocFile}.tmp"

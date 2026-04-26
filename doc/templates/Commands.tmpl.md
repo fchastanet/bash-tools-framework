@@ -4,8 +4,8 @@ linkTitle: Commands
 description: Overview of the Bash Tools Framework command-line tools
 type: docs
 weight: 1002
-creationDate: 2026-03-01
-lastUpdated: 2026-03-02
+date: 2026-03-01
+lastmod: 2026-03-02
 version: 1.0
 ---
 

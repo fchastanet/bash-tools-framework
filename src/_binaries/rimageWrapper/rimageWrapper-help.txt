@@ -1,0 +1,196 @@
+SYNOPSIS:
+    Compression and conversion of images using Rimage.
+    https://github.com/vlad-salone/rimage
+
+
+USAGE: rimageWrapper [OPTIONS] [ARGUMENTS]
+USAGE: rimageWrapper [--help|-h] [--config]
+  [--bash-framework-config <bash-framework-config>] [--verbose|-v] [-vv] [-vvv]
+  [--log-level <log-level>] [--log-file <log-file>]
+  [--display-level <display-level>] [--no-color] [--theme <theme>] [--version]
+  [--quiet|-q] [--ci] [--same-dir] [--output-dir|-o <OutputDir>]
+
+ARGUMENTS:
+  command {single} (mandatory)    command to run with rimageWrapper, e.g. mozjpeg, oxipng, etc.
+
+    Possible values:
+      - avif: Encode images into AVIF format. (Small and Efficient)
+      - farbfeld: Encode images into Farbfeld format. (Bitmapped)
+      - jpeg: Encode images into JPEG format. (Progressive-able)
+      - jpeg_xl: Encode images into JpegXL format. (Big but Lossless)
+      - mozjpeg: Encode images into JPEG format using MozJpeg codec.
+          (RECOMMENDED and Small)
+
+      - oxipng: Encode images into PNG format using OxiPNG codec.
+          (Progressive-able)
+
+      - png: Encode images into PNG format.
+      - ppm: Encode images into PPM format. (Bitmapped)
+      - qoi: Encode images into QOI format. (Trendy and Small)
+      - webp: Encode images into WebP format. (Lossless-able)
+      - help: Print this message or the help of the given subcommand(s)
+
+GLOBAL OPTIONS:
+  --help, -h {single}
+    Displays this command help
+  --config {single}
+    Displays configuration
+  --bash-framework-config <bash-framework-config> {single}
+    Use alternate bash framework configuration.
+  --verbose, -v {single}
+    Info level verbose mode (alias of --display-level INFO)
+  -vv {single}
+    Debug level verbose mode (alias of --display-level DEBUG)
+  -vvv {single}
+    Trace level verbose mode (alias of --display-level TRACE)
+  --log-level <log-level> {single}
+    Set log level
+    Possible values:
+      - OFF
+      - ERR
+      - ERROR
+      - WARN
+      - WARNING
+      - INFO
+      - DEBUG
+      - TRACE
+    Default value: OFF
+  --log-file <log-file> {single}
+    Set log file
+    Default value: /home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-frame
+      work/logs/rimageWrapper.log
+  --display-level <display-level> {single}
+    Set display level
+    Possible values:
+      - OFF
+      - ERR
+      - ERROR
+      - WARN
+      - WARNING
+      - INFO
+      - DEBUG
+      - TRACE
+    Default value: INFO
+  --no-color {single}
+    Produce monochrome output. alias of --theme noColor.
+  --theme <theme> {single}
+    Choose color theme - default-force means colors will be produced even if
+    command is piped.
+    Possible values:
+      - default
+      - default-force
+      - noColor
+    Default value: default
+  --version {single}
+    Print version information and quit.
+  --quiet, -q {single}
+    Quiet mode, doesn't display any output.
+
+OPTIONS:
+  --ci {single}
+    Activate continuous integration mode (tmp folder not shared with host)
+
+  --same-dir {single}
+    Write output file in same directory as source file
+    and with the same base name (except extension)
+    Incompatible with the option --output-dir
+
+  --output-dir, -o <OutputDir> {single}
+    Define output directory of this command (default: <currentDirectory>)
+    Incompatible with the option --same-dir
+
+
+
+DESCRIPTION:
+Compression and conversion of images using Rimage.
+https://github.com/vlad-salone/rimageWrapper
+
+RIMAGE HELP
+
+Optimize images natively with best-in-class codecs
+
+Usage: rimage [COMMAND]
+
+Commands:
+  avif      Encode images into AVIF format. (Small and Efficient)
+  farbfeld  Encode images into Farbfeld format. (Bitmapped)
+  jpeg      Encode images into JPEG format. (Progressive-able)
+  jpeg_xl   Encode images into JpegXL format. (Big but Lossless)
+  mozjpeg   Encode images into JPEG format using MozJpeg codec. (RECOMMENDED and Small)
+  oxipng    Encode images into PNG format using OxiPNG codec. (Progressive-able)
+  png       Encode images into PNG format.
+  ppm       Encode images into PPM format. (Bitmapped)
+  qoi       Encode images into QOI format. (Trendy and Small)
+  webp      Encode images into WebP format. (Lossless-able)
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+
+List of supported codecs
+| Image Format  | Input | Output | Note            |
+| ------------- | ----- | ------ | --------------- |
+| avif          | O     | O      | Static only     |
+| bmp           | O     | X      |                 |
+| farbfeld      | O     | O      |                 |
+| hdr           | O     | O      |                 |
+| jpeg          | O     | O      |                 |
+| jpeg_xl(jxl)  | O     | O      |                 |
+| mozjpeg(moz)  | O     | O      |                 |
+| oxipng(oxi)   | O     | O      | Static only     |
+| png           | O     | O      | Static only     |
+| ppm           | O     | O      |                 |
+| psd           | O     | X      |                 |
+| qoi           | O     | O      |                 |
+| tiff          | O     | X      |                 |
+| webp          | O     | O      | Static only     |
+
+List of supported preprocessing options
+- Resize
+- Quantization
+- Alpha premultiply
+
+List of supported mode for output info presenting
+- No-progress (Shown on Default)
+- Quiet (Show all msgs on Default)
+
+For more info use rimageWrapper help <command>
+E.g.: rimageWrapper help mozjpeg
+
+RIMAGE ADVANCED OPTIONS
+
+Options: --quality <NUM>     Quality, values 60-80 are recommended.
+    [default: 75]
+
+--chroma_quality <NUM>     Separate chrome quality.
+
+--baseline     Set to use baseline encoding (by default is progressive).
+
+--no_optimize_coding     Set to make files larger for no reason.
+
+--smoothing <NUM>     Use MozJPEG's smoothing.
+
+--colorspace <COLOR>     Set color space of JPEG being written.
+    [default: ycbcr]     [possible values: ycbcr, grayscale, rgb]
+
+--multipass     Specifies whether multiple scans should be considered during
+trellis quantization.
+
+--subsample <PIX>     Sets chroma subsampling.
+
+--qtable <TABLE>     Use a specific quantization table.
+    [default: NRobidoux]
+
+    [possible values: AhumadaWatsonPeterson, AnnexK, Flat,
+    KleinSilversteinCarney, MSSSIM, NRobidoux,
+    PSNRHVS, PetersonAhumadaWatson, WatsonTaylorBorthwick]
+
+VERSION: 1.0
+
+AUTHOR: [François Chastanet](https://github.com/fchastanet)
+
+SOURCE FILE: https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/rimageWrapper/rimageWrapper-binary.yaml
+
+LICENSE: MIT License
+Copyright (c) 2026-now François Chastanet

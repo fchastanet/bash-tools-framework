@@ -1,3 +1,95 @@
+SYNOPSIS:
+    Generates mermaid diagrams from mermaid files.
+
+USAGE: mermaid [OPTIONS]
+USAGE: mermaid [--help|-h] [--config]
+  [--bash-framework-config <bash-framework-config>] [--verbose|-v] [-vv] [-vvv]
+  [--log-level <log-level>] [--log-file <log-file>]
+  [--display-level <display-level>] [--no-color] [--theme <theme>] [--version]
+  [--quiet|-q] [--ci] [--format|-f <Format>] [--same-dir]
+  [--output-dir|-o <OutputDir>]
+
+GLOBAL OPTIONS:
+  --help, -h {single}
+    Displays this command help
+  --config {single}
+    Displays configuration
+  --bash-framework-config <bash-framework-config> {single}
+    Use alternate bash framework configuration.
+  --verbose, -v {single}
+    Info level verbose mode (alias of --display-level INFO)
+  -vv {single}
+    Debug level verbose mode (alias of --display-level DEBUG)
+  -vvv {single}
+    Trace level verbose mode (alias of --display-level TRACE)
+  --log-level <log-level> {single}
+    Set log level
+    Possible values:
+      - OFF
+      - ERR
+      - ERROR
+      - WARN
+      - WARNING
+      - INFO
+      - DEBUG
+      - TRACE
+    Default value: OFF
+  --log-file <log-file> {single}
+    Set log file
+    Default value: /home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-frame
+      work/logs/mermaid.log
+  --display-level <display-level> {single}
+    Set display level
+    Possible values:
+      - OFF
+      - ERR
+      - ERROR
+      - WARN
+      - WARNING
+      - INFO
+      - DEBUG
+      - TRACE
+    Default value: INFO
+  --no-color {single}
+    Produce monochrome output. alias of --theme noColor.
+  --theme <theme> {single}
+    Choose color theme - default-force means colors will be produced even if
+    command is piped.
+    Possible values:
+      - default
+      - default-force
+      - noColor
+    Default value: default
+  --version {single}
+    Print version information and quit.
+  --quiet, -q {single}
+    Quiet mode, doesn't display any output.
+
+OPTIONS:
+  --ci {single}
+    Activate continuous integration mode (tmp folder not shared with host)
+
+  --format, -f <Format> {list} (optional)
+    Defines output format of this command (default: svg if not provided)
+    Possible values:
+      - svg
+      - png
+      - pdf
+  --same-dir {single}
+    Write output file in same directory as source file
+    and with the same base name (except extension)
+    Incompatible with the option --output-dir
+
+  --output-dir, -o <OutputDir> {single}
+    Define output directory of this command (default: <currentDirectory>)
+    Incompatible with the option --same-dir
+
+
+
+DESCRIPTION:
+Generates mermaid diagrams from mermaid files in formats provided
+
+MERMAID HELP
 Usage: mmdc [options]
 
 Options:
@@ -20,3 +112,12 @@ Options:
   --iconPacks <icons...>                          Icon packs to use, e.g. @iconify-json/logos. These should be Iconify NPM packages that expose a icons.json file, see https://iconify.design/docs/icons/json.html. These will be downloaded from https://unkpg.com when needed. (default: [])
   --iconPacksNamesAndUrls <prefix#iconsurl...>    Icon packs to use, e.g. azure#https://raw.githubusercontent.com/NakayamaKento/AzureIcons/refs/heads/main/icons.json where the name (prefix) of the icon pack is defined before the "#" and the url of the json definition after the "#". These should be Iconify json file formatted as IconifyJson, see https://iconify.design/docs/icons/json.html. These will be downloaded when needed. (default: [])
   -h, --help                                      display help for command
+
+VERSION: 1.1
+
+AUTHOR: [François Chastanet](https://github.com/fchastanet)
+
+SOURCE FILE: https://github.com/fchastanet/bash-tools-framework/tree/master/src/_binaries/mermaid/mermaid-binary.yaml
+
+LICENSE: MIT License
+Copyright (c) 2026-now François Chastanet

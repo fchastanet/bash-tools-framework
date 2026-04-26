@@ -116,7 +116,6 @@ JSON_JSONLINT_FILTER_REGEX_EXCLUDE: |
 MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
   (?x)(
     ^pages/Commands.md|
-    ^pages/FrameworkFullDoc.md|
     ^pages/README.md|
     ^pages/doc|
     ^pages/bashDoc|
@@ -127,7 +126,6 @@ MARKDOWN_MARKDOWN_LINK_CHECK_FILTER_REGEX_EXCLUDE: |
 MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: |
   (?x)(
     ^pages/Commands.md|
-    ^pages/FrameworkFullDoc.md|
     ^pages/README.md|
     ^pages/doc|
     ^pages/bashDoc|

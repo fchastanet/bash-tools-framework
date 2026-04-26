@@ -2,6 +2,7 @@
 title: Configuration Files
 description: Understanding configuration file management in Bash Tools Framework
 weight: 10
+type: docs
 categories: [documentation, guides]
 tags: [configuration, env-files, environment]
 date: '2026-03-01T08:00:00+01:00'

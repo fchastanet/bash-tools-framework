@@ -2,6 +2,7 @@
 title: Best Practices
 description: Bash development best practices and recipes
 weight: 30
+type: docs
 categories: [documentation, guides]
 tags: [best-practices, bash, testing, development]
 version: '1.0'
