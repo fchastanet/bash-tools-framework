@@ -244,3 +244,11 @@ Graphviz, and many more.
 ```text
 @@@krokiWrapper_help@@@
 ```
+
+### 4.5. bin/html2image
+
+Generate images from HTML files.
+
+```text
+@@@html2image_help@@@
+```

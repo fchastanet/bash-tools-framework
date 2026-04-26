@@ -5,8 +5,8 @@ description: Overview of the Bash Tools Framework pre-commit hooks
 type: docs
 weight: 2001
 date: '2026-03-15T08:00:00+01:00'
-lastmod: '2026-04-06T14:40:17+02:00'
-version: '1.2'
+lastmod: '2026-04-25T00:06:10+02:00'
+version: '1.3'
 ---
 
 The Bash Tools Framework provides pre-commit hooks to ensure code quality and consistency before changes are committed
@@ -24,9 +24,11 @@ development workflow using the [pre-commit](https://pre-commit.com/) tool.
   - [1.6. plantuml](#16-plantuml)
   - [1.7. mermaid](#17-mermaid)
   - [1.8. rimage](#18-rimage)
-  - [1.9. megalinterCheckVersion](#19-megalintercheckversion)
-  - [1.10. megalinter](#110-megalinter)
-  - [1.11. hugoUpdateLastmod](#111-hugoupdatelastmod)
+  - [1.9. html2image](#19-html2image)
+  - [1.10. html2imageMarkwhen](#110-html2imagemarkwhen)
+  - [1.11. megalinterCheckVersion](#111-megalintercheckversion)
+  - [1.12. megalinter](#112-megalinter)
+  - [1.13. hugoUpdateLastmod](#113-hugoupdatelastmod)
 - [2. Usage](#2-usage)
 
 <!--TOC-->
@@ -76,17 +78,30 @@ uses the `bin/rimageWrapper` script, which can be configured to run in CI mode, 
 the source files, and specify output formats. It uses the latest rimage binary and uses it to generate images. It also
 detects added files in CI mode to only generate images for new files.
 
-### 1.9. megalinterCheckVersion
+### 1.9. html2image
+
+This hook generates images from HTML files using the `bin/html2image` script, which can be configured to run in CI mode,
+generate images in the same directory as the source files, and specify output formats. It also detects added files in CI
+mode to only generate images for new files.
+
+### 1.10. html2imageMarkwhen
+
+This hook generates images from Markwhen files using the `bin/html2image` script, which can be configured to run in CI
+mode, generate images in the same directory as the source files, and specify output formats. It is a special
+configuration of the html2image hook that uses the `--transform-cmd` option to transform Markwhen files into HTML using
+the `npx markwhen` command before generating images.
+
+### 1.11. megalinterCheckVersion
 
 This hook checks if a new version of megalinter is available. It uses the `bin/megalinter` script with the
 `--check-megalinter-version` option to check for updates.
 
-### 1.10. megalinter
+### 1.12. megalinter
 
 This hook runs megalinter for comprehensive code quality checks. It uses the `bin/megalinter` script, which can be
 configured to specify the megalinter image, configuration file, and whether to automatically fix issues.
 
-### 1.11. hugoUpdateLastmod
+### 1.13. hugoUpdateLastmod
 
 This hook updates the `lastmod` and `version` fields in Hugo frontmatter based on git modification dates or the current
 date.

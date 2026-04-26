@@ -48,6 +48,9 @@ dictionaryDefinitions:
   - name: mySoftwares
     path: .cspell/softwares.txt
     addWords: true
+  - name: myJavascript
+    path: .cspell/javascript.txt
+    addWords: true
   - name: markdown
     path: .cspell/markdown.txt
     addWords: true
@@ -93,6 +96,16 @@ languageSettings:
       - mySoftwares
       - software
 
+  - languageId: javascript
+    locale: '*'
+    dictionaries:
+      - myJavascript
+      - mySoftwares
+      - software
+      - npm
+      - html
+      - filetypes
+
   - languageId: markdown
     locale: '*'
     dictionaries:
@@ -107,6 +120,9 @@ languageSettings:
       - dirColors
 # ----------
 overrides:
+  - filename:
+      - '**/*.js'
+    languageId: javascript
   - filename:
       - '.*'
       - '*.yml'
@@ -129,6 +145,7 @@ overrides:
   - filename:
       - LICENSE
       - '**/*.md'
+      - '**/*.mwh'
       - '**/*-help.txt'
     languageId: markdown
   - filename:

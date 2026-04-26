@@ -171,3 +171,35 @@
   pass_filenames: false
   always_run: true
   stages: [pre-commit, pre-push]
+
+- id: html2image
+  name: HTML to Image
+  description: Convert HTML files to images (webp) using Puppeteer
+  language: script
+  entry: bin/html2image
+  args: [--ci, --format, webp, --same-dir]
+  pass_filenames: true
+  files: \.html$
+  types: ["file", "non-executable", "text"]
+  always_run: false
+  stages: [pre-commit, manual]
+
+- id: html2imageMarkwhen
+  name: Markwhen to Image
+  description: |
+    Convert Markwhen (.mwh) files to timeline images (webp) using
+    @markwhen/mw and Puppeteer
+  language: script
+  entry: bin/html2image
+  args:
+    - --ci
+    - --format
+    - webp
+    - --same-dir
+    - --transform-cmd
+    - "npx -y @markwhen/mw -o timeline -d %tempFile%"
+  pass_filenames: true
+  files: \.mwh$
+  types: ["file", "non-executable", "text"]
+  always_run: false
+  stages: [pre-commit, manual]
