@@ -31,6 +31,9 @@
     "pages/FrameworkDoc.md",
     "pages/bashDoc/**",
     ".docker/createUser.*.sh",
+    "src/_binaries/krokiWrapper/krokiWrapper-help.txt",
+    "src/_binaries/rimageWrapper/rimageWrapper-help.txt",
+    "src/_binaries/mermaid/mermaid-help.txt",
     "src/_binaries/mermaid/mermaid-options.sh",
     "src/_binaries/mermaid/mermaid-main.sh"
   ]

@@ -24,7 +24,7 @@ build/
 public/
 sites/
 content/bashDoc/
-content/Commands.md
+content/commands/Commands-*.md
 resources/
 .hugo_build.lock
 hugo.yaml

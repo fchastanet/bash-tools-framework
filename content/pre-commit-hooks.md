@@ -3,10 +3,10 @@ title: Pre-commit Hooks
 linkTitle: Pre-commit Hooks
 description: Overview of the Bash Tools Framework pre-commit hooks
 type: docs
-weight: 2001
+weight: 11
 date: '2026-03-15T08:00:00+01:00'
-lastmod: '2026-04-25T00:06:10+02:00'
-version: '1.3'
+lastmod: '2026-04-26T23:17:38+02:00'
+version: '1.4'
 ---
 
 The Bash Tools Framework provides pre-commit hooks to ensure code quality and consistency before changes are committed

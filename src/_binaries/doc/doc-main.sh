@@ -70,28 +70,7 @@ generateDoc() {
   #-----------------------------
   # doc generation
   #-----------------------------
-  Log::displayInfo 'generate Commands.md'
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
-  generateBinary "npx" "mermaid"
-  generateBinary "rimageWrapper" "rimageWrapper"
-  generateBinary "krokiWrapper" "krokiWrapper"
-
-  export KROKI_DIR="${TMPDIR}/kroki"
-  export SKIP_KROKI_PULL=1
-
-  ShellDoc::generateMdFileFromTemplate \
-    "${FRAMEWORK_ROOT_DIR}/doc/templates/Commands.tmpl.md" \
-    "${PAGES_DIR}/Commands.md" \
-    "${COMMAND_BIN_DIR}" \
-    TOKEN_NOT_FOUND_COUNT \
-    '(var|simpleBinary|shdoc|installFacadeExample)$'
-  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
-    exit 1
-  fi
-
-  # clean folder before generate
-  rm -f "${PAGES_DIR}/Index.md" || true
-  rm -Rf "${PAGES_DIR}/bashDoc" || true
 
   ShellDoc::generateShellDocsFromDir \
     "${FRAMEWORK_SRC_DIR}" \
@@ -101,12 +80,74 @@ generateDoc() {
     "${REPOSITORY_URL}" \
     '/testsData|/_.*' \
     '(/__all\.sh)$' \
-    "${FRAMEWORK_ROOT_DIR}/doc/templates/FrameworkDirectoryIndex.tmpl.md"
+    "${FRAMEWORK_ROOT_DIR}/assets/templates/FrameworkDirectoryIndex.tmpl.md"
 
+  Log::displayInfo 'generate commands doc ...'
+  # clean folder before generate
+  rm -f "${PAGES_DIR}/Index.md" || true
+  rm -Rf "${PAGES_DIR}/bashDoc" || true
+
+  local templateFile
+  local templateBaseName
+  for templateFile in "${FRAMEWORK_ROOT_DIR}/assets/templates/Commands-"*.tmpl.md; do
+    templateBaseName=$(basename "${templateFile}")
+    local token="${templateBaseName#Commands-}"
+    token="${token%.tmpl.md}"
+    local targetFile="${PAGES_DIR}/commands/${templateBaseName%.tmpl.md}.md"
+    cp "${templateFile}" "${targetFile}"
+    local binaryPath="${FRAMEWORK_ROOT_DIR}/bin/${token}"
+    if [[ "${token}" = "install" ]]; then
+      # install command is in root folder
+      binaryPath="${FRAMEWORK_ROOT_DIR}/${token}"
+    fi
+    if [[ ! -x "${binaryPath}" || ! -f "${binaryPath}" ]]; then
+      Log::displayError "No executable file found for ${token} command (${binaryPath})"
+      ((TOKEN_NOT_FOUND_COUNT++))
+      continue
+    fi
+    Log::displayInfo "generate help for ${token} command"
+    local tokenCommandHelpVariable="embed_file_${token}CommandHelp"
+    (
+      if [[ -n "${!tokenCommandHelpVariable}" ]]; then
+        cat "${!tokenCommandHelpVariable}"
+      else
+        "${binaryPath}" --help
+      fi
+    ) | File::replaceTokenByInput "@@@${token}_help@@@" "${targetFile}"
+  done
+
+  # check if all binaries have their associated template file
+  local command
+  local commandBaseName
+  local excludedCommands=(
+    "installFacadeExample"
+    "var"
+    "simpleBinary"
+    "shdoc"
+  )
+  for command in "${FRAMEWORK_ROOT_DIR}/bin/"*; do
+    if [[ -x "${command}" && -f "${command}" ]]; then
+      commandBaseName=$(basename "${command}")
+      local expectedTemplateFile="${FRAMEWORK_ROOT_DIR}/assets/templates/Commands-${commandBaseName}.tmpl.md"
+      if [[ ! -f "${expectedTemplateFile}" ]] && ! Array::contains "${commandBaseName}" "${excludedCommands[@]}"; then
+        Log::displayError "No template file found for ${commandBaseName} command (${expectedTemplateFile})"
+        ((TOKEN_NOT_FOUND_COUNT++))
+      fi
+    fi
+  done
+
+  if ((TOKEN_NOT_FOUND_COUNT > 0)); then
+    Log::displayError "doc generation failed with ${TOKEN_NOT_FOUND_COUNT} errors"
+    return 1
+  fi
+
+  Log::displayInfo "Copy doc assets"
   mkdir -p "${PAGES_DIR}/assets"
   cp -v \
     "${FRAMEWORK_ROOT_DIR}/src/Env/requireLoad-activityDiagram.svg" \
     "${PAGES_DIR}/assets"
+
+  Log::displayInfo "doc generated successfully in ${PAGES_DIR}"
 }
 
 installRequirements() {

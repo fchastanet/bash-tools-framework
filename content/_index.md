@@ -30,7 +30,3 @@ This framework is part of a suite of projects:
 - [Bash Tools](https://bash-tools.devlab.top/)
 - [Bash Dev Env](https://bash-dev-env.devlab.top/)
 - [Bash Compiler](https://bash-compiler.devlab.top/)
-
-## 3. Articles
-
-{{< articles-list >}}

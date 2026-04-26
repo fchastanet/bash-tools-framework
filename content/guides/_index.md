@@ -4,13 +4,11 @@ linkTitle: Framework Guides
 description: Framework guides explaining main features and best practices
 type: docs
 sidebar_root_for: self
-weight: 1
-version: 1.0
+weight: 2
 date: '2026-03-01T08:00:00+01:00'
-lastmod: '2026-03-01T08:00:00+01:00'
+lastmod: '2026-04-26T23:17:38+02:00'
+version: '1.1'
 ---
-
-{{< articles-list >}}
 
 General framework documentation explaining main framework features:
 
