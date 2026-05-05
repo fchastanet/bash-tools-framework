@@ -5,13 +5,15 @@ description: Collection of bash functions and commands for linting, documentatio
 type: docs
 weight: 10
 date: '2026-03-01'
-lastmod: '2026-04-26T20:10:14+02:00'
-version: '1.0'
+lastmod: '2026-05-05T23:36:57+02:00'
+version: '1.1'
 ---
 
 {{% pageinfo %}} Welcome to the Bash Tools Framework documentation. This framework provides a comprehensive collection
 of bash functions and commands that help you lint files, generate shell documentation, compile bash files, and much
 more. {{% /pageinfo %}}
+
+{{< img src="assets/bash-tools-framework-homepage.png" alt="Bash Tools Framework illustration" >}}
 
 ## 1. Quick Links
 

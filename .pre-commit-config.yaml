@@ -29,6 +29,26 @@ repos:
             /testsData/
           )
 
+  - repo: https://github.com/sudosubin/pre-commit-image
+    rev: v0.1.2
+    hooks:
+      # resize image to max resolution of 800x600
+      - id: image
+        args: [--max-width, '1200', --max-height, '1200']
+        files: \.(avif|heic|heif|jpeg|jpg|png|webp)$
+        exclude: |
+          (?x)(
+            ^assets/favicons/|
+            ^src/_binaries/html2image/tests/test-markwhen\.webp$|
+            ^src/_binaries/html2image/tests/test-html2image\.webp$
+          )
+
+  - repo: https://github.com/oxipng/oxipng
+    rev: v10.1.0
+    hooks:
+      - id: oxipng
+        args: ['-o', '4', '--strip', 'safe', '--alpha']
+
   - repo: local
     hooks:
       # generate mermaid help with npx and save it in a file to be used in doc generation
@@ -136,6 +156,16 @@ repos:
           )
         stages: [pre-commit, pre-push, manual]
       - id: check-added-large-files
+        files: \.(avif|heic|heif|jpeg|jpg|png|webp)$
+        args: [--maxkb=1024, --enforce-all]
+        exclude: |
+          (?x)(
+            ^content/assets/bash-tools-framework-homepage\.png$
+          )
+      - id: check-added-large-files
+        # check for non image files larger than 100KB
+        args: [--maxkb=128]
+        exclude: \.(avif|heic|heif|jpeg|jpg|png|webp)$
       - id: forbid-new-submodules
       - id: mixed-line-ending
         args: [--fix=lf]
