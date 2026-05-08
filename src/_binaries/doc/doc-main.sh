@@ -70,6 +70,10 @@ generateDoc() {
   #-----------------------------
   # doc generation
   #-----------------------------
+  # clean folder before generate
+  rm -f "${PAGES_DIR}/Index.md" || true
+  rm -Rf "${PAGES_DIR}/bashDoc" || true
+
   ((TOKEN_NOT_FOUND_COUNT = 0)) || true
 
   ShellDoc::generateShellDocsFromDir \
@@ -83,10 +87,6 @@ generateDoc() {
     "${FRAMEWORK_ROOT_DIR}/assets/templates/FrameworkDirectoryIndex.tmpl.md"
 
   Log::displayInfo 'generate commands doc ...'
-  # clean folder before generate
-  rm -f "${PAGES_DIR}/Index.md" || true
-  rm -Rf "${PAGES_DIR}/bashDoc" || true
-
   local templateFile
   local templateBaseName
   for templateFile in "${FRAMEWORK_ROOT_DIR}/assets/templates/Commands-"*.tmpl.md; do
