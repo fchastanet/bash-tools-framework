@@ -79,7 +79,7 @@
 - id: rimage
   name: Rimage Converter
   description: Convert and compress images using rimage
-  language: system
+  language: script
   entry: bin/rimageWrapper
   args: [--ci, webp]
   pass_filenames: true
