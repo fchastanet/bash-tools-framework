@@ -223,3 +223,4 @@ Xvfb
 xvfb
 yapf
 ycbcr
+zizmor

@@ -1737,42 +1737,16 @@ getDatePortion() {
   echo "${timestamp}" | sed 's/T.*//; s/["'\'']*//g'
 }
 
-# Get git creation date for a file
-# Args: $1 = file path
-getGitCreationDate() {
+# Get git date for a file
+# @arg $1 = file path
+# @arg $2 = command to use (e.g., head, tail) to get first or last commit date
+getGitDate() {
   local file="$1"
+  local command="$2"
   local timestamp
 
   # Get the first commit date for this file
-  timestamp=$(git log --follow --format="%aI" --reverse -- "${file}" | head -1)
-
-  if [[ -z "${timestamp}" ]]; then
-    # File not in git yet, use current date with default time
-    getCurrentDate
-    return
-  fi
-
-  # Convert to our format with default time if no time component
-  local dateOnly
-  dateOnly=$(date -d "${timestamp}" +"%Y-%m-%d" 2>/dev/null || echo "")
-
-  if [[ -z "${dateOnly}" ]]; then
-    getCurrentDate
-    return
-  fi
-
-  # Format with default time and timezone
-  TZ="${TIMEZONE}" date -d "${dateOnly} ${DEFAULT_TIME}" +"${DATE_FORMAT}"
-}
-
-# Get git last modification date for a file
-# Args: $1 = file path
-getGitModificationDate() {
-  local file="$1"
-  local timestamp
-
-  # Get the last commit date for this file
-  timestamp=$(git log --follow --format="%aI" -1 -- "${file}" | head -1)
+  timestamp=$(git log --follow --format="%aI" --reverse -- "${file}" | "${command}" -1)
 
   if [[ -z "${timestamp}" ]]; then
     # File not in git yet, use current date with default time
@@ -1917,7 +1891,7 @@ processMigrationMode() {
       modified=1
     else
       # Get from git
-      dateValue=$(getGitCreationDate "${file}")
+      dateValue=$(getGitDate "${file}" "head")
       Log::displayInfo "  ✓ Creating date from git: ${dateValue}"
       modified=1
     fi
@@ -1939,7 +1913,7 @@ processMigrationMode() {
       modified=1
     else
       # Get from git
-      lastmodValue=$(getGitModificationDate "${file}")
+      lastmodValue=$(getGitDate "${file}" "tail")
       Log::displaySuccess "  ✓ Creating lastmod from git: ${lastmodValue}"
       modified=1
     fi

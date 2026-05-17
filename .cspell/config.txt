@@ -26,6 +26,7 @@ commandline
 COMPREPLY
 CONCAT
 configurator
+cooldown
 cpes
 Creset
 CWORD

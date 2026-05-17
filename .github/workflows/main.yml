@@ -44,7 +44,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by guibranco/github-status-action-v2@v1.2.3
+      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
     strategy:
       fail-fast: true
@@ -58,19 +58,21 @@ jobs:
           - "5.3"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # overall process
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -93,7 +95,7 @@ jobs:
             fi
           ) >> "${GITHUB_ENV}"
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -102,7 +104,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -117,7 +119,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
-      - uses: docker/build-push-action@v7
+      - uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
         continue-on-error: false
         with:
           load: true
@@ -136,9 +138,9 @@ jobs:
       - name: Check image
         continue-on-error: false
         run: |
-          docker run --rm "${{ env.image_name }}:${{ env.image_tag }}" bash --version
+          docker run --rm "${image_name}:${image_tag}" bash --version
 
-      - uses: docker/build-push-action@v7
+      - uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
         continue-on-error: false
         with:
           load: true
@@ -152,7 +154,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -168,22 +170,24 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
-      # needed by guibranco/github-status-action-v2@v1.2.3
+      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: crazy-max/ghaction-import-gpg@v7
+      - uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7
         if: ${{ success() }}
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -191,14 +195,16 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - uses: actions/create-github-app-token@v3.1.1
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         if: ${{ success() }}
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -214,11 +220,11 @@ jobs:
           ) >> "${GITHUB_ENV}"
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: 3.12
 
-      - uses: fchastanet/github-action-setup-shfmt@v4.0.0
+      - uses: fchastanet/github-action-setup-shfmt@1ac9300e2fa90c29ee2d1da692af1f122d99a9e3 # v4.0.0
 
       - name: Install requirements
         run: |
@@ -230,7 +236,7 @@ jobs:
         run: .github/preCommitGeneration.sh
 
       - name: Run pre-commit
-        uses: j178/prek-action@v2
+        uses: j178/prek-action@bdca6f102f98e2b4c7029491a53dfd366469e33d # v2.0.4
         id: preCommit
         with:
           extra-args: >-
@@ -241,7 +247,7 @@ jobs:
         if: ${{ !cancelled() }}
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/latest/flavors/
-        uses: oxsecurity/megalinter/flavors/terraform@v9
+        uses: oxsecurity/megalinter/flavors/terraform@0e3ce9b9c8c10effb9b269509cc47ca17cae31c7 # v9
         # All available variables are described in documentation
         # https://megalinter.io/latest/config-file/
         env:
@@ -255,7 +261,7 @@ jobs:
 
       - name: Upload MegaLinter artifacts
         if: success() || failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: MegaLinter reports
           retention-days: 2
@@ -292,7 +298,7 @@ jobs:
           env.COND_UPDATED_SOURCES == 'true' &&
           env.COND_APPLY_FIXES_NEEDED == 'true' &&
           !contains(github.event.head_commit.message, 'skip fix')
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ steps.generate-token.outputs.token }}
           committer: fchastanet <237869+fchastanet@users.noreply.github.com>
@@ -311,10 +317,13 @@ jobs:
             steps.cpr.conclusion == 'success'
           }}
         run: |
-          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+          echo "Pull Request Number - ${STEPS_CPR_OUTPUTS_PULL_REQUEST_NUMBER}"
+          echo "Pull Request URL - ${STEPS_CPR_OUTPUTS_PULL_REQUEST_URL}"
+        env:
+          STEPS_CPR_OUTPUTS_PULL_REQUEST_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          STEPS_CPR_OUTPUTS_PULL_REQUEST_URL: ${{ steps.cpr.outputs.pull-request-url }}
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -330,7 +339,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
-      # needed by guibranco/github-status-action-v2@v1.2.3
+      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
       # needed by mikepenz/action-junit-report@v4
       checks: write
@@ -347,18 +356,20 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: crazy-max/ghaction-import-gpg@v7
+      - uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7
         if: ${{ success() }}
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -366,14 +377,15 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - uses: actions/create-github-app-token@v3.1.1
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         if: ${{ success() }}
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: read
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -391,10 +403,8 @@ jobs:
             echo "branch_name=${GITHUB_REF##*/}"
             if [[ "${{ matrix.vendor }}" = "ubuntu" ]]; then
               echo "bashImage=ubuntu:20.04"
-              echo "batsOptions=-j 30"
             else
               echo "bashImage=amd64/bash:${{ matrix.bashTarVersion }}-alpine3.19"
-              echo "batsOptions=-j 30 --filter-tags '!ubuntu_only'"
             fi
           ) >> "${GITHUB_ENV}"
 
@@ -409,9 +419,14 @@ jobs:
         run: |
           set -exo pipefail
 
-          docker pull "scrasnups/build:${{env.image_tag}}"
+          docker pull "scrasnups/build:${image_tag}"
 
+          batsOptions=(-j 30 --formatter junit -o logs -r src)
+          if [[ "${{ matrix.vendor }}" != "ubuntu" ]]; then
+            batsOptions+=("--filter-tags" "!ubuntu_only")
+          fi
           status=0
+          # shellcheck disable=SC2086
           docker run --rm \
             -e KEEP_TEMP_FILES=0 \
             -e BATS_FIX_TEST=0 \
@@ -420,18 +435,17 @@ jobs:
             --user "www-data:www-data" \
             -w /bash \
             -v "$(pwd):/bash" \
-            "scrasnups/build:${{env.image_tag}}" \
+            "scrasnups/build:${image_tag}" \
               /bash/vendor/bats/bin/bats \
-              ${{env.batsOptions}} \
-              --formatter junit -o logs -r src 2>&1 |
-            tee "logs/bats-${{ env.job_tag }}.log" || status=$?
+              "${batsOptions[@]}" 2>&1 |
+            tee "logs/bats-${job_tag}.log" || status=$?
 
           awk '/xml version="1.0"/{flag=1} flag; /<\/testsuites>/{flag=0}' \
-            "logs/bats-${{ env.job_tag }}.log" >"logs/junit-${{ env.job_tag }}.xml"
+            "logs/bats-${job_tag}.log" >"logs/junit-${job_tag}.xml"
           exit "${status}"
 
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v6
+        uses: mikepenz/action-junit-report@3a81627bfac62268172037048872e8ebd4207e6d # v6
         if: ${{ always() }}
         with:
           token: ${{ github.token }}
@@ -442,13 +456,13 @@ jobs:
           report_paths: "logs/**.xml"
 
       - name: Checkstyle aggregation
-        uses: lcollins/checkstyle-github-action@v3.2.0
+        uses: lcollins/checkstyle-github-action@64dd6cb4a632cb9e31917ebea89878118255af09 # v3.2.0
         with:
           path: "logs/*.xml"
 
       - name: Upload Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: Test Results ${{ env.image_tag }}
           retention-days: 2
@@ -456,7 +470,7 @@ jobs:
           path: |
             logs/**
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -471,15 +485,15 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by guibranco/github-status-action-v2@v1.2.3
+      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
 
     steps:
       # run this action to get the workflow conclusion
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
-      - uses: fchastanet/workflow-conclusion-status@v2
+      - uses: fchastanet/workflow-conclusion-status@e0eed4977dfffe2ea0a726f35aadf65de641b712 # v2
 
-      - uses: guibranco/github-status-action-v2@v1.2.3
+      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -501,12 +515,12 @@ jobs:
         needs.pre-commit.result == 'success' &&
         github.ref == 'refs/heads/master'
       }}
-    uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
+    uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@ab4ad7ee44dd2faf7533955057c98e9c85d19088 # master
     with:
       site-name: "bash-tools-framework"
       checkout-repo: "fchastanet/bash-tools-framework"
       site-dir: "_site-content"
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     permissions:
       contents: read
       pages: write
