@@ -17,7 +17,7 @@ binData:
         - html2imageCallback
       beforeParseCallbacks:
         - beforeParseCallback
-      version: "1.0"
+      version: "1.0.1"
       copyrightBeginYear: 2026
       commandName: html2image
       definitionFiles:
@@ -69,6 +69,10 @@ binData:
         ${__RESET_COLOR}
 
         ${__HELP_TITLE_COLOR}CHANGELOG:${__RESET_COLOR}
+
+        Version 1.0.1 (2026-05-16):
+
+          - Fix: handle same-directory output with stdin input correctly
 
         Version 1.0 (2026-04-24):
 

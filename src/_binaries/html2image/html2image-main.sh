@@ -117,7 +117,6 @@ processFile() {
     # Execute transform command with input file
     if ! eval "${transformCmd}" "${file}"; then
       Log::displayError "Transform command failed for ${file}"
-      rm -f "${tempHtmlFile}"
       return 1
     fi
 
@@ -138,12 +137,9 @@ processFile() {
 
   # Convert HTML to image
   if ! convertHTML "${htmlFile}" "${targetFile}" "${format}" "${viewport}" "${quality}" "${fullPage}" "${waitForRender}" "${waitForSelector}" "${injectCss}" "${hideSelector}"; then
-    [[ -n "${tempHtmlFile}" ]] && rm -f "${tempHtmlFile}"
     return 1
   fi
 
-  # Clean up temp file
-  [[ -n "${tempHtmlFile}" ]] && rm -f "${tempHtmlFile}"
   return 0
 }
 

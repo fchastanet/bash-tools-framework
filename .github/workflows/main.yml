@@ -44,7 +44,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by guibranco/github-status-action-v2@v1
+      # needed by guibranco/github-status-action-v2@v1.2.3
       statuses: write
     strategy:
       fail-fast: true
@@ -70,7 +70,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # overall process
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -93,7 +93,7 @@ jobs:
             fi
           ) >> "${GITHUB_ENV}"
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -152,7 +152,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -168,7 +168,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
-      # needed by guibranco/github-status-action-v2@v1
+      # needed by guibranco/github-status-action-v2@v1.2.3
       statuses: write
     steps:
       - name: Checkout
@@ -198,7 +198,7 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -314,7 +314,7 @@ jobs:
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -330,7 +330,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
-      # needed by guibranco/github-status-action-v2@v1
+      # needed by guibranco/github-status-action-v2@v1.2.3
       statuses: write
       # needed by mikepenz/action-junit-report@v4
       checks: write
@@ -373,7 +373,7 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -456,7 +456,7 @@ jobs:
           path: |
             logs/**
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -471,7 +471,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by guibranco/github-status-action-v2@v1
+      # needed by guibranco/github-status-action-v2@v1.2.3
       statuses: write
 
     steps:
@@ -479,7 +479,7 @@ jobs:
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
       - uses: fchastanet/workflow-conclusion-status@v2
 
-      - uses: guibranco/github-status-action-v2@v1
+      - uses: guibranco/github-status-action-v2@v1.2.3
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}

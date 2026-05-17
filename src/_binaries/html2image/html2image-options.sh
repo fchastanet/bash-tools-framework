@@ -47,7 +47,7 @@ html2imageCallback() {
 
   # Require --output for stdin input
   if [[ "${stdinInput}" = "1" ]]; then
-    if [[ -z "${optionOutput}" ]]; then
+    if [[ -z "${optionOutput}" && "${sameDirectoryOption}" = "0" ]]; then
       Log::displayError "Command ${SCRIPT_NAME} - option --output is required when reading from stdin"
       return 1
     fi

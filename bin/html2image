@@ -996,7 +996,7 @@ optionHelpCallback() {
 # shellcheck disable=SC2317,SC2329 # if function is overridden
 optionVersionCallback() {
   # shellcheck disable=SC2154
-  echo "${SCRIPT_NAME} version 1.0"
+  echo "${SCRIPT_NAME} version 1.0.1"
   exit 0
 }
 
@@ -1212,7 +1212,7 @@ html2imageCallback() {
 
   # Require --output for stdin input
   if [[ "${stdinInput}" = "1" ]]; then
-    if [[ -z "${optionOutput}" ]]; then
+    if [[ -z "${optionOutput}" && "${sameDirectoryOption}" = "0" ]]; then
       Log::displayError "Command ${SCRIPT_NAME} - option --output is required when reading from stdin"
       return 1
     fi
@@ -1293,7 +1293,7 @@ optionHelpCallback() {
 }
 
 optionVersionCallback() {
-  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}1.0"
+  echo -e "${__HELP_TITLE_COLOR}This command(${SCRIPT_NAME}) version: ${__RESET_COLOR}1.0.1"
   exit 0
 }
 
@@ -2269,6 +2269,10 @@ html2imageCommandHelp() {
   ""
   "${__HELP_TITLE_COLOR}CHANGELOG:${__RESET_COLOR}"
   ""
+  "Version 1.0.1 (2026-05-16):"
+  ""
+  "  - Fix: handle same-directory output with stdin input correctly"
+  ""
   "Version 1.0 (2026-04-24):"
   ""
   "  - Initial version"
@@ -2285,7 +2289,7 @@ html2imageCommandHelp() {
   # ------------------------------------------
   echo
   echo -n -e "${__HELP_TITLE_COLOR}VERSION: ${__RESET_COLOR}"
-  echo "1.0"
+  echo "1.0.1"
   # ------------------------------------------
   # author section
   # ------------------------------------------
@@ -2598,7 +2602,6 @@ processFile() {
     # Execute transform command with input file
     if ! eval "${transformCmd}" "${file}"; then
       Log::displayError "Transform command failed for ${file}"
-      rm -f "${tempHtmlFile}"
       return 1
     fi
 
@@ -2619,12 +2622,9 @@ processFile() {
 
   # Convert HTML to image
   if ! convertHTML "${htmlFile}" "${targetFile}" "${format}" "${viewport}" "${quality}" "${fullPage}" "${waitForRender}" "${waitForSelector}" "${injectCss}" "${hideSelector}"; then
-    [[ -n "${tempHtmlFile}" ]] && rm -f "${tempHtmlFile}"
     return 1
   fi
 
-  # Clean up temp file
-  [[ -n "${tempHtmlFile}" ]] && rm -f "${tempHtmlFile}"
   return 0
 }
 
