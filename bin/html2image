@@ -1182,7 +1182,7 @@ unknownArgument() {
 
 html2imageCallback() {
   # Check for stdin input (non-TTY on stdin)
-  if [[ ! -t 0 ]]; then
+  if [[ "${#argHtml2imageFiles[@]}" = "1" && "${argHtml2imageFiles[0]}" = "-" ]]; then
     stdinInput=1
   fi
 
