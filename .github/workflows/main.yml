@@ -44,7 +44,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      # needed by guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
       statuses: write
     strategy:
       fail-fast: true
@@ -72,7 +72,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # overall process
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -95,7 +95,7 @@ jobs:
             fi
           ) >> "${GITHUB_ENV}"
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -154,7 +154,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-to: type=gha,mode=max,scope=${{ env.image_tag }}
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -170,7 +170,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
-      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      # needed by guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
       statuses: write
     steps:
       - name: Checkout
@@ -204,7 +204,7 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -223,6 +223,11 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: 3.12
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
 
       - uses: fchastanet/github-action-setup-shfmt@1ac9300e2fa90c29ee2d1da692af1f122d99a9e3 # v4.0.0
 
@@ -323,7 +328,7 @@ jobs:
           STEPS_CPR_OUTPUTS_PULL_REQUEST_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
           STEPS_CPR_OUTPUTS_PULL_REQUEST_URL: ${{ steps.cpr.outputs.pull-request-url }}
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -339,7 +344,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
-      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      # needed by guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
       statuses: write
       # needed by mikepenz/action-junit-report@v4
       checks: write
@@ -385,7 +390,7 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           permission-contents: read
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -470,7 +475,7 @@ jobs:
           path: |
             logs/**
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
@@ -485,7 +490,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
-      # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      # needed by guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
       statuses: write
 
     steps:
@@ -493,7 +498,7 @@ jobs:
       # You can get the conclusion via env (env.WORKFLOW_CONCLUSION)
       - uses: fchastanet/workflow-conclusion-status@e0eed4977dfffe2ea0a726f35aadf65de641b712 # v2
 
-      - uses: guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
+      - uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
         if: ${{ env.COND_PUSH_OR_PR }}
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
