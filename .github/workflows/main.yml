@@ -247,7 +247,7 @@ jobs:
         if: ${{ !cancelled() }}
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/latest/flavors/
-        uses: oxsecurity/megalinter/flavors/terraform@0e3ce9b9c8c10effb9b269509cc47ca17cae31c7 # v9
+        uses: oxsecurity/megalinter/flavors/terraform@v9
         # All available variables are described in documentation
         # https://megalinter.io/latest/config-file/
         env:
@@ -515,12 +515,12 @@ jobs:
         needs.pre-commit.result == 'success' &&
         github.ref == 'refs/heads/master'
       }}
-    uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@ab4ad7ee44dd2faf7533955057c98e9c85d19088 # master
+    uses: fchastanet/my-documents/.github/workflows/build-site-action.yml@master
     with:
       site-name: "bash-tools-framework"
       checkout-repo: "fchastanet/bash-tools-framework"
       site-dir: "_site-content"
-    secrets: inherit # zizmor: ignore[secrets-inherit]
+    secrets: inherit
     permissions:
       contents: read
       pages: write
