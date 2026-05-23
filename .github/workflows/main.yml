@@ -44,6 +44,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     permissions:
+      contents: read
       # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
     strategy:
@@ -170,6 +171,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
+      contents: read
       # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
     steps:
@@ -339,6 +341,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Forces Node 24 runtime
     needs: [build-docker-images]
     permissions:
+      contents: read
       # needed by guibranco/github-status-action-v2@f6952298057800f771cdce8e7918d5b88333eb89 # v1.2.3
       statuses: write
       # needed by mikepenz/action-junit-report@v4
