@@ -165,7 +165,11 @@ repos:
       - id: check-added-large-files
         # check for non image files larger than 100KB
         args: [--maxkb=128]
-        exclude: \.(avif|heic|heif|jpeg|jpg|png|webp)$
+        exclude: |
+          (?x)(
+            \.(avif|heic|heif|jpeg|jpg|png|webp)$|
+            ^.pnp.cjs$
+          )
       - id: forbid-new-submodules
       - id: mixed-line-ending
         args: [--fix=lf]
@@ -207,6 +211,7 @@ repos:
               ^install$|
               ^distro$|
               ^srcAlt|
+              ^.pnp.cjs$|
               ^.cspell/codespellrc-.*.txt$
           )
 

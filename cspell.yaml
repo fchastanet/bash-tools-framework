@@ -32,6 +32,8 @@ ignorePaths:
   - src/_binaries/krokiWrapper/krokiWrapper-help.txt
   - src/_binaries/rimageWrapper/rimageWrapper-help.txt
   - src/_binaries/mermaid/mermaid-help.txt
+  - .pnp.cjs
+  - .pnp.loader.mjs
   - .mega-linter*.yml
   - TODO.md
   - .env

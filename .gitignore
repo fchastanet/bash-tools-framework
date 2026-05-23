@@ -5,7 +5,6 @@ commit-msg.md
 # node modules
 node_modules/
 package*.json
-yarn.lock
 
 # megalinter
 megalinter-reports/
@@ -36,3 +35,4 @@ doc/images/requireLoad-activityDiagram.svg
 .cspell/forbidden.txt
 
 .pre-commit-config-github.yaml
+.yarn/install-state.gz
