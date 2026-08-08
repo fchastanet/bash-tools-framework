@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 # @description checkout usage doc below
 #
-# [DockerNamespace usage](DockerUsage.md ':include')
+# [DockerNamespace usage](docker-usage.md ':include')

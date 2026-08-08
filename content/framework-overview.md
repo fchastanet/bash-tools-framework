@@ -5,11 +5,9 @@ description: Overview of the Bash Tools Framework functions and namespaces
 type: docs
 weight: 1
 date: '2026-03-01T08:00:00+01:00'
-lastmod: '2026-04-26T23:17:38+02:00'
-version: '1.1'
+lastmod: '2026-08-09T01:09:49+02:00'
+version: '1.2'
 ---
-
-{{< articles-list >}}
 
 This framework is a collection of several bash functions and commands that helps you to lint files, generate shell
 documentation, compile bash files, and many more, ...

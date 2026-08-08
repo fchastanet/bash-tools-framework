@@ -110,7 +110,7 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_ROOT_DIR}/vendor/bin"
 
 # @description checkout usage doc below
 #
-# [DockerNamespace usage](DockerUsage.md ':include')
+# [DockerNamespace usage](docker-usage.md ':include')
 
 # @description Log namespace provides 2 kind of functions
 # - Log::display* allows to display given message with
