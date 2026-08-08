@@ -158,4 +158,5 @@ wslprofile
 xdebug
 xdebugini
 zfxyuip
+zstd
 zstyle
