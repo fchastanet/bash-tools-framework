@@ -1960,8 +1960,6 @@ rimageWrapperCommandParse() {
         ((++options_parse_optionParsedCountOptionOutputDir))
         # shellcheck disable=SC2034
         optionOutputDir="$1"
-        rimageWrapperOutputDirCallback "${options_parse_arg}" "${optionOutputDir}"
-
         ;;
 
       -*)

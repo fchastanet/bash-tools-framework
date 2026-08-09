@@ -3,6 +3,8 @@ extends:
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/defaultCommand.yaml"
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/frameworkConfig.yaml"
   - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsCi.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsSameDir.yaml"
+  - "${FRAMEWORK_ROOT_DIR}/src/_binaries/commandDefinitions/optionsOutputDir.yaml"
 
 vars:
   SRC_FILE_PATH: src/_binaries/mermaid/mermaid-binary.yaml
@@ -50,26 +52,3 @@ binData:
           min: 0
           helpValueName: Format
           variableName: optionFormats
-
-        - alts:
-            - --same-dir
-          help: |
-            Write output file in same directory as source file
-            and with the same base name (except extension)
-            Incompatible with the option --output-dir
-          type: Boolean
-          group: OptionsGroup
-          variableName: sameDirectoryOption
-
-        - alts:
-            - --output-dir
-            - -o
-          help: |
-            Define output directory of this command (default: <currentDirectory>)
-            Incompatible with the option --same-dir
-          type: String
-          callbacks:
-            - mermaidOutputDirCallback
-          group: OptionsGroup
-          helpValueName: OutputDir
-          variableName: optionOutputDir

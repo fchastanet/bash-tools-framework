@@ -1,0 +1,14 @@
+---
+binData:
+  commands:
+    default:
+      options:
+        - alts:
+            - --same-dir
+          help: |
+            Write output file in same directory as source file
+            and with the same base name (except extension)
+            Incompatible with the option --output-dir
+          type: Boolean
+          group: OptionsGroup
+          variableName: sameDirectoryOption

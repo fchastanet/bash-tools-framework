@@ -1,0 +1,15 @@
+---
+binData:
+  commands:
+    default:
+      options:
+        - alts:
+            - --output-dir
+            - -o
+          help: |
+            Define output directory of this command (default: <currentDirectory>)
+            Incompatible with the option --same-dir
+          type: String
+          group: OptionsGroup
+          helpValueName: OutputDir
+          variableName: optionOutputDir
