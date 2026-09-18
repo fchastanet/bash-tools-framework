@@ -11,6 +11,7 @@ repos:
         entry: npx -y v8r --ci .v8rrc.yaml
         language: system
         pass_filenames: true
+        require_serial: true
         stages: [pre-commit, pre-push, manual]
         files: |
           (?x)(
