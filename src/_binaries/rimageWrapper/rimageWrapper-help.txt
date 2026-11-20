@@ -57,8 +57,8 @@ GLOBAL OPTIONS:
     Default value: OFF
   --log-file <log-file> {single}
     Set log file
-    Default value: /home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-frame
-      work/logs/rimageWrapper.log
+    Default value: /home/perso/fchastanet/bash-dev-env/vendor/bash-tools-fra
+      mework/logs/rimageWrapper.log
   --display-level <display-level> {single}
     Set display level
     Possible values:
@@ -128,23 +128,25 @@ Options:
   -h, --help     Print help
   -V, --version  Print version
 
+
 List of supported codecs
-| Image Format  | Input | Output | Note            |
-| ------------- | ----- | ------ | --------------- |
-| avif          | O     | O      | Static only     |
-| bmp           | O     | X      |                 |
-| farbfeld      | O     | O      |                 |
-| hdr           | O     | O      |                 |
-| jpeg          | O     | O      |                 |
-| jpeg_xl(jxl)  | O     | O      |                 |
-| mozjpeg(moz)  | O     | O      |                 |
-| oxipng(oxi)   | O     | O      | Static only     |
-| png           | O     | O      | Static only     |
-| ppm           | O     | O      |                 |
-| psd           | O     | X      |                 |
-| qoi           | O     | O      |                 |
-| tiff          | O     | X      |                 |
-| webp          | O     | O      | Static only     |
+| Image Format  | Input | Output | Note              |
+| ------------- | ----- | ------ | ----------------- |
+| avif          | O     | O      | Static only       |
+| bmp           | O     | X      |                   |
+| farbfeld      | O     | O      |                   |
+| hdr           | O     | O      |                   |
+| jpeg          | O     | O      |                   |
+| jpeg_xl(jxl)  | O     | O      |                   |
+| mozjpeg(moz)  | O     | O      |                   |
+| oxipng(oxi)   | O     | O      | Static only       |
+| png           | O     | O      | Static only       |
+| ppm           | O     | O      |                   |
+| psd           | O     | X      |                   |
+| qoi           | O     | O      |                   |
+| svg           | O     | X      | Resize losslessly |
+| tiff          | O     | X      |                   |
+| webp          | O     | O      | Static only       |
 
 List of supported preprocessing options
 - Resize

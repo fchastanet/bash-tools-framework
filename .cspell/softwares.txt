@@ -57,6 +57,7 @@ gettext
 GITHUB
 github
 gitleaks
+gitmoji
 gofmt
 golxdebindings
 goserver
@@ -141,6 +142,7 @@ nbthread
 nojekyll
 nomnoml
 nproc
+nullary
 nwdiag
 obconf
 opcache
@@ -181,6 +183,7 @@ shdoc
 SHELLCHECK
 shellcheck
 shellcheckrc
+shfmt
 Silverstein
 SpacesAftertabs
 Structurizr

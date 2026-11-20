@@ -16,6 +16,7 @@ Brzóska
 Chastanet
 cklmurl
 configurator
+Dockerfiles
 elif
 esac
 exitcode

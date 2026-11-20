@@ -184,6 +184,14 @@ overrides:
       - 'src/Array/wrap*.bats'
     dictionaries:
       - loremIpsum
+  - filename:
+      - AGENTS.md
+      - CLAUDE.md
+    dictionaries:
+      - myBash
+      - mySoftwares
+      - software
+      - lintersConfig
   - filename: bash-tools-framework-schema.json
     dictionaries:
       - mySoftwares

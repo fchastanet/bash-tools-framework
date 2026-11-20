@@ -36,8 +36,8 @@ GLOBAL OPTIONS:
     Default value: OFF
   --log-file <log-file> {single}
     Set log file
-    Default value: /home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-frame
-      work/logs/mermaid.log
+    Default value: /home/perso/fchastanet/bash-dev-env/vendor/bash-tools-fra
+      mework/logs/mermaid.log
   --display-level <display-level> {single}
     Set display level
     Possible values:
@@ -92,26 +92,36 @@ Generates mermaid diagrams from mermaid files in formats provided
 MERMAID HELP
 Usage: mmdc [options]
 
+Render a mermaid diagram definition into various formats
+
 Options:
   -V, --version                                   output the version number
-  -t, --theme [theme]                             Theme of the chart (choices: "default", "forest", "dark", "neutral", default: "default")
-  -w, --width [width]                             Width of the page (default: 800)
-  -H, --height [height]                           Height of the page (default: 600)
+  -t, --theme <theme>                             Theme of the chart (choices: "base", "dark", "default", "forest", "neutral", "neo", "neo-dark", "redux", "redux-dark", "redux-color", "redux-dark-color", "null")
+  --size <size>                                   Size of the diagram.
+  This will attempt to create a PNG with a maximum height or width equal to the given size.
+  For `.svg`s, this will set the `max-width` attribute.
+  For `.pdf`s, this is in CSS px, which is 1/96 of an inch.
   -i, --input <input>                             Input mermaid file. Files ending in .md will be treated as Markdown and all charts (e.g. ```mermaid (...)``` or :::mermaid (...):::) will be extracted and generated. Use `-` to read from stdin.
-  -o, --output [output]                           Output file. It should be either md, svg, png, pdf or use `-` to output to stdout. Optional. Default: input + ".svg"
-  -a, --artefacts [artefacts]                     Output artefacts path. Only used with Markdown input file. Optional. Default: output directory
+  -o, --output <output>                           Output file. It should be either md, svg, png, pdf or use `-` to output to stdout. Optional. Default: input + ".svg"
+  -a, --artefacts <artefacts>                     Output artefacts path. Only used with Markdown input file. Optional. Default: output directory
   -j, --jobs <jobs>                               Number of parallel jobs to run when rendering multiple diagrams. Defaults to half the available CPUs. (default: 6)
-  -e, --outputFormat [format]                     Output format for the generated image. (choices: "svg", "png", "pdf", default: Loaded from the output file extension)
-  -b, --backgroundColor [backgroundColor]         Background color for pngs/svgs (not pdfs). Example: transparent, red, '#F0F0F0'. (default: "white")
-  -c, --configFile [configFile]                   JSON configuration file for mermaid.
-  -C, --cssFile [cssFile]                         CSS file for the page.
-  -I, --svgId [svgId]                             The id attribute for the SVG element to be rendered.
-  -s, --scale [scale]                             Puppeteer scale factor (default: 1)
-  -f, --pdfFit                                    Scale PDF to fit chart
+  -e, --outputFormat <format>                     Output format for the generated image. (choices: "svg", "png", "pdf")
+  -b, --backgroundColor <backgroundColor>         Background color for pngs/svgs (not pdfs). Example: transparent, red, '#F0F0F0'. (default: "white")
+  -c, --configFile <configFile>                   JSON configuration file for mermaid.
+  -C, --cssFile <cssFile>                         CSS file for the page, used as Mermaid's `themeCSS`
+  -I, --svgId <svgId>                             The id attribute for the SVG element to be rendered.
+  -s, --scale <scale>                             Puppeteer scale factor (default: 1)
+  --no-font-embed                                 Disable embedding fonts into the SVG. This cuts down on SVG size, but would result in missing fonts if they are not available on the system.
+  --pdf-paper-format <format>                     If set, output a PDF with the given paper size, instead of fitting the diagram. (choices: "Letter", "Legal", "Tabloid", "Ledger", "A0", "A1", "A2", "A3", "A4", "A5", "A6")
   -q, --quiet                                     Suppress log output
-  -p --puppeteerConfigFile [puppeteerConfigFile]  JSON configuration file for puppeteer.
-  --iconPacks <icons...>                          Icon packs to use, e.g. @iconify-json/logos. These should be Iconify NPM packages that expose a icons.json file, see https://iconify.design/docs/icons/json.html. These will be downloaded from https://unkpg.com when needed. (default: [])
-  --iconPacksNamesAndUrls <prefix#iconsurl...>    Icon packs to use, e.g. azure#https://raw.githubusercontent.com/NakayamaKento/AzureIcons/refs/heads/main/icons.json where the name (prefix) of the icon pack is defined before the "#" and the url of the json definition after the "#". These should be Iconify json file formatted as IconifyJson, see https://iconify.design/docs/icons/json.html. These will be downloaded when needed. (default: [])
+  -p --puppeteerConfigFile <puppeteerConfigFile>  JSON configuration file for puppeteer.
+  --iconPacks <icon-packages...>                  Installed icon packs to use, e.g. @iconify-json/logos.
+  These should be Iconify NPM packages that expose a icons.json file, see https://iconify.design/docs/icons/json.html.
+  They can be installed via `npm install <icon-package-name>`.
+  --iconPacksNamesAndUrls <prefix#iconsurl...>    Icon packs to use, e.g. azure#file:///tmp/icons.json where the name (prefix) of the icon pack is defined before the "#" and the url of the json definition after the "#".
+  These should be Iconify json file formatted as IconifyJson, see https://iconify.design/docs/icons/json.html.
+  These will be downloaded when needed.
+  Use `file://` URIs to reference local files.
   -h, --help                                      display help for command
 
 VERSION: 1.1

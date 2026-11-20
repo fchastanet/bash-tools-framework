@@ -39,8 +39,8 @@ GLOBAL OPTIONS:
     Default value: OFF
   --log-file <log-file> {single}
     Set log file
-    Default value: /home/wsl/fchastanet/bash-dev-env/vendor/bash-tools-frame
-      work/logs/krokiWrapper.log
+    Default value: /home/perso/fchastanet/bash-dev-env/vendor/bash-tools-fra
+      mework/logs/krokiWrapper.log
   --display-level <display-level> {single}
     Set display level
     Possible values:
