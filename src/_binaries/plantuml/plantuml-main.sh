@@ -97,13 +97,28 @@ convertPuml() {
   if [[ "${optionTraceVerbose}" = "1" ]]; then
     set -x
   fi
-  # Generate the diagram
-  "${dockerCmd[@]}" >"${targetFile}" <"${file}"
+  # Generate the diagram into a temp file first, so that the target file
+  # is left untouched if generation fails or if nothing relevant changed
+  local tmpFile
+  tmpFile="$(mktemp)"
+  # shellcheck disable=SC2064
+  trap "rm -f '${tmpFile}'" EXIT
+  "${dockerCmd[@]}" >"${tmpFile}" <"${file}"
   set +x
   if [[ "${format}" = "svg" ]]; then
-    sed -E -i 's/^<\?plantuml [0-9.]+\?>(.*)/\1/' "${targetFile}"
-    echo >>"${targetFile}"
+    echo >>"${tmpFile}"
+    # ignore change if only plantuml metadata differs, ie: version
+    # (eg: <?plantuml 1.2026.10?>) or encoded source (<?plantuml-src ...?>,
+    # added by newer plantuml versions)
+    local metadataRegexp='<\?plantuml(-src)? [^?]*\?>'
+    if [[ -f "${targetFile}" ]] && cmp -s \
+      <(sed -E "s/${metadataRegexp}//g" "${targetFile}") \
+      <(sed -E "s/${metadataRegexp}//g" "${tmpFile}"); then
+      Log::displayInfo "Skipped ${targetFile} - unchanged (except plantuml version)"
+      return 0
+    fi
   fi
+  cat "${tmpFile}" >"${targetFile}"
   Log::displayInfo "Converted ${targetFile}"
 }
 # TODO generate convertPuml as binary to avoid all these exports
