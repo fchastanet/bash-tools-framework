@@ -414,6 +414,9 @@ jobs:
           ) >> "${GITHUB_ENV}"
 
       - name: install requirements
+        env:
+          # authenticated GitHub api calls avoid rate limit when retrieving tools releases
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -exo pipefail
           chmod 777 logs
