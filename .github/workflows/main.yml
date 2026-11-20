@@ -232,6 +232,9 @@ jobs:
       - uses: fchastanet/github-action-setup-shfmt@1ac9300e2fa90c29ee2d1da692af1f122d99a9e3 # v4.0.0
 
       - name: Install requirements
+        env:
+          # authenticated GitHub api calls avoid rate limit when retrieving tools releases
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -exo pipefail
           bin/installRequirements
