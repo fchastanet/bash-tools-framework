@@ -41,6 +41,7 @@ markdownlint
 Michał
 mmdc
 noargs
+oneline
 openapi
 pageinfo
 pdfs

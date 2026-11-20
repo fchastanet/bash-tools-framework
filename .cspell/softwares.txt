@@ -25,6 +25,7 @@ Chastanet
 checkov
 checkstyle
 chsh
+claude
 codesniffer
 colorspace
 containerd

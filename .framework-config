@@ -9,11 +9,11 @@ FRAMEWORK_VENDOR_BIN_DIR="${FRAMEWORK_VENDOR_BIN_DIR:-${FRAMEWORK_ROOT_DIR}/vend
 # describe the functions that will be skipped from being imported
 FRAMEWORK_FUNCTIONS_IGNORE_REGEXP="${FRAMEWORK_FUNCTIONS_IGNORE_REGEXP:-^(Namespace::functions|Functions::myFunction|Namespace::requireSomething|IMPORT::dir::file|Acquire::ForceIPv4)$}"
 # describe the files that do not contain function to be imported
-NON_FRAMEWORK_FILES_REGEXP="${NON_FRAMEWORK_FILES_REGEXP:-(^bin/|^hooks/|^test.sh$|^preCommitTest.sh$|^.github/|^.docker/createUser.|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)}"
+NON_FRAMEWORK_FILES_REGEXP="${NON_FRAMEWORK_FILES_REGEXP:-(^bin/|^hooks/|^.claude/|^test.sh$|^preCommitTest.sh$|^.github/|^.docker/createUser.|.framework-config|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/_binaries|^src/_includes|^src/batsHeaders.sh$|^src/_standalone)}"
 # describe the files that are allowed to not have an associated bats file
-BATS_FILE_NOT_NEEDED_REGEXP="${BATS_FILE_NOT_NEEDED_REGEXP:-(^bin/|.framework-config|^.docker/|^.github/|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes|-(main|options)\.sh$)}"
+BATS_FILE_NOT_NEEDED_REGEXP="${BATS_FILE_NOT_NEEDED_REGEXP:-(^bin/|^.claude/|.framework-config|^.docker/|^.github/|.bats$|/testsData/|^manualTests/|/_.sh$|/ZZZ.sh$|/__all.sh$|^src/batsHeaders.sh$|^src/_includes|-(main|options)\.sh$)}"
 # describe the files that are allowed to not have a function matching the filename
-FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^.github/|^\.framework-config$|/testsData/|^manualTests/|\.bats$|src/Options/_bats.sh}"
+FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP="${FRAMEWORK_FILES_FUNCTION_MATCHING_IGNORE_REGEXP:-^bin/|^.claude/|^.github/|^\.framework-config$|/testsData/|^manualTests/|\.bats$|src/Options/_bats.sh}"
 # Source directories
 if [[ ! -v FRAMEWORK_SRC_DIRS ]]; then
   FRAMEWORK_SRC_DIRS=(
