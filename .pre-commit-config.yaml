@@ -240,17 +240,62 @@ repos:
             /testsData/
           )
 
-  - repo: https://github.com/fchastanet/bash-tools-framework
-    rev: 6.3.0
-    hooks:
-      - id: fixShebangExecutionBit
-      - id: awkLint
-      - id: shellcheckLint
-      - id: hugoUpdateLastmod
-        stages: [pre-commit]
-
   - repo: local
     hooks:
+      # bash-tools-framework own hooks (see .pre-commit-hooks.yaml), run from
+      # the working tree so they always use the current version of bin/
+      - id: fixShebangExecutionBit
+        name: fixShebangExecutionBit
+        description: |
+          Find all files containing a shebang and
+          mark them as executable if not yet
+        language: script
+        entry: bin/findShebangFiles
+        args: [chmod, +x]
+        pass_filenames: false
+        types: ["file", "shell", "text"]
+        always_run: true
+        stages: [pre-commit, manual]
+      - id: awkLint
+        name: awk Lint
+        description: Lint awk files using awk.
+        language: script
+        entry: bin/awkLint
+        args: []
+        log_file: logs/awkLint.xml
+        pass_filenames: false
+        files: \.awk$
+        always_run: false
+        stages: [pre-commit, manual]
+      - id: shellcheckLint
+        name: shellcheck Lint
+        description: |
+          Lint bash files using shellcheck.
+          Installing last version automatically
+        language: script
+        entry: bin/shellcheckLint
+        args: [-f, tty, --xargs]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+      - id: shellcheckLintGithubAction
+        name: shellcheck Linter for Github Actions
+        language: script
+        entry: bin/shellcheckLint
+        args: [-f, checkstyle, --xargs]
+        log_file: logs/shellcheckLint.xml
+        pass_filenames: false
+        always_run: true
+        stages: [] # GITHUB
+      - id: hugoUpdateLastmod
+        name: Hugo Update Lastmod
+        description: Update lastmod field in Hugo frontmatter based on git modification date or current date.
+        language: script
+        entry: bin/hugoUpdateLastmod
+        args: [--commit]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
       - id: frameworkLint
         name: Bash Framework Lint
         description: |

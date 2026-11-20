@@ -2485,6 +2485,8 @@ cm9jZXNzLmV4aXQoMSk7Cn0pOwo=" \
 
 declare -gx embed_file_html2imagePuppeteer="${PERSISTENT_TMPDIR:-/tmp}/2077f33210ac203c06acaf5fe5edcc85b05e55100756f7e80a345cfe1eabb9c6/html2imagePuppeteer"
 
+# main code is compiled inside main() function, so local is valid
+# shellcheck disable=SC2168
 
 detectChangedAddedFiles() {
   git ls-files --exclude-standard --modified --others

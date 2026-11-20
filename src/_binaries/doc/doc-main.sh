@@ -2,7 +2,6 @@
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/mermaid/mermaid-help.txt" AS mermaidCommandHelp
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/rimageWrapper/rimageWrapper-help.txt" AS rimageWrapperCommandHelp
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/krokiWrapper/krokiWrapper-help.txt" AS krokiWrapperCommandHelp
-COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
   local image="scrasnups/build:bash-tools-ubuntu-5.3"

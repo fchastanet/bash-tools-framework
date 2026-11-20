@@ -2936,7 +2936,6 @@ bmV0Cg==" \
 
 declare -gx embed_file_krokiWrapperCommandHelp="${PERSISTENT_TMPDIR:-/tmp}/d4abdb9e6a8d28fdd49fbed224a0b8a23114d7146d8af6245625f33ffdcf7231/krokiWrapperCommandHelp"
 
-COMMAND_BIN_DIR="${FRAMEWORK_ROOT_DIR}/bin"
 
 runContainer() {
   local image="scrasnups/build:bash-tools-ubuntu-5.3"

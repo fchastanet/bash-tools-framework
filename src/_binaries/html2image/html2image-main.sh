@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # @embed "${FRAMEWORK_ROOT_DIR}/src/_binaries/html2image/html2image-puppeteer.js" AS html2imagePuppeteer
+# main code is compiled inside main() function, so local is valid
+# shellcheck disable=SC2168
 
 detectChangedAddedFiles() {
   git ls-files --exclude-standard --modified --others
